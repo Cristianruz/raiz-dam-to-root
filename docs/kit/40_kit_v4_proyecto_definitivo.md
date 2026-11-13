@@ -53,7 +53,7 @@
 | Video | Grabador de pantalla y editor; **solo texto en pantalla y subtítulos en inglés, sin voz** | P6 |
 
 **Ahorro de cuota de Earth Engine (nivel Comunidad, 150 EECU-h al mes por proyecto):**
-1. Un proyecto de Cloud exclusivo del evento (`suelosat-evento` o el ID que confirme Cristian), **sin uso antes del sábado a las 9:00**.
+1. Proyecto de Cloud del evento: **`iondroplet`** (registrado como no comercial el 28-oct-2026, nivel Comunidad, 0 % de uso al 12-nov), **sin uso antes del sábado a las 9:00**. **Solo Cristian ejecuta Earth Engine** (decisión del 12-nov): las tareas que lo usan (A3, A3-M, A8, A9 y la exportación de NASADEM) las corre Cristian y deja los CSV en el buzón; P2–P5 trabajan en Colab sobre esas tablas, sin autenticarse en Earth Engine.
 2. Área limitada: solo los polígonos de la zona piloto y de la muestra etiquetada. Nada sobre el distrito completo ni sobre imágenes enteras.
 3. **Corrida piloto antes de cada exportación** (3 protagonistas): se lee el consumo de EECU y se anota en `docs/ee_uso.md`.
 4. Exportación de tablas con `Export.table.toDrive`, una por pieza o por año. Sin `getInfo()` en ciclos. Las series, las reglas y los días de suelo desnudo se calculan en pandas.
