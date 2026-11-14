@@ -192,7 +192,8 @@ def main():
             filas.append([c, lp, round(e50), round(n50), round(b10, 2), round(b50, 2), round(b90, 2)])
     for r in ROTACIONES:
         reg = {k: v for k, v in r.items() if k != "sin_riego_meses"}
-        reg["plazo_anios"] = PARAMS["plazo_anios"][r["plazo"]]
+        pz = PARAMS["plazo_anios"][r["plazo"]]
+        reg["plazo_anios"] = pz if isinstance(pz, dict) else {"min": pz, "max": pz}   # contrato: siempre {min, max}
         reg["lamina_bruta_millares"] = {}
         for lp, f in ((0, 1.0), (-20, 0.8)):
             if r["cultivos"]:

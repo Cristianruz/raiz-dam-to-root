@@ -18,6 +18,10 @@ from comun import carpeta, registrar_fuentes
 from eto_fao56 import eto_dia
 
 LAT, LON = 28.19, -105.45          # punto representativo de la zona (kit A1) [supuesto]
+# El punto queda ~3 km al norte y oeste del bbox [-105.42, 28.08, -105.32, 28.16], pero cae en la misma celda
+# de POWER que toda la zona: MERRA-2 (0.5° × 0.625°) centro 28.0 N, −105.625 O (lat 27.75–28.25,
+# lon −105.9375 a −105.3125); radiación CERES SYN1deg (1° × 1°) lat 28–29, lon −106 a −105. POWER no interpola
+# dentro de la celda, así que da los mismos valores que el centro del bbox.
 Z = 1173                           # m; INEGI, ficha de la localidad Delicias (080210001) [V]
 PARAMS = "T2M_MAX,T2M_MIN,RH2M,WS2M,ALLSKY_SFC_SW_DWN,PRECTOTCORR"
 URL = ("https://power.larc.nasa.gov/api/temporal/daily/point"
@@ -60,7 +64,7 @@ def main():
         w.writerow(["fecha", "eto_mm", "tmin", "tmax", "lluvia_mm", "ws2m", "rs", "rh2m"])
         w.writerows(filas)
 
-    registrar_fuentes("A1", ["eto_diaria.csv"], "NASA POWER Daily API, community=AG, punto 28.19 N −105.45 O",
+    registrar_fuentes("A1", ["eto_diaria.csv"], "NASA POWER Daily API, community=AG, punto 28.19 N −105.45 O (misma celda MERRA-2 0.5°×0.625° y CERES 1° que el bbox)",
                       "datos/colab/A1_power_eto.py")
     # Prueba de aceptación (kit A1)
     etos = [r[1] for r in filas]

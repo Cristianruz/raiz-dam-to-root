@@ -24,6 +24,10 @@ Zona piloto [S]: `[-105.42, 28.08, -105.32, 28.16]` (oeste, sur, este, norte), l
 La trazabilidad de cada archivo entregado está en los `fuentes_*.csv` (incluye sha256).
 
 Notas para el integrador (B4):
-- `suelo_desnudo.csv` entrega `dias_suelo_desnudo_feb_abr` del año 2026 (no una mediana entre años); el campo
-  `dias_suelo_desnudo_mediana` del contrato se llena con ese valor y se rotula «feb–abr 2026».
-- `plazo_anios` de la alfalfa llega como {min, max}; el nogal como 10 (horizonte [S]).
+- `dias_suelo_desnudo_mediana` queda en null: solo hay 2026 (`suelo_desnudo.csv` trae `dias_suelo_desnudo_feb_abr`).
+- `rotaciones.json`: `plazo_anios` siempre {min, max}; láminas con llaves "0" y "-20" (p10, p50, p90, neta_mm_p50, etc_mm_p50).
+- Entregas: Drive `Raiz_entregas/` (sin mover a mano) con `LEEME.md`, una línea por archivo
+  `archivo | fuente | fecha | script`. Las líneas salen de `python colab/comun.py <carpeta>`; `nasadem_zona_piloto.tif`
+  se anota a mano porque lo escribe Earth Engine. Orden: primero `parcelas_base.geojson`.
+- Punto de NASA POWER (28.19 N, −105.45 O): fuera del bbox por ~3 km, pero en la misma celda MERRA-2
+  (0.5° × 0.625°, centro 28.0 N, −105.625 O) y CERES (1°) que las cuatro esquinas y el centro del bbox.

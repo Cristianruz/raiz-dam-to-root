@@ -34,3 +34,25 @@ def registrar_fuentes(pieza, salidas, fuente, script):
         for s in salidas:
             if os.path.exists(s):
                 w.writerow([s, fuente, dt.date.today().isoformat(), script, sha256(s)])
+
+
+ENTREGABLES = ("parcelas_base.geojson", "eto_diaria.csv", "hls_mensual_parcelas.csv", "suelo_desnudo.csv",
+               "nasadem_zona_piloto.tif", "relieve_parcelas.csv", "relieve_rutas.geojson", "rotaciones.json",
+               "demanda_cultivos.csv", "memoria_parcelas.csv", "relieve_meta.json")
+
+
+def lineas_leeme(carpeta_trabajo="."):
+    """Junta los fuentes_*.csv en las líneas del LEEME.md de Raiz_entregas: archivo | fuente | fecha | script.
+    Solo incluye los nombres congelados (tabla 0.4-B y acordados)."""
+    import glob
+    filas = {}
+    for p in sorted(glob.glob(os.path.join(carpeta_trabajo, "fuentes_*.csv"))):
+        for r in csv.DictReader(open(p)):
+            if r["archivo"] in ENTREGABLES:
+                filas[r["archivo"]] = f'{r["archivo"]} | {r["fuente"]} | {r["fecha"]} | {r["script"]}'
+    return [filas[k] for k in ENTREGABLES if k in filas]
+
+
+if __name__ == "__main__":
+    import sys
+    print("\n".join(lineas_leeme(sys.argv[1] if len(sys.argv) > 1 else ".")))
