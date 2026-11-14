@@ -47,9 +47,9 @@ Lo ya construido y probado no cambia: el mapa 2D, el deslizador, la ficha, La go
 {
   "terreno": {
     "encoding": "terrarium", "tileSize": 256, "minzoom": 9, "maxzoom": 12,
-    "teselas": "data/dem/{z}/{x}/{y}.png",
-    "bounds": [oeste, sur, este, norte],
-    "zonas": { "<id_zona>": { "bounds": [o, s, e, n], "elev_min_m": 0, "elev_max_m": 0 } },
+    "zonas": {
+      "<id_zona>": { "teselas": "data/dem/<id_zona>/{z}/{x}/{y}.png", "bounds": [o, s, e, n], "elev_min_m": 0, "elev_max_m": 0 }
+    },
     "exageracion": 0,
     "fuente": "NASADEM (NASA/NASADEM_HGT/001), 30 m, vía Google Earth Engine",
     "rotulo": "regional, 30 m (NASADEM); vertical exaggeration applied"
@@ -66,6 +66,7 @@ Lo ya construido y probado no cambia: el mapa 2D, el deslizador, la ficha, La go
 ```
 - Los valores de diseño (exageración, metros por millar, cámara, intervalo) viven en `data/params.json`, bloque `gemelo`, con la etiqueta «Diseño».
 - La página no escribe ninguno a mano.
+- Hay un juego de teselas de relieve por zona (cada uno con sus `bounds`): la vista 3D trabaja sobre una zona a la vez.
 - Si falta `gemelo.json` o faltan las teselas, la vista 3D no se ofrece y la página lo dice («3D twin view: not available»).
 
 `web/data/ndvi_mensual.json`:
