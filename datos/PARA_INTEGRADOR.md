@@ -246,3 +246,25 @@ Probado contra tu commit c5de01c.
   10.3390/su16051851) y lee la sección de métodos, se cierra la duda.
 - **Pendiente mío, en este orden:** D6 nogal (cobertura del dosel y vida de la huerta, con fuente). Lo de Tena
   (`etiquetas_unidas.csv`) no ha llegado.
+
+## 14-nov 17:10 — D6 (nogal): cobertura estimada con NDVI y edad de las huertas
+- **ENTREGA: supuestos.json — prueba OK** (contra c5de01c; un aviso esperado: `nogal_referencia.vida_huerta_anios` va en null).
+  Dos bloques nuevos, los dos **solo de referencia** (el cálculo no los usa; ninguna cifra de la herramienta cambia y
+  `rotaciones.json` no se toca):
+  - `cobertura_ndvi_relacion`: Fc = 1.26 × NDVI − 0.18 (Johnson y Trout 2012, DOI 10.3390/rs4020439; leída hoy).
+  - `nogal_referencia`: cobertura estimada en 105 parcelas de nogal: mediana **0.72** (P10–P90: 0.57–0.83). El supuesto
+    del modelo (0.7) cae en la mediana. Kc de media temporada estimado: 0.97–1.08 (el modelo usa 1.07). Lámina P50 del
+    nogal según la cobertura: 17.1–19.4 millares/ha (modelo: 19.1). Altura con GEDI: mediana 7.2 m (el modelo supone 10 m;
+    casi no mueve el Kc).
+- **Vida de la huerta con fuente INIFAP: no la encontré.** Lo que sí tiene fuente y va en el mismo bloque:
+  huertas encuestadas con 27 años de edad en promedio (Orona Castillo et al. 2019, revista del INIFAP; Comarca Lagunera,
+  Jiménez y Hermosillo) y unidad típica de Delicias con árboles de 25 años (López Díaz et al. 2011). Además, 97 de las
+  105 parcelas muestran patrón de huerta en los 11 años de la memoria. Sirve para sostener la nota «calculation horizon;
+  orchards live longer», no para escribir una vida útil en años. `vida_huerta_anios` queda en null.
+- Frase segura para la ficha o el README: «Pecan canopy cover estimated from NDVI (median 0.72 in 105 orchards) is
+  consistent with the model assumption (0.7).» Límite que debe acompañarla: la relación NDVI–cobertura no está verificada
+  en huertas adultas.
+- Por parcela: `data/reto/nogal_cobertura.csv` (id, zona, ndvi_verano_max, cobertura_estimada, kc_mid_estimado,
+  altura_gedi_p90_m, anios_patron_huerta). No lo mando al buzón porque no está en el contrato; si lo quieres en la ficha
+  del nogal, dime y lo entrego con ese nombre.
+- Detalle y límites: `docs/nogal_cobertura.md`. Script: `datos/colab/A12_nogal_cobertura.py`.

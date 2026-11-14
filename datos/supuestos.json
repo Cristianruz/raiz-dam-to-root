@@ -209,5 +209,64 @@
     "fuente": "INIFAP, Folleto Técnico 53 (2014): 5 riegos de 10–12 cm, incluida la presiembra (documento maestro del proyecto, §5.2)"
    }
   }
+ },
+ "cobertura_ndvi_relacion": {
+  "valor": {
+   "pendiente": 1.26,
+   "ordenada": -0.18
+  },
+  "etiqueta": "[V] relación publicada; assumption [S] al aplicarla a huertas adultas de nogal",
+  "fuente": "Johnson, L.F. y Trout, T.J. (2012), Remote Sensing 4(2):439–455, DOI 10.3390/rs4020439, Ec. 1: Fc = 1.26 × NDVI − 0.18 (r² = 0.96; NDVI de Landsat; hortalizas, viñedos y huertas jóvenes del Valle de San Joaquín; los autores no la verificaron en huertas adultas). Leída el 14-nov-2026. Solo se usa en A12 (referencia); el cálculo de la demanda no la usa"
+ },
+ "nogal_referencia": {
+  "_nota": "REFERENCIA sobre las huertas de nogal de las zonas piloto (A12, 14-nov-2026). El cálculo de la demanda no usa este bloque: A5 sigue con cobertura_dosel_nogal. Detalle en docs/nogal_cobertura.md",
+  "cobertura_estimada_ndvi": {
+   "valor": 0.72,
+   "min": 0.57,
+   "max": 0.83,
+   "etiqueta": "own analysis (A12), estimate",
+   "fuente": "Mediana y percentiles 10 y 90 de 105 parcelas clasificadas como nogal en las dos zonas: máximo de NDVI de jun–sep de 2026 (NASA HLS) convertido a cobertura con cobertura_ndvi_relacion. Compatible con el supuesto del modelo (cobertura_dosel_nogal = 0.7)"
+  },
+  "kc_mid_estimado": {
+   "valor": 1.07,
+   "min": 0.97,
+   "max": 1.08,
+   "etiqueta": "own analysis (A12), estimate",
+   "fuente": "FAO-56, Ec. 98 con kc_nogal_tabla y altura_nogal_m, aplicada a la cobertura estimada de cada parcela (antes del ajuste por clima). El modelo usa 1.07"
+  },
+  "lamina_bruta_millares_ha_p50": {
+   "valor": 19.1,
+   "min": 17.13,
+   "max": 19.36,
+   "etiqueta": "own analysis (A12), estimate",
+   "fuente": "Lámina bruta P50 del nogal en Delicias–Saucillo (A5) con la cobertura en los percentiles 10 y 90 estimados (0.57 y 0.83) y con la del modelo (0.7). Rango por cobertura; no incluye la banda P10–P90 del clima y la eficiencia"
+  },
+  "altura_gedi_p90_m": {
+   "valor": 7.21,
+   "min": 2.88,
+   "max": 13.62,
+   "etiqueta": "own analysis (A11 y A12), estimate",
+   "fuente": "Mediana y percentiles 10 y 90, entre 86 parcelas de nogal con 3 o más disparos de GEDI, del percentil 90 de rh98 de cada parcela. El modelo supone 10 m (altura_nogal_m); con 7 m el Kc de media temporada cambia en el segundo decimal"
+  },
+  "parcelas_con_patron_huerta_2016_2026": {
+   "valor": 97,
+   "etiqueta": "own analysis (A3-M y A12), estimate",
+   "fuente": "De 105 parcelas de nogal, las que muestran el patrón de huerta en los 11 años de la memoria de HLS (2016–2026): tienen al menos 11 años"
+  },
+  "edad_promedio_huertas_encuesta_anios": {
+   "valor": 27,
+   "etiqueta": "[V]",
+   "fuente": "Orona Castillo, I. et al. (2019), «La producción y comercialización de nuez pecanera en México», Revista Mexicana de Ciencias Agrícolas 10(8):1797–1808 (revista del INIFAP; https://cienciasagricolas.inifap.gob.mx/index.php/agricolas/article/download/1833/2842/11310), leído el 14-nov-2026: «La edad de los huertos es similar en las tres zonas (27 años en promedio)»; encuestas de 2014–2015 en la Comarca Lagunera, Jiménez (Chihuahua) y Hermosillo (Sonora). No es Delicias y no es la vida de la huerta"
+  },
+  "edad_arboles_unidad_tipica_delicias_anios": {
+   "valor": 25,
+   "etiqueta": "[V]",
+   "fuente": "López Díaz, J.C. et al. (2011), «Rentabilidad del nogal pecanero bajo sistemas de producción de mediana tecnología en Delicias, Chihuahua», Revista Mexicana de Agronegocios 29:720–731 (https://ageconsearch.umn.edu/record/114475), leído el 14-nov-2026: unidad típica con «árboles con madurez de producción comercial (25 años de edad)». No es una publicación del INIFAP y no es la vida de la huerta"
+  },
+  "vida_huerta_anios": {
+   "valor": null,
+   "etiqueta": "sin fuente",
+   "fuente": "No se encontró una publicación del INIFAP que dé la vida de la huerta en años (búsqueda del 14-nov-2026). No se publica una cifra; lo que sí tiene fuente es la edad de huertas en producción (ver las dos entradas anteriores)"
+  }
  }
 }

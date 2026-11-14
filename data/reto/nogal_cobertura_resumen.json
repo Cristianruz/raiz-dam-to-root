@@ -1,0 +1,82 @@
+{
+ "anio_agricola": 2026,
+ "relacion": {
+  "valor": {
+   "pendiente": 1.26,
+   "ordenada": -0.18
+  },
+  "etiqueta": "[V] relación publicada; assumption [S] al aplicarla a huertas adultas de nogal",
+  "fuente": "Johnson, L.F. y Trout, T.J. (2012), Remote Sensing 4(2):439–455, DOI 10.3390/rs4020439, Ec. 1: Fc = 1.26 × NDVI − 0.18 (r² = 0.96; NDVI de Landsat; hortalizas, viñedos y huertas jóvenes del Valle de San Joaquín; los autores no la verificaron en huertas adultas). Leída el 14-nov-2026. Solo se usa en A12 (referencia); el cálculo de la demanda no la usa"
+ },
+ "modelo": {
+  "cobertura_dosel_nogal": 0.7,
+  "altura_nogal_m": 10,
+  "kc_mid": 1.07
+ },
+ "zonas": {
+  "delicias_saucillo": {
+   "n_parcelas": 79,
+   "cobertura_estimada": {
+    "p10": 0.57,
+    "p50": 0.71,
+    "p90": 0.82
+   },
+   "kc_mid_estimado": {
+    "p10": 0.96,
+    "p50": 1.07,
+    "p90": 1.08
+   },
+   "parcelas_con_cobertura_menor_a_0.5": 3,
+   "altura_gedi_p90_m": {
+    "p10": 2.82,
+    "p50": 6.59,
+    "p90": 12.79,
+    "n_parcelas": 64
+   },
+   "parcelas_con_patron_huerta_toda_la_memoria": 74
+  },
+  "lazaro_cardenas": {
+   "n_parcelas": 26,
+   "cobertura_estimada": {
+    "p10": 0.59,
+    "p50": 0.75,
+    "p90": 0.88
+   },
+   "kc_mid_estimado": {
+    "p10": 1.0,
+    "p50": 1.08,
+    "p90": 1.09
+   },
+   "parcelas_con_cobertura_menor_a_0.5": 0,
+   "altura_gedi_p90_m": {
+    "p10": 3.56,
+    "p50": 8.86,
+    "p90": 13.81,
+    "n_parcelas": 22
+   },
+   "parcelas_con_patron_huerta_toda_la_memoria": 23
+  }
+ },
+ "todas": {
+  "n_parcelas": 105,
+  "cobertura_estimada": {
+   "p10": 0.57,
+   "p50": 0.72,
+   "p90": 0.83
+  },
+  "kc_mid_estimado": {
+   "p10": 0.97,
+   "p50": 1.07,
+   "p90": 1.08
+  },
+  "parcelas_con_cobertura_menor_a_0.5": 3,
+  "altura_gedi_p90_m": {
+   "p10": 2.88,
+   "p50": 7.21,
+   "p90": 13.62,
+   "n_parcelas": 86
+  },
+  "parcelas_con_patron_huerta_toda_la_memoria": 97
+ },
+ "nota": "Referencia: el cálculo de la demanda (A5) no usa estos valores. Memoria de HLS: 2016–2026 (11 años)."
+}
