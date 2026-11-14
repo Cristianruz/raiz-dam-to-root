@@ -122,7 +122,13 @@ def main():
     cand = sorted(limpias)                             # ids estables: de norte a sur, de oeste a este
     feats = []
     for k, (_, _, fid, g, gj, ha) in enumerate(cand, 1):
-        feats.append({"type": "Feature", "geometry": json.loads(json.dumps(gj)), "properties": {
+        # Geometría de salida simplificada a ~10 m (los bordes de FTW son escalones de píxel de 10 m) y con
+        # 5 decimales (~1 m): pesa ~3 veces menos; el área es la de la geometría sin simplificar.
+        gs = g.simplify(0.0001, preserve_topology=True)
+        if not gs.is_valid or gs.geom_type != "Polygon":
+            gs = g                                    # si la simplificación la daña, se deja la original
+        gj = json.loads(json.dumps(mapping(gs)), parse_float=lambda x: round(float(x), 5))
+        feats.append({"type": "Feature", "geometry": gj, "properties": {
             "id": f"{prefijo}{k:04d}", "zona": a.zona, "area_ha": round(ha, 2), "modulo": None,
             "ftw_confianza": confianza(g, raster), "protagonista": False, "ftw_id": fid}})
     prot = [x for x in a.protagonistas.split(",") if x]

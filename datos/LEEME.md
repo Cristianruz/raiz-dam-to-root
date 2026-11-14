@@ -35,3 +35,15 @@ Notas para el integrador (B4):
 Corrida real (14-nov-2026): 338 parcelas; protagonistas P0097 (alfalfa, 3 años, por vencer), P0110 (nogal,
 comprometida) y P0118 (barbecho en 2026 tras años perenne, libre), elegidas por confianza FTW ≥ 55, 6–40 ha y
 12 meses válidos; revisarlas a ojo en el mapa. Las 14 entregas pasan `motor/ensamblar.py` de la otra rama sin rechazos.
+
+## Dos zonas piloto (decisión del 14-nov, 12:50)
+- Zonas: `delicias_saucillo` [-105.56, 28.07, -105.32, 28.19] (ids P…) y `lazaro_cardenas` [-105.66, 28.35, -105.56, 28.43] (ids L…).
+- Earth Engine (`earthengine/A3_hls_nasadem.js`) exporta por zona con sufijo; los rásteres crudos están en la rama `ee-crudos`
+  (`data/raw/ee_zonas/`), no en esta rama.
+- Cada zona se procesa en `data/zonas/<zona>/` con los mismos scripts (B1 `--zona`, A1 con `--lat/--lon/--patron`, A3, A4, A5, A9).
+- `colab/unir_zonas.py --salida data/entrega_zonas` arma la entrega: un solo archivo con las dos zonas para parcelas, CSV por
+  parcela y rutas; con sufijo `_lazaro_cardenas` para clima, demanda, relieve_meta y NASADEM; y el `LEEME.md`.
+- Corrida real: 940 + 299 parcelas. Protagonistas: P0757 (alfalfa de 3 años, por vencer, a 0.25 km de Km 92), P0244 (descanso en
+  2026 tras años con cultivo, libre, a 0.7 km de El Molino) y L0175 (nogal, comprometida, a 2.6 km de Lázaro Cárdenas).
+  No hay «anual libre» con nombre de cultivo: las anuales de verano se abstienen; la protagonista libre es una parcela en descanso.
+- La entrega pasa `motor/ensamblar.py` de la rama del integrador: 18 archivos, 0 rechazados, 0 retenidos.

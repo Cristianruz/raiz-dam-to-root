@@ -20,7 +20,8 @@ ZONAS = ["delicias_saucillo", "lazaro_cardenas"]
 BASE = "delicias_saucillo"                         # sus archivos van sin sufijo
 UNIDOS_CSV = ["hls_mensual_parcelas.csv", "suelo_desnudo.csv", "memoria_parcelas.csv", "memoria_resumen.csv",
               "cultivos_parcelas.csv", "relieve_parcelas.csv"]
-POR_ZONA = ["eto_diaria.csv", "rotaciones.json", "demanda_cultivos.csv", "relieve_meta.json", "nasadem_zona_piloto.tif"]
+POR_ZONA = ["eto_diaria.csv", "rotaciones.json", "demanda_cultivos.csv", "relieve_meta.json", "nasadem_zona_piloto.tif",
+            "imerg_diaria.csv"]                    # imerg_diaria.csv solo si ya existe en la carpeta de la zona
 
 
 def fuentes(carpeta):
@@ -82,6 +83,8 @@ def main():
         for nombre in POR_ZONA:
             raiz, ext = os.path.splitext(nombre)
             destino = nombre if z == BASE else f"{raiz}_{z}{ext}"
+            if nombre == "imerg_diaria.csv" and not os.path.exists(os.path.join(a.zonas, z, nombre)):
+                continue
             shutil.copyfile(os.path.realpath(os.path.join(a.zonas, z, nombre)), os.path.join(a.salida, destino))
             linea(destino, z, nombre, f"; zona {z}")
     with open(os.path.join(a.salida, "LEEME.md"), "w") as fo:
