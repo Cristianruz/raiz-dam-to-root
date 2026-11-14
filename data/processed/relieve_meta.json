@@ -8,19 +8,19 @@
   "celdas_de_ruta_omitidas": 2931,
   "retazos_omitidos": 339,
   "retazo_min_celdas": 10,
-  "nota": "no se dibuja ruta dentro de depresiones cerradas del DEM de esa profundidad o más, ni los retazos cortos que quedan entre dos de ellas"
+  "nota": "No runoff path is drawn inside closed depressions of the elevation model that are this deep or deeper, nor on the short stretches left between two of them: there the 30 m model cannot tell where water leaves."
  },
- "pendiente": "por parcela: plano ajustado por mínimos cuadrados a las celdas de NASADEM; zona: DEM suavizado 5 × 5 celdas (~150 m) [S]",
+ "pendiente": "per field: least-squares plane fitted to its NASADEM cells; area: elevation model smoothed over 5 x 5 cells (about 150 m) [S]",
  "celda_ha": 0.0788,
  "tormenta": {
   "mm": 20.2,
   "definicion": "95th percentile of days with rain >= 1 mm",
   "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), mean over the pilot area rectangle",
-  "periodo": "2001-01-01 a 2026-11-13",
+  "periodo": "2001-01-01 to 2026-11-13",
   "contraste": {
    "mm": 15.5,
    "fuente": "NASA POWER PRECTOTCORR, pilot area point",
-   "periodo": "1984-01-01 a 2026-11-09"
+   "periodo": "1984-01-01 to 2026-11-09"
   }
  }
 }

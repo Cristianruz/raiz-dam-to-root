@@ -1,0 +1,121 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_nota": "Supuestos de las piezas de datos. Cada valor lleva fuente y etiqueta; [S] = assumption. Los scripts se detienen si falta una clave. Copiar a la carpeta de trabajo (--dir).",
+ "ea_gravedad": {
+  "valor": [
+   0.45,
+   0.7
+  ],
+  "etiqueta": "assumption [S]",
+  "fuente": "Sin valor medido en el DR-005 ni fuente en el repo; rango de sensibilidad propuesto por el equipo"
+ },
+ "sesgo_eto": {
+  "valor": [
+   -0.1,
+   0.0
+  ],
+  "etiqueta": "assumption [S]",
+  "fuente": "Sin fuente en el repo; se prueba la hipótesis de que POWER-PM sobreestima la ETo hasta 10 %"
+ },
+ "presiembra_mm": {
+  "valor": [
+   150,
+   200
+  ],
+  "etiqueta": "[P] kit A5",
+  "fuente": "Kit 40, A5: riego de presiembra de 15–20 cm"
+ },
+ "plazo_alfalfa_anios": {
+  "valor": {
+   "min": 3,
+   "max": 4
+  },
+  "etiqueta": "[P]",
+  "fuente": "FIRA AGROCOSTOS 2025: vida productiva de 3–4 años"
+ },
+ "plazo_nogal_horizonte": {
+  "valor": 10,
+  "etiqueta": "assumption [S]",
+  "fuente": "S9 §5: horizonte de cálculo, no vida de la huerta; no se descuenta la edad"
+ },
+ "umbral_verde_ndvi": {
+  "valor": 0.4,
+  "etiqueta": "assumption [S]",
+  "fuente": "S9 §5; sensibilidad 0.35–0.45; calibrar con etiquetas a ciegas"
+ },
+ "umbral_desnudo_ndvi": {
+  "valor": 0.2,
+  "etiqueta": "assumption [S]",
+  "fuente": "Kit A3"
+ },
+ "umbral_invierno_alfalfa": {
+  "valor": 0.35,
+  "etiqueta": "assumption [S]",
+  "fuente": "Manual de etiquetado (39): alfalfa en diciembre 0.35–0.65"
+ },
+ "umbral_invierno_nogal": {
+  "valor": 0.3,
+  "etiqueta": "assumption [S]",
+  "fuente": "Manual de etiquetado (39): nogal en dormancia 0.10–0.22 en diciembre; margen hasta 0.30"
+ },
+ "viento_alto": {
+  "valor": 75,
+  "etiqueta": "assumption [S]",
+  "fuente": "Percentil de ws2m (feb–abr 1981–2025) que define día de viento alto; sin umbral publicado para Delicias"
+ },
+ "umbral_ruta_ha": {
+  "valor": 50,
+  "etiqueta": "assumption [S]",
+  "fuente": "Valor de visualización para dibujar rutas de escurrimiento"
+ },
+ "prof_depresion_ruta_m": {
+  "valor": 3,
+  "etiqueta": "assumption [S]",
+  "fuente": "Profundidad de relleno a partir de la cual no se dibuja ruta: por encima del ruido vertical de NASADEM (1–3 m por celda), el modelo de elevación marca una depresión cerrada y no permite saber por dónde sale el agua"
+ },
+ "elevacion_punto_m": {
+  "valor": 1173,
+  "etiqueta": "assumption [S]",
+  "fuente": "Sin fuente en el repo; se reemplaza por la mediana de NASADEM de la zona cuando llegue nasadem_zona_piloto.tif"
+ },
+ "presiembra_algodon_mm": {
+  "valor": 200,
+  "etiqueta": "assumption [S]",
+  "fuente": "Sin fuente en el repo; extremo superior del rango del kit"
+ },
+ "kc_nogal_tabla": {
+  "valor": [
+   0.5,
+   1.1,
+   0.65
+  ],
+  "etiqueta": "[V] FAO-56",
+  "fuente": "FAO-56, Tabla 12, renglón «Walnut orchard» (Kc ini, mid, end)"
+ },
+ "cobertura_dosel_nogal": {
+  "valor": 0.7,
+  "etiqueta": "assumption [S]",
+  "fuente": "Fracción de cobertura efectiva del dosel; a medir con NDVI de las parcelas de nogal (S8, decisión 5)"
+ },
+ "altura_nogal_m": {
+  "valor": 10,
+  "etiqueta": "assumption [S]",
+  "fuente": "Altura típica de huerta adulta; entra en la Ec. 98 de FAO-56"
+ },
+ "corte_verano_moderado": {
+  "valor": {
+   "riegos_omitidos": [
+    2,
+    3
+   ],
+   "riegos_jul_sep": 6
+  },
+  "etiqueta": "[P] kit B3 (omitir 2–3 riegos entre julio y septiembre); riegos_jul_sep = 6 assumption [S]",
+  "fuente": "Kit 40, B3: variante moderada por omisión"
+ },
+ "umbral_resiembra_ndvi": {
+  "valor": 0.25,
+  "etiqueta": "assumption [S]",
+  "fuente": "NDVI mensual mínimo del año por debajo del cual se considera que la parcela estuvo desnuda (resiembra o establecimiento de la alfalfa); en la zona piloto los alfalfares establecidos tienen mínimos anuales ≥ 0.26 y los años de establecimiento 0.12–0.24. Sensibilidad 0.20–0.30"
+ }
+}
