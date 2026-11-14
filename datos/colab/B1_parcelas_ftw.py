@@ -1,26 +1,27 @@
 # AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
 """B1 · Parcelas de Fields of The World (predicciones globales, CC-BY-4.0) para la zona piloto.
 
-Uso en Colab:
-    !pip install duckdb
-    python B1_parcelas_ftw.py --listar          # muestra los archivos publicados (llms.txt)
-    python B1_parcelas_ftw.py --url <URL.parquet>
-Salida: parcelas_base.geojson con id, area_ha, modulo, ftw_confianza, protagonista.
+Entrada: data/raw/ftw/ftw_zona_piloto_crudo.geojson, extraído con datos/navegador/ftw_extraer.js de
+    https://data.source.coop/ftw/global-data/predictions/vectors/alpha/results-by-admin/admin:country_code=MX/Mexico.parquet
+    (row groups cuyo bbox cruza la zona) y del raster de confianza de 500 m
+    https://data.source.coop/ftw/global-data/predictions/confidence/confidence/prue_v1_confidence_global.tif
+Uso: python B1_parcelas_ftw.py --crudo ../../data/raw/ftw/ftw_zona_piloto_crudo.geojson --dir <carpeta>
+Salida: parcelas_base.geojson con id, area_ha, modulo, ftw_confianza (0-100), protagonista, ftw_id.
 
-Advertencia (kit 40, B1): el entrenamiento de FTW no incluye México ni riego árido.
-Las predicciones se filtran por confianza y las 3 protagonistas se revisan a mano.
-Atribución: "Field boundaries: Fields of The World global predictions (CC-BY-4.0), source.coop/ftw/global-data".
+FTW publica polígonos repetidos donde se traslapan sus mosaicos de predicción: se procesan de mayor a menor área
+y a cada uno se le resta lo ya aceptado; queda como parcela solo si lo restante mide >= 1 ha (partición sin traslapes).
+Los vectores de FTW no traen columna de confianza: se toma del raster de 500 m (media de las celdas que cubre la
+parcela; si no cubre ningún centro de celda, la celda de su centroide). Si el raster no viene, el script se detiene.
+Advertencia (kit 40, B1): el entrenamiento de FTW no incluye México ni riego árido. Las 3 protagonistas se revisan
+a mano. Atribución: "Field boundaries: Fields of The World global predictions (CC-BY-4.0), source.coop/ftw/global-data".
 """
-import argparse
 import json
 import math
 import os
-import urllib.request
 
-from comun import registrar_fuentes
+from comun import carpeta, registrar_fuentes
 
 ZONA = (-105.42, 28.08, -105.32, 28.16)     # lon_min, lat_min, lon_max, lat_max (igual que Earth Engine)
-LLMS = "https://data.source.coop/ftw/global-data/llms.txt"
 AREA_MIN_HA = 1.0
 
 
@@ -34,57 +35,95 @@ def area_ha(coords):
     return abs(s) / 2 / 10000
 
 
+def area_geom_ha(g):
+    polys = [g["coordinates"]] if g["type"] == "Polygon" else g["coordinates"]
+    return sum(area_ha(p[0]) - sum(area_ha(h) for h in p[1:]) for p in polys)
+
+
+def confianza(geom, raster):
+    """Media del raster de confianza (0-1) sobre la parcela; devuelve 0-100 o None si todo es nodata."""
+    from shapely.geometry import Point
+    r = raster
+    x0, y0, res, w, h = r["origen_lon"], r["origen_lat"], r["res"], r["w"], r["h"]
+    v = r["valores"]
+    minx, miny, maxx, maxy = geom.bounds
+    vals = []
+    for i in range(max(0, int((y0 - maxy) / res)), min(h, int((y0 - miny) / res) + 1)):
+        for j in range(max(0, int((minx - x0) / res)), min(w, int((maxx - x0) / res) + 1)):
+            c = Point(x0 + (j + 0.5) * res, y0 - (i + 0.5) * res)
+            if geom.contains(c) and v[i * w + j] != r["nodata"]:
+                vals.append(v[i * w + j])
+    if not vals:
+        c = geom.centroid
+        i, j = int((y0 - c.y) / res), int((c.x - x0) / res)
+        if 0 <= i < h and 0 <= j < w and v[i * w + j] != r["nodata"]:
+            vals = [v[i * w + j]]
+    return None if not vals else round(100 * sum(vals) / len(vals))
+
+
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--listar", action="store_true")
-    ap.add_argument("--url", help="GeoParquet de FTW que cubre México")
-    ap.add_argument("--col_conf", default="confidence", help="nombre de la columna de confianza")
-    ap.add_argument("--dir", default=".", help="carpeta de trabajo, p. ej. data/processed")
-    a = ap.parse_args()
-    os.chdir(a.dir)
-    if a.listar:
-        print(urllib.request.urlopen(LLMS, timeout=60).read().decode()[:6000])
-        return
-    import duckdb
-    con = duckdb.connect()
-    con.execute("INSTALL httpfs; LOAD httpfs; INSTALL spatial; LOAD spatial;")
-    x0, y0, x1, y1 = ZONA
-    cols = [r[0] for r in con.execute(f"DESCRIBE SELECT * FROM read_parquet('{a.url}')").fetchall()]
-    # Filtro por la columna bbox (GeoParquet 1.1) para no leer el archivo global; luego recorte exacto
-    pre = (f"bbox.xmax >= {x0} AND bbox.xmin <= {x1} AND bbox.ymax >= {y0} AND bbox.ymin <= {y1} AND "
-           if "bbox" in cols else "")
-    caja = f"ST_MakeEnvelope({x0}, {y0}, {x1}, {y1})"
-    q = f"""
-        SELECT * EXCLUDE (geometry{', bbox' if 'bbox' in cols else ''}),
-               ST_AsGeoJSON(ST_Intersection(geometry, {caja})) AS gj
-        FROM read_parquet('{a.url}')
-        WHERE {pre}ST_Intersects(geometry, {caja})
-        ORDER BY ST_Y(ST_Centroid(geometry)) DESC, ST_X(ST_Centroid(geometry))
-    """
-    filas = con.execute(q).fetchdf()
-    print("Columnas:", list(filas.columns))
-    feats = []
-    for i, r in filas.iterrows():
-        g = json.loads(r["gj"])
-        if g["type"] not in ("Polygon", "MultiPolygon"):
-            continue                               # el recorte puede dejar líneas o puntos en el borde
-        anillo = g["coordinates"][0] if g["type"] == "Polygon" else g["coordinates"][0][0]
-        ha = area_ha(anillo)
+    a = carpeta("B1: parcelas de Fields of The World",
+                lambda ap: ap.add_argument("--crudo", required=True, help="ftw_zona_piloto_crudo.geojson"))
+    from shapely.geometry import box, mapping, shape
+    crudo = json.load(open(a.crudo))
+    raster = crudo.get("confianza_raster")
+    if not raster or not raster.get("valores"):
+        raise SystemExit("Falta el raster de confianza de FTW en el crudo: no se puede calcular ftw_confianza")
+    zona = box(*ZONA)
+    cand = []
+    for f in crudo["features"]:
+        g = shape(f["geometry"])
+        if not g.is_valid:
+            g = g.buffer(0)
+        g = g.intersection(zona)
+        if g.is_empty or g.geom_type not in ("Polygon", "MultiPolygon"):
+            continue
+        gj = mapping(g)
+        ha = area_geom_ha(gj)
         if ha < AREA_MIN_HA:
             continue
-        conf = r.get(a.col_conf)
-        if conf is not None and conf <= 1:
-            conf = conf * 100                      # FTW puede venir en 0-1; el contrato usa 0-100
-        feats.append({"type": "Feature", "geometry": g, "properties": {
-            "id": f"P{len(feats) + 1:04d}", "area_ha": round(ha, 2), "modulo": None,
-            "ftw_confianza": None if conf is None else round(float(conf)),
-            "protagonista": False}})
-    with open("parcelas_base.geojson", "w") as f:
-        json.dump({"type": "FeatureCollection", "features": feats}, f)
+        cand.append((round(-g.centroid.y, 6), round(g.centroid.x, 6), f["properties"]["ftw_id"], g, gj, ha))
+    # Quitar duplicados y traslapes: mayor área primero; a cada polígono se le resta lo ya aceptado
+    from shapely.strtree import STRtree
+    cand.sort(key=lambda c: -c[3].area)
+    aceptadas, limpias = [], []
+    for c in cand:
+        g = c[3]
+        if aceptadas:
+            arbol = STRtree(aceptadas)
+            vecinas = [aceptadas[j] for j in arbol.query(g)]
+            for v in vecinas:
+                g = g.difference(v)
+        if g.is_empty:
+            continue
+        if g.geom_type == "MultiPolygon":                # restos: conservar la pieza mayor
+            g = max(g.geoms, key=lambda x: x.area)
+        if g.geom_type != "Polygon":
+            continue
+        gj = mapping(g)
+        ha = area_geom_ha(gj)
+        if ha < AREA_MIN_HA:
+            continue
+        aceptadas.append(g)
+        limpias.append((round(-g.centroid.y, 6), round(g.centroid.x, 6), c[2], g, gj, ha))
+    print(f"Candidatos >= 1 ha: {len(cand)} · tras quitar duplicados y traslapes: {len(limpias)}")
+    cand = sorted(limpias)                             # ids estables: de norte a sur, de oeste a este
+    feats = []
+    for k, (_, _, fid, g, gj, ha) in enumerate(cand, 1):
+        feats.append({"type": "Feature", "geometry": json.loads(json.dumps(gj)), "properties": {
+            "id": f"P{k:04d}", "area_ha": round(ha, 2), "modulo": None,
+            "ftw_confianza": confianza(g, raster), "protagonista": False, "ftw_id": fid}})
+    with open("parcelas_base.geojson", "w") as fo:
+        json.dump({"type": "FeatureCollection", "features": feats}, fo)
     registrar_fuentes("B1", ["parcelas_base.geojson"],
-                      f"Fields of The World global predictions (CC-BY-4.0), {a.url}", "datos/colab/B1_parcelas_ftw.py")
-    baja = sum(1 for x in feats if (x["properties"]["ftw_confianza"] or 0) < 50)
-    print(f"Parcelas >= {AREA_MIN_HA} ha: {len(feats)} · con confianza < 50: {baja}")
+                      "Fields of The World global predictions (CC-BY-4.0), source.coop/ftw/global-data "
+                      "(vectores alpha MX y confianza prue_v1 500 m)", "datos/colab/B1_parcelas_ftw.py")
+    conf = [x["properties"]["ftw_confianza"] for x in feats]
+    sin = sum(1 for c in conf if c is None)
+    baja = sum(1 for c in conf if c is not None and c < 50)
+    tot = sum(x["properties"]["area_ha"] for x in feats)
+    print(f"Polígonos crudos: {len(crudo['features'])} · parcelas >= {AREA_MIN_HA} ha: {len(feats)} ({tot:.0f} ha)")
+    print(f"Confianza < 50: {baja} · sin confianza: {sin} · mediana: {sorted(c for c in conf if c is not None)[len(conf)//2 - sin//2] if conf else None}")
 
 
 if __name__ == "__main__":
