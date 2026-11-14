@@ -56,13 +56,13 @@ async function nombresDeCopias() {
   return (await caches.keys()).filter((nombre) => nombre.startsWith(PREFIJO));
 }
 
-/** Listado guardado en una caché (su marca de «completa»), o null si no lo tiene. */
+/** Listado guardado en una caché (su marca de «completa»), o null si no lo tiene o es de otra versión. */
 async function listadoDe(nombre) {
   try {
     const cache = await caches.open(nombre);
     const guardado = await cache.match(absoluta(LISTADO));
     const listado = guardado ? await guardado.json() : null;
-    return listadoValido(listado) ? listado : null;
+    return listadoValido(listado) && PREFIJO + listado.version === nombre ? listado : null;
   } catch {
     return null;
   }
@@ -220,10 +220,12 @@ function sirveParaLaCopia(respuesta) {
 
 /** Renueva en la copia vigente el archivo que la red acaba de entregar. */
 async function renovarCopia(pedido, respuesta) {
+  const llave = sinConsulta(pedido.url);
+  if (llave === absoluta(LISTADO)) return; // el listado es la marca de su caché: solo lo escribe guardarCopia
   const vigente = await copiaVigente();
   if (!vigente) return;
   const cache = await caches.open(vigente.nombre);
-  await cache.put(sinConsulta(pedido.url), respuesta);
+  await cache.put(llave, respuesta);
 }
 
 /** Una respuesta guardada que llegó tras una redirección no sirve para una navegación: se entrega limpia. */

@@ -39,7 +39,11 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                    decisión): va bajo la llave «cuenca» (esquemas.ZONA_CUENCA) con ambito «cuenca», y
                    la página la muestra igual en las dos zonas; las demás series llevan ambito «zona».
   gedi             null + gedi_motivo, o {archivo, fuente, fecha, parcelas: {id: {n_disparos,
-                   altura_mediana_m, altura_p90_m}} (solo n_disparos > 0), n_con_dato, n_total}
+                   altura_mediana_m, altura_p90_m}} (solo n_disparos > 0), n_con_dato, n_total,
+                   referencia: {n_parcelas, minimo_m, mediana_m, maximo_m} | null}. «referencia» es
+                   cómo se reparte altura_mediana_m entre las parcelas con disparos de ESA entrega:
+                   GEDI (rh98) no marca cero sobre suelo desnudo, y con esto la ficha deja comparar
+                   la lectura de una parcela con las demás en vez de leerla como altura del cultivo.
   ecostress        null + ecostress_motivo, o {archivo, fuente, fecha, meses, parcelas: {id: [valores
                    por mes]}}
   gaez             null + gaez_motivo, o {archivo, fuente, fecha, zonas: {zona: [{cultivo, variable,
@@ -73,6 +77,7 @@ import csv
 import datetime
 import json
 import math
+import statistics
 import sys
 from collections import Counter
 from pathlib import Path
@@ -115,6 +120,7 @@ IDIOMA_FUENTES = "es"
 # Redondeos de presentación (no cambian el dato de origen).
 DECIMALES_MM = 1
 DECIMALES_MEDIA = 4
+DECIMALES_ALTURA = 2   # los de la entrega de GEDI (metros con centésimas)
 # Unidades del contrato que se suman en el año (láminas y días); las demás se promedian.
 UNIDADES_ADITIVAS = ("mm/mes", "dias")
 
@@ -441,6 +447,22 @@ def bloque_contexto(ruta, zonas, unidades, registro, avisos):
 # ---------------------------------------------------------------------------------------
 # Evidencia por parcela y por zona
 # ---------------------------------------------------------------------------------------
+def referencia_gedi(parcelas):
+    """Cómo se reparte la lectura de GEDI (altura_mediana_m) entre las parcelas con disparos de ESTA
+    entrega: cuántas son, y su mínimo, su mediana y su máximo. Nada se supone: sale del propio archivo.
+    Sirve de vara en la ficha, porque rh98 no marca cero sobre suelo desnudo y una lectura baja no es la
+    altura de un cultivo. None si ninguna parcela trae lectura."""
+    lecturas = sorted(p["altura_mediana_m"] for p in parcelas.values() if p["altura_mediana_m"] is not None)
+    if not lecturas:
+        return None
+    return {
+        "n_parcelas": len(lecturas),
+        "minimo_m": lecturas[0],
+        "mediana_m": redondear(statistics.median(lecturas), DECIMALES_ALTURA),
+        "maximo_m": lecturas[-1],
+    }
+
+
 def bloque_gedi(ruta, registro):
     filas = leer_csv(ruta)
     parcelas = {}
@@ -452,7 +474,8 @@ def bloque_gedi(ruta, registro):
                 "altura_mediana_m": numero(fila["altura_mediana_m"]),
                 "altura_p90_m": numero(fila["altura_p90_m"]),
             }
-    return {**procedencia(registro), "parcelas": parcelas, "n_con_dato": len(parcelas), "n_total": len(filas)}
+    return {**procedencia(registro), "parcelas": parcelas, "n_con_dato": len(parcelas), "n_total": len(filas),
+            "referencia": referencia_gedi(parcelas)}
 
 
 def bloque_ecostress(ruta, registro):

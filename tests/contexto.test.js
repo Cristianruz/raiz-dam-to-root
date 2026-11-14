@@ -4,16 +4,21 @@
 // - clima del año: valores del año elegido, diferencia IMERG − POWER, año por omisión y modelos de las gráficas;
 // - series regionales: resumen anual (suma o media), años parciales, tarjetas con y sin entrega;
 // - et_contraste: se dibuja solo en su zona piloto; en otra zona se dice y no se cruzan dos áreas;
+// - malla de cada serie: un panel con series de mallas distintas escribe un renglón por serie (ninguna
+//   hereda la resolución de otra);
 // - fuentes: cada tarjeta cita en corto y el texto completo de cada fuente va una sola vez por sección;
 // - formato: resolución (m → km), números, meses; eje vertical;
 // - recursos del reto: orden y conteos por estado;
-// - evidencia por parcela (GEDI y ECOSTRESS) con y sin dato, y riesgo de helada por fecha de siembra.
+// - evidencia por parcela (GEDI y ECOSTRESS) con y sin dato; la lectura de GEDI no se presenta como
+//   altura del cultivo y lleva su nota y la referencia de la entrega; riesgo de helada por fecha de siembra.
 // Datos: tests/fixtures/contexto_reto/contexto_lleno.json (DE PRUEBA, lo genera el motor con datos de
 // prueba) y, si existe, web/data/contexto.json (lo real de hoy). Los valores esperados se leen de ahí.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import {
+  NOTA_GEDI,
+  NOTA_GEDI_SIN_DISPAROS,
   NOTA_REGIONAL,
   anioPorOmision,
   cargarContexto,
@@ -29,6 +34,7 @@ import {
   fuentesDeSeccion,
   graficasDeClima,
   mesDia,
+  metaDePanel,
   modeloContraste,
   modeloTarjetas,
   montarContextoRegional,
@@ -36,6 +42,7 @@ import {
   num,
   ordenarRecursos,
   puntosAnuales,
+  referenciaGedi,
   riesgoDeHelada,
   seriesDeZona,
   ultimoMesConDato,
@@ -218,6 +225,93 @@ test("seriesDeZona: las series de la zona más la de cuenca (GRACE), igual en la
   // La tarjeta de GRACE se dibuja en las dos zonas con la misma gráfica.
   const [ga, gb] = [ZONA_A, ZONA_B].map((z) => modeloTarjetas(LLENO, z).find((t) => t.id === "agua_almacenada").paneles[0].grafica);
   assert.deepEqual(ga.series[0].valores, gb.series[0].valores);
+});
+
+// Lo que la página debe decir de la malla de una serie, armado aquí con el JSON (no con metaDePanel).
+const celdasEsperadas = (serie) =>
+  serie.n_celdas != null
+    ? `${formatoNumero(serie.n_celdas)} grid ${serie.n_celdas === 1 ? "cell" : "cells"}`
+    : `${formatoNumero(serie.n_celdas_rango[0])} to ${formatoNumero(serie.n_celdas_rango[1])} grid cells`;
+
+function revisarMallas(contexto, zona) {
+  let conVarias = 0;
+  for (const t of modeloTarjetas(contexto, zona)) {
+    for (const p of t.paneles) {
+      const presentes = p.series.filter((s) => s.serie);
+      const meta = metaDePanel(p);
+      if (!presentes.length) {
+        assert.deepEqual(meta, [], `${zona} · ${t.id}: sin series no hay malla que decir`);
+        continue;
+      }
+      const mallas = new Set(presentes.map((s) => JSON.stringify([s.serie.ambito, s.serie.resolucion_m, s.serie.n_celdas, s.serie.n_celdas_rango ?? null])));
+      const donde = `${zona} · ${t.id} · ${p.titulo}`;
+      if (mallas.size === 1) {
+        assert.equal(meta.length, 1, `${donde}: una malla, un renglón`);
+        assert.equal(meta[0].etiqueta, null, donde);
+      } else {
+        conVarias += 1;
+        assert.deepEqual(meta.map((r) => r.etiqueta), presentes.map((s) => s.etiqueta), `${donde}: un renglón por serie, con su nombre`);
+      }
+      // Cada serie presente encuentra SU resolución y SUS celdas en su renglón (el único, o el de su nombre).
+      for (const s of presentes) {
+        const renglon = meta.length === 1 ? meta[0] : meta.find((r) => r.etiqueta === s.etiqueta);
+        assert.ok(renglon.texto.includes(`${formatoResolucion(s.serie.resolucion_m)} grid`), `${donde} · ${s.etiqueta}: ${renglon.texto}`);
+        assert.ok(renglon.texto.includes(celdasEsperadas(s.serie)), `${donde} · ${s.etiqueta}: ${renglon.texto}`);
+        assert.ok(renglon.texto.startsWith(s.serie.ambito === CUENCA ? "Basin scale, " : "Regional, "), donde);
+        assert.equal(renglon.texto, renglon.partes.join(" · "));
+      }
+    }
+  }
+  return conVarias;
+}
+
+test("metaDePanel: cada serie con su resolución; mallas distintas en un panel, un renglón por serie", () => {
+  for (const zona of [ZONA_A, ZONA_B]) assert.ok(revisarMallas(LLENO, zona) >= 1, "la fixture trae un panel con dos mallas");
+  // El caso del hallazgo: «MODIS and GLDAS» no atribuye a GLDAS la resolución de MODIS.
+  const panel = modeloTarjetas(LLENO, ZONA_A).find((t) => t.id === "evapotranspiracion").paneles[0];
+  const [modis, gldas] = panel.series.map((s) => s.serie);
+  assert.notEqual(modis.resolucion_m, gldas.resolucion_m, "la fixture trae MODIS y GLDAS con mallas distintas");
+  const meta = metaDePanel(panel);
+  assert.deepEqual(meta.map((r) => r.etiqueta), panel.series.map((s) => s.etiqueta));
+  assert.ok(meta[0].texto.includes(formatoResolucion(modis.resolucion_m)) && !meta[0].texto.includes(formatoResolucion(gldas.resolucion_m)));
+  assert.ok(meta[1].texto.includes(formatoResolucion(gldas.resolucion_m)) && !meta[1].texto.includes(formatoResolucion(modis.resolucion_m)));
+  // Dos series con la misma malla (SMAP: capa superficial y zona de raíces): un renglón sin nombre.
+  const smap = modeloTarjetas(LLENO, ZONA_A).find((t) => t.id === "humedad_suelo").paneles[0];
+  assert.equal(smap.series.length, 2);
+  assert.deepEqual(metaDePanel(smap).map((r) => r.etiqueta), [null]);
+  // GRACE: escala de cuenca, y se dice que es una serie para toda la cuenca.
+  const grace = metaDePanel(modeloTarjetas(LLENO, ZONA_B).find((t) => t.id === "agua_almacenada").paneles[0]);
+  assert.equal(grace.length, 1);
+  assert.ok(grace[0].partes.includes("One series for the whole basin, the same in every pilot area"));
+  // Si falta una de las dos series, queda el renglón de la que sí está (sin nombre: no hay con quién confundirla).
+  const sinGldas = { ...panel, series: panel.series.map((s, i) => (i === 1 ? { ...s, serie: null } : s)) };
+  assert.deepEqual(metaDePanel(sinGldas).map((r) => [r.etiqueta, r.texto]), [[null, meta[0].texto]]);
+  // Una serie que no dice su malla junto a otra que sí: se dice, no se le presta la de la otra.
+  const sinMalla = { ...panel, series: panel.series.map((s, i) => (i === 1 ? { ...s, serie: { ...s.serie, resolucion_m: null, n_celdas: null } } : s)) };
+  assert.deepEqual(metaDePanel(sinMalla).map((r) => [r.etiqueta, r.texto]), [[panel.series[0].etiqueta, meta[0].texto], [panel.series[1].etiqueta, "grid not stated in the delivery"]]);
+  // Sin entregas, sin series o sin panel: nada que escribir.
+  for (const t of modeloTarjetas(SIN_ENTREGAS, ZONA_A)) for (const p of t.paneles) assert.deepEqual(metaDePanel(p), []);
+  assert.deepEqual(metaDePanel({ series: [] }), []);
+  assert.deepEqual(metaDePanel(null), []);
+  assert.deepEqual(metaDePanel(), []);
+});
+
+test("mallas de hoy (web/data/contexto.json): MODIS y GLDAS, cada una con su resolución en la tarjeta de ET", { skip: !(REAL && REAL.contexto_regional) && "sin contexto_regional en web/data/contexto.json" }, () => {
+  for (const zona of Object.keys(REAL.zonas)) {
+    revisarMallas(REAL, zona);
+    const panel = modeloTarjetas(REAL, zona).find((t) => t.id === "evapotranspiracion").paneles[0];
+    const presentes = panel.series.filter((s) => s.serie);
+    const resoluciones = new Set(presentes.map((s) => s.serie.resolucion_m));
+    if (resoluciones.size <= 1) continue; // llegó una sola de las dos, o comparten malla
+    const meta = metaDePanel(panel);
+    assert.deepEqual(meta.map((r) => r.etiqueta), presentes.map((s) => s.etiqueta), zona);
+    presentes.forEach((s, i) => {
+      assert.ok(meta[i].texto.includes(`${formatoResolucion(s.serie.resolucion_m)} grid`), `${zona} · ${s.etiqueta}: ${meta[i].texto}`);
+      assert.ok(meta[i].texto.includes(celdasEsperadas(s.serie)), `${zona} · ${s.etiqueta}: ${meta[i].texto}`);
+      const ajenas = presentes.filter((o) => o.serie.resolucion_m !== s.serie.resolucion_m).map((o) => formatoResolucion(o.serie.resolucion_m));
+      assert.ok(ajenas.every((r) => !meta[i].texto.includes(`${r} grid`)), `${zona} · ${s.etiqueta} no lleva la resolución de otra serie: ${meta[i].texto}`);
+    });
+  }
 });
 
 test("modeloTarjetas: sin entrega, la tarjeta existe con el motivo del JSON y sin gráfica", () => {
@@ -490,22 +584,80 @@ test("ultimoMesConDato", () => {
   assert.equal(ultimoMesConDato(undefined, undefined), null);
 });
 
-test("evidenciaDeParcela: altura del dosel de GEDI y ET de ECOSTRESS del último mes con dato", () => {
+const CLAVES_EVIDENCIA = ["etiqueta", "texto", "nota", "fuente", "archivo", "fecha"];
+// Lo que la ficha no debe decir de GEDI: que su lectura es la altura (medida) del dosel o del cultivo.
+const COMO_ALTURA_DE_CULTIVO = /canopy height|crop height \(|height of the crop/i;
+
+test("evidenciaDeParcela: lectura de GEDI con su nota y ET de ECOSTRESS del último mes con dato", () => {
   const [conDato] = Object.entries(LLENO.gedi.parcelas).filter(([, p]) => p.n_disparos > 1);
   const [id, p] = conDato;
   const filas = evidenciaDeParcela({ contexto: LLENO, id });
-  assert.deepEqual(filas.map((f) => f.etiqueta), ["Canopy height (GEDI)", "Evapotranspiration (ECOSTRESS)"]);
+  assert.deepEqual(filas.map((f) => f.etiqueta), ["GEDI height reading", "Evapotranspiration (ECOSTRESS)"]);
   assert.equal(filas[0].texto, `median ${p.altura_mediana_m} m from ${p.n_disparos} shots; top decile above ${p.altura_p90_m} m`);
   assert.equal(filas[0].fuente, LLENO.gedi.fuente);
   assert.deepEqual([filas[0].archivo, filas[0].fecha], [LLENO.gedi.archivo, LLENO.gedi.fecha]);
   assert.deepEqual([filas[1].archivo, filas[1].fecha], [LLENO.ecostress.archivo, LLENO.ecostress.fecha]);
-  assert.deepEqual(Object.keys(filas[0]), ["etiqueta", "texto", "fuente", "archivo", "fecha"]);
+  for (const f of filas) assert.deepEqual(Object.keys(f), CLAVES_EVIDENCIA, "los dos renglones traen las mismas llaves");
   const ultimo = ultimoMesConDato(LLENO.ecostress.meses, LLENO.ecostress.parcelas[id]);
   assert.equal(filas[1].texto, `${formatoNumero(ultimo.valor)} mm/day, median of the clear scenes of ${etiquetaMes(ultimo.mes)}`);
   assert.equal(filas[1].fuente, LLENO.ecostress.fuente);
+  assert.equal(filas[1].nota, null, "ECOSTRESS no lleva nota");
   // Un solo disparo: singular.
   const [unoId, uno] = Object.entries(LLENO.gedi.parcelas).find(([, q]) => q.n_disparos === 1);
   assert.ok(evidenciaDeParcela({ contexto: LLENO, id: unoId })[0].texto.startsWith(`median ${uno.altura_mediana_m} m from 1 shot;`));
+});
+
+test("evidenciaDeParcela: la lectura de GEDI no se presenta como altura del cultivo y lleva su nota", () => {
+  // La nota fija no trae cifras: lo que leen las parcelas sale de la entrega (gedi.referencia).
+  for (const nota of [NOTA_GEDI, NOTA_GEDI_SIN_DISPAROS]) assert.ok(!/\d/.test(nota), nota);
+  assert.ok(NOTA_GEDI.includes("does not read zero on bare ground") && NOTA_GEDI.includes("does not measure crop height"));
+  const referencia = referenciaGedi(LLENO);
+  assert.ok(referencia, "la fixture trae gedi.referencia");
+  for (const [id] of Object.entries(LLENO.gedi.parcelas)) {
+    const [gedi] = evidenciaDeParcela({ contexto: LLENO, id });
+    assert.ok(!COMO_ALTURA_DE_CULTIVO.test(`${gedi.etiqueta} ${gedi.texto}`), `${gedi.etiqueta}: ${gedi.texto}`);
+    assert.equal(gedi.nota, `${NOTA_GEDI} ${referencia}`, "nota fija + referencia de la entrega");
+  }
+  // Si la entrega no trae la referencia (un contexto.json anterior), queda la nota fija: nunca el valor solo.
+  const sinReferencia = { ...LLENO, gedi: { ...LLENO.gedi, referencia: null } };
+  const [conNota] = evidenciaDeParcela({ contexto: sinReferencia, id: Object.keys(LLENO.gedi.parcelas)[0] });
+  assert.equal(conNota.nota, NOTA_GEDI);
+  const { referencia: _quitada, ...gediViejo } = LLENO.gedi;
+  assert.equal(evidenciaDeParcela({ contexto: { ...LLENO, gedi: gediViejo }, id: Object.keys(LLENO.gedi.parcelas)[0] })[0].nota, NOTA_GEDI);
+});
+
+test("referenciaGedi: entre qué valores leen las parcelas de la entrega; null si no hay con qué comparar", () => {
+  const r = LLENO.gedi.referencia;
+  assert.equal(
+    referenciaGedi(LLENO),
+    `In this delivery, the ${formatoNumero(r.n_parcelas)} fields with shots read from ${formatoNumero(r.minimo_m)} m to ${formatoNumero(r.maximo_m)} m; half of them read ${formatoNumero(r.mediana_m)} m or less.`,
+  );
+  const con = (referencia) => ({ ...LLENO, gedi: { ...LLENO.gedi, referencia } });
+  assert.equal(referenciaGedi(con(null)), null);
+  assert.equal(referenciaGedi(con({ ...r, n_parcelas: 1 })), null, "una sola parcela: no hay con qué comparar");
+  assert.equal(referenciaGedi(con({ ...r, mediana_m: null })), null, "un valor que falta no se supone");
+  assert.equal(referenciaGedi(con({ ...r, minimo_m: "x" })), null);
+  assert.equal(referenciaGedi(SIN_ENTREGAS), null);
+  assert.equal(referenciaGedi(null), null);
+  assert.equal(referenciaGedi(), null);
+});
+
+test("GEDI de hoy (web/data/contexto.json): todas las parcelas con lectura llevan la nota y la referencia", { skip: !(REAL && REAL.gedi) && "sin gedi en web/data/contexto.json" }, () => {
+  const referencia = referenciaGedi(REAL);
+  const r = REAL.gedi.referencia;
+  assert.ok(r && referencia, "la entrega real trae su referencia");
+  for (const v of [r.n_parcelas, r.minimo_m, r.mediana_m, r.maximo_m]) assert.ok(referencia.includes(formatoNumero(v)), `${v} en: ${referencia}`);
+  // La referencia sale de las mismas parcelas del bloque (cálculo independiente, aquí).
+  const lecturas = Object.values(REAL.gedi.parcelas).map((p) => p.altura_mediana_m).sort((a, b) => a - b);
+  assert.equal(r.n_parcelas, lecturas.length);
+  assert.deepEqual([r.minimo_m, r.maximo_m], [lecturas[0], lecturas.at(-1)]);
+  const mitad = lecturas.length % 2 ? lecturas[(lecturas.length - 1) / 2] : (lecturas[lecturas.length / 2 - 1] + lecturas[lecturas.length / 2]) / 2;
+  assert.ok(Math.abs(r.mediana_m - mitad) < 0.006, `${r.mediana_m} vs ${mitad}`);
+  for (const id of Object.keys(REAL.gedi.parcelas)) {
+    const [gedi] = evidenciaDeParcela({ contexto: REAL, id });
+    assert.ok(!COMO_ALTURA_DE_CULTIVO.test(`${gedi.etiqueta} ${gedi.texto}`), `${id}: ${gedi.etiqueta}: ${gedi.texto}`);
+    assert.equal(gedi.nota, `${NOTA_GEDI} ${referencia}`, id);
+  }
 });
 
 test("evidenciaDeParcela: sin dato se dice (no es cero) y sin bloques devuelve []", () => {
@@ -513,7 +665,9 @@ test("evidenciaDeParcela: sin dato se dice (no es cero) y sin bloques devuelve [
   const sinDisparos = Object.keys(LLENO.ecostress.parcelas).find((id) => !(id in LLENO.gedi.parcelas));
   const filas = evidenciaDeParcela({ contexto: LLENO, id: sinDisparos });
   assert.equal(filas[0].texto, "GEDI: no shots inside this field");
+  assert.equal(filas[0].nota, NOTA_GEDI_SIN_DISPAROS, "sin disparos: es «sin dato», y se explica por qué");
   assert.equal(filas[0].fuente, LLENO.gedi.fuente);
+  assert.deepEqual(Object.keys(filas[0]), CLAVES_EVIDENCIA);
   // Parcela con sus últimos meses sin escena: se usa el último mes que sí tiene dato.
   const [idHueco, valores] = Object.entries(LLENO.ecostress.parcelas).find(([, v]) => v.at(-1) === null && v.some((x) => x != null));
   const ultimo = ultimoMesConDato(LLENO.ecostress.meses, valores);

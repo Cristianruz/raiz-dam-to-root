@@ -1,0 +1,161 @@
+/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* web/css/instalar.css — Aplicación instalable y sin conexión (web/js/instalar.js): pastillas «Online» /
+   «Offline — showing the last synced copy» y «Ready to work offline», y el botón «Install app».
+   Colores como variables: toma --agua, --brote, --ambar… de style.css; el valor tras la coma es el respaldo
+   si style.css no está cargado (mismos códigos de la identidad, kit C1 §10).
+   Cada estado lleva texto y una figura distinta (disco, aro tachado, palomita, aro que gira, admiración):
+   nada depende solo del color. Las figuras se dibujan con bordes, que se conservan en modo de alto contraste.
+   El bloque se acomoda al ancho que le den (sus piezas bajan de renglón): barra de la marca, panel o teléfono.
+   Los números de este archivo son medidas de diseño, no datos. */
+
+.instalar {
+  --instalar-agua: var(--agua, #1F6FB2);
+  --instalar-agua-osc: var(--agua-osc, #174F80);
+  --instalar-brote: var(--brote, #4C9A2A);
+  --instalar-brote-osc: var(--mem-perenne, #2F6B1B);
+  --instalar-ambar: var(--ambar, #D98E04);
+  --instalar-ambar-claro: var(--ambar-claro, #FBEFD5);
+  --instalar-tinta: var(--tinta, #1D2329);
+  --instalar-borde: var(--borde, #D8CFC2);
+  --instalar-papel: var(--blanco, #FFFFFF);
+  --instalar-figura: 12px; /* lado de la figura de cada pastilla */
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--instalar-tinta);
+  font-size: 0.88rem;
+  line-height: 1.25;
+  text-align: left;
+}
+.instalar, .instalar *, .instalar *::before, .instalar *::after { box-sizing: border-box; }
+.instalar[hidden], .instalar [hidden] { display: none !important; }
+
+.instalar-estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-width: 0;
+  margin: 0;
+  border-radius: 16px;
+}
+.instalar-estado:focus-visible {
+  outline: 3px solid var(--instalar-agua);
+  outline-offset: 2px;
+}
+
+/* --- Pastillas ---------------------------------------------------------------------------------- */
+.instalar-pastilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 3px 12px;
+  border: 1px solid var(--instalar-borde);
+  border-radius: 16px;
+  background: var(--instalar-papel);
+}
+.instalar-texto { min-width: 0; overflow-wrap: anywhere; }
+
+.instalar-figura {
+  position: relative;
+  flex: none;
+  width: var(--instalar-figura);
+  height: var(--instalar-figura);
+  border-radius: 50%;
+}
+
+/* Con conexión: disco lleno (un borde tan grueso como el radio). */
+.instalar[data-red="online"] .instalar-red .instalar-figura {
+  border: calc(var(--instalar-figura) / 2) solid var(--instalar-brote);
+}
+
+/* Sin conexión: pastilla ámbar, texto en negritas y un aro tachado. */
+.instalar[data-red="offline"] .instalar-red {
+  border-color: var(--instalar-ambar);
+  background: var(--instalar-ambar-claro);
+  font-weight: 700;
+}
+.instalar[data-red="offline"] .instalar-red .instalar-figura { border: 2px solid currentColor; }
+.instalar[data-red="offline"] .instalar-red .instalar-figura::after {
+  content: "";
+  position: absolute;
+  left: -4px; right: -4px; top: calc(50% - 1px);
+  border-top: 2px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+/* Copia lista: palomita (dos bordes de un rectángulo girado). */
+.instalar[data-copia="lista"] .instalar-copia .instalar-figura {
+  width: 7px;
+  height: 12px;
+  margin: 0 3px 3px 2px;
+  border: solid var(--instalar-brote-osc);
+  border-width: 0 2.5px 2.5px 0;
+  border-radius: 0;
+  transform: rotate(45deg);
+}
+
+/* Guardando la copia: aro con un tramo azul que gira. */
+.instalar[data-copia="guardando"] .instalar-copia .instalar-figura {
+  border: 2px solid var(--instalar-borde);
+  border-top-color: var(--instalar-agua);
+  animation: instalar-giro 0.9s linear infinite;
+}
+@keyframes instalar-giro { to { transform: rotate(360deg); } }
+
+/* Copia incompleta: aro ámbar con una admiración. */
+.instalar[data-copia="incompleta"] .instalar-copia { border-color: var(--instalar-ambar); }
+.instalar[data-copia="incompleta"] .instalar-copia .instalar-figura {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--instalar-ambar);
+}
+.instalar[data-copia="incompleta"] .instalar-copia .instalar-figura::after {
+  content: "!";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* --- Botón «Install app» ------------------------------------------------------------------------- */
+.instalar-boton {
+  min-height: 36px;
+  padding: 3px 16px;
+  border: 1px solid var(--instalar-agua-osc);
+  border-radius: 999px;
+  background: var(--instalar-agua);
+  color: var(--instalar-papel);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.instalar-boton:hover { background: var(--instalar-agua-osc); }
+.instalar-boton:focus-visible {
+  outline: 3px solid var(--instalar-agua);
+  outline-offset: 2px;
+}
+/* Dedo en vez de puntero: blanco de toque más alto. */
+@media (pointer: coarse) {
+  .instalar-boton { min-height: 44px; }
+}
+
+/* Sin animaciones si la persona pidió movimiento reducido: el aro queda quieto (el texto ya lo dice). */
+@media (prefers-reduced-motion: reduce) {
+  .instalar[data-copia="guardando"] .instalar-copia .instalar-figura { animation: none; }
+}
+
+/* En papel no hay conexión ni instalación que mostrar. */
+@media print {
+  .instalar { display: none !important; }
+}

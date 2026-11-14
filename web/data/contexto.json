@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/contexto_web.py con las entregas validadas de data/processed; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
- "generado": "2026-11-14T22:03:51+00:00",
+ "generado": "2026-11-14T22:20:26+00:00",
  "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
  "zonas": {
   "delicias_saucillo": {
@@ -23986,7 +23986,13 @@
    }
   },
   "n_con_dato": 1072,
-  "n_total": 1239
+  "n_total": 1239,
+  "referencia": {
+   "n_parcelas": 1072,
+   "minimo_m": 2.3,
+   "mediana_m": 2.76,
+   "maximo_m": 23.41
+  }
  },
  "gedi_motivo": null,
  "ecostress": null,

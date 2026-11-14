@@ -128,6 +128,11 @@
   font-size: 0.8rem; color: var(--contexto-tinta-suave);
 }
 .contexto-meta > span { overflow-wrap: anywhere; }
+/* Series de un panel con mallas distintas: un renglón por serie, con su nombre delante. */
+.contexto-meta--series { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.contexto-meta--series > li { display: flex; flex-wrap: wrap; gap: 0 10px; }
+.contexto-meta--series > li > span { overflow-wrap: anywhere; }
+.contexto-meta-serie { font-weight: 700; color: var(--contexto-tinta); }
 .contexto-fuente { flex-basis: 100%; }
 
 /* ---------- Gráficas ---------- */

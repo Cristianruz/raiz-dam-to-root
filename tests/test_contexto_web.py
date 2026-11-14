@@ -13,6 +13,8 @@ Decisión: docs/decisiones/2026-11-14_recursos_del_reto.md.
     sus «dias_con_dato» reales; la fixture contexto_lleno.json está al día.
 (d) et_contraste lleva la zona piloto a la que pertenece (archivo sin sufijo = zona por omisión) y
     el motivo fijo para las demás zonas; cada bloque dice de qué archivo salió.
+(e) GEDI: el bloque trae la referencia de la propia entrega (mínimo, mediana y máximo de las lecturas
+    de las parcelas con disparos), igual a un cálculo independiente; null si no hay lecturas.
 Todo se escribe en tmp_path: nunca en data/processed ni en web/data. Los valores de (b) y (c) son
 DE PRUEBA; los umbrales se leen de motor/esquemas.py y de data/params.json, no se escriben aquí.
 """
@@ -362,6 +364,62 @@ def test_lleno_gedi_solo_parcelas_con_disparos(lleno):
     assert gedi["parcelas"]["P0001"] == {"n_disparos": 4, "altura_mediana_m": 6.2, "altura_p90_m": 8.1}
     assert "P0002" not in gedi["parcelas"] and "L0002" not in gedi["parcelas"], "sin disparos: no es cero, no entra"
     assert gedi["fuente"] and gedi["fecha"]
+
+
+def lecturas_de_gedi(ruta):
+    """altura_mediana_m de las parcelas con disparos, leída del CSV sin pasar por el motor."""
+    with open(ruta, newline="", encoding="utf-8") as f:
+        return [float(fila["altura_mediana_m"]) for fila in csv.DictReader(f) if int(fila["n_disparos"]) > 0]
+
+
+def test_lleno_gedi_referencia_de_la_propia_entrega(lleno):
+    """GEDI (rh98) no marca cero sobre suelo desnudo: el bloque dice entre qué valores leen las parcelas de
+    la entrega, para que la ficha compare una lectura con las demás y no la presente como altura del cultivo."""
+    gedi = lleno["contexto"]["gedi"]
+    lecturas = sorted(lecturas_de_gedi(lleno["processed"] / ARCHIVO_DE["gedi"]))
+    assert len(lecturas) == 2, "la fixture trae dos parcelas con disparos"
+    assert gedi["referencia"] == {"n_parcelas": 2, "minimo_m": lecturas[0],
+                                  "mediana_m": round((lecturas[0] + lecturas[1]) / 2, 2), "maximo_m": lecturas[1]}
+
+
+def test_gedi_referencia_null_si_ninguna_parcela_tiene_disparos(lleno, tmp_path):
+    """Sin lecturas no hay referencia: null, no un cero ni un valor supuesto."""
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    (processed / ARCHIVO_DE["gedi"]).write_text("id,n_disparos,altura_mediana_m,altura_p90_m\nP0001,0,,\nP0002,0,,\n",
+                                                encoding="utf-8")
+    _, contexto, _ = construir_en(tmp_path, processed)
+    gedi = contexto["gedi"]
+    assert gedi["parcelas"] == {} and gedi["n_con_dato"] == 0 and gedi["n_total"] == 2
+    assert gedi["referencia"] is None
+    assert cw.referencia_gedi({}) is None
+
+
+def test_gedi_referencia_con_numero_impar_de_parcelas():
+    """La mediana de un número impar es una lectura de la entrega; con una sola parcela, las tres coinciden."""
+    def parcela(v):
+        return {"n_disparos": 1, "altura_mediana_m": v, "altura_p90_m": v}
+    tres = cw.referencia_gedi({"A": parcela(9.5), "B": parcela(2.5), "C": parcela(3.25)})
+    assert tres == {"n_parcelas": 3, "minimo_m": 2.5, "mediana_m": 3.25, "maximo_m": 9.5}
+    assert cw.referencia_gedi({"A": parcela(4.5)}) == {"n_parcelas": 1, "minimo_m": 4.5, "mediana_m": 4.5,
+                                                         "maximo_m": 4.5}
+
+
+def test_real_gedi_referencia_coincide_con_un_calculo_independiente(real):
+    """Con la entrega real de hoy (si ya llegó): mínimo, mediana y máximo calculados aquí, del CSV."""
+    _, contexto, _ = real
+    ruta = PROCESADOS / ARCHIVO_DE["gedi"]
+    if not ruta.is_file():
+        assert contexto["gedi"] is None and contexto["gedi_motivo"] == cw.MOTIVO_PEDIDO
+        pytest.skip("data/processed aún no trae gedi_parcelas.csv")
+    lecturas = sorted(lecturas_de_gedi(ruta))
+    n = len(lecturas)
+    mitad = lecturas[n // 2] if n % 2 else (lecturas[n // 2 - 1] + lecturas[n // 2]) / 2
+    referencia = contexto["gedi"]["referencia"]
+    assert referencia["n_parcelas"] == n == contexto["gedi"]["n_con_dato"]
+    assert referencia["minimo_m"] == lecturas[0] and referencia["maximo_m"] == lecturas[-1]
+    assert referencia["mediana_m"] == pytest.approx(mitad, abs=0.005)
+    assert referencia["minimo_m"] <= referencia["mediana_m"] <= referencia["maximo_m"]
 
 
 def test_lleno_ecostress_alineado_a_los_meses(lleno):

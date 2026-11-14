@@ -14,7 +14,9 @@
 //           ETo y días con helada del año agrícola elegido, y una gráfica por variable con todos los
 //           años y el elegido resaltado (línea, marcador y texto; no solo color);
 //       (2) una tarjeta por grupo de series de contexto_regional (contexto.tarjetas): gráfica, valor
-//           del año elegido, unidad, resolución y fuente. Si el bloque es null o la serie no llegó, la
+//           del año elegido, unidad, resolución y fuente. Cada serie lleva SU resolución: si las series
+//           de un panel no comparten malla (MODIS y GLDAS en la tarjeta de evapotranspiración), va un
+//           renglón por serie con su nombre (metaDePanel). Si el bloque es null o la serie no llegó, la
 //           tarjeta existe y dice el motivo del JSON («Requested from the data team — not delivered
 //           yet»), sin gráfica vacía ni ceros. GRACE llega como una sola serie de cuenca: se muestra
 //           igual en todas las zonas y se rotula «Basin scale». Otra tarjeta lista la aptitud de GAEZ
@@ -35,10 +37,14 @@
 //       Tabla «Challenge data sources» (Resource · Agency · Role in Raíz · Status · Files), con el
 //       estado en símbolo y texto, ordenada (en uso, pedidas, no aplica) y un resumen cuyos conteos
 //       se calculan de contexto.recursos.
-//   evidenciaDeParcela({ contexto, id }) -> [{ etiqueta, texto, fuente, archivo, fecha }]
-//       Renglones para la ficha: altura del dosel de GEDI y ET de ECOSTRESS del último mes con dato.
-//       [] si los dos bloques son null. «fuente» es el texto completo de la entrega (puede ser
-//       largo); «archivo» y «fecha» sirven para citarla en corto.
+//   evidenciaDeParcela({ contexto, id }) -> [{ etiqueta, texto, nota, fuente, archivo, fecha }]
+//       Renglones para la ficha: la lectura de altura de GEDI y la ET de ECOSTRESS del último mes con
+//       dato. [] si los dos bloques son null. «nota» (texto o null) es parte del renglón: la ficha la
+//       escribe SIEMPRE junto al valor. La de GEDI dice que el instrumento no marca cero sobre suelo
+//       desnudo (una lectura baja es dosel bajo o ninguno: no es la altura del cultivo) y, si la
+//       entrega la trae (gedi.referencia), entre qué valores leen las parcelas de esa misma entrega.
+//       «fuente» es el texto completo de la entrega (puede ser largo); «archivo» y «fecha» sirven
+//       para citarla en corto.
 //   riesgoDeHelada({ contexto, fechaSiembra, zonaId }) -> { prob, fuente, fecha } | null
 //       Probabilidad de helada después de la fecha de siembra, de heladas.prob_helada_despues_de
 //       (la fecha «MM-DD» más cercana anterior o igual). fechaSiembra: «MM-DD», «AAAA-MM-DD», Date,
@@ -46,9 +52,10 @@
 //       si no, la de la zona base. null si no hay bloque o la fecha cae fuera de la ventana calculada.
 //   Funciones puras (las mismas que usa la página; se prueban en tests/contexto.test.js):
 //       num, climaDelAnio, diferenciaLluvia, anioPorOmision, graficasDeClima, seriesDeZona,
-//       puntosAnuales, valorAnual, modeloTarjetas, modeloContraste, citasDeTarjeta, fuentesDeSeccion,
-//       escalaY, formatoResolucion, formatoNumero, etiquetaMes, ordenarRecursos, contarEstados,
-//       ultimoMesConDato, mesDia.
+//       puntosAnuales, valorAnual, modeloTarjetas, modeloContraste, metaDePanel, citasDeTarjeta,
+//       fuentesDeSeccion, escalaY, formatoResolucion, formatoNumero, etiquetaMes, ordenarRecursos,
+//       contarEstados, ultimoMesConDato, referenciaGedi, mesDia. Textos fijos exportados:
+//       NOTA_REGIONAL, NOTA_GEDI, NOTA_GEDI_SIN_DISPAROS.
 //   Las funciones «montar…» insertan css/contexto.css en la página si aún no está enlazada.
 //
 // Reglas de este archivo:
@@ -74,6 +81,14 @@ const TITULO_CLIMA = "Climate of the year";
 const TITULO_RECURSOS = "Challenge data sources";
 export const NOTA_REGIONAL =
   "Regional series describe the area or the basin, not a single field. They do not forecast the dam and do not change the water light.";
+// GEDI (rh, altura relativa del retorno): el instrumento no marca cero sobre suelo desnudo, así que el
+// renglón de la ficha no se rotula como altura del cultivo y lleva siempre esta nota (sin cifras: lo
+// que leen las parcelas de la entrega sale de gedi.referencia, ver referenciaGedi).
+const ETIQUETA_GEDI = "GEDI height reading";
+export const NOTA_GEDI =
+  "GEDI does not read zero on bare ground: a low value means low or no canopy. It tells an orchard from a low crop; it does not measure crop height.";
+export const NOTA_GEDI_SIN_DISPAROS =
+  "GEDI samples the ground with separate laser shots, so many fields have none. This is no data, not zero.";
 const TEXTO_NO_DISPONIBLE = "Not available yet";
 const TEXTO_SIN_CONTEXTO = "Regional context: not available yet.";
 const TEXTO_ELIJA_ZONA = "Choose one pilot area to see its regional context.";
@@ -85,6 +100,8 @@ const ROTULO_FUENTES = "Sources and product versions";
 // Respaldo de et_contraste.motivo_otras_zonas (lo escribe motor/contexto_web.py).
 const TEXTO_CONTRASTE_OTRA_ZONA = "Not run for this pilot area";
 const AYUDA_MESES = "Point at a month to read its values, or open the data table.";
+const TEXTO_SIN_MALLA = "grid not stated in the delivery";
+const ROTULO_MALLAS = "Grid of each series";
 
 // Estado de un recurso (contexto.recursos[].estado). El símbolo acompaña al texto y al color.
 const ESTADOS_RECURSO = {
@@ -443,6 +460,45 @@ export function modeloTarjetas(contexto, zonaId) {
   });
 }
 
+function textoCeldas(serie) {
+  const n = num(serie.n_celdas);
+  if (n != null) return `${formatoNumero(n)} ${plural(n, "grid cell", "grid cells")} in the average`;
+  const rango = serie.n_celdas_rango;
+  if (Array.isArray(rango) && rango.length > 1) return `${formatoNumero(rango[0])} to ${formatoNumero(rango[1])} grid cells in the average`;
+  return null;
+}
+
+/** Lo que el JSON dice de la malla de UNA serie regional, en textos: ámbito con su resolución y celdas del promedio. */
+function partesDeMalla(serie) {
+  const resolucion = formatoResolucion(serie.resolucion_m);
+  const deCuenca = serie.ambito === LLAVE_CUENCA;
+  return [
+    resolucion ? `${deCuenca ? "Basin scale" : "Regional"}, ${resolucion} grid` : null,
+    deCuenca ? "One series for the whole basin, the same in every pilot area" : null,
+    textoCeldas(serie),
+  ].filter(Boolean);
+}
+
+/**
+ * Malla de las series presentes de un panel (un elemento de modeloTarjetas(…)[i].paneles):
+ * [{ etiqueta, partes, texto }]. Cada serie lleva SU resolución y SUS celdas:
+ * - si todas las presentes dicen lo mismo, un solo renglón con etiqueta null;
+ * - si difieren en ámbito, resolución o celdas, un renglón por serie con la etiqueta de la serie
+ *   (la misma de la leyenda), para que ninguna herede la malla de otra.
+ * `partes` son los textos sueltos y `texto` los junta. [] si no hay series o ninguna dice su malla.
+ */
+export function metaDePanel(panel) {
+  const SEPARADOR = " · ";
+  const presentes = ((panel && panel.series) || []).filter((s) => s && s.serie);
+  const renglones = presentes.map((s) => ({ etiqueta: s.etiqueta ?? null, partes: partesDeMalla(s.serie) }));
+  if (!renglones.some((r) => r.partes.length)) return [];
+  const iguales = new Set(renglones.map((r) => JSON.stringify(r.partes))).size === 1;
+  const lista = iguales
+    ? [{ etiqueta: null, partes: renglones[0].partes }]
+    : renglones.map((r) => (r.partes.length ? r : { ...r, partes: [TEXTO_SIN_MALLA] }));
+  return lista.map((r) => ({ ...r, texto: r.partes.join(SEPARADOR) }));
+}
+
 function nombreDeZona(contexto, zonaId) {
   const zona = contexto && contexto.zonas && contexto.zonas[zonaId];
   return (zona && zona.nombre) || (zonaId == null ? null : String(zonaId));
@@ -613,7 +669,24 @@ export function ultimoMesConDato(meses, valores) {
   return null;
 }
 
-/** Renglones de evidencia de una parcela para la ficha; [] si GEDI y ECOSTRESS aún no llegan. */
+/**
+ * Entre qué valores leen las parcelas con disparos de la MISMA entrega de GEDI (gedi.referencia, que
+ * calcula motor/contexto_web.py): la frase que deja comparar la lectura de una parcela con las demás.
+ * null si la entrega no trae la referencia o si no hay al menos dos parcelas que comparar.
+ */
+export function referenciaGedi(contexto) {
+  const r = contexto && contexto.gedi && contexto.gedi.referencia;
+  if (!r) return null;
+  const [n, minimo, mediana, maximo] = [r.n_parcelas, r.minimo_m, r.mediana_m, r.maximo_m].map(num);
+  if (n == null || n <= 1 || minimo == null || mediana == null || maximo == null) return null;
+  return `In this delivery, the ${formatoNumero(n)} fields with shots read from ${formatoNumero(minimo)} m to ${formatoNumero(maximo)} m; half of them read ${formatoNumero(mediana)} m or less.`;
+}
+
+/**
+ * Renglones de evidencia de una parcela para la ficha; [] si GEDI y ECOSTRESS aún no llegan.
+ * Cada renglón: { etiqueta, texto, nota, fuente, archivo, fecha }. «nota» (texto o null) va siempre
+ * junto al valor: la de GEDI evita leer el piso del instrumento como la altura de un cultivo.
+ */
 export function evidenciaDeParcela({ contexto, id } = {}) {
   const lista = [];
   const gedi = contexto && contexto.gedi;
@@ -621,14 +694,16 @@ export function evidenciaDeParcela({ contexto, id } = {}) {
     const p = (gedi.parcelas || {})[id];
     const mediana = p ? num(p.altura_mediana_m) : null;
     let texto = "GEDI: no shots inside this field";
+    let nota = NOTA_GEDI_SIN_DISPAROS;
     if (p && mediana != null) {
       const disparos = num(p.n_disparos) ?? 0;
       const alta = num(p.altura_p90_m);
       texto =
         `median ${formatoNumero(mediana)} m from ${formatoNumero(disparos)} ${plural(disparos, "shot", "shots")}` +
         (alta != null ? `; top decile above ${formatoNumero(alta)} m` : "");
+      nota = [NOTA_GEDI, referenciaGedi(contexto)].filter(Boolean).join(" ");
     }
-    lista.push({ etiqueta: "Canopy height (GEDI)", texto, fuente: gedi.fuente || null, archivo: gedi.archivo || null, fecha: gedi.fecha || null });
+    lista.push({ etiqueta: ETIQUETA_GEDI, texto, nota, fuente: gedi.fuente || null, archivo: gedi.archivo || null, fecha: gedi.fecha || null });
   }
   const eco = contexto && contexto.ecostress;
   if (eco) {
@@ -638,6 +713,7 @@ export function evidenciaDeParcela({ contexto, id } = {}) {
       texto: ultimo
         ? `${formatoNumero(ultimo.valor)} mm/day, median of the clear scenes of ${etiquetaMes(ultimo.mes)}`
         : "ECOSTRESS: no clear scene over this field",
+      nota: null,
       fuente: eco.fuente || null,
       archivo: eco.archivo || null,
       fecha: eco.fecha || null,
@@ -958,26 +1034,19 @@ function htmlFuentesClima(contexto, zonaId) {
     </details>`;
 }
 
-function textoCeldas(serie) {
-  const n = num(serie.n_celdas);
-  if (n != null) return `${formatoNumero(n)} ${plural(n, "grid cell", "grid cells")} in the average`;
-  const rango = serie.n_celdas_rango;
-  if (Array.isArray(rango) && rango.length > 1) return `${formatoNumero(rango[0])} to ${formatoNumero(rango[1])} grid cells in the average`;
-  return null;
-}
-
+/**
+ * Malla de un panel bajo su gráfica (metaDePanel): un renglón si las series la comparten; si no, una
+ * lista con un renglón por serie, cada uno con su nombre.
+ */
 function htmlMetaPanel(panel) {
-  const presentes = panel.series.filter((s) => s.serie);
-  if (!presentes.length) return "";
-  const s = presentes[0].serie;
-  const resolucion = formatoResolucion(s.resolucion_m);
-  const deCuenca = s.ambito === LLAVE_CUENCA;
-  const partes = [
-    resolucion ? `${deCuenca ? "Basin scale" : "Regional"}, ${resolucion} grid` : null,
-    deCuenca ? "One series for the whole basin, the same in every pilot area" : null,
-    textoCeldas(s),
-  ].filter(Boolean);
-  return partes.length ? `<p class="contexto-meta">${partes.map((p) => `<span>${esc(p)}</span>`).join("")}</p>` : "";
+  const renglones = metaDePanel(panel);
+  if (!renglones.length) return "";
+  const partes = (r) => r.partes.map((p) => `<span>${esc(p)}</span>`).join(" ");
+  if (renglones.length === 1 && renglones[0].etiqueta == null) return `<p class="contexto-meta">${partes(renglones[0])}</p>`;
+  const filas = renglones
+    .map((r) => `<li data-serie="${esc(r.etiqueta)}"><b class="contexto-meta-serie">${esc(r.etiqueta)}:</b> ${partes(r)}</li>`)
+    .join("");
+  return `<ul class="contexto-meta contexto-meta--series" aria-label="${esc(ROTULO_MALLAS)}">${filas}</ul>`;
 }
 
 /**
