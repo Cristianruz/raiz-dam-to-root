@@ -4,7 +4,8 @@
 Entradas: nasadem_zona_piloto.tif (Earth Engine), parcelas_base.geojson (B1), imerg_diaria.csv (A9b) o eto_diaria.csv (A1)
 Salidas:
     relieve_parcelas.csv     id, pendiente_media_pct, aportacion_externa_ha, frac_depresion
-    relieve_rutas.geojson    líneas por donde se concentra el escurrimiento (para animar «Simular tormenta»)
+    relieve_rutas.geojson    tramos (LineString) por donde se concentra el escurrimiento, con aporta_ha;
+                             para animar «Simular tormenta». Debe pesar < 1 MB (kit A9, paso 3)
     relieve_meta.json        umbral de rutas, tormenta P95 (mm) con su fuente y periodo, rótulo de escala
 Rótulo obligatorio: "regional, 30 m (NASADEM); not field drainage design".
 Método: relleno de depresiones (priority-flood), dirección D8 y acumulación de flujo. Sin dependencias
@@ -155,22 +156,43 @@ def main():
             filas.append([f["properties"]["id"], round(pend, 3),
                           round(externa * celda_ha, 2), round(float((prof[m] > PROF_DEPRESION_M).mean()), 3)])
 
+        # Rutas: celdas con acumulación ≥ umbral, encadenadas aguas abajo en polilíneas (de cabecera o
+        # confluencia a la siguiente confluencia) y simplificadas a media celda. Cada línea lleva el área de
+        # aportación al final del tramo (aporta_ha), útil para el grosor y el orden de la animación.
+        from shapely.geometry import LineString
         umbral_celdas = UMBRAL_RUTA_HA / celda_ha
-        lineas = []
-        for i, j in zip(*np.where(acum >= umbral_celdas)):
+        ruta = acum >= umbral_celdas
+        entradas = np.zeros(z.shape, dtype=int)
+        for i, j in zip(*np.where(ruta)):
             a, b = destino[i, j]
             if a >= 0:
-                p = lambda r, c: [round(tr.c + (c + 0.5) * tr.a, 6), round(tr.f + (r + 0.5) * tr.e, 6)]
-                lineas.append([p(i, j), p(a, b)])
+                entradas[a, b] += 1
+        centro = lambda r, c: (tr.c + (c + 0.5) * tr.a, tr.f + (r + 0.5) * tr.e)
+        lineas, n_seg = [], 0
+        for i, j in zip(*np.where(ruta)):
+            if entradas[i, j] == 1:
+                continue                                # celda intermedia: la recorre el tramo que viene de arriba
+            pts, (a, b), fin = [centro(i, j)], destino[i, j], (i, j)
+            while a >= 0:
+                pts.append(centro(a, b))
+                fin = (a, b)
+                if entradas[a, b] != 1:
+                    break                               # confluencia: ahí empieza otro tramo
+                a, b = destino[a, b]
+            if len(pts) < 2:
+                continue
+            n_seg += len(pts) - 1
+            g = LineString(pts).simplify(abs(tr.a) / 2)
+            lineas.append({"type": "Feature",
+                           "properties": {"aporta_ha": round(float(acum[fin]) * celda_ha, 1)},
+                           "geometry": {"type": "LineString",
+                                        "coordinates": [[round(x, 5), round(y, 5)] for x, y in g.coords]}})
 
     with open("relieve_parcelas.csv", "w", newline="") as fo:
         w = csv.writer(fo)
         w.writerow(["id", "pendiente_media_pct", "aportacion_externa_ha", "frac_depresion"])
         w.writerows(filas)
-    json.dump({"type": "FeatureCollection", "features": [{
-        "type": "Feature", "properties": {"umbral_ha": UMBRAL_RUTA_HA},
-        "geometry": {"type": "MultiLineString", "coordinates": lineas}}]},
-        open("relieve_rutas.geojson", "w"))
+    json.dump({"type": "FeatureCollection", "features": lineas}, open("relieve_rutas.geojson", "w"))
     json.dump({"rotulo": "regional, 30 m (NASADEM); not field drainage design",
                "umbral_ruta_ha": UMBRAL_RUTA_HA, "umbral_ruta_etiqueta": "assumption [S]",
                "pendiente": "por parcela: plano ajustado por mínimos cuadrados a las celdas de NASADEM; zona: DEM suavizado 5 × 5 celdas (~150 m) [S]", "celda_ha": round(celda_ha, 4),
@@ -178,7 +200,7 @@ def main():
     registrar_fuentes("A9", ["relieve_parcelas.csv", "relieve_rutas.geojson", "relieve_meta.json"],
                       "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta)",
                       "datos/colab/A9_relieve.py")
-    print(f"Parcelas: {len(filas)} · segmentos de ruta: {len(lineas)} · "
+    print(f"Parcelas: {len(filas)} · rutas: {len(lineas)} tramos ({n_seg} segmentos de celda) · "
           f"pendiente media de la zona: {pendiente.mean():.2f} %")
 
 
