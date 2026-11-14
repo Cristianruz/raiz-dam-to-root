@@ -1,0 +1,133 @@
+<!doctype html>
+<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- web/index.html — Centro de control (C1) y ficha de parcela (C2).
+     Regla: el texto visible de este archivo NO lleva cifras. Todos los números los escribe
+     app.js leyendo web/data/ (cubo.json, parcelas.geojson, explicaciones.json).
+     Librerías locales con versión fija (web/vendor/VERSIONS.json); nada desde un CDN. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Raíz – From Dam to Root</title>
+  <meta name="description" content="Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover.">
+  <!-- Tipografía: Atkinson Hyperlegible si está instalada; si no, la del sistema (style.css).
+       No se carga de Google Fonts: su hoja no admite hash de integridad (tests/versiones.test.js)
+       y la página no depende de la red. Copiarla a web/vendor/ queda como pendiente. -->
+  <link rel="stylesheet" href="vendor/maplibre-gl-5.24.0/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="vendor/maplibre-gl-5.24.0/maplibre-gl.js"></script>
+  <script defer src="vendor/d3-7.9.0/d3.min.js"></script>
+  <script defer src="vendor/d3-sankey-0.12.3/d3-sankey.min.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="saltar" href="#principal">Skip to the map and indicators</a>
+
+  <!-- La marca se desplaza con la página; los controles quedan fijos arriba (sticky) para mover
+       el deslizador también con la ficha abierta. -->
+  <header class="marca" id="marca">
+    <span><span class="marca-nombre">Raíz</span> <span class="marca-sub">– From Dam to Root<span class="marca-lema"> · pre-planting water commitments</span></span></span>
+    <span class="aviso-simulado" id="aviso-simulado" role="note" hidden>SIMULATED DATA</span>
+    <span class="aviso-simulado-detalle" id="aviso-simulado-detalle" hidden>Placeholder values so the screens work before the real data arrive. Not real fields or measurements.</span>
+  </header>
+
+  <section class="controles" id="controles" aria-label="Water allocation controls">
+    <div class="control-dotacion">
+      <label for="dotacion" class="etiqueta-control">Water allocation <span class="unidad">(thousand m³ per hectare · millares/ha)</span></label>
+      <div class="fila-deslizador">
+        <input type="range" id="dotacion" list="dotacion-marcas" aria-describedby="punto-medicion">
+        <datalist id="dotacion-marcas"></datalist>
+        <output id="dotacion-valor" class="valor-dotacion" for="dotacion"></output>
+      </div>
+      <div class="marcas" id="marcas" role="group" aria-label="Reference allocations"></div>
+      <div class="info-marca" id="info-marca" aria-live="polite" hidden>
+        <p id="info-marca-resumen"></p>
+        <details id="info-marca-detalle"><summary>Source and note</summary><p id="info-marca-fuente"></p></details>
+      </div>
+    </div>
+
+    <div class="control-extra">
+      <label class="interruptor" for="lluvia">
+        <input type="checkbox" role="switch" id="lluvia" aria-describedby="lluvia-ayuda">
+        <span id="lluvia-etiqueta">Rain</span>
+      </label>
+      <span class="ayuda-interruptor" id="lluvia-ayuda">Less rain: every option needs more irrigation water.</span>
+      <details class="unidades" id="unidades">
+        <summary>Units and measuring point</summary>
+        <p><strong>Equivalence:</strong> <span id="equivalencia"></span></p>
+        <p><strong>Measured at:</strong> <span id="punto-medicion"></span></p>
+      </details>
+    </div>
+  </section>
+
+  <main id="principal" class="principal">
+    <section class="zona-mapa" aria-label="Pilot area map">
+      <div class="indicador" id="indicador">
+        <h1 class="indicador-titulo">Water already committed by perennial crops</h1>
+        <div aria-live="polite" aria-atomic="true">
+          <p class="indicador-cifra" id="indicador-cifra"></p>
+          <p class="indicador-rango" id="indicador-rango"></p>
+          <div class="indicador-mensaje" id="indicador-mensaje" hidden></div>
+          <p class="indicador-segunda" id="indicador-segunda"></p>
+        </div>
+      </div>
+      <div id="mapa" class="mapa" role="region" aria-label="Map of the pilot-area fields. Use the field list to open a field with the keyboard."></div>
+      <p class="mapa-aviso" id="mapa-aviso" role="status" hidden></p>
+    </section>
+
+    <aside class="panel" aria-label="Map options, fields and district summary">
+      <section class="bloque" aria-labelledby="t-colorear">
+        <h2 id="t-colorear">Color fields by</h2>
+        <fieldset>
+          <legend>Water</legend>
+          <label class="opcion-radio"><input type="radio" name="colorear" value="semaforo" checked> Enough water?</label>
+          <label class="opcion-radio"><input type="radio" name="colorear" value="plazo"> Water term</label>
+        </fieldset>
+        <fieldset id="capas" hidden>
+          <legend>Layers</legend>
+        </fieldset>
+        <div class="leyenda" id="leyenda" aria-live="polite"></div>
+      </section>
+
+      <section class="bloque" aria-labelledby="t-campos">
+        <h2 id="t-campos">Fields</h2>
+        <p class="ayuda">Select a field to open its sheet.</p>
+        <ul class="lista-parcelas" id="lista-parcelas"></ul>
+      </section>
+
+      <section class="bloque" aria-labelledby="t-conteos">
+        <h2 id="t-conteos">Fields at this allocation</h2>
+        <ul class="conteos" id="conteos-semaforo"></ul>
+        <h3>Water term</h3>
+        <ul class="conteos" id="conteos-plazo"></ul>
+      </section>
+
+      <section class="bloque" aria-labelledby="t-boquilla">
+        <h2 id="t-boquilla">La Boquilla dam</h2>
+        <div id="boquilla"></div>
+      </section>
+
+      <section class="bloque" aria-labelledby="t-acuifero">
+        <h2 id="t-acuifero">Aquifer</h2>
+        <div id="acuifero"></div>
+      </section>
+
+      <section class="bloque" aria-label="Notice">
+        <p class="aviso-juicio">This tool supports, never replaces, the judgment of farmers and local experts.</p>
+        <p class="limites">It does not allocate, sell or trade water, and it does not forecast the dam. Field boundaries are estimated.</p>
+        <p class="fuente" id="pie-fuentes"></p>
+      </section>
+    </aside>
+  </main>
+
+  <section class="ficha" id="ficha" role="dialog" aria-modal="false" aria-labelledby="ficha-titulo" hidden>
+    <div class="ficha-cabeza">
+      <h2 id="ficha-titulo" tabindex="-1"></h2>
+      <button type="button" class="boton-cerrar" id="ficha-cerrar">Close</button>
+    </div>
+    <div class="ficha-cuerpo" id="ficha-cuerpo"></div>
+  </section>
+
+  <noscript><p class="error-carga">This page needs JavaScript to read its data files.</p></noscript>
+</body>
+</html>

@@ -1,0 +1,551 @@
+/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* web/style.css — Centro de control (C1) y ficha de parcela (C2).
+   Colores de la identidad como variables; app.js los lee de aquí (no hay colores en el JS).
+   Los números de este archivo son medidas de diseño, no datos. */
+
+:root {
+  /* Identidad (kit C1, punto 10) */
+  --agua: #1F6FB2;
+  --brote: #4C9A2A;
+  --tierra: #8A5A3B;
+  --ambar: #D98E04;
+  --arena: #F5EFE6;
+
+  /* Apoyo de interfaz */
+  --rojo: #B3261E;
+  --gris: #8E9399;
+  --tinta: #1D2329;
+  --tinta-suave: #4A525A;
+  --borde: #D8CFC2;
+  --blanco: #FFFFFF;
+  --agua-osc: #174F80;
+  --agua-clara: #DCEAF6;
+  --ambar-claro: #FBEFD5;
+  --rojo-claro: #F6DEDC;
+  --brote-claro: #E3F0DC;
+  --arena-osc: #E9DFD0;
+  --arena-mapa: #EDE4D6;
+
+  /* Semáforo de agua (S9 §5) */
+  --sem-verde: var(--brote);
+  --sem-ambar: var(--ambar);
+  --sem-rojo: var(--rojo);
+  --sem-gris: var(--gris);
+
+  /* Estado del plazo */
+  --plazo-libre: var(--brote);
+  --plazo-por_vencer: var(--ambar);
+  --plazo-comprometida: var(--agua);
+  --plazo-sin_dato: var(--gris);
+
+  /* Estados de la memoria de la parcela */
+  --mem-perenne: #2F6B1B;
+  --mem-verano: #E3A21A;
+  --mem-invierno: #6FA8DC;
+  --mem-doble: #7E57C2;
+  --mem-descanso: #C9A27E;
+  --mem-sin_dato: #C4C8CC;
+
+  /* Cultivos (capa «Crops») */
+  --cul-alfalfa: var(--brote);
+  --cul-nogal: #5D3A1A;
+  --cul-chile: #C0392B;
+  --cul-maiz_forrajero: #E6B800;
+  --cul-sorgo: #B5651D;
+  --cul-algodon: #8FA3B8;
+  --cul-cereal_invierno: #C7A24A;
+  --cul-barbecho: #D9C3A0;
+  --cul-forraje_verano: #7CB342;
+  --cul-descanso: #D9C3A0;
+  --cul-sin_clasificar: var(--gris);
+
+  /* Rampa de suelo desnudo (capa «Bare soil») */
+  --suelo-bajo: #F1E6D2;
+  --suelo-alto: var(--tierra);
+
+  /* La gota */
+  --gota-agua: var(--agua);
+  --gota-canal: var(--ambar);
+  --gota-et: var(--brote);
+  --gota-acuifero: var(--tierra);
+  --gota-otras: #B9A88F;
+
+  --radio: 10px;
+  --sombra: 0 2px 10px rgba(29, 35, 41, 0.12);
+  --alto-cabecera: 0px; /* marca + controles (lo fija app.js) */
+  --tope-ficha: 0px;    /* borde inferior de los controles en pantalla (lo fija app.js) */
+  --ancho-panel: 380px;
+
+  font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color: var(--tinta);
+  background: var(--arena);
+  line-height: 1.4;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--arena);
+  color: var(--tinta);
+  font-size: 16px;
+}
+
+h1, h2, h3, h4, h5 { margin: 0; line-height: 1.2; }
+p { margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--agua);
+  outline-offset: 2px;
+}
+
+[hidden] { display: none !important; }
+
+.solo-lector {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.saltar {
+  position: absolute; left: 8px; top: -60px; z-index: 100;
+  background: var(--tinta); color: var(--blanco);
+  padding: 8px 12px; border-radius: var(--radio);
+}
+.saltar:focus { top: 8px; }
+
+/* ---------- Marca y controles ---------- */
+/* La marca se desplaza con la página; los controles quedan fijos arriba. */
+.marca {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px;
+  padding: 8px 16px 4px;
+  background: var(--blanco);
+}
+.marca-nombre { font-weight: 700; font-size: 1.25rem; color: var(--agua-osc); }
+.marca-sub { color: var(--tinta-suave); font-size: 0.95rem; }
+
+.aviso-simulado {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--ambar); color: var(--tinta);
+  border: 2px solid var(--tinta);
+  font-weight: 700; letter-spacing: 0.04em;
+  padding: 2px 10px; border-radius: 999px; font-size: 0.85rem;
+}
+.aviso-simulado-detalle { color: var(--tinta-suave); font-size: 0.85rem; }
+
+.controles {
+  position: sticky; top: 0; z-index: 30;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 24px;
+  padding: 4px 16px 10px;
+  align-items: start;
+  background: var(--blanco);
+  border-bottom: 1px solid var(--borde);
+  box-shadow: var(--sombra);
+}
+
+.etiqueta-control { font-weight: 700; display: block; }
+.etiqueta-control .unidad { font-weight: 400; color: var(--tinta-suave); }
+
+.fila-deslizador { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+.fila-deslizador input[type="range"] { flex: 1; min-width: 0; accent-color: var(--agua); height: 32px; }
+.valor-dotacion {
+  min-width: 9.5em; font-weight: 700; font-size: 1.1rem; color: var(--agua-osc);
+  white-space: nowrap;
+}
+
+.marcas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.boton-marca {
+  border: 2px solid var(--agua); background: var(--blanco); color: var(--agua-osc);
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; font-weight: 700;
+  min-height: 36px;
+}
+.boton-marca[aria-pressed="true"] { background: var(--agua); color: var(--blanco); }
+.boton-marca:hover { background: var(--agua-clara); }
+.boton-marca[aria-pressed="true"]:hover { background: var(--agua-osc); }
+
+.info-marca {
+  margin-top: 6px; font-size: 0.9rem; color: var(--tinta);
+  background: var(--agua-clara); border-left: 4px solid var(--agua);
+  padding: 6px 10px; border-radius: 4px;
+}
+.info-marca summary { cursor: pointer; color: var(--agua-osc); font-size: 0.85rem; }
+.info-marca details p { margin-top: 2px; }
+
+.control-extra { display: flex; flex-direction: column; gap: 6px; max-width: 360px; }
+
+.interruptor {
+  display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+  font-weight: 700; min-height: 36px;
+}
+.interruptor input {
+  appearance: none; -webkit-appearance: none;
+  width: 46px; height: 26px; border-radius: 999px;
+  background: var(--gris); position: relative; cursor: pointer; flex: none;
+  border: 2px solid var(--tinta-suave);
+  transition: background 0.2s;
+}
+.interruptor input::after {
+  content: ""; position: absolute; top: 2px; left: 2px;
+  width: 18px; height: 18px; border-radius: 50%; background: var(--blanco);
+  transition: transform 0.2s;
+}
+.interruptor input:checked { background: var(--agua); border-color: var(--agua-osc); }
+.interruptor input:checked::after { transform: translateX(20px); }
+.interruptor input:disabled { opacity: 0.45; cursor: not-allowed; }
+.interruptor .estado-interruptor { font-weight: 400; color: var(--tinta-suave); }
+.ayuda-interruptor { font-size: 0.85rem; color: var(--tinta-suave); }
+
+.unidades summary { cursor: pointer; font-size: 0.9rem; color: var(--agua-osc); }
+.unidades p { font-size: 0.85rem; color: var(--tinta-suave); margin-top: 4px; }
+
+/* ---------- Zona principal ---------- */
+.principal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--ancho-panel);
+  height: calc(100vh - var(--alto-cabecera));
+  height: calc(100dvh - var(--alto-cabecera));
+  min-height: 420px;
+}
+
+.zona-mapa { position: relative; min-height: 0; min-width: 0; }
+.mapa { position: absolute; inset: 0; background: var(--arena-mapa); }
+
+.indicador {
+  position: absolute; top: 12px; left: 12px; z-index: 5;
+  max-width: min(420px, calc(100% - 24px));
+  background: var(--blanco); border-radius: var(--radio);
+  box-shadow: var(--sombra); padding: 12px 14px;
+  border-top: 6px solid var(--agua);
+}
+.indicador-titulo { font-size: 0.95rem; color: var(--tinta-suave); }
+.indicador-cifra { font-size: 2rem; font-weight: 700; color: var(--agua-osc); margin-top: 2px; }
+.indicador-cifra .al-menos { font-size: 1.1rem; font-weight: 700; color: var(--tinta); }
+.indicador-cifra .de-dotacion { font-size: 1rem; font-weight: 400; color: var(--tinta-suave); }
+.indicador-rango { font-size: 0.9rem; color: var(--tinta-suave); }
+.indicador-mensaje { margin-top: 6px; font-size: 0.95rem; }
+.indicador-mensaje.alerta {
+  background: var(--ambar-claro); border-left: 4px solid var(--ambar);
+  padding: 6px 8px; border-radius: 4px;
+}
+.indicador-mensaje .enlace-gota {
+  display: inline-block; margin-top: 4px;
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--agua-osc); text-decoration: underline; font-weight: 700;
+}
+.indicador-segunda {
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--borde);
+  font-size: 0.95rem;
+}
+.indicador-segunda strong { color: var(--rojo); }
+
+.mapa-aviso {
+  position: absolute; bottom: 36px; left: 12px; z-index: 5;
+  max-width: calc(100% - 24px);
+  background: var(--blanco); border-left: 4px solid var(--ambar);
+  padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; box-shadow: var(--sombra);
+}
+
+/* Marcadores de las parcelas protagonistas (texto + símbolo: no depende del color) */
+.marcador {
+  background: var(--blanco); color: var(--tinta);
+  border: 3px solid var(--gris); border-radius: 999px;
+  padding: 2px 8px; font-weight: 700; font-size: 0.85rem;
+  box-shadow: var(--sombra); cursor: pointer; white-space: nowrap;
+}
+
+/* ---------- Panel lateral ---------- */
+.panel {
+  overflow-y: auto; background: var(--arena);
+  border-left: 1px solid var(--borde);
+  padding: 12px 14px 24px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.bloque {
+  background: var(--blanco); border-radius: var(--radio);
+  padding: 12px 14px; box-shadow: var(--sombra);
+}
+.bloque h2 { font-size: 1.05rem; margin-bottom: 6px; }
+.bloque h3 { font-size: 0.95rem; margin: 10px 0 4px; }
+.bloque fieldset { border: none; margin: 0 0 6px; padding: 0; }
+.bloque legend { font-weight: 700; font-size: 0.9rem; color: var(--tinta-suave); padding: 0; margin-bottom: 2px; }
+.opcion-radio { display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
+.opcion-radio input { accent-color: var(--agua); width: 18px; height: 18px; }
+
+.leyenda { margin-top: 8px; font-size: 0.9rem; }
+.leyenda ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.leyenda li { display: flex; align-items: center; gap: 8px; }
+.leyenda .fuente { margin-top: 6px; }
+.muestra {
+  width: 22px; height: 16px; border-radius: 3px; flex: none;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: var(--tinta);
+}
+.rampa { height: 14px; border-radius: 3px; border: 1px solid rgba(0, 0, 0, 0.35); }
+.rampa-etiquetas { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--tinta-suave); }
+
+/* Tramas CSS que acompañan al color (mismas que en el mapa) */
+.trama-diagonal { background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.45) 0 2px, transparent 2px 6px); }
+.trama-cruz { background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.45) 0 2px, transparent 2px 6px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.45) 0 2px, transparent 2px 6px); }
+.trama-puntos { background-image: radial-gradient(rgba(0,0,0,0.5) 1.2px, transparent 1.6px); background-size: 5px 5px; }
+.trama-horizontal { background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.45) 0 2px, transparent 2px 6px); }
+.trama-vertical { background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.45) 0 2px, transparent 2px 6px); }
+
+.fuente { font-size: 0.8rem; color: var(--tinta-suave); }
+.ayuda { font-size: 0.85rem; color: var(--tinta-suave); margin-bottom: 6px; }
+
+.lista-parcelas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 320px; overflow-y: auto; }
+.boton-parcela {
+  width: 100%; text-align: left; cursor: pointer;
+  background: var(--arena); border: 1px solid var(--borde); border-radius: 8px;
+  padding: 8px 10px; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center;
+}
+.boton-parcela:hover { background: var(--arena-osc); }
+.boton-parcela[aria-current="true"] { border: 2px solid var(--tinta); background: var(--blanco); }
+.boton-parcela .sem-circulo { grid-row: span 2; }
+.boton-parcela .p-titulo { font-weight: 700; }
+.boton-parcela .p-detalle { font-size: 0.85rem; color: var(--tinta-suave); }
+.insignia-historia {
+  font-size: 0.75rem; font-weight: 700; color: var(--agua-osc);
+  border: 1px solid var(--agua); border-radius: 999px; padding: 0 6px; margin-left: 4px;
+}
+
+.conteos { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.conteos li { display: flex; align-items: center; gap: 8px; }
+.conteos .n { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.sem-circulo {
+  width: 26px; height: 26px; border-radius: 50%; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; color: var(--blanco); font-size: 0.95rem;
+  border: 2px solid rgba(0, 0, 0, 0.25);
+}
+.sem-circulo.claro { color: var(--tinta); }
+
+.barra-presa {
+  height: 14px; background: var(--arena-osc); border-radius: 999px; overflow: hidden;
+  border: 1px solid var(--borde); margin: 6px 0;
+}
+.barra-presa span { display: block; height: 100%; background: var(--agua); }
+.dato-grande { font-size: 1.15rem; font-weight: 700; }
+
+.aviso-juicio {
+  font-weight: 700; background: var(--brote-claro);
+  border-left: 4px solid var(--brote); padding: 8px 10px; border-radius: 4px;
+}
+.limites { font-size: 0.85rem; color: var(--tinta-suave); margin-top: 6px; }
+
+/* ---------- Ficha de parcela ---------- */
+.ficha {
+  position: fixed; z-index: 25;
+  top: var(--tope-ficha); right: 0; bottom: 0;
+  width: min(1060px, 76vw);
+  background: var(--blanco);
+  box-shadow: -6px 0 24px rgba(29, 35, 41, 0.22);
+  overflow-y: auto; overscroll-behavior: contain;
+  animation: entrar-lado 0.25s ease-out;
+}
+@keyframes entrar-lado { from { transform: translateX(24px); } to { transform: none; } }
+@keyframes entrar-abajo { from { transform: translateY(32px); } to { transform: none; } }
+
+.ficha-cabeza {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; gap: 12px;
+  background: var(--blanco); border-bottom: 1px solid var(--borde);
+  padding: 10px 16px;
+}
+.ficha-cabeza h2 { font-size: 1.3rem; flex: 1; }
+.boton-cerrar {
+  border: 2px solid var(--tinta); background: var(--blanco); border-radius: 8px;
+  padding: 4px 12px; cursor: pointer; font-weight: 700; min-height: 40px;
+}
+.boton-cerrar:hover { background: var(--arena); }
+
+.ficha-cuerpo { padding: 12px 16px 32px; display: grid; gap: 18px; }
+.ficha-cuerpo h3 { font-size: 1.1rem; margin-bottom: 6px; }
+
+.ficha-encabezado { display: grid; gap: 4px; }
+.ficha-meta { color: var(--tinta-suave); }
+.ficha-cultivo { font-size: 1.2rem; font-weight: 700; }
+.ficha-plazo { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border-radius: 999px; padding: 2px 10px; font-weight: 700; font-size: 0.9rem;
+  border: 2px solid var(--gris); background: var(--blanco);
+}
+
+/* Franja de memoria */
+.franja {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(var(--n, 11), minmax(0, 1fr)); gap: 3px;
+}
+.celda { display: grid; gap: 2px; text-align: center; }
+.celda .caja {
+  height: 34px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; color: var(--blanco); font-size: 1rem;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
+}
+.celda .anio { font-size: 0.72rem; color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
+.leyenda-memoria { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.9rem; }
+.leyenda-memoria li { display: flex; align-items: center; gap: 6px; }
+.nota-fija { font-size: 0.85rem; color: var(--tinta-suave); font-style: italic; margin-top: 6px; }
+
+/* Tarjetas de opción */
+.tarjetas { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.tarjeta {
+  border: 1px solid var(--borde); border-radius: var(--radio);
+  background: var(--blanco); box-shadow: var(--sombra);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.tarjeta-cabeza { padding: 10px 12px; background: var(--arena); border-bottom: 1px solid var(--borde); }
+.tarjeta-cabeza h4 { font-size: 1rem; }
+.insignia-actual {
+  display: inline-block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--blanco); background: var(--agua-osc);
+  border-radius: 4px; padding: 1px 6px; margin-bottom: 4px;
+}
+.renglon { display: grid; grid-template-columns: auto 1fr; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--arena-osc); }
+.renglon h5 { font-size: 0.95rem; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.renglon h5 .sem-texto { font-weight: 400; font-size: 0.9rem; }
+.renglon p { font-size: 0.9rem; margin-top: 2px; }
+.lamina strong { font-size: 1.15rem; }
+.alcanza { background: var(--agua-clara); border-radius: 6px; padding: 4px 8px; margin-top: 6px !important; }
+.alcanza strong { color: var(--agua-osc); }
+.etiqueta-origen {
+  font-size: 0.75rem; font-weight: 700; border: 1px solid var(--tinta-suave);
+  border-radius: 4px; padding: 0 4px; margin-left: 4px; color: var(--tinta-suave);
+}
+
+/* Barra P10–P90 con la marca de la dotación */
+.barra-banda {
+  position: relative; height: 16px; margin: 6px 0 2px;
+  background: var(--arena-osc); border-radius: 999px;
+}
+.barra-banda .banda { position: absolute; top: 2px; bottom: 2px; background: var(--agua); opacity: 0.45; border-radius: 999px; }
+.barra-banda .mediana { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1px; background: var(--agua-osc); }
+.barra-banda .marca-d {
+  position: absolute; top: -4px; bottom: -4px; width: 0; margin-left: -1px;
+  border-left: 3px dashed var(--tinta);
+}
+.leyenda-banda { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 0.78rem; color: var(--tinta-suave); }
+
+.meses { padding: 8px 12px; border-bottom: 1px solid var(--arena-osc); }
+.meses-titulo { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
+.meses-fila { display: grid; grid-template-columns: repeat(var(--n, 12), minmax(0, 1fr)); gap: 2px; }
+.mes { display: grid; gap: 1px; text-align: center; }
+.mes .caja { height: 14px; border-radius: 2px; }
+.mes .caja.cultivo { background: var(--brote); }
+.mes .caja.desnudo { background-color: var(--tierra); background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.45) 0 2px, transparent 2px 5px); }
+.mes .ini { font-size: 0.68rem; color: var(--tinta-suave); }
+.meses-leyenda { display: flex; gap: 12px; font-size: 0.78rem; color: var(--tinta-suave); margin-top: 4px; }
+.meses-leyenda span { display: inline-flex; align-items: center; gap: 4px; }
+.meses-leyenda i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
+.meses-leyenda i.cultivo { background: var(--brote); }
+.meses-leyenda i.desnudo { background-color: var(--tierra); background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.45) 0 2px, transparent 2px 5px); }
+
+.filtros { list-style: none; margin: 0; padding: 8px 12px; display: grid; gap: 4px; font-size: 0.85rem; border-bottom: 1px solid var(--arena-osc); }
+.filtros li.no { color: var(--rojo); }
+.advertencia {
+  margin: 8px 12px 0; background: var(--rojo-claro); border-left: 4px solid var(--rojo);
+  padding: 6px 8px; border-radius: 4px; font-size: 0.9rem; font-weight: 700;
+}
+
+.porque { padding: 8px 12px 12px; margin-top: auto; }
+.porque summary {
+  cursor: pointer; font-weight: 700; color: var(--agua-osc);
+  border: 2px solid var(--agua); border-radius: 8px; padding: 4px 10px; display: inline-block;
+  min-height: 36px; list-style: none;
+}
+.porque summary::-webkit-details-marker { display: none; }
+.porque[open] summary { background: var(--agua); color: var(--blanco); }
+.porque dl { margin: 8px 0 0; display: grid; gap: 6px; }
+.porque dt { font-weight: 700; font-size: 0.9rem; }
+.porque dd { margin: 0; font-size: 0.9rem; }
+
+/* La gota (plan B de X3.2: barras horizontales apiladas) */
+.gota { border: 1px solid var(--borde); border-radius: var(--radio); padding: 12px 14px; background: var(--arena); }
+.gota-controles { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin: 8px 0; }
+.gota-controles select { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--borde); background: var(--blanco); min-height: 36px; max-width: 100%; }
+.boton-goteo {
+  border: 2px solid var(--agua); background: var(--blanco); color: var(--agua-osc);
+  border-radius: 8px; padding: 6px 12px; font-weight: 700; cursor: pointer; min-height: 40px;
+}
+.boton-goteo[aria-pressed="true"] { background: var(--agua); color: var(--blanco); }
+.gota-cifras { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 6px 0; }
+.gota-cifra { font-size: 1.5rem; font-weight: 700; color: var(--agua-osc); }
+.gota-cifra small { display: block; font-size: 0.85rem; font-weight: 400; color: var(--tinta-suave); }
+.gota-filas { display: grid; gap: 10px; }
+.gota-fila { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px; align-items: center; }
+.gota-fila .rotulo { font-size: 0.9rem; font-weight: 700; }
+.gota-pista { height: 26px; background: var(--blanco); border: 1px solid var(--borde); border-radius: 4px; overflow: hidden; }
+.gota-barra { display: flex; height: 100%; width: 0; }
+.gota-seg { height: 100%; width: 0; min-width: 0; border-right: 1px solid var(--blanco); }
+.gota-leyenda { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 4px 16px; font-size: 0.88rem; }
+.gota-leyenda li { display: flex; align-items: center; gap: 6px; }
+.gota-leyenda .v { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+.gota-nota { font-size: 0.9rem; margin-top: 8px; }
+.gota-alerta { background: var(--rojo-claro); border-left: 4px solid var(--rojo); padding: 6px 8px; border-radius: 4px; font-weight: 700; margin-top: 8px; }
+
+.glosario summary { cursor: pointer; font-weight: 700; color: var(--agua-osc); }
+.glosario dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: 0.9rem; margin: 8px 0 0; }
+.glosario dt { font-weight: 700; }
+.glosario dd { margin: 0; }
+abbr[title] { text-decoration: underline dotted; cursor: help; }
+
+.error-carga {
+  margin: 24px; padding: 16px; background: var(--rojo-claro);
+  border-left: 6px solid var(--rojo); border-radius: var(--radio);
+}
+
+/* ---------- Pantallas angostas: el panel pasa debajo del mapa ---------- */
+@media (max-width: 899px) {
+  .controles { grid-template-columns: minmax(0, 1fr); padding: 2px 12px 8px; gap: 6px; }
+  .marca { padding: 6px 12px 2px; }
+  .marca-nombre { font-size: 1.1rem; }
+  .marca-sub { font-size: 0.85rem; }
+  .marca-lema { display: none; }
+  .aviso-simulado { font-size: 0.75rem; padding: 1px 8px; }
+  .etiqueta-control .unidad { display: none; }
+  .fila-deslizador { margin-top: 0; }
+  .boton-marca { min-height: 34px; padding: 2px 10px; }
+  .info-marca { margin-top: 4px; padding: 4px 8px; font-size: 0.85rem; }
+  .aviso-simulado-detalle { display: none; }
+  .valor-dotacion { min-width: 0; font-size: 1rem; }
+  .control-extra { max-width: none; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+  .ayuda-interruptor { display: none; }
+
+  .principal { display: block; height: auto; min-height: 0; }
+  .zona-mapa { display: flex; flex-direction: column; }
+  .indicador { position: static; max-width: none; margin: 10px 12px; order: -1; }
+  .indicador-cifra { font-size: 1.6rem; }
+  .mapa { position: relative; inset: auto; height: 52vh; min-height: 300px; }
+  .mapa-aviso { bottom: 30px; }
+  .panel { border-left: none; overflow: visible; padding: 12px; }
+  .lista-parcelas { max-height: none; }
+
+  .ficha {
+    left: 0; width: 100%;
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -6px 24px rgba(29, 35, 41, 0.25);
+    animation-name: entrar-abajo;
+  }
+  .ficha-cuerpo { padding: 10px 12px 28px; }
+  .tarjetas { grid-template-columns: minmax(0, 1fr); }
+  .gota-fila { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .celda .anio { font-size: 0.6rem; }
+  .glosario dl { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Movimiento reducido: sin animaciones ni transiciones */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
