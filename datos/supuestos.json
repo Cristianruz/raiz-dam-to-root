@@ -117,5 +117,15 @@
   "valor": 0.25,
   "etiqueta": "assumption [S]",
   "fuente": "NDVI mensual mínimo del año por debajo del cual se considera que la parcela estuvo desnuda (resiembra o establecimiento de la alfalfa); en la zona piloto los alfalfares establecidos tienen mínimos anuales ≥ 0.26 y los años de establecimiento 0.12–0.24. Sensibilidad 0.20–0.30"
+ },
+ "ea_goteo": {
+  "valor": 0.9,
+  "etiqueta": "[V] indicative, not local",
+  "fuente": "FAO, Irrigation Water Management Training Manual No. 4, «Irrigation Scheduling» (Brouwer, Prins y Heibloem, 1989), Anexo I, Tabla 8 «Indicative values of the field application efficiency (ea)»: riego superficial 60 %, aspersión 75 %, goteo 90 %. https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026. Valor indicativo general, no medido en el DR-005"
+ },
+ "ea_superficial_referencia": {
+  "valor": 0.6,
+  "etiqueta": "[V] indicative, not local",
+  "fuente": "FAO, Irrigation Water Management Training Manual No. 4, «Irrigation Scheduling» (Brouwer, Prins y Heibloem, 1989), Anexo I, Tabla 8 «Indicative values of the field application efficiency (ea)»: riego superficial 60 %, aspersión 75 %, goteo 90 %. https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026. Valor indicativo general, no medido en el DR-005. Solo referencia: el cálculo usa el rango de ea_gravedad"
  }
 }

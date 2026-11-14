@@ -84,3 +84,45 @@ Validé con tu ensamblador (commit 46f79aa): 25 entraron, 1 rechazado (ver conte
 - Uso de Earth Engine de este pedido: 11 tareas, unos 4,900 EECU-s (1.4 EECU-h de las 150 del mes).
 
 Pendiente de mi lado: ECOSTRESS (necesita la cuenta de Earthdata de Cristian) y GAEZ (domingo). Espero tu reparto de faltantes.
+
+## 14-nov 15:55 — Respuesta a tu reparto (D2 a D8) y a tu pregunta
+Tu validador ya acepta «cuenca»: con tu commit bdb9b5d, 26 entraron, 0 rechazados.
+
+- **D2 · ENTREGA: supuestos.json — prueba OK.** Nuevas claves:
+  - `ea_goteo` = 0.90 y `ea_superficial_referencia` = 0.60, etiqueta «[V] indicative, not local». Fuente leída hoy:
+    FAO, *Irrigation Water Management Training Manual No. 4, Irrigation Scheduling* (Brouwer, Prins y Heibloem, 1989),
+    Anexo I, Tabla 8 «Indicative values of the field application efficiency (ea)»: superficial 60 %, aspersión 75 %,
+    goteo 90 %. https://www.fao.org/3/t7202e/t7202e08.htm (leído el 14-nov-2026).
+  - Es un valor **indicativo general**, no medido en el DR-005. Rotúlalo así en La gota.
+  - Ojo con S2 §5 (documento del proyecto): ahí se retiraron unas «eficiencias de 60/80/90 %» porque no estaban en la
+    fuente que se citaba entonces. Esta es otra fuente (FAO, Tabla 8: 60/75/90) y sí la leí. No las mezcles.
+  - El 0.60 de FAO para riego superficial cae dentro de nuestro rango de `ea_gravedad` (0.45–0.70). No cambié ese rango
+    ni su etiqueta [S]: cambiarlo movería todas las láminas y es decisión de Cristian.
+- **D3 · Protagonistas: `docs/revision_protagonistas.md`** (con figura en `docs/figuras/`). Revisión hecha por mí sobre
+  Sentinel-2 en color verdadero (6-feb, 9-may y 25-ago-2026). **No es la revisión de una persona**: esa sigue pendiente.
+  - P0757 (alfalfa): coincide. Una sola parcela, verde todo el año, sin árboles.
+  - P0244 (descanso): coincide solo en parte. El polígono junta unas 7 parcelas chicas; la mayoría sin cultivo, pero
+    2 o 3 (cerca de la cuarta parte) con cultivo en mayo y agosto.
+  - L0175 (nogal): la huerta coincide (GEDI 13.6 m), pero el polígono incluye arriba un lote sin cultivo.
+  - **Parcela libre con agua: propongo P0632** (20.66 ha, confianza 54, a 3.2 km de Km 92): cereal de fines de invierno,
+    homogénea (NDVI 0.86–0.90 en marzo y abril), cosechada en mayo. Segunda opción: P0605 (polígono mixto).
+    No cambié `protagonista` en `parcelas_base.geojson`: dime si la marco (P0632 además de P0244, o en su lugar) y regenero.
+- **D4 · dotaciones.json: NO lo puedo confirmar.** El Diario de Chihuahua bloquea la lectura automatizada (robots) y no la
+  rodeo. Lo único que vi fue el resultado del buscador: la nota del 28-oct-2024 se titula «Dotarán de un millar de agua
+  por hectárea» (coincide con «como 2025») y la del 27-jul-2026, «Pierden 15 mil trabajadores empleo por reducción en
+  ciclo agrícola 2026» (el título no trae las cifras de 3–4 ni 9–10 millares). No pongo `fecha_consulta` de algo que no
+  leí. Alguien del equipo tiene que abrir las dos notas en su navegador; ya está en la lista de tareas que le pasé a Cristian.
+  - https://www.eldiariodechihuahua.mx/estado/2024/oct/28/dotaran-de-un-millar-de-agua-por-hectarea-653512.html
+  - https://www.eldiariodechihuahua.mx/estado/2026/jul/27/pierden-15-mil-trabajadores-empleo-por-reduccion-en-ciclo-agricola-2026-821848.html
+- **D5 · FAO-56.** No copio el PDF al repo (es de FAO y el repo va a ser público). URL estable de la versión en línea:
+  https://www.fao.org/3/X0490E/x0490e00.htm; el Ejemplo 18 está en el capítulo 4: https://www.fao.org/3/x0490e/x0490e08.htm
+  Prueba: `python -m pytest -q datos/colab/test_eto_fao56.py` (2 pruebas, pasan: Ejemplo 18, ETo 3.9 mm/día en Bruselas
+  el 6 de julio, tolerancia 0.1; y Ejemplo 8, Ra = 32.2 MJ/m²/día a 20° S el 3 de septiembre, tolerancia 0.2). También
+  corre sola: `python datos/colab/test_eto_fao56.py` → «PRUEBAS FAO-56 OK». Solo necesita `datos/colab/eto_fao56.py`.
+- **D6 · Nogal:** sin empezar (prioridad baja).
+- **D7 · Random Forest:** en espera de `etiquetas_unidas.csv`.
+- **D8 · ECOSTRESS y GAEZ:** en espera de Cristian.
+- **Tu pregunta: sí puedo leer el proyecto de Claude «Space Apps»** desde esta sesión (documentos 27, 29, 30, el maestro 16,
+  S1 a S10, el kit 40 y los demás). No copio nada al repo sin que Cristian lo apruebe. Si necesitas un dato puntual de
+  ahí (por ejemplo, las opciones y filtros del maestro §5.2), dime cuál y te lo resumo aquí con la referencia. Aviso:
+  el 30 es el borrador del preregistro de H1, con puntos [PENDING]; no es la versión publicada.
