@@ -163,9 +163,9 @@ Una línea por evento, con la hora local de Chihuahua:
 5. Al final, **Q1** y la lista de envío **Q2** del kit.
 
 ## 9. P2 a P5 con Gemini (`para_gemini.md`)
-- Antes de dejar una tabla en `Raiz/entregas/<rol>/`, cada quien pega `para_gemini.md` en un chat de Gemini **nuevo**, con su cuaderno, la salida de la prueba y el esquema de la tabla 0.4-B.
+- Antes de dejar una tabla en `Raiz_entregas/<rol>/`, cada quien pega `para_gemini.md` en un chat de Gemini **nuevo**, con su cuaderno, la salida de la prueba y el esquema de la tabla 0.4-B.
 - Si el veredicto es «CORREGIR ANTES DE ENTREGAR», corrige y repite, con un máximo de 3 rondas; con 2 fallas iguales, R1.
-- Cuando el veredicto es «LISTO PARA ENTREGAR», agrega su línea en `Raiz/entregas/LEEME.md` (`archivo | fuente | fecha | script`) y avisa con `ENTREGA: [archivo] — prueba OK`.
+- Cuando el veredicto es «LISTO PARA ENTREGAR», agrega su línea en `Raiz_entregas/LEEME.md` (`archivo | fuente | fecha | script`) y avisa con `ENTREGA: [archivo] — prueba OK`.
 - El ensamblador (K-ENS) vuelve a validar todo.
 
 ## 10. Hitos

@@ -10,9 +10,13 @@
 
 **Con qué trabaja:** la app de Gemini o Claude en el navegador. No usa Colab ni Earth Engine. Vea [herramientas.md](herramientas.md).
 
-**Lo que cambió hoy:** los tres archivos de texto se entregan en `Raiz/entregas/`, carpeta plana sin `P6/`, con una línea por archivo en `Raiz/entregas/LEEME.md`. El ensamblador (`motor/ensamblar.py`) **rechaza `plantillas_explicaciones.md` si encuentra un dígito fuera de los marcadores `{{…}}`**. La única excepción es la línea del encabezado AI-assisted.
+**Estado a las 10:30** (detalle en [README](README.md#estado-a-las-1030-sábado-14-nov)): la sesión de datos ya entregó parcelas, clima, satélite, cultivos por reglas, demanda y relieve. **La web ya muestra en local los 338 campos reales** y se publica cuando estén los arreglos que faltan. Sus piezas no cambian: textos, página, video, People's Choice y #MejorMeme.
 
-**Antes de cada pieza, revise `Raiz/entregas/LEEME.md`.** Si el archivo ya tiene su línea (por ejemplo, porque otra persona o la sesión de Chrome ya lo entregó), no lo rehaga: revíselo con la autoverificación de abajo y avise a Cristian. Dos archivos con el mismo nombre se pisan.
+**Dónde se entrega:** los tres archivos de texto van a la carpeta de Drive `Raiz_entregas` (plana, sin subcarpetas), con una línea por archivo **al final** de `Raiz_entregas/LEEME.md` (sin borrar las de los demás; [README §5](README.md#5-la-línea-de-leememd-y-el-aviso)). El ensamblador (`motor/ensamblar.py`) **rechaza `plantillas_explicaciones.md` si encuentra un dígito fuera de los marcadores `{{…}}`**: también en citas como «FAO-56», que se escriben con palabras o con un marcador. La única excepción es la línea del encabezado AI-assisted.
+
+**Antes de cada pieza, revise `Raiz_entregas/LEEME.md`.** Si el archivo ya tiene su línea (por ejemplo, porque otra persona ya lo entregó), no lo rehaga: revíselo con la autoverificación de abajo y avise a Cristian. Dos archivos con el mismo nombre se pisan.
+
+**Dos datos para sus textos:** la tormenta de referencia de la capa de relieve (`relieve_meta.json`) salió de **NASA POWER**, no de GPM: no escriba «GPM» en la página ni en el video. Y el mapa de cultivos se publica con reglas + Random Forest cuando P2 lo entregue; mientras tanto, la mayoría de las parcelas sale «Not classified».
 
 | Orden | Pieza | Archivo (tabla 0.4-B) | Hora límite |
 |---|---|---|---|
@@ -69,7 +73,7 @@ CONTEXTO
 Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
-App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, carpeta /MyDrive/Raiz/entregas/ (UNA carpeta plana, sin subcarpetas por rol), con una línea por archivo en Raiz/entregas/LEEME.md.
+App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras ni las escribas. La web lee los números de los datos; en los textos van marcadores. En las plantillas usa SOLO {{f1}}, {{f2}}… y los marcadores dinámicos {{d}}, {{ha}} y {{cobertura}}; ningún dígito fuera de los marcadores. Si una frase necesita un número que no tiene marcador, escribe [FALTA DATO] y avísame.
@@ -79,7 +83,7 @@ REGLAS OBLIGATORIAS
 5. Cada ficha y la página llevan el aviso: "This tool supports, never replaces, the judgment of farmers and local experts."
 6. La sección de IA se titula "SI/AI tools used". La IA nunca produce los números ni toma la decisión.
 7. Al final imprime una AUTOVERIFICACIÓN: (a) cada dígito que aparezca fuera de los marcadores {{…}} (debe ser cero o estar en la lista de texto fijo del kit que te pego); (b) cada palabra prohibida de la regla 4 (debe ser cero); (c) cada marcador usado y qué dato representa.
-8. Al final escribe, para CADA archivo, su línea para Raiz/entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque T1). Sin esa línea el archivo no entra.
+8. Al final escribe, para CADA archivo, su línea para Raiz_entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque T1). Sin esa línea el archivo no entra.
 
 ESQUEMA DE SALIDA DE ESTA TAREA
 Fila de la tabla 0.4-B del kit (copiada tal cual; aquí solo textos_ui.md):
@@ -209,7 +213,7 @@ CONTEXTO
 Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
-App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, carpeta /MyDrive/Raiz/entregas/ (UNA carpeta plana, sin subcarpetas por rol), con una línea por archivo en Raiz/entregas/LEEME.md.
+App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras ni las escribas. La web lee los números de los datos; en los textos van marcadores. En las plantillas usa SOLO {{f1}}, {{f2}}… y los marcadores dinámicos {{d}}, {{ha}} y {{cobertura}}; ningún dígito fuera de los marcadores. Si una frase necesita un número que no tiene marcador, escribe [FALTA DATO] y avísame.
@@ -219,7 +223,7 @@ REGLAS OBLIGATORIAS
 5. Cada ficha y la página llevan el aviso: "This tool supports, never replaces, the judgment of farmers and local experts."
 6. La sección de IA se titula "SI/AI tools used". La IA nunca produce los números ni toma la decisión.
 7. Al final imprime una AUTOVERIFICACIÓN: (a) cada dígito que aparezca fuera de los marcadores {{…}} en CUALQUIER línea del archivo, incluidas la lista marcador → hecho y las citas de fuentes. Debe ser CERO, sin excepciones: este archivo no tiene texto fijo con dígitos, y un solo dígito hace que el validador lo rechace; (b) cada palabra prohibida de la regla 4 (debe ser cero); (c) cada marcador usado y qué dato representa.
-8. Al final escribe, para CADA archivo, su línea para Raiz/entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque T2). Sin esa línea el archivo no entra. La AUTOVERIFICACIÓN y la línea de LEEME.md van en tu respuesta, FUERA del archivo plantillas_explicaciones.md: llevan dígitos.
+8. Al final escribe, para CADA archivo, su línea para Raiz_entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque T2). Sin esa línea el archivo no entra. La AUTOVERIFICACIÓN y la línea de LEEME.md van en tu respuesta, FUERA del archivo plantillas_explicaciones.md: llevan dígitos.
 
 ESQUEMA DE SALIDA DE ESTA TAREA
 Fila de la tabla 0.4-B del kit (copiada tal cual; aquí solo plantillas_explicaciones.md):
@@ -284,7 +288,7 @@ CONTEXTO
 Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
-App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, carpeta /MyDrive/Raiz/entregas/ (UNA carpeta plana, sin subcarpetas por rol), con una línea por archivo en Raiz/entregas/LEEME.md.
+App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras ni las escribas. La web lee los números de los datos; en los textos van marcadores. En las plantillas usa SOLO {{f1}}, {{f2}}… y los marcadores dinámicos {{d}}, {{ha}} y {{cobertura}}; ningún dígito fuera de los marcadores. Si una frase necesita un número que no tiene marcador, escribe [FALTA DATO] y avísame.
@@ -294,7 +298,7 @@ REGLAS OBLIGATORIAS
 5. Cada ficha y la página llevan el aviso: "This tool supports, never replaces, the judgment of farmers and local experts."
 6. La sección de IA se titula "SI/AI tools used". La IA nunca produce los números ni toma la decisión.
 7. Al final imprime una AUTOVERIFICACIÓN: (a) cada dígito que aparezca fuera de los marcadores {{…}} (debe ser cero o estar en la lista de texto fijo del kit que te pego); (b) cada palabra prohibida de la regla 4 (debe ser cero); (c) cada marcador usado y qué dato representa.
-8. Al final escribe, para CADA archivo, su línea para Raiz/entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque T3). Sin esa línea el archivo no entra.
+8. Al final escribe, para CADA archivo, su línea para Raiz_entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque T3). Sin esa línea el archivo no entra.
 
 ESQUEMA DE SALIDA DE ESTA TAREA
 Fila de la tabla 0.4-B del kit (copiada tal cual; aquí solo whatsapp_plantilla.md):
@@ -335,7 +339,8 @@ Aviso: `ENTREGA: whatsapp_plantilla.md — prueba OK`.
 - **Mentorías obligatorias, sáb 16:00 y 17:00.** Faltar descalifica (S10 §3, A6).
   - Haga la prueba de pasillo.
   - Pregunte a un técnico o mentor **dónde se mide el millar** y si las dotaciones de prensa son correctas (kit §3; S9 §12).
-  - Anote el cargo de quien lo dijo (sin nombre) y la hora, y páselo a P5 para `dotaciones.json` (kit B2, paso 2).
+  - **Pregunta abierta del integrador (14-nov 10:30):** la lámina del modelo sale bastante más alta que la del INIFAP, sobre todo por la eficiencia parcelaria supuesta. La tabla y las preguntas exactas están en [P4 → pregunta de las mentorías](P4_clima_demanda.md#pregunta-para-las-mentorías-de-las-1600-y-las-1700); P4 las prepara. Si usted entra a la mentoría, llévelas.
+  - Anote el cargo de quien lo dijo (sin nombre) y la hora, y páselo a Cristian y a P5 (para `dotaciones.json` y `propuesta_supuestos.md`; kit B2, paso 2).
 - **Prueba de usabilidad, sáb 18:00** (kit §3). Una persona ajena al equipo usa la web sin ayuda. Anote dónde se atora y páselo a Cristian en una lista corta.
 
 ---
@@ -344,7 +349,7 @@ Aviso: `ENTREGA: whatsapp_plantilla.md — prueba OK`.
 
 **No pasa por el buzón.** La página vive en el repo (README y página): se trabaja en un documento compartido con Cristian y él la integra. No hay línea de `LEEME.md`.
 - **Hora:** borrador sáb 20:30–1:00; final dom 8:00–11:00 (kit §3 y C6).
-- **Insumos:** los resultados que llegan a `Raiz/entregas/`.
+- **Insumos:** los resultados que llegan a `Raiz_entregas`. Lo que no se ejecute se dice «not run»: hoy, por ejemplo, el contraste regional de ET (A8) está en «not run» hasta que lleguen sus insumos ([P4](P4_clima_demanda.md#a8--contraste-regional-de-et-por-ahora-not-run)).
 
 **Bloque para pegar:**
 ```text
@@ -352,7 +357,7 @@ CONTEXTO
 Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
-App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, carpeta /MyDrive/Raiz/entregas/ (UNA carpeta plana, sin subcarpetas por rol), con una línea por archivo en Raiz/entregas/LEEME.md.
+App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras ni las escribas. La web lee los números de los datos; en los textos van marcadores. En las plantillas usa SOLO {{f1}}, {{f2}}… y los marcadores dinámicos {{d}}, {{ha}} y {{cobertura}}; ningún dígito fuera de los marcadores. Si una frase necesita un número que no tiene marcador, escribe [FALTA DATO] y avísame.
@@ -362,7 +367,7 @@ REGLAS OBLIGATORIAS
 5. Cada ficha y la página llevan el aviso: "This tool supports, never replaces, the judgment of farmers and local experts."
 6. La sección de IA se titula "SI/AI tools used". La IA nunca produce los números ni toma la decisión.
 7. Al final imprime una AUTOVERIFICACIÓN: (a) cada dígito que aparezca fuera de los marcadores {{…}} (debe ser cero o estar en la lista de texto fijo del kit que te pego); (b) cada palabra prohibida de la regla 4 (debe ser cero); (c) cada marcador usado y qué dato representa.
-8. Al final escribe, para CADA archivo, su línea para Raiz/entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque C6). Sin esa línea el archivo no entra.
+8. Al final escribe, para CADA archivo, su línea para Raiz_entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque C6). Sin esa línea el archivo no entra.
 
 ESQUEMA DE SALIDA DE ESTA TAREA
 No es una fila de la tabla 0.4-B: la página no pasa por el buzón. Entrego el texto de la página (Markdown) a Cristian en el documento compartido. Secciones del README (kit K-INT): Summary, How it works, NASA Data, Validation, Limitations, SI/AI tools used, References.
@@ -398,8 +403,8 @@ Cierre de la sección: *"AI never generates the numbers or makes the decision; f
 TAREA
 NOTA DEL EQUIPO: la tabla "SI/AI tools used" es la del kit §9 (Cristian la tiene); en "Investigación previa" y "Textos de la página", agrega Claude en el navegador si se usó.
 Tarea C6. Utilice el borrador de la página (archivo 31, actualizado con S9; no está en el repo: se lo pasa Cristian) y reemplace cada [PENDING] con los resultados reales:
-- resultado_H1.md y resultado_H3.md (Raiz/entregas/);
-- tabla_metodos.csv y olofsson.csv (Raiz/entregas/);
+- resultado_H1.md y resultado_H3.md (Raiz_entregas);
+- tabla_metodos.csv y olofsson.csv (Raiz_entregas);
 - llm_eval.csv;
 - et_contraste.csv, si se ejecutó;
 - la tabla resumen de B4 y docs/pruebas.md.
@@ -409,8 +414,8 @@ PRUEBA: una lista de verificación con cada cifra, su archivo de origen y su fue
 
 **Ajustes de ruta hechos al texto del kit en este bloque:**
 - «(archivo 31, actualizado con S9)» → «(archivo 31, actualizado con S9; no está en el repo: se lo pasa Cristian)»
-- «- docs/resultado_H1.md y docs/resultado_H3.md;» → «- resultado_H1.md y resultado_H3.md (Raiz/entregas/);»
-- «- docs/figuras/tabla_metodos.csv y olofsson.csv;» → «- tabla_metodos.csv y olofsson.csv (Raiz/entregas/);»
+- «- docs/resultado_H1.md y docs/resultado_H3.md;» → «- resultado_H1.md y resultado_H3.md (Raiz_entregas);»
+- «- docs/figuras/tabla_metodos.csv y olofsson.csv;» → «- tabla_metodos.csv y olofsson.csv (Raiz_entregas);»
 
 **Prueba de aceptación** (kit C6):
 ```text
@@ -438,7 +443,7 @@ CONTEXTO
 Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
-App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, carpeta /MyDrive/Raiz/entregas/ (UNA carpeta plana, sin subcarpetas por rol), con una línea por archivo en Raiz/entregas/LEEME.md.
+App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras ni las escribas. La web lee los números de los datos; en los textos van marcadores. En las plantillas usa SOLO {{f1}}, {{f2}}… y los marcadores dinámicos {{d}}, {{ha}} y {{cobertura}}; ningún dígito fuera de los marcadores. Si una frase necesita un número que no tiene marcador, escribe [FALTA DATO] y avísame.
@@ -448,7 +453,7 @@ REGLAS OBLIGATORIAS
 5. Cada ficha y la página llevan el aviso: "This tool supports, never replaces, the judgment of farmers and local experts."
 6. La sección de IA se titula "SI/AI tools used". La IA nunca produce los números ni toma la decisión.
 7. Al final imprime una AUTOVERIFICACIÓN: (a) cada dígito que aparezca fuera de los marcadores {{…}} (debe ser cero o estar en la lista de texto fijo del kit que te pego); (b) cada palabra prohibida de la regla 4 (debe ser cero); (c) cada marcador usado y qué dato representa.
-8. Al final escribe, para CADA archivo, su línea para Raiz/entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque C7). Sin esa línea el archivo no entra.
+8. Al final escribe, para CADA archivo, su línea para Raiz_entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque C7). Sin esa línea el archivo no entra.
 
 ESQUEMA DE SALIDA DE ESTA TAREA
 No es una fila de la tabla 0.4-B. Entrego a Cristian: guion del video (tabla segundo | lo que se ve en pantalla | texto en pantalla en inglés | subtítulo en inglés) y el texto de cada diapositiva (máximo 7).
@@ -517,7 +522,7 @@ CONTEXTO
 Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
-App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, carpeta /MyDrive/Raiz/entregas/ (UNA carpeta plana, sin subcarpetas por rol), con una línea por archivo en Raiz/entregas/LEEME.md.
+App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras ni las escribas. La web lee los números de los datos; en los textos van marcadores. En las plantillas usa SOLO {{f1}}, {{f2}}… y los marcadores dinámicos {{d}}, {{ha}} y {{cobertura}}; ningún dígito fuera de los marcadores. Si una frase necesita un número que no tiene marcador, escribe [FALTA DATO] y avísame.
@@ -527,7 +532,7 @@ REGLAS OBLIGATORIAS
 5. Cada ficha y la página llevan el aviso: "This tool supports, never replaces, the judgment of farmers and local experts."
 6. La sección de IA se titula "SI/AI tools used". La IA nunca produce los números ni toma la decisión.
 7. Al final imprime una AUTOVERIFICACIÓN: (a) cada dígito que aparezca fuera de los marcadores {{…}} (debe ser cero o estar en la lista de texto fijo del kit que te pego); (b) cada palabra prohibida de la regla 4 (debe ser cero); (c) cada marcador usado y qué dato representa.
-8. Al final escribe, para CADA archivo, su línea para Raiz/entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque PC). Sin esa línea el archivo no entra.
+8. Al final escribe, para CADA archivo, su línea para Raiz_entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque PC). Sin esa línea el archivo no entra.
 
 ESQUEMA DE SALIDA DE ESTA TAREA
 No es una fila de la tabla 0.4-B. Entrego textos cortos para historias de Instagram y la publicación del People's Choice.

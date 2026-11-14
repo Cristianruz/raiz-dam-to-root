@@ -19,7 +19,7 @@ REGLAS:
 11. Agregue una línea a AI_USAGE.md por tarea y la entrada de cada cifra nueva en manifest.json.
 
 OPERACIÓN:
-- Las entregas del equipo llegan a Google Drive, `Raiz/entregas/`, con una línea por archivo en `Raiz/entregas/LEEME.md` (`archivo | fuente | fecha | script`). `motor/ensamblar.py` las valida contra la tabla 0.4-B del kit y solo copia a data/processed las que pasan.
+- Las entregas del equipo llegan a Google Drive, `Raiz_entregas/`, con una línea por archivo en `Raiz_entregas/LEEME.md` (`archivo | fuente | fecha | script`). `motor/ensamblar.py` las valida contra la tabla 0.4-B del kit y solo copia a data/processed las que pasan.
 - Earth Engine lo ejecuta otra sesión (no este repo): no escriba scripts de Earth Engine aquí.
 - Protocolo de revisión de cada pieza: `docs/prompts/` (implementador → revisor con contexto nuevo → corrección, máximo 3 rondas). Bitácora: `docs/progreso.md`.
 - Trabajo en la rama `claude/sleepy-heisenberg-pxyhtx`; a `main` solo por pull request que fusiona Cristian.

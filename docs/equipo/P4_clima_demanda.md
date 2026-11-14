@@ -148,7 +148,7 @@ Aviso: `ENTREGA: heladas.json — prueba OK`. Avise también a P5: la usa en sus
 - Páselo a Cristian y a P5 en un mensaje: P5 actualiza `dotaciones.json` si cambia el punto de medición (kit B2, paso 2) y cita la respuesta en `propuesta_supuestos.md`.
 - **No cambie usted ninguna cifra** ni recalcule A5: los supuestos los cambia solo su dueña, la sesión de datos, cuando Cristian lo decida.
 
-**Quién va:** Cristian y uno más (S10 §7). Si usted no entra, deje la tabla y las tres preguntas a quien sí vaya antes de las 15:00 (S10 §7: «15:00, preparar mentorías: 3 preguntas concretas»).
+**Quién va:** Cristian y uno más (S10 §7). Si usted no entra, deje la tabla y las tres preguntas a quien sí vaya antes de las 15:00 (S10 §7, a las 15:00: «Preparar mentorías: 3 preguntas concretas»).
 
 ---
 

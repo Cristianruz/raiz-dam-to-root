@@ -1,7 +1,7 @@
 <!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
 # Revisor para Gemini (P2 a P5): revise SU cuaderno y SU tabla antes de entregarla
 
-**Para qué:** antes de dejar un archivo en `Raiz/entregas/<rol>/`, otra IA con contexto nuevo revisa el cuaderno y la tabla contra el kit. Es la misma idea que usa Cristian con Claude Code (`docs/prompts/README.md`): quien escribió no se revisa a sí mismo.
+**Para qué:** antes de dejar un archivo en `Raiz_entregas/<rol>/`, otra IA con contexto nuevo revisa el cuaderno y la tabla contra el kit. Es la misma idea que usa Cristian con Claude Code (`docs/prompts/README.md`): quien escribió no se revisa a sí mismo.
 
 **Cómo se usa:**
 1. Abra un chat de Gemini **NUEVO**. No use el chat ni el panel que generó el cuaderno: necesita contexto nuevo.
@@ -19,8 +19,8 @@
 
    Máximo 3 rondas. Si un hallazgo falla 2 veces con el mismo error, use R1 (al final) y avise a Cristian.
 4. Con «LISTO PARA ENTREGAR»:
-   - guarde el cuaderno en `Raiz/cuadernos/` y la tabla en `Raiz/entregas/<rol>/`;
-   - agregue su línea a `Raiz/entregas/LEEME.md` (`archivo | fuente | fecha | script`);
+   - guarde el cuaderno en `Raiz/cuadernos/` y la tabla en `Raiz_entregas/<rol>/`;
+   - agregue su línea a `Raiz_entregas/LEEME.md` (`archivo | fuente | fecha | script`);
    - avise en el grupo con `ENTREGA: [archivo] — prueba OK`.
 
    El ensamblador de Cristian vuelve a validar todo; esta revisión es para que no la rechace.

@@ -3,7 +3,7 @@
 
 Fixture de `tests/test_ensamblar.py`. TODOS LOS VALORES SON DE PRUEBA: se escribieron para probar el
 validador del buzón (`motor/ensamblar.py`); no son datos reales, no tienen fuente y no se usan en la web.
-Imita el buzón de Drive `Raiz/entregas/`: cada archivo tiene su línea «archivo | fuente | fecha | script».
+Imita el buzón de Drive `Raiz_entregas/`: cada archivo tiene su línea «archivo | fuente | fecha | script».
 El GeoTIFF se genera con Pillow: `python tests/test_ensamblar.py --regenerar-tif`.
 `hls_ndvi_memoria_2016.tif` imita un crudo de Earth Engine (texto, no un TIFF): no lleva línea aquí,
 no se valida ni se copia; el ensamblador lo lista aparte como «crudo».
