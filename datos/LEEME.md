@@ -4,7 +4,7 @@ Orden de ejecución (cada script lee y escribe en la carpeta de trabajo):
 
 | Paso | Dónde | Script | Entradas | Salidas |
 |---|---|---|---|---|
-| 1 | Code Editor de Earth Engine, proyecto `iondroplet` | `earthengine/A3_hls_nasadem.js` | — | En Drive `Raiz_entregas/`: `hls_mensual_2025_10_a_2026_09.tif`, `hls_ndvi_memoria_2015_10_a_2026_09.tif`, `nasadem_zona_piloto.tif` |
+| 1 | Code Editor de Earth Engine, proyecto `iondroplet` (solo lo corre Cristian) | `earthengine/A3_hls_nasadem.js` | — | En Drive `Raiz_entregas/` (Drive no crea subcarpetas; después se mueven a `Raiz/entregas/`). Orden: `piloto_consumo` (medir EECU) → `hls_mensual_2025_10_a_2026_09` → `hls_reflect_2025_10_a_2026_09` → `hls_ndvi_memoria_<año>` de 2025, 2026, 2024 … 2016 → `nasadem_zona_piloto` |
 | 2 | Python con internet | `colab/B1_parcelas_ftw.py --listar`, luego `--url <GeoParquet>` | — | `parcelas_base.geojson` |
 | 3 | Python con internet | `colab/A1_power_eto.py` | — | `eto_diaria.csv`, `power_crudo_*.json` |
 | 4 | Python | `colab/A3_parcelas_hls.py` | pasos 1–3 | `hls_mensual_parcelas.csv`, `suelo_desnudo.csv`, `memoria_parcelas.csv` |
@@ -12,7 +12,12 @@ Orden de ejecución (cada script lee y escribe en la carpeta de trabajo):
 | 6 | Python | `colab/A5_demanda_plazo.py` | paso 3 | `demanda_cultivos.csv`, `rotaciones.json` |
 | 7 | Python | `colab/A9_relieve.py` | pasos 1–3 | `relieve_parcelas.csv`, `relieve_rutas.geojson`, `relieve_meta.json` |
 
+Todos los scripts aceptan `--dir <carpeta>` (p. ej. `--dir data/processed`) y trabajan dentro de ella.
+Antes de correr, copiar `datos/supuestos.json` a esa carpeta: A3, A4, A5 y A9 leen de ahí Ea, sesgo de ETo,
+presiembra, Kc del nogal, plazos y umbrales, cada uno con su fuente o marcado como `assumption`, y se detienen si falta uno.
+Cada script escribe `fuentes_<pieza>.csv` (archivo, fuente, fecha, script, sha256) junto a sus salidas.
+
 Dependencias: `pip install rasterio shapely numpy duckdb`.
 Prueba de FAO-56: `python colab/test_eto_fao56.py` (Ejemplos 8 y 18 del manual).
 Zona piloto [S]: `[-105.42, 28.08, -105.32, 28.16]` (oeste, sur, este, norte), la misma en todos los scripts.
-Cada archivo entregado se anota en `Raiz/entregas/LEEME.md` como `archivo | fuente | fecha | script`.
+La trazabilidad de cada archivo entregado está en los `fuentes_*.csv` (incluye sha256).

@@ -19,8 +19,10 @@ import numpy as np
 import rasterio
 from rasterio.features import geometry_mask
 
-UMBRAL_RUTA_HA = 50.0          # [S] área de aportación mínima para dibujar una ruta (parámetro de supuestos)
-PROF_DEPRESION_M = 0.1         # [S] profundidad mínima de depresión (kit A9)
+from comun import carpeta, registrar_fuentes
+
+UMBRAL_RUTA_HA = None          # se lee de supuestos.json (umbral_ruta_ha, assumption [S])
+PROF_DEPRESION_M = 0.1         # profundidad mínima de depresión (kit A9), assumption [S]
 VECINOS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
 
@@ -87,6 +89,12 @@ def tormenta_p95(ruta="eto_diaria.csv"):
 
 
 def main():
+    global UMBRAL_RUTA_HA
+    carpeta("A9: relieve y escurrimiento con NASADEM")
+    sup = json.load(open("supuestos.json"))
+    if "umbral_ruta_ha" not in sup:
+        raise SystemExit("Falta 'umbral_ruta_ha' en supuestos.json")
+    UMBRAL_RUTA_HA = float(sup["umbral_ruta_ha"]["valor"])
     with rasterio.open("nasadem_zona_piloto.tif") as src:
         z = src.read(1).astype(float)
         tr = src.transform
@@ -132,8 +140,11 @@ def main():
         "geometry": {"type": "MultiLineString", "coordinates": lineas}}]},
         open("relieve_rutas.geojson", "w"))
     json.dump({"rotulo": "regional, 30 m (NASADEM); not field drainage design",
-               "umbral_ruta_ha": UMBRAL_RUTA_HA, "celda_ha": round(celda_ha, 4),
+               "umbral_ruta_ha": UMBRAL_RUTA_HA, "umbral_ruta_etiqueta": "assumption [S]", "celda_ha": round(celda_ha, 4),
                "tormenta": tormenta_p95()}, open("relieve_meta.json", "w"), ensure_ascii=False, indent=1)
+    registrar_fuentes("A9", ["relieve_parcelas.csv", "relieve_rutas.geojson", "relieve_meta.json"],
+                      "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; lluvia NASA POWER",
+                      "datos/colab/A9_relieve.py")
     print(f"Parcelas: {len(filas)} · segmentos de ruta: {len(lineas)} · "
           f"pendiente media de la zona: {pendiente.mean():.2f} %")
 

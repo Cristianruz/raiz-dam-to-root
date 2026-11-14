@@ -1,170 +1,105 @@
 // AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
 // Raíz – From Dam to Root · Los Norteados
-// Script para el Code Editor de Google Earth Engine (code.earthengine.google.com)
-// Proyecto de Cloud: iondroplet (nivel Comunidad). Solo lo ejecuta Cristian.
+// Script para el Code Editor de Google Earth Engine, proyecto de Cloud iondroplet (nivel Comunidad).
+// Solo lo ejecuta Cristian (o la sesión de datos en su navegador).
 //
-// Qué hace (piezas A3, A3-M y A9 del kit 40):
-//   1. Compuestos MENSUALES de HLS v2 (Landsat 8/9 + Sentinel-2) del año agrícola
-//      oct-2025 a sep-2026 sobre la zona piloto: NDVI, LSWI, BSI y número de
-//      observaciones válidas. Sirve para el mapa de cultivos y el suelo desnudo.
-//   2. NDVI mensual 2016–2026 (memoria de la parcela y experimento natural 2025).
-//   3. Elevación NASADEM (30 m) de la zona piloto + 2 km (relieve y tormenta).
-//
-// Cómo usarlo:
-//   a) Elige el proyecto "iondroplet" arriba a la derecha.
-//   b) Pega todo este script y presiona Run. Revisa en el mapa que el rectángulo
-//      rojo caiga sobre parcelas de riego (no sobre la ciudad). Si no, cambia ZONA.
-//   c) En la pestaña Tasks aparecen 3 tareas: presiona Run en cada una.
-//      Corren en los servidores de Google aunque cierres el navegador.
-//   d) Los archivos caen en tu Google Drive, carpeta "Raiz_entregas".
-//
-// Ahorro de cuota: solo la zona piloto, una exportación por producto, sin getInfo.
+// Exporta a Google Drive, carpeta "Raiz_entregas" (Drive no admite subcarpetas en el nombre
+// de la exportación; el contenido se mueve a Raiz/entregas/ al bajarlo):
+//   0. piloto_consumo           1 mes, 2 km × 2 km: medir el consumo de EECU antes de lo demás
+//   1. hls_mensual_2025_10_a_2026_09        NDVI, LSWI, BSI y n por mes (×10,000, Int16)
+//   2. hls_reflect_2025_10_a_2026_09        6 reflectancias medianas por mes (×10,000, Int16) para el Random Forest
+//   3. hls_ndvi_memoria_AAAA                NDVI mensual de un año agrícola (oct–sep); una tarea por año,
+//                                           empezando por 2025 (experimento natural) y luego 2026, 2024…2016
+//   4. nasadem_zona_piloto                  elevación, zona + 2 km
+// Orden: correr primero la tarea 0, anotar su consumo en docs/ee_uso.md y después las demás.
+// Ahorro de cuota: solo la zona piloto; sin getInfo en ciclos.
 
-// ---------------------------------------------------------------------------
-// Parámetros (los mismos van en data/params.json)
-// Zona piloto [supuesto]: rectángulo agrícola entre Delicias y Saucillo.
-// Verificar visualmente antes de exportar.
-var ZONA = ee.Geometry.Rectangle([-105.42, 28.08, -105.32, 28.16]);
-var ZONA_DEM = ZONA.buffer(2000).bounds();   // + 2 km para el escurrimiento
+var ZONA = ee.Geometry.Rectangle([-105.42, 28.08, -105.32, 28.16]);   // [S] verificar en el mapa
+var ZONA_DEM = ZONA.buffer(2000).bounds();
+var PILOTO = ee.Geometry.Point([-105.37, 28.12]).buffer(1000).bounds();
 var CARPETA = 'Raiz_entregas';
-var ESCALA = 30;                                 // m, resolución de HLS
+var ESCALA = 30;
 var CRS = 'EPSG:4326';
+var REFL = ['azul', 'verde', 'rojo', 'nir', 'swir1', 'swir2'];
 
-// ---------------------------------------------------------------------------
-// HLS: armonizar nombres de bandas ANTES de fusionar las colecciones.
-// NIR = B5 en L30 y B8A en S30 (no usar B8 ni B5 de S30).
-var NOMBRES = ['azul', 'verde', 'rojo', 'nir', 'swir1', 'swir2', 'Fmask'];
+// HLS: renombrar ANTES de fusionar. NIR = B5 en L30 y B8A en S30.
+var l30 = ee.ImageCollection('NASA/HLS/HLSL30/v002').filterBounds(ZONA_DEM)
+  .select(['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'Fmask'], REFL.concat(['Fmask']));
+var s30 = ee.ImageCollection('NASA/HLS/HLSS30/v002').filterBounds(ZONA_DEM)
+  .select(['B2', 'B3', 'B4', 'B8A', 'B11', 'B12', 'Fmask'], REFL.concat(['Fmask']));
 
-var l30 = ee.ImageCollection('NASA/HLS/HLSL30/v002')
-  .filterBounds(ZONA)
-  .select(['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'Fmask'], NOMBRES);
-
-var s30 = ee.ImageCollection('NASA/HLS/HLSS30/v002')
-  .filterBounds(ZONA)
-  .select(['B2', 'B3', 'B4', 'B8A', 'B11', 'B12', 'Fmask'], NOMBRES);
-
-var hls = l30.merge(s30);
-
-// Máscara Fmask por bits: 1 nube, 2 adyacente a nube, 3 sombra, 4 nieve.
-// El bit 5 (agua) NO se enmascara: el riego por gravedad puede verse como agua.
+// Fmask por bits: 1 nube, 2 adyacente, 3 sombra, 4 nieve. El bit 5 (agua) no se enmascara.
 function limpiar(img) {
   var f = img.select('Fmask');
-  var malo = f.bitwiseAnd(1 << 1).neq(0)
-    .or(f.bitwiseAnd(1 << 2).neq(0))
-    .or(f.bitwiseAnd(1 << 3).neq(0))
-    .or(f.bitwiseAnd(1 << 4).neq(0));
-  var r = img.select(['azul', 'verde', 'rojo', 'nir', 'swir1', 'swir2']);
+  var malo = f.bitwiseAnd(1 << 1).neq(0).or(f.bitwiseAnd(1 << 2).neq(0))
+    .or(f.bitwiseAnd(1 << 3).neq(0)).or(f.bitwiseAnd(1 << 4).neq(0));
+  var r = img.select(REFL);
   var ndvi = r.normalizedDifference(['nir', 'rojo']).rename('ndvi');
   var lswi = r.normalizedDifference(['nir', 'swir1']).rename('lswi');
-  var bsi = r.expression(
-    '((S + R) - (N + B)) / ((S + R) + (N + B))',
-    {S: r.select('swir1'), R: r.select('rojo'), N: r.select('nir'), B: r.select('azul')}
-  ).rename('bsi');
-  return ndvi.addBands(lswi).addBands(bsi)
-    .updateMask(malo.not())
+  var bsi = r.expression('((S + R) - (N + B)) / ((S + R) + (N + B))',
+    {S: r.select('swir1'), R: r.select('rojo'), N: r.select('nir'), B: r.select('azul')}).rename('bsi');
+  return r.addBands(ndvi).addBands(lswi).addBands(bsi).updateMask(malo.not())
     .copyProperties(img, ['system:time_start']);
 }
+var limpia = l30.merge(s30).map(limpiar);
+var BANDAS = REFL.concat(['ndvi', 'lswi', 'bsi']);
 
-var limpia = hls.map(limpiar);
-
-// Compuesto mensual (mediana) de un mes dado.
+// Mediana mensual; si el mes no tiene escenas, imagen enmascarada.
 function mes(anio, m) {
   var ini = ee.Date.fromYMD(anio, m, 1);
-  var fin = ini.advance(1, 'month');
-  var c = limpia.filterDate(ini, fin);
-  var etiqueta = ini.format('YYYY_MM');
-  // Si un mes no tiene escenas, se usa una imagen enmascarada (evita errores).
-  var vacia = ee.Image.constant([0, 0, 0]).rename(['ndvi', 'lswi', 'bsi']).updateMask(0);
-  var med = ee.Image(ee.Algorithms.If(c.size().gt(0),
-    c.select(['ndvi', 'lswi', 'bsi']).median(), vacia));
-  var n = ee.Image(ee.Algorithms.If(c.size().gt(0),
-    c.select('ndvi').count(), ee.Image.constant(0))).rename('n');
-  return {med: med, n: n, etiqueta: etiqueta};
+  var c = limpia.filterDate(ini, ini.advance(1, 'month'));
+  var vacia = ee.Image.constant([0, 0, 0, 0, 0, 0, 0, 0, 0]).rename(BANDAS).updateMask(0);
+  return {
+    med: ee.Image(ee.Algorithms.If(c.size().gt(0), c.select(BANDAS).median(), vacia)),
+    n: ee.Image(ee.Algorithms.If(c.size().gt(0), c.select('ndvi').count(), ee.Image.constant(0))).rename('n'),
+    tag: ee.String(ini.format('YYYY_MM'))
+  };
+}
+function i16(img) { return img.multiply(10000).round().toInt16().unmask(-32768); }
+function anioAgricola(ag) {                      // meses de oct (ag-1) a sep (ag)
+  var l = [];
+  for (var k = 0; k < 12; k++) { l.push(k < 3 ? [ag - 1, 10 + k] : [ag, k - 2]); }
+  return l;
 }
 
-// ---------------------------------------------------------------------------
-// 1) Año agrícola oct-2025 a sep-2026: NDVI, LSWI, BSI y n por mes
-var meses2026 = [];
-for (var i = 0; i < 12; i++) {
-  var anio = (i < 3) ? 2025 : 2026;
-  var m = (i < 3) ? 10 + i : i - 2;
-  meses2026.push([anio, m]);
-}
-
-var pila2026 = ee.Image([]);
-meses2026.forEach(function (am) {
+// 1 y 2) Año agrícola 2026
+var indices = ee.Image([]), reflect = ee.Image([]);
+anioAgricola(2026).forEach(function (am) {
   var r = mes(am[0], am[1]);
-  var tag = ee.String(r.etiqueta);
-  var bandas = r.med.multiply(10000).round().toInt16()   // índice × 10,000
-    .rename([tag.cat('_ndvi'), tag.cat('_lswi'), tag.cat('_bsi')]);
-  var n = r.n.unmask(0).toInt16().rename(tag.cat('_n'));
-  pila2026 = pila2026.addBands(bandas.unmask(-32768)).addBands(n);
+  indices = indices.addBands(i16(r.med.select(['ndvi', 'lswi', 'bsi']))
+      .rename([r.tag.cat('_ndvi'), r.tag.cat('_lswi'), r.tag.cat('_bsi')]))
+    .addBands(r.n.unmask(0).toInt16().rename(r.tag.cat('_n')));
+  reflect = reflect.addBands(i16(r.med.select(REFL)).rename(REFL.map(function (b) { return r.tag.cat('_' + b); })));
 });
 
-// ---------------------------------------------------------------------------
-// 2) Memoria: NDVI mensual de oct-2015 a sep-2026 (años agrícolas 2016–2026)
-var pilaMemoria = ee.Image([]);
-for (var a = 2015; a <= 2026; a++) {
-  for (var mm = 1; mm <= 12; mm++) {
-    if (a === 2015 && mm < 10) continue;
-    if (a === 2026 && mm > 9) continue;
-    var rr = mes(a, mm);
-    var t = ee.String(rr.etiqueta);
-    pilaMemoria = pilaMemoria.addBands(
-      rr.med.select('ndvi').multiply(10000).round().toInt16()
-        .unmask(-32768).rename(t.cat('_ndvi')));
-  }
+// 3) Memoria: NDVI mensual por año agrícola
+function memoria(ag) {
+  var img = ee.Image([]);
+  anioAgricola(ag).forEach(function (am) {
+    var r = mes(am[0], am[1]);
+    img = img.addBands(i16(r.med.select('ndvi')).rename(r.tag.cat('_ndvi')));
+  });
+  return img;
 }
 
-// ---------------------------------------------------------------------------
-// 3) NASADEM
+// 4) NASADEM
 var dem = ee.Image('NASA/NASADEM_HGT/001').select('elevation').clip(ZONA_DEM);
 
-// ---------------------------------------------------------------------------
-// Vista previa para revisar la zona (no gasta cuota de exportación)
+// Vista previa (para verificar que la zona cae sobre parcelas de riego)
 Map.centerObject(ZONA, 12);
-var vistaJul = limpia.filterDate('2026-07-01', '2026-08-01').select('ndvi').median();
-Map.addLayer(vistaJul.clip(ZONA), {min: 0, max: 0.8, palette: ['#ccc682', '#91bf51', '#306d1c', '#004400']}, 'NDVI julio 2026');
+Map.addLayer(limpia.filterDate('2026-07-01', '2026-08-01').select('ndvi').median().clip(ZONA),
+  {min: 0, max: 0.8, palette: ['#ccc682', '#91bf51', '#306d1c', '#004400']}, 'NDVI julio 2026');
 Map.addLayer(ee.Image().paint(ZONA, 0, 2), {palette: ['red']}, 'Zona piloto');
 
-// ---------------------------------------------------------------------------
-// Exportaciones (aparecen en la pestaña Tasks; presionar Run en cada una)
-Export.image.toDrive({
-  image: pila2026,
-  description: 'hls_mensual_2025_10_a_2026_09',
-  folder: CARPETA,
-  fileNamePrefix: 'hls_mensual_2025_10_a_2026_09',
-  region: ZONA,
-  scale: ESCALA,
-  crs: CRS,
-  maxPixels: 1e9,
-  fileFormat: 'GeoTIFF'
+function exportar(img, nombre, region) {
+  Export.image.toDrive({image: img, description: nombre, folder: CARPETA, fileNamePrefix: nombre,
+    region: region, scale: ESCALA, crs: CRS, maxPixels: 1e9, fileFormat: 'GeoTIFF'});
+}
+exportar(indices.select('2026_07.*'), 'piloto_consumo', PILOTO);              // 0
+exportar(indices, 'hls_mensual_2025_10_a_2026_09', ZONA);                     // 1
+exportar(reflect, 'hls_reflect_2025_10_a_2026_09', ZONA);                     // 2
+[2025, 2026, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016].forEach(function (ag) {
+  exportar(memoria(ag), 'hls_ndvi_memoria_' + ag, ZONA);                     // 3
 });
-
-Export.image.toDrive({
-  image: pilaMemoria,
-  description: 'hls_ndvi_memoria_2015_10_a_2026_09',
-  folder: CARPETA,
-  fileNamePrefix: 'hls_ndvi_memoria_2015_10_a_2026_09',
-  region: ZONA,
-  scale: ESCALA,
-  crs: CRS,
-  maxPixels: 1e9,
-  fileFormat: 'GeoTIFF'
-});
-
-Export.image.toDrive({
-  image: dem,
-  description: 'nasadem_zona_piloto',
-  folder: CARPETA,
-  fileNamePrefix: 'nasadem_zona_piloto',
-  region: ZONA_DEM,
-  scale: ESCALA,
-  crs: CRS,
-  maxPixels: 1e9,
-  fileFormat: 'GeoTIFF'
-});
-
-print('Listo. Revisa el mapa y luego presiona Run en las 3 tareas de la pestaña Tasks.');
-print('Bandas del año agrícola 2026:', pila2026.bandNames().size());
-print('Bandas de la memoria:', pilaMemoria.bandNames().size());
+exportar(dem, 'nasadem_zona_piloto', ZONA_DEM);                              // 4
+print('Tareas creadas. Primero corre piloto_consumo y anota su consumo de EECU.');

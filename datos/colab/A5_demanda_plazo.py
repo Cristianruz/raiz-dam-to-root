@@ -9,7 +9,7 @@ Unidad: 1 millar/ha = 1,000 m³/ha = 100 mm de lámina.
 Cadena: ETc = Kc·ETo; neta = Σ_mes max(ETc − Peff, 0); bruta = neta / Ea + presiembra (anuales).
 Peff: FAO/AGLW «dependable rain» (0.6P−10 si P ≤ 70 mm/mes; 0.8P−24 si P > 70), acotada a [0, P].
 Monte Carlo: año climático remuestreado 1991–2025, sesgo de ETo U(−0.10, 0), Ea U(rango), presiembra U(150, 200).
-Todos los parámetros [S] se declaran en PARAMS con su etiqueta; las cifras con fuente llevan la referencia.
+Los supuestos (Ea, sesgo de ETo, presiembra, Kc del nogal y plazos) se leen de supuestos.json con su fuente; el script se detiene si falta alguno. Las tuplas del Monte Carlo se sortean una sola vez y se reutilizan en todas las variantes y rotaciones.
 """
 import csv
 import datetime as dt
@@ -17,25 +17,31 @@ import json
 import random
 from collections import defaultdict
 
-PARAMS = {
-    "ea_gravedad": {"valor": [0.45, 0.70], "etiqueta": "[S]",
-                    "fuente": "Sin valor medido en el DR-005; aplicación por gravedad 55–60 % (IMTA, según la investigación del 10-nov) con sensibilidad 45–70 %"},
-    "sesgo_eto": {"valor": [-0.10, 0.0], "etiqueta": "[S]",
-                  "fuente": "POWER-PM sobreestima ~10 % en La Laguna (Delgado-Ramírez 2023); aplicado a Delicias como supuesto"},
-    "presiembra_mm": {"valor": [150, 200], "etiqueta": "[S]; algodón 200 mm [V] INIFAP 2017"},
-    "periodo_clima": {"valor": [1991, 2025], "etiqueta": "[S] propuesto en el preregistro"},
-    "corridas": 2000,
-    "plazo_anios": {"anual": 1, "alfalfa": 4, "nogal": 10,
-                    "fuente": "alfalfa 3–4 años [P] FIRA; nogal: horizonte de cálculo de 10 años [S] (S9 §5)"},
-}
+from comun import carpeta, registrar_fuentes
+
+PARAMS = {"corridas": 2000, "periodo_clima": {"valor": [1991, 2025], "etiqueta": "assumption [S], propuesto en el preregistro"}}
+REQUERIDOS = ("ea_gravedad", "sesgo_eto", "presiembra_mm", "kc_nogal", "plazo_alfalfa_anios", "plazo_nogal_horizonte")
+
+
+def cargar_supuestos(ruta="supuestos.json"):
+    """Lee los supuestos con fuente; se detiene si falta alguno (kit A5, paso 3)."""
+    s = json.load(open(ruta))
+    faltan = [k for k in REQUERIDOS if k not in s]
+    if faltan:
+        raise SystemExit(f"Faltan en supuestos.json: {faltan}. No se usan valores de memoria.")
+    PARAMS.update({k: s[k] for k in REQUERIDOS})
+    CULTIVOS["nogal"]["kc"] = tuple(s["kc_nogal"]["valor"])
+    PARAMS["plazo_anios"] = {"anual": 1, "alfalfa": s["plazo_alfalfa_anios"]["valor"],
+                             "nogal": s["plazo_nogal_horizonte"]["valor"]}
+
 
 # Kc FAO-56 Tabla 12 [V] y etapas Tabla 11 [V] (ajustes de duración marcados [S]).
 # siembra = (mes, día); dias = (ini, des, med, fin)
 CULTIVOS = {
     "alfalfa":         {"kc": (0.95, 0.95, 0.95), "perenne": True,
                         "nota": "Kc 0.95 todo el año (efecto promediado de cortes) [S]; contraste INIFAP 170–180 cm aplicados [V]"},
-    "nogal":           {"kc": (0.45, 0.90, 0.65), "siembra": (3, 15), "dias": (20, 10, 130, 30), "perenne": True,
-                        "nota": "FAO-56 «stone fruit» sin cobertura; inicio = brotación ≈15-mar (INIFAP) [S]"},
+    "nogal":           {"kc": None, "siembra": (3, 15), "dias": (20, 10, 130, 30), "perenne": True,
+                        "nota": "Kc de supuestos.json (kc_nogal); inicio = brotación ≈15-mar (INIFAP) [S]"},
     "algodon":         {"kc": (0.35, 1.175, 0.60), "siembra": (4, 25), "dias": (30, 50, 55, 45), "presiembra_fija": 200},
     "chile":           {"kc": (0.60, 1.05, 0.90), "siembra": (3, 10), "dias": (28, 35, 40, 20),
                         "nota": "sustituto: pimiento FAO-56; siembra directa 20-feb a 31-mar (INIFAP) [V]"},
@@ -147,33 +153,39 @@ def percentiles(v):
     return q(0.1), q(0.5), q(0.9)
 
 
-def simular(cultivos, clima, anios, f_lluvia, rng, sin_riego=()):
+def sortear(anios, rng):
+    """Sortea UNA vez las tuplas del Monte Carlo; se reutilizan en todas las variantes y rotaciones."""
     ea0, ea1 = PARAMS["ea_gravedad"]["valor"]
     s0, s1 = PARAMS["sesgo_eto"]["valor"]
     p0, p1 = PARAMS["presiembra_mm"]["valor"]
+    return [(rng.choice(anios), rng.uniform(s0, s1), rng.uniform(ea0, ea1), rng.uniform(p0, p1))
+            for _ in range(PARAMS["corridas"])]
+
+
+def simular(cultivos, clima, tuplas, f_lluvia, sin_riego=()):
     anuales = [c for c in cultivos if not CULTIVOS[c].get("perenne")]
     brutas, netas, etcs = [], [], []
-    for _ in range(PARAMS["corridas"]):
-        a = rng.choice(anios)
-        neta, etc = neta_anio(cultivos, a, clima, rng.uniform(s0, s1), f_lluvia, sin_riego)
-        pres = sum(CULTIVOS[c].get("presiembra_fija", rng.uniform(p0, p1)) for c in anuales)
-        bruta = neta / rng.uniform(ea0, ea1) + pres
-        brutas.append(bruta / 100)            # mm → millares/ha
+    for anio, sesgo, ea, pres in tuplas:
+        neta, etc = neta_anio(cultivos, anio, clima, sesgo, f_lluvia, sin_riego)
+        presiembra = sum(CULTIVOS[c].get("presiembra_fija", pres) for c in anuales)
+        brutas.append((neta / ea + presiembra) / 100)        # mm → millares/ha
         netas.append(neta)
         etcs.append(etc)
     return percentiles(brutas), percentiles(netas)[1], percentiles(etcs)[1]
 
 
 def main():
+    carpeta("A5: demanda por cultivo y rotación, y plazo del agua")
+    cargar_supuestos()
     clima = cargar_clima()
     a0, a1 = PARAMS["periodo_clima"]["valor"]
     anios = [a for a in range(a0 + 1, a1 + 1)
              if sum(1 for d in clima if dt.date(a - 1, 10, 1) <= d <= dt.date(a, 9, 30)) >= 360]
-    rng = random.Random(20261114)
+    tuplas = sortear(anios, random.Random(20261114))
     filas, salida = [], []
     for c in CULTIVOS:
         for lp, f in ((0, 1.0), (-20, 0.8)):
-            (b10, b50, b90), n50, e50 = simular([c], clima, anios, f, rng)
+            (b10, b50, b90), n50, e50 = simular([c], clima, tuplas, f)
             filas.append([c, lp, round(e50), round(n50), round(b10, 2), round(b50, 2), round(b90, 2)])
     for r in ROTACIONES:
         reg = {k: v for k, v in r.items() if k != "sin_riego_meses"}
@@ -181,7 +193,7 @@ def main():
         reg["lamina_bruta_millares"] = {}
         for lp, f in ((0, 1.0), (-20, 0.8)):
             if r["cultivos"]:
-                (b10, b50, b90), n50, e50 = simular(r["cultivos"], clima, anios, f, rng, r.get("sin_riego_meses", ()))
+                (b10, b50, b90), n50, e50 = simular(r["cultivos"], clima, tuplas, f, r.get("sin_riego_meses", ()))
             else:
                 b10 = b50 = b90 = n50 = e50 = 0.0
             reg["lamina_bruta_millares"][str(lp)] = {"p10": round(b10, 2), "p50": round(b50, 2), "p90": round(b90, 2),
@@ -196,6 +208,9 @@ def main():
                "rotaciones": salida, "anios_clima": anios},
               open("rotaciones.json", "w"), ensure_ascii=False, indent=1)
 
+    registrar_fuentes("A5", ["demanda_cultivos.csv", "rotaciones.json"],
+                      "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json",
+                      "datos/colab/A5_demanda_plazo.py")
     # Prueba de aceptación (kit A5): orden de percentiles y contraste con INIFAP
     for r in salida:
         for v in r["lamina_bruta_millares"].values():

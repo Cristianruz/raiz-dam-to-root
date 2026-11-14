@@ -14,10 +14,11 @@ import json
 import sys
 import urllib.request
 
+from comun import carpeta, registrar_fuentes
 from eto_fao56 import eto_dia
 
 LAT, LON = 28.19, -105.45          # punto representativo de la zona (kit A1) [supuesto]
-Z = 1173                           # m; altitud de la cabecera de Delicias (INEGI) [V]
+Z = 1173                           # m; INEGI, ficha de la localidad Delicias (080210001) [V]
 PARAMS = "T2M_MAX,T2M_MIN,RH2M,WS2M,ALLSKY_SFC_SW_DWN,PRECTOTCORR"
 URL = ("https://power.larc.nasa.gov/api/temporal/daily/point"
        "?parameters={p}&community=AG&longitude={lon}&latitude={lat}"
@@ -34,6 +35,7 @@ def descargar(ini, fin):
 
 
 def main():
+    carpeta("A1: NASA POWER y ETo FAO-56")
     hoy = dt.date.today().strftime("%Y%m%d")
     tramos = [("19810101", "19951231"), ("19960101", "20101231"), ("20110101", hoy)]
     filas, faltantes = [], 0
@@ -58,6 +60,8 @@ def main():
         w.writerow(["fecha", "eto_mm", "tmin", "tmax", "lluvia_mm", "ws2m", "rs", "rh2m"])
         w.writerows(filas)
 
+    registrar_fuentes("A1", ["eto_diaria.csv"], "NASA POWER Daily API, community=AG, punto 28.19 N −105.45 O",
+                      "datos/colab/A1_power_eto.py")
     # Prueba de aceptación (kit A1)
     etos = [r[1] for r in filas]
     assert all(0 <= e <= 15 for e in etos), "ETo fuera de 0-15 mm/d"

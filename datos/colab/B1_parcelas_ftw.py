@@ -14,7 +14,10 @@ Atribución: "Field boundaries: Fields of The World global predictions (CC-BY-4.
 import argparse
 import json
 import math
+import os
 import urllib.request
+
+from comun import registrar_fuentes
 
 ZONA = (-105.42, 28.08, -105.32, 28.16)     # lon_min, lat_min, lon_max, lat_max (igual que Earth Engine)
 LLMS = "https://data.source.coop/ftw/global-data/llms.txt"
@@ -36,7 +39,9 @@ def main():
     ap.add_argument("--listar", action="store_true")
     ap.add_argument("--url", help="GeoParquet de FTW que cubre México")
     ap.add_argument("--col_conf", default="confidence", help="nombre de la columna de confianza")
+    ap.add_argument("--dir", default=".", help="carpeta de trabajo, p. ej. data/processed")
     a = ap.parse_args()
+    os.chdir(a.dir)
     if a.listar:
         print(urllib.request.urlopen(LLMS, timeout=60).read().decode()[:6000])
         return
@@ -66,6 +71,8 @@ def main():
             "protagonista": False}})
     with open("parcelas_base.geojson", "w") as f:
         json.dump({"type": "FeatureCollection", "features": feats}, f)
+    registrar_fuentes("B1", ["parcelas_base.geojson"],
+                      f"Fields of The World global predictions (CC-BY-4.0), {a.url}", "datos/colab/B1_parcelas_ftw.py")
     baja = sum(1 for x in feats if (x["properties"]["ftw_confianza"] or 0) < 50)
     print(f"Parcelas >= {AREA_MIN_HA} ha: {len(feats)} · con confianza < 50: {baja}")
 
