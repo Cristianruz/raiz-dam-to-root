@@ -20,10 +20,12 @@ CLI:
 Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página sale de aquí):
   _encabezado, generado (fecha y hora UTC), decision
   zonas            {id: {"nombre"}} de data/params.json → zona_piloto.zonas
+  motivo_pedido    el texto común de lo pedido y aún no entregado
   recursos         uno por renglón de data/recursos_reto.json: id, nombre, organismo, papel, aplica,
                    estado («in_use» si AL MENOS UNA de sus entregas está en processed; «requested» si
                    aplica y no hay ninguna; «not_applicable»), entregas_presentes, entregas_faltantes,
-                   motivo, equivalente_local, fuentes [{archivo, fuente, fecha}] (de fuentes.json) y fecha
+                   motivo, equivalente_local, fuentes [{archivo, fuente, fecha}] (de fuentes.json), fecha
+                   y fuente_contexto (su valor de «fuente» en contexto_regional.csv, o null)
   clima_anual      {zona: {definicion_anio, definicion_helada, umbral_faltantes, anios: [{anio,
                    lluvia_imerg_mm, lluvia_power_mm, eto_mm, dias_helada, dias_con_dato,
                    dias_con_dato_imerg, dias_del_anio}], fuentes: {power, imerg}}}
@@ -139,6 +141,12 @@ def numero(texto, faltante=None):
     if not math.isfinite(v) or (faltante is not None and v == faltante):
         return None
     return v
+
+
+def numero_limpio(texto):
+    """Como numero(), pero un entero se queda entero (9000, no 9000.0): para resoluciones."""
+    v = numero(texto)
+    return int(v) if v is not None and float(v).is_integer() else v
 
 
 def entero(texto):
@@ -371,7 +379,7 @@ def bloque_contexto(ruta, zonas, unidades, registro, avisos):
         if any(v is not None for v in valores):
             fuentes_con_valor.add(fuente)
         unidad = _unico(fila["unidad"].strip() for fila in filas)
-        resolucion = _unico(numero(fila["resolucion_m"]) for fila in filas)
+        resolucion = _unico(numero_limpio(fila["resolucion_m"]) for fila in filas)
         celdas = [entero(fila["n_celdas"]) for fila in filas]
         clave = f"{fuente}.{variable}"
         if unidad is None or resolucion is None:
@@ -445,7 +453,7 @@ def bloque_gaez(ruta, zonas, registro, avisos):
             "variable": fila["variable"].strip(),
             "valor": numero(fila["valor"]),
             "unidad": fila["unidad"].strip(),
-            "resolucion_m": numero(fila["resolucion_m"]),
+            "resolucion_m": numero_limpio(fila["resolucion_m"]),
         })
     return {"fuente": registro.get("fuente"), "fecha": registro.get("fecha"), "zonas": por_zona}
 
@@ -504,6 +512,8 @@ def estado_de_recursos(catalogo, processed, zonas, registradas, fuentes_contexto
             "entregas_presentes": presentes, "entregas_faltantes": faltantes,
             "motivo": motivo, "equivalente_local": rec.get("equivalente_local"),
             "fuentes": fuentes, "fecha": fechas[-1] if fechas else None,
+            # Fuente de contexto_regional.csv que corresponde al recurso (la página liga serie y recurso).
+            "fuente_contexto": rec.get("fuente_contexto"),
         })
     return salida
 
@@ -535,6 +545,8 @@ def armar(processed, params, catalogo):
         "generado": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "decision": catalogo.get("decision", DECISION),
         "zonas": zonas,
+        # Motivo común de lo pedido y no entregado (el de cada bloque y cada recurso sin entrega).
+        "motivo_pedido": MOTIVO_PEDIDO,
     }
 
     def bloque_opcional(nombre, archivo, leer):

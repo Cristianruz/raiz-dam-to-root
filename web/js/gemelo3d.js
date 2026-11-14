@@ -85,6 +85,17 @@ const CAPA_FALTA = "gemelo-columna-falta";
 const CAPA_CAMARA = "gemelo-camara"; // capa «custom» sin dibujo: recibe la matriz de proyección de cada cuadro
 const IMAGEN_PLANA = "gemelo-trama-plana";
 const IMAGEN_FALTA = "gemelo-trama-falta";
+const CAPAS = [
+  CAPA_SOMBRA,
+  CAPA_PLANA,
+  CAPA_PLANA_BORDE,
+  CAPA_SIN_RIEGO,
+  CAPA_SIN_RIEGO_BORDE,
+  CAPA_APUNTADA,
+  CAPA_AGUA,
+  CAPA_FALTA,
+  CAPA_CAMARA,
+];
 const FUENTES = [FUENTE_COLUMNAS, FUENTE_PLANAS, FUENTE_SOMBRA, FUENTE_RELIEVE];
 const IMAGENES = [IMAGEN_PLANA, IMAGEN_FALTA];
 const CAPAS_COLUMNA = [CAPA_AGUA, CAPA_FALTA];
@@ -498,11 +509,14 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     conProtocolo: false,
     teselasFallidas: [],
     matriz: null, // Mercator (0 a 1, con altura) -> espacio de recorte, del último cuadro dibujado
+    camaraCambio: false,
+    suelos: new Map(), // id -> altura del terreno bajo la columna (se vacía si cambia el relieve cargado o el zoom)
     avisados: new Set(), // tipos de aviso ya emitidos en esta activación
     apuntada: null,
     conTeclado: false,
     ultimoPuntero: null,
     pusoCursor: false,
+    inclinada: false, // la cámara ya tomó la inclinación del gemelo en esta activación
     maxPitchPrevio: null,
     habiaOyenteDeError: false,
     dom: null,
@@ -726,16 +740,22 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
       type: "custom",
       render(_gl, cuadro) {
         const matriz = cuadro?.defaultProjectionData?.mainMatrix;
-        if (matriz) est.matriz = Float64Array.from(matriz);
+        if (!matriz) return;
+        const previa = est.matriz;
+        let igual = Boolean(previa);
+        for (let i = 0; igual && i < matriz.length; i += 1) igual = previa[i] === matriz[i];
+        if (igual) return;
+        est.matriz = Float64Array.from(matriz);
+        est.camaraCambio = true; // al terminar el cuadro se revisa qué columna quedó bajo la mira o el puntero
       },
     });
   }
 
   function quitarCapasYFuentes() {
-    for (const id of mapa.getLayersOrder?.() ?? []) {
-      if (id.startsWith(PREFIJO)) mapa.removeLayer(id);
+    for (const id of CAPAS) {
+      if (mapa.getLayer(id)) mapa.removeLayer(id);
     }
-    if (mapa.getTerrain?.()?.source === FUENTE_RELIEVE) mapa.setTerrain(null);
+    if (mapa.getTerrain?.()?.source === FUENTE_RELIEVE) mapa.setTerrain(null); // antes de quitar su fuente
     for (const id of FUENTES) {
       if (mapa.getSource(id)) mapa.removeSource(id);
     }
@@ -784,15 +804,15 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     const columnas = est.ultimo?.columnas.features ?? [];
     const m = est.matriz;
     if (!m || !Mercator) return columnaSegunMapLibre([px, py]);
-    const caja = mapa.getContainer();
-    const ancho = caja.clientWidth;
-    const alto = caja.clientHeight;
+    const lienzo = mapa.getCanvas(); // el tamaño con el que MapLibre dibujó el cuadro (píxeles CSS)
+    const ancho = lienzo.clientWidth;
+    const alto = lienzo.clientHeight;
     let mejor = null;
     let distanciaMejor = Infinity;
     for (const f of columnas) {
       const g = enMercator(f.geometry, Mercator);
       if (!g.centro) continue;
-      const suelo = mapa.queryTerrainElevation?.(g.centro) ?? 0; // metros, ya con la exageración
+      const suelo = alturaDelSuelo(f.properties.id, g.centro);
       const zPie = suelo * g.zPorMetro;
       const zCima = (suelo + f.properties.pide_m) * g.zPorMetro;
       const distancia = m[3] * g.centroXY[0] + m[7] * g.centroXY[1] + m[11] * zPie + m[15];
@@ -809,6 +829,21 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     }
     return mejor;
   }
+
+  /** Altura del terreno (metros, ya con la exageración) bajo el centro de una columna; se guarda entre consultas. */
+  function alturaDelSuelo(id, centro) {
+    let suelo = est.suelos.get(id);
+    if (suelo === undefined) {
+      suelo = mapa.queryTerrainElevation?.(centro) ?? 0;
+      est.suelos.set(id, suelo);
+    }
+    return suelo;
+  }
+
+  const olvidarSuelos = () => est.suelos.clear();
+  const alLlegarDatos = (ev) => {
+    if (ev?.sourceId === FUENTE_RELIEVE) olvidarSuelos();
+  };
 
   /** Respaldo si aún no hay matriz (ningún cuadro dibujado): la consulta de MapLibre, sin la altura del terreno. */
   function columnaSegunMapLibre(xy) {
@@ -956,9 +991,17 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     elegir(est.apuntada);
   }
 
-  const alMoverMapa = () => {
-    if (est.conTeclado) apuntarConLaMira();
-    else if (est.apuntada != null) pintarEtiqueta();
+  /** Tras dibujar un cuadro con la cámara en otro sitio: la columna bajo la mira (o el puntero) puede ser otra. */
+  const alDibujar = () => {
+    if (!est.camaraCambio) return;
+    est.camaraCambio = false;
+    if (est.conTeclado) {
+      apuntarConLaMira();
+    } else if (est.ultimoPuntero) {
+      const id = columnaEn(est.ultimoPuntero);
+      ponerCursor(id != null);
+      apuntar(id);
+    }
   };
 
   function ponerDOM() {
@@ -989,7 +1032,10 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     mapa.on("click", alClic);
     mapa.on("mousemove", alMoverPuntero);
     mapa.on("mouseout", alSalirPuntero);
-    mapa.on("move", alMoverMapa);
+    mapa.on("render", alDibujar);
+    mapa.on("zoom", olvidarSuelos);
+    mapa.on("terrain", olvidarSuelos);
+    mapa.on("sourcedata", alLlegarDatos);
     lienzo.addEventListener("keydown", alTecla);
     lienzo.addEventListener("focus", alEnfocar);
     lienzo.addEventListener("blur", alDesenfocar);
@@ -1003,7 +1049,10 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     mapa.off("click", alClic);
     mapa.off("mousemove", alMoverPuntero);
     mapa.off("mouseout", alSalirPuntero);
-    mapa.off("move", alMoverMapa);
+    mapa.off("render", alDibujar);
+    mapa.off("zoom", olvidarSuelos);
+    mapa.off("terrain", olvidarSuelos);
+    mapa.off("sourcedata", alLlegarDatos);
     lienzo.removeEventListener("keydown", alTecla);
     lienzo.removeEventListener("focus", alEnfocar);
     lienzo.removeEventListener("blur", alDesenfocar);
@@ -1019,7 +1068,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
   }
 
   // -------------------------------------------------------------- montar y desmontar
-  function montar(conCamara) {
+  function montar() {
     const zona = zonaDe(est.zonaId);
     if (!zona || est.montado) return;
     try {
@@ -1030,13 +1079,16 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
       agregarParcelas();
       est.montado = true;
       ponerDOM();
-      if (conCamara) inclinarCamara();
+      if (!est.inclinada) {
+        est.inclinada = true;
+        inclinarCamara();
+      }
       pintar();
     } catch (error) {
       console.warn("Raíz: twin view not available", error);
       est.montado = true; // para que desmontar retire lo que alcanzó a entrar
-      desmontar(false, false);
       est.activo = false;
+      desmontar(est.inclinada, false);
       avisar("error", TEXTOS.error, { detalle: String(error?.message ?? error) });
     }
   }
@@ -1060,7 +1112,12 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     est.firmaPlanas = null;
     est.fuenteRelieve = null;
     est.matriz = null;
-    if (conCamara) aplanarCamara(animar);
+    est.camaraCambio = false;
+    est.suelos.clear();
+    if (conCamara) {
+      est.inclinada = false;
+      aplanarCamara(animar);
+    }
   }
 
   function activar(zonaId) {
@@ -1070,14 +1127,13 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
       return false;
     }
     if (est.activo && est.zonaId === zonaId) return true;
-    const cambioDeZona = est.activo;
-    if (cambioDeZona) desmontar(false, false); // otra zona: se cambia el relieve y se conserva la cámara
+    if (est.activo) desmontar(false, false); // otra zona: se cambia el relieve y se conserva la cámara
     est.activo = true;
     est.zonaId = zonaId;
     est.avisados.clear();
     est.teselasFallidas = [];
     cuandoEstiloListo(() => {
-      if (est.activo && est.zonaId === zonaId && !est.montado) montar(!cambioDeZona);
+      if (est.activo && est.zonaId === zonaId && !est.montado) montar();
     });
     return true;
   }
