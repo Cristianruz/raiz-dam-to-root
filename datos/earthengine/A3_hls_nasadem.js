@@ -14,18 +14,22 @@
 // Orden: correr primero la tarea 0, anotar su consumo en docs/ee_uso.md y después las demás.
 // Ahorro de cuota: solo la zona piloto; sin getInfo en ciclos.
 
-var ZONA = ee.Geometry.Rectangle([-105.42, 28.08, -105.32, 28.16]);   // [S] verificar en el mapa
-var ZONA_DEM = ZONA.buffer(2000).bounds();
-var PILOTO = ee.Geometry.Point([-105.37, 28.12]).buffer(1000).bounds();
+// Dos zonas piloto (decisión del equipo, 14-nov 12:50); rectángulos de diseño [S]
+var ZONAS = {
+  delicias_saucillo: [-105.56, 28.07, -105.32, 28.19],
+  lazaro_cardenas:   [-105.66, 28.35, -105.56, 28.43]
+};
+var PILOTOS = {lazaro_cardenas: [-105.61, 28.39], delicias_saucillo: [-105.45, 28.13]};
 var CARPETA = 'Raiz_entregas';
 var ESCALA = 30;
 var CRS = 'EPSG:4326';
 var REFL = ['azul', 'verde', 'rojo', 'nir', 'swir1', 'swir2'];
 
 // HLS: renombrar ANTES de fusionar. NIR = B5 en L30 y B8A en S30.
-var l30 = ee.ImageCollection('NASA/HLS/HLSL30/v002').filterBounds(ZONA_DEM)
+var TODAS = ee.Geometry.Rectangle([-105.70, 28.03, -105.28, 28.47]);
+var l30 = ee.ImageCollection('NASA/HLS/HLSL30/v002').filterBounds(TODAS)
   .select(['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'Fmask'], REFL.concat(['Fmask']));
-var s30 = ee.ImageCollection('NASA/HLS/HLSS30/v002').filterBounds(ZONA_DEM)
+var s30 = ee.ImageCollection('NASA/HLS/HLSS30/v002').filterBounds(TODAS)
   .select(['B2', 'B3', 'B4', 'B8A', 'B11', 'B12', 'Fmask'], REFL.concat(['Fmask']));
 
 // Fmask por bits: 1 nube, 2 adyacente, 3 sombra, 4 nieve. El bit 5 (agua) no se enmascara.
@@ -83,23 +87,27 @@ function memoria(ag) {
 }
 
 // 4) NASADEM
-var dem = ee.Image('NASA/NASADEM_HGT/001').select('elevation').clip(ZONA_DEM);
+var DEM = ee.Image('NASA/NASADEM_HGT/001').select('elevation');
 
-// Vista previa (para verificar que la zona cae sobre parcelas de riego)
-Map.centerObject(ZONA, 12);
-Map.addLayer(limpia.filterDate('2026-07-01', '2026-08-01').select('ndvi').median().clip(ZONA),
+// Vista previa (para verificar que cada zona cae sobre parcelas de riego)
+Map.setCenter(-105.5, 28.25, 10);
+Map.addLayer(limpia.filterDate('2026-07-01', '2026-08-01').select('ndvi').median().clip(TODAS),
   {min: 0, max: 0.8, palette: ['#ccc682', '#91bf51', '#306d1c', '#004400']}, 'NDVI julio 2026');
-Map.addLayer(ee.Image().paint(ZONA, 0, 2), {palette: ['red']}, 'Zona piloto');
 
 function exportar(img, nombre, region) {
   Export.image.toDrive({image: img, description: nombre, folder: CARPETA, fileNamePrefix: nombre,
     region: region, scale: ESCALA, crs: CRS, maxPixels: 1e9, fileFormat: 'GeoTIFF'});
 }
-exportar(indices.select('2026_07.*'), 'piloto_consumo', PILOTO);              // 0
-exportar(indices, 'hls_mensual_2025_10_a_2026_09', ZONA);                     // 1
-exportar(reflect, 'hls_reflect_2025_10_a_2026_09', ZONA);                     // 2
-[2025, 2026, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016].forEach(function (ag) {
-  exportar(memoria(ag), 'hls_ndvi_memoria_' + ag, ZONA);                     // 3
+// Orden de tareas: piloto de la zona nueva primero; luego, por zona, mensual, reflectancias, memoria y NASADEM.
+['lazaro_cardenas', 'delicias_saucillo'].forEach(function (z) {
+  var ZONA = ee.Geometry.Rectangle(ZONAS[z]);
+  Map.addLayer(ee.Image().paint(ZONA, 0, 2), {palette: ['red']}, z);
+  exportar(indices.select('2026_07.*'), 'piloto_consumo_' + z, ee.Geometry.Point(PILOTOS[z]).buffer(1000).bounds());
+  exportar(indices, 'hls_mensual_2025_10_a_2026_09_' + z, ZONA);
+  exportar(reflect, 'hls_reflect_2025_10_a_2026_09_' + z, ZONA);
+  [2025, 2026, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016].forEach(function (ag) {
+    exportar(memoria(ag), 'hls_ndvi_memoria_' + ag + '_' + z, ZONA);
+  });
+  exportar(DEM.clip(ZONA.buffer(2000).bounds()), 'nasadem_' + z, ZONA.buffer(2000).bounds());
 });
-exportar(dem, 'nasadem_zona_piloto', ZONA_DEM);                              // 4
-print('Tareas creadas. Primero corre piloto_consumo y anota su consumo de EECU.');
+print('Tareas creadas. Primero corre piloto_consumo_lazaro_cardenas y anota su consumo de EECU.');
