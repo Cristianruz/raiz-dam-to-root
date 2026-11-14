@@ -17,14 +17,16 @@
 
   **Su trabajo empieza con los CSV o TIF que esa sesión deja en Drive.** NASA POWER no es Earth Engine: esa API sí la usa usted (A1).
 - **Entrega** en `Raiz/entregas/`, carpeta plana sin `P4/`, con una línea por archivo en `Raiz/entregas/LEEME.md`. Donde el kit dice `data/processed/…` o `docs/resultado_H1.md`, se entrega en `Raiz/entregas/`.
-- **Nombres exactos** de la tabla 0.4-B: por ejemplo, la demanda se llama `demanda_parcelas.csv`. Un archivo con otro nombre no entra; por ejemplo, `demanda_cultivos.csv`, de un script de la rama `datos-satelite`.
+- **Nombres exactos** de la tabla 0.4-B o del acuerdo de formatos del 14-nov ([README §6, cambio e](README.md#6-cambios-respecto-al-kit-mandan-sobre-el-kit)). Un archivo con otro nombre no entra. El acuerdo cambió dos piezas suyas:
+  - **A5:** el motor del cubo lee `rotaciones.json` y `demanda_cultivos.csv`, las dos salidas de A5 en el formato acordado. Hoy las entrega la sesión de datos; usted las verifica. `demanda_parcelas.csv` y `etc_mensual.csv` (tabla 0.4-B) se siguen aceptando, pero el cubo ya no los lee. Detalle en [A5](#a5--demanda-de-agua-por-opción-con-banda).
+  - **A9:** la tormenta P95 va en `relieve_meta.json`, junto con el rótulo y el umbral de las rutas. Ya no se le pasa a mano a P5; si la cifra aparece en la página, P5 la copia de ese archivo a `cifras.csv`.
 
 | Orden | Pieza | Archivos que entrega | Hora límite |
 |---|---|---|---|
 | 1 | [A1 · POWER y ETo](#a1--clima-nasa-power-y-eto-fao-56) | `eto_diaria.csv`, `fuentes_A1.csv` | sáb 12:00 |
 | 2 | [A2 · heladas](#a2--heladas-por-fecha) | `heladas.json`, `fuentes_A2.csv` | sáb 12:00 |
-| 3 | [A5 · demanda con banda](#a5--demanda-de-agua-por-opción-con-banda) | `demanda_parcelas.csv`, `etc_mensual.csv`, figura del tornado, `fuentes_A5.csv` | Entrega entre sáb 15:00 y 18:00 |
-| 4 | [A9 · relieve y tormenta](#a9--relieve-y-simulación-de-tormenta) | `relieve_rutas.geojson`, `relieve_parcelas.csv`, `fuentes_A9.csv` | Pasos 1–4 (núcleo): sáb 20:30. Pasos 5–6: dom 8:00 |
+| 3 | [A5 · demanda con banda](#a5--demanda-de-agua-por-opción-con-banda) | Verificar `rotaciones.json` y `demanda_cultivos.csv` (los entrega la sesión de datos; cambio e). Solo si Cristian se lo pide: `demanda_parcelas.csv`, `etc_mensual.csv`, figura del tornado, `fuentes_A5.csv` | Entrega entre sáb 15:00 y 18:00 |
+| 4 | [A9 · relieve y tormenta](#a9--relieve-y-simulación-de-tormenta) | `relieve_rutas.geojson`, `relieve_meta.json` (cambio e), `relieve_parcelas.csv`, `fuentes_A9.csv` | Pasos 1–4 (núcleo): sáb 20:30. Pasos 5–6: dom 8:00 |
 | 5 | [A6 · back-test H1](#a6--back-test-h1) | `resultado_H1.md`, figura PNG, `fuentes_A6.csv` | Arranque sáb 18:00. Terminado entre dom 8:00 y 11:00 |
 | 6 | [A8 · contraste de ET](#a8--contraste-regional-de-et) | `et_contraste.csv`, figura PNG, `fuentes_A8.csv` | Dom, antes de las 11:00; solo si A5 está entregada |
 
@@ -232,10 +234,18 @@ Aviso: `ENTREGA: heladas.json — prueba OK`.
 
 | | |
 |---|---|
-| **Entradas** | `eto_diaria.csv` (A1); `rotaciones.json` y `supuestos.json` (P5, B3); `hls_mensual_parcelas.csv` (A3, para el nogal y las etapas); `cultivos_parcelas.csv` (A4.2) |
+| **Entradas** | `eto_diaria.csv` (A1); `supuestos.json` (P5, B3) y las opciones de rotación de B3 (P5; mientras no lleguen, pida a Cristian su diseño provisional, `data/opciones_b4.json`); `hls_mensual_parcelas.csv` (A3, para el nogal y las etapas); `cultivos_parcelas.csv` (A4.2) |
 | **Documentos que no están en el repo (pídalos a Cristian)** | Archivo 27, §2.1 (FAO-56, Tabla 12, Kc) y §2.2 (Tabla 11, duraciones); maestro §5.2 (fechas de siembra); INIFAP 2017; archivo 33, módulo de clima, paso 4 (lluvia efectiva); preregistro (periodo de referencia del clima) |
 | **Cuaderno** | `A5_demanda.ipynb` en `Raiz/cuadernos/` |
 | **Hora límite** | Sáb 12:00–18:00; entrega entre 15:00 y 18:00 (kit §3) |
+
+**A5 cambió con el acuerdo de formatos del 14-nov (cambio e). Léalo antes de empezar:**
+- **Lo que lee el cubo.** El motor del cubo (`motor/b4_cubo.py`) toma la lámina de dos salidas de A5, que hoy entrega la sesión de datos:
+  - `rotaciones.json`: llaves `params` (cada una con `valor` y `etiqueta`), `cultivos`, `rotaciones` y `anios_clima`. Cada rotación lleva `id`, `nombre`, `cultivos` (lista; vacía = descanso), `plazo` (`alfalfa`, `nogal` o `anual`), `plazo_anios` (`min` ≤ `max`) y `lamina_bruta_millares` con las llaves exactas `"0"` y `"-20"`; en cada una, `p10`, `p50`, `p90`, `neta_mm_p50` y `etc_mm_p50`;
+  - `demanda_cultivos.csv`: `cultivo, lluvia_pct, etc_mm_p50, neta_mm_p50, bruta_millares_p10, bruta_millares_p50, bruta_millares_p90`, para los cultivos sueltos sin rotación.
+- **`rotaciones.json` ya no es una entrada de P5.** Es la salida de A5 y sustituye a la lista de opciones del kit B3. Solo quien entrega A5 guarda un archivo con ese nombre: en la carpeta plana, dos archivos iguales se pisan.
+- **`demanda_parcelas.csv` y `etc_mensual.csv`** (tabla 0.4-B) se siguen validando si llegan, pero el cubo ya no los lee.
+- **Qué hace usted.** Si `rotaciones.json` y `demanda_cultivos.csv` ya tienen línea en `LEEME.md`, no los rehaga: verifíquelos con el prompt de verificación de abajo, que aplica la prueba de A5, y avise a Cristian. El bloque del kit (abajo) solo se corre si Cristian le pide hacer A5. En ese caso, pregúntele en qué archivos entrega: los del acuerdo o los de la tabla 0.4-B.
 
 **Si `supuestos.json` no trae lo que el cálculo necesita, deténgase y avise.** Nunca ponga un valor «típico». Lo que debe traer:
 - el rango de eficiencia parcelaria;
@@ -276,7 +286,8 @@ REGLAS OBLIGATORIAS
 ESQUEMA DE SALIDA DE ESTA TAREA
 Fila de la tabla 0.4-B del kit (copiada tal cual):
 | A5 (P4) | `demanda_parcelas.csv`, `etc_mensual.csv` y figura del tornado | (id, opcion, lluvia_pct, bruta_mm_p10, bruta_mm_p50, bruta_mm_p90, neta_mm_p50, etc_mm_p50); (id, opcion, mes, etc_mm_p50) |
-Además: fuentes_A5.csv (archivo, url_o_api, fecha_consulta, sha256). lluvia_pct solo vale 0 o -20. En cada fila, bruta_mm_p10 ≤ bruta_mm_p50 ≤ bruta_mm_p90. Los id son los de parcelas_base.geojson; los nombres de opcion, los de rotaciones.json.
+Además: fuentes_A5.csv (archivo, url_o_api, fecha_consulta, sha256). lluvia_pct solo vale 0 o -20. En cada fila, bruta_mm_p10 ≤ bruta_mm_p50 ≤ bruta_mm_p90. Los id son los de parcelas_base.geojson; los nombres de opcion, los de las opciones de B3 que te pego.
+CAMBIO ACORDADO EL 14-NOV: el cubo lee la lámina de rotaciones.json y demanda_cultivos.csv (salidas de A5 en otro formato), que entrega otra sesión. NO escribas archivos con esos nombres salvo que te lo pida y te pegue su formato.
 
 DOCUMENTOS DE REFERENCIA (pegados)
 S8, decisión 5 (copiada tal cual):
@@ -288,11 +299,12 @@ S9 §5, primera viñeta de cálculo (copiada tal cual):
 [PEGA AQUÍ archivo 33, módulo de clima, paso 4 (fórmulas de lluvia efectiva), que te pasa Cristian.]
 [PEGA AQUÍ el periodo de referencia del clima que fija el preregistro, que te pasa Cristian.]
 [PEGA AQUÍ el contenido de supuestos.json (P5): eficiencia parcelaria, relación cobertura–Kc del nogal y cultivo representativo de forraje_verano.]
+[PEGA AQUÍ las opciones de rotación de B3 que te pase Cristian o P5 (secuencias y fechas de siembra).]
 
 TAREA
-NOTA DEL EQUIPO: los parámetros inciertos se sortean UNA vez por corrida y se reutilizan en todas las parcelas, opciones y variantes de lluvia (semilla fija). Si falta un documento o un valor de supuestos.json, detente y avísame.
+NOTA DEL EQUIPO: los parámetros inciertos se sortean UNA vez por corrida y se reutilizan en todas las parcelas, opciones y variantes de lluvia (semilla fija). Si falta un documento o un valor de supuestos.json, detente y avísame. Las opciones de rotación de B3 te las pego: ya no vienen en rotaciones.json, que es una salida de A5 (cambio acordado el 14-nov).
 Tarea A5. En A5_demanda.ipynb (Raiz/cuadernos/):
-1) Para cada cultivo y para cada opción de rotación (definidas por B3 en rotaciones.json), calcule la ETc diaria = Kc × ETo con los Kc de FAO-56, Tabla 12 (archivo 27, sección 2.1) y las duraciones de etapa de FAO-56, Tabla 11 (archivo 27, sección 2.2). Las fechas de siembra provienen del maestro (sección 5.2) y de INIFAP 2017; las fechas de las etapas pueden ajustarse con el NDVI de A3.
+1) Para cada cultivo y para cada opción de rotación (definidas por B3; se las pego), calcule la ETc diaria = Kc × ETo con los Kc de FAO-56, Tabla 12 (archivo 27, sección 2.1) y las duraciones de etapa de FAO-56, Tabla 11 (archivo 27, sección 2.2). Las fechas de siembra provienen del maestro (sección 5.2) y de INIFAP 2017; las fechas de las etapas pueden ajustarse con el NDVI de A3.
    - Alfalfa: Kc mid 0.95 para el balance anual (efecto promediado de cortes) y 1.20 / 1.15 (mid / end) por periodo de corte. Use 0.95 en el balance anual y declare la versión utilizada.
    - Nogal pecanero (S8, decisión 5): Kc en función de la cobertura del dosel estimada con el NDVI de A3; el resultado se muestra como rango. Valores publicados de referencia: 0.3 en huerta joven a 1.1–1.39 en huerta madura [V según la investigación]. La relación entre cobertura y Kc se lee de supuestos.json con su fuente; si no está declarada, deténgase y notifíquelo. Variante de sensibilidad: FAO-56 "Stone fruit" sin cobertura y con helada, 0.45 / 0.90 / 0.65.
    - Ajuste por clima árido: Kc mid con la Ec. 62 de FAO-56, con u2 y RHmin de NASA POWER; p = p_tab + 0.04(5 − ETc), acotado a 0.1–0.8.
@@ -326,6 +338,11 @@ Explique qué parámetro tiene mayor influencia en la incertidumbre.
 - «En datos/A5_demanda.ipynb:» → «En A5_demanda.ipynb (Raiz/cuadernos/):»
 - «6) Guarde demanda_parcelas.csv (» → «6) Guarde en Raiz/entregas/ demanda_parcelas.csv (»
 
+**Ajustes por el acuerdo de formatos (cambio e):**
+- «(definidas por B3 en rotaciones.json)» → «(definidas por B3; se las pego)»;
+- «los nombres de opcion, los de rotaciones.json» → «los nombres de opcion, los de las opciones de B3 que te pego»;
+- se agregaron el aviso «CAMBIO ACORDADO EL 14-NOV», la última frase de la NOTA DEL EQUIPO y el «[PEGA AQUÍ las opciones de rotación de B3 …]».
+
 **Prueba de aceptación** (kit A5):
 ```text
 PRUEBA DE ACEPTACIÓN (imprímala):
@@ -341,12 +358,25 @@ Explique qué parámetro tiene mayor influencia en la incertidumbre.
 
 **Líneas de LEEME.md:**
 ```text
-demanda_parcelas.csv | FAO-56 (Kc × ETo) con eto_diaria.csv (NASA POWER), rotaciones.json y supuestos.json; Monte Carlo <N> corridas; lluvia 0 y −20 % | 2026-11-14 | colab/A5_demanda.ipynb
+demanda_parcelas.csv | FAO-56 (Kc × ETo) con eto_diaria.csv (NASA POWER), opciones de B3 y supuestos.json; Monte Carlo <N> corridas; lluvia 0 y −20 % | 2026-11-14 | colab/A5_demanda.ipynb
 etc_mensual.csv | ETc mensual P50 por parcela y opción (mismo cálculo que demanda_parcelas.csv) | 2026-11-14 | colab/A5_demanda.ipynb
 A5_tornado.png | Sensibilidad de la lámina bruta a cada parámetro (Monte Carlo de A5) | 2026-11-14 | colab/A5_demanda.ipynb
-fuentes_A5.csv | Fuentes de A5: eto_diaria.csv, rotaciones.json, supuestos.json, tablas FAO-56 (archivo 27) (sha256) | 2026-11-14 | colab/A5_demanda.ipynb
+fuentes_A5.csv | Fuentes de A5: eto_diaria.csv, opciones de B3, supuestos.json, tablas FAO-56 (archivo 27) (sha256) | 2026-11-14 | colab/A5_demanda.ipynb
 ```
 Aviso: `ENTREGA: demanda_parcelas.csv — prueba OK`.
+
+**Prompt de verificación de `rotaciones.json` y `demanda_cultivos.csv`** (cuando los entrega la sesión de datos; cuaderno `A5_verificacion.ipynb` en `Raiz/cuadernos/`):
+```text
+Eres revisor de datos. NO inventes cifras: usa los archivos y los controles del kit que te doy, con su fuente.
+Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que lea entregas/rotaciones.json y entregas/demanda_cultivos.csv e imprima:
+1) llaves de primer nivel de rotaciones.json (deben ser params, cultivos, rotaciones y anios_clima) y cuántos años trae anios_clima;
+2) por rotación: id, nombre, cultivos, plazo, plazo_anios y, para lluvia "0" y "-20", p10, p50, p90, neta_mm_p50 y etc_mm_p50; marca las que no cumplan p10 ≤ p50 ≤ p90 (deben ser 0) y los cultivos que no estén en el objeto cultivos;
+3) demanda_cultivos.csv: columnas exactas cultivo, lluvia_pct, etc_mm_p50, neta_mm_p50, bruta_millares_p10, bruta_millares_p50, bruta_millares_p90; lluvia_pct solo 0 o -20; filas que no cumplan p10 ≤ p50 ≤ p90 (deben ser 0);
+4) PRUEBA DEL KIT A5: ETc anual de alfalfa (etc_mm_p50) y si cae en el rango de control estimado de 1,100–1,700 mm; la eficiencia implícita = ETc neta / lámina INIFAP de 170–180 cm (convierte con 1 millar/ha = 10 cm de lámina, S9 §5); la misma comparación para algodón (~68 cm aplicados, INIFAP) y chile (~92 cm);
+5) si la lámina con lluvia -20 es mayor o igual que con lluvia 0 en cada rotación y cultivo (menos lluvia, más riego).
+Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
+```
+Si algo sale REVISAR, no corrija el archivo: avise a Cristian con la tabla.
 
 ---
 
@@ -366,7 +396,7 @@ Núcleo: pasos 1 a 4 (S9 §4 bis y §8). Segunda línea: pasos 5 y 6.
 **Tres cuidados:**
 1. **Pendiente.** El TIF viene en grados (EPSG:4326). Para la pendiente en %, reproyecte a metros (UTM) o convierta el tamaño de celda a metros antes de calcular. Si no, la pendiente sale mal (kit A9, prueba).
 2. **Umbrales.** El de acumulación de las rutas se declara en `supuestos.json` (kit A9, paso 3). El de «día con lluvia» no lo fija el kit. Pida a P5 que declare los dos, con fuente o «assumption». No los invente.
-3. **La lámina de la tormenta (paso 4) no tiene archivo propio en la tabla 0.4-B.** Un archivo nuevo se rechazaría. Imprímala con su fuente y periodo y pásesela a P5 para `cifras.csv` (por ejemplo, con la clave `tormenta_p95_mm`).
+3. **La lámina de la tormenta (paso 4) va en `relieve_meta.json`** (acuerdo de formatos del 14-nov, cambio e); ya no se le pasa a mano a P5. Ese archivo lleva `rotulo`, `umbral_ruta_ha`, `umbral_ruta_etiqueta`, `celda_ha` y `tormenta` con `mm`, `definicion`, `fuente` y `periodo`. Ninguno puede ir vacío; si le falta uno, deténgase y avise. Si `relieve_meta.json` ya tiene su línea en `LEEME.md`, no lo rehaga: compárelo con su cálculo y avise a Cristian.
 
 **Bloque para pegar en Gemini:**
 ```text
@@ -404,8 +434,9 @@ A9 no tiene fila en la tabla 0.4-B. Los nombres y columnas salen del prompt A9 y
 - nasadem_zona_piloto.tif: 30 m, EPSG:4326, zona piloto + 2 km. LO ENTREGA LA SESIÓN DE CHROME; yo solo lo leo.
 - relieve_rutas.geojson: líneas (LineString o MultiLineString), < 1 MB, geometrías simplificadas.
 - relieve_parcelas.csv: id, pendiente_media_pct, aportacion_externa_ha, frac_depresion (más fuente_dem solo si se usa LiDAR, paso 6).
+- relieve_meta.json (CAMBIO ACORDADO EL 14-NOV): un objeto JSON con rotulo (el rótulo de la capa: "regional, 30 m (NASADEM); not field drainage design"), umbral_ruta_ha (el umbral de acumulación de supuestos.json, en hectáreas, > 0), umbral_ruta_etiqueta (la etiqueta de ese umbral en supuestos.json), celda_ha (área de una celda del modelo de elevación, en hectáreas, > 0, calculada en metros) y tormenta: {mm, definicion, fuente, periodo} (paso 4). Ningún campo vacío: si falta uno, detente y avísame.
 - fuentes_A9.csv: archivo, url_o_api, fecha_consulta, sha256.
-La lámina de la tormenta de referencia (paso 4) NO lleva archivo propio: imprímela con su fuente y periodo en la explicación final, para que P5 la agregue a cifras.csv. No crees otro archivo.
+La lámina de la tormenta de referencia (paso 4) va en relieve_meta.json (tormenta.mm, con su definición, fuente y periodo). No crees otro archivo.
 
 DOCUMENTOS DE REFERENCIA (pegados)
 S9 §4 bis, tabla de las capas (copiada tal cual):
@@ -421,7 +452,7 @@ Tarea A9. En A9_relieve.ipynb (Raiz/cuadernos/):
 1) Elevación: NASADEM (Earth Engine: NASA/NASADEM_HGT/001, banda elevation) recortada al rectángulo de la zona piloto más un margen de 2 km. Exporte UNA vez a GeoTIFF con Export.image.toDrive a 30 m. Corrida piloto y consumo de EECU anotados.
 2) En Colab (no en Earth Engine), con una biblioteca de hidrología de terreno (pysheds, richdem o whitebox; diga cuál y por qué): rellene depresiones, calcule dirección de flujo D8, acumulación de flujo, pendiente en % y profundidad de depresión (diferencia entre el modelo relleno y el original).
 3) Rutas de escurrimiento: celdas con acumulación ≥ un umbral declarado en supuestos.json; conviértalas en líneas y guárdelas en Raiz/entregas/relieve_rutas.geojson (< 1 MB, geometrías simplificadas).
-4) Tormenta de referencia: percentil 95 de la lluvia diaria de los días con lluvia en la zona, de GPM IMERG (NASA/GPM_L3/IMERG_V07, agregado diario) o, si no alcanza la cuota, de eto_diaria.csv (POWER). Guarde el valor en mm con su fuente y periodo.
+4) Tormenta de referencia: percentil 95 de la lluvia diaria de los días con lluvia en la zona, de GPM IMERG (NASA/GPM_L3/IMERG_V07, agregado diario) o, si no alcanza la cuota, de eto_diaria.csv (POWER). Guarde el valor en mm con su fuente y periodo en Raiz/entregas/relieve_meta.json (tormenta: mm, definicion, fuente, periodo; cambio acordado el 14-nov).
 5) Por parcela (contexto, no medición): pendiente media (%), acumulación máxima que entra a la parcela desde fuera (área de aportación en ha) y fracción del área en depresión > 0.1 m. Guarde Raiz/entregas/relieve_parcelas.csv (id, pendiente_media_pct, aportacion_externa_ha, frac_depresion).
 6) Si existe en entradas/ un modelo LiDAR del INEGI que cubra la zona (descargado antes del evento en el navegador), repita 2 y 5 con ese modelo y añada la columna fuente_dem. Si no existe, no lo busque durante el evento.
 
@@ -432,6 +463,7 @@ PRUEBA: el mapa de acumulación sigue los drenes y canales visibles en la imagen
 - «En datos/A9_relieve.ipynb:» → «En A9_relieve.ipynb (Raiz/cuadernos/):»
 - «guárdelas en relieve_rutas.geojson (» → «guárdelas en Raiz/entregas/relieve_rutas.geojson (»
 - «Guarde relieve_parcelas.csv (» → «Guarde Raiz/entregas/relieve_parcelas.csv (»
+- «Guarde el valor en mm con su fuente y periodo.» → «Guarde el valor en mm con su fuente y periodo en Raiz/entregas/relieve_meta.json (tormenta: mm, definicion, fuente, periodo; cambio acordado el 14-nov).» (ruta y cambio e)
 
 **Prueba de aceptación** (kit A9):
 ```text
@@ -446,6 +478,7 @@ PRUEBA: el mapa de acumulación sigue los drenes y canales visibles en la imagen
 **Líneas de LEEME.md:**
 ```text
 relieve_rutas.geojson | NASADEM (NASA/NASADEM_HGT/001, 30 m) exportado por la sesión de Chrome; acumulación D8 ≥ umbral de supuestos.json; regional, 30 m (NASADEM); not field drainage design | 2026-11-14 | colab/A9_relieve.ipynb
+relieve_meta.json | Rótulo y umbral de rutas (supuestos.json); tormenta P95 de la lluvia diaria de GPM IMERG V07 (o NASA POWER), <periodo> (kit A9, paso 4; acuerdo de formatos del 14-nov) | 2026-11-14 | colab/A9_relieve.ipynb
 relieve_parcelas.csv | NASADEM 30 m + parcelas_base.geojson; indicadores de contexto, no medición | 2026-11-15 | colab/A9_relieve.ipynb
 fuentes_A9.csv | Fuentes de A9: nasadem_zona_piloto.tif, serie de GPM IMERG V07 (o eto_diaria.csv), supuestos.json (sha256) | 2026-11-14 | colab/A9_relieve.ipynb
 ```

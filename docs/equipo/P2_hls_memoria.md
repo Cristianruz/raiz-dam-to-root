@@ -7,6 +7,10 @@
 - **Usted no usa Earth Engine.** Las exportaciones de A3, A3-M y NASADEM las corre otra sesión de Claude en el Chrome de Cristian, con el proyecto `iondroplet`. **Su trabajo empieza con los CSV o GeoTIFF que esa sesión deja en Drive.** No se autentique en Earth Engine. El kit (§0.3 y G0, regla 6) le asignaba Earth Engine: eso ya no aplica.
 - **B1 también lo hace la sesión de Chrome**, porque necesita red. Le toca la revisión manual de las protagonistas y la prueba de B1.
 - **Entrega:** en `Raiz/entregas/`, carpeta plana sin `P2/`, con una línea por archivo en `Raiz/entregas/LEEME.md`.
+- **Acuerdo de formatos del 14-nov (cambio e; manda sobre la tabla 0.4-B).** El validador ya lo aplica: con la fila vieja del kit, sus dos archivos se rechazan.
+  - `memoria_resumen.csv` lleva `id, dias_suelo_desnudo_mediana, anios_con_dato, estado_2025`. **Ya no lleva `edad_perenne_anios`.**
+  - `cultivos_parcelas.csv` lleva `id, cultivo_actual, prob_max, acuerdo_metodos, abstencion, edad_perenne_anios, estado_plazo, grupo_fenologico`. Las tres últimas pueden ir vacías.
+  - **La edad de la perenne va en `cultivos_parcelas.csv`.** La calcula quien entrega ese archivo, con la regla de A3-M, paso 9, sobre `memoria_parcelas.csv`: usted, en A4.2; o la sesión de datos, en su versión de solo reglas.
 
 | Orden | Pieza | Archivos que entrega (tabla 0.4-B) | Hora límite |
 |---|---|---|---|
@@ -282,13 +286,19 @@ Es segunda línea (S9 §8): no se pone por delante de A3 ni de A4.2.
 |---|---|
 | **Lo hace la sesión de Chrome** | La parte A (pasos 1 a 5): extracción en Earth Engine, piloto de consumo y una exportación por año agrícola, de 2025 hacia atrás. El consumo de EECU lo anota esa sesión en `docs/ee_uso.md` |
 | **Le toca a usted** | Las partes B (reglas, pasos 6 a 9) y C (validación y sensibilidad, pasos 10 y 11), en pandas, con cada año que llega |
-| **Entradas** | Las exportaciones anuales de NDVI mensual de la sesión de Chrome; `hls_mensual_parcelas.csv` y `suelo_desnudo.csv` (A3, para 2026); `cultivos_parcelas.csv` (A4.2, para la edad); `etiquetas_unidas.csv` (P3) y `parcelas_muestra.geojson` (B1), para el paso 10 |
+| **Entradas** | Las exportaciones anuales de NDVI mensual de la sesión de Chrome; `hls_mensual_parcelas.csv` y `suelo_desnudo.csv` (A3, para 2026); `cultivos_parcelas.csv` (A4.2, para comparar en el paso 10); `etiquetas_unidas.csv` (P3) y `parcelas_muestra.geojson` (B1), para el paso 10 |
 | **Cuaderno** | `A3M_memoria.ipynb` en `Raiz/cuadernos/` |
 | **Paso 10: etiquetas y parcelas tienen `id` distintos** | El `id` de `etiquetas_unidas.csv` es el del polígono de `parcelas_muestra.geojson`; el de la memoria, el de `parcelas_base.geojson`. El bloque pide una unión espacial (punto representativo del polígono de la muestra dentro de una parcela de `parcelas_base`) e imprimir cuántas etiquetas coinciden. Si son pocas o ninguna, avise a Cristian |
 | **Hora límite** | Cada año se entrega en cuanto llega. **Si a las 20:30 del sábado no hay ningún año exportado, se aplica el plan B general.** Años restantes: sáb 20:30 a 1:00. Funciones congeladas: dom 8:00 |
 | **Verificación de datos** | [verificar_datos_nasa.md → HLS](verificar_datos_nasa.md#2-hls-l30-y-s30-v002-a3-a3-m-y-a42) (fecha de inicio de cada colección) |
 
 **Cada vez que entregue años nuevos:** reescriba los 4 archivos completos, cambie la fecha de su línea en `LEEME.md` (no agregue otra) y avise.
+
+**`memoria_resumen.csv` cambió (cambio e):**
+- columnas exactas: `id, dias_suelo_desnudo_mediana, anios_con_dato, estado_2025`;
+- **sin `edad_perenne_anios`**: la edad se calcula con la regla del paso 9 y se entrega en `cultivos_parcelas.csv` (A4.2). Cada vez que entregue años nuevos, avise también a quien entrega `cultivos_parcelas.csv`, para que recalcule la edad;
+- `anios_con_dato`: el kit no lo define. Esta guía lo toma como los años agrícolas de la parcela con estado distinto de `sin_dato` (entero, nunca vacío). Si Cristian lo define de otro modo, manda él;
+- `dias_suelo_desnudo_mediana` es entero o vacío (kit §2.2). Con un número par de años, la mediana puede salir con «.5»: redondéela y diga cómo.
 
 **Bloque para pegar en Gemini:**
 ```text
@@ -324,6 +334,7 @@ REGLAS OBLIGATORIAS
 ESQUEMA DE SALIDA DE ESTA TAREA
 Fila de la tabla 0.4-B del kit (copiada tal cual):
 | A3-M (P2) | `memoria_mensual.csv`, `memoria_parcelas.csv`, `memoria_resumen.csv` y `memoria_validacion.csv` | (id, anio_agricola, mes, ndvi_mediana, n_validos); (id, anio_agricola, estado, meses_verdes, max_verano, max_invierno, dias_suelo_desnudo_feb_abr, meses_validos); (id, edad_perenne_anios, dias_suelo_desnudo_mediana, estado_2025); tabla de acuerdo con las etiquetas de 2026 |
+CAMBIO ACORDADO EL 14-NOV (manda sobre la fila de arriba; el validador ya lo aplica): memoria_resumen.csv lleva EXACTAMENTE id, dias_suelo_desnudo_mediana, anios_con_dato, estado_2025. NO lleva edad_perenne_anios: la edad va en cultivos_parcelas.csv (A4.2). anios_con_dato = número de años agrícolas de la parcela con estado distinto de sin_dato (entero ≥ 0, nunca vacío). dias_suelo_desnudo_mediana es entero o vacío (kit §2.2): si la mediana sale con .5, redondéala y dime cómo.
 Además: fuentes_A3M.csv (archivo, url_o_api, fecha_consulta, sha256). Estados permitidos en memoria_parcelas.csv y estado_2025: perenne, verano, invierno, doble, descanso, sin_dato (kit §2.2).
 
 DOCUMENTOS DE REFERENCIA (pegados)
@@ -342,7 +353,7 @@ S9 §5 "Cálculo: lo que cambia" (copiado tal cual; de aquí salen los umbrales)
 - **Ejemplo de escala** (láminas del INIFAP [V]; la herramienta usa su propio cálculo): 10 ha con 3.5 millares/ha reciben 35 millares, que alcanzan para 2.0 ha de alfalfa (17.5), 5.1 ha de algodón (6.8) o 6.4 ha de maíz forrajero (5.5).
 
 TAREA
-NOTA DEL EQUIPO: la parte A (pasos 1 a 5, Earth Engine) la hace la sesión de Chrome. Yo hago las partes B y C en pandas con los años exportados que haya en Drive. Primero imprime qué años agrícolas hay, cuántas parcelas trae cada uno y si algún año usa una sola colección (L30 o S30). Si falta cultivos_parcelas.csv, deja edad_perenne_anios en null. Si falta etiquetas_unidas.csv (o parcelas_muestra.geojson), no hagas el paso 10 y avísame. En la prueba, el consumo de EECU lo reporta la sesión de Chrome (docs/ee_uso.md).
+NOTA DEL EQUIPO: la parte A (pasos 1 a 5, Earth Engine) la hace la sesión de Chrome. Yo hago las partes B y C en pandas con los años exportados que haya en Drive. Primero imprime qué años agrícolas hay, cuántas parcelas trae cada uno y si algún año usa una sola colección (L30 o S30). La edad (edad_perenne_anios) NO se escribe en este cuaderno: va en cultivos_parcelas.csv (A4.2). Si falta etiquetas_unidas.csv (o parcelas_muestra.geojson), no hagas el paso 10 y avísame. En la prueba, el consumo de EECU lo reporta la sesión de Chrome (docs/ee_uso.md).
 NOTA DEL EQUIPO (paso 10): UNIÓN ETIQUETA → PARCELA: etiquetas_unidas.csv trae en id el polígono de parcelas_muestra.geojson (la muestra del distrito), no el de parcelas_base.geojson. Para cada etiqueta: (1) únela por punto_id con entregas/parcelas_muestra.geojson para obtener su polígono; (2) toma su punto representativo (geometry.representative_point(), que siempre cae dentro del polígono); (3) haz geopandas.sjoin con entregas/parcelas_base.geojson (predicate="within"; si el CRS difiere, reproyecta antes) y llama id_base al id que resulte; (4) imprime: etiquetas totales, etiquetas con id_base (zona piloto), etiquetas sin id_base (fuera de la zona piloto) e id_base con más de una etiqueta. No cambies la columna id de etiquetas_unidas.csv: id_base vive solo en el cuaderno. En el paso 10, "solo las de la zona piloto" son las etiquetas con id_base; el estado de 2026 y cultivo_actual se leen por id_base. Si ninguna etiqueta tiene id_base, no armes la tabla de acuerdo: escribe que no hay etiquetas en la zona piloto y avísame.
 Tarea A3-M. En A3M_memoria.ipynb, en Raiz/cuadernos/ (Earth Engine con Python `ee` desde Colab; después, pandas).
 
@@ -368,11 +379,12 @@ B) REGLAS (pandas; umbrales leídos de la sección 5 de S9, que le pego; ninguno
 9) Resumen por parcela:
    - dias_suelo_desnudo_mediana: mediana de los años con dato;
    - estado_2025;
-   - edad_perenne_anios, con cultivo_actual de A4.2:
+   - anios_con_dato: años agrícolas con estado distinto de sin_dato (cambio acordado el 14-nov);
+   - edad_perenne_anios, con cultivo_actual de A4.2 (NO va en memoria_resumen.csv: se calcula con esta regla y se guarda en cultivos_parcelas.csv, A4.2; cambio acordado el 14-nov):
      · alfalfa: años agrícolas consecutivos en estado perenne contados hacia atrás desde 2026; mínimo 1 si el mapa de 2026 dice alfalfa;
      · nogal: años consecutivos con señal de verano (estado verano, doble o perenne) contados hacia atrás desde 2026. El nogal pierde la hoja en invierno y puede no cumplir la regla de 8 meses: su condición de perenne la da el mapa de cultivos, y la memoria solo le calcula la antigüedad;
      · los demás cultivos y las parcelas abstenidas: null.
-   Si A4.2 aún no está entregada, deje edad_perenne_anios en null y vuelva a calcularla después.
+   Si A4.2 aún no está entregada, la edad se calcula cuando se entregue cultivos_parcelas.csv.
 
 C) VALIDACIÓN Y SENSIBILIDAD
 10) Compare el estado de 2026 con las etiquetas a ciegas de 2026 (etiquetas_unidas.csv, solo las de la zona piloto) y con cultivo_actual: alfalfa ↔ perenne; maíz, sorgo, algodón y chile ↔ verano (o doble); cereal de invierno ↔ invierno (o doble); barbecho ↔ descanso; nogal ↔ verano o perenne (reporte cuántos caen en cada uno). Entregue la tabla de acuerdo.
@@ -392,6 +404,11 @@ Explique en 5 líneas qué mide la memoria y qué no (es una regla sobre el verd
 **Ajustes de ruta hechos al texto del kit en este bloque:**
 - «En datos/A3M_memoria.ipynb (» → «En A3M_memoria.ipynb, en Raiz/cuadernos/ (»
 - «SALIDAS: memoria_mensual.csv,» → «SALIDAS (en Raiz/entregas/): memoria_mensual.csv,»
+
+**Ajustes por el acuerdo de formatos (cambio e), en el paso 9:**
+- se agregó «- anios_con_dato: años agrícolas con estado distinto de sin_dato (cambio acordado el 14-nov);»;
+- «- edad_perenne_anios, con cultivo_actual de A4.2:» → «- edad_perenne_anios, con cultivo_actual de A4.2 (NO va en memoria_resumen.csv: se calcula con esta regla y se guarda en cultivos_parcelas.csv, A4.2; cambio acordado el 14-nov):»;
+- «Si A4.2 aún no está entregada, deje edad_perenne_anios en null y vuelva a calcularla después.» → «Si A4.2 aún no está entregada, la edad se calcula cuando se entregue cultivos_parcelas.csv.»
 
 **Prueba de aceptación** (kit A3-M):
 ```text
@@ -414,7 +431,7 @@ Explique en 5 líneas qué mide la memoria y qué no (es una regla sobre el verd
 ```text
 memoria_mensual.csv | HLS L30/S30 v002 (NASA LP DAAC), NDVI mensual por año agrícola, exportaciones de la sesión de Chrome, años <lista de años> | 2026-11-14 | colab/A3M_memoria.ipynb
 memoria_parcelas.csv | Reglas de S9 §5 sobre memoria_mensual.csv (umbral 0.40; kit A3-M, pasos 6–8) | 2026-11-14 | colab/A3M_memoria.ipynb
-memoria_resumen.csv | Resumen por parcela de memoria_parcelas.csv y cultivos_parcelas.csv (kit A3-M, paso 9) | 2026-11-14 | colab/A3M_memoria.ipynb
+memoria_resumen.csv | Resumen por parcela de memoria_parcelas.csv (kit A3-M, paso 9; acuerdo de formatos del 14-nov: anios_con_dato, sin edad) | 2026-11-14 | colab/A3M_memoria.ipynb
 memoria_validacion.csv | Estado 2026 frente a etiquetas_unidas.csv (zona piloto) y cultivo_actual (kit A3-M, paso 10) | 2026-11-14 | colab/A3M_memoria.ipynb
 fuentes_A3M.csv | Fuentes de A3-M: exportaciones anuales de la sesión de Chrome (sha256) | 2026-11-14 | colab/A3M_memoria.ipynb
 ```
@@ -427,12 +444,13 @@ Aviso: `ENTREGA: memoria_parcelas.csv — prueba OK (años …)`.
 | | |
 |---|---|
 | **Quién** | P2, con P3 (kit A4.2). P3 trae las etiquetas (`etiquetas_unidas.csv`) |
-| **Entradas** | `hls_mensual_parcelas.csv` (A3); `etiquetas_unidas.csv` (A4.1); `parcelas_base.geojson` y `parcelas_muestra.geojson` (B1) |
+| **Entradas** | `hls_mensual_parcelas.csv` (A3); `etiquetas_unidas.csv` (A4.1); `parcelas_base.geojson` y `parcelas_muestra.geojson` (B1); `memoria_parcelas.csv` (A3-M, para la edad de la perenne; cambio e) |
 | **Cuaderno** | `A4_mapa_cultivos.ipynb` en `Raiz/cuadernos/` |
 | **Hora límite** | Sáb 15:00–20:30; entrega entre 18:00 y 20:30 (kit §3) |
 | **Verificación de datos** | [verificar_datos_nasa.md → HLS](verificar_datos_nasa.md#2-hls-l30-y-s30-v002-a3-a3-m-y-a42) y [Fields of The World](verificar_datos_nasa.md#7-fields-of-the-world-2025-b1) |
 
 **Avise a Cristian antes de empezar si falta algo de esto:**
+- **Versión de solo reglas.** El validador (`motor/esquemas.py`) acepta hoy un `cultivos_parcelas.csv` de A4 hecho solo con reglas: `acuerdo_metodos` = «1/1 (reglas)» y `prob_max` vacío. Lo entrega la sesión de datos. Si ya tiene su línea en `LEEME.md`, **no lo sobrescriba**: Cristian decide si su versión con Random Forest lo sustituye.
 - **HLS de la muestra.** Para entrenar hace falta el HLS de los polígonos de `parcelas_muestra.geojson` (los puntos etiquetados). Si la sesión de Chrome solo exportó la zona piloto, no hay con qué entrenar.
 - **Referencia de Conagua.** La comparación usa la Estadística Agrícola 2016-2017, Cuadro 3.5 (archivo 29). No está en el repo: pídala.
 - **Presto.** El enfoque C («solo si sobra tiempo») no se inicia antes del hito de las 20:30 (kit §3).
@@ -473,7 +491,11 @@ ESQUEMA DE SALIDA DE ESTA TAREA
 Fila de la tabla 0.4-B del kit (copiada tal cual):
 | A4.2 (P2) | `cultivos_parcelas.csv` y `tabla_metodos.csv` | (id, cultivo_actual, prob_max, acuerdo_metodos, abstencion); (enfoque, f1_macro, f1_por_clase, tiempo) |
 Además: una figura PNG (curva cobertura–exactitud) y fuentes_A42.csv (archivo, url_o_api, fecha_consulta, sha256).
-Valores permitidos de cultivo_actual (kit §2.2): "alfalfa", "nogal", "chile", "maiz_forrajero", "sorgo", "algodon", "cereal_invierno", "barbecho", "sin_clasificar"; "forraje_verano" solo si las etiquetas agrupan maíz y sorgo. acuerdo_metodos: "2/2" o "1/2".
+CAMBIO ACORDADO EL 14-NOV (manda sobre la fila de arriba; el validador ya lo aplica): cultivos_parcelas.csv lleva EXACTAMENTE id, cultivo_actual, prob_max, acuerdo_metodos, abstencion, edad_perenne_anios, estado_plazo, grupo_fenologico. Las tres últimas pueden ir vacías:
+- edad_perenne_anios: entero ≥ 0 o vacío. Solo en alfalfa y nogal, con la regla de A3-M paso 9 (pegada abajo) sobre memoria_parcelas.csv; vacía en los demás cultivos, en las abstenidas y si no hay memoria;
+- estado_plazo: déjalo vacío; el estado del plazo lo calcula el motor B4 con data/params.json (kit B4, paso 6). Si se llena: solo libre, por_vencer o comprometida, y vacío en las abstenidas;
+- grupo_fenologico: texto o vacío. Si las reglas fenológicas (enfoque A) asignan un grupo a la parcela, va aquí; si no, vacío.
+Valores permitidos de cultivo_actual (kit §2.2): "alfalfa", "nogal", "chile", "maiz_forrajero", "sorgo", "algodon", "cereal_invierno", "barbecho", "sin_clasificar"; "forraje_verano" solo si las etiquetas agrupan maíz y sorgo. acuerdo_metodos: "2/2" o "1/2" (kit §2.2); además "1/1" = solo reglas, mientras el Random Forest no esté, y solo entonces prob_max puede ir vacío (extensión del contrato en validar_contrato.py).
 
 DOCUMENTOS DE REFERENCIA (pegados)
 S9 §6, prueba 1 (copiada tal cual):
@@ -481,9 +503,15 @@ S9 §6, prueba 1 (copiada tal cual):
 Advertencia del kit v4, sección A4 (copiada tal cual):
 > **Advertencia sobre Fields of The World:** su benchmark no incluye México y el riego árido de Norteamérica no está en su entrenamiento. Se usan sus predicciones globales de 2025 (CC-BY-4.0), con filtro de confianza por polígono y revisión manual de las 3 protagonistas (B1). En la página se declara: *"Field boundaries are NN predictions outside the model's training domain; filtered by confidence and manually reviewed for the showcased fields."*
 [PEGA AQUÍ, si Cristian te la pasó, la tabla de la Estadística Agrícola 2016-2017 de Conagua, Cuadro 3.5 (archivo 29). Si no está, la comparación se reporta como "no realizada: falta la referencia".]
+Regla de la edad, kit A3-M paso 9 (copiada tal cual):
+   - edad_perenne_anios, con cultivo_actual de A4.2:
+     · alfalfa: años agrícolas consecutivos en estado perenne contados hacia atrás desde 2026; mínimo 1 si el mapa de 2026 dice alfalfa;
+     · nogal: años consecutivos con señal de verano (estado verano, doble o perenne) contados hacia atrás desde 2026. El nogal pierde la hoja en invierno y puede no cumplir la regla de 8 meses: su condición de perenne la da el mapa de cultivos, y la memoria solo le calcula la antigüedad;
+     · los demás cultivos y las parcelas abstenidas: null.
 
 TAREA
 NOTA DEL EQUIPO: trabajo con las tablas de entregas/; no uso Earth Engine. Si no hay HLS para los polígonos de la muestra etiquetada, detente y avísame. El id de etiquetas_unidas.csv es el del polígono de parcelas_muestra.geojson, no el de parcelas_base.geojson. En cultivos_parcelas.csv van SOLO id de parcelas_base.geojson: no metas ahí predicciones de polígonos de la muestra (el validador rechaza el archivo). Las predicciones sobre los polígonos de validación de la muestra las necesita A4.3: guárdalas solo donde Cristian indique; si no lo ha dicho, avísame.
+NOTA DEL EQUIPO (edad, cambio acordado el 14-nov): edad_perenne_anios se calcula aquí con la regla pegada y entregas/memoria_parcelas.csv (estado por parcela y año agrícola). Si memoria_parcelas.csv no está, deja la edad vacía y avísame; cuando llegue, se recalcula y se vuelve a entregar cultivos_parcelas.csv.
 Tarea A4.2. En A4_mapa_cultivos.ipynb (Raiz/cuadernos/), con hls_mensual_parcelas.csv de Raiz/entregas/ y las etiquetas acordadas (etiquetas_unidas.csv de Raiz/entregas/). Los enfoques A y B son OBLIGATORIOS; el C, SOLO SI SOBRA TIEMPO.
 A) REGLAS FENOLÓGICAS (interpretables):
 - reglas simples con pico de NDVI, meses verdes y meses de suelo desnudo para cada clase;
@@ -511,7 +539,7 @@ CURVA COBERTURA–EXACTITUD (diagnóstico; no cambia la regla): con las probabil
 Si los cereales de invierno no se separan, agrúpelos en "cereal_invierno". Si las etiquetas traen "forraje_verano", úsela como una sola clase y regístrelo en la tabla de métodos.
 
 SALIDA:
-- cultivo_actual, prob_max, acuerdo_metodos y abstencion por parcela (sin modificar otros campos), en Raiz/entregas/cultivos_parcelas.csv;
+- cultivo_actual, prob_max, acuerdo_metodos y abstencion por parcela (sin modificar otros campos), en Raiz/entregas/cultivos_parcelas.csv, más edad_perenne_anios, estado_plazo y grupo_fenologico (cambio acordado el 14-nov; pueden ir vacías);
 - la tabla comparativa en Raiz/entregas/tabla_metodos.csv.
 
 PRUEBA:
@@ -524,7 +552,7 @@ Explique en 6 líneas qué enfoque obtuvo el mejor desempeño y por qué.
 **Ajustes de ruta hechos al texto del kit en este bloque:**
 - «En datos/A4_mapa_cultivos.ipynb, con data/processed/hls_mensual_parcelas.csv y las etiquetas acordadas.» → «En A4_mapa_cultivos.ipynb (Raiz/cuadernos/), con hls_mensual_parcelas.csv de Raiz/entregas/ y las etiquetas acordadas (etiquetas_unidas.csv de Raiz/entregas/).»
 - «Guarde una figura en docs/figuras/.» → «Guarde una figura PNG en Raiz/entregas/.»
-- «- cultivo_actual, prob_max, acuerdo_metodos y abstencion por parcela (sin modificar otros campos);» → «- cultivo_actual, prob_max, acuerdo_metodos y abstencion por parcela (sin modificar otros campos), en Raiz/entregas/cultivos_parcelas.csv;»
+- «- cultivo_actual, prob_max, acuerdo_metodos y abstencion por parcela (sin modificar otros campos);» → «- cultivo_actual, prob_max, acuerdo_metodos y abstencion por parcela (sin modificar otros campos), en Raiz/entregas/cultivos_parcelas.csv, más edad_perenne_anios, estado_plazo y grupo_fenologico (cambio acordado el 14-nov; pueden ir vacías);» (rutas y cambio e)
 - «- la tabla comparativa en docs/figuras/tabla_metodos.csv.» → «- la tabla comparativa en Raiz/entregas/tabla_metodos.csv.»
 - «- verificación de esquema (o validar_contrato.py → "CONTRATO OK");» → «- verificación de esquema;»
 - «(de data/raw/conagua;» → «(de Raiz/entradas/; si no está, pídala a Cristian;»
@@ -542,7 +570,7 @@ Explique en 6 líneas qué enfoque obtuvo el mejor desempeño y por qué.
 
 **Líneas de LEEME.md:**
 ```text
-cultivos_parcelas.csv | Reglas fenológicas + Random Forest sobre hls_mensual_parcelas.csv (HLS L30/S30 v002) y etiquetas_unidas.csv; abstención según kit A4.2 | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
+cultivos_parcelas.csv | Reglas fenológicas + Random Forest sobre hls_mensual_parcelas.csv (HLS L30/S30 v002) y etiquetas_unidas.csv; abstención según kit A4.2; edad de la perenne con la regla de A3-M paso 9 sobre memoria_parcelas.csv (acuerdo de formatos del 14-nov) | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
 tabla_metodos.csv | Validación cruzada espacial por bloques de 5 km (kit A4.2) | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
 A42_cobertura_exactitud.png | Probabilidades fuera de pliegue del Random Forest, muestra de entrenamiento (kit A4.2) | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
 fuentes_A42.csv | Fuentes de A4.2: hls_mensual_parcelas.csv, etiquetas_unidas.csv y la referencia de Conagua (sha256) | 2026-11-14 | colab/A4_mapa_cultivos.ipynb

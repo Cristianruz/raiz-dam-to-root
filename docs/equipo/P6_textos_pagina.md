@@ -12,6 +12,8 @@
 
 **Lo que cambió hoy:** los tres archivos de texto se entregan en `Raiz/entregas/`, carpeta plana sin `P6/`, con una línea por archivo en `Raiz/entregas/LEEME.md`. El ensamblador (`motor/ensamblar.py`) **rechaza `plantillas_explicaciones.md` si encuentra un dígito fuera de los marcadores `{{…}}`**. La única excepción es la línea del encabezado AI-assisted.
 
+**Antes de cada pieza, revise `Raiz/entregas/LEEME.md`.** Si el archivo ya tiene su línea (por ejemplo, porque otra persona o la sesión de Chrome ya lo entregó), no lo rehaga: revíselo con la autoverificación de abajo y avise a Cristian. Dos archivos con el mismo nombre se pisan.
+
 | Orden | Pieza | Archivo (tabla 0.4-B) | Hora límite |
 |---|---|---|---|
 | — | Sesiones de la sede, 10:00 y 12:00, con otro integrante | — | sáb 10:00–14:00 |

@@ -979,8 +979,12 @@ function textoEdad(p) {
   const perenne = p.estado_plazo === "por_vencer" || p.estado_plazo === "comprometida";
   if (e == null) return perenne ? "Stand age: age not available" : "";
   const registro = Array.isArray(p.memoria) ? p.memoria.length : 0;
-  const minimo = registro > 0 && e >= registro; // la memoria entera es perenne: la edad es un mínimo
-  return `Stand age from satellite memory: ${minimo ? "≥ " : ""}${esc(fmtDato(e))} ${anios(e)}`;
+  // La edad cubre toda la memoria: el patrón empezó antes del primer año observado, así que es un mínimo.
+  const minimo = registro > 0 && e >= registro;
+  // Nogal: la memoria lo ve como «cultivo de verano» cada año (pierde la hoja en invierno);
+  // su edad cuenta los años seguidos con ese patrón (kit A3-M, paso 9).
+  const etiqueta = p.cultivo_actual === "nogal" ? "Orchard pattern in satellite memory" : "Stand age from satellite memory";
+  return `${etiqueta}: ${minimo ? "≥ " : ""}${esc(fmtDato(e))} ${anios(e)}`;
 }
 
 function htmlMemoria(p) {
@@ -1008,7 +1012,7 @@ function htmlMemoria(p) {
     .join("");
   return (
     `<section class="memoria" aria-labelledby="t-memoria">${titulo}` +
-    `<ol class="franja" style="--n: ${p.memoria.length}" aria-label="Agricultural years, oldest first">${celdas}</ol>` +
+    `<ol class="franja" style="--n: ${p.memoria.length}" aria-label="Agricultural years, from oldest to newest">${celdas}</ol>` +
     `<ul class="leyenda-memoria" aria-label="Legend">${leyenda}</ul>` +
     '<p class="nota-fija">Rule-based reading of monthly greenness; not a crop census.</p>' +
     "</section>"

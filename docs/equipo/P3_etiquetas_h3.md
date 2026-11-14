@@ -31,6 +31,10 @@
 
 El flujo completo está en [README §4](README.md#4-flujo-de-trabajo-de-una-pieza).
 
+**Antes de cada pieza, revise `Raiz/entregas/LEEME.md`.** Si el archivo ya tiene su línea (por ejemplo, porque la sesión de Chrome lo entregó), no lo rehaga: verifíquelo con la [guía de verificación](verificar_datos_nasa.md) y avise a Cristian. Dos archivos con el mismo nombre se pisan.
+
+**Formatos que cambiaron (README §6, cambio e).** `cultivos_parcelas.csv`, que usted lee en A7 y A4.3, trae ahora también `edad_perenne_anios`, `estado_plazo` y `grupo_fenologico`, y `acuerdo_metodos` puede valer `1/1` (solo reglas; entonces `prob_max` va vacío). Lea las columnas por nombre, no por posición.
+
 ---
 
 ## A4.1 · Unión de etiquetas

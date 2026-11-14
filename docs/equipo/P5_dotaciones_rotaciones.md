@@ -12,11 +12,13 @@
 - **Entrega** en `Raiz/entregas/`, carpeta plana sin `P5/`, con una línea por archivo en `Raiz/entregas/LEEME.md`.
 - **Usted no usa Earth Engine** (B2 y B3 no lo necesitan).
 - **Código.** `filtros.py` va en `Raiz/entregas/`, como pide la tabla 0.4-B, pero el ensamblador no copia código: Cristian lo revisa y lo pasa al repo a mano (kit §0.1, regla 2).
+- **`rotaciones.json` ya no es suyo** (acuerdo de formatos del 14-nov, [README §6, cambio e](README.md#6-cambios-respecto-al-kit-mandan-sobre-el-kit)). Es la salida de A5 y la entrega la sesión de datos, con otro formato (llaves `params`, `cultivos`, `rotaciones` y `anios_clima`, con la lámina de cada rotación). El motor del cubo lo necesita. **No escriba ningún archivo con ese nombre**: el validador rechazaría la estructura del kit B3 y, en la carpeta plana, podría pisar el de la sesión de datos. Sus opciones, filtros y fechas de siembra (B3) se entregan donde indique Cristian; vea [B3](#b3--rotaciones-filtros-duros-plazos-y-supuestosjson).
+- **Antes de cada pieza, revise `Raiz/entregas/LEEME.md`.** Si el archivo ya tiene su línea (por ejemplo, porque la sesión de Chrome lo entregó), no lo rehaga: verifíquelo y avise a Cristian. Dos archivos con el mismo nombre se pisan.
 
 | Orden | Pieza | Archivos que entrega (tabla 0.4-B) | Hora límite |
 |---|---|---|---|
 | 1 | [B2 · dotaciones](#b2--dotaciones-en-millares-por-hectárea) | `dotaciones.json`, `fuentes_B2.csv`; `historial_superficie.csv` solo si sobra tiempo | sáb 12:00 |
-| 2 | [B3 · rotaciones, filtros, plazos y supuestos](#b3--rotaciones-filtros-duros-plazos-y-supuestosjson) | `rotaciones.json`, `filtros.py`, `supuestos.json`, `fuentes_B3.csv` | sáb 14:30. P4 necesita `supuestos.json` y `rotaciones.json` para A5 (12:00–18:00): entréguelos lo antes posible |
+| 2 | [B3 · rotaciones, filtros, plazos y supuestos](#b3--rotaciones-filtros-duros-plazos-y-supuestosjson) | `filtros.py`, `supuestos.json`, `fuentes_B3.csv`. Las opciones de B3, donde indique Cristian (**no** como `rotaciones.json`; cambio e) | sáb 14:30. A5 (12:00–18:00) necesita `supuestos.json` y las opciones: entréguelos lo antes posible |
 | 3 | [Tabla única de cifras](#tabla-única-de-cifras-cifrascsv) | `cifras.csv` | Primera versión, sáb 15:00–18:00; se actualiza hasta la revisión de cifras del dom 12:30 |
 | 4 | [B2-cal](#b2-cal--calibración-solo-si-el-preregistro-la-declara) | `calibracion.csv` | Solo si el preregistro la declara |
 | — | Revisiones sin archivo propio | Revisa B4; verificación manual de las cifras del motor (sáb 18:00–20:30); plazos y estados (sáb 20:30–1:00); revisión de cifras (dom hasta 8:00); lista cifra → fuente (dom 8:00–11:00) | Kit §3 |
@@ -159,17 +161,24 @@ Aviso: `ENTREGA: dotaciones.json — prueba OK`.
 | **Entradas** | `heladas.json` (P4, A2) |
 | **Documentos que no están en el repo (pídalos a Cristian)** | Maestro §5.2 (opciones ACTUAL, A–E y «nogal no rota», con filtros duros); INIFAP 2017; SDR Chihuahua 2026; archivo 29, §4 (FAO-29, Tabla 4) y §5 (plazos de etiqueta de la atrazina); Silva-Rojas et al. 2009 |
 | **Cuaderno** | `B3_rotaciones.ipynb` en `Raiz/cuadernos/` (el kit no le da nombre) |
-| **Hora límite** | Sáb 14:30; `supuestos.json`, entre las 12:00 y las 14:30 (kit §3). A5 (P4) lo necesita: entregue primero lo que pide A5 |
+| **Hora límite** | Sáb 14:30; `supuestos.json`, entre las 12:00 y las 14:30 (kit §3). A5 lo necesita: entregue primero lo que pide A5 |
+
+**`rotaciones.json` cambió de dueño (acuerdo de formatos del 14-nov, cambio e).**
+- La tabla 0.4-B le pedía crear `rotaciones.json` con la estructura del prompt B3. **Eso ya no aplica.** Ese nombre es ahora la salida de A5: la entrega la sesión de datos, con las llaves `params`, `cultivos`, `rotaciones` y `anios_clima` y la lámina bruta de cada rotación en millares. El motor del cubo (`motor/b4_cubo.py`) lo exige. Según el validador (`motor/esquemas.py`), «sustituye a la lista opciones del kit B3».
+- **No guarde ningún archivo llamado `rotaciones.json`.** El validador rechaza la estructura del kit B3 («falta la llave params / cultivos / rotaciones / anios_clima») y, en la carpeta plana, su archivo podría pisar el de la sesión de datos.
+- **Sus opciones, filtros y fechas de siembra siguen haciendo falta.** Mientras no lleguen, el cubo usa un diseño provisional de Cristian (`data/opciones_b4.json`, marcado [S]): la opción ACTUAL más 2 alternativas por cultivo.
+- **Dónde entregarlas:** donde indique Cristian; por ejemplo, para que la sesión de datos las incorpore a su `rotaciones.json`. **Si no hay indicación, deténgase en ese paso y avise.** Mientras tanto, guarde una copia de trabajo en `Raiz/cuadernos/B3_opciones.json`, que no pasa por el buzón. No invente otro nombre en `Raiz/entregas/`: el validador rechaza los nombres que no conoce.
+- `filtros.py` y `supuestos.json` siguen igual: van a `Raiz/entregas/`.
 
 **Lo que otras piezas leen de `supuestos.json`.** Cada valor lleva fuente o la marca «assumption». Si no hay fuente, se deja en `null` y se avisa (kit B3, paso 4). **Nunca se escribe de memoria.**
 
 | Clave que piden | Quién la usa | Dónde lo dice |
 |---|---|---|
 | Plazos: anual, alfalfa, nogal (horizonte), alfalfa «por vencer» | B4 (Cristian) | kit B3, paso 4; tabla 0.4-B |
-| Rango de eficiencia parcelaria | A5 (P4) | kit A5, paso 3 |
+| Rango de eficiencia parcelaria | A5 (sesión de datos; P4 lo verifica) | kit A5, paso 3 |
 | Eficiencia de goteo | X3.1 (Cristian) | kit B3, paso 4; X3.1 |
-| Relación cobertura–Kc del nogal | A5 (P4) | kit A5, paso 1; S8, decisión 5 |
-| Cultivo representativo de `forraje_verano` (si las etiquetas lo usan) | A5 (P4) | kit B3, paso 4; A5, paso 1 |
+| Relación cobertura–Kc del nogal | A5 (sesión de datos; P4 lo verifica) | kit A5, paso 1; S8, decisión 5 |
+| Cultivo representativo de `forraje_verano` (si las etiquetas lo usan) | A5 (sesión de datos; P4 lo verifica) | kit B3, paso 4; A5, paso 1 |
 | Punto de medición del millar | B4 y web | tabla 0.4-B |
 | Umbral de acumulación de las rutas de escurrimiento | A9 (P4) | kit A9, paso 3 |
 | Umbral de «día con lluvia» para la tormenta P95 | A9 (P4) | Lo pide A9, paso 4; el kit no fija valor |
@@ -210,6 +219,7 @@ ESQUEMA DE SALIDA DE ESTA TAREA
 Filas de la tabla 0.4-B del kit (copiadas tal cual):
 | B3 (P5) | `rotaciones.json` y `filtros.py` (con sus 8 pruebas impresas) | Estructura del prompt B3, más la opción «no sembrar / rastrojo en pie» |
 | Supuestos (P5) | `supuestos.json` | Valor o rango, fuente o «assumption». Incluye plazos, edad «por vencer», eficiencia parcelaria, eficiencia de goteo y punto de medición del millar |
+CAMBIO ACORDADO EL 14-NOV (manda sobre la fila B3 de arriba): NO escribas ningún archivo llamado rotaciones.json. Ese nombre es ahora la salida de A5 y lo entrega otra sesión, con otro formato. Las opciones del paso 1 (secuencia, fechas de siembra, fuente, banderas e indicadores de suelo) guárdalas como archivo de trabajo en cuadernos/B3_opciones.json, que no pasa por el buzón, y avísame: Cristian dice dónde se entregan. En entregas/ van solo filtros.py, supuestos.json y fuentes_B3.csv.
 Además: fuentes_B3.csv (archivo, url_o_api, fecha_consulta, sha256). Ninguna celda puede quedar vacía: el validador rechaza el archivo si falta un sha256. Para un documento que solo te pegué (maestro §5.2, archivo 29), guarda el texto pegado en cuadernos/ como .txt y registra su sha256; si no hay copia que guardar, no pongas la fila: detente y avísame. En supuestos.json, cada clave con: valor (o rango min/max, o null), unidad, fuente (o "assumption") y etiqueta ([V], [P], [S] o [NE]).
 
 DOCUMENTOS DE REFERENCIA (pegados)
@@ -226,8 +236,8 @@ Kit v4 §2.5, filas de plazos (copiadas tal cual):
 [PEGA AQUÍ las demás claves que piden otras piezas (tabla de arriba), con la fuente de cada valor. Si no hay fuente, déjalo en null.]
 
 TAREA
-NOTA DEL EQUIPO: primero escribe supuestos.json con lo que A5 necesita (eficiencia parcelaria, relación cobertura–Kc del nogal, cultivo representativo de forraje_verano) y avísame para entregarlo. Después, rotaciones.json y filtros.py. Si un valor no tiene fuente en lo que pegué, va en null con aviso.
-Tarea B3. Cree rotaciones.json, filtros.py (con pruebas) y supuestos.json en Raiz/entregas/ (cuaderno B3_rotaciones.ipynb en Raiz/cuadernos/):
+NOTA DEL EQUIPO: primero escribe supuestos.json con lo que A5 necesita (eficiencia parcelaria, relación cobertura–Kc del nogal, cultivo representativo de forraje_verano) y avísame para entregarlo. Después, las opciones (en cuadernos/B3_opciones.json, nunca como rotaciones.json; ver el CAMBIO ACORDADO) y filtros.py. Si un valor no tiene fuente en lo que pegué, va en null con aviso.
+Tarea B3. Cree las opciones (en Raiz/cuadernos/B3_opciones.json; NO como rotaciones.json, cambio acordado el 14-nov), filtros.py (con pruebas) y supuestos.json; filtros.py y supuestos.json en Raiz/entregas/ (cuaderno B3_rotaciones.ipynb en Raiz/cuadernos/):
 1) Las opciones de la sección 5.2 del maestro (ACTUAL, A, B, C, D, E y "nogal no rota"), más la opción "no sembrar / rastrojo en pie". Cada una con:
    - secuencia de cultivos por ciclo (OI/PV) en 12–24 meses;
    - fechas de siembra;
@@ -259,7 +269,7 @@ Imprima una tabla opción × filtro para una parcela de ejemplo y la tabla de pl
 ```
 
 **Ajustes de ruta hechos al texto del kit en este bloque:**
-- «Cree rotaciones.json, filtros.py (con pruebas) y supuestos.json:» → «Cree rotaciones.json, filtros.py (con pruebas) y supuestos.json en Raiz/entregas/ (cuaderno B3_rotaciones.ipynb en Raiz/cuadernos/):»
+- «Cree rotaciones.json, filtros.py (con pruebas) y supuestos.json:» → «Cree las opciones (en Raiz/cuadernos/B3_opciones.json; NO como rotaciones.json, cambio acordado el 14-nov), filtros.py (con pruebas) y supuestos.json; filtros.py y supuestos.json en Raiz/entregas/ (cuaderno B3_rotaciones.ipynb en Raiz/cuadernos/):» (rutas y cambio e)
 
 **Prueba de aceptación** (kit B3):
 ```text
@@ -275,11 +285,12 @@ Imprima una tabla opción × filtro para una parcela de ejemplo y la tabla de pl
 **Líneas de LEEME.md:**
 ```text
 supuestos.json | Plazos (S9 §5; FIRA [P]); eficiencias, relación cobertura–Kc del nogal y umbrales con su fuente o "assumption" (kit B3, paso 4) | 2026-11-14 | colab/B3_rotaciones.ipynb
-rotaciones.json | Maestro §5.2 e INIFAP 2017 (fechas de siembra), con la opción "no sembrar / rastrojo en pie" | 2026-11-14 | colab/B3_rotaciones.ipynb
 filtros.py | Filtros duros de maestro §5.2, INIFAP 2017, NOM-026, Silva-Rojas et al. 2009 y archivo 29, con 8 pruebas | 2026-11-14 | colab/B3_rotaciones.ipynb
 fuentes_B3.csv | Fuentes de B3: heladas.json y documentos citados (URL o copia en cuadernos/, con sha256) | 2026-11-14 | colab/B3_rotaciones.ipynb
 ```
-Aviso: `ENTREGA: supuestos.json — prueba OK` (primero) y `ENTREGA: rotaciones.json — prueba OK`.
+Las opciones (`B3_opciones.json`) no llevan línea: no están en el buzón. Cuando Cristian diga dónde van, la línea la escribe quien las entregue.
+
+Aviso: `ENTREGA: supuestos.json — prueba OK` (primero) y `ENTREGA: filtros.py — prueba OK`. Para las opciones: `B3: opciones listas en Raiz/cuadernos/B3_opciones.json — ¿dónde las entrego?`.
 
 ---
 
@@ -355,7 +366,7 @@ S8 §2 "Cifras" (copiado tal cual):
 [PEGA AQUÍ data/params.json completo (GitHub del proyecto).]
 
 TAREA
-Tarea cifras. Arma cifras.csv con UNA fila por cada cifra que puede aparecer en la página, la interfaz, el video, el póster o la ficha impresa: las de S9 §2, S8 §2 y data/params.json que te pegué. Cada fila con clave, valor (tal como lo da la fuente, sin redondear), unidad, fuente (documento y sección, o URL), fecha y etiqueta. No agregues ninguna cifra que no esté en lo pegado. Si dos documentos dan valores distintos, pon las dos filas y avísame. Cuando lleguen entregas con resultados (resultado_H1.md, resultado_H3.md, olofsson.csv, tabla_metodos.csv, et_contraste.csv) o cifras sueltas de otra pieza (por ejemplo, la lámina de la tormenta P95 de A9, que P4 te pasa con su fuente y periodo), agrega sus cifras con la fuente "<archivo o pieza> (entrega de <rol>)".
+Tarea cifras. Arma cifras.csv con UNA fila por cada cifra que puede aparecer en la página, la interfaz, el video, el póster o la ficha impresa: las de S9 §2, S8 §2 y data/params.json que te pegué. Cada fila con clave, valor (tal como lo da la fuente, sin redondear), unidad, fuente (documento y sección, o URL), fecha y etiqueta. No agregues ninguna cifra que no esté en lo pegado. Si dos documentos dan valores distintos, pon las dos filas y avísame. Cuando lleguen entregas con resultados (resultado_H1.md, resultado_H3.md, olofsson.csv, tabla_metodos.csv, et_contraste.csv) o cifras sueltas de otra pieza (por ejemplo, la lámina de la tormenta P95 de A9, que está en relieve_meta.json, en tormenta.mm, con su definición, fuente y periodo), agrega sus cifras con la fuente "<archivo o pieza> (entrega de <rol>)".
 PRUEBA: (a) ninguna clave repetida; (b) ninguna fila sin fuente ni etiqueta; (c) lista de las cifras de S9 §2 y S8 §2 que NO están en la tabla (debe quedar vacía); (d) número de filas por etiqueta.
 ```
 

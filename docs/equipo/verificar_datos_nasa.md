@@ -131,6 +131,7 @@ Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
 | Cobertura | Todas las parcelas de `parcelas_base.geojson` tienen filas. % de parcelas con ≥ 8 meses válidos (meta ≥ 80 %) | Kit A3, prueba |
 | Rangos | NDVI y LSWI entre −1 y 1; reflectancias entre 0 y 1 ya escaladas; `p25 ≤ mediana ≤ p75`; `n_validos ≥ 0`; `mes` en formato AAAA-MM | Kit K-ENS; `motor/esquemas.py` |
 | Suelo desnudo | Días con NDVI < 0.2 del 1-feb al 30-abr; entre 0 y los días de esa ventana. `dias_desnudo_viento_alto ≤ dias_suelo_desnudo_feb_abr` | S9 §5; `motor/esquemas.py` |
+| Columnas de la memoria y del mapa (cambio e) | `memoria_resumen.csv`: `id, dias_suelo_desnudo_mediana, anios_con_dato, estado_2025`, **sin edad**. `cultivos_parcelas.csv`: `id, cultivo_actual, prob_max, acuerdo_metodos, abstencion, edad_perenne_anios, estado_plazo, grupo_fenologico`; la edad va aquí. Con la fila vieja del kit, los dos se rechazan | Acuerdo de formatos del 14-nov ([README §6, cambio e](README.md#6-cambios-respecto-al-kit-mandan-sobre-el-kit)); `motor/esquemas.py` |
 
 **Controles** (solo los del kit):
 - **NDVI de las 3 protagonistas** (kit A3, prueba):
@@ -158,13 +159,14 @@ Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
 **Prompt: memoria (A3-M)**
 ```text
 Eres revisor de datos. NO inventes cifras: usa los archivos y las reglas de S9 §5 que te pego.
-Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que lea entregas/memoria_mensual.csv, entregas/memoria_parcelas.csv y entregas/memoria_resumen.csv e imprima:
+Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que lea entregas/memoria_mensual.csv, entregas/memoria_parcelas.csv, entregas/memoria_resumen.csv y, si existe, entregas/cultivos_parcelas.csv e imprima:
 1) años agrícolas presentes y, para cada uno, cuántas parcelas y si usa L30, S30 o ambas (el año 2016 empieza en oct-2015, antes del inicio de S30: debe marcarse);
 2) estados fuera de la lista perenne, verano, invierno, doble, descanso, sin_dato (deben ser 0);
 3) filas con meses_verdes > meses_validos (deben ser 0); max_verano y max_invierno entre -1 y 1;
 4) % de parcelas-año con estado distinto de sin_dato (kit A3-M, prueba);
 5) la franja año por año de las 3 protagonistas;
-6) en memoria_resumen.csv: edad_perenne_anios negativa (debe ser 0 filas) y cuántas en null.
+6) en memoria_resumen.csv (cambio acordado el 14-nov): ¿trae EXACTAMENTE id, dias_suelo_desnudo_mediana, anios_con_dato, estado_2025? Si trae edad_perenne_anios, escribe "REVISAR: la edad va en cultivos_parcelas.csv". dias_suelo_desnudo_mediana: enteros o vacíos (ningún .5), mínimo y máximo; anios_con_dato: entero ≥ 0, sin vacíos, y cuántas parcelas tienen 0; estado_2025 dentro de la lista de estados o vacío;
+7) en cultivos_parcelas.csv, si existe (cambio acordado el 14-nov): ¿trae EXACTAMENTE id, cultivo_actual, prob_max, acuerdo_metodos, abstencion, edad_perenne_anios, estado_plazo, grupo_fenologico? edad_perenne_anios negativa o no entera (deben ser 0 filas) y cuántas en null; filas con edad en un cultivo distinto de alfalfa o nogal (deben ser 0, kit A3-M paso 9); parcelas abstenidas con edad_perenne_anios o estado_plazo llenos (deben ser 0); estado_plazo fuera de libre, por_vencer, comprometida o vacío (deben ser 0).
 Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
 ```
 
@@ -222,7 +224,7 @@ Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
 
 **Qué es:** lluvia estimada por satélite, de la misión GPM.
 - **ID:** `NASA/GPM_L3/IMERG_V07` (kit A9; verificado en §0).
-- Se usa para la tormenta de referencia: el percentil 95 de la lluvia diaria de los días con lluvia.
+- Se usa para la tormenta de referencia: el percentil 95 de la lluvia diaria de los días con lluvia. El valor va en `relieve_meta.json` (`tormenta`: `mm`, `definicion`, `fuente`, `periodo`; acuerdo de formatos del 14-nov).
 - La extracción la hace la sesión de Chrome. Si no alcanza la cuota, se usa `eto_diaria.csv` (POWER), como permite el kit A9, paso 4.
 
 | Revisar | Qué debe salir | Fuente |
