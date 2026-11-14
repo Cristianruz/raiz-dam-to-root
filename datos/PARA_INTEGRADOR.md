@@ -268,3 +268,27 @@ Probado contra tu commit c5de01c.
   altura_gedi_p90_m, anios_patron_huerta). No lo mando al buzón porque no está en el contrato; si lo quieres en la ficha
   del nogal, dime y lo entrego con ese nombre.
 - Detalle y límites: `docs/nogal_cobertura.md`. Script: `datos/colab/A12_nogal_cobertura.py`.
+
+## 14-nov 17:17 — Idea nueva de Cristian (17:11): suelo por parcela. ENTREGA nueva: suelo_parcelas.csv
+Cristian pidió que el sistema contemple el tipo de suelo y qué cultivos son más aptos para cada suelo y clima, y que no
+sea solo local. Hice la parte de datos que se puede hacer hoy sin descargas nuevas; tú decides con él si entra a la ficha.
+
+- **ENTREGA: suelo_parcelas.csv** (archivo NUEVO; tu validador lo va a marcar «no está en la tabla 0.4-B» hasta que le
+  pongas esquema). 1,239 filas, una por parcela de `parcelas_base.geojson`. Columnas:
+  `id, zona, arena_pct, limo_pct, arcilla_pct, textura_usda, textura_olm, ph, carbono_organico_g_kg, cic_cmol_kg, n_celdas, distancia_celda_m`.
+  - `textura_usda` y `textura_olm`: una de `Sa, LoSa, SaLo, Lo, SiLo, Si, SaClLo, ClLo, SiClLo, SaCl, SiCl, Cl` o vacío.
+  - Vacío = sin dato (una parcela: P0316). `n_celdas` = celdas de 250 m con centro dentro (0 = se usó la más cercana;
+    entonces `distancia_celda_m` trae la distancia, si no va vacío).
+  - Fuentes: SoilGrids 2.0 (ISRIC, CC-BY 4.0, 0–30 cm) y OpenLandMap (CC-BY-SA 4.0). Datos globales: el mismo script
+    corre en cualquier región cambiando el rectángulo. Para la tabla de recursos: son bases abiertas, no de la NASA.
+- **Qué sale:** Delicias–Saucillo, franco arcillo-arenoso (602) y franco arcilloso (337), pH 8.1, carbono orgánico
+  ~10 g/kg. Lázaro Cárdenas, franco arcillo-arenoso (219) y franco arenoso (80), pH 8.1; más arenoso.
+- **Límites que deben ir a la vista si lo muestras** (detalle en `docs/suelo_parcelas.md`): celdas de 250 m (~6 ha), es
+  un modelo global y no un análisis de suelo; los dos mapas de textura coinciden en la clase exacta solo en 47 % de las
+  parcelas (difieren a la clase vecina); no hay hierro ni otros micronutrientes ni salinidad; el nitrógeno del mapa no
+  se entrega porque no es creíble (C:N cercana a 1).
+  Rótulo sugerido: «Soil (global 250 m model, not a soil test): sandy clay loam · pH 8.1 · organic carbon 1.0 %».
+- **Lo que NO está y no debe prometerse todavía:** «qué cultivo es más apto para este suelo». Falta la tabla de
+  requisitos por cultivo con fuente (ECOCROP de la FAO) o el índice de GAEZ; las dos necesitan una descarga que Cristian
+  no ha autorizado. Se lo pregunté. Además, dentro de una misma zona el suelo casi no cambia entre parcelas vecinas:
+  no va a ordenar cultivos parcela por parcela; sirve para describir la zona y para llevar la herramienta a otra región.
