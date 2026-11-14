@@ -92,15 +92,35 @@ def comprobar_suma(cubo):
 
 
 # --- (a) datos actuales: una zona ----------------------------------------------------
+def procesados_una_zona(destino):
+    """Copia de data/processed reducida a UNA zona en el formato anterior a la decisión de dos zonas:
+    solo las parcelas de delicias_saucillo (o sin «zona»), SIN la propiedad «zona», y solo los
+    archivos sin sufijo de zona. Sirve igual si data/processed trae una zona o dos."""
+    destino.mkdir(parents=True, exist_ok=True)
+    otras = [z for z in ZONAS_PARAMS if z != DZ]
+    for f in PROCESSED.iterdir():
+        if f.is_file() and not any(f.stem.endswith(f"_{z}") for z in otras):
+            shutil.copyfile(f, destino / f.name)
+    ruta = destino / "parcelas_base.geojson"
+    base = json.loads(ruta.read_text(encoding="utf-8"))
+    base["features"] = [f for f in base["features"] if f["properties"].get("zona") in (None, DZ)]
+    for f in base["features"]:
+        f["properties"].pop("zona", None)
+    ruta.write_text(json.dumps(base, ensure_ascii=False), encoding="utf-8")
+    return destino
+
+
 @pytest.fixture(scope="module")
 def una_zona(tmp_path_factory):
     if any(not (PROCESSED / f).exists() for f in b4_cubo.OBLIGATORIAS):
         pytest.skip("data/processed no tiene las entradas obligatorias de B4 (se usan simulados)")
-    return correr(PROCESSED, tmp_path_factory.mktemp("una_zona"))
+    tmp = tmp_path_factory.mktemp("una_zona")
+    proc = procesados_una_zona(tmp / "processed")
+    return correr(proc, tmp) + (proc,)
 
 
 def test_una_zona_un_solo_bloque_y_contrato_ok(una_zona):
-    rep, geo, cubo, expl, web = una_zona
+    rep, geo, cubo, expl, web, _ = una_zona
     assert list(cubo["zonas"]) == [DZ]
     z = cubo["zonas"][DZ]
     assert sin_metadatos(z) == sin_metadatos(cubo["zona"]), "con una zona, «zonas» debe ser igual al total"
@@ -112,12 +132,13 @@ def test_una_zona_un_solo_bloque_y_contrato_ok(una_zona):
 def test_una_zona_compatibilidad(una_zona):
     """Parcela sin «zona» = delicias_saucillo; llaves EXP_ZONA_<rotación> como antes; láminas de los
     archivos sin sufijo."""
-    _, geo, cubo, expl, _ = una_zona
-    base = json.loads((PROCESSED / "parcelas_base.geojson").read_text(encoding="utf-8"))
-    esperada = {f["properties"]["id"]: f["properties"].get("zona") or DZ for f in base["features"]}
+    _, geo, cubo, expl, _, proc = una_zona
+    base = json.loads((proc / "parcelas_base.geojson").read_text(encoding="utf-8"))
+    assert base["features"] and all("zona" not in f["properties"] for f in base["features"])
+    esperada = {f["properties"]["id"]: DZ for f in base["features"]}
     assert {f["properties"]["id"]: f["properties"]["zona"] for f in geo["features"]} == esperada
     assert all(not k.startswith(f"EXP_ZONA_{DZ}_") for k in expl["explicaciones"])
-    lam = laminas_de_zona(PROCESSED, DZ)
+    lam = laminas_de_zona(proc, DZ)
     props = {f["properties"]["id"]: f["properties"] for f in geo["features"]}
     for pid, pc in cubo["parcelas"].items():
         for op in pc["opciones"]:

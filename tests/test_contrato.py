@@ -44,9 +44,14 @@ def copia_alterada(tmp_path, alterar):
 
 
 def primera_opcion(cubo):
-    # Primera parcela CON opciones (las abstenidas no llevan opciones; kit B4, paso 1).
-    pid = next(k for k, v in cubo["parcelas"].items() if v["opciones"])
-    return cubo["parcelas"][pid]["opciones"][0]
+    # Primera opción que PIDE agua (lámina P50 > 0): las parcelas abstenidas no llevan opciones
+    # (kit B4, paso 1) y una opción en descanso tiene lámina y flujos en cero, así que alterarla
+    # no rompería nada y la prueba no probaría el validador.
+    for pc in cubo["parcelas"].values():
+        for op in pc["opciones"]:
+            if op["agua"]["lamina_bruta"]["0"]["p50"] > 0:
+                return op
+    raise AssertionError("el cubo no tiene ninguna opción con lámina > 0")
 
 
 # --- 1) datos actuales --------------------------------------------------------
