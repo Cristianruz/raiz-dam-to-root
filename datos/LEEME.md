@@ -1,3 +1,4 @@
+<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
 # datos/ · Piezas de datos de Raíz (sesión de datos)
 
 Orden de ejecución (cada script lee y escribe en la carpeta de trabajo):
@@ -21,3 +22,8 @@ Dependencias: `pip install rasterio shapely numpy duckdb`.
 Prueba de FAO-56: `python colab/test_eto_fao56.py` (Ejemplos 8 y 18 del manual).
 Zona piloto [S]: `[-105.42, 28.08, -105.32, 28.16]` (oeste, sur, este, norte), la misma en todos los scripts.
 La trazabilidad de cada archivo entregado está en los `fuentes_*.csv` (incluye sha256).
+
+Notas para el integrador (B4):
+- `suelo_desnudo.csv` entrega `dias_suelo_desnudo_feb_abr` del año 2026 (no una mediana entre años); el campo
+  `dias_suelo_desnudo_mediana` del contrato se llena con ese valor y se rotula «feb–abr 2026».
+- `plazo_anios` de la alfalfa llega como {min, max}; el nogal como 10 (horizonte [S]).

@@ -49,15 +49,25 @@ def main():
     con = duckdb.connect()
     con.execute("INSTALL httpfs; LOAD httpfs; INSTALL spatial; LOAD spatial;")
     x0, y0, x1, y1 = ZONA
+    cols = [r[0] for r in con.execute(f"DESCRIBE SELECT * FROM read_parquet('{a.url}')").fetchall()]
+    # Filtro por la columna bbox (GeoParquet 1.1) para no leer el archivo global; luego recorte exacto
+    pre = (f"bbox.xmax >= {x0} AND bbox.xmin <= {x1} AND bbox.ymax >= {y0} AND bbox.ymin <= {y1} AND "
+           if "bbox" in cols else "")
+    caja = f"ST_MakeEnvelope({x0}, {y0}, {x1}, {y1})"
     q = f"""
-        SELECT *, ST_AsGeoJSON(geometry) AS gj FROM read_parquet('{a.url}')
-        WHERE ST_Intersects(geometry, ST_MakeEnvelope({x0}, {y0}, {x1}, {y1}))
+        SELECT * EXCLUDE (geometry{', bbox' if 'bbox' in cols else ''}),
+               ST_AsGeoJSON(ST_Intersection(geometry, {caja})) AS gj
+        FROM read_parquet('{a.url}')
+        WHERE {pre}ST_Intersects(geometry, {caja})
+        ORDER BY ST_Y(ST_Centroid(geometry)) DESC, ST_X(ST_Centroid(geometry))
     """
     filas = con.execute(q).fetchdf()
     print("Columnas:", list(filas.columns))
     feats = []
     for i, r in filas.iterrows():
         g = json.loads(r["gj"])
+        if g["type"] not in ("Polygon", "MultiPolygon"):
+            continue                               # el recorte puede dejar líneas o puntos en el borde
         anillo = g["coordinates"][0] if g["type"] == "Polygon" else g["coordinates"][0][0]
         ha = area_ha(anillo)
         if ha < AREA_MIN_HA:

@@ -10,6 +10,9 @@ Cadena: ETc = Kc·ETo; neta = Σ_mes max(ETc − Peff, 0); bruta = neta / Ea + p
 Peff: FAO/AGLW «dependable rain» (0.6P−10 si P ≤ 70 mm/mes; 0.8P−24 si P > 70), acotada a [0, P].
 Monte Carlo: año climático remuestreado 1991–2025, sesgo de ETo U(−0.10, 0), Ea U(rango), presiembra U(150, 200).
 Los supuestos (Ea, sesgo de ETo, presiembra, Kc del nogal y plazos) se leen de supuestos.json con su fuente; el script se detiene si falta alguno. Las tuplas del Monte Carlo se sortean una sola vez y se reutilizan en todas las variantes y rotaciones.
+No aplicado en esta versión (se declara en la página): ajuste de Kc por clima (FAO-56 Ec. 62; rhmin_estimada
+queda lista pero no se usa), sorteo de Kc y fracción de lavado. Kc, etapas y fechas de siembra son supuestos [S]
+tomados de las tablas FAO-56 (12 y 17) y se marcan así en rotaciones.json.
 """
 import csv
 import datetime as dt
