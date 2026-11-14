@@ -234,6 +234,12 @@ def sha256_teselas(carpeta_zona, teselas):
 
 
 # --- Generación (necesita rasterio y numpy) -------------------------------------------------
+def versiones(np, rasterio):
+    """Bibliotecas de las que dependen los bytes de una tesela: remuestreo (GDAL) y compresión (zlib)."""
+    return {"rasterio": rasterio.__version__, "gdal": rasterio.__gdal_version__, "numpy": np.__version__,
+            "zlib": zlib.ZLIB_RUNTIME_VERSION}
+
+
 def _mosaico(np, reproject, Resampling, from_bounds, origen, transformada, crs, sin_dato_origen, z, rango):
     """Elevaciones (float32) de todas las teselas del zoom z juntas, ya con el borde extendido."""
     x0, y0, x1, y1 = rango
@@ -311,7 +317,7 @@ def _generar_zona(mods, zona, tif, carpeta, minzoom, maxzoom):
         "bbox": zona["bbox"],
         "paso_vertical_m": 1 / PASOS_POR_METRO,
         "remuestreo": "bilinear (rasterio.warp.reproject a EPSG:3857); fuera del ráster se extiende el borde",
-        "generado_con": {"rasterio": rasterio.__version__, "gdal": rasterio.__gdal_version__, "numpy": np.__version__},
+        "generado_con": versiones(np, rasterio),
         # Rutas relativas a esta carpeta: sirven para guardar el relieve sin conexión sin repetir las cuentas.
         "teselas": [f"{z}/{x}/{y}.png" for z, x, y in sorted(nuevas)],
         "sha256_teselas": sha256_teselas(carpeta, nuevas),

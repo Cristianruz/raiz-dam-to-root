@@ -361,10 +361,9 @@ def test_regenerar_da_los_mismos_bytes(tmp_path, gemelo):
     mismas_versiones = True
     for zid in gemelo["terreno"]["zonas"]:
         con = leer(WEB / "dem" / zid / "origen.json")["generado_con"]
-        mismas_versiones &= con == {"rasterio": rasterio.__version__, "gdal": rasterio.__gdal_version__,
-                                    "numpy": numpy.__version__}
+        mismas_versiones &= con == dem_teselas.versiones(numpy, rasterio)
     if not mismas_versiones:
-        pytest.skip("otra versión de rasterio, GDAL o numpy que la que generó las teselas versionadas")
+        pytest.skip("otra versión de rasterio, GDAL, numpy o zlib que la que generó las teselas versionadas")
     nuevos = sorted(p.relative_to(tmp_path / "dem").as_posix() for p in (tmp_path / "dem").rglob("*") if p.is_file())
     viejos = sorted(p.relative_to(WEB / "dem").as_posix() for p in (WEB / "dem").rglob("*") if p.is_file())
     assert nuevos == viejos

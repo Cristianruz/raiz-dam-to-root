@@ -21,7 +21,8 @@
  "generado_con": {
   "rasterio": "1.4.3",
   "gdal": "3.9.3",
-  "numpy": "2.5.3"
+  "numpy": "2.5.3",
+  "zlib": "1.3"
  },
  "teselas": [
   "7/26/53.png",

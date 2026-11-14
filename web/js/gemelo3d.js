@@ -82,6 +82,7 @@ const CAPA_SIN_RIEGO_BORDE = "gemelo-sin-riego-borde";
 const CAPA_APUNTADA = "gemelo-columna-apuntada";
 const CAPA_AGUA = "gemelo-columna-agua";
 const CAPA_FALTA = "gemelo-columna-falta";
+const CAPA_CAMARA = "gemelo-camara"; // capa «custom» sin dibujo: recibe la matriz de proyección de cada cuadro
 const IMAGEN_PLANA = "gemelo-trama-plana";
 const IMAGEN_FALTA = "gemelo-trama-falta";
 const FUENTES = [FUENTE_COLUMNAS, FUENTE_PLANAS, FUENTE_SOMBRA, FUENTE_RELIEVE];
@@ -97,7 +98,7 @@ const SIN_CLASIFICAR = "sin_clasificar";
 const DURACION_CAMARA_MS = 900;
 const FUERZA_SOMBRA = 0.55; // intensidad del sombreado del relieve
 const LADO_TRAMA_PX = 16; // lado de la imagen de las rayas (se registra a doble densidad)
-const GROSOR_TRAMA_PX = 3;
+const GROSOR_TRAMA_PX = 2.5;
 const OPACIDAD_PLANA = 0.85;
 const OPACIDAD_SIN_RIEGO = 0.18;
 const SEPARACION_ETIQUETA_PX = 14;
@@ -219,6 +220,88 @@ function imagenDeRayas(fondo, raya) {
   }
   ctx.stroke();
   return ctx.getImageData(0, 0, lado, lado);
+}
+
+// ---------------------------------------------------------------------------
+// Geometría para saber qué columna está bajo un punto de la pantalla
+// (la consulta de MapLibre no suma la altura del terreno a las extrusiones: se calcula aquí)
+// ---------------------------------------------------------------------------
+const mercatorPorGeometria = new WeakMap(); // geometry -> { anillos, centro, centroXY, zPorMetro }
+
+/** Anillos exteriores de la parcela en coordenadas Mercator (0 a 1), su centro y la escala vertical. */
+function enMercator(geometria, Mercator) {
+  let g = mercatorPorGeometria.get(geometria);
+  if (g) return g;
+  const poligonos =
+    geometria.type === "Polygon" ? [geometria.coordinates] : geometria.type === "MultiPolygon" ? geometria.coordinates : [];
+  const anillos = [];
+  let lng = 0;
+  let lat = 0;
+  let n = 0;
+  for (const poligono of poligonos) {
+    const exterior = poligono?.[0];
+    if (!Array.isArray(exterior) || exterior.length < 3) continue;
+    const xy = new Float64Array(exterior.length * 2);
+    exterior.forEach((c, i) => {
+      const m = Mercator.fromLngLat([c[0], c[1]]);
+      xy[i * 2] = m.x;
+      xy[i * 2 + 1] = m.y;
+      lng += c[0];
+      lat += c[1];
+      n += 1;
+    });
+    anillos.push(xy);
+  }
+  if (n) {
+    const centro = [lng / n, lat / n];
+    const m = Mercator.fromLngLat(centro);
+    g = { anillos, centro, centroXY: [m.x, m.y], zPorMetro: m.meterInMercatorCoordinateUnits() };
+  } else {
+    g = { anillos, centro: null, centroXY: null, zPorMetro: 0 };
+  }
+  mercatorPorGeometria.set(geometria, g);
+  return g;
+}
+
+/** Proyecta los vértices de un anillo a píxeles de pantalla, a una altura z. Devuelve null si alguno queda detrás de la cámara. */
+function anilloEnPantalla(m, xy, z, ancho, alto) {
+  const salida = new Float64Array(xy.length);
+  for (let i = 0; i < xy.length; i += 2) {
+    const x = xy[i];
+    const y = xy[i + 1];
+    const w = m[3] * x + m[7] * y + m[11] * z + m[15];
+    if (!(w > 0)) return null;
+    salida[i] = ((m[0] * x + m[4] * y + m[8] * z + m[12]) / w + 1) * 0.5 * ancho;
+    salida[i + 1] = (1 - (m[1] * x + m[5] * y + m[9] * z + m[13]) / w) * 0.5 * alto;
+  }
+  return salida;
+}
+
+/** ¿El punto (px, py) cae dentro del polígono? `v` es [x, y, x, y…]; `indices` elige los vértices (o todos). */
+function puntoDentro(px, py, v, indices) {
+  const n = indices ? indices.length : v.length / 2;
+  let dentro = false;
+  for (let i = 0, j = n - 1; i < n; j = i, i += 1) {
+    const a = (indices ? indices[i] : i) * 2;
+    const b = (indices ? indices[j] : j) * 2;
+    const ya = v[a + 1];
+    const yb = v[b + 1];
+    if (ya > py !== yb > py && px < ((v[b] - v[a]) * (py - ya)) / (yb - ya) + v[a]) dentro = !dentro;
+  }
+  return dentro;
+}
+
+/** ¿El punto cae sobre la columna? Tapa, pie o cualquiera de sus caras laterales. */
+function puntoEnColumna(px, py, pie, cima) {
+  if (puntoDentro(px, py, cima) || puntoDentro(px, py, pie)) return true;
+  // Caras laterales: cuadrilátero entre cada lado del pie y el mismo lado de la tapa.
+  const n = pie.length / 2;
+  const cara = new Float64Array(8);
+  for (let i = 0, j = n - 1; i < n; j = i, i += 1) {
+    cara.set([pie[j * 2], pie[j * 2 + 1], pie[i * 2], pie[i * 2 + 1], cima[i * 2], cima[i * 2 + 1], cima[j * 2], cima[j * 2 + 1]]);
+    if (puntoDentro(px, py, cara)) return true;
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -414,6 +497,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     fuenteRelieve: null,
     conProtocolo: false,
     teselasFallidas: [],
+    matriz: null, // Mercator (0 a 1, con altura) -> espacio de recorte, del último cuadro dibujado
     avisados: new Set(), // tipos de aviso ya emitidos en esta activación
     apuntada: null,
     conTeclado: false,
@@ -635,6 +719,16 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
         "fill-extrusion-height": ["get", "pide_m"],
       },
     });
+    // Capa «custom» que no dibuja: MapLibre le entrega en cada cuadro la matriz de proyección (API pública),
+    // con la que columnaEn() sabe qué columna hay bajo el puntero. Va al final para no partir las capas planas.
+    mapa.addLayer({
+      id: CAPA_CAMARA,
+      type: "custom",
+      render(_gl, cuadro) {
+        const matriz = cuadro?.defaultProjectionData?.mainMatrix;
+        if (matriz) est.matriz = Float64Array.from(matriz);
+      },
+    });
   }
 
   function quitarCapasYFuentes() {
@@ -677,14 +771,50 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
   }
 
   // -------------------------------------------------------------- puntero, teclado y etiqueta
+  /**
+   * Columna bajo un punto de la pantalla, o null. Cada columna se proyecta con la matriz del último cuadro:
+   * va de la altura del terreno en su centro (como la dibuja MapLibre) hasta esa altura más pide_m.
+   * Si varias quedan bajo el punto, gana la más cercana a la cámara.
+   */
   function columnaEn(punto) {
     if (!est.montado || !punto) return null;
-    const xy = Array.isArray(punto) ? punto : [punto.x, punto.y];
-    if (!xy.every(Number.isFinite)) return null;
+    const [px, py] = Array.isArray(punto) ? punto : [punto.x, punto.y];
+    if (!Number.isFinite(px) || !Number.isFinite(py)) return null;
+    const Mercator = biblioteca?.MercatorCoordinate;
+    const columnas = est.ultimo?.columnas.features ?? [];
+    const m = est.matriz;
+    if (!m || !Mercator) return columnaSegunMapLibre([px, py]);
+    const caja = mapa.getContainer();
+    const ancho = caja.clientWidth;
+    const alto = caja.clientHeight;
+    let mejor = null;
+    let distanciaMejor = Infinity;
+    for (const f of columnas) {
+      const g = enMercator(f.geometry, Mercator);
+      if (!g.centro) continue;
+      const suelo = mapa.queryTerrainElevation?.(g.centro) ?? 0; // metros, ya con la exageración
+      const zPie = suelo * g.zPorMetro;
+      const zCima = (suelo + f.properties.pide_m) * g.zPorMetro;
+      const distancia = m[3] * g.centroXY[0] + m[7] * g.centroXY[1] + m[11] * zPie + m[15];
+      if (!(distancia > 0) || distancia >= distanciaMejor) continue;
+      for (const xy of g.anillos) {
+        const pie = anilloEnPantalla(m, xy, zPie, ancho, alto);
+        const cima = pie && anilloEnPantalla(m, xy, zCima, ancho, alto);
+        if (cima && puntoEnColumna(px, py, pie, cima)) {
+          mejor = f.properties.id;
+          distanciaMejor = distancia;
+          break;
+        }
+      }
+    }
+    return mejor;
+  }
+
+  /** Respaldo si aún no hay matriz (ningún cuadro dibujado): la consulta de MapLibre, sin la altura del terreno. */
+  function columnaSegunMapLibre(xy) {
     const capas = CAPAS_COLUMNA.filter((id) => mapa.getLayer(id));
     if (!capas.length) return null;
-    const hallada = mapa.queryRenderedFeatures(xy, { layers: capas })[0];
-    return hallada?.properties?.id ?? null;
+    return mapa.queryRenderedFeatures(xy, { layers: capas })[0]?.properties?.id ?? null;
   }
 
   function centroDelMapa() {
@@ -929,6 +1059,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     est.montado = false;
     est.firmaPlanas = null;
     est.fuenteRelieve = null;
+    est.matriz = null;
     if (conCamara) aplanarCamara(animar);
   }
 

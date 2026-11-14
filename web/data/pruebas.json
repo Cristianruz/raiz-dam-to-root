@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-14T21:10:45+00:00",
+ "generado": "2026-11-14T21:11:44+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -233,7 +233,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-14T21:10:45+00:00",
+  "corrida": "2026-11-14T21:11:44+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -289,7 +289,7 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "497 passed, 30 warnings in 15.86s"
+    "detalle": "497 passed, 30 warnings in 14.85s"
    },
    {
     "id": "node",

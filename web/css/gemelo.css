@@ -10,10 +10,10 @@
   --gemelo-agua: var(--agua, #1F6FB2);             /* columna: lo que cubre la dotación elegida (Agua) */
   --gemelo-agua-apuntada: var(--agua-osc, #174F80); /* la misma parte, en la columna apuntada */
   --gemelo-falta: var(--rojo, #B3261E);            /* columna: lo que la dotación no cubre */
-  --gemelo-falta-trama: #F3C6C2;                   /* rayas de esa parte (para no depender solo del color) */
+  --gemelo-falta-trama: #7E1A15;                   /* rayas de esa parte (para no depender solo del color) */
   --gemelo-falta-apuntada: #7E1A15;                /* la misma parte, en la columna apuntada */
   --gemelo-plana: #C4C8CC;                         /* parcela sin clasificar: plana y gris… */
-  --gemelo-plana-trama: #6E757C;                   /* …con rayas… */
+  --gemelo-plana-trama: #9299A0;                   /* …con rayas… */
   --gemelo-plana-borde: var(--tinta-suave, #4A525A); /* …y borde punteado */
   --gemelo-sin-riego: var(--brote, #4C9A2A);       /* la rotación actual no pide riego: sin columna, borde verde */
   --gemelo-sombra: var(--tierra, #8A5A3B);         /* sombreado del relieve (Tierra) */
