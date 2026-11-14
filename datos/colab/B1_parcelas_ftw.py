@@ -21,7 +21,10 @@ import os
 
 from comun import carpeta, registrar_fuentes
 
-ZONA = (-105.42, 28.08, -105.32, 28.16)     # lon_min, lat_min, lon_max, lat_max (igual que Earth Engine)
+ZONAS = {                                    # lon_min, lat_min, lon_max, lat_max (igual que Earth Engine) [S]
+    "delicias_saucillo": ((-105.56, 28.07, -105.32, 28.19), "P"),
+    "lazaro_cardenas": ((-105.66, 28.35, -105.56, 28.43), "L"),
+}
 AREA_MIN_HA = 1.0
 
 
@@ -69,6 +72,7 @@ def confianza(geom, raster):
 def main():
     a = carpeta("B1: parcelas de Fields of The World",
                 lambda ap: (ap.add_argument("--crudo", required=True, help="ftw_zona_piloto_crudo.geojson"),
+                            ap.add_argument("--zona", required=True, choices=sorted(ZONAS)),
                             ap.add_argument("--protagonistas", default="",
                                             help="ids de las 3 protagonistas, separados por coma (revisadas a mano)")))
     from shapely.geometry import box, mapping, shape
@@ -76,7 +80,8 @@ def main():
     raster = crudo.get("confianza_raster")
     if not raster or not raster.get("valores"):
         raise SystemExit("Falta el raster de confianza de FTW en el crudo: no se puede calcular ftw_confianza")
-    zona = box(*ZONA)
+    bbox, prefijo = ZONAS[a.zona]
+    zona = box(*bbox)
     cand = []
     for f in crudo["features"]:
         g = shape(f["geometry"])
@@ -118,7 +123,7 @@ def main():
     feats = []
     for k, (_, _, fid, g, gj, ha) in enumerate(cand, 1):
         feats.append({"type": "Feature", "geometry": json.loads(json.dumps(gj)), "properties": {
-            "id": f"P{k:04d}", "area_ha": round(ha, 2), "modulo": None,
+            "id": f"{prefijo}{k:04d}", "zona": a.zona, "area_ha": round(ha, 2), "modulo": None,
             "ftw_confianza": confianza(g, raster), "protagonista": False, "ftw_id": fid}})
     prot = [x for x in a.protagonistas.split(",") if x]
     for x in feats:

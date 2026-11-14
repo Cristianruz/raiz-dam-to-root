@@ -46,17 +46,22 @@ def main():
     def opciones(ap):
         ap.add_argument("--crudo", required=True, help="carpeta del crudo, p. ej. data/raw/power (ruta absoluta o relativa a --dir)")
         ap.add_argument("--descargar", action="store_true")
+        ap.add_argument("--lat", type=float, default=LAT)
+        ap.add_argument("--lon", type=float, default=LON)
+        ap.add_argument("--patron", default="power_crudo_*.json", help="nombre de los JSON crudos")
+    global LAT, LON
     a = carpeta("A1: NASA POWER y ETo FAO-56", opciones)
+    LAT, LON = a.lat, a.lon
     Z = float(_json.load(open("supuestos.json"))["elevacion_punto_m"]["valor"])
     os.makedirs(a.crudo, exist_ok=True)
     if a.descargar:
         hoy = dt.date.today().strftime("%Y%m%d")
         lotes = [descargar(i, f, a.crudo) for i, f in [("19810101", "19951231"), ("19960101", "20101231"), ("20110101", hoy)]]
     else:
-        lotes = [_json.load(open(r)) for r in sorted(glob.glob(os.path.join(a.crudo, "power_crudo_*.json")))]
+        lotes = [_json.load(open(r)) for r in sorted(glob.glob(os.path.join(a.crudo, a.patron)))]
         if not lotes:
             raise SystemExit(f"No hay power_crudo_*.json en {a.crudo}; usar --descargar")
-    crudos = [os.path.relpath(c) for c in sorted(glob.glob(os.path.join(a.crudo, "power_crudo_*.json")))]
+    crudos = [os.path.relpath(c) for c in sorted(glob.glob(os.path.join(a.crudo, a.patron)))]
     filas, faltantes = [], 0
     for d in lotes:
         unidades = {k: v.get("units") for k, v in d.get("parameters", {}).items()}
@@ -80,7 +85,7 @@ def main():
 
     registrar_fuentes("A1_crudo", crudos, "NASA POWER Daily API, community=AG (respuesta original)",
                       "datos/colab/A1_power_eto.py")
-    registrar_fuentes("A1", ["eto_diaria.csv"], "NASA POWER Daily API, community=AG, punto 28.19 N −105.45 O (misma celda MERRA-2 0.5°×0.625° y CERES 1° que el bbox)",
+    registrar_fuentes("A1", ["eto_diaria.csv"], f"NASA POWER Daily API, community=AG, punto {LAT} N {LON} O",
                       "datos/colab/A1_power_eto.py")
     # Prueba de aceptación (kit A1)
     etos = [r[1] for r in filas]
