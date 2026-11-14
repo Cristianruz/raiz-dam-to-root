@@ -265,6 +265,30 @@ def paso_contrato():
     return Paso("contrato", FALLA, primera)
 
 
+# --- (d2) verificador de cifras (kit C3 y K-TEST prueba 6) ----------------------------
+def paso_verificador():
+    titulo("(d2) Verificador de cifras (motor/verificador.py --reporte)")
+    codigo, salida = correr([sys.executable, "motor/verificador.py", "web/data/explicaciones.json", "--reporte"])
+    print("  " + salida.strip().replace("\n", "\n  "))
+    ok = codigo == 0 and "VERIFICADOR OK" in salida
+    return Paso("verificador", OK if ok else FALLA, "VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv"
+                if ok else f"código {codigo}: ver salida")
+
+
+def escribir_pruebas_md(pasos, total_s):
+    """docs/pruebas.md (kit K-TEST): fecha, lista de pruebas y su resultado. Se genera, no se edita."""
+    ahora = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(timespec="seconds")
+    filas = "\n".join(f"| {p.nombre} | {p.estado} | {p.detalle} |" for p in pasos)
+    texto = (
+        "<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->\n"
+        "# Resultado de las pruebas (generado por `python construir.py`; no se edita a mano)\n\n"
+        f"Corrida: {ahora} · duración {total_s:.1f} s\n\n"
+        "| Paso | Estado | Detalle |\n|---|---|---|\n" + filas + "\n\n"
+        "La prueba con navegador (`node tests/e2e/web_smoke.mjs`) se corre aparte y antes de cada publicación.\n"
+    )
+    (RAIZ / "docs/pruebas.md").write_text(texto, encoding="utf-8")
+
+
 # --- (e) pytest --------------------------------------------------------------------
 def paso_pytest():
     titulo("(e) Pruebas de Python (pytest -q tests/)")
@@ -344,6 +368,7 @@ def main(argv=None):
     rel = paso_relieve()
     man = paso_manifest()
     con = paso_contrato()
+    ver = paso_verificador()
     if args.rapido:
         py = Paso("pytest", OMITIDO, "--rapido")
         js = Paso("node", OMITIDO, "--rapido")
@@ -351,7 +376,7 @@ def main(argv=None):
         py = paso_pytest()
         js = paso_node()
 
-    pasos = (origen, ens, sim, rel, man, con, py, js)
+    pasos = (origen, ens, sim, rel, man, con, ver, py, js)
     fallas = [p.nombre for p in pasos if p.estado == FALLA]
     pendientes = [p.nombre for p in pasos if p.estado == PENDIENTE]
     if reporte:
@@ -379,11 +404,14 @@ def main(argv=None):
         f" 5b. Relieve ......: {rel}",
         f" 6. Manifest ......: {man}",
         f" 7. Contrato ......: {con}",
+        f" 7b. Verificador ..: {ver}",
         f" 8. pytest ........: {py}",
         f" 9. node --test ...: {js}",
         f"10. RESULTADO .....: {final} · {time.time() - inicio:.1f} s · código de salida {codigo}",
     )
     print("\n".join(lineas))
+    if not args.rapido:
+        escribir_pruebas_md(pasos, time.time() - inicio)
     return codigo
 
 
