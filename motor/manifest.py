@@ -261,21 +261,50 @@ def generar(raiz=RAIZ, escribir=True, hoy=None):
                 m.avisos.append(f"fuente de origen incompleta ({', '.join(faltan)}): {fo}")
 
     simuladas = sum(1 for c in m.cifras.values() if c["mock"])
+    cifras = agrupar_cifras(m.cifras)
     manifest = {
         "_encabezado": ENCABEZADO,
         "_nota": "Generado por motor/manifest.py a partir de web/data/* y data/params.json; nunca se edita a mano (kit v4 §2.5).",
         "generado": hoy,
         "mock": bool(meta.get("mock")),
-        "resumen": {"cifras": len(m.cifras), "simuladas": simuladas,
+        "resumen": {"cifras": len(m.cifras), "patrones": len(cifras), "simuladas": simuladas,
                     "fuentes_de_origen": len(fuentes_origen), "avisos": len(m.avisos)},
         "avisos": m.avisos,
         "fuentes_de_origen": fuentes_origen,
-        "cifras": m.cifras,
+        "_nota_cifras": "Agrupadas por patrón de ruta: parcelas.<id> -> parcelas.*, índices [n] -> [*]. Cada patrón lleva su fuente, fecha, script, etiqueta, número de valores y rango; así el manifiesto no crece con el número de parcelas.",
+        "cifras": cifras,
     }
     if escribir:
         destino = raiz / "web/data/manifest.json"
         destino.write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return manifest
+
+
+def agrupar_cifras(cifras):
+    """Agrupa las cifras por patrón de ruta (sin id de parcela ni índice) para que el manifiesto
+    no crezca con el número de parcelas. Conserva fuente, fecha, script, etiqueta y mock; si un
+    patrón mezcla fuentes distintas, se guardan todas en una lista."""
+    import re
+    grupos = {}
+    for c in cifras.values():
+        patron = re.sub(r"parcelas\.[^.\[]+", "parcelas.*", c["clave"])
+        patron = re.sub(r"\[\d+\]", "[*]", patron)
+        llave = f"{Path(c['archivo']).name}:{patron}"
+        g = grupos.setdefault(llave, {"clave": patron, "archivo": c["archivo"], "n": 0, "min": None, "max": None,
+                                      "fuente": c["fuente"], "fecha": c["fecha"], "script": c["script"],
+                                      "etiqueta": c["etiqueta"], "mock": c["mock"]})
+        g["n"] += 1
+        v = c["valor"]
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            g["min"] = v if g["min"] is None else min(g["min"], v)
+            g["max"] = v if g["max"] is None else max(g["max"], v)
+        for k in ("fuente", "etiqueta", "script"):
+            if c[k] != g[k]:
+                otros = g[k] if isinstance(g[k], list) else [g[k]]
+                if c[k] not in otros:
+                    g[k] = otros + [c[k]]
+        g["mock"] = g["mock"] or c["mock"]
+    return grupos
 
 
 if __name__ == "__main__":

@@ -298,10 +298,12 @@ def paso_node():
 
 # --- (g) reporte -------------------------------------------------------------------------
 def estado_simulado(reporte):
-    """Qué sigue simulado: lo dice el ensamblador o, si no, las marcas de cubo.meta."""
+    """Qué sigue simulado: lo que no está en la caché validada (data/processed) según el ensamblador,
+    o, si no hay reporte, las marcas de cubo.meta."""
     if reporte and reporte.get("sigue_simulado") is not None:
-        s = reporte["sigue_simulado"]
-        return ", ".join(map(str, s)) if isinstance(s, (list, tuple, set)) else str(s)
+        cache = {f.name for f in (RAIZ / "data/processed").iterdir() if f.is_file()} if (RAIZ / "data/processed").exists() else set()
+        s = [x for x in (reporte["sigue_simulado"] or []) if x not in cache]
+        return (", ".join(map(str, s)) or "nada") + f" (caché data/processed: {len(cache)} archivos)"
     try:
         meta = leer_json(RAIZ / "web/data/cubo.json").get("meta", {})
     except Exception as ex:  # noqa: BLE001

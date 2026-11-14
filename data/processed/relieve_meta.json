@@ -1,0 +1,13 @@
+{
+ "rotulo": "regional, 30 m (NASADEM); not field drainage design",
+ "umbral_ruta_ha": 50.0,
+ "umbral_ruta_etiqueta": "assumption [S]",
+ "pendiente": "por parcela: plano ajustado por mínimos cuadrados a las celdas de NASADEM; zona: DEM suavizado 5 × 5 celdas (~150 m) [S]",
+ "celda_ha": 0.0788,
+ "tormenta": {
+  "mm": 15.5,
+  "definicion": "percentil 95 de los días con lluvia >= 1 mm",
+  "fuente": "NASA POWER PRECTOTCORR, punto de la zona piloto",
+  "periodo": "1984-01-01 a 2026-11-09"
+ }
+}

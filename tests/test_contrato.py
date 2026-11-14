@@ -41,7 +41,8 @@ def copia_alterada(tmp_path, alterar):
 
 
 def primera_opcion(cubo):
-    pid = next(iter(cubo["parcelas"]))
+    # Primera parcela CON opciones (las abstenidas no llevan opciones; kit B4, paso 1).
+    pid = next(k for k, v in cubo["parcelas"].items() if v["opciones"])
     return cubo["parcelas"][pid]["opciones"][0]
 
 
@@ -125,6 +126,10 @@ def test_manifest_cubre_cada_cifra_del_cubo(man):
                       "agua.compromiso_millares_ha", "gota", "gota_goteo_con_tope",
                       "gota_goteo_sin_tope", "tope_consumo"):
                 esperadas |= {r for r, _ in hojas(manifest.obtener(op, b), f"{base}.{b}")}
+    # El manifiesto agrupa por patrón (parcelas.<id> -> parcelas.*, [n] -> [*]): se compara por patrón.
+    import re
+    patron = lambda r: re.sub(r"\[\d+\]", "[*]", re.sub(r"parcelas\.[^.\[]+", "parcelas.*", r))
+    esperadas = {patron(r) for r in esperadas}
     claves = {c["clave"] for c in man["cifras"].values() if c["archivo"] == "web/data/cubo.json"}
     faltan = sorted(esperadas - claves)
     assert not faltan, f"cifras del cubo sin entrada en el manifest: {faltan[:10]}"
@@ -133,12 +138,12 @@ def test_manifest_cubre_cada_cifra_del_cubo(man):
 def test_manifest_valores_y_campos(man):
     cubo = leer("cubo.json")
     for llave, c in man["cifras"].items():
-        for campo in ("clave", "archivo", "valor", "fuente", "fecha", "script", "etiqueta", "mock"):
+        for campo in ("clave", "archivo", "n", "min", "max", "fuente", "fecha", "script", "etiqueta", "mock"):
             assert campo in c, f"{llave}: falta {campo}"
         assert c["fuente"] and c["script"], f"{llave}: sin fuente o sin script"
-        if c["archivo"] == "web/data/cubo.json" and isinstance(c["valor"], (int, float)):
-            # El valor del manifest es el del cubo en esa ruta.
-            assert valor_en_ruta(cubo, c["clave"]) == c["valor"], llave
+        if c["archivo"] == "web/data/cubo.json" and "*" not in c["clave"] and isinstance(c["min"], (int, float)):
+            # Patrón sin comodines = una sola ruta: su valor es el del cubo en esa ruta.
+            assert c["n"] == 1 and c["min"] == c["max"] == valor_en_ruta(cubo, c["clave"]), llave
 
 
 def test_manifest_marca_lo_simulado(man):
