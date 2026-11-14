@@ -90,7 +90,7 @@ CRUDOS_EARTH_ENGINE = ("hls_mensual_*.tif", "hls_reflect_*.tif", "hls_ndvi_memor
 ZONA_POR_OMISION = "delicias_saucillo"
 # Archivos que van uno por zona: «<base>_<zona>.<ext>» (p. ej., rotaciones_lazaro_cardenas.json).
 # Se validan con el esquema de su base y se copian a data/processed con su nombre tal cual.
-ARCHIVOS_POR_ZONA = ("eto_diaria.csv", "rotaciones.json", "demanda_cultivos.csv",
+ARCHIVOS_POR_ZONA = ("eto_diaria.csv", "imerg_diaria.csv", "rotaciones.json", "demanda_cultivos.csv",
                      "relieve_meta.json", "nasadem_zona_piloto.tif")
 
 # ---------------------------------------------------------------------------------------
@@ -233,6 +233,16 @@ ESQUEMAS = {
         "fuente_reglas": f"{FUENTE_TABLA} (en la muestra, además punto_id y bloque)",
     },
     # ---- A1 y A2 (clima) -------------------------------------------------------------
+    "imerg_diaria.csv": {
+        "pieza": "A9", "tipo": "csv",
+        "columnas": {
+            "fecha": {"tipo": "fecha", "unico": True},
+            "lluvia_mm": {"tipo": "numero", "min": 0, "nulo": True},
+        },
+        "reglas": [],
+        "fuente_reglas": ("Pedido a la sesión de datos (14-nov): lluvia diaria de NASA GPM IMERG V07 promediada "
+                          "sobre la zona; lluvia ≥ 0 por definición; un archivo por zona con sufijo «_<zona>»"),
+    },
     "eto_diaria.csv": {
         "pieza": "A1", "tipo": "csv",
         "columnas": {
