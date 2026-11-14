@@ -1,7 +1,7 @@
 # AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
 """A9 · Relieve y escurrimiento con NASADEM (30 m) a escala de zona; tormenta de referencia.
 
-Entradas: nasadem_zona_piloto.tif (Earth Engine), parcelas_base.geojson (B1), eto_diaria.csv (A1, opcional)
+Entradas: nasadem_zona_piloto.tif (Earth Engine), parcelas_base.geojson (B1), imerg_diaria.csv (A9b) o eto_diaria.csv (A1)
 Salidas:
     relieve_parcelas.csv     id, pendiente_media_pct, aportacion_externa_ha, frac_depresion
     relieve_rutas.geojson    líneas por donde se concentra el escurrimiento (para animar «Simular tormenta»)
@@ -75,18 +75,25 @@ def d8_y_acumulacion(z, dx, dy):
     return destino, acum
 
 
-def tormenta_p95(ruta="eto_diaria.csv"):
-    try:
-        filas = list(csv.DictReader(open(ruta)))
-    except FileNotFoundError:
-        return None
-    lluvias = [float(r["lluvia_mm"]) for r in filas if float(r["lluvia_mm"]) >= 1.0]
-    if not lluvias:
-        return None
-    return {"mm": round(float(np.percentile(lluvias, 95)), 1),
-            "definicion": "percentil 95 de los días con lluvia >= 1 mm",
-            "fuente": "NASA POWER PRECTOTCORR, punto de la zona piloto",
-            "periodo": f"{filas[0]['fecha']} a {filas[-1]['fecha']}"}
+def tormenta_p95():
+    """Tormenta de referencia: P95 de los días con lluvia ≥ 1 mm. Usa GPM IMERG (imerg_diaria.csv) si está en la
+    carpeta (kit A9, paso 4); si no, NASA POWER (eto_diaria.csv). Si están las dos, POWER queda como contraste."""
+    def p95(ruta, fuente):
+        try:
+            filas = [r for r in csv.DictReader(open(ruta)) if r["lluvia_mm"] not in ("", None)]
+        except FileNotFoundError:
+            return None
+        lluvias = [float(r["lluvia_mm"]) for r in filas if float(r["lluvia_mm"]) >= 1.0]
+        if not lluvias:
+            return None
+        return {"mm": round(float(np.percentile(lluvias, 95)), 1),
+                "definicion": "percentil 95 de los días con lluvia >= 1 mm", "fuente": fuente,
+                "periodo": f"{filas[0]['fecha']} a {filas[-1]['fecha']}"}
+    imerg = p95("imerg_diaria.csv", "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), media sobre el rectángulo de la zona")
+    power = p95("eto_diaria.csv", "NASA POWER PRECTOTCORR, punto de la zona piloto")
+    if imerg and power:
+        imerg["contraste"] = {"mm": power["mm"], "fuente": power["fuente"], "periodo": power["periodo"]}
+    return imerg or power
 
 
 def main():
@@ -169,7 +176,7 @@ def main():
                "pendiente": "por parcela: plano ajustado por mínimos cuadrados a las celdas de NASADEM; zona: DEM suavizado 5 × 5 celdas (~150 m) [S]", "celda_ha": round(celda_ha, 4),
                "tormenta": tormenta_p95()}, open("relieve_meta.json", "w"), ensure_ascii=False, indent=1)
     registrar_fuentes("A9", ["relieve_parcelas.csv", "relieve_rutas.geojson", "relieve_meta.json"],
-                      "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; lluvia NASA POWER",
+                      "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta)",
                       "datos/colab/A9_relieve.py")
     print(f"Parcelas: {len(filas)} · segmentos de ruta: {len(lineas)} · "
           f"pendiente media de la zona: {pendiente.mean():.2f} %")

@@ -16,6 +16,8 @@ Reglas [S] (umbrales a calibrar con las etiquetas a ciegas; S9 §5 y manual de e
   - barbecho: sin verdor todo el año. Lo demás: sin_clasificar (abstención).
   - Abstención también si ftw_confianza < 50 (kit A4.2).
 Abstenidas: cultivo sin_clasificar, edad y estado_plazo en null.
+Edad de la alfalfa: años perennes consecutivos hasta el año de establecimiento (primer año, hacia atrás, con
+  un mes desnudo: ndvi_min < umbral_resiembra_ndvi [S]); ese año cuenta como 1. Edad del nogal: años con el patrón.
 Plazo: anual → libre; alfalfa con edad ≥ 3 años → por_vencer; alfalfa más joven o nogal → comprometida.
 prob_max no aplica a reglas: se deja vacío; acuerdo_metodos = "1/1 (reglas)" hasta tener Random Forest.
 """
@@ -31,12 +33,13 @@ FTW_MIN = 50       # kit A4.2: abstención si la confianza de Fields of The Worl
 def main():
     carpeta("A4: cultivos por reglas fenológicas")
     sup = json.load(open("supuestos.json"))
-    for k in ("umbral_verde_ndvi", "umbral_invierno_alfalfa", "umbral_invierno_nogal"):
+    for k in ("umbral_verde_ndvi", "umbral_invierno_alfalfa", "umbral_invierno_nogal", "umbral_resiembra_ndvi"):
         if k not in sup:
             raise SystemExit(f"Falta '{k}' en supuestos.json")
     V = sup["umbral_verde_ndvi"]["valor"]
     INV_ALF = sup["umbral_invierno_alfalfa"]["valor"]
     INV_NOG = sup["umbral_invierno_nogal"]["valor"]
+    RESIEMBRA = sup["umbral_resiembra_ndvi"]["valor"]
     ndvi = defaultdict(dict)
     for r in csv.DictReader(open("hls_mensual_parcelas.csv")):
         if r["banda"] == "ndvi":
@@ -76,11 +79,16 @@ def main():
         # Edad del perenne: años agrícolas consecutivos con el mismo patrón, contando hacia atrás desde 2026
         edad = None
         if cultivo == "alfalfa":
+            # Edad del alfalfar: años perennes consecutivos hacia atrás hasta el año de establecimiento, que es
+            # el primero (hacia atrás) con un mes desnudo (ndvi_min < umbral_resiembra_ndvi) y se cuenta como año 1.
+            # Sin esto, la resiembra de alfalfa sobre alfalfa se leería como un alfalfar de 11 años.
             edad = 0
             for a in range(2026, 2015, -1):
-                if est(a) == "perenne":
-                    edad += 1
-                else:
+                if est(a) != "perenne":
+                    break
+                edad += 1
+                nmin = m.get(a, {}).get("ndvi_min")
+                if nmin not in (None, "") and float(nmin) < RESIEMBRA:
                     break
         elif cultivo == "nogal":
             edad = 0

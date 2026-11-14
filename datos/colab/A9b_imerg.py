@@ -18,9 +18,10 @@ from comun import carpeta, registrar_fuentes
 
 
 def main():
-    a = carpeta("A9b: lluvia diaria IMERG", lambda ap: ap.add_argument("--crudo", required=True))
+    a = carpeta("A9b: lluvia diaria IMERG", lambda ap: (ap.add_argument("--crudo", required=True),
+                                          ap.add_argument("--patron", default="imerg_2*.csv")))
     filas, incompletos = {}, []
-    for ruta in sorted(glob.glob(os.path.join(a.crudo, "imerg_*.csv"))):
+    for ruta in sorted(glob.glob(os.path.join(a.crudo, a.patron))):
         for r in csv.DictReader(open(ruta)):
             if r["lluvia_mm"] in ("", None):
                 continue

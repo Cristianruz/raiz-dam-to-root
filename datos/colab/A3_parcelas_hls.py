@@ -12,7 +12,7 @@ Salidas (columnas del kit 40, tabla 0.4-B, más la memoria):
     hls_mensual_parcelas.csv   id, mes, banda, mediana, p25, p75, n_validos
     suelo_desnudo.csv          id, dias_suelo_desnudo_feb_abr, dias_desnudo_viento_alto, ndvi_ultimo_mes, meses_validos
     memoria_parcelas.csv       id, anio_agricola, estado, meses_verdes, max_verano, max_invierno,
-                               dias_suelo_desnudo_feb_abr, meses_validos
+                               dias_suelo_desnudo_feb_abr, meses_validos, ndvi_min (adicional)
     memoria_resumen.csv        id, dias_suelo_desnudo_mediana (mediana entre años con dato), anios_con_dato, estado_2025
     fuentes_A3.csv             archivo | fuente | fecha | script | sha256
 Índices guardados por Earth Engine × 10,000 en Int16; −32768 = sin dato.
@@ -93,6 +93,7 @@ def resumen_anio(ndvi_mes, verde):
     ver = [validos[m] for m in VERANO if m in validos]
     inv = [validos[m] for m in INVIERNO if m in validos]
     return {"validos": len(validos), "verdes": sum(1 for v in validos.values() if v >= verde),
+            "min": min(validos.values()) if validos else None,
             "max_ver": max(ver) if ver else None, "max_inv": max(inv) if inv else None}
 
 
@@ -184,11 +185,13 @@ def main():
         estado = clasificar(res, resumen.get((pid, ag - 1)), resumen.get((pid, ag + 1)), verde)
         filas_mem.append([pid, ag, estado, res["verdes"],
                           None if res["max_ver"] is None else round(res["max_ver"], 3),
-                          None if res["max_inv"] is None else round(res["max_inv"], 3), res["desnudo"], res["validos"]])
+                          None if res["max_inv"] is None else round(res["max_inv"], 3), res["desnudo"], res["validos"],
+                          None if res["min"] is None else round(res["min"], 3)])
     with open("memoria_parcelas.csv", "w", newline="") as fo:
         w = csv.writer(fo)
         w.writerow(["id", "anio_agricola", "estado", "meses_verdes", "max_verano", "max_invierno",
-                     "dias_suelo_desnudo_feb_abr", "meses_validos"])          # columnas de la tabla 0.4-B (A3-M)
+                     "dias_suelo_desnudo_feb_abr", "meses_validos",           # columnas de la tabla 0.4-B (A3-M)
+                     "ndvi_min"])                                             # adicional: mínimo mensual del año (edad de la alfalfa)
         w.writerows(filas_mem)
     # A3-M paso 8: mediana entre años con dato (null si no hay ningún año)
     with open("memoria_resumen.csv", "w", newline="") as fo:
