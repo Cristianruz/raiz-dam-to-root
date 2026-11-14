@@ -225,6 +225,7 @@
    ],
    "contraste": {
     "titulo": "Monthly contrast with the modeled demand",
+    "nota": "This contrast covers the area named in its source, which can differ from the pilot area selected.",
     "unidad_en": "mm/month",
     "columnas": {
      "et_modelo_mm": "Modeled crop demand (FAO method with NASA POWER)",

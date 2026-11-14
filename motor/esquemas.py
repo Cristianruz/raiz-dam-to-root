@@ -51,7 +51,8 @@ Vocabulario de un campo (columna de CSV, propiedad de GeoJSON o llave de un obje
 Reglas de tabla («reglas»): orden (c1 ≤ c2 ≤ …), rango_por_banda, dias_ventana_por_anio,
 abstencion_a42, un_solo_valor_por, faltantes_max y, para las bases de datos del reto,
 combinacion_permitida (la combinación de varias columnas es una fila de una tabla cerrada),
-rango_segun (cota de una columna según el valor de otra: el valor según su unidad) y
+rango_segun (cota de una columna según el valor de otra: el valor según su unidad),
+valores_segun (lista cerrada de una columna según el valor de otra: la zona según la fuente) y
 vacias_segun (columnas que van vacías cuando otra vale cierto valor y, con «llenas_si_no»,
 llenas en cualquier otro caso). ensamblar.py las aplica por nombre.
 Reglas de JSON («regla»): heladas, dotaciones, supuestos, rotaciones y objeto (valida «campos»).
@@ -86,7 +87,10 @@ ARCHIVO_PARCELAS = "parcelas_base.geojson"
 # aparte («crudos»): no las valida, no las copia y no les pide línea en LEEME.md. Patrones de
 # fnmatch sobre el nombre en minúsculas. nasadem_zona_piloto.tif SÍ es entrega (A9) y se valida.
 CRUDOS_EARTH_ENGINE = ("hls_mensual_*.tif", "hls_reflect_*.tif", "hls_ndvi_memoria_*.tif",
-                       "piloto_consumo.tif")
+                       "piloto_consumo.tif",
+                       # Intermedios de las bases de datos del reto (decisión de recursos del reto,
+                       # «Otras precisiones»): de ellos salen contexto_regional.csv y gedi_parcelas.csv.
+                       "ctx_*.csv", "gedi_disparos_*.csv")
 
 # ---------------------------------------------------------------------------------------
 # Dos zonas piloto (FUENTE_DOS_ZONAS). Las zonas (id, nombre, prefijo_id, bbox) viven en
@@ -204,6 +208,11 @@ COMBINACIONES_CONTEXTO = (
     ("era5_land", "tmin_media", "°C"),
     ("era5_land", "dias_helada", "dias"),
 )
+# Nota de GRACE de FUENTE_RECURSOS (acordada con la sesión de datos): el límite entre dos celdas de
+# GRACE pasa por la zona, así que GRACE llega como UNA sola serie, con «zona» = «cuenca» (promedio
+# del rectángulo que envuelve las dos zonas). Ninguna otra fuente usa «cuenca».
+ZONA_CUENCA = "cuenca"
+FUENTE_DE_CUENCA = "grace"
 # Listas cerradas de cada columna, derivadas de la tabla (sin repetir y en su orden).
 FUENTES_CONTEXTO = tuple(dict.fromkeys(f for f, _, _ in COMBINACIONES_CONTEXTO))
 VARIABLES_CONTEXTO = tuple(dict.fromkeys(v for _, v, _ in COMBINACIONES_CONTEXTO))
@@ -652,7 +661,9 @@ ESQUEMAS = {
     "contexto_regional.csv": {
         "pieza": "A10", "tipo": "csv",
         "columnas": {
-            "zona": {"tipo": "texto", "valores": "@zonas_ids"},
+            # La lista de «zona» depende de la fuente (regla valores_segun): las zonas de params,
+            # o «cuenca» para GRACE.
+            "zona": {"tipo": "texto"},
             "fuente": {"tipo": "texto", "valores": FUENTES_CONTEXTO},
             "variable": {"tipo": "texto", "valores": VARIABLES_CONTEXTO},
             "mes": {"tipo": "mes"},
@@ -663,13 +674,16 @@ ESQUEMAS = {
         },
         "llave": ("zona", "fuente", "variable", "mes"),
         "reglas": [
+            {"regla": "valores_segun", "columna": "zona", "segun": "fuente",
+             "casos": {FUENTE_DE_CUENCA: (ZONA_CUENCA,)}, "resto": "@zonas_ids"},
             {"regla": "combinacion_permitida", "columnas": ["fuente", "variable", "unidad"],
              "permitidas": COMBINACIONES_CONTEXTO,
              "tabla": "docs/decisiones/2026-11-14_recursos_del_reto.md"},
             {"regla": "rango_segun", "columna": "valor", "grupos": LIMITES_CONTEXTO},
         ],
         "fuente_reglas": (f"{FUENTE_RECURSOS}: promedio mensual por zona, fuente y variable; zona de "
-                          "zona_piloto.zonas (params); fuente, variable y unidad en una de las 12 filas de "
+                          "zona_piloto.zonas (params), salvo GRACE, que llega como una sola serie con zona "
+                          "«cuenca» (nota de GRACE); fuente, variable y unidad en una de las 12 filas de "
                           "su tabla; llave (zona, fuente, variable, mes); valor vacío si no hay dato. "
                           "Límites físicos por definición: m3/m3 entre 0 y 1; NDVI entre −1 y 1; mm/mes y "
                           "kg/m2 ≥ 0; días del mes entre 0 y 31; resolución > 0 y al menos una celda. "

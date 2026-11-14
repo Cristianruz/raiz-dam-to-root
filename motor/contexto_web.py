@@ -31,8 +31,11 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                    dias_con_dato_imerg, dias_del_anio}], fuentes: {power, imerg}}}
                    calculado de eto_diaria[_zona].csv (NASA POWER) e imerg_diaria[_zona].csv.
   contexto_regional  null + contexto_regional_motivo, o {zona: {"fuente.variable": {fuente_id,
-                   variable, unidad, unidad_en, estadistica, unidad_anual_en, resolucion_m, n_celdas,
-                   fuente, fecha, meses, valores, anual: [{anio, media, n_meses, suma, completo}]}}}
+                   variable, ambito, unidad, unidad_en, estadistica, unidad_anual_en, resolucion_m,
+                   n_celdas, fuente, fecha, meses, valores, anual: [{anio, media, n_meses, suma,
+                   completo}]}}}. GRACE llega como UNA serie de cuenca (nota de GRACE de la decisión):
+                   va bajo la llave «cuenca» (esquemas.ZONA_CUENCA) con ambito «cuenca», y la página
+                   la muestra igual en las dos zonas; las demás series llevan ambito «zona».
   gedi             null + gedi_motivo, o {fuente, fecha, parcelas: {id: {n_disparos, altura_mediana_m,
                    altura_p90_m}} (solo n_disparos > 0), n_con_dato, n_total}
   ecostress        null + ecostress_motivo, o {fuente, fecha, meses, parcelas: {id: [valores por mes]}}
@@ -358,7 +361,8 @@ def bloque_contexto(ruta, zonas, unidades, registro, avisos):
     series, ajenas = {}, set()   # (zona, fuente, variable) → filas; zonas que params no conoce
     for fila in leer_csv(ruta):
         zona, fuente, variable = (fila[c].strip() for c in ("zona", "fuente", "variable"))
-        if zona not in zonas:
+        # «cuenca» es la zona de GRACE (una sola serie, la misma para las dos zonas piloto).
+        if zona not in zonas and zona != E.ZONA_CUENCA:
             ajenas.add(zona)
             continue
         series.setdefault((zona, fuente, variable), []).append(fila)
@@ -389,6 +393,8 @@ def bloque_contexto(ruta, zonas, unidades, registro, avisos):
         serie = {
             "fuente_id": fuente,
             "variable": variable,
+            # «cuenca»: una sola serie para las dos zonas (GRACE); «zona»: promedio del rectángulo de la zona.
+            "ambito": "cuenca" if zona == E.ZONA_CUENCA else "zona",
             "unidad": unidad,
             "unidad_en": rotulo.get("en", unidad),
             # Lo que resume el año: la suma de los 12 meses (láminas, días) o la media mensual.

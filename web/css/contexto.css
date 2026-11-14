@@ -196,6 +196,9 @@
 .contexto-datos .contexto-tabla td.contexto-celda-vacia { white-space: normal; font-style: italic; color: var(--contexto-tinta-suave); }
 .contexto-fila-elegida th, .contexto-fila-elegida td { background: var(--contexto-agua-clara); font-weight: 700; }
 .contexto-fila-elegida th { box-shadow: inset 4px 0 0 var(--contexto-agua); }
+/* GAEZ: tabla angosta que parte sus textos antes que salirse de la tarjeta. */
+.contexto-tabla--gaez { table-layout: fixed; }
+.contexto-tabla--gaez th, .contexto-tabla--gaez td { overflow-wrap: anywhere; }
 
 /* ---------- «Challenge data sources» ---------- */
 .contexto-recursos-resumen { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
@@ -220,7 +223,26 @@
 .contexto-archivo-falta span { font-style: italic; font-size: 0.78rem; }
 .contexto-archivos-fecha { display: block; margin-top: 2px; font-size: 0.78rem; color: var(--contexto-tinta-suave); }
 
-/* Teléfono: la tabla de recursos se apila (un bloque por recurso, cada dato con su rótulo). */
+/* Angosto: la tabla de recursos se apila (un bloque por recurso, cada dato con su rótulo). Se decide con
+   el ancho de SU contenedor (sirve igual en un panel lateral que en el teléfono); la regla @media es el
+   respaldo para navegadores sin consultas de contenedor. */
+.contexto-recursos { container-type: inline-size; container-name: contexto-recursos; }
+@container contexto-recursos (max-width: 760px) {
+  .contexto-tabla--recursos thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .contexto-tabla--recursos, .contexto-tabla--recursos tbody, .contexto-tabla--recursos tr,
+  .contexto-tabla--recursos th, .contexto-tabla--recursos td { display: block; width: 100%; }
+  .contexto-tabla--recursos tr { border: 1px solid var(--contexto-borde); border-radius: 10px; margin-bottom: 10px; padding: 6px 0; background: var(--contexto-fondo); }
+  .contexto-tabla--recursos th, .contexto-tabla--recursos td { border-bottom: none; padding: 3px 12px; }
+  .contexto-tabla--recursos tbody th { font-size: 0.98rem; }
+  .contexto-tabla--recursos .contexto-estado { white-space: normal; border-radius: 14px; }
+  .contexto-tabla--recursos td:last-child { min-width: 0; }
+  .contexto-tabla--recursos td::before {
+    content: attr(data-rotulo);
+    display: block;
+    font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--contexto-tinta-suave);
+  }
+}
 @media (max-width: 760px) {
   .contexto-tabla--recursos thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .contexto-tabla--recursos, .contexto-tabla--recursos tbody, .contexto-tabla--recursos tr,

@@ -4,12 +4,14 @@
 Contrato: docs/decisiones/2026-11-14_recursos_del_reto.md («Contrato de las entregas nuevas»).
 Esquemas: motor/esquemas.py (contexto_regional.csv A10, gedi_parcelas.csv A11,
 ecostress_parcelas.csv A12 y gaez_zona.csv A13); reglas nuevas en motor/ensamblar.py
-(combinacion_permitida, rango_segun y vacias_segun).
+(combinacion_permitida, rango_segun, valores_segun y vacias_segun).
 
 Por cada archivo: un buzón válido que entra y varios inválidos que se rechazan con un motivo
 legible (columna faltante, combinación fuente/variable/unidad que no está en la tabla, llave
 repetida, id que no existe en parcelas_base, alturas con n_disparos = 0, valor fuera del límite
-físico…). Todo se escribe en tmp_path: nunca en data/processed ni en web/data.
+físico…). GRACE llega como una sola serie con zona «cuenca» (nota de GRACE de la decisión) y los
+intermedios de Earth Engine (ctx_*.csv, gedi_disparos_*.csv) se listan aparte como crudos.
+Todo se escribe en tmp_path: nunca en data/processed ni en web/data.
 
 TODOS LOS VALORES SON DE PRUEBA (no son datos, no tienen fuente y no se usan en la web). Las
 zonas y las clases de cultivo se leen de data/params.json y de motor/esquemas.py, no se escriben aquí.
@@ -34,6 +36,8 @@ NUEVOS = {"contexto_regional.csv": "A10", "gedi_parcelas.csv": "A11",
           "ecostress_parcelas.csv": "A12", "gaez_zona.csv": "A13"}
 ZONAS = LIMITES["zonas_ids"]                 # de data/params.json (zona_piloto.zonas)
 ZONA_A, ZONA_B = ZONAS[0], ZONAS[1]
+CUENCA = esquemas.ZONA_CUENCA                # «zona» de GRACE: una sola serie de cuenca
+DE_CUENCA = esquemas.FUENTE_DE_CUENCA
 # Parcelas de la fixture de dos zonas (tests/fixtures/buzon_dos_zonas/parcelas_base.geojson).
 IDS = ("P0001", "P0002", "L0001", "L0002")
 MESES = ("2026-01", "2026-02")
@@ -54,10 +58,17 @@ def fila_contexto(zona, fuente, variable, mes, valor, unidad, resolucion=RESOLUC
     return f"{zona},{fuente},{variable},{mes},{valor},{unidad},{resolucion},{celdas}"
 
 
+def zona_de(fuente, zona):
+    """La zona con que va una fuente: GRACE siempre «cuenca»; las demás, la zona pedida."""
+    return CUENCA if fuente == DE_CUENCA else zona
+
+
 def contexto_valido():
-    """Las 12 combinaciones de la tabla, en las dos zonas y dos meses; un valor vacío (sin dato)."""
-    filas = [fila_contexto(z, f, v, m, VALOR_PRUEBA[u], u)
-             for z in (ZONA_A, ZONA_B) for (f, v, u) in esquemas.COMBINACIONES_CONTEXTO for m in MESES]
+    """Las 12 combinaciones de la tabla y dos meses; un valor vacío (sin dato). Cada fuente va en las
+    dos zonas, salvo GRACE, que va una sola vez con zona «cuenca»."""
+    filas = [fila_contexto(zona_de(f, z), f, v, m, VALOR_PRUEBA[u], u)
+             for z in (ZONA_A, ZONA_B) for (f, v, u) in esquemas.COMBINACIONES_CONTEXTO for m in MESES
+             if f != DE_CUENCA or z == ZONA_A]
     filas[0] = fila_contexto(ZONA_A, *esquemas.COMBINACIONES_CONTEXTO[0][:2], MESES[0], "",
                              esquemas.COMBINACIONES_CONTEXTO[0][2])
     return "\n".join([ENC_CONTEXTO, *filas]) + "\n"
@@ -206,10 +217,45 @@ def test_contexto_combinacion_que_no_esta_en_la_tabla(tmp_path):
 
 
 def test_contexto_unidad_que_no_corresponde_a_la_variable(tmp_path):
-    vieja = fila_contexto(ZONA_A, "grace", "agua_almacenada_anomalia", MESES[1], VALOR_PRUEBA["cm"], "cm")
-    nueva = fila_contexto(ZONA_A, "grace", "agua_almacenada_anomalia", MESES[1], VALOR_PRUEBA["cm"], "mm/mes")
+    vieja = fila_contexto(CUENCA, "grace", "agua_almacenada_anomalia", MESES[1], VALOR_PRUEBA["cm"], "cm")
+    nueva = fila_contexto(CUENCA, "grace", "agua_almacenada_anomalia", MESES[1], VALOR_PRUEBA["cm"], "mm/mes")
     m = rechazo(tmp_path, "contexto_regional.csv", cambiar(contexto_valido(), vieja, nueva))
     assert "no está en la tabla" in m and "grace, agua_almacenada_anomalia, mm/mes" in m
+
+
+# GRACE: una sola serie de cuenca (nota de GRACE de la decisión).
+def test_contexto_grace_va_con_zona_cuenca_y_solo_grace():
+    regla = next(r for r in esquemas.ESQUEMAS["contexto_regional.csv"]["reglas"] if r["regla"] == "valores_segun")
+    assert regla["casos"] == {"grace": ("cuenca",)} and regla["resto"] == "@zonas_ids"
+    assert "nota de GRACE" in esquemas.ESQUEMAS["contexto_regional.csv"]["fuente_reglas"]
+    texto = (RAIZ / DECISION).read_text(encoding="utf-8")
+    assert "Solo para `grace`: `cuenca`" in texto and "una sola serie" in texto, "el contrato sigue diciéndolo"
+    filas_grace = [l for l in contexto_valido().splitlines() if ",grace," in l]
+    assert len(filas_grace) == len(MESES) and all(l.startswith(f"{CUENCA},") for l in filas_grace)
+
+
+def test_contexto_grace_con_zona_de_parcelas_se_rechaza(tmp_path):
+    """GRACE repartido por zona sería un efecto de la malla, no información local: no entra."""
+    texto = contexto_valido().replace(f"{CUENCA},grace,", f"{ZONA_A},grace,")
+    m = rechazo(tmp_path, "contexto_regional.csv", texto)
+    assert f"zona «{ZONA_A}» no se admite con fuente «grace» (se admite: cuenca)" in m
+
+
+def test_contexto_cuenca_con_otra_fuente_se_rechaza(tmp_path):
+    vieja = fila_contexto(ZONA_B, "smap", "humedad_raiz", MESES[1], VALOR_PRUEBA["m3/m3"], "m3/m3")
+    nueva = fila_contexto(CUENCA, "smap", "humedad_raiz", MESES[1], VALOR_PRUEBA["m3/m3"], "m3/m3")
+    m = rechazo(tmp_path, "contexto_regional.csv", cambiar(contexto_valido(), vieja, nueva))
+    assert f"zona «cuenca» no se admite con fuente «smap» (se admite: {', '.join(ZONAS)})" in m
+
+
+def test_contexto_sin_zonas_en_params_avisa_y_no_inventa(tmp_path):
+    """Si params no trae zona_piloto.zonas, la zona de las demás fuentes no se comprueba y se avisa."""
+    import json
+    params = json.loads((RAIZ / "data/params.json").read_text(encoding="utf-8"))
+    del params["zona_piloto"]["zonas"]
+    rep = correr(buzon_con(tmp_path, {"contexto_regional.csv": contexto_valido()}, copiar=()), tmp_path, params=params)
+    x = next(e for e in rep["entraron"] if e["archivo"] == "contexto_regional.csv")
+    assert any("zonas_ids" in a for a in x["avisos"]), x["avisos"]
 
 
 def test_contexto_llave_repetida(tmp_path):
@@ -239,13 +285,15 @@ def test_contexto_valor_fuera_del_limite_fisico(tmp_path, fuente, variable, unid
     ("grace", "agua_almacenada_anomalia", "cm", "-250"),
 ])
 def test_contexto_celsius_y_cm_sin_limite_inventado(tmp_path, fuente, variable, unidad, valor):
-    vieja = fila_contexto(ZONA_A, fuente, variable, MESES[1], VALOR_PRUEBA[unidad], unidad)
-    nueva = fila_contexto(ZONA_A, fuente, variable, MESES[1], valor, unidad)
+    vieja = fila_contexto(zona_de(fuente, ZONA_A), fuente, variable, MESES[1], VALOR_PRUEBA[unidad], unidad)
+    nueva = fila_contexto(zona_de(fuente, ZONA_A), fuente, variable, MESES[1], valor, unidad)
     entra(tmp_path, "contexto_regional.csv", cambiar(contexto_valido(), vieja, nueva))
 
 
 @pytest.mark.parametrize("cambio, clave", [
-    (lambda f: f.replace(f"{ZONA_B},gldas,et,", "zona_inventada,gldas,et,", 1), "zona fuera de la lista permitida"),
+    (lambda f: f.replace(f"{ZONA_B},gldas,et,", "zona_inventada,gldas,et,", 1),
+     "zona «zona_inventada» no se admite con fuente «gldas»"),
+    (lambda f: f.replace(f"{ZONA_B},gldas,et,", ",gldas,et,", 1), "zona: celda vacía no permitida"),
     (lambda f: f.replace(",gldas,et,", ",merra,et,", 1), "fuente fuera de la lista permitida"),
     (lambda f: f.replace(",gldas,et,", ",gldas,escurrimiento,", 1), "variable fuera de la lista permitida"),
     (lambda f: f.replace(f",gldas,et,{MESES[0]},", ",gldas,et,2026-13,", 1), "no es un mes AAAA-MM válido"),
@@ -262,6 +310,34 @@ def test_contexto_celdas_invalidas(tmp_path, cambio, clave):
     texto = cambio(contexto_valido())
     assert texto != contexto_valido(), "el cambio de prueba no se aplicó"
     assert clave in rechazo(tmp_path, "contexto_regional.csv", texto)
+
+
+def test_contexto_dias_helada_con_decimales_entra(tmp_path):
+    """Los días con helada de ERA5-Land se promedian entre celdas: pueden traer decimales."""
+    vieja = fila_contexto(ZONA_A, "era5_land", "dias_helada", MESES[0], VALOR_PRUEBA["dias"], "dias")
+    nueva = fila_contexto(ZONA_A, "era5_land", "dias_helada", MESES[0], "3.6", "dias")
+    entra(tmp_path, "contexto_regional.csv", cambiar(contexto_valido(), vieja, nueva))
+
+
+# ---------------------------------------------------------------------------------------
+# Intermedios de Earth Engine: crudos, no entregas
+# ---------------------------------------------------------------------------------------
+def test_intermedios_de_earth_engine_se_listan_como_crudos(tmp_path):
+    """ctx_*.csv y gedi_disparos_*.csv no son entregas: ni entran, ni se rechazan, ni piden LEEME."""
+    b = buzon(tmp_path, {"contexto_regional.csv": contexto_valido(), "gedi_parcelas.csv": GEDI_VALIDO})
+    for nombre in ("ctx_smap_2026.csv", "ctx_grace.csv", "gedi_disparos_delicias_saucillo.csv"):
+        (b / nombre).write_text("columna_de_prueba\n1\n", encoding="utf-8")       # sin línea en LEEME.md
+        assert ens.es_crudo(nombre)
+    rep = correr(b, tmp_path)
+    assert rep["rechazados"] == []
+    assert sorted(c["archivo"] for c in rep["crudos"]) == ["ctx_grace.csv", "ctx_smap_2026.csv",
+                                                           "gedi_disparos_delicias_saucillo.csv"]
+    assert nombres(rep["entraron"]) == ["contexto_regional.csv", "gedi_parcelas.csv", "parcelas_base.geojson"]
+    for c in rep["crudos"]:
+        assert not (tmp_path / "salida" / c["archivo"]).exists()
+    # Las entregas de verdad no se confunden con crudos.
+    for nombre in NUEVOS:
+        assert not ens.es_crudo(nombre)
 
 
 # ---------------------------------------------------------------------------------------
@@ -382,7 +458,7 @@ def test_gaez_invalidos(tmp_path, columna, valor, clave):
 # Lo que ya había no cambia
 # ---------------------------------------------------------------------------------------
 def test_las_reglas_nuevas_solo_las_usan_los_esquemas_nuevos():
-    reglas_nuevas = {"combinacion_permitida", "rango_segun", "vacias_segun"}
+    reglas_nuevas = {"combinacion_permitida", "rango_segun", "valores_segun", "vacias_segun"}
     assert reglas_nuevas <= set(ens.REGLAS_CSV)
     for nombre, esq in esquemas.ESQUEMAS.items():
         usadas = {r["regla"] for r in esq.get("reglas", [])}

@@ -763,6 +763,23 @@ def regla_rango_segun(regla, filas, ctx, res, faltantes):
             res.motivo(f"{col} con {g['segun']} «{segun}» {cota_txt}", f"fila {n}: {fmt(v)}")
 
 
+def regla_valores_segun(regla, filas, ctx, res, faltantes):
+    """Lista cerrada de «columna» según el valor de otra columna de la fila: «casos» da la lista de
+    cada valor de «segun» y «resto» la de los demás (contexto_regional.csv: GRACE va con zona
+    «cuenca»; las demás fuentes, con una zona de params). Una lista «@nombre» sale de params; si
+    params no la trae, esa parte no se comprueba y se avisa (cota())."""
+    col, segun = regla["columna"], regla["segun"]
+    resto = cota(regla.get("resto"), ctx, res, f"la lista de {col}")
+    for n, fila in filas:
+        valor, de = fila.get(col), fila.get(segun)
+        if valor is None or de is None:
+            continue
+        permitidos = regla["casos"].get(de, resto)
+        if permitidos is not None and valor not in permitidos:
+            res.motivo(f"{col} «{valor}» no se admite con {segun} «{de}» (se admite: {', '.join(permitidos)})",
+                       f"fila {n}")
+
+
 def regla_vacias_segun(regla, filas, ctx, res, faltantes):
     """Las «columnas» van vacías cuando «columna» vale «valor» (sin disparos de GEDI no hay
     altura; sin escenas no hay ET) y, con «llenas_si_no», traen valor en cualquier otro caso."""
@@ -788,6 +805,7 @@ REGLAS_CSV = {
     # Bases de datos del reto (docs/decisiones/2026-11-14_recursos_del_reto.md).
     "combinacion_permitida": regla_combinacion_permitida,
     "rango_segun": regla_rango_segun,
+    "valores_segun": regla_valores_segun,
     "vacias_segun": regla_vacias_segun,
 }
 

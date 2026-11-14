@@ -283,11 +283,16 @@ def test_lleno_todos_los_bloques(lleno):
 
 def test_lleno_contexto_regional_alineado(lleno):
     bloque = lleno["contexto"]["contexto_regional"]
-    assert set(bloque) == set(ZONAS)
+    cuenca = esquemas.ZONA_CUENCA
+    assert set(bloque) == {*ZONAS, cuenca}, "las zonas de params y la serie de cuenca de GRACE"
     claves = {f"{f}.{v}": u for f, v, u in esquemas.COMBINACIONES_CONTEXTO}
-    for zona in ZONAS:
-        assert set(bloque[zona]) == set(claves), "las 12 series de la tabla"
+    de_cuenca = {c for c in claves if c.startswith(f"{esquemas.FUENTE_DE_CUENCA}.")}
+    assert set(bloque[cuenca]) == de_cuenca, "GRACE: una sola serie, bajo «cuenca»"
+    for zona in (*ZONAS, cuenca):
+        if zona != cuenca:
+            assert set(bloque[zona]) == set(claves) - de_cuenca, "las otras 11 series de la tabla, por zona"
         for clave, serie in bloque[zona].items():
+            assert serie["ambito"] == ("cuenca" if zona == cuenca else "zona")
             assert serie["unidad"] == claves[clave]
             assert f"{serie['fuente_id']}.{serie['variable']}" == clave
             assert len(serie["meses"]) == len(serie["valores"]) > 0
@@ -329,8 +334,8 @@ def test_lleno_media_y_suma_anual_con_un_calculo_independiente(lleno):
 
 def test_lleno_huecos_no_se_rellenan(lleno):
     series = lleno["contexto"]["contexto_regional"][ZONAS[0]]
-    # GRACE: tres meses sin fila → null en su lugar y año incompleto.
-    grace = series["grace.agua_almacenada_anomalia"]
+    # GRACE (serie de cuenca): tres meses sin fila → null en su lugar y año incompleto.
+    grace = lleno["contexto"]["contexto_regional"][esquemas.ZONA_CUENCA]["grace.agua_almacenada_anomalia"]
     por_mes = dict(zip(grace["meses"], grace["valores"]))
     assert [por_mes[m] for m in ("2023-03", "2023-04", "2023-05")] == [None, None, None]
     anio = next(a for a in grace["anual"] if a["anio"] == 2023)
@@ -456,6 +461,7 @@ def test_contexto_regional_sin_filas_de_una_fuente(tmp_path):
     assert recursos["grace"]["estado"] == "requested" and recursos["grace"]["motivo"] == cw.MOTIVO_SIN_FILAS
     assert recursos["grace"]["entregas_faltantes"] == ["contexto_regional.csv"]
     assert recursos["smap"]["estado"] == "in_use"
+    assert esquemas.ZONA_CUENCA not in contexto["contexto_regional"], "sin GRACE no hay serie de cuenca"
     assert all("grace." not in clave for z in ZONAS for clave in contexto["contexto_regional"][z])
 
 

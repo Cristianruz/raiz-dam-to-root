@@ -17,7 +17,8 @@
 //           del año elegido, unidad, resolución y fuente. Si el bloque es null o la serie no llegó, la
 //           tarjeta existe y dice el motivo del JSON («Requested from the data team — not delivered
 //           yet»), sin gráfica vacía ni ceros. La tarjeta de evapotranspiración dibuja además
-//           et_contraste. Otra tarjeta lista la aptitud de GAEZ por cultivo;
+//           et_contraste. GRACE llega como una sola serie de cuenca: se muestra igual en todas las
+//           zonas y se rotula «Basin scale». Otra tarjeta lista la aptitud de GAEZ por cultivo;
 //       (3) la nota fija de límites (NOTA_REGIONAL).
 //         contexto        contenido de contexto.json (null: la sección lo dice)
 //         zonaId          id de la zona piloto (contexto.zonas); otra cosa: «choose a pilot area»
@@ -32,14 +33,15 @@
 //   evidenciaDeParcela({ contexto, id }) -> [{ etiqueta, texto, fuente }]
 //       Renglones para la ficha: altura del dosel de GEDI y ET de ECOSTRESS del último mes con dato.
 //       [] si los dos bloques son null.
-//   riesgoDeHelada({ contexto, fechaSiembra }) -> { prob, fuente, fecha } | null
+//   riesgoDeHelada({ contexto, fechaSiembra, zonaId }) -> { prob, fuente, fecha } | null
 //       Probabilidad de helada después de la fecha de siembra, de heladas.prob_helada_despues_de
 //       (la fecha «MM-DD» más cercana anterior o igual). fechaSiembra: «MM-DD», «AAAA-MM-DD», Date,
-//       [mes, día] o { mes, dia }. null si no hay bloque o la fecha cae fuera de la ventana calculada.
+//       [mes, día] o { mes, dia }. zonaId (opcional): si heladas.zonas trae esa zona, se usa su tabla;
+//       si no, la de la zona base. null si no hay bloque o la fecha cae fuera de la ventana calculada.
 //   Funciones puras (las mismas que usa la página; se prueban en tests/contexto.test.js):
-//       num, climaDelAnio, diferenciaLluvia, anioPorOmision, graficasDeClima, puntosAnuales,
-//       valorAnual, modeloTarjetas, modeloContraste, escalaY, formatoResolucion, formatoNumero,
-//       etiquetaMes, ordenarRecursos, contarEstados, ultimoMesConDato, mesDia.
+//       num, climaDelAnio, diferenciaLluvia, anioPorOmision, graficasDeClima, seriesDeZona,
+//       puntosAnuales, valorAnual, modeloTarjetas, modeloContraste, escalaY, formatoResolucion,
+//       formatoNumero, etiquetaMes, ordenarRecursos, contarEstados, ultimoMesConDato, mesDia.
 //   Las funciones «montar…» insertan css/contexto.css en la página si aún no está enlazada.
 //
 // Reglas de este archivo:
@@ -84,6 +86,8 @@ const ESTADO_DESCONOCIDO = { texto: "Unknown", simbolo: "?", orden: 3 };
 
 // Ranuras de serie en orden fijo: el color sigue a la serie, no a su posición entre las presentes.
 const RANURAS = ["a", "b", "c", "d", "e"];
+// Llave de contexto_regional con las series de cuenca (motor/esquemas.py, ZONA_CUENCA).
+const LLAVE_CUENCA = "cuenca";
 
 // Medidas de diseño de las gráficas, en píxeles (no son datos). Cada gráfica se dibuja al ancho real
 // de su lienzo (entre ANCHO_MIN y ANCHO_MAX) para que el texto tenga siempre el mismo tamaño.
@@ -101,7 +105,7 @@ const ALTO_CLAVE = 12;
 const RADIO_CLAVE = 3.5;
 const BORDE_TEXTO = 40; // a menos de esto del borde, el rótulo del año se alinea hacia adentro
 const METROS_POR_KM = 1000;
-const ANIO_DE_REFERENCIA = 2001; // un año no bisiesto cualquiera, para ordenar fechas «MM-DD»
+const ANIO_DE_REFERENCIA = 2000; // un año bisiesto, para ordenar fechas «MM-DD» y admitir el 29 de febrero
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 const CERO = String(0);
 
@@ -346,6 +350,16 @@ function unidadAnual(serie) {
   return serie.unidad_anual_en ?? serie.unidad_en ?? serie.unidad ?? "";
 }
 
+/**
+ * Series regionales que se muestran en una zona: las de su rectángulo más las de cuenca (GRACE llega
+ * como una sola serie, bajo la llave LLAVE_CUENCA, y vale igual para todas las zonas piloto).
+ */
+export function seriesDeZona(contexto, zonaId) {
+  const regional = (contexto && contexto.contexto_regional) || null;
+  if (!regional) return {};
+  return { ...(regional[LLAVE_CUENCA] || {}), ...(regional[zonaId] || {}) };
+}
+
 function modeloAnualDePanel(tarjeta, indice, panel, seriesZona) {
   const presentes = panel.series
     .map((s, i) => ({ ...s, ranura: RANURAS[i], serie: seriesZona[s.clave] || null }))
@@ -366,6 +380,8 @@ function modeloAnualDePanel(tarjeta, indice, panel, seriesZona) {
   return {
     id: `${tarjeta.id}-${indice}`,
     titulo: panel.titulo,
+    // Nombre completo para lectores de pantalla: dos tarjetas pueden tener un panel con el mismo título.
+    nombre: `${tarjeta.titulo}: ${panel.titulo}`,
     unidad: unidadAnual(base),
     // Una suma ya lo dice en su unidad («mm/year»); una media lo dice con palabras.
     subtitulo: base.estadistica === "suma" ? unidadAnual(base) : [unidadAnual(base), "yearly mean"].filter(Boolean).join(", "),
@@ -382,7 +398,7 @@ function modeloAnualDePanel(tarjeta, indice, panel, seriesZona) {
  * motivo por el que no está. `disponible` es false cuando la tarjeta no tiene nada que dibujar.
  */
 export function modeloTarjetas(contexto, zonaId) {
-  const seriesZona = (contexto && contexto.contexto_regional && contexto.contexto_regional[zonaId]) || {};
+  const seriesZona = seriesDeZona(contexto, zonaId);
   return ((contexto && contexto.tarjetas) || []).map((tarjeta) => {
     const paneles = (tarjeta.paneles || []).map((panel, i) => {
       const grafica = modeloAnualDePanel(tarjeta, i, panel, seriesZona);
@@ -426,7 +442,7 @@ export function modeloContraste(contexto, zonaId, tarjeta) {
   const definicion = tarjeta && tarjeta.contraste;
   if (!bloque || !definicion || !(bloque.meses || []).length) return null;
   const meses = bloque.meses.map(String);
-  const seriesZona = (contexto.contexto_regional && contexto.contexto_regional[zonaId]) || {};
+  const seriesZona = seriesDeZona(contexto, zonaId);
   const candidatas = [];
   Object.entries(definicion.columnas || {}).forEach(([columna, nombre]) => {
     const valores = (bloque.columnas && bloque.columnas[columna]) || [];
@@ -435,7 +451,7 @@ export function modeloContraste(contexto, zonaId, tarjeta) {
   (definicion.series_regionales || []).forEach((s) => {
     const serie = seriesZona[s.clave];
     const porMes = new Map(serie ? serie.meses.map((m, i) => [m, num(serie.valores[i])]) : []);
-    candidatas.push({ nombre: s.etiqueta, valores: meses.map((m) => porMes.get(m) ?? null), regional: true, sinSerie: !serie });
+    candidatas.push({ nombre: s.etiqueta, valores: meses.map((m) => porMes.get(m) ?? null) });
   });
   const conRanura = candidatas.map((c, i) => ({ ...c, ranura: RANURAS[i % RANURAS.length] }));
   const series = conRanura
@@ -445,6 +461,7 @@ export function modeloContraste(contexto, zonaId, tarjeta) {
   return {
     id: `${tarjeta.id}-contraste`,
     titulo: definicion.titulo,
+    nombre: `${tarjeta.titulo}: ${definicion.titulo}`,
     unidad: definicion.unidad_en || "",
     subtitulo: definicion.unidad_en || "",
     x: meses.map((m) => ({ clave: m, etiqueta: etiquetaMes(m) })),
@@ -453,6 +470,7 @@ export function modeloContraste(contexto, zonaId, tarjeta) {
     desdeCero: true,
     porAnio: false,
     columnaX: ROTULO_MES,
+    nota: definicion.nota || null,
     fuente: bloque.fuente || null,
     fecha: bloque.fecha || null,
   };
@@ -563,12 +581,14 @@ function textoMesDia(md) {
 /**
  * Probabilidad de helada después de la fecha de siembra (kit A2). Usa la fecha calculada más cercana
  * anterior o igual. null si no hay bloque, si la siembra es anterior a la ventana calculada o si cae
- * más allá de la última fecha por más del paso entre fechas (ahí A2 no calculó nada).
+ * un paso o más después de la última fecha (ahí A2 no calculó nada: p. ej., una siembra de otoño).
  */
-export function riesgoDeHelada({ contexto, fechaSiembra } = {}) {
+export function riesgoDeHelada({ contexto, fechaSiembra, zonaId } = {}) {
   const bloque = contexto && contexto.heladas;
   const md = mesDia(fechaSiembra);
-  const tabla = bloque && bloque.prob_helada_despues_de;
+  // heladas.json trae la zona base arriba y las demás en «zonas»: una zona con bloque propio usa el suyo.
+  const deZona = bloque && zonaId != null && bloque.zonas && bloque.zonas[zonaId];
+  const tabla = bloque && (deZona || bloque).prob_helada_despues_de;
   if (!md || !tabla || typeof tabla !== "object") return null;
   const fechas = Object.keys(tabla)
     .map((k) => ({ md: mesDia(k), prob: num(tabla[k]) }))
@@ -577,13 +597,15 @@ export function riesgoDeHelada({ contexto, fechaSiembra } = {}) {
     .sort((a, b) => a.dia - b.dia);
   if (!fechas.length) return null;
   const dia = diaDelAnio(md);
-  // Paso de la ventana: la mayor separación entre fechas seguidas (un día si hay una sola).
-  const paso = fechas.slice(1).reduce((mayor, f, i) => Math.max(mayor, f.dia - fechas[i].dia), 1);
   const previas = fechas.filter((f) => f.dia <= dia);
   if (!previas.length) return null;
   const elegida = previas[previas.length - 1];
-  if (dia - elegida.dia >= paso) return null;
-  return { prob: elegida.prob, fuente: bloque.fuente || null, fecha: textoMesDia(elegida.md) };
+  // Entre dos fechas calculadas vale la anterior. Después de la última, la ventana se extiende un
+  // paso (la separación entre las dos últimas fechas; un día si hay una sola): más allá no hay cálculo.
+  const ultima = fechas[fechas.length - 1];
+  const paso = fechas.length > 1 ? ultima.dia - fechas[fechas.length - 2].dia : 1;
+  if (elegida === ultima && dia - ultima.dia >= paso) return null;
+  return { prob: elegida.prob, fuente: (deZona && deZona.fuente) || bloque.fuente || null, fecha: textoMesDia(elegida.md) };
 }
 
 // ---------------------------------------------------------------------------
@@ -607,8 +629,9 @@ export function escalaY(valores, desdeCero = false) {
     max = Math.max(max, 0);
   }
   if (min === max) {
+    // Todos los valores iguales: se abre un margen (sin bajar de cero cuando el eje nace en cero).
     const holgura = Math.abs(min) / 2 || 1;
-    min -= holgura;
+    if (!desdeCero) min -= holgura;
     max += holgura;
   }
   const paso = pasoBonito((max - min) / DIVISIONES_Y);
@@ -717,7 +740,7 @@ function textoValor(modelo, serie, i) {
 function descripcion(modelo, i) {
   const nombres = modelo.series.map((s) => s.nombre).join(", ");
   const rango = `${modelo.x[0].etiqueta} to ${modelo.x[modelo.x.length - 1].etiqueta}`;
-  const base = `Line chart of ${modelo.titulo}: ${nombres}, ${rango}.`;
+  const base = `Line chart of ${modelo.nombre || modelo.titulo}: ${nombres}, ${rango}.`;
   if (i < 0) return `${base} A data table follows.`;
   const valores = modelo.series.map((s) => `${s.nombre} ${textoValor(modelo, s, i)}`).join("; ");
   return `${base} ${modelo.x[i].etiqueta}: ${valores}. A data table follows.`;
@@ -754,9 +777,9 @@ function htmlTabla(modelo, indiceElegido) {
     })
     .join("");
   return `<details class="contexto-datos">
-      <summary>${esc(ROTULO_TABLA)}<span class="solo-lector">: ${esc(modelo.titulo)}</span></summary>
-      <div class="contexto-tabla-caja" tabindex="0" role="region" aria-label="${esc(ROTULO_TABLA)}: ${esc(modelo.titulo)}"><table class="contexto-tabla">
-        <caption>${esc(conUnidad(modelo.titulo, modelo.subtitulo ? `(${modelo.subtitulo})` : ""))}</caption>
+      <summary>${esc(ROTULO_TABLA)}<span class="solo-lector">: ${esc(modelo.nombre || modelo.titulo)}</span></summary>
+      <div class="contexto-tabla-caja" tabindex="0" role="region" aria-label="${esc(ROTULO_TABLA)}: ${esc(modelo.nombre || modelo.titulo)}"><table class="contexto-tabla">
+        <caption>${esc(conUnidad(modelo.nombre || modelo.titulo, modelo.subtitulo ? `(${modelo.subtitulo})` : ""))}</caption>
         <thead><tr><th scope="col">${esc(modelo.columnaX)}</th>${cabeceras}</tr></thead>
         <tbody>${filas}</tbody>
       </table></div>
@@ -826,9 +849,9 @@ function htmlFuentesClima(contexto, zonaId) {
 
 function textoCeldas(serie) {
   const n = num(serie.n_celdas);
-  if (n != null) return `${formatoNumero(n)} ${plural(n, "grid cell", "grid cells")} in the area average`;
+  if (n != null) return `${formatoNumero(n)} ${plural(n, "grid cell", "grid cells")} in the average`;
   const rango = serie.n_celdas_rango;
-  if (Array.isArray(rango) && rango.length > 1) return `${formatoNumero(rango[0])} to ${formatoNumero(rango[1])} grid cells in the area average`;
+  if (Array.isArray(rango) && rango.length > 1) return `${formatoNumero(rango[0])} to ${formatoNumero(rango[1])} grid cells in the average`;
   return null;
 }
 
@@ -837,7 +860,12 @@ function htmlMetaPanel(panel) {
   if (!presentes.length) return "";
   const s = presentes[0].serie;
   const resolucion = formatoResolucion(s.resolucion_m);
-  const partes = [resolucion ? `Regional, ${resolucion} grid` : null, textoCeldas(s)].filter(Boolean);
+  const deCuenca = s.ambito === LLAVE_CUENCA;
+  const partes = [
+    resolucion ? `${deCuenca ? "Basin scale" : "Regional"}, ${resolucion} grid` : null,
+    deCuenca ? "One series for the whole basin, the same in every pilot area" : null,
+    textoCeldas(s),
+  ].filter(Boolean);
   return partes.length ? `<p class="contexto-meta">${partes.map((p) => `<span>${esc(p)}</span>`).join("")}</p>` : "";
 }
 
@@ -867,7 +895,8 @@ function htmlTarjeta(t, nivel) {
   if (t.contraste) {
     const k = t.contraste;
     const sinDato = k.sinDato.length ? `<p class="contexto-meta"><span>Not drawn, no data: ${esc(k.sinDato.join(", "))}</span></p>` : "";
-    contraste = `${htmlFigura(k)}${sinDato}`;
+    const nota = k.nota ? `<p class="contexto-meta"><span>${esc(k.nota)}</span></p>` : "";
+    contraste = `${htmlFigura(k)}${sinDato}${nota}`;
   }
   const clase = t.disponible ? "contexto-tarjeta" : "contexto-tarjeta contexto-tarjeta--pendiente";
   return `<article class="${clase}" data-tarjeta="${esc(t.id)}">
@@ -892,20 +921,25 @@ function htmlTarjetaGaez(contexto, zonaId, nivel, nombres) {
     const motivo = !gaez ? contexto.gaez_motivo : "The delivered file has no rows for this pilot area";
     return `<article class="contexto-tarjeta contexto-tarjeta--pendiente" data-tarjeta="gaez">${cabeza}${htmlPendiente(motivo, "GAEZ (FAO)")}${nota}</article>`;
   }
+  // La escala se escribe una vez si todas las filas comparten resolución; si no, junto a cada valor.
+  const resoluciones = [...new Set(filas.map((f) => formatoResolucion(f.resolucion_m)).filter(Boolean))];
+  const unaEscala = resoluciones.length === 1 && filas.every((f) => formatoResolucion(f.resolucion_m));
   const cuerpo = filas
     .map((f) => {
       const resolucion = formatoResolucion(f.resolucion_m);
-      return `<tr><th scope="row">${esc(nombreCultivo(f.cultivo, nombres))}</th><td>${esc(f.variable)}</td><td>${esc(conUnidad(formatoNumero(f.valor), f.unidad))}</td><td>${esc(resolucion ? `${resolucion} grid` : "—")}</td></tr>`;
+      const escala = !unaEscala && resolucion ? ` <span class="contexto-equivalente">${esc(resolucion)} grid</span>` : "";
+      return `<tr><th scope="row">${esc(nombreCultivo(f.cultivo, nombres))}</th><td>${esc(f.variable)}</td><td>${esc(conUnidad(formatoNumero(f.valor), f.unidad))}${escala}</td></tr>`;
     })
     .join("");
+  const escalaComun = unaEscala ? `<p class="contexto-meta"><span>Regional, ${esc(resoluciones[0])} grid</span></p>` : "";
   const fuente = gaez.fuente ? `<p class="contexto-meta"><span class="contexto-fuente">Source: ${esc(gaez.fuente)}${gaez.fecha ? ` (${esc(gaez.fecha)})` : ""}</span></p>` : "";
   return `<article class="contexto-tarjeta" data-tarjeta="gaez">${cabeza}
-      <div class="contexto-tabla-caja"><table class="contexto-tabla contexto-tabla--gaez">
+      <table class="contexto-tabla contexto-tabla--gaez">
         <caption class="solo-lector">${titulo}</caption>
-        <thead><tr><th scope="col">Crop</th><th scope="col">Indicator</th><th scope="col">Value</th><th scope="col">Scale</th></tr></thead>
+        <thead><tr><th scope="col">Crop</th><th scope="col">Indicator</th><th scope="col">Value</th></tr></thead>
         <tbody>${cuerpo}</tbody>
-      </table></div>
-      ${fuente}${nota}
+      </table>
+      ${escalaComun}${fuente}${nota}
     </article>`;
 }
 
@@ -975,9 +1009,23 @@ export function montarContextoRegional(contenedor, opciones = {}) {
     });
   }
 
-  /** Lectura de la posición bajo el puntero (o el dedo); al salir, vuelve al año elegido. */
+  function dejarDeExplorar(figura) {
+    figura.classList.remove("contexto-figura--explorando");
+    const modelo = graficas.get(figura.dataset.grafica);
+    if (modelo) pintarFigura(figura, modelo);
+  }
+
+  /**
+   * Lectura de la posición bajo el puntero o el dedo. Con ratón, al salir vuelve al año elegido; con
+   * el dedo se queda hasta tocar fuera de la gráfica (si no, desaparecería al levantar el dedo).
+   */
   function alMover(ev) {
     const lienzo = ev.target.closest ? ev.target.closest(".contexto-lienzo") : null;
+    if (ev.type === "pointerdown") {
+      raiz.querySelectorAll(".contexto-figura--explorando").forEach((f) => {
+        if (!lienzo || !f.contains(lienzo)) dejarDeExplorar(f);
+      });
+    }
     if (!lienzo || !raiz.contains(lienzo)) return;
     const figura = lienzo.closest(".contexto-figura");
     const modelo = graficas.get(figura.dataset.grafica);
@@ -995,12 +1043,11 @@ export function montarContextoRegional(contenedor, opciones = {}) {
     figura.classList.add("contexto-figura--explorando");
   }
   function alSalir(ev) {
+    if (ev.pointerType === "touch") return;
     const figura = ev.target.closest ? ev.target.closest(".contexto-figura") : null;
     if (!figura || !figura.classList.contains("contexto-figura--explorando")) return;
     if (ev.relatedTarget && figura.querySelector(".contexto-lienzo").contains(ev.relatedTarget)) return;
-    figura.classList.remove("contexto-figura--explorando");
-    const modelo = graficas.get(figura.dataset.grafica);
-    if (modelo) pintarFigura(figura, modelo);
+    dejarDeExplorar(figura);
   }
   raiz.addEventListener("pointermove", alMover);
   raiz.addEventListener("pointerdown", alMover);

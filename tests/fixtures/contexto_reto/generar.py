@@ -11,7 +11,8 @@ Qué escribe:
   Las resoluciones y los nombres de fuente también son de prueba. Trae huecos a propósito:
   · eto_mm con el centinela de faltante de POWER durante DIAS_FALTANTES días de un año en una zona;
   · DIAS_AUSENTES filas ausentes en otro año de la otra zona;
-  · meses sin fila (GRACE) y un valor vacío (SMAP) en contexto_regional.csv;
+  · meses sin fila (GRACE) y un valor vacío (SMAP) en contexto_regional.csv; GRACE va como una
+    sola serie con zona «cuenca» (nota de GRACE del contrato);
   · parcelas sin disparos de GEDI y meses sin escena de ECOSTRESS.
 - main(): regenera tests/fixtures/contexto_reto/contexto_lleno.json con motor/contexto_web.py
   sobre ese processed (en una carpeta temporal) y con «generado» fijo (GENERADO_PRUEBA).
@@ -148,6 +149,13 @@ def contexto_regional():
     lineas = ["zona,fuente,variable,mes,valor,unidad,resolucion_m,n_celdas"]
     for zona in ZONAS:
         for fuente, variable, unidad in esquemas.COMBINACIONES_CONTEXTO:
+            # GRACE va una sola vez, con zona «cuenca» (nota de GRACE del contrato).
+            if fuente == esquemas.FUENTE_DE_CUENCA:
+                if zona != ZONA_A:
+                    continue
+                zona_fila = esquemas.ZONA_CUENCA
+            else:
+                zona_fila = zona
             for anio, mes in meses():
                 texto_mes = f"{anio:04d}-{mes:02d}"
                 if fuente == "grace" and anio == 2023 and mes in (3, 4, 5):
@@ -158,7 +166,7 @@ def contexto_regional():
                 celdas = CELDAS_PRUEBA[fuente]
                 if (fuente, variable) == ("nldas", "lluvia") and mes == 1:
                     celdas -= 1                                 # n_celdas que varía de un mes a otro
-                lineas.append(f"{zona},{fuente},{variable},{texto_mes},{valor},{unidad},"
+                lineas.append(f"{zona_fila},{fuente},{variable},{texto_mes},{valor},{unidad},"
                               f"{RESOLUCIONES_PRUEBA[fuente]},{celdas}")
     return lineas
 

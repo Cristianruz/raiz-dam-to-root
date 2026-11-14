@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/contexto_web.py con las entregas validadas de data/processed; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
- "generado": "2026-11-14T21:25:48+00:00",
+ "generado": "2026-11-14T21:37:13+00:00",
  "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
  "zonas": {
   "delicias_saucillo": {
@@ -941,8 +941,111 @@
  "ecostress_motivo": "Requested from the data team — not delivered yet",
  "gaez": null,
  "gaez_motivo": "Requested from the data team — not delivered yet",
- "heladas": null,
- "heladas_motivo": "Requested from the data team — not delivered yet",
+ "heladas": {
+  "ultima_primavera": {
+   "p10": "01-30",
+   "p50": "02-22",
+   "p90": "03-10",
+   "dia_del_anio": {
+    "p10": 30.1,
+    "p50": 53.0,
+    "p90": 69.0
+   },
+   "anios_con_helada": 42,
+   "anios_sin_helada": 0
+  },
+  "primera_otono": {
+   "p10": "11-14",
+   "p50": "11-30",
+   "p90": "12-17",
+   "dia_del_anio": {
+    "p10": 318.5,
+    "p50": 334.0,
+    "p90": 351.0
+   },
+   "anios_con_helada": 36,
+   "anios_sin_helada": 6
+  },
+  "prob_helada_despues_de": {
+   "02-01": 0.857,
+   "02-08": 0.738,
+   "02-15": 0.548,
+   "02-22": 0.524,
+   "03-01": 0.381,
+   "03-08": 0.167,
+   "03-15": 0.095,
+   "03-22": 0.095,
+   "03-29": 0.095,
+   "04-05": 0.0,
+   "04-12": 0.0
+  },
+  "anios": {
+   "primero": 1984,
+   "ultimo": 2025,
+   "n": 42
+  },
+  "definicion": {
+   "helada": "Tmin <= 0 °C",
+   "ultima_primavera": "last frost day, Jan 1 – Jun 30",
+   "primera_otono": "first frost day, Jul 1 – Dec 31",
+   "prob_helada_despues_de": "share of complete years with at least one frost from that date (included) to Jun 30",
+   "percentiles": "of the day of year, over the years with frost in that half-year"
+  },
+  "estacion_smn": "not run: no station file in data/raw/smn/ (kit A2, step 3)",
+  "nota": "NASA POWER is a regional grid cell (MERRA-2, about 0.5° x 0.625°), not a weather station; local frost can be more frequent.",
+  "fuente": "NASA POWER Daily API (community=AG), T2M_MIN, 1984–2025 (42 complete years)",
+  "zonas": {
+   "lazaro_cardenas": {
+    "ultima_primavera": {
+     "p10": "01-28",
+     "p50": "02-22",
+     "p90": "03-20",
+     "dia_del_anio": {
+      "p10": 28.2,
+      "p50": 53.0,
+      "p90": 79.2
+     },
+     "anios_con_helada": 42,
+     "anios_sin_helada": 0
+    },
+    "primera_otono": {
+     "p10": "11-12",
+     "p50": "11-30",
+     "p90": "12-17",
+     "dia_del_anio": {
+      "p10": 316.1,
+      "p50": 333.5,
+      "p90": 351.3
+     },
+     "anios_con_helada": 38,
+     "anios_sin_helada": 4
+    },
+    "prob_helada_despues_de": {
+     "02-01": 0.833,
+     "02-08": 0.714,
+     "02-15": 0.595,
+     "02-22": 0.548,
+     "03-01": 0.429,
+     "03-08": 0.238,
+     "03-15": 0.119,
+     "03-22": 0.095,
+     "03-29": 0.095,
+     "04-05": 0.0,
+     "04-12": 0.0
+    },
+    "anios": {
+     "primero": 1984,
+     "ultimo": 2025,
+     "n": 42
+    }
+   }
+  },
+  "entrega": {
+   "fuente": "NASA POWER Daily API (community=AG), T2M_MIN, 1984–2025 (42 complete years); helada = Tmin ≤ 0 °C; zona base delicias_saucillo y bloque «zonas» con lazaro_cardenas",
+   "fecha": "2026-11-14"
+  }
+ },
+ "heladas_motivo": null,
  "et_contraste": {
   "fuente": "SSEBop VIIRS v6 mensual (USGS, projects/usgs-ssebop/viirs_et_v6_monthly; banda et en mm, escala 1.0) vía Google Earth Engine, media del rectángulo original [-105.42, 28.08, -105.32, 28.16]; ETc FAO-56 con NASA POWER de las parcelas clasificadas de ese rectángulo; oct-2025 a sep-2026; et_wapor_mm vacío (WaPOR not run); regional comparison, not field-level validation",
   "fecha": "2026-11-14",
@@ -1071,15 +1174,21 @@
    "organismo": "NASA",
    "papel": "Frost risk by sowing date",
    "aplica": true,
-   "estado": "requested",
-   "entregas_presentes": [],
-   "entregas_faltantes": [
+   "estado": "in_use",
+   "entregas_presentes": [
     "heladas.json"
    ],
-   "motivo": "Requested from the data team — not delivered yet",
+   "entregas_faltantes": [],
+   "motivo": null,
    "equivalente_local": null,
-   "fuentes": [],
-   "fecha": null,
+   "fuentes": [
+    {
+     "archivo": "heladas.json",
+     "fuente": "NASA POWER Daily API (community=AG), T2M_MIN, 1984–2025 (42 complete years); helada = Tmin ≤ 0 °C; zona base delicias_saucillo y bloque «zonas» con lazaro_cardenas",
+     "fecha": "2026-11-14"
+    }
+   ],
+   "fecha": "2026-11-14",
    "fuente_contexto": null
   },
   {
@@ -1469,6 +1578,7 @@
    ],
    "contraste": {
     "titulo": "Monthly contrast with the modeled demand",
+    "nota": "This contrast covers the area named in its source, which can differ from the pilot area selected.",
     "unidad_en": "mm/month",
     "columnas": {
      "et_modelo_mm": "Modeled crop demand (FAO method with NASA POWER)",

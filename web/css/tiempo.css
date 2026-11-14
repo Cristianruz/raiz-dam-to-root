@@ -3,8 +3,8 @@
    botón Play/Pause, nota del año destacado y leyenda de los seis estados con sus conteos.
    Colores como variables: toma --agua, --ambar, --mem-perenne… de style.css; el valor tras la coma es el
    respaldo si style.css no está cargado (mismos códigos de la identidad, kit C1 §10).
-   El diseño responde al ANCHO DEL CONTENEDOR (container queries), no al de la ventana: sirve igual en el
-   panel angosto, en el teléfono y bajo el mapa.
+   El diseño responde al ANCHO DEL MÓDULO, no al de la ventana: tiempo.js mide su nodo y le pone la clase
+   .tiempo-ancha cuando caben dos columnas. Sirve igual en el panel angosto, en el teléfono y bajo el mapa.
    Los números de este archivo son medidas de diseño, no datos. */
 
 .tiempo {
@@ -32,16 +32,12 @@
   --tiempo-pista-alto: 10px;  /* grosor de la pista */
   --tiempo-trama: rgba(0, 0, 0, 0.45);
 
-  container-type: inline-size;
-  container-name: tiempo;
   min-width: 0;
   color: var(--tiempo-tinta);
   font-size: 1rem;
   line-height: 1.4;
   text-align: left;
 }
-/* El nodo .tiempo es el contenedor que se mide; la rejilla va en su hijo (una consulta de contenedor
-   no puede cambiar al propio contenedor). */
 .tiempo-cuerpo {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -103,6 +99,7 @@
   font: inherit; font-weight: 700; line-height: 1.2;
   cursor: pointer;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent; /* el toque ya se ve en el propio botón (cambia de texto o de fondo) */
 }
 .tiempo-boton:hover { background: var(--tiempo-agua-clara); }
 .tiempo-boton[aria-pressed="true"] { background: var(--tiempo-agua); color: var(--tiempo-papel); }
@@ -133,7 +130,7 @@
 }
 
 /* Deslizador nativo con pista y pulgar propios (así las marcas de los años quedan alineadas con el pulgar). */
-.tiempo-pista { min-width: 0; }
+.tiempo-pista { min-width: 0; margin-top: 4px; } /* aire para el contorno del foco bajo el año */
 .tiempo-rango {
   -webkit-appearance: none; appearance: none;
   display: block; width: 100%; height: 44px; margin: 0; padding: 0;
@@ -181,7 +178,7 @@
 .tiempo-marcas {
   position: relative;
   height: 34px;
-  margin: -8px calc(var(--tiempo-pulgar) / 2) 0; /* el primer y el último año caen bajo el centro del pulgar */
+  margin: -6px calc(var(--tiempo-pulgar) / 2) 0; /* el primer y el último año caen bajo el centro del pulgar */
   pointer-events: none;
 }
 .tiempo-marca {
@@ -329,14 +326,14 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Contenedor ancho (p. ej. bajo el mapa): el control a la izquierda y la leyenda a la derecha
+   Módulo ancho (p. ej. bajo el mapa): el control a la izquierda y la leyenda a la derecha.
+   La clase la pone tiempo.js al medir su nodo (no se usa container-type: su contención de tamaño
+   encogería el módulo a cero dentro de un contenedor que se ajusta a su contenido, como un panel flotante).
    --------------------------------------------------------------------------- */
-@container tiempo (min-width: 680px) {
-  .tiempo-cuerpo { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 28px; }
-  .tiempo-control { grid-column: 1; grid-row: 1; }
-  .tiempo-destacados { grid-column: 1; grid-row: 2; align-self: start; }
-  .tiempo-conteos { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
-}
+.tiempo-ancha .tiempo-cuerpo { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 28px; }
+.tiempo-ancha .tiempo-control { grid-column: 1; grid-row: 1; }
+.tiempo-ancha .tiempo-destacados { grid-column: 1; grid-row: 2; align-self: start; }
+.tiempo-ancha .tiempo-conteos { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
 
 /* ---------------------------------------------------------------------------
    Movimiento reducido: sin transiciones (la reproducción automática la apaga tiempo.js)
