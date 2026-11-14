@@ -13,7 +13,11 @@ Fuentes de lo que aquí se exige:
 - el acuerdo de formatos entre la sesión de datos y el integrador (14-nov-2026, FUENTE_FORMATOS):
   rotaciones.json y demanda_cultivos.csv (A5), memoria_parcelas.csv y memoria_resumen.csv (A3-M),
   cultivos_parcelas.csv (A4) y relieve_meta.json (A9) reemplazan o amplían sus filas de la
-  tabla 0.4-B; los crudos de Earth Engine (CRUDOS_EARTH_ENGINE) no son entregas.
+  tabla 0.4-B; los crudos de Earth Engine (CRUDOS_EARTH_ENGINE) no son entregas;
+- la decisión de dos zonas piloto (docs/decisiones/2026-11-14_dos_zonas.md, FUENTE_DOS_ZONAS):
+  propiedad «zona» en parcelas_base.geojson y relieve_rutas.geojson, ids con el prefijo de su
+  zona y archivos por zona con sufijo «_<zona>» (ARCHIVOS_POR_ZONA). Sin «zona» o sin sufijo =
+  ZONA_POR_OMISION (compatibilidad con la entrega de una sola zona).
 
 Vocabulario de un campo (columna de CSV, propiedad de GeoJSON o llave de un objeto JSON):
   tipo      texto | numero | entero | fecha (AAAA-MM-DD) | mes (AAAA-MM) |
@@ -29,6 +33,8 @@ Vocabulario de un campo (columna de CSV, propiedad de GeoJSON o llave de un obje
   alias     {texto entregado: texto que se valida}: equivalencias acordadas (p. ej.,
             «1/1 (reglas)» se lee como «1/1»); el reporte avisa cuántas celdas se leyeron así.
   nulo      True: la celda puede venir vacía (o null en JSON).
+  opcional  True (solo propiedades de GeoJSON): la propiedad puede faltar del todo; si viene,
+            se valida como las demás (p. ej., «zona»: si viene, debe ser un id de zona).
   nulo_si   {"columna": c, "valores": [...]} (solo CSV): la celda puede venir vacía SOLO si la
             columna c de la misma fila trae uno de esos valores (p. ej., prob_max vacío solo
             con acuerdo_metodos «1/1»). Una celda mal escrita sigue siendo error, no «vacía».
@@ -41,6 +47,8 @@ Vocabulario de un campo (columna de CSV, propiedad de GeoJSON o llave de un obje
 Reglas de tabla («reglas»): orden (c1 ≤ c2 ≤ …), rango_por_banda, dias_ventana_por_anio,
 abstencion_a42, un_solo_valor_por y faltantes_max. ensamblar.py las aplica por nombre.
 Reglas de JSON («regla»): heladas, dotaciones, supuestos, rotaciones y objeto (valida «campos»).
+Llave de GeoJSON «por_zona» (parcelas_base): si una parcela trae «zona», su id empieza con el
+prefijo_id de esa zona y su centroide cae en el rectángulo (bbox) de esa zona.
 """
 import sys
 from pathlib import Path
@@ -73,11 +81,28 @@ CRUDOS_EARTH_ENGINE = ("hls_mensual_*.tif", "hls_reflect_*.tif", "hls_ndvi_memor
                        "piloto_consumo.tif")
 
 # ---------------------------------------------------------------------------------------
+# Dos zonas piloto (FUENTE_DOS_ZONAS). Las zonas (id, nombre, prefijo_id, bbox) viven en
+# data/params.json → zona_piloto.zonas: aquí solo las convenciones de nombres.
+# ---------------------------------------------------------------------------------------
+# Zona de los archivos SIN sufijo y de las parcelas o rutas SIN propiedad «zona» (la entrega
+# de una sola zona sigue validando). Sus archivos van sin sufijo: «_delicias_saucillo» se rechaza
+# para que no haya dos archivos de la misma zona con nombres distintos.
+ZONA_POR_OMISION = "delicias_saucillo"
+# Archivos que van uno por zona: «<base>_<zona>.<ext>» (p. ej., rotaciones_lazaro_cardenas.json).
+# Se validan con el esquema de su base y se copian a data/processed con su nombre tal cual.
+ARCHIVOS_POR_ZONA = ("eto_diaria.csv", "rotaciones.json", "demanda_cultivos.csv",
+                     "relieve_meta.json", "nasadem_zona_piloto.tif")
+
+# ---------------------------------------------------------------------------------------
 # Límites derivados de data/params.json. ensamblar.limites_derivados() los calcula.
 # ---------------------------------------------------------------------------------------
 LIMITES_DERIVADOS = {
     "area_min_ha": "mapa.area_min_ha.valor (kit B1 paso 3: se filtran los campos menores)",
-    "bbox": "zona_piloto.bbox.valor ([oeste, sur, este, norte], EPSG:4326)",
+    "bbox": ("zona_piloto.bbox.valor ([oeste, sur, este, norte], EPSG:4326; envolvente de las "
+             "zonas: solo se usa si params no trae zona_piloto.zonas)"),
+    "zonas": ("zona_piloto.zonas.valor: id, nombre, prefijo_id y bbox [oeste, sur, este, norte] "
+              "de cada zona (decisión de dos zonas)"),
+    "zonas_ids": "los id de zona_piloto.zonas.valor (valores permitidos de la propiedad «zona»)",
     "anio_actual": "memoria.anio_actual.valor (año agrícola en curso)",
     "anio_inicio": "memoria.anio_inicio.valor (primer año de la memoria)",
     "dias_ventana_anio_actual": ("suelo.ventana_desnudo.valor (1-feb a 30-abr) en el año "
