@@ -1,0 +1,68 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_nota": "Excepciones de tests/test_sin_cifras.py (K-TEST 7): textos con dígitos que NO son cifras de los datos. Cada una lleva su motivo. Use «texto» (literal, distingue mayúsculas) o «patron» (expresión regular de Python). «archivos» limita la excepción (por omisión aplica a todos). Una cifra que la web muestra (dotación, hectáreas, lluvia −20 %, resolución, años de la memoria…) NUNCA va aquí: se lee de los datos.",
+ "excepciones": [
+  {
+   "patron": "#[0-9A-Fa-f]{6}\\b|#[0-9A-Fa-f]{3}\\b",
+   "motivo": "Colores hexadecimales de la identidad (kit C1 §10 y X3.2 §5); son códigos de color, no cifras",
+   "archivos": [
+    "*.js"
+   ]
+  },
+  {
+   "patron": "\\b(maplibre-gl|d3-sankey|d3)-\\d+\\.\\d+\\.\\d+\\b",
+   "motivo": "Carpeta de la biblioteca con su versión fija (web/vendor/VERSIONS.json)"
+  },
+  {
+   "patron": "\\bd3(-sankey)?\\b",
+   "motivo": "Nombre de las bibliotecas d3 y d3-sankey"
+  },
+  {
+   "texto": "FAO-56",
+   "motivo": "Nombre del método (FAO Irrigation and Drainage Paper 56, Allen et al. 1998), no es una cifra"
+  },
+  {
+   "texto": "Grafton et al., Science 2018",
+   "motivo": "Año dentro de una cita (frase fija de La gota, kit X3.2 §4)"
+  },
+  {
+   "texto": "Conagua 2024",
+   "motivo": "Año dentro de una cita (documento técnico del acuífero 0831; kit X3.2 §4)"
+  },
+  {
+   "patron": "\\b0831\\b",
+   "motivo": "Clave oficial del acuífero Meoqui-Delicias (Conagua), es un identificador"
+  },
+  {
+   "patron": "\\bDR-?005\\b|\\bDistrict 005\\b",
+   "motivo": "Clave oficial del Distrito de Riego 005 Delicias, es un identificador"
+  },
+  {
+   "texto": "Space Apps 2026",
+   "motivo": "Nombre del evento (NASA Space Apps Challenge 2026)"
+  },
+  {
+   "patron": "\\bH[13]\\b",
+   "motivo": "Nombre de las hipótesis preregistradas H1 y H3 (S9 §6)"
+  },
+  {
+   "patron": "(?i)\\butf-8\\b",
+   "motivo": "Nombre de la codificación de caracteres"
+  },
+  {
+   "patron": "\\bcomo_20(25|26)\\b",
+   "motivo": "Identificadores de las marcas de dotación del contrato v4 (§2.3, dotaciones.marcas[].id); no son cifras"
+  },
+  {
+   "patron": "^2d$",
+   "archivos": [
+    "*.js"
+   ],
+   "motivo": "Tipo de contexto del lienzo: canvas.getContext(\"2d\")"
+  },
+  {
+   "patron": "\\b(crearGemelo)?3D\\b",
+   "motivo": "«3D» es el nombre de la vista en tres dimensiones del gemelo digital (y de la función crearGemelo3D de web/js/gemelo3d.js), no una cifra de los datos"
+  }
+ ]
+}

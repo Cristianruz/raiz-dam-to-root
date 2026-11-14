@@ -1,0 +1,120 @@
+{
+ "type": "FeatureCollection",
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_nota": "Fixture de tests/test_ensamblar.py: valores DE PRUEBA, no son datos reales ni se usan en la web.",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.4,
+       28.1
+      ],
+      [
+       -105.397,
+       28.1
+      ],
+      [
+       -105.397,
+       28.103
+      ],
+      [
+       -105.4,
+       28.103
+      ],
+      [
+       -105.4,
+       28.1
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "id": "T0001",
+    "area_ha": 9.8,
+    "modulo": null,
+    "ftw_confianza": 70,
+    "protagonista": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.38,
+       28.12
+      ],
+      [
+       -105.3775,
+       28.12
+      ],
+      [
+       -105.3775,
+       28.1225
+      ],
+      [
+       -105.38,
+       28.1225
+      ],
+      [
+       -105.38,
+       28.12
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "id": "T0002",
+    "area_ha": 6.8,
+    "modulo": null,
+    "ftw_confianza": 81,
+    "protagonista": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        -105.35,
+        28.14
+       ],
+       [
+        -105.346,
+        28.14
+       ],
+       [
+        -105.346,
+        28.1435
+       ],
+       [
+        -105.35,
+        28.1435
+       ],
+       [
+        -105.35,
+        28.14
+       ]
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "id": "T0003",
+    "area_ha": 15.2,
+    "modulo": null,
+    "ftw_confianza": 64,
+    "protagonista": true
+   }
+  }
+ ]
+}

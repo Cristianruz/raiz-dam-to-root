@@ -1,0 +1,1592 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_nota": "Lo escribe motor/contexto_web.py con las entregas validadas de data/processed; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
+ "generado": "2026-11-14T21:25:48+00:00",
+ "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
+ "zonas": {
+  "delicias_saucillo": {
+   "nombre": "Delicias – Saucillo"
+  },
+  "lazaro_cardenas": {
+   "nombre": "Lázaro Cárdenas (Meoqui)"
+  }
+ },
+ "motivo_pedido": "Requested from the data team — not delivered yet",
+ "clima_anual": {
+  "delicias_saucillo": {
+   "definicion_anio": "Agricultural year: from October 1 of the previous year to September 30 of the named year (kit v4, A3-M step 3; data/params.json, memoria.anio_actual)",
+   "definicion_helada": "Frost day: daily minimum temperature at or below 0 °C (kit v4, A2 step 1)",
+   "umbral_faltantes": 0.05,
+   "anios": [
+    {
+     "anio": 1984,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": null,
+     "eto_mm": null,
+     "dias_helada": null,
+     "dias_con_dato": 274,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 1985,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 559.1,
+     "eto_mm": 1676.9,
+     "dias_helada": 31,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1986,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 415.1,
+     "eto_mm": 1702.2,
+     "dias_helada": 14,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1987,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 539.2,
+     "eto_mm": 1613.2,
+     "dias_helada": 36,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1988,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 298.4,
+     "eto_mm": 1770.8,
+     "dias_helada": 18,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 1989,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 385.3,
+     "eto_mm": 1860.2,
+     "dias_helada": 8,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1990,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 573.7,
+     "eto_mm": 1688.9,
+     "dias_helada": 27,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1991,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 700.8,
+     "eto_mm": 1598.8,
+     "dias_helada": 25,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1992,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 346.5,
+     "eto_mm": 1613.8,
+     "dias_helada": 30,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 1993,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 379.4,
+     "eto_mm": 1769.5,
+     "dias_helada": 12,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1994,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 91.6,
+     "eto_mm": 1935.4,
+     "dias_helada": 14,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1995,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 229.0,
+     "eto_mm": 1951.8,
+     "dias_helada": 11,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1996,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 274.6,
+     "eto_mm": 1941.9,
+     "dias_helada": 10,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 1997,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 279.5,
+     "eto_mm": 1874.0,
+     "dias_helada": 22,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1998,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 162.2,
+     "eto_mm": 2007.1,
+     "dias_helada": 29,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1999,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 177.8,
+     "eto_mm": 2086.9,
+     "dias_helada": 15,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2000,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 158.7,
+     "eto_mm": 2055.3,
+     "dias_helada": 16,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2001,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 236.7,
+     "eto_mm": 1890.8,
+     "dias_helada": 19,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 273,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2002,
+     "lluvia_imerg_mm": 300.3,
+     "lluvia_power_mm": 321.8,
+     "eto_mm": 1950.8,
+     "dias_helada": 28,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2003,
+     "lluvia_imerg_mm": 325.6,
+     "lluvia_power_mm": 277.0,
+     "eto_mm": 1950.0,
+     "dias_helada": 8,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2004,
+     "lluvia_imerg_mm": 613.8,
+     "lluvia_power_mm": 516.2,
+     "eto_mm": 1796.3,
+     "dias_helada": 20,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2005,
+     "lluvia_imerg_mm": 407.5,
+     "lluvia_power_mm": 323.4,
+     "eto_mm": 1831.5,
+     "dias_helada": 16,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2006,
+     "lluvia_imerg_mm": 470.1,
+     "lluvia_power_mm": 455.6,
+     "eto_mm": 1954.3,
+     "dias_helada": 5,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2007,
+     "lluvia_imerg_mm": 404.5,
+     "lluvia_power_mm": 382.0,
+     "eto_mm": 1792.0,
+     "dias_helada": 26,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2008,
+     "lluvia_imerg_mm": 628.5,
+     "lluvia_power_mm": 501.4,
+     "eto_mm": 1963.7,
+     "dias_helada": 25,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2009,
+     "lluvia_imerg_mm": 363.0,
+     "lluvia_power_mm": 284.4,
+     "eto_mm": 1831.0,
+     "dias_helada": 10,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2010,
+     "lluvia_imerg_mm": 585.4,
+     "lluvia_power_mm": 422.5,
+     "eto_mm": 1820.6,
+     "dias_helada": 23,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2011,
+     "lluvia_imerg_mm": 128.8,
+     "lluvia_power_mm": 98.1,
+     "eto_mm": 2173.5,
+     "dias_helada": 19,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2012,
+     "lluvia_imerg_mm": 284.7,
+     "lluvia_power_mm": 234.2,
+     "eto_mm": 1999.6,
+     "dias_helada": 11,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2013,
+     "lluvia_imerg_mm": 537.5,
+     "lluvia_power_mm": 426.0,
+     "eto_mm": 1917.1,
+     "dias_helada": 16,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2014,
+     "lluvia_imerg_mm": 399.1,
+     "lluvia_power_mm": 297.7,
+     "eto_mm": 1850.7,
+     "dias_helada": 8,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2015,
+     "lluvia_imerg_mm": 483.7,
+     "lluvia_power_mm": 366.4,
+     "eto_mm": 1794.2,
+     "dias_helada": 6,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2016,
+     "lluvia_imerg_mm": 350.0,
+     "lluvia_power_mm": 403.2,
+     "eto_mm": 1916.1,
+     "dias_helada": 15,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2017,
+     "lluvia_imerg_mm": 383.0,
+     "lluvia_power_mm": 343.9,
+     "eto_mm": 1893.1,
+     "dias_helada": 2,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2018,
+     "lluvia_imerg_mm": 333.3,
+     "lluvia_power_mm": 284.1,
+     "eto_mm": 1926.5,
+     "dias_helada": 9,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2019,
+     "lluvia_imerg_mm": 344.4,
+     "lluvia_power_mm": 245.9,
+     "eto_mm": 1948.6,
+     "dias_helada": 13,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2020,
+     "lluvia_imerg_mm": 351.4,
+     "lluvia_power_mm": 191.1,
+     "eto_mm": 1982.7,
+     "dias_helada": 15,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2021,
+     "lluvia_imerg_mm": 321.8,
+     "lluvia_power_mm": 258.6,
+     "eto_mm": 2007.6,
+     "dias_helada": 20,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2022,
+     "lluvia_imerg_mm": 425.5,
+     "lluvia_power_mm": 316.9,
+     "eto_mm": 2036.9,
+     "dias_helada": 5,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2023,
+     "lluvia_imerg_mm": 299.4,
+     "lluvia_power_mm": 187.9,
+     "eto_mm": 2060.7,
+     "dias_helada": 18,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2024,
+     "lluvia_imerg_mm": 246.6,
+     "lluvia_power_mm": 179.7,
+     "eto_mm": 2086.9,
+     "dias_helada": 7,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2025,
+     "lluvia_imerg_mm": 264.7,
+     "lluvia_power_mm": 271.8,
+     "eto_mm": 2079.8,
+     "dias_helada": 12,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2026,
+     "lluvia_imerg_mm": 364.0,
+     "lluvia_power_mm": 234.8,
+     "eto_mm": 2039.4,
+     "dias_helada": 4,
+     "dias_con_dato": 364,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2027,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": null,
+     "eto_mm": null,
+     "dias_helada": null,
+     "dias_con_dato": 40,
+     "dias_con_dato_imerg": 44,
+     "dias_del_anio": 365
+    }
+   ],
+   "fuentes": {
+    "power": {
+     "archivo": "eto_diaria.csv",
+     "fuente": "NASA POWER Daily API, community=AG, punto 28.19 N −105.45 O (misma celda MERRA-2 0.5°×0.625° y CERES 1° que el rectángulo ampliado [-105.56, 28.07, -105.32, 28.19]); zona delicias_saucillo",
+     "fecha": "2026-11-14"
+    },
+    "imerg": {
+     "archivo": "imerg_diaria.csv",
+     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) vía Google Earth Engine, proyecto iondroplet; media de las medias horas del día UTC × 24, promediada sobre el rectángulo de delicias_saucillo [-105.56, 28.07, -105.32, 28.19]; 2001-01-01 a 2026-11-13",
+     "fecha": "2026-11-14"
+    }
+   }
+  },
+  "lazaro_cardenas": {
+   "definicion_anio": "Agricultural year: from October 1 of the previous year to September 30 of the named year (kit v4, A3-M step 3; data/params.json, memoria.anio_actual)",
+   "definicion_helada": "Frost day: daily minimum temperature at or below 0 °C (kit v4, A2 step 1)",
+   "umbral_faltantes": 0.05,
+   "anios": [
+    {
+     "anio": 1984,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": null,
+     "eto_mm": null,
+     "dias_helada": null,
+     "dias_con_dato": 274,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 1985,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 470.4,
+     "eto_mm": 1698.3,
+     "dias_helada": 30,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1986,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 351.0,
+     "eto_mm": 1699.0,
+     "dias_helada": 13,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1987,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 527.1,
+     "eto_mm": 1604.1,
+     "dias_helada": 33,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1988,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 231.3,
+     "eto_mm": 1764.4,
+     "dias_helada": 16,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 1989,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 316.9,
+     "eto_mm": 1852.9,
+     "dias_helada": 13,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1990,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 540.8,
+     "eto_mm": 1691.2,
+     "dias_helada": 28,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1991,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 608.9,
+     "eto_mm": 1590.1,
+     "dias_helada": 26,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1992,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 341.6,
+     "eto_mm": 1618.1,
+     "dias_helada": 30,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 1993,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 338.8,
+     "eto_mm": 1745.8,
+     "dias_helada": 16,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1994,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 100.8,
+     "eto_mm": 1900.6,
+     "dias_helada": 14,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1995,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 233.4,
+     "eto_mm": 1902.3,
+     "dias_helada": 9,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1996,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 306.4,
+     "eto_mm": 1894.0,
+     "dias_helada": 11,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 1997,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 287.4,
+     "eto_mm": 1819.0,
+     "dias_helada": 22,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1998,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 166.8,
+     "eto_mm": 1958.9,
+     "dias_helada": 23,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 1999,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 189.3,
+     "eto_mm": 2018.3,
+     "dias_helada": 13,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2000,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 176.9,
+     "eto_mm": 2003.0,
+     "dias_helada": 15,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 0,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2001,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": 263.2,
+     "eto_mm": 1846.1,
+     "dias_helada": 22,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 273,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2002,
+     "lluvia_imerg_mm": 294.9,
+     "lluvia_power_mm": 312.5,
+     "eto_mm": 1917.1,
+     "dias_helada": 30,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2003,
+     "lluvia_imerg_mm": 297.5,
+     "lluvia_power_mm": 274.2,
+     "eto_mm": 1899.4,
+     "dias_helada": 9,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2004,
+     "lluvia_imerg_mm": 620.4,
+     "lluvia_power_mm": 533.4,
+     "eto_mm": 1768.8,
+     "dias_helada": 20,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2005,
+     "lluvia_imerg_mm": 437.9,
+     "lluvia_power_mm": 353.3,
+     "eto_mm": 1787.9,
+     "dias_helada": 17,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2006,
+     "lluvia_imerg_mm": 401.7,
+     "lluvia_power_mm": 390.4,
+     "eto_mm": 1907.0,
+     "dias_helada": 5,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2007,
+     "lluvia_imerg_mm": 384.9,
+     "lluvia_power_mm": 347.4,
+     "eto_mm": 1791.6,
+     "dias_helada": 22,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2008,
+     "lluvia_imerg_mm": 598.3,
+     "lluvia_power_mm": 434.2,
+     "eto_mm": 1919.7,
+     "dias_helada": 25,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2009,
+     "lluvia_imerg_mm": 326.0,
+     "lluvia_power_mm": 298.4,
+     "eto_mm": 1811.3,
+     "dias_helada": 11,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2010,
+     "lluvia_imerg_mm": 487.0,
+     "lluvia_power_mm": 362.7,
+     "eto_mm": 1801.4,
+     "dias_helada": 25,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2011,
+     "lluvia_imerg_mm": 140.4,
+     "lluvia_power_mm": 91.9,
+     "eto_mm": 2134.2,
+     "dias_helada": 23,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2012,
+     "lluvia_imerg_mm": 297.0,
+     "lluvia_power_mm": 228.6,
+     "eto_mm": 1957.5,
+     "dias_helada": 12,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2013,
+     "lluvia_imerg_mm": 569.7,
+     "lluvia_power_mm": 404.9,
+     "eto_mm": 1875.7,
+     "dias_helada": 17,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2014,
+     "lluvia_imerg_mm": 377.3,
+     "lluvia_power_mm": 266.2,
+     "eto_mm": 1837.7,
+     "dias_helada": 14,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2015,
+     "lluvia_imerg_mm": 441.1,
+     "lluvia_power_mm": 313.6,
+     "eto_mm": 1787.6,
+     "dias_helada": 5,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2016,
+     "lluvia_imerg_mm": 408.1,
+     "lluvia_power_mm": 379.7,
+     "eto_mm": 1884.9,
+     "dias_helada": 17,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2017,
+     "lluvia_imerg_mm": 374.0,
+     "lluvia_power_mm": 352.6,
+     "eto_mm": 1865.5,
+     "dias_helada": 3,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2018,
+     "lluvia_imerg_mm": 343.4,
+     "lluvia_power_mm": 239.3,
+     "eto_mm": 1898.9,
+     "dias_helada": 9,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2019,
+     "lluvia_imerg_mm": 325.5,
+     "lluvia_power_mm": 246.2,
+     "eto_mm": 1907.2,
+     "dias_helada": 12,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2020,
+     "lluvia_imerg_mm": 314.0,
+     "lluvia_power_mm": 196.1,
+     "eto_mm": 1941.1,
+     "dias_helada": 14,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2021,
+     "lluvia_imerg_mm": 317.2,
+     "lluvia_power_mm": 273.2,
+     "eto_mm": 1958.2,
+     "dias_helada": 21,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2022,
+     "lluvia_imerg_mm": 388.2,
+     "lluvia_power_mm": 306.2,
+     "eto_mm": 1982.7,
+     "dias_helada": 11,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2023,
+     "lluvia_imerg_mm": 283.7,
+     "lluvia_power_mm": 194.3,
+     "eto_mm": 2006.6,
+     "dias_helada": 19,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2024,
+     "lluvia_imerg_mm": 218.7,
+     "lluvia_power_mm": 139.4,
+     "eto_mm": 2042.3,
+     "dias_helada": 8,
+     "dias_con_dato": 366,
+     "dias_con_dato_imerg": 366,
+     "dias_del_anio": 366
+    },
+    {
+     "anio": 2025,
+     "lluvia_imerg_mm": 342.7,
+     "lluvia_power_mm": 261.6,
+     "eto_mm": 2026.5,
+     "dias_helada": 14,
+     "dias_con_dato": 365,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2026,
+     "lluvia_imerg_mm": 339.4,
+     "lluvia_power_mm": 246.1,
+     "eto_mm": 1995.7,
+     "dias_helada": 4,
+     "dias_con_dato": 364,
+     "dias_con_dato_imerg": 365,
+     "dias_del_anio": 365
+    },
+    {
+     "anio": 2027,
+     "lluvia_imerg_mm": null,
+     "lluvia_power_mm": null,
+     "eto_mm": null,
+     "dias_helada": null,
+     "dias_con_dato": 40,
+     "dias_con_dato_imerg": 44,
+     "dias_del_anio": 365
+    }
+   ],
+   "fuentes": {
+    "power": {
+     "archivo": "eto_diaria_lazaro_cardenas.csv",
+     "fuente": "NASA POWER Daily API, community=AG, punto 28.39 N −105.61 O (celda MERRA-2 de centro 28.5 N, distinta de la de Delicias); zona lazaro_cardenas",
+     "fecha": "2026-11-14"
+    },
+    "imerg": {
+     "archivo": "imerg_diaria_lazaro_cardenas.csv",
+     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) vía Google Earth Engine, proyecto iondroplet; media de las medias horas del día UTC × 24, promediada sobre el rectángulo de lazaro_cardenas [-105.66, 28.35, -105.56, 28.43]; 2001-01-01 a 2026-11-13",
+     "fecha": "2026-11-14"
+    }
+   }
+  }
+ },
+ "clima_anual_motivo": null,
+ "contexto_regional": null,
+ "contexto_regional_motivo": "Requested from the data team — not delivered yet",
+ "gedi": null,
+ "gedi_motivo": "Requested from the data team — not delivered yet",
+ "ecostress": null,
+ "ecostress_motivo": "Requested from the data team — not delivered yet",
+ "gaez": null,
+ "gaez_motivo": "Requested from the data team — not delivered yet",
+ "heladas": null,
+ "heladas_motivo": "Requested from the data team — not delivered yet",
+ "et_contraste": {
+  "fuente": "SSEBop VIIRS v6 mensual (USGS, projects/usgs-ssebop/viirs_et_v6_monthly; banda et en mm, escala 1.0) vía Google Earth Engine, media del rectángulo original [-105.42, 28.08, -105.32, 28.16]; ETc FAO-56 con NASA POWER de las parcelas clasificadas de ese rectángulo; oct-2025 a sep-2026; et_wapor_mm vacío (WaPOR not run); regional comparison, not field-level validation",
+  "fecha": "2026-11-14",
+  "meses": [
+   "2025-10",
+   "2025-11",
+   "2025-12",
+   "2026-01",
+   "2026-02",
+   "2026-03",
+   "2026-04",
+   "2026-05",
+   "2026-06",
+   "2026-07",
+   "2026-08",
+   "2026-09"
+  ],
+  "columnas": {
+   "et_modelo_mm": [
+    39.8,
+    31.9,
+    26.6,
+    25.6,
+    33.0,
+    75.7,
+    142.6,
+    196.5,
+    175.8,
+    149.9,
+    159.3,
+    82.6
+   ],
+   "et_ssebop_mm": [
+    60.8,
+    37.0,
+    23.1,
+    20.9,
+    30.2,
+    49.4,
+    68.4,
+    85.8,
+    93.2,
+    104.5,
+    101.0,
+    72.0
+   ],
+   "et_wapor_mm": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  }
+ },
+ "et_contraste_motivo": null,
+ "recursos": [
+  {
+   "id": "hls",
+   "nombre": "Landsat and Sentinel-2 (HLS)",
+   "organismo": "NASA, USGS and ESA (Copernicus)",
+   "papel": "Monthly greenness of each field and the field memory, year by year",
+   "aplica": true,
+   "estado": "in_use",
+   "entregas_presentes": [
+    "hls_mensual_parcelas.csv",
+    "memoria_parcelas.csv"
+   ],
+   "entregas_faltantes": [],
+   "motivo": null,
+   "equivalente_local": null,
+   "fuentes": [
+    {
+     "archivo": "hls_mensual_parcelas.csv",
+     "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) vía Google Earth Engine, proyecto iondroplet; dos zonas",
+     "fecha": "2026-11-14"
+    },
+    {
+     "archivo": "memoria_parcelas.csv",
+     "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) vía Google Earth Engine, proyecto iondroplet; años agrícolas 2016-2026; dos zonas; columna adicional ndvi_min (mínimo mensual del año, para la edad de la alfalfa)",
+     "fecha": "2026-11-14"
+    }
+   ],
+   "fecha": "2026-11-14",
+   "fuente_contexto": null
+  },
+  {
+   "id": "power",
+   "nombre": "NASA POWER",
+   "organismo": "NASA",
+   "papel": "Daily weather and the water each crop asks for (FAO crop-coefficient method)",
+   "aplica": true,
+   "estado": "in_use",
+   "entregas_presentes": [
+    "eto_diaria.csv",
+    "eto_diaria_lazaro_cardenas.csv"
+   ],
+   "entregas_faltantes": [],
+   "motivo": null,
+   "equivalente_local": null,
+   "fuentes": [
+    {
+     "archivo": "eto_diaria.csv",
+     "fuente": "NASA POWER Daily API, community=AG, punto 28.19 N −105.45 O (misma celda MERRA-2 0.5°×0.625° y CERES 1° que el rectángulo ampliado [-105.56, 28.07, -105.32, 28.19]); zona delicias_saucillo",
+     "fecha": "2026-11-14"
+    },
+    {
+     "archivo": "eto_diaria_lazaro_cardenas.csv",
+     "fuente": "NASA POWER Daily API, community=AG, punto 28.39 N −105.61 O (celda MERRA-2 de centro 28.5 N, distinta de la de Delicias); zona lazaro_cardenas",
+     "fecha": "2026-11-14"
+    }
+   ],
+   "fecha": "2026-11-14",
+   "fuente_contexto": null
+  },
+  {
+   "id": "power_heladas",
+   "nombre": "NASA POWER (frost dates)",
+   "organismo": "NASA",
+   "papel": "Frost risk by sowing date",
+   "aplica": true,
+   "estado": "requested",
+   "entregas_presentes": [],
+   "entregas_faltantes": [
+    "heladas.json"
+   ],
+   "motivo": "Requested from the data team — not delivered yet",
+   "equivalente_local": null,
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": null
+  },
+  {
+   "id": "nasadem",
+   "nombre": "SRTM / NASADEM",
+   "organismo": "NASA",
+   "papel": "Terrain relief, runoff routes and the storm simulation",
+   "aplica": true,
+   "estado": "in_use",
+   "entregas_presentes": [
+    "nasadem_zona_piloto.tif",
+    "nasadem_zona_piloto_lazaro_cardenas.tif",
+    "relieve_parcelas.csv",
+    "relieve_rutas.geojson",
+    "relieve_meta.json",
+    "relieve_meta_lazaro_cardenas.json"
+   ],
+   "entregas_faltantes": [],
+   "motivo": null,
+   "equivalente_local": null,
+   "fuentes": [
+    {
+     "archivo": "nasadem_zona_piloto.tif",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine, proyecto iondroplet, zona + 2 km, 30 m; zona delicias_saucillo",
+     "fecha": "2026-11-14"
+    },
+    {
+     "archivo": "nasadem_zona_piloto_lazaro_cardenas.tif",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine, proyecto iondroplet, zona + 2 km, 30 m; zona lazaro_cardenas",
+     "fecha": "2026-11-14"
+    },
+    {
+     "archivo": "relieve_parcelas.csv",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta); dos zonas",
+     "fecha": "2026-11-14"
+    },
+    {
+     "archivo": "relieve_rutas.geojson",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta); dos zonas (propiedad zona); sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
+     "fecha": "2026-11-14"
+    },
+    {
+     "archivo": "relieve_meta.json",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona delicias_saucillo; sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
+     "fecha": "2026-11-14"
+    },
+    {
+     "archivo": "relieve_meta_lazaro_cardenas.json",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona lazaro_cardenas; sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
+     "fecha": "2026-11-14"
+    }
+   ],
+   "fecha": "2026-11-14",
+   "fuente_contexto": null
+  },
+  {
+   "id": "imerg",
+   "nombre": "GPM IMERG",
+   "organismo": "NASA and JAXA",
+   "papel": "Daily rainfall and the design storm",
+   "aplica": true,
+   "estado": "in_use",
+   "entregas_presentes": [
+    "imerg_diaria.csv",
+    "imerg_diaria_lazaro_cardenas.csv"
+   ],
+   "entregas_faltantes": [],
+   "motivo": null,
+   "equivalente_local": null,
+   "fuentes": [
+    {
+     "archivo": "imerg_diaria.csv",
+     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) vía Google Earth Engine, proyecto iondroplet; media de las medias horas del día UTC × 24, promediada sobre el rectángulo de delicias_saucillo [-105.56, 28.07, -105.32, 28.19]; 2001-01-01 a 2026-11-13",
+     "fecha": "2026-11-14"
+    },
+    {
+     "archivo": "imerg_diaria_lazaro_cardenas.csv",
+     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) vía Google Earth Engine, proyecto iondroplet; media de las medias horas del día UTC × 24, promediada sobre el rectángulo de lazaro_cardenas [-105.66, 28.35, -105.56, 28.43]; 2001-01-01 a 2026-11-13",
+     "fecha": "2026-11-14"
+    }
+   ],
+   "fecha": "2026-11-14",
+   "fuente_contexto": null
+  },
+  {
+   "id": "viirs_ssebop",
+   "nombre": "VIIRS (SSEBop)",
+   "organismo": "NASA and NOAA (VIIRS); USGS (SSEBop)",
+   "papel": "Regional contrast of evapotranspiration",
+   "aplica": true,
+   "estado": "in_use",
+   "entregas_presentes": [
+    "et_contraste.csv"
+   ],
+   "entregas_faltantes": [],
+   "motivo": null,
+   "equivalente_local": null,
+   "fuentes": [
+    {
+     "archivo": "et_contraste.csv",
+     "fuente": "SSEBop VIIRS v6 mensual (USGS, projects/usgs-ssebop/viirs_et_v6_monthly; banda et en mm, escala 1.0) vía Google Earth Engine, media del rectángulo original [-105.42, 28.08, -105.32, 28.16]; ETc FAO-56 con NASA POWER de las parcelas clasificadas de ese rectángulo; oct-2025 a sep-2026; et_wapor_mm vacío (WaPOR not run); regional comparison, not field-level validation",
+     "fecha": "2026-11-14"
+    }
+   ],
+   "fecha": "2026-11-14",
+   "fuente_contexto": null
+  },
+  {
+   "id": "smap",
+   "nombre": "SMAP",
+   "organismo": "NASA",
+   "papel": "Observed state: soil moisture of the region, month by month",
+   "aplica": true,
+   "estado": "requested",
+   "entregas_presentes": [],
+   "entregas_faltantes": [
+    "contexto_regional.csv"
+   ],
+   "motivo": "Requested from the data team — not delivered yet",
+   "equivalente_local": null,
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": "smap"
+  },
+  {
+   "id": "modis",
+   "nombre": "MODIS",
+   "organismo": "NASA",
+   "papel": "Greenness of the area before the field-scale record starts; a second evapotranspiration contrast; land surface temperature",
+   "aplica": true,
+   "estado": "requested",
+   "entregas_presentes": [],
+   "entregas_faltantes": [
+    "contexto_regional.csv"
+   ],
+   "motivo": "Requested from the data team — not delivered yet",
+   "equivalente_local": null,
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": "modis"
+  },
+  {
+   "id": "grace",
+   "nombre": "GRACE / GRACE-FO",
+   "organismo": "NASA with the German centers DLR and GFZ",
+   "papel": "Observed state: water stored in the basin (surface, soil and aquifer together), month by month",
+   "aplica": true,
+   "estado": "requested",
+   "entregas_presentes": [],
+   "entregas_faltantes": [
+    "contexto_regional.csv"
+   ],
+   "motivo": "Requested from the data team — not delivered yet",
+   "equivalente_local": null,
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": "grace"
+  },
+  {
+   "id": "gldas",
+   "nombre": "GLDAS",
+   "organismo": "NASA",
+   "papel": "A third evapotranspiration contrast and root-zone moisture from a land surface model",
+   "aplica": true,
+   "estado": "requested",
+   "entregas_presentes": [],
+   "entregas_faltantes": [
+    "contexto_regional.csv"
+   ],
+   "motivo": "Requested from the data team — not delivered yet",
+   "equivalente_local": null,
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": "gldas"
+  },
+  {
+   "id": "nldas",
+   "nombre": "NLDAS",
+   "organismo": "NASA and NOAA",
+   "papel": "A second climate source to bound the uncertainty of NASA POWER (rainfall and potential evaporation)",
+   "aplica": true,
+   "estado": "requested",
+   "entregas_presentes": [],
+   "entregas_faltantes": [
+    "contexto_regional.csv"
+   ],
+   "motivo": "Requested from the data team — not delivered yet",
+   "equivalente_local": null,
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": "nldas"
+  },
+  {
+   "id": "era5_land",
+   "nombre": "ERA5 (ERA5-Land)",
+   "organismo": "ECMWF, Copernicus Climate Change Service (listed under ESA on the challenge page)",
+   "papel": "A second source of minimum temperature and frost days",
+   "aplica": true,
+   "estado": "requested",
+   "entregas_presentes": [],
+   "entregas_faltantes": [
+    "contexto_regional.csv"
+   ],
+   "motivo": "Requested from the data team — not delivered yet",
+   "equivalente_local": null,
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": "era5_land"
+  },
+  {
+   "id": "gedi",
+   "nombre": "GEDI",
+   "organismo": "NASA",
+   "papel": "Evidence per field: canopy height (tells an orchard from a low crop)",
+   "aplica": true,
+   "estado": "requested",
+   "entregas_presentes": [],
+   "entregas_faltantes": [
+    "gedi_parcelas.csv"
+   ],
+   "motivo": "Requested from the data team — not delivered yet",
+   "equivalente_local": null,
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": null
+  },
+  {
+   "id": "ecostress",
+   "nombre": "ECOSTRESS",
+   "organismo": "NASA",
+   "papel": "Field-scale contrast of evapotranspiration (the other contrasts are regional)",
+   "aplica": true,
+   "estado": "requested",
+   "entregas_presentes": [],
+   "entregas_faltantes": [
+    "ecostress_parcelas.csv"
+   ],
+   "motivo": "Requested from the data team — not delivered yet",
+   "equivalente_local": null,
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": null
+  },
+  {
+   "id": "gaez",
+   "nombre": "GAEZ (FAO)",
+   "organismo": "FAO and IIASA",
+   "papel": "Regional evidence: agro-climatic suitability by crop",
+   "aplica": true,
+   "estado": "requested",
+   "entregas_presentes": [],
+   "entregas_faltantes": [
+    "gaez_zona.csv"
+   ],
+   "motivo": "Requested from the data team — not delivered yet",
+   "equivalente_local": null,
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": null
+  },
+  {
+   "id": "openet",
+   "nombre": "OpenET",
+   "organismo": "OpenET consortium (with NASA and USGS)",
+   "papel": null,
+   "aplica": false,
+   "estado": "not_applicable",
+   "entregas_presentes": [],
+   "entregas_faltantes": [],
+   "motivo": "It does not cover Mexico",
+   "equivalente_local": "SSEBop on VIIRS, used here as the regional evapotranspiration contrast",
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": null
+  },
+  {
+   "id": "recursos_eeuu",
+   "nombre": "USDA, NRCS, CDL, NAIP, NLCD, PRISM, NWIS, CoCoRaHS, AMS, NASS, LANDFIRE",
+   "organismo": "United States agencies and networks",
+   "papel": null,
+   "aplica": false,
+   "estado": "not_applicable",
+   "entregas_presentes": [],
+   "entregas_faltantes": [],
+   "motivo": "They cover the United States, not Mexico",
+   "equivalente_local": "SIAP (crop statistics), SIH/Conagua (dams) and SDR Chihuahua",
+   "fuentes": [],
+   "fecha": null,
+   "fuente_contexto": null
+  }
+ ],
+ "tarjetas": [
+  {
+   "id": "humedad_suelo",
+   "titulo": "Soil moisture",
+   "recursos": [
+    "smap",
+    "gldas"
+   ],
+   "nota": "A satellite radiometer (SMAP) and a land surface model (GLDAS). Regional grid cells, not field probes.",
+   "paneles": [
+    {
+     "titulo": "SMAP",
+     "series": [
+      {
+       "clave": "smap.humedad_superficial",
+       "etiqueta": "Surface layer"
+      },
+      {
+       "clave": "smap.humedad_raiz",
+       "etiqueta": "Root zone"
+      }
+     ]
+    },
+    {
+     "titulo": "GLDAS (model)",
+     "series": [
+      {
+       "clave": "gldas.humedad_raiz",
+       "etiqueta": "Root zone"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "agua_almacenada",
+   "titulo": "Water stored in the basin",
+   "recursos": [
+    "grace"
+   ],
+   "nota": "GRACE measures all the water stored (surface, soil and aquifer together) at basin scale. It does not separate the aquifer or the irrigation district.",
+   "paneles": [
+    {
+     "titulo": "GRACE / GRACE-FO",
+     "series": [
+      {
+       "clave": "grace.agua_almacenada_anomalia",
+       "etiqueta": "Water storage anomaly"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "verdor",
+   "titulo": "Greenness of the area, long record",
+   "recursos": [
+    "modis"
+   ],
+   "nota": "Mean greenness of the whole area. The field-by-field record comes from HLS.",
+   "paneles": [
+    {
+     "titulo": "MODIS",
+     "series": [
+      {
+       "clave": "modis.ndvi",
+       "etiqueta": "NDVI"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "evapotranspiracion",
+   "titulo": "Evapotranspiration",
+   "recursos": [
+    "modis",
+    "gldas",
+    "viirs_ssebop"
+   ],
+   "nota": "Independent estimates next to the modeled crop demand. A regional comparison, not a field-level validation.",
+   "paneles": [
+    {
+     "titulo": "MODIS and GLDAS",
+     "series": [
+      {
+       "clave": "modis.et",
+       "etiqueta": "MODIS"
+      },
+      {
+       "clave": "gldas.et",
+       "etiqueta": "GLDAS (model)"
+      }
+     ]
+    }
+   ],
+   "contraste": {
+    "titulo": "Monthly contrast with the modeled demand",
+    "unidad_en": "mm/month",
+    "columnas": {
+     "et_modelo_mm": "Modeled crop demand (FAO method with NASA POWER)",
+     "et_ssebop_mm": "SSEBop on VIIRS",
+     "et_wapor_mm": "WaPOR"
+    },
+    "series_regionales": [
+     {
+      "clave": "modis.et",
+      "etiqueta": "MODIS"
+     },
+     {
+      "clave": "gldas.et",
+      "etiqueta": "GLDAS (model)"
+     }
+    ]
+   }
+  },
+  {
+   "id": "segundo_clima",
+   "titulo": "Second climate source",
+   "recursos": [
+    "nldas"
+   ],
+   "nota": "A second source next to NASA POWER, to bound its uncertainty.",
+   "paneles": [
+    {
+     "titulo": "NLDAS rainfall",
+     "series": [
+      {
+       "clave": "nldas.lluvia",
+       "etiqueta": "Rainfall"
+      }
+     ]
+    },
+    {
+     "titulo": "NLDAS potential evaporation",
+     "series": [
+      {
+       "clave": "nldas.evaporacion_potencial",
+       "etiqueta": "Potential evaporation"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "temperatura_minima",
+   "titulo": "Minimum temperature and frost days",
+   "recursos": [
+    "era5_land"
+   ],
+   "nota": "A second source next to NASA POWER, with the same definition of a frost day.",
+   "paneles": [
+    {
+     "titulo": "ERA5-Land minimum temperature",
+     "series": [
+      {
+       "clave": "era5_land.tmin_media",
+       "etiqueta": "Mean daily minimum"
+      }
+     ]
+    },
+    {
+     "titulo": "ERA5-Land frost days",
+     "series": [
+      {
+       "clave": "era5_land.dias_helada",
+       "etiqueta": "Frost days"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "temperatura_superficie",
+   "titulo": "Daytime land surface temperature",
+   "recursos": [
+    "modis"
+   ],
+   "nota": "Temperature of the land surface seen from the satellite, not air temperature.",
+   "paneles": [
+    {
+     "titulo": "MODIS",
+     "series": [
+      {
+       "clave": "modis.temp_superficie_dia",
+       "etiqueta": "Land surface, daytime"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "unidades": {
+  "m3/m3": {
+   "en": "m³/m³"
+  },
+  "adimensional": {
+   "en": ""
+  },
+  "mm/mes": {
+   "en": "mm/month",
+   "anual_en": "mm/year"
+  },
+  "°C": {
+   "en": "°C"
+  },
+  "cm": {
+   "en": "cm"
+  },
+  "kg/m2": {
+   "en": "kg/m²"
+  },
+  "dias": {
+   "en": "days/month",
+   "anual_en": "days/year"
+  }
+ },
+ "avisos": []
+}

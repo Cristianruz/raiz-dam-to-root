@@ -1,0 +1,496 @@
+{
+ "params": {
+  "corridas": {
+   "valor": 2000,
+   "etiqueta": "[S] número de corridas Monte Carlo"
+  },
+  "periodo_clima": {
+   "valor": [
+    1991,
+    2025
+   ],
+   "etiqueta": "assumption [S], propuesto en el preregistro"
+  },
+  "ea_gravedad": {
+   "valor": [
+    0.45,
+    0.7
+   ],
+   "etiqueta": "assumption [S]",
+   "fuente": "Sin valor medido en el DR-005 ni fuente en el repo; rango de sensibilidad propuesto por el equipo"
+  },
+  "sesgo_eto": {
+   "valor": [
+    -0.1,
+    0.0
+   ],
+   "etiqueta": "assumption [S]",
+   "fuente": "Sin fuente en el repo; se prueba la hipótesis de que POWER-PM sobreestima la ETo hasta 10 %"
+  },
+  "presiembra_mm": {
+   "valor": [
+    150,
+    200
+   ],
+   "etiqueta": "[P] kit A5",
+   "fuente": "Kit 40, A5: riego de presiembra de 15–20 cm"
+  },
+  "presiembra_algodon_mm": {
+   "valor": 200,
+   "etiqueta": "assumption [S]",
+   "fuente": "Sin fuente en el repo; extremo superior del rango del kit"
+  },
+  "kc_nogal_tabla": {
+   "valor": [
+    0.5,
+    1.1,
+    0.65
+   ],
+   "etiqueta": "[V] FAO-56",
+   "fuente": "FAO-56, Tabla 12, renglón «Walnut orchard» (Kc ini, mid, end)"
+  },
+  "cobertura_dosel_nogal": {
+   "valor": 0.7,
+   "etiqueta": "assumption [S]",
+   "fuente": "Fracción de cobertura efectiva del dosel; a medir con NDVI de las parcelas de nogal (S8, decisión 5)"
+  },
+  "altura_nogal_m": {
+   "valor": 10,
+   "etiqueta": "assumption [S]",
+   "fuente": "Altura típica de huerta adulta; entra en la Ec. 98 de FAO-56"
+  },
+  "corte_verano_moderado": {
+   "valor": {
+    "riegos_omitidos": [
+     2,
+     3
+    ],
+    "riegos_jul_sep": 6
+   },
+   "etiqueta": "[P] kit B3 (omitir 2–3 riegos entre julio y septiembre); riegos_jul_sep = 6 assumption [S]",
+   "fuente": "Kit 40, B3: variante moderada por omisión"
+  },
+  "plazo_alfalfa_anios": {
+   "valor": {
+    "min": 3,
+    "max": 4
+   },
+   "etiqueta": "[P]",
+   "fuente": "FIRA AGROCOSTOS 2025: vida productiva de 3–4 años"
+  },
+  "plazo_nogal_horizonte": {
+   "valor": 10,
+   "etiqueta": "assumption [S]",
+   "fuente": "S9 §5: horizonte de cálculo, no vida de la huerta; no se descuenta la edad"
+  }
+ },
+ "cultivos": {
+  "alfalfa": {
+   "kc": [
+    0.95,
+    0.95,
+    0.95
+   ],
+   "perenne": true,
+   "nota": "Kc 0.95 todo el año (efecto promediado de cortes) [S]; contraste INIFAP 170–180 cm aplicados [V]"
+  },
+  "nogal": {
+   "kc": [
+    0.5,
+    1.07,
+    0.65
+   ],
+   "siembra": [
+    3,
+    15
+   ],
+   "dias": [
+    20,
+    10,
+    130,
+    30
+   ],
+   "perenne": true,
+   "nota": "Kc de FAO-56 Tabla 12 (Walnut orchard) ajustado por cobertura del dosel (Ec. 98) con supuestos.json; inicio = brotación ≈15-mar (INIFAP) [S]"
+  },
+  "algodon": {
+   "kc": [
+    0.35,
+    1.175,
+    0.6
+   ],
+   "siembra": [
+    4,
+    25
+   ],
+   "dias": [
+    30,
+    50,
+    55,
+    45
+   ],
+   "presiembra_fija": 200
+  },
+  "chile": {
+   "kc": [
+    0.6,
+    1.05,
+    0.9
+   ],
+   "siembra": [
+    3,
+    10
+   ],
+   "dias": [
+    28,
+    35,
+    40,
+    20
+   ],
+   "nota": "sustituto: pimiento FAO-56; siembra directa 20-feb a 31-mar (INIFAP) [V]"
+  },
+  "maiz_forrajero": {
+   "kc": [
+    0.3,
+    1.2,
+    0.6
+   ],
+   "siembra": [
+    4,
+    15
+   ],
+   "dias": [
+    25,
+    35,
+    30,
+    15
+   ],
+   "nota": "corte de ensilaje a ~105 días; etapas FAO maíz escaladas [S]"
+  },
+  "sorgo": {
+   "kc": [
+    0.3,
+    1.05,
+    0.55
+   ],
+   "siembra": [
+    5,
+    1
+   ],
+   "dias": [
+    20,
+    35,
+    45,
+    30
+   ]
+  },
+  "cereal_invierno": {
+   "kc": [
+    0.3,
+    1.15,
+    0.25
+   ],
+   "siembra": [
+    10,
+    15
+   ],
+   "dias": [
+    15,
+    35,
+    45,
+    20
+   ],
+   "nota": "avena forrajera, corte a ~115 días; etapas FAO escaladas [S]"
+  }
+ },
+ "rotaciones": [
+  {
+   "id": "alfalfa",
+   "nombre": "Alfalfa (perenne)",
+   "cultivos": [
+    "alfalfa"
+   ],
+   "plazo": "alfalfa",
+   "plazo_anios": {
+    "min": 3,
+    "max": 4
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 22.9,
+     "p50": 27.83,
+     "p90": 34.38,
+     "neta_mm_p50": 1593,
+     "etc_mm_p50": 1712
+    },
+    "-20": {
+     "p10": 23.54,
+     "p50": 28.4,
+     "p90": 34.94,
+     "neta_mm_p50": 1630,
+     "etc_mm_p50": 1712
+    }
+   }
+  },
+  {
+   "id": "alfalfa_corte_verano",
+   "nombre": "Alfalfa con corte de riego en verano",
+   "cultivos": [
+    "alfalfa"
+   ],
+   "plazo": "alfalfa",
+   "nota": "variante moderada del kit B3: se omiten 2–3 de ~6 riegos entre julio y septiembre [S]",
+   "plazo_anios": {
+    "min": 3,
+    "max": 4
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 20.75,
+     "p50": 24.93,
+     "p90": 30.72,
+     "neta_mm_p50": 1442,
+     "etc_mm_p50": 1712
+    },
+    "-20": {
+     "p10": 21.14,
+     "p50": 25.33,
+     "p90": 31.11,
+     "neta_mm_p50": 1463,
+     "etc_mm_p50": 1712
+    }
+   }
+  },
+  {
+   "id": "nogal",
+   "nombre": "Nogal (huerta)",
+   "cultivos": [
+    "nogal"
+   ],
+   "plazo": "nogal",
+   "plazo_anios": {
+    "min": 10,
+    "max": 10
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 15.33,
+     "p50": 18.84,
+     "p90": 23.17,
+     "neta_mm_p50": 1068,
+     "etc_mm_p50": 1177
+    },
+    "-20": {
+     "p10": 15.95,
+     "p50": 19.35,
+     "p90": 23.68,
+     "neta_mm_p50": 1100,
+     "etc_mm_p50": 1177
+    }
+   }
+  },
+  {
+   "id": "algodon",
+   "nombre": "Algodón",
+   "cultivos": [
+    "algodon"
+   ],
+   "plazo": "anual",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 11.85,
+     "p50": 14.64,
+     "p90": 18.18,
+     "neta_mm_p50": 719,
+     "etc_mm_p50": 818
+    },
+    "-20": {
+     "p10": 12.49,
+     "p50": 15.14,
+     "p90": 18.53,
+     "neta_mm_p50": 748,
+     "etc_mm_p50": 818
+    }
+   }
+  },
+  {
+   "id": "chile",
+   "nombre": "Chile",
+   "cultivos": [
+    "chile"
+   ],
+   "plazo": "anual",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 11.92,
+     "p50": 13.94,
+     "p90": 16.68,
+     "neta_mm_p50": 704,
+     "etc_mm_p50": 744
+    },
+    "-20": {
+     "p10": 12.09,
+     "p50": 14.14,
+     "p90": 16.88,
+     "neta_mm_p50": 713,
+     "etc_mm_p50": 744
+    }
+   }
+  },
+  {
+   "id": "maiz_forrajero",
+   "nombre": "Maíz forrajero",
+   "cultivos": [
+    "maiz_forrajero"
+   ],
+   "plazo": "anual",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 9.28,
+     "p50": 11.05,
+     "p90": 13.34,
+     "neta_mm_p50": 533,
+     "etc_mm_p50": 579
+    },
+    "-20": {
+     "p10": 9.59,
+     "p50": 11.27,
+     "p90": 13.53,
+     "neta_mm_p50": 547,
+     "etc_mm_p50": 579
+    }
+   }
+  },
+  {
+   "id": "sorgo",
+   "nombre": "Sorgo forrajero",
+   "cultivos": [
+    "sorgo"
+   ],
+   "plazo": "anual",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 9.22,
+     "p50": 11.36,
+     "p90": 14.16,
+     "neta_mm_p50": 547,
+     "etc_mm_p50": 640
+    },
+    "-20": {
+     "p10": 9.76,
+     "p50": 11.83,
+     "p90": 14.5,
+     "neta_mm_p50": 572,
+     "etc_mm_p50": 640
+    }
+   }
+  },
+  {
+   "id": "avena_maiz",
+   "nombre": "Avena (invierno) + maíz forrajero (verano)",
+   "cultivos": [
+    "cereal_invierno",
+    "maiz_forrajero"
+   ],
+   "plazo": "anual",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 14.7,
+     "p50": 17.2,
+     "p90": 20.29,
+     "neta_mm_p50": 790,
+     "etc_mm_p50": 841
+    },
+    "-20": {
+     "p10": 15.04,
+     "p50": 17.51,
+     "p90": 20.58,
+     "neta_mm_p50": 804,
+     "etc_mm_p50": 841
+    }
+   }
+  },
+  {
+   "id": "descanso",
+   "nombre": "Descanso con rastrojo en pie",
+   "cultivos": [],
+   "plazo": "anual",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 0.0,
+     "p50": 0.0,
+     "p90": 0.0,
+     "neta_mm_p50": 0,
+     "etc_mm_p50": 0
+    },
+    "-20": {
+     "p10": 0.0,
+     "p50": 0.0,
+     "p90": 0.0,
+     "neta_mm_p50": 0,
+     "etc_mm_p50": 0
+    }
+   }
+  }
+ ],
+ "anios_clima": [
+  1992,
+  1993,
+  1994,
+  1995,
+  1996,
+  1997,
+  1998,
+  1999,
+  2000,
+  2001,
+  2002,
+  2003,
+  2004,
+  2005,
+  2006,
+  2007,
+  2008,
+  2009,
+  2010,
+  2011,
+  2012,
+  2013,
+  2014,
+  2015,
+  2016,
+  2017,
+  2018,
+  2019,
+  2020,
+  2021,
+  2022,
+  2023,
+  2024,
+  2025
+ ]
+}

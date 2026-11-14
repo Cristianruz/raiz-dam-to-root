@@ -1,0 +1,13 @@
+# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+node_modules/
+.DS_Store
+# Buzón local sincronizado desde Drive (las entregas validadas se copian a data/processed/)
+buzon/
+.env
+/dist/

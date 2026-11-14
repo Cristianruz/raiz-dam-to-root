@@ -1,0 +1,7 @@
+{
+  "name": "raiz-prototipo-front-lara",
+  "private": true,
+  "description": "Prototipo de Lara (integrante 6). CommonJS para que sus pruebas (require) corran dentro del repo, que en la raíz usa módulos ES.",
+  "type": "commonjs",
+  "scripts": { "test": "node --test tests/*.test.js" }
+}

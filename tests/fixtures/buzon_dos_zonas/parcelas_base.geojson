@@ -1,0 +1,161 @@
+{
+ "type": "FeatureCollection",
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_nota": "Fixture de tests/test_ensamblar.py (dos zonas): valores DE PRUEBA, no son datos reales ni se usan en la web.",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.52,
+       28.14
+      ],
+      [
+       -105.517,
+       28.14
+      ],
+      [
+       -105.517,
+       28.143
+      ],
+      [
+       -105.52,
+       28.143
+      ],
+      [
+       -105.52,
+       28.14
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "id": "P0001",
+    "area_ha": 9.8,
+    "modulo": null,
+    "ftw_confianza": 72,
+    "protagonista": true,
+    "zona": "delicias_saucillo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.4,
+       28.1
+      ],
+      [
+       -105.397,
+       28.1
+      ],
+      [
+       -105.397,
+       28.103
+      ],
+      [
+       -105.4,
+       28.103
+      ],
+      [
+       -105.4,
+       28.1
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "id": "P0002",
+    "area_ha": 9.1,
+    "modulo": null,
+    "ftw_confianza": 66,
+    "protagonista": false,
+    "zona": "delicias_saucillo"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.625,
+       28.39
+      ],
+      [
+       -105.622,
+       28.39
+      ],
+      [
+       -105.622,
+       28.393
+      ],
+      [
+       -105.625,
+       28.393
+      ],
+      [
+       -105.625,
+       28.39
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "id": "L0001",
+    "area_ha": 9.5,
+    "modulo": null,
+    "ftw_confianza": 80,
+    "protagonista": true,
+    "zona": "lazaro_cardenas"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        -105.6,
+        28.37
+       ],
+       [
+        -105.597,
+        28.37
+       ],
+       [
+        -105.597,
+        28.373
+       ],
+       [
+        -105.6,
+        28.373
+       ],
+       [
+        -105.6,
+        28.37
+       ]
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "id": "L0002",
+    "area_ha": 8.7,
+    "modulo": null,
+    "ftw_confianza": 58,
+    "protagonista": true,
+    "zona": "lazaro_cardenas"
+   }
+  }
+ ]
+}

@@ -1,0 +1,438 @@
+{
+  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+  "_nota": "Todas las constantes del proyecto (kit v4 §2.5). Cada clave: valor, unidad, fuente, etiqueta y nota. Etiquetas: [V] verificado en fuente primaria; [P] prensa o fuente secundaria; [S] supuesto declarado; [NE] no encontrado; Diseño = valor de interfaz, no dato. Lo pendiente queda en null.",
+  "zona_piloto": {
+    "bbox": {
+      "valor": [
+        -105.66,
+        28.07,
+        -105.32,
+        28.43
+      ],
+      "unidad": "grados [oeste, sur, este, norte], EPSG:4326",
+      "fuente": "Decisión del equipo, 14-nov-2026 12:50: rectángulo original de la sesión de datos [-105.42, 28.08, -105.32, 28.16] ampliado al oeste para incluir Colonia Campesina, Colonia Nicolás Bravo y El Molino (localidades propuestas por el equipo). Zona principal (delicias_saucillo); el límite del módulo no es público",
+      "etiqueta": "[S]",
+      "nota": "Envolvente de las dos zonas de zona_piloto.zonas (delicias_saucillo y lazaro_cardenas); cada zona tiene su propio rectángulo. Verificar en el mapa de Earth Engine antes de exportar"
+    },
+    "punto_clima": {
+      "valor": {
+        "lat": 28.19,
+        "lon": -105.45
+      },
+      "unidad": "grados decimales, EPSG:4326",
+      "fuente": "Kit v4, A1 (punto de NASA POWER); confirmado en LEEME.md de la entrega eto_diaria.csv",
+      "etiqueta": "Método",
+      "nota": "Punto de consulta de NASA POWER; no es el límite de la zona piloto"
+    },
+    "zonas": {
+      "valor": [
+        {
+          "id": "delicias_saucillo",
+          "nombre": "Delicias – Saucillo",
+          "prefijo_id": "P",
+          "bbox": [
+            -105.56,
+            28.07,
+            -105.32,
+            28.19
+          ],
+          "localidades": [
+            "Colonia Campesina (Delicias)",
+            "Colonia Nicolás Bravo (Km 92, Delicias)",
+            "El Molino (Rosales / acceso norte Delicias)"
+          ]
+        },
+        {
+          "id": "lazaro_cardenas",
+          "nombre": "Lázaro Cárdenas (Meoqui)",
+          "prefijo_id": "L",
+          "bbox": [
+            -105.66,
+            28.35,
+            -105.56,
+            28.43
+          ],
+          "localidades": [
+            "Lázaro Cárdenas (Meoqui)"
+          ]
+        }
+      ],
+      "unidad": "grados [oeste, sur, este, norte], EPSG:4326",
+      "fuente": "Decisión del equipo, 14-nov-2026 12:50; localidades y centroides propuestos por el equipo (chat del equipo, 12:08)",
+      "etiqueta": "[S]",
+      "nota": "Rectángulos de diseño por verificar en el mapa de Earth Engine (la sesión del navegador puede ajustarlos y debe avisar). Los id de parcela llevan el prefijo de su zona"
+    },
+    "localidades_equipo": {
+      "valor": [
+        {
+          "nombre": "Colonia Campesina",
+          "municipio": "Delicias",
+          "lat": 28.148278,
+          "lon": -105.526667
+        },
+        {
+          "nombre": "Colonia Nicolás Bravo (Km 92)",
+          "municipio": "Delicias",
+          "lat": 28.098278,
+          "lon": -105.525833
+        },
+        {
+          "nombre": "El Molino",
+          "municipio": "Rosales",
+          "lat": 28.166111,
+          "lon": -105.539167
+        },
+        {
+          "nombre": "Lázaro Cárdenas",
+          "municipio": "Meoqui",
+          "lat": 28.389722,
+          "lon": -105.623611
+        }
+      ],
+      "unidad": "grados decimales, EPSG:4326 (centroide de la localidad)",
+      "fuente": "Propuesta del equipo (chat del equipo, 14-nov-2026 12:08), centroides de localidad",
+      "etiqueta": "[S]",
+      "nota": "Referencia para el mapa y para buscar registros de siembra y técnicos; no son parcelas"
+    }
+  },
+  "unidades": {
+    "millar": {
+      "valor": {
+        "m3_por_ha": 1000,
+        "lamina_cm": 10,
+        "lamina_mm": 100
+      },
+      "unidad": "1 millar/ha",
+      "fuente": "S9 §5",
+      "etiqueta": "Definición",
+      "nota": "1 millar/ha = 1,000 m³/ha = 10 cm de lámina; 100 mm = 1 millar/ha (kit B4)"
+    }
+  },
+  "dotaciones": {
+    "deslizador": {
+      "valor": {
+        "min": 0,
+        "max": 12,
+        "paso": 0.5
+      },
+      "unidad": "millares/ha",
+      "fuente": "S9 §3 (mínimo y máximo); el paso es valor de diseño por acordar con P5 (kit B2)",
+      "etiqueta": "Diseño",
+      "nota": "No es un dato: rango del control de la interfaz"
+    },
+    "como_2025": {
+      "valor": {
+        "min": 1,
+        "max": 1,
+        "valor": 1
+      },
+      "unidad": "millares/ha",
+      "fuente": "El Diario de Chihuahua, 28-oct-2024, según la investigación (S8 §2). Referencia: Módulo 4, 1 millar/ha a 4,976 ha desde 11 pozos",
+      "fecha_consulta": null,
+      "etiqueta": "[P]",
+      "nota": "≈1 millar/ha, de pozos; sin agua de las presas"
+    },
+    "como_2026": {
+      "valor": {
+        "min": 3,
+        "max": 4,
+        "valor": 3.5
+      },
+      "unidad": "millares/ha",
+      "fuente": "El Diario de Chihuahua, 27-jul-2026; nota no leída directamente (S8 §2)",
+      "fecha_consulta": null,
+      "etiqueta": "[P], por confirmar",
+      "nota": "valor = punto medio del rango"
+    },
+    "anio_normal": {
+      "valor": {
+        "min": 9,
+        "max": 10,
+        "valor": 9.5
+      },
+      "unidad": "millares/ha",
+      "fuente": "El Diario de Chihuahua, 27-jul-2026; nota no leída directamente (S8 §2)",
+      "fecha_consulta": null,
+      "etiqueta": "[P], por confirmar",
+      "nota": "valor = punto medio del rango"
+    },
+    "punto_medicion": {
+      "valor": "Toma de la parcela",
+      "unidad": null,
+      "fuente": "S8, decisión 2",
+      "etiqueta": "[S]",
+      "nota": "Por confirmar con un técnico de módulo en la mentoría"
+    }
+  },
+  "lluvia_pct": {
+    "valor": [
+      0,
+      -20
+    ],
+    "unidad": "% de la lluvia diaria",
+    "fuente": "S9 §3; kit A5 paso 5",
+    "etiqueta": "Diseño",
+    "nota": "Variantes de lluvia del cubo"
+  },
+  "plazo": {
+    "anual": {
+      "valor": 1,
+      "unidad": "años",
+      "fuente": "S9 §5",
+      "etiqueta": "Definición",
+      "nota": "Cultivo anual, barbecho o descanso"
+    },
+    "alfalfa": {
+      "valor": {
+        "min": 3,
+        "max": 4
+      },
+      "unidad": "años",
+      "fuente": "FIRA (S9 §4)",
+      "etiqueta": "[P]",
+      "nota": ""
+    },
+    "nogal_horizonte": {
+      "valor": 10,
+      "unidad": "años",
+      "fuente": "S9 §5",
+      "etiqueta": "[S]",
+      "nota": "Horizonte de cálculo, no vida de la huerta; la vida se cita con fuente INIFAP antes de publicarla. No se descuenta la edad"
+    },
+    "alfalfa_por_vencer": {
+      "valor": 3,
+      "unidad": "años de edad observada (mínimo)",
+      "fuente": "S9 §5",
+      "etiqueta": "[S]",
+      "nota": "Alfalfa con esta edad o más = por vencer"
+    }
+  },
+  "memoria": {
+    "ndvi_verde": {
+      "valor": 0.4,
+      "sensibilidad": [
+        0.35,
+        0.45
+      ],
+      "unidad": "NDVI",
+      "fuente": "S9 §5",
+      "etiqueta": "[S]",
+      "nota": "Mes verde = NDVI ≥ umbral"
+    },
+    "ventana_verano": {
+      "valor": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "unidad": "meses",
+      "fuente": "S9 §5",
+      "etiqueta": "[S]",
+      "nota": "jun–sep"
+    },
+    "ventana_invierno": {
+      "valor": [
+        12,
+        1,
+        2,
+        3
+      ],
+      "unidad": "meses",
+      "fuente": "S9 §5",
+      "etiqueta": "[S]",
+      "nota": "dic–mar"
+    },
+    "meses_perenne": {
+      "valor": 8,
+      "unidad": "meses verdes en dos años agrícolas seguidos",
+      "fuente": "S9 §5",
+      "etiqueta": "[S]",
+      "nota": ""
+    },
+    "anio_inicio": {
+      "valor": 2016,
+      "unidad": "año agrícola",
+      "fuente": "S9 §3",
+      "etiqueta": "Diseño",
+      "nota": "Plan B: 2019 (kit A3-M)"
+    },
+    "anio_actual": {
+      "valor": 2026,
+      "unidad": "año agrícola (1-oct-2025 a 30-sep-2026)",
+      "fuente": "Kit v4, A3",
+      "etiqueta": "Definición",
+      "nota": ""
+    }
+  },
+  "suelo": {
+    "ndvi_desnudo": {
+      "valor": 0.2,
+      "unidad": "NDVI (menor que)",
+      "fuente": "S9 §5; kit A3",
+      "etiqueta": "Método",
+      "nota": "Días con NDVI < 0.2"
+    },
+    "ventana_desnudo": {
+      "valor": {
+        "inicio": "02-01",
+        "fin": "04-30"
+      },
+      "unidad": "mes-día",
+      "fuente": "S9 §5",
+      "etiqueta": "Método",
+      "nota": "1-feb a 30-abr; temporada de viento"
+    }
+  },
+  "mapa": {
+    "umbral_abstencion": {
+      "valor": 0.6,
+      "unidad": "probabilidad",
+      "fuente": "Kit 23 y kit v4 (A4.2)",
+      "etiqueta": "Método",
+      "nota": "Abstención si prob_max < umbral"
+    },
+    "ftw_confianza_min": {
+      "valor": 50,
+      "unidad": "confianza FTW 0–100",
+      "fuente": "Kit v4 §2.2 y A4.2",
+      "etiqueta": "Método",
+      "nota": "Abstención si ftw_confianza < umbral"
+    },
+    "bloque_km": {
+      "valor": 5,
+      "unidad": "km",
+      "fuente": "Kit 23 y kit v4 (A4.2)",
+      "etiqueta": "Método",
+      "nota": "Validación espacial por bloques"
+    },
+    "area_min_ha": {
+      "valor": 1,
+      "unidad": "ha",
+      "fuente": "Kit v4, B1 paso 3",
+      "etiqueta": "Método",
+      "nota": "Se filtran los campos menores"
+    }
+  },
+  "eficiencia": {
+    "conduccion": {
+      "valor": {
+        "media": 0.6,
+        "min": 0.47,
+        "max": 0.681
+      },
+      "unidad": "fracción",
+      "fuente": "IMTA, COMEII 2021 (rango medido 2012–2016)",
+      "etiqueta": "[V]",
+      "nota": ""
+    },
+    "parcelaria": {
+      "valor": null,
+      "unidad": "fracción",
+      "fuente": null,
+      "etiqueta": "[S]",
+      "nota": "pendiente: rango declarado por P5 en supuestos.json; no existe valor medido para el DR-005"
+    },
+    "goteo": {
+      "valor": null,
+      "unidad": "fracción",
+      "fuente": null,
+      "etiqueta": "[S]",
+      "nota": "pendiente: P5 en supuestos.json"
+    }
+  },
+  "gota": {
+    "c_retorno_superficial": {
+      "valor": 0.2,
+      "unidad": "fracción del volumen superficial agrícola",
+      "fuente": "Conagua 2024, acuífero 0831 (DR_0831): 122.8 de 614 hm³/año",
+      "etiqueta": "[V]",
+      "nota": "Confirmar a qué volumen se refiere el 614 (kit X3.1)"
+    },
+    "c_retorno_subterraneo": {
+      "valor": 0.18,
+      "unidad": "fracción del volumen bombeado",
+      "fuente": "Conagua 2024, acuífero 0831 (DR_0831): 53.1 de 294.9 hm³/año",
+      "etiqueta": "[V]",
+      "nota": ""
+    }
+  },
+  "distrito": {
+    "namo_hm3": {
+      "valor": 2846.78,
+      "unidad": "hm³",
+      "fuente": "Tabla de Conagua reproducida en prensa",
+      "etiqueta": "[P]",
+      "nota": "La Boquilla, capacidad al NAMO"
+    },
+    "almacenamiento_hm3": {
+      "valor": 825.577,
+      "fecha": "2026-11-09",
+      "unidad": "hm³",
+      "fuente": "Impacto Noticias, 9-nov-2026, con el reporte diario de Conagua (S8 §2)",
+      "etiqueta": "[P]",
+      "nota": "Último dato con fecha y fuente"
+    }
+  },
+  "acuifero": {
+    "disponibilidad_hm3_anio": {
+      "valor": -167.12,
+      "unidad": "hm³/año",
+      "fuente": "Conagua 2024, documento técnico DR_0831",
+      "etiqueta": "[V]",
+      "nota": "Déficit oficial, no una pérdida medida"
+    }
+  },
+  "gemelo": {
+    "exageracion_vertical": {
+      "valor": 6,
+      "unidad": "factor (veces la altura real del terreno)",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "No es un dato: el valle es casi plano y sin exagerar el relieve no se lee. La vista 3D lo declara en su rótulo (vertical exaggeration applied)"
+    },
+    "metros_por_millar": {
+      "valor": 60,
+      "unidad": "m de altura de la columna por cada millar/ha",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "No es un dato: escala visual de la columna de agua de cada parcela. La altura no se mide en el terreno; solo permite comparar parcelas entre sí",
+      "nota_web": "Column height is a visual scale, not a measurement: every thousand m³ per hectare adds the same height."
+    },
+    "camara": {
+      "valor": {
+        "pitch": 60,
+        "bearing": -20
+      },
+      "unidad": "grados (pitch: inclinación de la cámara; bearing: giro respecto al norte)",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "Vista inicial del modo 3D; el usuario puede girarla"
+    },
+    "reproduccion_intervalo_ms": {
+      "valor": 1200,
+      "unidad": "ms por año agrícola",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "Tiempo que la línea de tiempo se detiene en cada año durante la reproducción"
+    },
+    "dem": {
+      "valor": {
+        "minzoom": 7,
+        "maxzoom": 12
+      },
+      "unidad": "nivel de zoom de las teselas de relieve (XYZ, 256 px)",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "Máximo: en el zoom 12 un píxel de tesela mide cerca de los 30 m de NASADEM; más zoom no añade detalle. Mínimo: MapLibre dibuja el relieve con teselas de un nivel menos que el zoom del mapa, y en un teléfono la zona completa se ve cerca del zoom 10 del mapa; con el mínimo en 9 (el del ejemplo de la decisión) el relieve quedaba plano ahí. Con 7 hay relieve desde el zoom 8 del mapa. Si cambia, regenere las teselas: python motor/dem_teselas.py"
+    },
+    "anio_destacado": {
+      "valor": 2025,
+      "unidad": "año agrícola",
+      "texto": "Year without dam water: the district received no dam allocation",
+      "fuente": "S9 §2 (prensa con cifras de Conagua)",
+      "etiqueta": "[P]",
+      "nota": "Año que la línea de tiempo resalta. S9 §2: en 2025 el distrito no recibió agua de las presas"
+    }
+  }
+}

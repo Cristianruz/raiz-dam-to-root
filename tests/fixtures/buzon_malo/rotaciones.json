@@ -1,0 +1,125 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 — fixture: VALORES DE PRUEBA",
+ "params": {
+  "corridas_prueba": {
+   "valor": 10,
+   "etiqueta": "prueba (fixture)"
+  },
+  "plazo_prueba": {
+   "valor": {
+    "min": 3,
+    "max": 4
+   },
+   "etiqueta": "prueba (fixture)",
+   "fuente": "fixture"
+  }
+ },
+ "cultivos": {
+  "alfalfa": {
+   "kc": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "nota": "prueba"
+  },
+  "chile": {
+   "kc": [
+    0.5,
+    1.0,
+    0.8
+   ],
+   "nota": "prueba"
+  }
+ },
+ "rotaciones": [
+  {
+   "id": "R_PRUEBA_A",
+   "nombre": "Prueba A (perenne)",
+   "cultivos": [
+    "alfalfa"
+   ],
+   "plazo": "alfalfa",
+   "plazo_anios": {
+    "min": 3,
+    "max": 4
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 13,
+     "p50": 12,
+     "p90": 14,
+     "neta_mm_p50": 900,
+     "etc_mm_p50": 1000
+    },
+    "-20": {
+     "p10": 11,
+     "p50": 13,
+     "p90": 15,
+     "neta_mm_p50": 950,
+     "etc_mm_p50": 1000
+    }
+   }
+  },
+  {
+   "id": "R_PRUEBA_B",
+   "nombre": "Prueba B (anual)",
+   "cultivos": [
+    "chile"
+   ],
+   "plazo": "anual",
+   "nota": "prueba",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 5,
+     "p50": 6,
+     "p90": 7,
+     "neta_mm_p50": 450,
+     "etc_mm_p50": 500
+    },
+    "-20": {
+     "p10": 5.5,
+     "p50": 6.5,
+     "p90": 7.5,
+     "neta_mm_p50": 470,
+     "etc_mm_p50": 500
+    }
+   }
+  },
+  {
+   "id": "R_PRUEBA_DESCANSO",
+   "nombre": "Prueba de descanso",
+   "cultivos": [],
+   "plazo": "anual",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 0,
+     "p50": 0,
+     "p90": 0,
+     "neta_mm_p50": 0,
+     "etc_mm_p50": 0
+    },
+    "-20": {
+     "p10": 0,
+     "p50": 0,
+     "p90": 0,
+     "neta_mm_p50": 0,
+     "etc_mm_p50": 0
+    }
+   }
+  }
+ ],
+ "anios_clima": [
+  2001,
+  2002,
+  2003
+ ]
+}

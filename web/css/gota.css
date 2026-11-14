@@ -1,0 +1,141 @@
+/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* web/css/gota.css — La gota (kit X3.2): Sankey, gotas, controles del goteo, plan B y tabla oculta.
+   Colores de la identidad como variables (kit X3.2 §5): Agua para el agua que fluye, Brote para la ET del
+   cultivo, Tierra para el acuífero y Ámbar para las pérdidas. Si style.css ya define la identidad, se usa
+   esa; si no, el valor de respaldo. web/js/gota.js no lleva colores: solo pone clases «gota-tipo-…».
+   Los números de este archivo son medidas de diseño, no datos. */
+
+.gota-modulo {
+  --gota-flujo: var(--agua, #1F6FB2);
+  --gota-consumo: var(--brote, #4C9A2A);
+  --gota-recarga: var(--tierra, #8A5A3B);
+  --gota-perdida: var(--ambar, #D98E04);
+  --gota-texto: var(--tinta, #1D2329);
+  --gota-texto-suave: var(--tinta-suave, #4A525A);
+  --gota-fondo: var(--arena, #F5EFE6);
+  --gota-blanco: var(--blanco, #FFFFFF);
+  --gota-linea: var(--borde, #D8CFC2);
+  --gota-oscuro: var(--agua-osc, #174F80);
+  --gota-alerta: var(--rojo, #B3261E);
+  --gota-alerta-fondo: var(--rojo-claro, #F6DEDC);
+  --gota-neutro: var(--gris, #8E9399);
+  --gota-opacidad-banda: 0.45;
+  --gota-transicion: 0.7s;
+
+  color: var(--gota-texto);
+}
+
+/* Color por tipo de flujo: relleno (nodos, muestras, barras) y trazo (bandas). */
+.gota-modulo .gota-tipo-agua { --gota-color: var(--gota-flujo); }
+.gota-modulo .gota-tipo-et { --gota-color: var(--gota-consumo); }
+.gota-modulo .gota-tipo-acuifero { --gota-color: var(--gota-recarga); }
+.gota-modulo .gota-tipo-perdidas { --gota-color: var(--gota-perdida); }
+
+/* ---------- Controles del goteo ---------- */
+.gota-mod-controles { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin: 8px 0; }
+.gota-mod-boton {
+  border: 2px solid var(--gota-flujo); background: var(--gota-blanco); color: var(--gota-oscuro);
+  border-radius: 8px; padding: 6px 12px; font: inherit; font-weight: 700; cursor: pointer; min-height: 44px;
+}
+.gota-mod-boton[aria-pressed="true"] { background: var(--gota-flujo); color: var(--gota-blanco); }
+.gota-mod-interruptor { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.gota-mod-interruptor input { width: 22px; height: 22px; margin: 0; accent-color: var(--gota-flujo); cursor: pointer; }
+.gota-mod-interruptor input:disabled { cursor: not-allowed; }
+.gota-mod-interruptor input:disabled + span { color: var(--gota-texto-suave); }
+.gota-mod-estado { font-weight: 700; }
+
+.gota-mod-nota {
+  font-size: 0.9rem; margin: 4px 0 8px; padding: 6px 8px;
+  background: var(--gota-blanco); border-left: 4px solid var(--gota-neutro); border-radius: 4px;
+}
+
+/* ---------- Cifras grandes y aviso ---------- */
+.gota-mod-cifras { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 6px 0; }
+.gota-mod-cifras:empty { display: none; }
+.gota-mod-cifra { margin: 0; color: var(--gota-oscuro); }
+.gota-mod-cifra-rotulo { font-weight: 700; font-size: 1.05rem; }
+.gota-mod-cifra-valor { font-size: 1.7rem; font-variant-numeric: tabular-nums; }
+.gota-mod-cifra small { display: block; font-size: 0.85rem; font-weight: 400; color: var(--gota-texto-suave); }
+.gota-mod-alerta {
+  background: var(--gota-alerta-fondo); border-left: 4px solid var(--gota-alerta);
+  padding: 6px 8px; border-radius: 4px; font-weight: 700; margin: 8px 0;
+}
+
+/* ---------- Diagrama Sankey ---------- */
+.gota-mod-mostrando { font-size: 0.88rem; color: var(--gota-texto-suave); margin: 6px 0 2px; }
+.gota-mod-diagrama { width: 100%; min-width: 0; }
+.gota-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.gota-banda { fill: none; stroke: var(--gota-color); stroke-opacity: var(--gota-opacidad-banda); }
+.gota-nodo { fill: var(--gota-color); }
+.gota-etiqueta {
+  font-size: 13px; fill: var(--gota-texto);
+  /* Halo del color de fondo: la etiqueta se lee aunque pase sobre una banda. */
+  paint-order: stroke; stroke: var(--gota-fondo); stroke-width: 4px; stroke-linejoin: round;
+}
+.gota-etiqueta-nombre { font-weight: 700; }
+.gota-etiqueta-valor { font-variant-numeric: tabular-nums; }
+.gota-svg--compacto .gota-etiqueta { font-size: 11.5px; }
+/* Gota: blanca con borde de agua, visible sobre las cuatro bandas. */
+.gota-gotita { fill: var(--gota-blanco); stroke: var(--gota-flujo); stroke-width: 1.5px; pointer-events: none; }
+
+/* ---------- Leyenda ---------- */
+.gota-mod-leyenda {
+  list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.85rem;
+}
+.gota-mod-leyenda li { display: flex; align-items: center; gap: 6px; }
+.gota-modulo[data-gota-plan="barras"] .gota-mod-leyenda {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.gota-mod-v { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+.gota-muestra {
+  display: inline-block; width: 14px; height: 14px; border-radius: 3px; flex: none;
+  background: var(--gota-color); border: 1px solid rgba(29, 35, 41, 0.25);
+}
+
+/* ---------- Plan B: barras horizontales apiladas ---------- */
+.gota-pb { display: grid; gap: 10px; margin-top: 6px; }
+.gota-pb-fila { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px; align-items: center; }
+.gota-pb-rotulo { font-size: 0.9rem; font-weight: 700; }
+.gota-pb-pista { height: 26px; background: var(--gota-blanco); border: 1px solid var(--gota-linea); border-radius: 4px; overflow: hidden; }
+.gota-pb-barra { display: flex; height: 100%; width: 0; transition: width var(--gota-transicion) ease; }
+.gota-pb-seg {
+  height: 100%; width: 0; min-width: 0; background: var(--gota-color);
+  border-right: 1px solid var(--gota-blanco); transition: width var(--gota-transicion) ease;
+}
+
+/* ---------- Frase fija, fuente y supuestos ---------- */
+.gota-mod-frase { font-size: 0.92rem; margin: 12px 0 4px; }
+.gota-mod-fuente { font-size: 0.82rem; color: var(--gota-texto-suave); margin: 0 0 6px; }
+.gota-mod-supuestos { font-size: 0.82rem; color: var(--gota-texto-suave); }
+.gota-mod-supuestos summary { cursor: pointer; font-weight: 700; color: var(--gota-oscuro); min-height: 32px; display: flex; align-items: center; }
+.gota-mod-supuestos ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* Oculta a la vista, presente para lectores de pantalla (la tabla con los mismos números del diagrama). */
+.gota-solo-lector {
+  position: absolute !important;
+  width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Pantallas angostas ---------- */
+@media (max-width: 520px) {
+  .gota-mod-cifra-valor { font-size: 1.4rem; }
+  .gota-mod-cifras { gap: 6px 20px; }
+  .gota-pb-fila { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+
+/* ---------- Sin movimiento: preferencia del sistema o ctx.reducirMovimiento ---------- */
+.gota-quieto *, .gota-quieto *::before, .gota-quieto *::after { transition: none !important; animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .gota-modulo *, .gota-modulo *::before, .gota-modulo *::after { transition: none !important; animation: none !important; }
+  .gota-gotitas { display: none; }
+}
+
+/* ---------- Ficha imprimible: La gota en versión estática ---------- */
+@media print {
+  .gota-mod-controles, .gota-gotitas { display: none !important; }
+  .gota-mod-supuestos[open] summary, .gota-mod-supuestos summary { color: var(--gota-texto); }
+  .gota-banda { stroke-opacity: 0.6; }
+  .gota-modulo { break-inside: avoid; }
+}

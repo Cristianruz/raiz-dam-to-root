@@ -1,0 +1,12 @@
+{
+ "rotulo": "rótulo de prueba (fixture)",
+ "umbral_ruta_ha": 0,
+ "umbral_ruta_etiqueta": "prueba (fixture)",
+ "celda_ha": 0.1,
+ "tormenta": {
+  "mm": 10,
+  "definicion": "prueba (fixture)",
+  "fuente": "fixture",
+  "periodo": "prueba (fixture)"
+ }
+}
