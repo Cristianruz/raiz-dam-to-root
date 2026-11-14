@@ -1394,7 +1394,7 @@ def ensamblar(buzon=None, salida=None, log=None, params=None):
         "sigue_simulado": esperados_simulados(), "fuentes": [], "avisos": [],
         "nota": "web/data/ no se toca todavía: la integración al contrato llega con el motor B4.",
     }
-    if buzon is None:
+    if buzon is None or not str(buzon).strip():
         rep["nota"] = ("Sin buzón: no hay entregas; todo sigue simulado y no se escribió nada. " + rep["nota"])
         return rep
 
