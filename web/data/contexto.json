@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/contexto_web.py con las entregas validadas de data/processed; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
- "generado": "2026-11-14T22:20:26+00:00",
+ "generado": "2026-11-14T22:31:18+00:00",
  "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
  "zonas": {
   "delicias_saucillo": {
@@ -18627,5362 +18627,6434 @@
    "P0002": {
     "n_disparos": 9,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.09
+    "altura_p90_m": 3.09,
+    "dosel_alto": false
    },
    "P0003": {
     "n_disparos": 2,
     "altura_mediana_m": 2.75,
-    "altura_p90_m": 2.76
+    "altura_p90_m": 2.76,
+    "dosel_alto": null
    },
    "P0006": {
     "n_disparos": 1,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": null
    },
    "P0007": {
     "n_disparos": 1,
     "altura_mediana_m": 11.75,
-    "altura_p90_m": 11.75
+    "altura_p90_m": 11.75,
+    "dosel_alto": null
    },
    "P0008": {
     "n_disparos": 7,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": false
    },
    "P0009": {
     "n_disparos": 4,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.7
+    "altura_p90_m": 2.7,
+    "dosel_alto": false
    },
    "P0011": {
     "n_disparos": 3,
     "altura_mediana_m": 12.66,
-    "altura_p90_m": 13.59
+    "altura_p90_m": 13.59,
+    "dosel_alto": true
    },
    "P0012": {
     "n_disparos": 8,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 4.32
+    "altura_p90_m": 4.32,
+    "dosel_alto": false
    },
    "P0013": {
     "n_disparos": 7,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 4.66
+    "altura_p90_m": 4.66,
+    "dosel_alto": false
    },
    "P0014": {
     "n_disparos": 9,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.27
+    "altura_p90_m": 3.27,
+    "dosel_alto": false
    },
    "P0015": {
     "n_disparos": 2,
     "altura_mediana_m": 2.89,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": null
    },
    "P0016": {
     "n_disparos": 9,
     "altura_mediana_m": 2.72,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "P0017": {
     "n_disparos": 13,
     "altura_mediana_m": 2.51,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "P0020": {
     "n_disparos": 7,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.75
+    "altura_p90_m": 2.75,
+    "dosel_alto": false
    },
    "P0021": {
     "n_disparos": 3,
     "altura_mediana_m": 2.39,
-    "altura_p90_m": 2.48
+    "altura_p90_m": 2.48,
+    "dosel_alto": false
    },
    "P0022": {
     "n_disparos": 1,
     "altura_mediana_m": 3.55,
-    "altura_p90_m": 3.55
+    "altura_p90_m": 3.55,
+    "dosel_alto": null
    },
    "P0023": {
     "n_disparos": 13,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "P0024": {
     "n_disparos": 11,
     "altura_mediana_m": 2.99,
-    "altura_p90_m": 9.73
+    "altura_p90_m": 9.73,
+    "dosel_alto": true
    },
    "P0025": {
     "n_disparos": 1,
     "altura_mediana_m": 6.31,
-    "altura_p90_m": 6.31
+    "altura_p90_m": 6.31,
+    "dosel_alto": null
    },
    "P0026": {
     "n_disparos": 8,
     "altura_mediana_m": 2.93,
-    "altura_p90_m": 8.06
+    "altura_p90_m": 8.06,
+    "dosel_alto": true
    },
    "P0027": {
     "n_disparos": 12,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 3.65
+    "altura_p90_m": 3.65,
+    "dosel_alto": false
    },
    "P0028": {
     "n_disparos": 6,
     "altura_mediana_m": 2.6,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": false
    },
    "P0029": {
     "n_disparos": 10,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.96
+    "altura_p90_m": 2.96,
+    "dosel_alto": false
    },
    "P0030": {
     "n_disparos": 6,
     "altura_mediana_m": 8.36,
-    "altura_p90_m": 13.46
+    "altura_p90_m": 13.46,
+    "dosel_alto": true
    },
    "P0031": {
     "n_disparos": 4,
     "altura_mediana_m": 2.39,
-    "altura_p90_m": 2.39
+    "altura_p90_m": 2.39,
+    "dosel_alto": false
    },
    "P0033": {
     "n_disparos": 1,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": null
    },
    "P0034": {
     "n_disparos": 2,
     "altura_mediana_m": 4.15,
-    "altura_p90_m": 5.1
+    "altura_p90_m": 5.1,
+    "dosel_alto": null
    },
    "P0035": {
     "n_disparos": 36,
     "altura_mediana_m": 2.67,
-    "altura_p90_m": 3.56
+    "altura_p90_m": 3.56,
+    "dosel_alto": false
    },
    "P0036": {
     "n_disparos": 11,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.72
+    "altura_p90_m": 2.72,
+    "dosel_alto": false
    },
    "P0037": {
     "n_disparos": 3,
     "altura_mediana_m": 2.39,
-    "altura_p90_m": 2.39
+    "altura_p90_m": 2.39,
+    "dosel_alto": false
    },
    "P0038": {
     "n_disparos": 5,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": false
    },
    "P0040": {
     "n_disparos": 51,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 4.54
+    "altura_p90_m": 4.54,
+    "dosel_alto": false
    },
    "P0041": {
     "n_disparos": 2,
     "altura_mediana_m": 2.6,
-    "altura_p90_m": 2.64
+    "altura_p90_m": 2.64,
+    "dosel_alto": null
    },
    "P0042": {
     "n_disparos": 9,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 2.87
+    "altura_p90_m": 2.87,
+    "dosel_alto": false
    },
    "P0043": {
     "n_disparos": 1,
     "altura_mediana_m": 3.03,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": null
    },
    "P0044": {
     "n_disparos": 4,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.71
+    "altura_p90_m": 2.71,
+    "dosel_alto": false
    },
    "P0046": {
     "n_disparos": 10,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 2.93
+    "altura_p90_m": 2.93,
+    "dosel_alto": false
    },
    "P0047": {
     "n_disparos": 10,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.99
+    "altura_p90_m": 2.99,
+    "dosel_alto": false
    },
    "P0048": {
     "n_disparos": 38,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 4.82
+    "altura_p90_m": 4.82,
+    "dosel_alto": false
    },
    "P0049": {
     "n_disparos": 4,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.74
+    "altura_p90_m": 2.74,
+    "dosel_alto": false
    },
    "P0050": {
     "n_disparos": 4,
     "altura_mediana_m": 2.49,
-    "altura_p90_m": 2.53
+    "altura_p90_m": 2.53,
+    "dosel_alto": false
    },
    "P0051": {
     "n_disparos": 17,
     "altura_mediana_m": 2.94,
-    "altura_p90_m": 4.47
+    "altura_p90_m": 4.47,
+    "dosel_alto": false
    },
    "P0052": {
     "n_disparos": 5,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.9
+    "altura_p90_m": 2.9,
+    "dosel_alto": false
    },
    "P0053": {
     "n_disparos": 20,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.93
+    "altura_p90_m": 2.93,
+    "dosel_alto": false
    },
    "P0054": {
     "n_disparos": 1,
     "altura_mediana_m": 2.98,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": null
    },
    "P0056": {
     "n_disparos": 10,
     "altura_mediana_m": 9.46,
-    "altura_p90_m": 11.53
+    "altura_p90_m": 11.53,
+    "dosel_alto": true
    },
    "P0057": {
     "n_disparos": 13,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": false
    },
    "P0058": {
     "n_disparos": 5,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.71
+    "altura_p90_m": 3.71,
+    "dosel_alto": false
    },
    "P0059": {
     "n_disparos": 16,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "P0060": {
     "n_disparos": 3,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 8.26
+    "altura_p90_m": 8.26,
+    "dosel_alto": true
    },
    "P0062": {
     "n_disparos": 9,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.43
+    "altura_p90_m": 3.43,
+    "dosel_alto": false
    },
    "P0063": {
     "n_disparos": 2,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": null
    },
    "P0064": {
     "n_disparos": 3,
     "altura_mediana_m": 2.35,
-    "altura_p90_m": 2.41
+    "altura_p90_m": 2.41,
+    "dosel_alto": false
    },
    "P0065": {
     "n_disparos": 3,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.94
+    "altura_p90_m": 2.94,
+    "dosel_alto": false
    },
    "P0066": {
     "n_disparos": 16,
     "altura_mediana_m": 2.46,
-    "altura_p90_m": 4.34
+    "altura_p90_m": 4.34,
+    "dosel_alto": false
    },
    "P0067": {
     "n_disparos": 71,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 3.81
+    "altura_p90_m": 3.81,
+    "dosel_alto": false
    },
    "P0068": {
     "n_disparos": 3,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": false
    },
    "P0070": {
     "n_disparos": 28,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 3.41
+    "altura_p90_m": 3.41,
+    "dosel_alto": false
    },
    "P0071": {
     "n_disparos": 7,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 2.57
+    "altura_p90_m": 2.57,
+    "dosel_alto": false
    },
    "P0072": {
     "n_disparos": 10,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.85
+    "altura_p90_m": 2.85,
+    "dosel_alto": false
    },
    "P0073": {
     "n_disparos": 6,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 2.86
+    "altura_p90_m": 2.86,
+    "dosel_alto": false
    },
    "P0074": {
     "n_disparos": 9,
     "altura_mediana_m": 3.03,
-    "altura_p90_m": 3.26
+    "altura_p90_m": 3.26,
+    "dosel_alto": false
    },
    "P0075": {
     "n_disparos": 4,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.9
+    "altura_p90_m": 2.9,
+    "dosel_alto": false
    },
    "P0076": {
     "n_disparos": 11,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 3.13
+    "altura_p90_m": 3.13,
+    "dosel_alto": false
    },
    "P0078": {
     "n_disparos": 5,
     "altura_mediana_m": 6.8,
-    "altura_p90_m": 6.83
+    "altura_p90_m": 6.83,
+    "dosel_alto": true
    },
    "P0079": {
     "n_disparos": 34,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0081": {
     "n_disparos": 9,
     "altura_mediana_m": 3.37,
-    "altura_p90_m": 8.12
+    "altura_p90_m": 8.12,
+    "dosel_alto": true
    },
    "P0082": {
     "n_disparos": 6,
     "altura_mediana_m": 4.1,
-    "altura_p90_m": 4.73
+    "altura_p90_m": 4.73,
+    "dosel_alto": false
    },
    "P0084": {
     "n_disparos": 3,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": false
    },
    "P0085": {
     "n_disparos": 9,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 3.21
+    "altura_p90_m": 3.21,
+    "dosel_alto": false
    },
    "P0086": {
     "n_disparos": 11,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": false
    },
    "P0087": {
     "n_disparos": 10,
     "altura_mediana_m": 4.23,
-    "altura_p90_m": 5.97
+    "altura_p90_m": 5.97,
+    "dosel_alto": true
    },
    "P0089": {
     "n_disparos": 3,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.9
+    "altura_p90_m": 2.9,
+    "dosel_alto": false
    },
    "P0092": {
     "n_disparos": 22,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 4.6
+    "altura_p90_m": 4.6,
+    "dosel_alto": false
    },
    "P0094": {
     "n_disparos": 16,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "P0095": {
     "n_disparos": 7,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.73
+    "altura_p90_m": 2.73,
+    "dosel_alto": false
    },
    "P0097": {
     "n_disparos": 3,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.73
+    "altura_p90_m": 2.73,
+    "dosel_alto": false
    },
    "P0098": {
     "n_disparos": 1,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 2.77
+    "altura_p90_m": 2.77,
+    "dosel_alto": null
    },
    "P0099": {
     "n_disparos": 4,
     "altura_mediana_m": 4.9,
-    "altura_p90_m": 5.82
+    "altura_p90_m": 5.82,
+    "dosel_alto": true
    },
    "P0100": {
     "n_disparos": 3,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 15.51
+    "altura_p90_m": 15.51,
+    "dosel_alto": true
    },
    "P0101": {
     "n_disparos": 3,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": false
    },
    "P0102": {
     "n_disparos": 3,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": false
    },
    "P0103": {
     "n_disparos": 27,
     "altura_mediana_m": 2.36,
-    "altura_p90_m": 2.73
+    "altura_p90_m": 2.73,
+    "dosel_alto": false
    },
    "P0104": {
     "n_disparos": 2,
     "altura_mediana_m": 10.51,
-    "altura_p90_m": 11.53
+    "altura_p90_m": 11.53,
+    "dosel_alto": null
    },
    "P0105": {
     "n_disparos": 3,
     "altura_mediana_m": 3.4,
-    "altura_p90_m": 3.91
+    "altura_p90_m": 3.91,
+    "dosel_alto": false
    },
    "P0106": {
     "n_disparos": 1,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": null
    },
    "P0107": {
     "n_disparos": 3,
     "altura_mediana_m": 2.39,
-    "altura_p90_m": 4.93
+    "altura_p90_m": 4.93,
+    "dosel_alto": false
    },
    "P0108": {
     "n_disparos": 4,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 7.89
+    "altura_p90_m": 7.89,
+    "dosel_alto": true
    },
    "P0109": {
     "n_disparos": 13,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": false
    },
    "P0111": {
     "n_disparos": 1,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": null
    },
    "P0112": {
     "n_disparos": 1,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": null
    },
    "P0113": {
     "n_disparos": 76,
     "altura_mediana_m": 3.2,
-    "altura_p90_m": 4.62
+    "altura_p90_m": 4.62,
+    "dosel_alto": false
    },
    "P0114": {
     "n_disparos": 4,
     "altura_mediana_m": 2.75,
-    "altura_p90_m": 5.44
+    "altura_p90_m": 5.44,
+    "dosel_alto": true
    },
    "P0115": {
     "n_disparos": 3,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.75
+    "altura_p90_m": 2.75,
+    "dosel_alto": false
    },
    "P0116": {
     "n_disparos": 3,
     "altura_mediana_m": 3.17,
-    "altura_p90_m": 3.38
+    "altura_p90_m": 3.38,
+    "dosel_alto": false
    },
    "P0117": {
     "n_disparos": 4,
     "altura_mediana_m": 5.52,
-    "altura_p90_m": 12.98
+    "altura_p90_m": 12.98,
+    "dosel_alto": true
    },
    "P0118": {
     "n_disparos": 4,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": false
    },
    "P0119": {
     "n_disparos": 27,
     "altura_mediana_m": 2.88,
-    "altura_p90_m": 5.49
+    "altura_p90_m": 5.49,
+    "dosel_alto": true
    },
    "P0120": {
     "n_disparos": 3,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.8
+    "altura_p90_m": 2.8,
+    "dosel_alto": false
    },
    "P0121": {
     "n_disparos": 4,
     "altura_mediana_m": 3.39,
-    "altura_p90_m": 4.82
+    "altura_p90_m": 4.82,
+    "dosel_alto": false
    },
    "P0122": {
     "n_disparos": 13,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 3.12
+    "altura_p90_m": 3.12,
+    "dosel_alto": false
    },
    "P0123": {
     "n_disparos": 6,
     "altura_mediana_m": 2.37,
-    "altura_p90_m": 2.5
+    "altura_p90_m": 2.5,
+    "dosel_alto": false
    },
    "P0124": {
     "n_disparos": 12,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "P0125": {
     "n_disparos": 1,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": null
    },
    "P0126": {
     "n_disparos": 11,
     "altura_mediana_m": 3.29,
-    "altura_p90_m": 3.58
+    "altura_p90_m": 3.58,
+    "dosel_alto": false
    },
    "P0128": {
     "n_disparos": 6,
     "altura_mediana_m": 2.82,
-    "altura_p90_m": 6.39
+    "altura_p90_m": 6.39,
+    "dosel_alto": true
    },
    "P0129": {
     "n_disparos": 44,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.9
+    "altura_p90_m": 2.9,
+    "dosel_alto": false
    },
    "P0130": {
     "n_disparos": 9,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.92
+    "altura_p90_m": 2.92,
+    "dosel_alto": false
    },
    "P0131": {
     "n_disparos": 19,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.13
+    "altura_p90_m": 3.13,
+    "dosel_alto": false
    },
    "P0132": {
     "n_disparos": 1,
     "altura_mediana_m": 2.98,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": null
    },
    "P0134": {
     "n_disparos": 2,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.64
+    "altura_p90_m": 2.64,
+    "dosel_alto": null
    },
    "P0135": {
     "n_disparos": 19,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 3.66
+    "altura_p90_m": 3.66,
+    "dosel_alto": false
    },
    "P0136": {
     "n_disparos": 18,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.82
+    "altura_p90_m": 2.82,
+    "dosel_alto": false
    },
    "P0137": {
     "n_disparos": 13,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 8.43
+    "altura_p90_m": 8.43,
+    "dosel_alto": true
    },
    "P0138": {
     "n_disparos": 14,
     "altura_mediana_m": 2.67,
-    "altura_p90_m": 3.48
+    "altura_p90_m": 3.48,
+    "dosel_alto": false
    },
    "P0139": {
     "n_disparos": 3,
     "altura_mediana_m": 2.39,
-    "altura_p90_m": 2.42
+    "altura_p90_m": 2.42,
+    "dosel_alto": false
    },
    "P0140": {
     "n_disparos": 4,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 2.92
+    "altura_p90_m": 2.92,
+    "dosel_alto": false
    },
    "P0141": {
     "n_disparos": 41,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 5.45
+    "altura_p90_m": 5.45,
+    "dosel_alto": true
    },
    "P0142": {
     "n_disparos": 18,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.72
+    "altura_p90_m": 2.72,
+    "dosel_alto": false
    },
    "P0143": {
     "n_disparos": 2,
     "altura_mediana_m": 4.25,
-    "altura_p90_m": 5.46
+    "altura_p90_m": 5.46,
+    "dosel_alto": null
    },
    "P0144": {
     "n_disparos": 1,
     "altura_mediana_m": 2.99,
-    "altura_p90_m": 2.99
+    "altura_p90_m": 2.99,
+    "dosel_alto": null
    },
    "P0145": {
     "n_disparos": 5,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": false
    },
    "P0146": {
     "n_disparos": 2,
     "altura_mediana_m": 3.02,
-    "altura_p90_m": 3.11
+    "altura_p90_m": 3.11,
+    "dosel_alto": null
    },
    "P0148": {
     "n_disparos": 7,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "P0149": {
     "n_disparos": 6,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": false
    },
    "P0150": {
     "n_disparos": 4,
     "altura_mediana_m": 4.36,
-    "altura_p90_m": 13.0
+    "altura_p90_m": 13.0,
+    "dosel_alto": true
    },
    "P0151": {
     "n_disparos": 1,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.47
+    "altura_p90_m": 2.47,
+    "dosel_alto": null
    },
    "P0152": {
     "n_disparos": 22,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.21
+    "altura_p90_m": 3.21,
+    "dosel_alto": false
    },
    "P0153": {
     "n_disparos": 30,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.25
+    "altura_p90_m": 3.25,
+    "dosel_alto": false
    },
    "P0154": {
     "n_disparos": 20,
     "altura_mediana_m": 2.45,
-    "altura_p90_m": 2.77
+    "altura_p90_m": 2.77,
+    "dosel_alto": false
    },
    "P0155": {
     "n_disparos": 13,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.14
+    "altura_p90_m": 3.14,
+    "dosel_alto": false
    },
    "P0156": {
     "n_disparos": 21,
     "altura_mediana_m": 10.48,
-    "altura_p90_m": 11.69
+    "altura_p90_m": 11.69,
+    "dosel_alto": true
    },
    "P0158": {
     "n_disparos": 3,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": false
    },
    "P0159": {
     "n_disparos": 19,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.11
+    "altura_p90_m": 3.11,
+    "dosel_alto": false
    },
    "P0161": {
     "n_disparos": 13,
     "altura_mediana_m": 2.68,
-    "altura_p90_m": 6.05
+    "altura_p90_m": 6.05,
+    "dosel_alto": true
    },
    "P0162": {
     "n_disparos": 10,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.86
+    "altura_p90_m": 2.86,
+    "dosel_alto": false
    },
    "P0163": {
     "n_disparos": 6,
     "altura_mediana_m": 2.49,
-    "altura_p90_m": 2.52
+    "altura_p90_m": 2.52,
+    "dosel_alto": false
    },
    "P0164": {
     "n_disparos": 200,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 5.56
+    "altura_p90_m": 5.56,
+    "dosel_alto": true
    },
    "P0165": {
     "n_disparos": 6,
     "altura_mediana_m": 2.49,
-    "altura_p90_m": 2.56
+    "altura_p90_m": 2.56,
+    "dosel_alto": false
    },
    "P0166": {
     "n_disparos": 5,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 4.46
+    "altura_p90_m": 4.46,
+    "dosel_alto": false
    },
    "P0167": {
     "n_disparos": 22,
     "altura_mediana_m": 3.36,
-    "altura_p90_m": 4.18
+    "altura_p90_m": 4.18,
+    "dosel_alto": false
    },
    "P0168": {
     "n_disparos": 5,
     "altura_mediana_m": 4.54,
-    "altura_p90_m": 4.99
+    "altura_p90_m": 4.99,
+    "dosel_alto": false
    },
    "P0169": {
     "n_disparos": 6,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 3.01
+    "altura_p90_m": 3.01,
+    "dosel_alto": false
    },
    "P0170": {
     "n_disparos": 7,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 5.92
+    "altura_p90_m": 5.92,
+    "dosel_alto": true
    },
    "P0171": {
     "n_disparos": 2,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 3.21
+    "altura_p90_m": 3.21,
+    "dosel_alto": null
    },
    "P0172": {
     "n_disparos": 4,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 2.75
+    "altura_p90_m": 2.75,
+    "dosel_alto": false
    },
    "P0173": {
     "n_disparos": 10,
     "altura_mediana_m": 2.67,
-    "altura_p90_m": 7.28
+    "altura_p90_m": 7.28,
+    "dosel_alto": true
    },
    "P0175": {
     "n_disparos": 2,
     "altura_mediana_m": 2.6,
-    "altura_p90_m": 2.62
+    "altura_p90_m": 2.62,
+    "dosel_alto": null
    },
    "P0176": {
     "n_disparos": 4,
     "altura_mediana_m": 2.55,
-    "altura_p90_m": 2.57
+    "altura_p90_m": 2.57,
+    "dosel_alto": false
    },
    "P0177": {
     "n_disparos": 3,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "P0178": {
     "n_disparos": 55,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.82
+    "altura_p90_m": 2.82,
+    "dosel_alto": false
    },
    "P0179": {
     "n_disparos": 5,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.66
+    "altura_p90_m": 2.66,
+    "dosel_alto": false
    },
    "P0180": {
     "n_disparos": 9,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.94
+    "altura_p90_m": 3.94,
+    "dosel_alto": false
    },
    "P0181": {
     "n_disparos": 12,
     "altura_mediana_m": 2.55,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": false
    },
    "P0182": {
     "n_disparos": 3,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.49
+    "altura_p90_m": 2.49,
+    "dosel_alto": false
    },
    "P0183": {
     "n_disparos": 34,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.93
+    "altura_p90_m": 2.93,
+    "dosel_alto": false
    },
    "P0185": {
     "n_disparos": 1,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 2.8
+    "altura_p90_m": 2.8,
+    "dosel_alto": null
    },
    "P0186": {
     "n_disparos": 8,
     "altura_mediana_m": 3.02,
-    "altura_p90_m": 4.19
+    "altura_p90_m": 4.19,
+    "dosel_alto": false
    },
    "P0187": {
     "n_disparos": 2,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.82
+    "altura_p90_m": 2.82,
+    "dosel_alto": null
    },
    "P0188": {
     "n_disparos": 17,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 3.66
+    "altura_p90_m": 3.66,
+    "dosel_alto": false
    },
    "P0189": {
     "n_disparos": 10,
     "altura_mediana_m": 2.67,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": false
    },
    "P0190": {
     "n_disparos": 14,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.39
+    "altura_p90_m": 3.39,
+    "dosel_alto": false
    },
    "P0191": {
     "n_disparos": 5,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.71
+    "altura_p90_m": 2.71,
+    "dosel_alto": false
    },
    "P0192": {
     "n_disparos": 3,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "P0193": {
     "n_disparos": 6,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": false
    },
    "P0194": {
     "n_disparos": 12,
     "altura_mediana_m": 3.61,
-    "altura_p90_m": 6.63
+    "altura_p90_m": 6.63,
+    "dosel_alto": true
    },
    "P0195": {
     "n_disparos": 17,
     "altura_mediana_m": 3.52,
-    "altura_p90_m": 8.76
+    "altura_p90_m": 8.76,
+    "dosel_alto": true
    },
    "P0196": {
     "n_disparos": 10,
     "altura_mediana_m": 12.32,
-    "altura_p90_m": 13.35
+    "altura_p90_m": 13.35,
+    "dosel_alto": true
    },
    "P0197": {
     "n_disparos": 23,
     "altura_mediana_m": 3.02,
-    "altura_p90_m": 3.39
+    "altura_p90_m": 3.39,
+    "dosel_alto": false
    },
    "P0198": {
     "n_disparos": 4,
     "altura_mediana_m": 2.81,
-    "altura_p90_m": 3.18
+    "altura_p90_m": 3.18,
+    "dosel_alto": false
    },
    "P0200": {
     "n_disparos": 6,
     "altura_mediana_m": 2.89,
-    "altura_p90_m": 3.0
+    "altura_p90_m": 3.0,
+    "dosel_alto": false
    },
    "P0201": {
     "n_disparos": 3,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "P0202": {
     "n_disparos": 12,
     "altura_mediana_m": 2.85,
-    "altura_p90_m": 3.53
+    "altura_p90_m": 3.53,
+    "dosel_alto": false
    },
    "P0203": {
     "n_disparos": 11,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 3.13
+    "altura_p90_m": 3.13,
+    "dosel_alto": false
    },
    "P0204": {
     "n_disparos": 9,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": false
    },
    "P0205": {
     "n_disparos": 6,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.52
+    "altura_p90_m": 2.52,
+    "dosel_alto": false
    },
    "P0206": {
     "n_disparos": 12,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.5
+    "altura_p90_m": 2.5,
+    "dosel_alto": false
    },
    "P0207": {
     "n_disparos": 14,
     "altura_mediana_m": 2.41,
-    "altura_p90_m": 2.47
+    "altura_p90_m": 2.47,
+    "dosel_alto": false
    },
    "P0208": {
     "n_disparos": 2,
     "altura_mediana_m": 2.78,
-    "altura_p90_m": 3.06
+    "altura_p90_m": 3.06,
+    "dosel_alto": null
    },
    "P0210": {
     "n_disparos": 2,
     "altura_mediana_m": 2.44,
-    "altura_p90_m": 2.52
+    "altura_p90_m": 2.52,
+    "dosel_alto": null
    },
    "P0211": {
     "n_disparos": 2,
     "altura_mediana_m": 3.16,
-    "altura_p90_m": 3.35
+    "altura_p90_m": 3.35,
+    "dosel_alto": null
    },
    "P0212": {
     "n_disparos": 6,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.71
+    "altura_p90_m": 2.71,
+    "dosel_alto": false
    },
    "P0213": {
     "n_disparos": 4,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.7
+    "altura_p90_m": 2.7,
+    "dosel_alto": false
    },
    "P0214": {
     "n_disparos": 6,
     "altura_mediana_m": 5.41,
-    "altura_p90_m": 10.0
+    "altura_p90_m": 10.0,
+    "dosel_alto": true
    },
    "P0215": {
     "n_disparos": 6,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 3.02
+    "altura_p90_m": 3.02,
+    "dosel_alto": false
    },
    "P0217": {
     "n_disparos": 22,
     "altura_mediana_m": 11.29,
-    "altura_p90_m": 11.71
+    "altura_p90_m": 11.71,
+    "dosel_alto": true
    },
    "P0218": {
     "n_disparos": 6,
     "altura_mediana_m": 3.34,
-    "altura_p90_m": 4.28
+    "altura_p90_m": 4.28,
+    "dosel_alto": false
    },
    "P0219": {
     "n_disparos": 5,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.81
+    "altura_p90_m": 2.81,
+    "dosel_alto": false
    },
    "P0221": {
     "n_disparos": 2,
     "altura_mediana_m": 3.93,
-    "altura_p90_m": 4.64
+    "altura_p90_m": 4.64,
+    "dosel_alto": null
    },
    "P0223": {
     "n_disparos": 5,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": false
    },
    "P0225": {
     "n_disparos": 11,
     "altura_mediana_m": 3.23,
-    "altura_p90_m": 3.38
+    "altura_p90_m": 3.38,
+    "dosel_alto": false
    },
    "P0226": {
     "n_disparos": 22,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 3.25
+    "altura_p90_m": 3.25,
+    "dosel_alto": false
    },
    "P0228": {
     "n_disparos": 18,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "P0229": {
     "n_disparos": 5,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.86
+    "altura_p90_m": 2.86,
+    "dosel_alto": false
    },
    "P0230": {
     "n_disparos": 22,
     "altura_mediana_m": 2.49,
-    "altura_p90_m": 2.72
+    "altura_p90_m": 2.72,
+    "dosel_alto": false
    },
    "P0231": {
     "n_disparos": 4,
     "altura_mediana_m": 2.6,
-    "altura_p90_m": 2.82
+    "altura_p90_m": 2.82,
+    "dosel_alto": false
    },
    "P0232": {
     "n_disparos": 33,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "P0233": {
     "n_disparos": 46,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 4.82
+    "altura_p90_m": 4.82,
+    "dosel_alto": false
    },
    "P0234": {
     "n_disparos": 6,
     "altura_mediana_m": 4.24,
-    "altura_p90_m": 4.67
+    "altura_p90_m": 4.67,
+    "dosel_alto": false
    },
    "P0235": {
     "n_disparos": 7,
     "altura_mediana_m": 7.71,
-    "altura_p90_m": 11.98
+    "altura_p90_m": 11.98,
+    "dosel_alto": true
    },
    "P0236": {
     "n_disparos": 1,
     "altura_mediana_m": 5.05,
-    "altura_p90_m": 5.05
+    "altura_p90_m": 5.05,
+    "dosel_alto": null
    },
    "P0238": {
     "n_disparos": 33,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.79
+    "altura_p90_m": 2.79,
+    "dosel_alto": false
    },
    "P0239": {
     "n_disparos": 9,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.66
+    "altura_p90_m": 2.66,
+    "dosel_alto": false
    },
    "P0240": {
     "n_disparos": 6,
     "altura_mediana_m": 4.17,
-    "altura_p90_m": 5.03
+    "altura_p90_m": 5.03,
+    "dosel_alto": true
    },
    "P0241": {
     "n_disparos": 2,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.75
+    "altura_p90_m": 2.75,
+    "dosel_alto": null
    },
    "P0242": {
     "n_disparos": 7,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": false
    },
    "P0243": {
     "n_disparos": 35,
     "altura_mediana_m": 2.51,
-    "altura_p90_m": 2.93
+    "altura_p90_m": 2.93,
+    "dosel_alto": false
    },
    "P0244": {
     "n_disparos": 28,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 2.78
+    "altura_p90_m": 2.78,
+    "dosel_alto": false
    },
    "P0245": {
     "n_disparos": 1,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.62
+    "altura_p90_m": 2.62,
+    "dosel_alto": null
    },
    "P0246": {
     "n_disparos": 7,
     "altura_mediana_m": 4.17,
-    "altura_p90_m": 4.66
+    "altura_p90_m": 4.66,
+    "dosel_alto": false
    },
    "P0247": {
     "n_disparos": 51,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 7.4
+    "altura_p90_m": 7.4,
+    "dosel_alto": true
    },
    "P0248": {
     "n_disparos": 9,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.81
+    "altura_p90_m": 2.81,
+    "dosel_alto": false
    },
    "P0249": {
     "n_disparos": 6,
     "altura_mediana_m": 4.56,
-    "altura_p90_m": 4.88
+    "altura_p90_m": 4.88,
+    "dosel_alto": false
    },
    "P0251": {
     "n_disparos": 4,
     "altura_mediana_m": 2.86,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": false
    },
    "P0252": {
     "n_disparos": 1,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 2.43
+    "altura_p90_m": 2.43,
+    "dosel_alto": null
    },
    "P0253": {
     "n_disparos": 167,
     "altura_mediana_m": 3.88,
-    "altura_p90_m": 10.44
+    "altura_p90_m": 10.44,
+    "dosel_alto": true
    },
    "P0254": {
     "n_disparos": 16,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 3.11
+    "altura_p90_m": 3.11,
+    "dosel_alto": false
    },
    "P0255": {
     "n_disparos": 2,
     "altura_mediana_m": 2.86,
-    "altura_p90_m": 2.96
+    "altura_p90_m": 2.96,
+    "dosel_alto": null
    },
    "P0257": {
     "n_disparos": 40,
     "altura_mediana_m": 2.88,
-    "altura_p90_m": 4.66
+    "altura_p90_m": 4.66,
+    "dosel_alto": false
    },
    "P0259": {
     "n_disparos": 2,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.49
+    "altura_p90_m": 2.49,
+    "dosel_alto": null
    },
    "P0261": {
     "n_disparos": 19,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 3.17
+    "altura_p90_m": 3.17,
+    "dosel_alto": false
    },
    "P0262": {
     "n_disparos": 19,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.96
+    "altura_p90_m": 2.96,
+    "dosel_alto": false
    },
    "P0263": {
     "n_disparos": 36,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.99
+    "altura_p90_m": 2.99,
+    "dosel_alto": false
    },
    "P0264": {
     "n_disparos": 7,
     "altura_mediana_m": 3.64,
-    "altura_p90_m": 4.05
+    "altura_p90_m": 4.05,
+    "dosel_alto": false
    },
    "P0265": {
     "n_disparos": 21,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "P0266": {
     "n_disparos": 15,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 3.53
+    "altura_p90_m": 3.53,
+    "dosel_alto": false
    },
    "P0267": {
     "n_disparos": 4,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": false
    },
    "P0268": {
     "n_disparos": 3,
     "altura_mediana_m": 3.38,
-    "altura_p90_m": 4.28
+    "altura_p90_m": 4.28,
+    "dosel_alto": false
    },
    "P0269": {
     "n_disparos": 21,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "P0270": {
     "n_disparos": 2,
     "altura_mediana_m": 2.55,
-    "altura_p90_m": 2.72
+    "altura_p90_m": 2.72,
+    "dosel_alto": null
    },
    "P0271": {
     "n_disparos": 8,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.77
+    "altura_p90_m": 2.77,
+    "dosel_alto": false
    },
    "P0272": {
     "n_disparos": 22,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.79
+    "altura_p90_m": 2.79,
+    "dosel_alto": false
    },
    "P0273": {
     "n_disparos": 10,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 2.85
+    "altura_p90_m": 2.85,
+    "dosel_alto": false
    },
    "P0274": {
     "n_disparos": 3,
     "altura_mediana_m": 7.11,
-    "altura_p90_m": 7.23
+    "altura_p90_m": 7.23,
+    "dosel_alto": true
    },
    "P0276": {
     "n_disparos": 7,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": false
    },
    "P0278": {
     "n_disparos": 1,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": null
    },
    "P0279": {
     "n_disparos": 15,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.08
+    "altura_p90_m": 3.08,
+    "dosel_alto": false
    },
    "P0280": {
     "n_disparos": 2,
     "altura_mediana_m": 2.7,
-    "altura_p90_m": 2.81
+    "altura_p90_m": 2.81,
+    "dosel_alto": null
    },
    "P0281": {
     "n_disparos": 11,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.88
+    "altura_p90_m": 2.88,
+    "dosel_alto": false
    },
    "P0282": {
     "n_disparos": 3,
     "altura_mediana_m": 4.58,
-    "altura_p90_m": 4.72
+    "altura_p90_m": 4.72,
+    "dosel_alto": false
    },
    "P0283": {
     "n_disparos": 3,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 2.8
+    "altura_p90_m": 2.8,
+    "dosel_alto": false
    },
    "P0284": {
     "n_disparos": 1,
     "altura_mediana_m": 5.21,
-    "altura_p90_m": 5.21
+    "altura_p90_m": 5.21,
+    "dosel_alto": null
    },
    "P0285": {
     "n_disparos": 1,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": null
    },
    "P0286": {
     "n_disparos": 16,
     "altura_mediana_m": 2.93,
-    "altura_p90_m": 3.58
+    "altura_p90_m": 3.58,
+    "dosel_alto": false
    },
    "P0287": {
     "n_disparos": 2,
     "altura_mediana_m": 2.78,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": null
    },
    "P0288": {
     "n_disparos": 1,
     "altura_mediana_m": 3.61,
-    "altura_p90_m": 3.61
+    "altura_p90_m": 3.61,
+    "dosel_alto": null
    },
    "P0291": {
     "n_disparos": 2,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.78
+    "altura_p90_m": 2.78,
+    "dosel_alto": null
    },
    "P0293": {
     "n_disparos": 1,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.73
+    "altura_p90_m": 2.73,
+    "dosel_alto": null
    },
    "P0294": {
     "n_disparos": 7,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 3.13
+    "altura_p90_m": 3.13,
+    "dosel_alto": false
    },
    "P0295": {
     "n_disparos": 5,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.72
+    "altura_p90_m": 2.72,
+    "dosel_alto": false
    },
    "P0296": {
     "n_disparos": 31,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": false
    },
    "P0297": {
     "n_disparos": 17,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.02
+    "altura_p90_m": 3.02,
+    "dosel_alto": false
    },
    "P0298": {
     "n_disparos": 7,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.59
+    "altura_p90_m": 2.59,
+    "dosel_alto": false
    },
    "P0299": {
     "n_disparos": 3,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.87
+    "altura_p90_m": 2.87,
+    "dosel_alto": false
    },
    "P0300": {
     "n_disparos": 9,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 3.04
+    "altura_p90_m": 3.04,
+    "dosel_alto": false
    },
    "P0301": {
     "n_disparos": 4,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 2.92
+    "altura_p90_m": 2.92,
+    "dosel_alto": false
    },
    "P0302": {
     "n_disparos": 4,
     "altura_mediana_m": 2.59,
-    "altura_p90_m": 2.64
+    "altura_p90_m": 2.64,
+    "dosel_alto": false
    },
    "P0303": {
     "n_disparos": 18,
     "altura_mediana_m": 8.8,
-    "altura_p90_m": 13.6
+    "altura_p90_m": 13.6,
+    "dosel_alto": true
    },
    "P0306": {
     "n_disparos": 20,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.5
+    "altura_p90_m": 2.5,
+    "dosel_alto": false
    },
    "P0307": {
     "n_disparos": 16,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.8
+    "altura_p90_m": 2.8,
+    "dosel_alto": false
    },
    "P0308": {
     "n_disparos": 1,
     "altura_mediana_m": 11.01,
-    "altura_p90_m": 11.01
+    "altura_p90_m": 11.01,
+    "dosel_alto": null
    },
    "P0309": {
     "n_disparos": 7,
     "altura_mediana_m": 3.53,
-    "altura_p90_m": 3.99
+    "altura_p90_m": 3.99,
+    "dosel_alto": false
    },
    "P0310": {
     "n_disparos": 1,
     "altura_mediana_m": 9.69,
-    "altura_p90_m": 9.69
+    "altura_p90_m": 9.69,
+    "dosel_alto": null
    },
    "P0311": {
     "n_disparos": 14,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 3.02
+    "altura_p90_m": 3.02,
+    "dosel_alto": false
    },
    "P0313": {
     "n_disparos": 12,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 3.18
+    "altura_p90_m": 3.18,
+    "dosel_alto": false
    },
    "P0314": {
     "n_disparos": 15,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.3
+    "altura_p90_m": 3.3,
+    "dosel_alto": false
    },
    "P0316": {
     "n_disparos": 3,
     "altura_mediana_m": 4.57,
-    "altura_p90_m": 4.66
+    "altura_p90_m": 4.66,
+    "dosel_alto": false
    },
    "P0318": {
     "n_disparos": 24,
     "altura_mediana_m": 7.6,
-    "altura_p90_m": 10.02
+    "altura_p90_m": 10.02,
+    "dosel_alto": true
    },
    "P0319": {
     "n_disparos": 6,
     "altura_mediana_m": 4.82,
-    "altura_p90_m": 5.15
+    "altura_p90_m": 5.15,
+    "dosel_alto": true
    },
    "P0320": {
     "n_disparos": 10,
     "altura_mediana_m": 3.09,
-    "altura_p90_m": 4.69
+    "altura_p90_m": 4.69,
+    "dosel_alto": false
    },
    "P0321": {
     "n_disparos": 9,
     "altura_mediana_m": 3.12,
-    "altura_p90_m": 3.5
+    "altura_p90_m": 3.5,
+    "dosel_alto": false
    },
    "P0322": {
     "n_disparos": 8,
     "altura_mediana_m": 2.86,
-    "altura_p90_m": 4.8
+    "altura_p90_m": 4.8,
+    "dosel_alto": false
    },
    "P0323": {
     "n_disparos": 5,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.81
+    "altura_p90_m": 2.81,
+    "dosel_alto": false
    },
    "P0324": {
     "n_disparos": 19,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.57
+    "altura_p90_m": 2.57,
+    "dosel_alto": false
    },
    "P0325": {
     "n_disparos": 4,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.72
+    "altura_p90_m": 2.72,
+    "dosel_alto": false
    },
    "P0326": {
     "n_disparos": 3,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 2.6
+    "altura_p90_m": 2.6,
+    "dosel_alto": false
    },
    "P0327": {
     "n_disparos": 5,
     "altura_mediana_m": 2.82,
-    "altura_p90_m": 2.94
+    "altura_p90_m": 2.94,
+    "dosel_alto": false
    },
    "P0328": {
     "n_disparos": 5,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.64
+    "altura_p90_m": 2.64,
+    "dosel_alto": false
    },
    "P0329": {
     "n_disparos": 2,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": null
    },
    "P0332": {
     "n_disparos": 32,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.87
+    "altura_p90_m": 2.87,
+    "dosel_alto": false
    },
    "P0333": {
     "n_disparos": 3,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.78
+    "altura_p90_m": 2.78,
+    "dosel_alto": false
    },
    "P0335": {
     "n_disparos": 5,
     "altura_mediana_m": 2.35,
-    "altura_p90_m": 2.82
+    "altura_p90_m": 2.82,
+    "dosel_alto": false
    },
    "P0336": {
     "n_disparos": 3,
     "altura_mediana_m": 4.43,
-    "altura_p90_m": 4.61
+    "altura_p90_m": 4.61,
+    "dosel_alto": false
    },
    "P0337": {
     "n_disparos": 6,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.77
+    "altura_p90_m": 2.77,
+    "dosel_alto": false
    },
    "P0338": {
     "n_disparos": 8,
     "altura_mediana_m": 4.1,
-    "altura_p90_m": 7.01
+    "altura_p90_m": 7.01,
+    "dosel_alto": true
    },
    "P0339": {
     "n_disparos": 6,
     "altura_mediana_m": 9.78,
-    "altura_p90_m": 11.26
+    "altura_p90_m": 11.26,
+    "dosel_alto": true
    },
    "P0340": {
     "n_disparos": 7,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.78
+    "altura_p90_m": 2.78,
+    "dosel_alto": false
    },
    "P0341": {
     "n_disparos": 8,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.6
+    "altura_p90_m": 2.6,
+    "dosel_alto": false
    },
    "P0342": {
     "n_disparos": 5,
     "altura_mediana_m": 4.28,
-    "altura_p90_m": 4.65
+    "altura_p90_m": 4.65,
+    "dosel_alto": false
    },
    "P0344": {
     "n_disparos": 6,
     "altura_mediana_m": 3.29,
-    "altura_p90_m": 4.71
+    "altura_p90_m": 4.71,
+    "dosel_alto": false
    },
    "P0345": {
     "n_disparos": 15,
     "altura_mediana_m": 2.86,
-    "altura_p90_m": 3.18
+    "altura_p90_m": 3.18,
+    "dosel_alto": false
    },
    "P0346": {
     "n_disparos": 7,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 9.22
+    "altura_p90_m": 9.22,
+    "dosel_alto": true
    },
    "P0348": {
     "n_disparos": 2,
     "altura_mediana_m": 3.37,
-    "altura_p90_m": 3.65
+    "altura_p90_m": 3.65,
+    "dosel_alto": null
    },
    "P0349": {
     "n_disparos": 115,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 5.47
+    "altura_p90_m": 5.47,
+    "dosel_alto": true
    },
    "P0350": {
     "n_disparos": 17,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0352": {
     "n_disparos": 10,
     "altura_mediana_m": 2.41,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": false
    },
    "P0353": {
     "n_disparos": 3,
     "altura_mediana_m": 3.35,
-    "altura_p90_m": 4.63
+    "altura_p90_m": 4.63,
+    "dosel_alto": false
    },
    "P0354": {
     "n_disparos": 33,
     "altura_mediana_m": 11.94,
-    "altura_p90_m": 16.58
+    "altura_p90_m": 16.58,
+    "dosel_alto": true
    },
    "P0355": {
     "n_disparos": 61,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.58
+    "altura_p90_m": 2.58,
+    "dosel_alto": false
    },
    "P0356": {
     "n_disparos": 11,
     "altura_mediana_m": 2.72,
-    "altura_p90_m": 2.99
+    "altura_p90_m": 2.99,
+    "dosel_alto": false
    },
    "P0358": {
     "n_disparos": 2,
     "altura_mediana_m": 11.42,
-    "altura_p90_m": 11.51
+    "altura_p90_m": 11.51,
+    "dosel_alto": null
    },
    "P0360": {
     "n_disparos": 13,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.22
+    "altura_p90_m": 3.22,
+    "dosel_alto": false
    },
    "P0361": {
     "n_disparos": 5,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.67
+    "altura_p90_m": 2.67,
+    "dosel_alto": false
    },
    "P0364": {
     "n_disparos": 20,
     "altura_mediana_m": 3.28,
-    "altura_p90_m": 4.31
+    "altura_p90_m": 4.31,
+    "dosel_alto": false
    },
    "P0366": {
     "n_disparos": 2,
     "altura_mediana_m": 2.97,
-    "altura_p90_m": 2.99
+    "altura_p90_m": 2.99,
+    "dosel_alto": null
    },
    "P0367": {
     "n_disparos": 3,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.64
+    "altura_p90_m": 2.64,
+    "dosel_alto": false
    },
    "P0368": {
     "n_disparos": 9,
     "altura_mediana_m": 4.58,
-    "altura_p90_m": 5.45
+    "altura_p90_m": 5.45,
+    "dosel_alto": true
    },
    "P0370": {
     "n_disparos": 3,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "P0371": {
     "n_disparos": 31,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.88
+    "altura_p90_m": 2.88,
+    "dosel_alto": false
    },
    "P0372": {
     "n_disparos": 10,
     "altura_mediana_m": 4.63,
-    "altura_p90_m": 5.11
+    "altura_p90_m": 5.11,
+    "dosel_alto": true
    },
    "P0373": {
     "n_disparos": 3,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 12.0
+    "altura_p90_m": 12.0,
+    "dosel_alto": true
    },
    "P0374": {
     "n_disparos": 4,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "P0375": {
     "n_disparos": 8,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": false
    },
    "P0377": {
     "n_disparos": 19,
     "altura_mediana_m": 8.82,
-    "altura_p90_m": 13.79
+    "altura_p90_m": 13.79,
+    "dosel_alto": true
    },
    "P0378": {
     "n_disparos": 24,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 3.31
+    "altura_p90_m": 3.31,
+    "dosel_alto": false
    },
    "P0380": {
     "n_disparos": 15,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 6.18
+    "altura_p90_m": 6.18,
+    "dosel_alto": true
    },
    "P0381": {
     "n_disparos": 56,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 3.2
+    "altura_p90_m": 3.2,
+    "dosel_alto": false
    },
    "P0382": {
     "n_disparos": 7,
     "altura_mediana_m": 2.79,
-    "altura_p90_m": 2.88
+    "altura_p90_m": 2.88,
+    "dosel_alto": false
    },
    "P0383": {
     "n_disparos": 8,
     "altura_mediana_m": 2.78,
-    "altura_p90_m": 4.27
+    "altura_p90_m": 4.27,
+    "dosel_alto": false
    },
    "P0385": {
     "n_disparos": 3,
     "altura_mediana_m": 2.39,
-    "altura_p90_m": 2.51
+    "altura_p90_m": 2.51,
+    "dosel_alto": false
    },
    "P0386": {
     "n_disparos": 5,
     "altura_mediana_m": 3.12,
-    "altura_p90_m": 3.24
+    "altura_p90_m": 3.24,
+    "dosel_alto": false
    },
    "P0387": {
     "n_disparos": 13,
     "altura_mediana_m": 2.97,
-    "altura_p90_m": 3.67
+    "altura_p90_m": 3.67,
+    "dosel_alto": false
    },
    "P0389": {
     "n_disparos": 3,
     "altura_mediana_m": 2.72,
-    "altura_p90_m": 2.78
+    "altura_p90_m": 2.78,
+    "dosel_alto": false
    },
    "P0391": {
     "n_disparos": 4,
     "altura_mediana_m": 3.26,
-    "altura_p90_m": 3.61
+    "altura_p90_m": 3.61,
+    "dosel_alto": false
    },
    "P0392": {
     "n_disparos": 24,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.01
+    "altura_p90_m": 3.01,
+    "dosel_alto": false
    },
    "P0393": {
     "n_disparos": 18,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "P0394": {
     "n_disparos": 15,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.56
+    "altura_p90_m": 2.56,
+    "dosel_alto": false
    },
    "P0395": {
     "n_disparos": 16,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0397": {
     "n_disparos": 1,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": null
    },
    "P0400": {
     "n_disparos": 19,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.92
+    "altura_p90_m": 2.92,
+    "dosel_alto": false
    },
    "P0401": {
     "n_disparos": 22,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 4.16
+    "altura_p90_m": 4.16,
+    "dosel_alto": false
    },
    "P0402": {
     "n_disparos": 3,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": false
    },
    "P0403": {
     "n_disparos": 57,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "P0405": {
     "n_disparos": 6,
     "altura_mediana_m": 3.17,
-    "altura_p90_m": 6.25
+    "altura_p90_m": 6.25,
+    "dosel_alto": true
    },
    "P0406": {
     "n_disparos": 5,
     "altura_mediana_m": 2.9,
-    "altura_p90_m": 2.94
+    "altura_p90_m": 2.94,
+    "dosel_alto": false
    },
    "P0408": {
     "n_disparos": 23,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.79
+    "altura_p90_m": 2.79,
+    "dosel_alto": false
    },
    "P0409": {
     "n_disparos": 119,
     "altura_mediana_m": 2.75,
-    "altura_p90_m": 3.46
+    "altura_p90_m": 3.46,
+    "dosel_alto": false
    },
    "P0411": {
     "n_disparos": 25,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.67
+    "altura_p90_m": 2.67,
+    "dosel_alto": false
    },
    "P0412": {
     "n_disparos": 14,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.73
+    "altura_p90_m": 2.73,
+    "dosel_alto": false
    },
    "P0413": {
     "n_disparos": 48,
     "altura_mediana_m": 2.81,
-    "altura_p90_m": 9.0
+    "altura_p90_m": 9.0,
+    "dosel_alto": true
    },
    "P0414": {
     "n_disparos": 4,
     "altura_mediana_m": 6.76,
-    "altura_p90_m": 9.26
+    "altura_p90_m": 9.26,
+    "dosel_alto": true
    },
    "P0415": {
     "n_disparos": 28,
     "altura_mediana_m": 8.93,
-    "altura_p90_m": 13.11
+    "altura_p90_m": 13.11,
+    "dosel_alto": true
    },
    "P0416": {
     "n_disparos": 6,
     "altura_mediana_m": 4.36,
-    "altura_p90_m": 5.66
+    "altura_p90_m": 5.66,
+    "dosel_alto": true
    },
    "P0417": {
     "n_disparos": 6,
     "altura_mediana_m": 4.91,
-    "altura_p90_m": 5.08
+    "altura_p90_m": 5.08,
+    "dosel_alto": true
    },
    "P0419": {
     "n_disparos": 85,
     "altura_mediana_m": 3.21,
-    "altura_p90_m": 9.27
+    "altura_p90_m": 9.27,
+    "dosel_alto": true
    },
    "P0420": {
     "n_disparos": 5,
     "altura_mediana_m": 5.1,
-    "altura_p90_m": 5.36
+    "altura_p90_m": 5.36,
+    "dosel_alto": true
    },
    "P0422": {
     "n_disparos": 1,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.73
+    "altura_p90_m": 2.73,
+    "dosel_alto": null
    },
    "P0423": {
     "n_disparos": 3,
     "altura_mediana_m": 4.76,
-    "altura_p90_m": 6.82
+    "altura_p90_m": 6.82,
+    "dosel_alto": true
    },
    "P0424": {
     "n_disparos": 12,
     "altura_mediana_m": 3.1,
-    "altura_p90_m": 3.74
+    "altura_p90_m": 3.74,
+    "dosel_alto": false
    },
    "P0427": {
     "n_disparos": 6,
     "altura_mediana_m": 2.93,
-    "altura_p90_m": 3.12
+    "altura_p90_m": 3.12,
+    "dosel_alto": false
    },
    "P0428": {
     "n_disparos": 8,
     "altura_mediana_m": 3.44,
-    "altura_p90_m": 5.09
+    "altura_p90_m": 5.09,
+    "dosel_alto": true
    },
    "P0429": {
     "n_disparos": 44,
     "altura_mediana_m": 2.59,
-    "altura_p90_m": 3.13
+    "altura_p90_m": 3.13,
+    "dosel_alto": false
    },
    "P0430": {
     "n_disparos": 14,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 3.01
+    "altura_p90_m": 3.01,
+    "dosel_alto": false
    },
    "P0431": {
     "n_disparos": 14,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 2.88
+    "altura_p90_m": 2.88,
+    "dosel_alto": false
    },
    "P0433": {
     "n_disparos": 3,
     "altura_mediana_m": 4.62,
-    "altura_p90_m": 5.0
+    "altura_p90_m": 5.0,
+    "dosel_alto": true
    },
    "P0434": {
     "n_disparos": 74,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 3.57
+    "altura_p90_m": 3.57,
+    "dosel_alto": false
    },
    "P0435": {
     "n_disparos": 5,
     "altura_mediana_m": 2.75,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": false
    },
    "P0436": {
     "n_disparos": 2,
     "altura_mediana_m": 4.86,
-    "altura_p90_m": 5.41
+    "altura_p90_m": 5.41,
+    "dosel_alto": null
    },
    "P0438": {
     "n_disparos": 19,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 3.21
+    "altura_p90_m": 3.21,
+    "dosel_alto": false
    },
    "P0439": {
     "n_disparos": 3,
     "altura_mediana_m": 4.54,
-    "altura_p90_m": 4.6
+    "altura_p90_m": 4.6,
+    "dosel_alto": false
    },
    "P0440": {
     "n_disparos": 11,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": false
    },
    "P0441": {
     "n_disparos": 20,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.8
+    "altura_p90_m": 2.8,
+    "dosel_alto": false
    },
    "P0442": {
     "n_disparos": 2,
     "altura_mediana_m": 5.36,
-    "altura_p90_m": 6.34
+    "altura_p90_m": 6.34,
+    "dosel_alto": null
    },
    "P0443": {
     "n_disparos": 17,
     "altura_mediana_m": 2.72,
-    "altura_p90_m": 3.26
+    "altura_p90_m": 3.26,
+    "dosel_alto": false
    },
    "P0446": {
     "n_disparos": 13,
     "altura_mediana_m": 3.85,
-    "altura_p90_m": 5.5
+    "altura_p90_m": 5.5,
+    "dosel_alto": true
    },
    "P0447": {
     "n_disparos": 7,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": false
    },
    "P0448": {
     "n_disparos": 55,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.24
+    "altura_p90_m": 3.24,
+    "dosel_alto": false
    },
    "P0449": {
     "n_disparos": 8,
     "altura_mediana_m": 2.97,
-    "altura_p90_m": 3.74
+    "altura_p90_m": 3.74,
+    "dosel_alto": false
    },
    "P0450": {
     "n_disparos": 11,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": false
    },
    "P0451": {
     "n_disparos": 16,
     "altura_mediana_m": 3.07,
-    "altura_p90_m": 3.34
+    "altura_p90_m": 3.34,
+    "dosel_alto": false
    },
    "P0452": {
     "n_disparos": 42,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": false
    },
    "P0453": {
     "n_disparos": 4,
     "altura_mediana_m": 5.0,
-    "altura_p90_m": 5.4
+    "altura_p90_m": 5.4,
+    "dosel_alto": true
    },
    "P0454": {
     "n_disparos": 2,
     "altura_mediana_m": 2.88,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": null
    },
    "P0455": {
     "n_disparos": 7,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.05
+    "altura_p90_m": 3.05,
+    "dosel_alto": false
    },
    "P0456": {
     "n_disparos": 16,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.73
+    "altura_p90_m": 2.73,
+    "dosel_alto": false
    },
    "P0457": {
     "n_disparos": 68,
     "altura_mediana_m": 3.02,
-    "altura_p90_m": 8.65
+    "altura_p90_m": 8.65,
+    "dosel_alto": true
    },
    "P0459": {
     "n_disparos": 6,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.5
+    "altura_p90_m": 2.5,
+    "dosel_alto": false
    },
    "P0463": {
     "n_disparos": 4,
     "altura_mediana_m": 10.12,
-    "altura_p90_m": 10.28
+    "altura_p90_m": 10.28,
+    "dosel_alto": true
    },
    "P0464": {
     "n_disparos": 5,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.66
+    "altura_p90_m": 3.66,
+    "dosel_alto": false
    },
    "P0465": {
     "n_disparos": 11,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 3.2
+    "altura_p90_m": 3.2,
+    "dosel_alto": false
    },
    "P0466": {
     "n_disparos": 4,
     "altura_mediana_m": 12.9,
-    "altura_p90_m": 16.62
+    "altura_p90_m": 16.62,
+    "dosel_alto": true
    },
    "P0467": {
     "n_disparos": 26,
     "altura_mediana_m": 2.67,
-    "altura_p90_m": 5.27
+    "altura_p90_m": 5.27,
+    "dosel_alto": true
    },
    "P0469": {
     "n_disparos": 2,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": null
    },
    "P0470": {
     "n_disparos": 20,
     "altura_mediana_m": 2.99,
-    "altura_p90_m": 3.98
+    "altura_p90_m": 3.98,
+    "dosel_alto": false
    },
    "P0472": {
     "n_disparos": 7,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.3
+    "altura_p90_m": 3.3,
+    "dosel_alto": false
    },
    "P0473": {
     "n_disparos": 1,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": null
    },
    "P0475": {
     "n_disparos": 17,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "P0476": {
     "n_disparos": 15,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 3.13
+    "altura_p90_m": 3.13,
+    "dosel_alto": false
    },
    "P0477": {
     "n_disparos": 7,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.96
+    "altura_p90_m": 2.96,
+    "dosel_alto": false
    },
    "P0480": {
     "n_disparos": 46,
     "altura_mediana_m": 2.89,
-    "altura_p90_m": 4.75
+    "altura_p90_m": 4.75,
+    "dosel_alto": false
    },
    "P0481": {
     "n_disparos": 16,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.86
+    "altura_p90_m": 2.86,
+    "dosel_alto": false
    },
    "P0482": {
     "n_disparos": 23,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.77
+    "altura_p90_m": 2.77,
+    "dosel_alto": false
    },
    "P0483": {
     "n_disparos": 12,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0484": {
     "n_disparos": 13,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": false
    },
    "P0485": {
     "n_disparos": 7,
     "altura_mediana_m": 3.16,
-    "altura_p90_m": 3.99
+    "altura_p90_m": 3.99,
+    "dosel_alto": false
    },
    "P0486": {
     "n_disparos": 2,
     "altura_mediana_m": 2.78,
-    "altura_p90_m": 2.8
+    "altura_p90_m": 2.8,
+    "dosel_alto": null
    },
    "P0487": {
     "n_disparos": 2,
     "altura_mediana_m": 2.49,
-    "altura_p90_m": 2.5
+    "altura_p90_m": 2.5,
+    "dosel_alto": null
    },
    "P0488": {
     "n_disparos": 47,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.99
+    "altura_p90_m": 2.99,
+    "dosel_alto": false
    },
    "P0490": {
     "n_disparos": 41,
     "altura_mediana_m": 4.86,
-    "altura_p90_m": 9.24
+    "altura_p90_m": 9.24,
+    "dosel_alto": true
    },
    "P0491": {
     "n_disparos": 7,
     "altura_mediana_m": 2.72,
-    "altura_p90_m": 4.77
+    "altura_p90_m": 4.77,
+    "dosel_alto": false
    },
    "P0492": {
     "n_disparos": 16,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 3.02
+    "altura_p90_m": 3.02,
+    "dosel_alto": false
    },
    "P0493": {
     "n_disparos": 7,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.67
+    "altura_p90_m": 2.67,
+    "dosel_alto": false
    },
    "P0495": {
     "n_disparos": 18,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 4.44
+    "altura_p90_m": 4.44,
+    "dosel_alto": false
    },
    "P0496": {
     "n_disparos": 7,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 2.57
+    "altura_p90_m": 2.57,
+    "dosel_alto": false
    },
    "P0497": {
     "n_disparos": 2,
     "altura_mediana_m": 3.34,
-    "altura_p90_m": 4.0
+    "altura_p90_m": 4.0,
+    "dosel_alto": null
    },
    "P0498": {
     "n_disparos": 114,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 9.31
+    "altura_p90_m": 9.31,
+    "dosel_alto": true
    },
    "P0499": {
     "n_disparos": 2,
     "altura_mediana_m": 2.41,
-    "altura_p90_m": 2.43
+    "altura_p90_m": 2.43,
+    "dosel_alto": null
    },
    "P0501": {
     "n_disparos": 11,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.76
+    "altura_p90_m": 2.76,
+    "dosel_alto": false
    },
    "P0502": {
     "n_disparos": 30,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 4.26
+    "altura_p90_m": 4.26,
+    "dosel_alto": false
    },
    "P0503": {
     "n_disparos": 1,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.58
+    "altura_p90_m": 2.58,
+    "dosel_alto": null
    },
    "P0504": {
     "n_disparos": 2,
     "altura_mediana_m": 2.45,
-    "altura_p90_m": 2.49
+    "altura_p90_m": 2.49,
+    "dosel_alto": null
    },
    "P0505": {
     "n_disparos": 1,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 2.8
+    "altura_p90_m": 2.8,
+    "dosel_alto": null
    },
    "P0506": {
     "n_disparos": 7,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.73
+    "altura_p90_m": 2.73,
+    "dosel_alto": false
    },
    "P0507": {
     "n_disparos": 9,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.21
+    "altura_p90_m": 3.21,
+    "dosel_alto": false
    },
    "P0510": {
     "n_disparos": 10,
     "altura_mediana_m": 2.75,
-    "altura_p90_m": 3.23
+    "altura_p90_m": 3.23,
+    "dosel_alto": false
    },
    "P0512": {
     "n_disparos": 14,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 3.41
+    "altura_p90_m": 3.41,
+    "dosel_alto": false
    },
    "P0513": {
     "n_disparos": 3,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 6.62
+    "altura_p90_m": 6.62,
+    "dosel_alto": true
    },
    "P0514": {
     "n_disparos": 19,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.36
+    "altura_p90_m": 3.36,
+    "dosel_alto": false
    },
    "P0515": {
     "n_disparos": 24,
     "altura_mediana_m": 3.61,
-    "altura_p90_m": 5.31
+    "altura_p90_m": 5.31,
+    "dosel_alto": true
    },
    "P0517": {
     "n_disparos": 9,
     "altura_mediana_m": 3.1,
-    "altura_p90_m": 5.7
+    "altura_p90_m": 5.7,
+    "dosel_alto": true
    },
    "P0518": {
     "n_disparos": 18,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 3.4
+    "altura_p90_m": 3.4,
+    "dosel_alto": false
    },
    "P0519": {
     "n_disparos": 4,
     "altura_mediana_m": 8.38,
-    "altura_p90_m": 9.33
+    "altura_p90_m": 9.33,
+    "dosel_alto": true
    },
    "P0520": {
     "n_disparos": 10,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 2.49
+    "altura_p90_m": 2.49,
+    "dosel_alto": false
    },
    "P0521": {
     "n_disparos": 8,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.74
+    "altura_p90_m": 2.74,
+    "dosel_alto": false
    },
    "P0522": {
     "n_disparos": 7,
     "altura_mediana_m": 2.68,
-    "altura_p90_m": 4.2
+    "altura_p90_m": 4.2,
+    "dosel_alto": false
    },
    "P0524": {
     "n_disparos": 3,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 9.06
+    "altura_p90_m": 9.06,
+    "dosel_alto": true
    },
    "P0525": {
     "n_disparos": 10,
     "altura_mediana_m": 3.13,
-    "altura_p90_m": 3.25
+    "altura_p90_m": 3.25,
+    "dosel_alto": false
    },
    "P0526": {
     "n_disparos": 4,
     "altura_mediana_m": 5.27,
-    "altura_p90_m": 9.03
+    "altura_p90_m": 9.03,
+    "dosel_alto": true
    },
    "P0527": {
     "n_disparos": 14,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 3.5
+    "altura_p90_m": 3.5,
+    "dosel_alto": false
    },
    "P0528": {
     "n_disparos": 4,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.66
+    "altura_p90_m": 2.66,
+    "dosel_alto": false
    },
    "P0529": {
     "n_disparos": 10,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 2.87
+    "altura_p90_m": 2.87,
+    "dosel_alto": false
    },
    "P0531": {
     "n_disparos": 8,
     "altura_mediana_m": 12.26,
-    "altura_p90_m": 14.2
+    "altura_p90_m": 14.2,
+    "dosel_alto": true
    },
    "P0533": {
     "n_disparos": 11,
     "altura_mediana_m": 3.73,
-    "altura_p90_m": 7.5
+    "altura_p90_m": 7.5,
+    "dosel_alto": true
    },
    "P0534": {
     "n_disparos": 5,
     "altura_mediana_m": 4.96,
-    "altura_p90_m": 9.46
+    "altura_p90_m": 9.46,
+    "dosel_alto": true
    },
    "P0535": {
     "n_disparos": 3,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.59
+    "altura_p90_m": 2.59,
+    "dosel_alto": false
    },
    "P0537": {
     "n_disparos": 26,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "P0538": {
     "n_disparos": 5,
     "altura_mediana_m": 3.55,
-    "altura_p90_m": 4.04
+    "altura_p90_m": 4.04,
+    "dosel_alto": false
    },
    "P0539": {
     "n_disparos": 6,
     "altura_mediana_m": 2.89,
-    "altura_p90_m": 7.0
+    "altura_p90_m": 7.0,
+    "dosel_alto": true
    },
    "P0540": {
     "n_disparos": 10,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 8.63
+    "altura_p90_m": 8.63,
+    "dosel_alto": true
    },
    "P0541": {
     "n_disparos": 16,
     "altura_mediana_m": 2.88,
-    "altura_p90_m": 4.63
+    "altura_p90_m": 4.63,
+    "dosel_alto": false
    },
    "P0542": {
     "n_disparos": 3,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.58
+    "altura_p90_m": 2.58,
+    "dosel_alto": false
    },
    "P0543": {
     "n_disparos": 10,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": false
    },
    "P0544": {
     "n_disparos": 2,
     "altura_mediana_m": 6.94,
-    "altura_p90_m": 7.72
+    "altura_p90_m": 7.72,
+    "dosel_alto": null
    },
    "P0547": {
     "n_disparos": 11,
     "altura_mediana_m": 2.98,
-    "altura_p90_m": 4.55
+    "altura_p90_m": 4.55,
+    "dosel_alto": false
    },
    "P0549": {
     "n_disparos": 113,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 3.18
+    "altura_p90_m": 3.18,
+    "dosel_alto": false
    },
    "P0550": {
     "n_disparos": 39,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 6.43
+    "altura_p90_m": 6.43,
+    "dosel_alto": true
    },
    "P0551": {
     "n_disparos": 8,
     "altura_mediana_m": 3.14,
-    "altura_p90_m": 3.37
+    "altura_p90_m": 3.37,
+    "dosel_alto": false
    },
    "P0552": {
     "n_disparos": 5,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.67
+    "altura_p90_m": 2.67,
+    "dosel_alto": false
    },
    "P0553": {
     "n_disparos": 9,
     "altura_mediana_m": 4.58,
-    "altura_p90_m": 5.0
+    "altura_p90_m": 5.0,
+    "dosel_alto": true
    },
    "P0554": {
     "n_disparos": 2,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 3.04
+    "altura_p90_m": 3.04,
+    "dosel_alto": null
    },
    "P0555": {
     "n_disparos": 2,
     "altura_mediana_m": 3.89,
-    "altura_p90_m": 4.91
+    "altura_p90_m": 4.91,
+    "dosel_alto": null
    },
    "P0556": {
     "n_disparos": 9,
     "altura_mediana_m": 2.88,
-    "altura_p90_m": 3.73
+    "altura_p90_m": 3.73,
+    "dosel_alto": false
    },
    "P0557": {
     "n_disparos": 10,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.55
+    "altura_p90_m": 2.55,
+    "dosel_alto": false
    },
    "P0558": {
     "n_disparos": 7,
     "altura_mediana_m": 2.72,
-    "altura_p90_m": 2.96
+    "altura_p90_m": 2.96,
+    "dosel_alto": false
    },
    "P0559": {
     "n_disparos": 4,
     "altura_mediana_m": 3.55,
-    "altura_p90_m": 6.22
+    "altura_p90_m": 6.22,
+    "dosel_alto": true
    },
    "P0560": {
     "n_disparos": 38,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.92
+    "altura_p90_m": 2.92,
+    "dosel_alto": false
    },
    "P0561": {
     "n_disparos": 5,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 6.29
+    "altura_p90_m": 6.29,
+    "dosel_alto": true
    },
    "P0562": {
     "n_disparos": 1,
     "altura_mediana_m": 3.44,
-    "altura_p90_m": 3.44
+    "altura_p90_m": 3.44,
+    "dosel_alto": null
    },
    "P0563": {
     "n_disparos": 82,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.2
+    "altura_p90_m": 3.2,
+    "dosel_alto": false
    },
    "P0564": {
     "n_disparos": 26,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.82
+    "altura_p90_m": 2.82,
+    "dosel_alto": false
    },
    "P0565": {
     "n_disparos": 5,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 3.74
+    "altura_p90_m": 3.74,
+    "dosel_alto": false
    },
    "P0566": {
     "n_disparos": 15,
     "altura_mediana_m": 2.35,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": false
    },
    "P0567": {
     "n_disparos": 14,
     "altura_mediana_m": 2.9,
-    "altura_p90_m": 3.15
+    "altura_p90_m": 3.15,
+    "dosel_alto": false
    },
    "P0568": {
     "n_disparos": 10,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.16
+    "altura_p90_m": 3.16,
+    "dosel_alto": false
    },
    "P0569": {
     "n_disparos": 34,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.44
+    "altura_p90_m": 3.44,
+    "dosel_alto": false
    },
    "P0570": {
     "n_disparos": 8,
     "altura_mediana_m": 3.56,
-    "altura_p90_m": 4.79
+    "altura_p90_m": 4.79,
+    "dosel_alto": false
    },
    "P0571": {
     "n_disparos": 9,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 3.02
+    "altura_p90_m": 3.02,
+    "dosel_alto": false
    },
    "P0572": {
     "n_disparos": 11,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 6.1
+    "altura_p90_m": 6.1,
+    "dosel_alto": true
    },
    "P0573": {
     "n_disparos": 21,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.76
+    "altura_p90_m": 2.76,
+    "dosel_alto": false
    },
    "P0574": {
     "n_disparos": 22,
     "altura_mediana_m": 3.49,
-    "altura_p90_m": 14.71
+    "altura_p90_m": 14.71,
+    "dosel_alto": true
    },
    "P0575": {
     "n_disparos": 16,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 3.44
+    "altura_p90_m": 3.44,
+    "dosel_alto": false
    },
    "P0576": {
     "n_disparos": 1,
     "altura_mediana_m": 7.58,
-    "altura_p90_m": 7.58
+    "altura_p90_m": 7.58,
+    "dosel_alto": null
    },
    "P0577": {
     "n_disparos": 4,
     "altura_mediana_m": 2.97,
-    "altura_p90_m": 3.02
+    "altura_p90_m": 3.02,
+    "dosel_alto": false
    },
    "P0579": {
     "n_disparos": 3,
     "altura_mediana_m": 2.99,
-    "altura_p90_m": 3.05
+    "altura_p90_m": 3.05,
+    "dosel_alto": false
    },
    "P0580": {
     "n_disparos": 1,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": null
    },
    "P0581": {
     "n_disparos": 7,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.67
+    "altura_p90_m": 2.67,
+    "dosel_alto": false
    },
    "P0582": {
     "n_disparos": 2,
     "altura_mediana_m": 3.28,
-    "altura_p90_m": 3.61
+    "altura_p90_m": 3.61,
+    "dosel_alto": null
    },
    "P0583": {
     "n_disparos": 3,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": false
    },
    "P0584": {
     "n_disparos": 31,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0585": {
     "n_disparos": 4,
     "altura_mediana_m": 2.92,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": false
    },
    "P0586": {
     "n_disparos": 10,
     "altura_mediana_m": 2.7,
-    "altura_p90_m": 3.02
+    "altura_p90_m": 3.02,
+    "dosel_alto": false
    },
    "P0588": {
     "n_disparos": 6,
     "altura_mediana_m": 2.74,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "P0589": {
     "n_disparos": 7,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.22
+    "altura_p90_m": 3.22,
+    "dosel_alto": false
    },
    "P0590": {
     "n_disparos": 31,
     "altura_mediana_m": 7.97,
-    "altura_p90_m": 9.13
+    "altura_p90_m": 9.13,
+    "dosel_alto": true
    },
    "P0592": {
     "n_disparos": 30,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "P0594": {
     "n_disparos": 3,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "P0595": {
     "n_disparos": 20,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "P0596": {
     "n_disparos": 8,
     "altura_mediana_m": 3.26,
-    "altura_p90_m": 3.48
+    "altura_p90_m": 3.48,
+    "dosel_alto": false
    },
    "P0597": {
     "n_disparos": 37,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 3.26
+    "altura_p90_m": 3.26,
+    "dosel_alto": false
    },
    "P0598": {
     "n_disparos": 56,
     "altura_mediana_m": 3.78,
-    "altura_p90_m": 10.0
+    "altura_p90_m": 10.0,
+    "dosel_alto": true
    },
    "P0599": {
     "n_disparos": 2,
     "altura_mediana_m": 3.01,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": null
    },
    "P0600": {
     "n_disparos": 35,
     "altura_mediana_m": 2.82,
-    "altura_p90_m": 4.88
+    "altura_p90_m": 4.88,
+    "dosel_alto": false
    },
    "P0601": {
     "n_disparos": 10,
     "altura_mediana_m": 2.93,
-    "altura_p90_m": 3.27
+    "altura_p90_m": 3.27,
+    "dosel_alto": false
    },
    "P0602": {
     "n_disparos": 11,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.62
+    "altura_p90_m": 2.62,
+    "dosel_alto": false
    },
    "P0603": {
     "n_disparos": 4,
     "altura_mediana_m": 2.68,
-    "altura_p90_m": 2.72
+    "altura_p90_m": 2.72,
+    "dosel_alto": false
    },
    "P0604": {
     "n_disparos": 6,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0605": {
     "n_disparos": 25,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 3.54
+    "altura_p90_m": 3.54,
+    "dosel_alto": false
    },
    "P0606": {
     "n_disparos": 22,
     "altura_mediana_m": 2.99,
-    "altura_p90_m": 3.25
+    "altura_p90_m": 3.25,
+    "dosel_alto": false
    },
    "P0607": {
     "n_disparos": 27,
     "altura_mediana_m": 2.99,
-    "altura_p90_m": 3.71
+    "altura_p90_m": 3.71,
+    "dosel_alto": false
    },
    "P0608": {
     "n_disparos": 18,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 6.85
+    "altura_p90_m": 6.85,
+    "dosel_alto": true
    },
    "P0609": {
     "n_disparos": 123,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 4.41
+    "altura_p90_m": 4.41,
+    "dosel_alto": false
    },
    "P0612": {
     "n_disparos": 708,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 4.34
+    "altura_p90_m": 4.34,
+    "dosel_alto": false
    },
    "P0613": {
     "n_disparos": 7,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.2
+    "altura_p90_m": 3.2,
+    "dosel_alto": false
    },
    "P0614": {
     "n_disparos": 16,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.16
+    "altura_p90_m": 3.16,
+    "dosel_alto": false
    },
    "P0615": {
     "n_disparos": 12,
     "altura_mediana_m": 2.85,
-    "altura_p90_m": 3.12
+    "altura_p90_m": 3.12,
+    "dosel_alto": false
    },
    "P0616": {
     "n_disparos": 37,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.66
+    "altura_p90_m": 3.66,
+    "dosel_alto": false
    },
    "P0617": {
     "n_disparos": 4,
     "altura_mediana_m": 8.2,
-    "altura_p90_m": 8.77
+    "altura_p90_m": 8.77,
+    "dosel_alto": true
    },
    "P0618": {
     "n_disparos": 1,
     "altura_mediana_m": 3.32,
-    "altura_p90_m": 3.32
+    "altura_p90_m": 3.32,
+    "dosel_alto": null
    },
    "P0619": {
     "n_disparos": 2,
     "altura_mediana_m": 11.52,
-    "altura_p90_m": 12.97
+    "altura_p90_m": 12.97,
+    "dosel_alto": null
    },
    "P0620": {
     "n_disparos": 7,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 4.35
+    "altura_p90_m": 4.35,
+    "dosel_alto": false
    },
    "P0621": {
     "n_disparos": 19,
     "altura_mediana_m": 11.8,
-    "altura_p90_m": 13.55
+    "altura_p90_m": 13.55,
+    "dosel_alto": true
    },
    "P0622": {
     "n_disparos": 4,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 3.05
+    "altura_p90_m": 3.05,
+    "dosel_alto": false
    },
    "P0623": {
     "n_disparos": 12,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.79
+    "altura_p90_m": 2.79,
+    "dosel_alto": false
    },
    "P0624": {
     "n_disparos": 6,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 3.36
+    "altura_p90_m": 3.36,
+    "dosel_alto": false
    },
    "P0627": {
     "n_disparos": 71,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.13
+    "altura_p90_m": 3.13,
+    "dosel_alto": false
    },
    "P0628": {
     "n_disparos": 11,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.79
+    "altura_p90_m": 2.79,
+    "dosel_alto": false
    },
    "P0629": {
     "n_disparos": 11,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 6.02
+    "altura_p90_m": 6.02,
+    "dosel_alto": true
    },
    "P0630": {
     "n_disparos": 1,
     "altura_mediana_m": 3.89,
-    "altura_p90_m": 3.89
+    "altura_p90_m": 3.89,
+    "dosel_alto": null
    },
    "P0631": {
     "n_disparos": 7,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 3.12
+    "altura_p90_m": 3.12,
+    "dosel_alto": false
    },
    "P0632": {
     "n_disparos": 20,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "P0633": {
     "n_disparos": 36,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.33
+    "altura_p90_m": 3.33,
+    "dosel_alto": false
    },
    "P0634": {
     "n_disparos": 21,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.96
+    "altura_p90_m": 3.96,
+    "dosel_alto": false
    },
    "P0635": {
     "n_disparos": 6,
     "altura_mediana_m": 2.78,
-    "altura_p90_m": 6.51
+    "altura_p90_m": 6.51,
+    "dosel_alto": true
    },
    "P0636": {
     "n_disparos": 16,
     "altura_mediana_m": 2.67,
-    "altura_p90_m": 3.62
+    "altura_p90_m": 3.62,
+    "dosel_alto": false
    },
    "P0637": {
     "n_disparos": 149,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.9
+    "altura_p90_m": 2.9,
+    "dosel_alto": false
    },
    "P0638": {
     "n_disparos": 44,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 3.06
+    "altura_p90_m": 3.06,
+    "dosel_alto": false
    },
    "P0639": {
     "n_disparos": 54,
     "altura_mediana_m": 2.93,
-    "altura_p90_m": 3.55
+    "altura_p90_m": 3.55,
+    "dosel_alto": false
    },
    "P0640": {
     "n_disparos": 21,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 2.99
+    "altura_p90_m": 2.99,
+    "dosel_alto": false
    },
    "P0641": {
     "n_disparos": 1,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.47
+    "altura_p90_m": 2.47,
+    "dosel_alto": null
    },
    "P0642": {
     "n_disparos": 14,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 9.33
+    "altura_p90_m": 9.33,
+    "dosel_alto": true
    },
    "P0643": {
     "n_disparos": 22,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.87
+    "altura_p90_m": 2.87,
+    "dosel_alto": false
    },
    "P0644": {
     "n_disparos": 21,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.32
+    "altura_p90_m": 3.32,
+    "dosel_alto": false
    },
    "P0645": {
     "n_disparos": 3,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.53
+    "altura_p90_m": 2.53,
+    "dosel_alto": false
    },
    "P0646": {
     "n_disparos": 34,
     "altura_mediana_m": 2.74,
-    "altura_p90_m": 3.47
+    "altura_p90_m": 3.47,
+    "dosel_alto": false
    },
    "P0647": {
     "n_disparos": 8,
     "altura_mediana_m": 2.6,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "P0648": {
     "n_disparos": 3,
     "altura_mediana_m": 4.45,
-    "altura_p90_m": 5.31
+    "altura_p90_m": 5.31,
+    "dosel_alto": true
    },
    "P0649": {
     "n_disparos": 7,
     "altura_mediana_m": 3.09,
-    "altura_p90_m": 3.92
+    "altura_p90_m": 3.92,
+    "dosel_alto": false
    },
    "P0650": {
     "n_disparos": 11,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 3.17
+    "altura_p90_m": 3.17,
+    "dosel_alto": false
    },
    "P0652": {
     "n_disparos": 27,
     "altura_mediana_m": 2.94,
-    "altura_p90_m": 9.51
+    "altura_p90_m": 9.51,
+    "dosel_alto": true
    },
    "P0653": {
     "n_disparos": 8,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.01
+    "altura_p90_m": 3.01,
+    "dosel_alto": false
    },
    "P0654": {
     "n_disparos": 4,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 3.05
+    "altura_p90_m": 3.05,
+    "dosel_alto": false
    },
    "P0655": {
     "n_disparos": 5,
     "altura_mediana_m": 2.99,
-    "altura_p90_m": 3.47
+    "altura_p90_m": 3.47,
+    "dosel_alto": false
    },
    "P0656": {
     "n_disparos": 12,
     "altura_mediana_m": 4.17,
-    "altura_p90_m": 10.53
+    "altura_p90_m": 10.53,
+    "dosel_alto": true
    },
    "P0657": {
     "n_disparos": 10,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.78
+    "altura_p90_m": 2.78,
+    "dosel_alto": false
    },
    "P0658": {
     "n_disparos": 16,
     "altura_mediana_m": 2.86,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0661": {
     "n_disparos": 11,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.88
+    "altura_p90_m": 2.88,
+    "dosel_alto": false
    },
    "P0662": {
     "n_disparos": 7,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.86
+    "altura_p90_m": 2.86,
+    "dosel_alto": false
    },
    "P0663": {
     "n_disparos": 1,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.62
+    "altura_p90_m": 2.62,
+    "dosel_alto": null
    },
    "P0664": {
     "n_disparos": 3,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 3.36
+    "altura_p90_m": 3.36,
+    "dosel_alto": false
    },
    "P0665": {
     "n_disparos": 25,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.2
+    "altura_p90_m": 3.2,
+    "dosel_alto": false
    },
    "P0666": {
     "n_disparos": 27,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 9.21
+    "altura_p90_m": 9.21,
+    "dosel_alto": true
    },
    "P0667": {
     "n_disparos": 13,
     "altura_mediana_m": 10.45,
-    "altura_p90_m": 12.19
+    "altura_p90_m": 12.19,
+    "dosel_alto": true
    },
    "P0668": {
     "n_disparos": 28,
     "altura_mediana_m": 2.85,
-    "altura_p90_m": 3.45
+    "altura_p90_m": 3.45,
+    "dosel_alto": false
    },
    "P0669": {
     "n_disparos": 1,
     "altura_mediana_m": 3.7,
-    "altura_p90_m": 3.7
+    "altura_p90_m": 3.7,
+    "dosel_alto": null
    },
    "P0670": {
     "n_disparos": 4,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.62
+    "altura_p90_m": 2.62,
+    "dosel_alto": false
    },
    "P0671": {
     "n_disparos": 9,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.64
+    "altura_p90_m": 3.64,
+    "dosel_alto": false
    },
    "P0672": {
     "n_disparos": 15,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 4.32
+    "altura_p90_m": 4.32,
+    "dosel_alto": false
    },
    "P0673": {
     "n_disparos": 10,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.5
+    "altura_p90_m": 3.5,
+    "dosel_alto": false
    },
    "P0674": {
     "n_disparos": 4,
     "altura_mediana_m": 2.49,
-    "altura_p90_m": 2.53
+    "altura_p90_m": 2.53,
+    "dosel_alto": false
    },
    "P0675": {
     "n_disparos": 22,
     "altura_mediana_m": 3.0,
-    "altura_p90_m": 7.77
+    "altura_p90_m": 7.77,
+    "dosel_alto": true
    },
    "P0676": {
     "n_disparos": 18,
     "altura_mediana_m": 2.78,
-    "altura_p90_m": 3.44
+    "altura_p90_m": 3.44,
+    "dosel_alto": false
    },
    "P0677": {
     "n_disparos": 4,
     "altura_mediana_m": 2.98,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": false
    },
    "P0678": {
     "n_disparos": 11,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": false
    },
    "P0679": {
     "n_disparos": 7,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": false
    },
    "P0682": {
     "n_disparos": 2,
     "altura_mediana_m": 2.89,
-    "altura_p90_m": 2.94
+    "altura_p90_m": 2.94,
+    "dosel_alto": null
    },
    "P0683": {
     "n_disparos": 215,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 3.6
+    "altura_p90_m": 3.6,
+    "dosel_alto": false
    },
    "P0684": {
     "n_disparos": 15,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.75
+    "altura_p90_m": 2.75,
+    "dosel_alto": false
    },
    "P0685": {
     "n_disparos": 3,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 2.43
+    "altura_p90_m": 2.43,
+    "dosel_alto": false
    },
    "P0687": {
     "n_disparos": 78,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 3.31
+    "altura_p90_m": 3.31,
+    "dosel_alto": false
    },
    "P0688": {
     "n_disparos": 2,
     "altura_mediana_m": 3.23,
-    "altura_p90_m": 3.26
+    "altura_p90_m": 3.26,
+    "dosel_alto": null
    },
    "P0689": {
     "n_disparos": 3,
     "altura_mediana_m": 5.52,
-    "altura_p90_m": 6.18
+    "altura_p90_m": 6.18,
+    "dosel_alto": true
    },
    "P0690": {
     "n_disparos": 3,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "P0691": {
     "n_disparos": 28,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 8.72
+    "altura_p90_m": 8.72,
+    "dosel_alto": true
    },
    "P0692": {
     "n_disparos": 2,
     "altura_mediana_m": 3.0,
-    "altura_p90_m": 3.16
+    "altura_p90_m": 3.16,
+    "dosel_alto": null
    },
    "P0693": {
     "n_disparos": 4,
     "altura_mediana_m": 4.81,
-    "altura_p90_m": 6.79
+    "altura_p90_m": 6.79,
+    "dosel_alto": true
    },
    "P0694": {
     "n_disparos": 6,
     "altura_mediana_m": 2.75,
-    "altura_p90_m": 2.88
+    "altura_p90_m": 2.88,
+    "dosel_alto": false
    },
    "P0695": {
     "n_disparos": 4,
     "altura_mediana_m": 3.25,
-    "altura_p90_m": 12.97
+    "altura_p90_m": 12.97,
+    "dosel_alto": true
    },
    "P0696": {
     "n_disparos": 16,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.88
+    "altura_p90_m": 2.88,
+    "dosel_alto": false
    },
    "P0697": {
     "n_disparos": 7,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 4.26
+    "altura_p90_m": 4.26,
+    "dosel_alto": false
    },
    "P0698": {
     "n_disparos": 27,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 4.38
+    "altura_p90_m": 4.38,
+    "dosel_alto": false
    },
    "P0699": {
     "n_disparos": 10,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 3.5
+    "altura_p90_m": 3.5,
+    "dosel_alto": false
    },
    "P0700": {
     "n_disparos": 20,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.15
+    "altura_p90_m": 3.15,
+    "dosel_alto": false
    },
    "P0701": {
     "n_disparos": 7,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": false
    },
    "P0702": {
     "n_disparos": 34,
     "altura_mediana_m": 2.93,
-    "altura_p90_m": 3.38
+    "altura_p90_m": 3.38,
+    "dosel_alto": false
    },
    "P0703": {
     "n_disparos": 21,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0704": {
     "n_disparos": 6,
     "altura_mediana_m": 2.39,
-    "altura_p90_m": 3.0
+    "altura_p90_m": 3.0,
+    "dosel_alto": false
    },
    "P0705": {
     "n_disparos": 24,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.93
+    "altura_p90_m": 2.93,
+    "dosel_alto": false
    },
    "P0706": {
     "n_disparos": 8,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 3.33
+    "altura_p90_m": 3.33,
+    "dosel_alto": false
    },
    "P0707": {
     "n_disparos": 8,
     "altura_mediana_m": 4.39,
-    "altura_p90_m": 4.78
+    "altura_p90_m": 4.78,
+    "dosel_alto": false
    },
    "P0708": {
     "n_disparos": 3,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.77
+    "altura_p90_m": 2.77,
+    "dosel_alto": false
    },
    "P0709": {
     "n_disparos": 9,
     "altura_mediana_m": 2.72,
-    "altura_p90_m": 4.94
+    "altura_p90_m": 4.94,
+    "dosel_alto": false
    },
    "P0711": {
     "n_disparos": 14,
     "altura_mediana_m": 2.9,
-    "altura_p90_m": 3.28
+    "altura_p90_m": 3.28,
+    "dosel_alto": false
    },
    "P0712": {
     "n_disparos": 3,
     "altura_mediana_m": 2.99,
-    "altura_p90_m": 3.11
+    "altura_p90_m": 3.11,
+    "dosel_alto": false
    },
    "P0713": {
     "n_disparos": 32,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 4.42
+    "altura_p90_m": 4.42,
+    "dosel_alto": false
    },
    "P0714": {
     "n_disparos": 22,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": false
    },
    "P0715": {
     "n_disparos": 7,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.04
+    "altura_p90_m": 3.04,
+    "dosel_alto": false
    },
    "P0716": {
     "n_disparos": 19,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0717": {
     "n_disparos": 10,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": false
    },
    "P0718": {
     "n_disparos": 5,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 3.34
+    "altura_p90_m": 3.34,
+    "dosel_alto": false
    },
    "P0719": {
     "n_disparos": 5,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "P0720": {
     "n_disparos": 21,
     "altura_mediana_m": 2.72,
-    "altura_p90_m": 4.19
+    "altura_p90_m": 4.19,
+    "dosel_alto": false
    },
    "P0721": {
     "n_disparos": 50,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.8
+    "altura_p90_m": 2.8,
+    "dosel_alto": false
    },
    "P0722": {
     "n_disparos": 13,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 3.01
+    "altura_p90_m": 3.01,
+    "dosel_alto": false
    },
    "P0723": {
     "n_disparos": 31,
     "altura_mediana_m": 6.06,
-    "altura_p90_m": 7.52
+    "altura_p90_m": 7.52,
+    "dosel_alto": true
    },
    "P0725": {
     "n_disparos": 14,
     "altura_mediana_m": 2.59,
-    "altura_p90_m": 2.94
+    "altura_p90_m": 2.94,
+    "dosel_alto": false
    },
    "P0726": {
     "n_disparos": 6,
     "altura_mediana_m": 7.14,
-    "altura_p90_m": 8.18
+    "altura_p90_m": 8.18,
+    "dosel_alto": true
    },
    "P0727": {
     "n_disparos": 74,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.17
+    "altura_p90_m": 3.17,
+    "dosel_alto": false
    },
    "P0728": {
     "n_disparos": 12,
     "altura_mediana_m": 2.74,
-    "altura_p90_m": 3.26
+    "altura_p90_m": 3.26,
+    "dosel_alto": false
    },
    "P0729": {
     "n_disparos": 24,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 4.97
+    "altura_p90_m": 4.97,
+    "dosel_alto": false
    },
    "P0730": {
     "n_disparos": 8,
     "altura_mediana_m": 2.9,
-    "altura_p90_m": 4.42
+    "altura_p90_m": 4.42,
+    "dosel_alto": false
    },
    "P0731": {
     "n_disparos": 8,
     "altura_mediana_m": 3.08,
-    "altura_p90_m": 3.44
+    "altura_p90_m": 3.44,
+    "dosel_alto": false
    },
    "P0732": {
     "n_disparos": 16,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.99
+    "altura_p90_m": 2.99,
+    "dosel_alto": false
    },
    "P0733": {
     "n_disparos": 15,
     "altura_mediana_m": 2.68,
-    "altura_p90_m": 3.26
+    "altura_p90_m": 3.26,
+    "dosel_alto": false
    },
    "P0734": {
     "n_disparos": 15,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 3.17
+    "altura_p90_m": 3.17,
+    "dosel_alto": false
    },
    "P0735": {
     "n_disparos": 5,
     "altura_mediana_m": 11.64,
-    "altura_p90_m": 13.07
+    "altura_p90_m": 13.07,
+    "dosel_alto": true
    },
    "P0736": {
     "n_disparos": 20,
     "altura_mediana_m": 2.49,
-    "altura_p90_m": 3.59
+    "altura_p90_m": 3.59,
+    "dosel_alto": false
    },
    "P0738": {
     "n_disparos": 2,
     "altura_mediana_m": 3.12,
-    "altura_p90_m": 3.4
+    "altura_p90_m": 3.4,
+    "dosel_alto": null
    },
    "P0739": {
     "n_disparos": 21,
     "altura_mediana_m": 6.08,
-    "altura_p90_m": 7.57
+    "altura_p90_m": 7.57,
+    "dosel_alto": true
    },
    "P0740": {
     "n_disparos": 6,
     "altura_mediana_m": 2.96,
-    "altura_p90_m": 3.23
+    "altura_p90_m": 3.23,
+    "dosel_alto": false
    },
    "P0741": {
     "n_disparos": 11,
     "altura_mediana_m": 3.36,
-    "altura_p90_m": 4.1
+    "altura_p90_m": 4.1,
+    "dosel_alto": false
    },
    "P0742": {
     "n_disparos": 114,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 4.4
+    "altura_p90_m": 4.4,
+    "dosel_alto": false
    },
    "P0743": {
     "n_disparos": 5,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.19
+    "altura_p90_m": 3.19,
+    "dosel_alto": false
    },
    "P0744": {
     "n_disparos": 44,
     "altura_mediana_m": 2.67,
-    "altura_p90_m": 4.94
+    "altura_p90_m": 4.94,
+    "dosel_alto": false
    },
    "P0745": {
     "n_disparos": 5,
     "altura_mediana_m": 4.09,
-    "altura_p90_m": 5.32
+    "altura_p90_m": 5.32,
+    "dosel_alto": true
    },
    "P0746": {
     "n_disparos": 10,
     "altura_mediana_m": 2.6,
-    "altura_p90_m": 6.1
+    "altura_p90_m": 6.1,
+    "dosel_alto": true
    },
    "P0747": {
     "n_disparos": 16,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 5.28
+    "altura_p90_m": 5.28,
+    "dosel_alto": true
    },
    "P0748": {
     "n_disparos": 12,
     "altura_mediana_m": 3.02,
-    "altura_p90_m": 3.2
+    "altura_p90_m": 3.2,
+    "dosel_alto": false
    },
    "P0749": {
     "n_disparos": 1,
     "altura_mediana_m": 3.66,
-    "altura_p90_m": 3.66
+    "altura_p90_m": 3.66,
+    "dosel_alto": null
    },
    "P0750": {
     "n_disparos": 6,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0752": {
     "n_disparos": 7,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": false
    },
    "P0753": {
     "n_disparos": 6,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 3.84
+    "altura_p90_m": 3.84,
+    "dosel_alto": false
    },
    "P0754": {
     "n_disparos": 7,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 4.04
+    "altura_p90_m": 4.04,
+    "dosel_alto": false
    },
    "P0755": {
     "n_disparos": 4,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 4.02
+    "altura_p90_m": 4.02,
+    "dosel_alto": false
    },
    "P0756": {
     "n_disparos": 11,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 3.39
+    "altura_p90_m": 3.39,
+    "dosel_alto": false
    },
    "P0757": {
     "n_disparos": 11,
     "altura_mediana_m": 2.94,
-    "altura_p90_m": 4.42
+    "altura_p90_m": 4.42,
+    "dosel_alto": false
    },
    "P0758": {
     "n_disparos": 9,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.14
+    "altura_p90_m": 3.14,
+    "dosel_alto": false
    },
    "P0759": {
     "n_disparos": 112,
     "altura_mediana_m": 8.16,
-    "altura_p90_m": 11.6
+    "altura_p90_m": 11.6,
+    "dosel_alto": true
    },
    "P0760": {
     "n_disparos": 24,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "P0761": {
     "n_disparos": 45,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.85
+    "altura_p90_m": 2.85,
+    "dosel_alto": false
    },
    "P0762": {
     "n_disparos": 268,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.23
+    "altura_p90_m": 3.23,
+    "dosel_alto": false
    },
    "P0763": {
     "n_disparos": 8,
     "altura_mediana_m": 2.88,
-    "altura_p90_m": 3.41
+    "altura_p90_m": 3.41,
+    "dosel_alto": false
    },
    "P0764": {
     "n_disparos": 5,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.02
+    "altura_p90_m": 3.02,
+    "dosel_alto": false
    },
    "P0765": {
     "n_disparos": 6,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 4.48
+    "altura_p90_m": 4.48,
+    "dosel_alto": false
    },
    "P0766": {
     "n_disparos": 6,
     "altura_mediana_m": 3.9,
-    "altura_p90_m": 5.2
+    "altura_p90_m": 5.2,
+    "dosel_alto": true
    },
    "P0768": {
     "n_disparos": 21,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 4.29
+    "altura_p90_m": 4.29,
+    "dosel_alto": false
    },
    "P0769": {
     "n_disparos": 88,
     "altura_mediana_m": 2.81,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "P0770": {
     "n_disparos": 7,
     "altura_mediana_m": 3.24,
-    "altura_p90_m": 5.15
+    "altura_p90_m": 5.15,
+    "dosel_alto": true
    },
    "P0771": {
     "n_disparos": 1,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": null
    },
    "P0772": {
     "n_disparos": 2,
     "altura_mediana_m": 2.3,
-    "altura_p90_m": 2.32
+    "altura_p90_m": 2.32,
+    "dosel_alto": null
    },
    "P0773": {
     "n_disparos": 6,
     "altura_mediana_m": 4.34,
-    "altura_p90_m": 4.71
+    "altura_p90_m": 4.71,
+    "dosel_alto": false
    },
    "P0774": {
     "n_disparos": 31,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "P0775": {
     "n_disparos": 15,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 2.87
+    "altura_p90_m": 2.87,
+    "dosel_alto": false
    },
    "P0776": {
     "n_disparos": 49,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0777": {
     "n_disparos": 8,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.75
+    "altura_p90_m": 2.75,
+    "dosel_alto": false
    },
    "P0778": {
     "n_disparos": 6,
     "altura_mediana_m": 2.49,
-    "altura_p90_m": 3.7
+    "altura_p90_m": 3.7,
+    "dosel_alto": false
    },
    "P0779": {
     "n_disparos": 5,
     "altura_mediana_m": 3.14,
-    "altura_p90_m": 3.57
+    "altura_p90_m": 3.57,
+    "dosel_alto": false
    },
    "P0780": {
     "n_disparos": 35,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.0
+    "altura_p90_m": 3.0,
+    "dosel_alto": false
    },
    "P0781": {
     "n_disparos": 10,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 4.0
+    "altura_p90_m": 4.0,
+    "dosel_alto": false
    },
    "P0782": {
     "n_disparos": 7,
     "altura_mediana_m": 9.36,
-    "altura_p90_m": 11.27
+    "altura_p90_m": 11.27,
+    "dosel_alto": true
    },
    "P0783": {
     "n_disparos": 15,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 3.18
+    "altura_p90_m": 3.18,
+    "dosel_alto": false
    },
    "P0784": {
     "n_disparos": 2,
     "altura_mediana_m": 2.75,
-    "altura_p90_m": 2.81
+    "altura_p90_m": 2.81,
+    "dosel_alto": null
    },
    "P0785": {
     "n_disparos": 10,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.48
+    "altura_p90_m": 3.48,
+    "dosel_alto": false
    },
    "P0786": {
     "n_disparos": 5,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 2.67
+    "altura_p90_m": 2.67,
+    "dosel_alto": false
    },
    "P0787": {
     "n_disparos": 16,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 3.41
+    "altura_p90_m": 3.41,
+    "dosel_alto": false
    },
    "P0788": {
     "n_disparos": 4,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.62
+    "altura_p90_m": 2.62,
+    "dosel_alto": false
    },
    "P0789": {
     "n_disparos": 2,
     "altura_mediana_m": 4.04,
-    "altura_p90_m": 4.97
+    "altura_p90_m": 4.97,
+    "dosel_alto": null
    },
    "P0790": {
     "n_disparos": 21,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 3.8
+    "altura_p90_m": 3.8,
+    "dosel_alto": false
    },
    "P0791": {
     "n_disparos": 6,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "P0792": {
     "n_disparos": 29,
     "altura_mediana_m": 8.52,
-    "altura_p90_m": 10.57
+    "altura_p90_m": 10.57,
+    "dosel_alto": true
    },
    "P0793": {
     "n_disparos": 33,
     "altura_mediana_m": 3.02,
-    "altura_p90_m": 4.9
+    "altura_p90_m": 4.9,
+    "dosel_alto": false
    },
    "P0794": {
     "n_disparos": 16,
     "altura_mediana_m": 2.46,
-    "altura_p90_m": 2.67
+    "altura_p90_m": 2.67,
+    "dosel_alto": false
    },
    "P0795": {
     "n_disparos": 101,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 3.29
+    "altura_p90_m": 3.29,
+    "dosel_alto": false
    },
    "P0796": {
     "n_disparos": 2,
     "altura_mediana_m": 4.71,
-    "altura_p90_m": 5.17
+    "altura_p90_m": 5.17,
+    "dosel_alto": null
    },
    "P0798": {
     "n_disparos": 9,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 3.34
+    "altura_p90_m": 3.34,
+    "dosel_alto": false
    },
    "P0799": {
     "n_disparos": 6,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 3.18
+    "altura_p90_m": 3.18,
+    "dosel_alto": false
    },
    "P0801": {
     "n_disparos": 1,
     "altura_mediana_m": 6.58,
-    "altura_p90_m": 6.58
+    "altura_p90_m": 6.58,
+    "dosel_alto": null
    },
    "P0802": {
     "n_disparos": 2,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 2.58
+    "altura_p90_m": 2.58,
+    "dosel_alto": null
    },
    "P0803": {
     "n_disparos": 50,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.86
+    "altura_p90_m": 2.86,
+    "dosel_alto": false
    },
    "P0806": {
     "n_disparos": 8,
     "altura_mediana_m": 2.6,
-    "altura_p90_m": 2.92
+    "altura_p90_m": 2.92,
+    "dosel_alto": false
    },
    "P0807": {
     "n_disparos": 3,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "P0808": {
     "n_disparos": 9,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "P0809": {
     "n_disparos": 27,
     "altura_mediana_m": 3.28,
-    "altura_p90_m": 5.19
+    "altura_p90_m": 5.19,
+    "dosel_alto": true
    },
    "P0810": {
     "n_disparos": 27,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.4
+    "altura_p90_m": 3.4,
+    "dosel_alto": false
    },
    "P0811": {
     "n_disparos": 5,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 8.76
+    "altura_p90_m": 8.76,
+    "dosel_alto": true
    },
    "P0812": {
     "n_disparos": 12,
     "altura_mediana_m": 2.67,
-    "altura_p90_m": 3.09
+    "altura_p90_m": 3.09,
+    "dosel_alto": false
    },
    "P0813": {
     "n_disparos": 6,
     "altura_mediana_m": 8.43,
-    "altura_p90_m": 10.5
+    "altura_p90_m": 10.5,
+    "dosel_alto": true
    },
    "P0815": {
     "n_disparos": 1,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.5
+    "altura_p90_m": 2.5,
+    "dosel_alto": null
    },
    "P0816": {
     "n_disparos": 1,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": null
    },
    "P0817": {
     "n_disparos": 12,
     "altura_mediana_m": 2.7,
-    "altura_p90_m": 3.01
+    "altura_p90_m": 3.01,
+    "dosel_alto": false
    },
    "P0818": {
     "n_disparos": 26,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": false
    },
    "P0819": {
     "n_disparos": 9,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 3.06
+    "altura_p90_m": 3.06,
+    "dosel_alto": false
    },
    "P0820": {
     "n_disparos": 182,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 3.23
+    "altura_p90_m": 3.23,
+    "dosel_alto": false
    },
    "P0821": {
     "n_disparos": 25,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": false
    },
    "P0822": {
     "n_disparos": 3,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 2.96
+    "altura_p90_m": 2.96,
+    "dosel_alto": false
    },
    "P0823": {
     "n_disparos": 35,
     "altura_mediana_m": 2.39,
-    "altura_p90_m": 4.05
+    "altura_p90_m": 4.05,
+    "dosel_alto": false
    },
    "P0825": {
     "n_disparos": 6,
     "altura_mediana_m": 4.35,
-    "altura_p90_m": 9.12
+    "altura_p90_m": 9.12,
+    "dosel_alto": true
    },
    "P0826": {
     "n_disparos": 7,
     "altura_mediana_m": 4.3,
-    "altura_p90_m": 8.63
+    "altura_p90_m": 8.63,
+    "dosel_alto": true
    },
    "P0827": {
     "n_disparos": 8,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.87
+    "altura_p90_m": 2.87,
+    "dosel_alto": false
    },
    "P0828": {
     "n_disparos": 38,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": false
    },
    "P0829": {
     "n_disparos": 15,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": false
    },
    "P0830": {
     "n_disparos": 3,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 4.5
+    "altura_p90_m": 4.5,
+    "dosel_alto": false
    },
    "P0831": {
     "n_disparos": 5,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 3.12
+    "altura_p90_m": 3.12,
+    "dosel_alto": false
    },
    "P0832": {
     "n_disparos": 3,
     "altura_mediana_m": 3.14,
-    "altura_p90_m": 3.35
+    "altura_p90_m": 3.35,
+    "dosel_alto": false
    },
    "P0833": {
     "n_disparos": 62,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.02
+    "altura_p90_m": 3.02,
+    "dosel_alto": false
    },
    "P0834": {
     "n_disparos": 12,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 6.96
+    "altura_p90_m": 6.96,
+    "dosel_alto": true
    },
    "P0835": {
     "n_disparos": 18,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.19
+    "altura_p90_m": 3.19,
+    "dosel_alto": false
    },
    "P0836": {
     "n_disparos": 7,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 6.6
+    "altura_p90_m": 6.6,
+    "dosel_alto": true
    },
    "P0837": {
     "n_disparos": 69,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.77
+    "altura_p90_m": 2.77,
+    "dosel_alto": false
    },
    "P0839": {
     "n_disparos": 14,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.35
+    "altura_p90_m": 3.35,
+    "dosel_alto": false
    },
    "P0840": {
     "n_disparos": 70,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.24
+    "altura_p90_m": 3.24,
+    "dosel_alto": false
    },
    "P0841": {
     "n_disparos": 7,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.66
+    "altura_p90_m": 2.66,
+    "dosel_alto": false
    },
    "P0842": {
     "n_disparos": 11,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.09
+    "altura_p90_m": 3.09,
+    "dosel_alto": false
    },
    "P0843": {
     "n_disparos": 16,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 3.01
+    "altura_p90_m": 3.01,
+    "dosel_alto": false
    },
    "P0844": {
     "n_disparos": 6,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.93
+    "altura_p90_m": 3.93,
+    "dosel_alto": false
    },
    "P0845": {
     "n_disparos": 24,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": false
    },
    "P0846": {
     "n_disparos": 45,
     "altura_mediana_m": 3.17,
-    "altura_p90_m": 4.87
+    "altura_p90_m": 4.87,
+    "dosel_alto": false
    },
    "P0847": {
     "n_disparos": 11,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": false
    },
    "P0848": {
     "n_disparos": 12,
     "altura_mediana_m": 2.59,
-    "altura_p90_m": 2.79
+    "altura_p90_m": 2.79,
+    "dosel_alto": false
    },
    "P0849": {
     "n_disparos": 9,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.11
+    "altura_p90_m": 3.11,
+    "dosel_alto": false
    },
    "P0850": {
     "n_disparos": 5,
     "altura_mediana_m": 3.07,
-    "altura_p90_m": 4.04
+    "altura_p90_m": 4.04,
+    "dosel_alto": false
    },
    "P0851": {
     "n_disparos": 11,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": false
    },
    "P0852": {
     "n_disparos": 48,
     "altura_mediana_m": 2.81,
-    "altura_p90_m": 8.72
+    "altura_p90_m": 8.72,
+    "dosel_alto": true
    },
    "P0853": {
     "n_disparos": 14,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 7.42
+    "altura_p90_m": 7.42,
+    "dosel_alto": true
    },
    "P0854": {
     "n_disparos": 111,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 3.07
+    "altura_p90_m": 3.07,
+    "dosel_alto": false
    },
    "P0855": {
     "n_disparos": 2,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.71
+    "altura_p90_m": 2.71,
+    "dosel_alto": null
    },
    "P0856": {
     "n_disparos": 3,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.57
+    "altura_p90_m": 2.57,
+    "dosel_alto": false
    },
    "P0857": {
     "n_disparos": 107,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.07
+    "altura_p90_m": 3.07,
+    "dosel_alto": false
    },
    "P0858": {
     "n_disparos": 39,
     "altura_mediana_m": 12.13,
-    "altura_p90_m": 14.64
+    "altura_p90_m": 14.64,
+    "dosel_alto": true
    },
    "P0860": {
     "n_disparos": 3,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.75
+    "altura_p90_m": 2.75,
+    "dosel_alto": false
    },
    "P0863": {
     "n_disparos": 4,
     "altura_mediana_m": 3.05,
-    "altura_p90_m": 3.12
+    "altura_p90_m": 3.12,
+    "dosel_alto": false
    },
    "P0865": {
     "n_disparos": 2,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": null
    },
    "P0866": {
     "n_disparos": 10,
     "altura_mediana_m": 4.87,
-    "altura_p90_m": 7.24
+    "altura_p90_m": 7.24,
+    "dosel_alto": true
    },
    "P0867": {
     "n_disparos": 6,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 2.58
+    "altura_p90_m": 2.58,
+    "dosel_alto": false
    },
    "P0868": {
     "n_disparos": 16,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": false
    },
    "P0869": {
     "n_disparos": 3,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.53
+    "altura_p90_m": 2.53,
+    "dosel_alto": false
    },
    "P0870": {
     "n_disparos": 7,
     "altura_mediana_m": 6.99,
-    "altura_p90_m": 8.01
+    "altura_p90_m": 8.01,
+    "dosel_alto": true
    },
    "P0871": {
     "n_disparos": 4,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 3.0
+    "altura_p90_m": 3.0,
+    "dosel_alto": false
    },
    "P0872": {
     "n_disparos": 25,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0873": {
     "n_disparos": 20,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.88
+    "altura_p90_m": 2.88,
+    "dosel_alto": false
    },
    "P0874": {
     "n_disparos": 5,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.78
+    "altura_p90_m": 2.78,
+    "dosel_alto": false
    },
    "P0875": {
     "n_disparos": 4,
     "altura_mediana_m": 2.93,
-    "altura_p90_m": 3.92
+    "altura_p90_m": 3.92,
+    "dosel_alto": false
    },
    "P0876": {
     "n_disparos": 12,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.9
+    "altura_p90_m": 2.9,
+    "dosel_alto": false
    },
    "P0877": {
     "n_disparos": 13,
     "altura_mediana_m": 7.65,
-    "altura_p90_m": 8.65
+    "altura_p90_m": 8.65,
+    "dosel_alto": true
    },
    "P0878": {
     "n_disparos": 30,
     "altura_mediana_m": 2.79,
-    "altura_p90_m": 2.94
+    "altura_p90_m": 2.94,
+    "dosel_alto": false
    },
    "P0879": {
     "n_disparos": 10,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "P0881": {
     "n_disparos": 11,
     "altura_mediana_m": 11.34,
-    "altura_p90_m": 12.13
+    "altura_p90_m": 12.13,
+    "dosel_alto": true
    },
    "P0882": {
     "n_disparos": 465,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 6.62
+    "altura_p90_m": 6.62,
+    "dosel_alto": true
    },
    "P0883": {
     "n_disparos": 39,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 3.94
+    "altura_p90_m": 3.94,
+    "dosel_alto": false
    },
    "P0884": {
     "n_disparos": 1,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.62
+    "altura_p90_m": 2.62,
+    "dosel_alto": null
    },
    "P0885": {
     "n_disparos": 30,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.26
+    "altura_p90_m": 3.26,
+    "dosel_alto": false
    },
    "P0886": {
     "n_disparos": 59,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "P0887": {
     "n_disparos": 1,
     "altura_mediana_m": 3.89,
-    "altura_p90_m": 3.89
+    "altura_p90_m": 3.89,
+    "dosel_alto": null
    },
    "P0888": {
     "n_disparos": 42,
     "altura_mediana_m": 2.85,
-    "altura_p90_m": 3.3
+    "altura_p90_m": 3.3,
+    "dosel_alto": false
    },
    "P0889": {
     "n_disparos": 2,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.57
+    "altura_p90_m": 2.57,
+    "dosel_alto": null
    },
    "P0890": {
     "n_disparos": 10,
     "altura_mediana_m": 2.7,
-    "altura_p90_m": 3.0
+    "altura_p90_m": 3.0,
+    "dosel_alto": false
    },
    "P0891": {
     "n_disparos": 9,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 3.46
+    "altura_p90_m": 3.46,
+    "dosel_alto": false
    },
    "P0893": {
     "n_disparos": 69,
     "altura_mediana_m": 8.83,
-    "altura_p90_m": 12.14
+    "altura_p90_m": 12.14,
+    "dosel_alto": true
    },
    "P0894": {
     "n_disparos": 7,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 5.94
+    "altura_p90_m": 5.94,
+    "dosel_alto": true
    },
    "P0895": {
     "n_disparos": 3,
     "altura_mediana_m": 9.48,
-    "altura_p90_m": 9.69
+    "altura_p90_m": 9.69,
+    "dosel_alto": true
    },
    "P0896": {
     "n_disparos": 3,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.5
+    "altura_p90_m": 2.5,
+    "dosel_alto": false
    },
    "P0897": {
     "n_disparos": 10,
     "altura_mediana_m": 5.84,
-    "altura_p90_m": 9.26
+    "altura_p90_m": 9.26,
+    "dosel_alto": true
    },
    "P0898": {
     "n_disparos": 9,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 3.25
+    "altura_p90_m": 3.25,
+    "dosel_alto": false
    },
    "P0899": {
     "n_disparos": 2,
     "altura_mediana_m": 5.48,
-    "altura_p90_m": 5.99
+    "altura_p90_m": 5.99,
+    "dosel_alto": null
    },
    "P0900": {
     "n_disparos": 25,
     "altura_mediana_m": 3.44,
-    "altura_p90_m": 7.18
+    "altura_p90_m": 7.18,
+    "dosel_alto": true
    },
    "P0901": {
     "n_disparos": 97,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 5.42
+    "altura_p90_m": 5.42,
+    "dosel_alto": true
    },
    "P0902": {
     "n_disparos": 11,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 3.06
+    "altura_p90_m": 3.06,
+    "dosel_alto": false
    },
    "P0903": {
     "n_disparos": 6,
     "altura_mediana_m": 5.24,
-    "altura_p90_m": 6.08
+    "altura_p90_m": 6.08,
+    "dosel_alto": true
    },
    "P0904": {
     "n_disparos": 28,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 2.85
+    "altura_p90_m": 2.85,
+    "dosel_alto": false
    },
    "P0905": {
     "n_disparos": 3,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "P0907": {
     "n_disparos": 1,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": null
    },
    "P0908": {
     "n_disparos": 12,
     "altura_mediana_m": 3.08,
-    "altura_p90_m": 3.63
+    "altura_p90_m": 3.63,
+    "dosel_alto": false
    },
    "P0909": {
     "n_disparos": 34,
     "altura_mediana_m": 2.62,
-    "altura_p90_m": 2.85
+    "altura_p90_m": 2.85,
+    "dosel_alto": false
    },
    "P0910": {
     "n_disparos": 4,
     "altura_mediana_m": 5.62,
-    "altura_p90_m": 6.24
+    "altura_p90_m": 6.24,
+    "dosel_alto": true
    },
    "P0912": {
     "n_disparos": 24,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": false
    },
    "P0913": {
     "n_disparos": 37,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "P0914": {
     "n_disparos": 1,
     "altura_mediana_m": 3.47,
-    "altura_p90_m": 3.47
+    "altura_p90_m": 3.47,
+    "dosel_alto": null
    },
    "P0915": {
     "n_disparos": 4,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.09
+    "altura_p90_m": 3.09,
+    "dosel_alto": false
    },
    "P0917": {
     "n_disparos": 3,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.53
+    "altura_p90_m": 2.53,
+    "dosel_alto": false
    },
    "P0918": {
     "n_disparos": 1,
     "altura_mediana_m": 3.1,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": null
    },
    "P0919": {
     "n_disparos": 7,
     "altura_mediana_m": 2.39,
-    "altura_p90_m": 2.66
+    "altura_p90_m": 2.66,
+    "dosel_alto": false
    },
    "P0921": {
     "n_disparos": 31,
     "altura_mediana_m": 2.72,
-    "altura_p90_m": 3.24
+    "altura_p90_m": 3.24,
+    "dosel_alto": false
    },
    "P0922": {
     "n_disparos": 9,
     "altura_mediana_m": 2.99,
-    "altura_p90_m": 3.17
+    "altura_p90_m": 3.17,
+    "dosel_alto": false
    },
    "P0923": {
     "n_disparos": 24,
     "altura_mediana_m": 2.75,
-    "altura_p90_m": 7.38
+    "altura_p90_m": 7.38,
+    "dosel_alto": true
    },
    "P0924": {
     "n_disparos": 26,
     "altura_mediana_m": 2.59,
-    "altura_p90_m": 2.76
+    "altura_p90_m": 2.76,
+    "dosel_alto": false
    },
    "P0925": {
     "n_disparos": 2,
     "altura_mediana_m": 3.41,
-    "altura_p90_m": 3.55
+    "altura_p90_m": 3.55,
+    "dosel_alto": null
    },
    "P0926": {
     "n_disparos": 9,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.66
+    "altura_p90_m": 2.66,
+    "dosel_alto": false
    },
    "P0927": {
     "n_disparos": 68,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.12
+    "altura_p90_m": 3.12,
+    "dosel_alto": false
    },
    "P0928": {
     "n_disparos": 7,
     "altura_mediana_m": 5.02,
-    "altura_p90_m": 7.51
+    "altura_p90_m": 7.51,
+    "dosel_alto": true
    },
    "P0929": {
     "n_disparos": 10,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 2.88
+    "altura_p90_m": 2.88,
+    "dosel_alto": false
    },
    "P0930": {
     "n_disparos": 35,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": false
    },
    "P0931": {
     "n_disparos": 12,
     "altura_mediana_m": 2.74,
-    "altura_p90_m": 3.23
+    "altura_p90_m": 3.23,
+    "dosel_alto": false
    },
    "P0932": {
     "n_disparos": 13,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": false
    },
    "P0933": {
     "n_disparos": 3,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.47
+    "altura_p90_m": 2.47,
+    "dosel_alto": false
    },
    "P0934": {
     "n_disparos": 1,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 3.06
+    "altura_p90_m": 3.06,
+    "dosel_alto": null
    },
    "P0935": {
     "n_disparos": 1,
     "altura_mediana_m": 6.36,
-    "altura_p90_m": 6.36
+    "altura_p90_m": 6.36,
+    "dosel_alto": null
    },
    "P0936": {
     "n_disparos": 28,
     "altura_mediana_m": 3.17,
-    "altura_p90_m": 6.56
+    "altura_p90_m": 6.56,
+    "dosel_alto": true
    },
    "P0937": {
     "n_disparos": 4,
     "altura_mediana_m": 2.45,
-    "altura_p90_m": 2.49
+    "altura_p90_m": 2.49,
+    "dosel_alto": false
    },
    "P0939": {
     "n_disparos": 3,
     "altura_mediana_m": 2.64,
-    "altura_p90_m": 2.77
+    "altura_p90_m": 2.77,
+    "dosel_alto": false
    },
    "P0940": {
     "n_disparos": 1,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 2.87
+    "altura_p90_m": 2.87,
+    "dosel_alto": null
    },
    "L0003": {
     "n_disparos": 22,
     "altura_mediana_m": 2.55,
-    "altura_p90_m": 2.77
+    "altura_p90_m": 2.77,
+    "dosel_alto": false
    },
    "L0004": {
     "n_disparos": 9,
     "altura_mediana_m": 8.38,
-    "altura_p90_m": 11.72
+    "altura_p90_m": 11.72,
+    "dosel_alto": true
    },
    "L0005": {
     "n_disparos": 11,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.13
+    "altura_p90_m": 3.13,
+    "dosel_alto": false
    },
    "L0006": {
     "n_disparos": 2,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.71
+    "altura_p90_m": 2.71,
+    "dosel_alto": null
    },
    "L0007": {
     "n_disparos": 21,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 3.51
+    "altura_p90_m": 3.51,
+    "dosel_alto": false
    },
    "L0008": {
     "n_disparos": 8,
     "altura_mediana_m": 2.79,
-    "altura_p90_m": 3.13
+    "altura_p90_m": 3.13,
+    "dosel_alto": false
    },
    "L0010": {
     "n_disparos": 31,
     "altura_mediana_m": 7.03,
-    "altura_p90_m": 8.9
+    "altura_p90_m": 8.9,
+    "dosel_alto": true
    },
    "L0011": {
     "n_disparos": 4,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 2.85
+    "altura_p90_m": 2.85,
+    "dosel_alto": false
    },
    "L0013": {
     "n_disparos": 60,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": false
    },
    "L0014": {
     "n_disparos": 22,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "L0015": {
     "n_disparos": 27,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 2.67
+    "altura_p90_m": 2.67,
+    "dosel_alto": false
    },
    "L0016": {
     "n_disparos": 42,
     "altura_mediana_m": 2.78,
-    "altura_p90_m": 11.48
+    "altura_p90_m": 11.48,
+    "dosel_alto": true
    },
    "L0017": {
     "n_disparos": 4,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 2.62
+    "altura_p90_m": 2.62,
+    "dosel_alto": false
    },
    "L0018": {
     "n_disparos": 7,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.14
+    "altura_p90_m": 3.14,
+    "dosel_alto": false
    },
    "L0019": {
     "n_disparos": 8,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "L0020": {
     "n_disparos": 62,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.76
+    "altura_p90_m": 2.76,
+    "dosel_alto": false
    },
    "L0021": {
     "n_disparos": 38,
     "altura_mediana_m": 2.86,
-    "altura_p90_m": 3.51
+    "altura_p90_m": 3.51,
+    "dosel_alto": false
    },
    "L0022": {
     "n_disparos": 32,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": false
    },
    "L0023": {
     "n_disparos": 6,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.49
+    "altura_p90_m": 3.49,
+    "dosel_alto": false
    },
    "L0024": {
     "n_disparos": 7,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.59
+    "altura_p90_m": 2.59,
+    "dosel_alto": false
    },
    "L0025": {
     "n_disparos": 9,
     "altura_mediana_m": 6.36,
-    "altura_p90_m": 10.66
+    "altura_p90_m": 10.66,
+    "dosel_alto": true
    },
    "L0026": {
     "n_disparos": 22,
     "altura_mediana_m": 2.52,
-    "altura_p90_m": 2.72
+    "altura_p90_m": 2.72,
+    "dosel_alto": false
    },
    "L0027": {
     "n_disparos": 4,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.72
+    "altura_p90_m": 2.72,
+    "dosel_alto": false
    },
    "L0028": {
     "n_disparos": 12,
     "altura_mediana_m": 2.71,
-    "altura_p90_m": 3.5
+    "altura_p90_m": 3.5,
+    "dosel_alto": false
    },
    "L0029": {
     "n_disparos": 25,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.64
+    "altura_p90_m": 2.64,
+    "dosel_alto": false
    },
    "L0030": {
     "n_disparos": 4,
     "altura_mediana_m": 2.78,
-    "altura_p90_m": 2.8
+    "altura_p90_m": 2.8,
+    "dosel_alto": false
    },
    "L0031": {
     "n_disparos": 20,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": false
    },
    "L0032": {
     "n_disparos": 5,
     "altura_mediana_m": 2.36,
-    "altura_p90_m": 2.43
+    "altura_p90_m": 2.43,
+    "dosel_alto": false
    },
    "L0033": {
     "n_disparos": 6,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": false
    },
    "L0034": {
     "n_disparos": 535,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.44
+    "altura_p90_m": 3.44,
+    "dosel_alto": false
    },
    "L0035": {
     "n_disparos": 28,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.58
+    "altura_p90_m": 3.58,
+    "dosel_alto": false
    },
    "L0036": {
     "n_disparos": 17,
     "altura_mediana_m": 2.51,
-    "altura_p90_m": 2.94
+    "altura_p90_m": 2.94,
+    "dosel_alto": false
    },
    "L0037": {
     "n_disparos": 16,
     "altura_mediana_m": 2.48,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": false
    },
    "L0038": {
     "n_disparos": 27,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 3.42
+    "altura_p90_m": 3.42,
+    "dosel_alto": false
    },
    "L0039": {
     "n_disparos": 28,
     "altura_mediana_m": 2.49,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": false
    },
    "L0041": {
     "n_disparos": 16,
     "altura_mediana_m": 4.06,
-    "altura_p90_m": 5.21
+    "altura_p90_m": 5.21,
+    "dosel_alto": true
    },
    "L0042": {
     "n_disparos": 36,
     "altura_mediana_m": 3.62,
-    "altura_p90_m": 5.24
+    "altura_p90_m": 5.24,
+    "dosel_alto": true
    },
    "L0043": {
     "n_disparos": 6,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 5.08
+    "altura_p90_m": 5.08,
+    "dosel_alto": true
    },
    "L0045": {
     "n_disparos": 44,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 3.51
+    "altura_p90_m": 3.51,
+    "dosel_alto": false
    },
    "L0046": {
     "n_disparos": 23,
     "altura_mediana_m": 11.43,
-    "altura_p90_m": 14.56
+    "altura_p90_m": 14.56,
+    "dosel_alto": true
    },
    "L0047": {
     "n_disparos": 42,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": false
    },
    "L0048": {
     "n_disparos": 10,
     "altura_mediana_m": 5.82,
-    "altura_p90_m": 7.53
+    "altura_p90_m": 7.53,
+    "dosel_alto": true
    },
    "L0049": {
     "n_disparos": 13,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.71
+    "altura_p90_m": 2.71,
+    "dosel_alto": false
    },
    "L0050": {
     "n_disparos": 16,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.93
+    "altura_p90_m": 2.93,
+    "dosel_alto": false
    },
    "L0052": {
     "n_disparos": 5,
     "altura_mediana_m": 2.51,
-    "altura_p90_m": 2.79
+    "altura_p90_m": 2.79,
+    "dosel_alto": false
    },
    "L0053": {
     "n_disparos": 8,
     "altura_mediana_m": 3.26,
-    "altura_p90_m": 4.83
+    "altura_p90_m": 4.83,
+    "dosel_alto": false
    },
    "L0054": {
     "n_disparos": 7,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 4.21
+    "altura_p90_m": 4.21,
+    "dosel_alto": false
    },
    "L0055": {
     "n_disparos": 13,
     "altura_mediana_m": 4.71,
-    "altura_p90_m": 5.48
+    "altura_p90_m": 5.48,
+    "dosel_alto": true
    },
    "L0056": {
     "n_disparos": 21,
     "altura_mediana_m": 10.11,
-    "altura_p90_m": 10.87
+    "altura_p90_m": 10.87,
+    "dosel_alto": true
    },
    "L0057": {
     "n_disparos": 20,
     "altura_mediana_m": 3.03,
-    "altura_p90_m": 5.92
+    "altura_p90_m": 5.92,
+    "dosel_alto": true
    },
    "L0059": {
     "n_disparos": 6,
     "altura_mediana_m": 2.45,
-    "altura_p90_m": 2.73
+    "altura_p90_m": 2.73,
+    "dosel_alto": false
    },
    "L0060": {
     "n_disparos": 6,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.0
+    "altura_p90_m": 3.0,
+    "dosel_alto": false
    },
    "L0062": {
     "n_disparos": 19,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.99
+    "altura_p90_m": 2.99,
+    "dosel_alto": false
    },
    "L0063": {
     "n_disparos": 19,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 2.62
+    "altura_p90_m": 2.62,
+    "dosel_alto": false
    },
    "L0064": {
     "n_disparos": 15,
     "altura_mediana_m": 2.46,
-    "altura_p90_m": 3.38
+    "altura_p90_m": 3.38,
+    "dosel_alto": false
    },
    "L0065": {
     "n_disparos": 3,
     "altura_mediana_m": 10.87,
-    "altura_p90_m": 11.23
+    "altura_p90_m": 11.23,
+    "dosel_alto": true
    },
    "L0066": {
     "n_disparos": 9,
     "altura_mediana_m": 7.64,
-    "altura_p90_m": 8.16
+    "altura_p90_m": 8.16,
+    "dosel_alto": true
    },
    "L0067": {
     "n_disparos": 36,
     "altura_mediana_m": 2.59,
-    "altura_p90_m": 3.23
+    "altura_p90_m": 3.23,
+    "dosel_alto": false
    },
    "L0068": {
     "n_disparos": 7,
     "altura_mediana_m": 4.11,
-    "altura_p90_m": 5.86
+    "altura_p90_m": 5.86,
+    "dosel_alto": true
    },
    "L0069": {
     "n_disparos": 2,
     "altura_mediana_m": 3.08,
-    "altura_p90_m": 3.12
+    "altura_p90_m": 3.12,
+    "dosel_alto": null
    },
    "L0070": {
     "n_disparos": 13,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 3.63
+    "altura_p90_m": 3.63,
+    "dosel_alto": false
    },
    "L0071": {
     "n_disparos": 3,
     "altura_mediana_m": 3.1,
-    "altura_p90_m": 3.12
+    "altura_p90_m": 3.12,
+    "dosel_alto": false
    },
    "L0072": {
     "n_disparos": 11,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 3.47
+    "altura_p90_m": 3.47,
+    "dosel_alto": false
    },
    "L0073": {
     "n_disparos": 16,
     "altura_mediana_m": 2.55,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": false
    },
    "L0074": {
     "n_disparos": 16,
     "altura_mediana_m": 2.45,
-    "altura_p90_m": 2.65
+    "altura_p90_m": 2.65,
+    "dosel_alto": false
    },
    "L0075": {
     "n_disparos": 5,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": false
    },
    "L0076": {
     "n_disparos": 1,
     "altura_mediana_m": 16.97,
-    "altura_p90_m": 16.97
+    "altura_p90_m": 16.97,
+    "dosel_alto": null
    },
    "L0077": {
     "n_disparos": 6,
     "altura_mediana_m": 2.51,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": false
    },
    "L0078": {
     "n_disparos": 7,
     "altura_mediana_m": 4.0,
-    "altura_p90_m": 5.69
+    "altura_p90_m": 5.69,
+    "dosel_alto": true
    },
    "L0079": {
     "n_disparos": 23,
     "altura_mediana_m": 7.41,
-    "altura_p90_m": 8.44
+    "altura_p90_m": 8.44,
+    "dosel_alto": true
    },
    "L0080": {
     "n_disparos": 13,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 2.82
+    "altura_p90_m": 2.82,
+    "dosel_alto": false
    },
    "L0081": {
     "n_disparos": 12,
     "altura_mediana_m": 8.57,
-    "altura_p90_m": 9.91
+    "altura_p90_m": 9.91,
+    "dosel_alto": true
    },
    "L0082": {
     "n_disparos": 38,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 3.24
+    "altura_p90_m": 3.24,
+    "dosel_alto": false
    },
    "L0083": {
     "n_disparos": 9,
     "altura_mediana_m": 2.39,
-    "altura_p90_m": 3.11
+    "altura_p90_m": 3.11,
+    "dosel_alto": false
    },
    "L0084": {
     "n_disparos": 35,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 3.53
+    "altura_p90_m": 3.53,
+    "dosel_alto": false
    },
    "L0085": {
     "n_disparos": 28,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 3.56
+    "altura_p90_m": 3.56,
+    "dosel_alto": false
    },
    "L0086": {
     "n_disparos": 1,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.54
+    "altura_p90_m": 2.54,
+    "dosel_alto": null
    },
    "L0087": {
     "n_disparos": 19,
     "altura_mediana_m": 10.03,
-    "altura_p90_m": 12.76
+    "altura_p90_m": 12.76,
+    "dosel_alto": true
    },
    "L0088": {
     "n_disparos": 9,
     "altura_mediana_m": 2.5,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": false
    },
    "L0089": {
     "n_disparos": 51,
     "altura_mediana_m": 3.93,
-    "altura_p90_m": 5.79
+    "altura_p90_m": 5.79,
+    "dosel_alto": true
    },
    "L0090": {
     "n_disparos": 46,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": false
    },
    "L0091": {
     "n_disparos": 31,
     "altura_mediana_m": 6.96,
-    "altura_p90_m": 12.89
+    "altura_p90_m": 12.89,
+    "dosel_alto": true
    },
    "L0092": {
     "n_disparos": 16,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.86
+    "altura_p90_m": 2.86,
+    "dosel_alto": false
    },
    "L0093": {
     "n_disparos": 51,
     "altura_mediana_m": 2.57,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "L0094": {
     "n_disparos": 1,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 2.95
+    "altura_p90_m": 2.95,
+    "dosel_alto": null
    },
    "L0095": {
     "n_disparos": 56,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 3.45
+    "altura_p90_m": 3.45,
+    "dosel_alto": false
    },
    "L0096": {
     "n_disparos": 15,
     "altura_mediana_m": 6.78,
-    "altura_p90_m": 8.97
+    "altura_p90_m": 8.97,
+    "dosel_alto": true
    },
    "L0097": {
     "n_disparos": 23,
     "altura_mediana_m": 2.68,
-    "altura_p90_m": 3.41
+    "altura_p90_m": 3.41,
+    "dosel_alto": false
    },
    "L0098": {
     "n_disparos": 32,
     "altura_mediana_m": 3.01,
-    "altura_p90_m": 3.31
+    "altura_p90_m": 3.31,
+    "dosel_alto": false
    },
    "L0099": {
     "n_disparos": 81,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.59
+    "altura_p90_m": 3.59,
+    "dosel_alto": false
    },
    "L0100": {
     "n_disparos": 34,
     "altura_mediana_m": 2.51,
-    "altura_p90_m": 3.2
+    "altura_p90_m": 3.2,
+    "dosel_alto": false
    },
    "L0101": {
     "n_disparos": 8,
     "altura_mediana_m": 10.34,
-    "altura_p90_m": 12.62
+    "altura_p90_m": 12.62,
+    "dosel_alto": true
    },
    "L0102": {
     "n_disparos": 50,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": false
    },
    "L0103": {
     "n_disparos": 2,
     "altura_mediana_m": 2.49,
-    "altura_p90_m": 2.53
+    "altura_p90_m": 2.53,
+    "dosel_alto": null
    },
    "L0104": {
     "n_disparos": 5,
     "altura_mediana_m": 3.31,
-    "altura_p90_m": 3.47
+    "altura_p90_m": 3.47,
+    "dosel_alto": false
    },
    "L0105": {
     "n_disparos": 33,
     "altura_mediana_m": 11.28,
-    "altura_p90_m": 12.21
+    "altura_p90_m": 12.21,
+    "dosel_alto": true
    },
    "L0106": {
     "n_disparos": 24,
     "altura_mediana_m": 2.63,
-    "altura_p90_m": 3.28
+    "altura_p90_m": 3.28,
+    "dosel_alto": false
    },
    "L0107": {
     "n_disparos": 1,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 2.87
+    "altura_p90_m": 2.87,
+    "dosel_alto": null
    },
    "L0108": {
     "n_disparos": 11,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.47
+    "altura_p90_m": 3.47,
+    "dosel_alto": false
    },
    "L0109": {
     "n_disparos": 76,
     "altura_mediana_m": 2.74,
-    "altura_p90_m": 3.38
+    "altura_p90_m": 3.38,
+    "dosel_alto": false
    },
    "L0110": {
     "n_disparos": 43,
     "altura_mediana_m": 4.29,
-    "altura_p90_m": 6.05
+    "altura_p90_m": 6.05,
+    "dosel_alto": true
    },
    "L0111": {
     "n_disparos": 58,
     "altura_mediana_m": 2.97,
-    "altura_p90_m": 3.36
+    "altura_p90_m": 3.36,
+    "dosel_alto": false
    },
    "L0112": {
     "n_disparos": 1,
     "altura_mediana_m": 2.98,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": null
    },
    "L0113": {
     "n_disparos": 101,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.51
+    "altura_p90_m": 3.51,
+    "dosel_alto": false
    },
    "L0114": {
     "n_disparos": 12,
     "altura_mediana_m": 2.99,
-    "altura_p90_m": 3.21
+    "altura_p90_m": 3.21,
+    "dosel_alto": false
    },
    "L0115": {
     "n_disparos": 13,
     "altura_mediana_m": 2.51,
-    "altura_p90_m": 6.04
+    "altura_p90_m": 6.04,
+    "dosel_alto": true
    },
    "L0116": {
     "n_disparos": 4,
     "altura_mediana_m": 3.04,
-    "altura_p90_m": 3.09
+    "altura_p90_m": 3.09,
+    "dosel_alto": false
    },
    "L0117": {
     "n_disparos": 5,
     "altura_mediana_m": 2.51,
-    "altura_p90_m": 2.53
+    "altura_p90_m": 2.53,
+    "dosel_alto": false
    },
    "L0118": {
     "n_disparos": 18,
     "altura_mediana_m": 3.08,
-    "altura_p90_m": 3.69
+    "altura_p90_m": 3.69,
+    "dosel_alto": false
    },
    "L0120": {
     "n_disparos": 11,
     "altura_mediana_m": 3.13,
-    "altura_p90_m": 3.47
+    "altura_p90_m": 3.47,
+    "dosel_alto": false
    },
    "L0121": {
     "n_disparos": 3,
     "altura_mediana_m": 4.18,
-    "altura_p90_m": 4.39
+    "altura_p90_m": 4.39,
+    "dosel_alto": false
    },
    "L0122": {
     "n_disparos": 6,
     "altura_mediana_m": 2.45,
-    "altura_p90_m": 2.49
+    "altura_p90_m": 2.49,
+    "dosel_alto": false
    },
    "L0124": {
     "n_disparos": 1,
     "altura_mediana_m": 2.58,
-    "altura_p90_m": 2.58
+    "altura_p90_m": 2.58,
+    "dosel_alto": null
    },
    "L0125": {
     "n_disparos": 2,
     "altura_mediana_m": 2.85,
-    "altura_p90_m": 2.87
+    "altura_p90_m": 2.87,
+    "dosel_alto": null
    },
    "L0127": {
     "n_disparos": 8,
     "altura_mediana_m": 3.13,
-    "altura_p90_m": 3.49
+    "altura_p90_m": 3.49,
+    "dosel_alto": false
    },
    "L0128": {
     "n_disparos": 2,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": null
    },
    "L0129": {
     "n_disparos": 5,
     "altura_mediana_m": 2.51,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": false
    },
    "L0131": {
     "n_disparos": 1,
     "altura_mediana_m": 4.49,
-    "altura_p90_m": 4.49
+    "altura_p90_m": 4.49,
+    "dosel_alto": null
    },
    "L0132": {
     "n_disparos": 3,
     "altura_mediana_m": 3.13,
-    "altura_p90_m": 3.52
+    "altura_p90_m": 3.52,
+    "dosel_alto": false
    },
    "L0133": {
     "n_disparos": 5,
     "altura_mediana_m": 3.28,
-    "altura_p90_m": 3.39
+    "altura_p90_m": 3.39,
+    "dosel_alto": false
    },
    "L0134": {
     "n_disparos": 3,
     "altura_mediana_m": 3.25,
-    "altura_p90_m": 3.58
+    "altura_p90_m": 3.58,
+    "dosel_alto": false
    },
    "L0135": {
     "n_disparos": 16,
     "altura_mediana_m": 3.42,
-    "altura_p90_m": 5.97
+    "altura_p90_m": 5.97,
+    "dosel_alto": true
    },
    "L0136": {
     "n_disparos": 14,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 3.39
+    "altura_p90_m": 3.39,
+    "dosel_alto": false
    },
    "L0137": {
     "n_disparos": 30,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 3.51
+    "altura_p90_m": 3.51,
+    "dosel_alto": false
    },
    "L0138": {
     "n_disparos": 25,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 3.14
+    "altura_p90_m": 3.14,
+    "dosel_alto": false
    },
    "L0139": {
     "n_disparos": 4,
     "altura_mediana_m": 7.98,
-    "altura_p90_m": 8.26
+    "altura_p90_m": 8.26,
+    "dosel_alto": true
    },
    "L0140": {
     "n_disparos": 1,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.47
+    "altura_p90_m": 2.47,
+    "dosel_alto": null
    },
    "L0141": {
     "n_disparos": 18,
     "altura_mediana_m": 2.59,
-    "altura_p90_m": 2.71
+    "altura_p90_m": 2.71,
+    "dosel_alto": false
    },
    "L0142": {
     "n_disparos": 11,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.4
+    "altura_p90_m": 3.4,
+    "dosel_alto": false
    },
    "L0144": {
     "n_disparos": 53,
     "altura_mediana_m": 3.13,
-    "altura_p90_m": 3.49
+    "altura_p90_m": 3.49,
+    "dosel_alto": false
    },
    "L0145": {
     "n_disparos": 38,
     "altura_mediana_m": 3.04,
-    "altura_p90_m": 3.55
+    "altura_p90_m": 3.55,
+    "dosel_alto": false
    },
    "L0146": {
     "n_disparos": 1,
     "altura_mediana_m": 2.43,
-    "altura_p90_m": 2.43
+    "altura_p90_m": 2.43,
+    "dosel_alto": null
    },
    "L0147": {
     "n_disparos": 15,
     "altura_mediana_m": 3.16,
-    "altura_p90_m": 3.73
+    "altura_p90_m": 3.73,
+    "dosel_alto": false
    },
    "L0148": {
     "n_disparos": 104,
     "altura_mediana_m": 2.98,
-    "altura_p90_m": 3.36
+    "altura_p90_m": 3.36,
+    "dosel_alto": false
    },
    "L0149": {
     "n_disparos": 26,
     "altura_mediana_m": 2.47,
-    "altura_p90_m": 2.69
+    "altura_p90_m": 2.69,
+    "dosel_alto": false
    },
    "L0150": {
     "n_disparos": 1,
     "altura_mediana_m": 2.98,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": null
    },
    "L0151": {
     "n_disparos": 16,
     "altura_mediana_m": 3.07,
-    "altura_p90_m": 3.57
+    "altura_p90_m": 3.57,
+    "dosel_alto": false
    },
    "L0152": {
     "n_disparos": 5,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 4.21
+    "altura_p90_m": 4.21,
+    "dosel_alto": false
    },
    "L0153": {
     "n_disparos": 24,
     "altura_mediana_m": 3.03,
-    "altura_p90_m": 3.42
+    "altura_p90_m": 3.42,
+    "dosel_alto": false
    },
    "L0154": {
     "n_disparos": 5,
     "altura_mediana_m": 12.25,
-    "altura_p90_m": 13.02
+    "altura_p90_m": 13.02,
+    "dosel_alto": true
    },
    "L0155": {
     "n_disparos": 11,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 3.06
+    "altura_p90_m": 3.06,
+    "dosel_alto": false
    },
    "L0156": {
     "n_disparos": 57,
     "altura_mediana_m": 9.04,
-    "altura_p90_m": 15.28
+    "altura_p90_m": 15.28,
+    "dosel_alto": true
    },
    "L0157": {
     "n_disparos": 14,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.05
+    "altura_p90_m": 3.05,
+    "dosel_alto": false
    },
    "L0158": {
     "n_disparos": 18,
     "altura_mediana_m": 3.4,
-    "altura_p90_m": 3.75
+    "altura_p90_m": 3.75,
+    "dosel_alto": false
    },
    "L0159": {
     "n_disparos": 37,
     "altura_mediana_m": 3.13,
-    "altura_p90_m": 3.47
+    "altura_p90_m": 3.47,
+    "dosel_alto": false
    },
    "L0160": {
     "n_disparos": 5,
     "altura_mediana_m": 3.35,
-    "altura_p90_m": 3.42
+    "altura_p90_m": 3.42,
+    "dosel_alto": false
    },
    "L0161": {
     "n_disparos": 25,
     "altura_mediana_m": 9.68,
-    "altura_p90_m": 10.86
+    "altura_p90_m": 10.86,
+    "dosel_alto": true
    },
    "L0162": {
     "n_disparos": 38,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 3.32
+    "altura_p90_m": 3.32,
+    "dosel_alto": false
    },
    "L0163": {
     "n_disparos": 8,
     "altura_mediana_m": 2.73,
-    "altura_p90_m": 3.7
+    "altura_p90_m": 3.7,
+    "dosel_alto": false
    },
    "L0164": {
     "n_disparos": 53,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 3.43
+    "altura_p90_m": 3.43,
+    "dosel_alto": false
    },
    "L0165": {
     "n_disparos": 10,
     "altura_mediana_m": 9.8,
-    "altura_p90_m": 10.26
+    "altura_p90_m": 10.26,
+    "dosel_alto": true
    },
    "L0166": {
     "n_disparos": 12,
     "altura_mediana_m": 3.22,
-    "altura_p90_m": 3.61
+    "altura_p90_m": 3.61,
+    "dosel_alto": false
    },
    "L0167": {
     "n_disparos": 29,
     "altura_mediana_m": 7.21,
-    "altura_p90_m": 9.32
+    "altura_p90_m": 9.32,
+    "dosel_alto": true
    },
    "L0168": {
     "n_disparos": 6,
     "altura_mediana_m": 3.28,
-    "altura_p90_m": 3.92
+    "altura_p90_m": 3.92,
+    "dosel_alto": false
    },
    "L0169": {
     "n_disparos": 52,
     "altura_mediana_m": 3.31,
-    "altura_p90_m": 12.62
+    "altura_p90_m": 12.62,
+    "dosel_alto": true
    },
    "L0170": {
     "n_disparos": 5,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.73
+    "altura_p90_m": 2.73,
+    "dosel_alto": false
    },
    "L0171": {
     "n_disparos": 29,
     "altura_mediana_m": 3.09,
-    "altura_p90_m": 3.38
+    "altura_p90_m": 3.38,
+    "dosel_alto": false
    },
    "L0172": {
     "n_disparos": 34,
     "altura_mediana_m": 10.57,
-    "altura_p90_m": 13.78
+    "altura_p90_m": 13.78,
+    "dosel_alto": true
    },
    "L0173": {
     "n_disparos": 63,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 3.36
+    "altura_p90_m": 3.36,
+    "dosel_alto": false
    },
    "L0174": {
     "n_disparos": 5,
     "altura_mediana_m": 13.44,
-    "altura_p90_m": 13.77
+    "altura_p90_m": 13.77,
+    "dosel_alto": true
    },
    "L0175": {
     "n_disparos": 3,
     "altura_mediana_m": 13.57,
-    "altura_p90_m": 13.81
+    "altura_p90_m": 13.81,
+    "dosel_alto": true
    },
    "L0176": {
     "n_disparos": 1,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": null
    },
    "L0177": {
     "n_disparos": 14,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 2.97
+    "altura_p90_m": 2.97,
+    "dosel_alto": false
    },
    "L0178": {
     "n_disparos": 27,
     "altura_mediana_m": 3.05,
-    "altura_p90_m": 10.83
+    "altura_p90_m": 10.83,
+    "dosel_alto": true
    },
    "L0179": {
     "n_disparos": 19,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 5.15
+    "altura_p90_m": 5.15,
+    "dosel_alto": true
    },
    "L0180": {
     "n_disparos": 8,
     "altura_mediana_m": 5.37,
-    "altura_p90_m": 5.97
+    "altura_p90_m": 5.97,
+    "dosel_alto": true
    },
    "L0181": {
     "n_disparos": 10,
     "altura_mediana_m": 3.23,
-    "altura_p90_m": 8.76
+    "altura_p90_m": 8.76,
+    "dosel_alto": true
    },
    "L0182": {
     "n_disparos": 17,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 3.33
+    "altura_p90_m": 3.33,
+    "dosel_alto": false
    },
    "L0183": {
     "n_disparos": 24,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 2.86
+    "altura_p90_m": 2.86,
+    "dosel_alto": false
    },
    "L0184": {
     "n_disparos": 14,
     "altura_mediana_m": 5.35,
-    "altura_p90_m": 14.25
+    "altura_p90_m": 14.25,
+    "dosel_alto": true
    },
    "L0185": {
     "n_disparos": 5,
     "altura_mediana_m": 13.41,
-    "altura_p90_m": 13.82
+    "altura_p90_m": 13.82,
+    "dosel_alto": true
    },
    "L0186": {
     "n_disparos": 6,
     "altura_mediana_m": 2.92,
-    "altura_p90_m": 3.33
+    "altura_p90_m": 3.33,
+    "dosel_alto": false
    },
    "L0187": {
     "n_disparos": 13,
     "altura_mediana_m": 7.39,
-    "altura_p90_m": 8.81
+    "altura_p90_m": 8.81,
+    "dosel_alto": true
    },
    "L0188": {
     "n_disparos": 232,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 3.66
+    "altura_p90_m": 3.66,
+    "dosel_alto": false
    },
    "L0189": {
     "n_disparos": 18,
     "altura_mediana_m": 2.81,
-    "altura_p90_m": 3.78
+    "altura_p90_m": 3.78,
+    "dosel_alto": false
    },
    "L0190": {
     "n_disparos": 4,
     "altura_mediana_m": 2.74,
-    "altura_p90_m": 2.89
+    "altura_p90_m": 2.89,
+    "dosel_alto": false
    },
    "L0191": {
     "n_disparos": 7,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 3.08
+    "altura_p90_m": 3.08,
+    "dosel_alto": false
    },
    "L0192": {
     "n_disparos": 6,
     "altura_mediana_m": 3.16,
-    "altura_p90_m": 3.27
+    "altura_p90_m": 3.27,
+    "dosel_alto": false
    },
    "L0193": {
     "n_disparos": 9,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 6.95
+    "altura_p90_m": 6.95,
+    "dosel_alto": true
    },
    "L0194": {
     "n_disparos": 2,
     "altura_mediana_m": 3.36,
-    "altura_p90_m": 3.69
+    "altura_p90_m": 3.69,
+    "dosel_alto": null
    },
    "L0195": {
     "n_disparos": 9,
     "altura_mediana_m": 3.1,
-    "altura_p90_m": 3.77
+    "altura_p90_m": 3.77,
+    "dosel_alto": false
    },
    "L0196": {
     "n_disparos": 6,
     "altura_mediana_m": 2.67,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": false
    },
    "L0197": {
     "n_disparos": 12,
     "altura_mediana_m": 3.22,
-    "altura_p90_m": 3.54
+    "altura_p90_m": 3.54,
+    "dosel_alto": false
    },
    "L0198": {
     "n_disparos": 6,
     "altura_mediana_m": 2.94,
-    "altura_p90_m": 3.37
+    "altura_p90_m": 3.37,
+    "dosel_alto": false
    },
    "L0199": {
     "n_disparos": 5,
     "altura_mediana_m": 3.24,
-    "altura_p90_m": 3.34
+    "altura_p90_m": 3.34,
+    "dosel_alto": false
    },
    "L0200": {
     "n_disparos": 1,
     "altura_mediana_m": 23.41,
-    "altura_p90_m": 23.41
+    "altura_p90_m": 23.41,
+    "dosel_alto": null
    },
    "L0202": {
     "n_disparos": 13,
     "altura_mediana_m": 2.68,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "L0203": {
     "n_disparos": 17,
     "altura_mediana_m": 3.24,
-    "altura_p90_m": 3.71
+    "altura_p90_m": 3.71,
+    "dosel_alto": false
    },
    "L0205": {
     "n_disparos": 17,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.96
+    "altura_p90_m": 2.96,
+    "dosel_alto": false
    },
    "L0206": {
     "n_disparos": 6,
     "altura_mediana_m": 7.53,
-    "altura_p90_m": 10.57
+    "altura_p90_m": 10.57,
+    "dosel_alto": true
    },
    "L0207": {
     "n_disparos": 8,
     "altura_mediana_m": 3.54,
-    "altura_p90_m": 5.44
+    "altura_p90_m": 5.44,
+    "dosel_alto": true
    },
    "L0208": {
     "n_disparos": 15,
     "altura_mediana_m": 9.41,
-    "altura_p90_m": 14.04
+    "altura_p90_m": 14.04,
+    "dosel_alto": true
    },
    "L0209": {
     "n_disparos": 9,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.49
+    "altura_p90_m": 3.49,
+    "dosel_alto": false
    },
    "L0210": {
     "n_disparos": 7,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 11.73
+    "altura_p90_m": 11.73,
+    "dosel_alto": true
    },
    "L0211": {
     "n_disparos": 9,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 2.92
+    "altura_p90_m": 2.92,
+    "dosel_alto": false
    },
    "L0213": {
     "n_disparos": 1,
     "altura_mediana_m": 3.27,
-    "altura_p90_m": 3.27
+    "altura_p90_m": 3.27,
+    "dosel_alto": null
    },
    "L0214": {
     "n_disparos": 11,
     "altura_mediana_m": 3.16,
-    "altura_p90_m": 3.46
+    "altura_p90_m": 3.46,
+    "dosel_alto": false
    },
    "L0215": {
     "n_disparos": 9,
     "altura_mediana_m": 3.25,
-    "altura_p90_m": 3.97
+    "altura_p90_m": 3.97,
+    "dosel_alto": false
    },
    "L0216": {
     "n_disparos": 8,
     "altura_mediana_m": 3.12,
-    "altura_p90_m": 3.28
+    "altura_p90_m": 3.28,
+    "dosel_alto": false
    },
    "L0217": {
     "n_disparos": 1,
     "altura_mediana_m": 2.79,
-    "altura_p90_m": 2.79
+    "altura_p90_m": 2.79,
+    "dosel_alto": null
    },
    "L0219": {
     "n_disparos": 33,
     "altura_mediana_m": 11.17,
-    "altura_p90_m": 15.76
+    "altura_p90_m": 15.76,
+    "dosel_alto": true
    },
    "L0221": {
     "n_disparos": 6,
     "altura_mediana_m": 2.96,
-    "altura_p90_m": 3.6
+    "altura_p90_m": 3.6,
+    "dosel_alto": false
    },
    "L0222": {
     "n_disparos": 1,
     "altura_mediana_m": 4.29,
-    "altura_p90_m": 4.29
+    "altura_p90_m": 4.29,
+    "dosel_alto": null
    },
    "L0223": {
     "n_disparos": 2,
     "altura_mediana_m": 2.67,
-    "altura_p90_m": 2.68
+    "altura_p90_m": 2.68,
+    "dosel_alto": null
    },
    "L0224": {
     "n_disparos": 7,
     "altura_mediana_m": 13.11,
-    "altura_p90_m": 13.64
+    "altura_p90_m": 13.64,
+    "dosel_alto": true
    },
    "L0225": {
     "n_disparos": 5,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.76
+    "altura_p90_m": 2.76,
+    "dosel_alto": false
    },
    "L0226": {
     "n_disparos": 9,
     "altura_mediana_m": 3.06,
-    "altura_p90_m": 3.25
+    "altura_p90_m": 3.25,
+    "dosel_alto": false
    },
    "L0227": {
     "n_disparos": 17,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 3.22
+    "altura_p90_m": 3.22,
+    "dosel_alto": false
    },
    "L0228": {
     "n_disparos": 6,
     "altura_mediana_m": 2.65,
-    "altura_p90_m": 8.86
+    "altura_p90_m": 8.86,
+    "dosel_alto": true
    },
    "L0229": {
     "n_disparos": 1,
     "altura_mediana_m": 2.98,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": null
    },
    "L0230": {
     "n_disparos": 5,
     "altura_mediana_m": 3.13,
-    "altura_p90_m": 3.28
+    "altura_p90_m": 3.28,
+    "dosel_alto": false
    },
    "L0231": {
     "n_disparos": 9,
     "altura_mediana_m": 11.62,
-    "altura_p90_m": 13.17
+    "altura_p90_m": 13.17,
+    "dosel_alto": true
    },
    "L0232": {
     "n_disparos": 3,
     "altura_mediana_m": 3.47,
-    "altura_p90_m": 3.53
+    "altura_p90_m": 3.53,
+    "dosel_alto": false
    },
    "L0233": {
     "n_disparos": 2,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 2.94
+    "altura_p90_m": 2.94,
+    "dosel_alto": null
    },
    "L0235": {
     "n_disparos": 37,
     "altura_mediana_m": 2.98,
-    "altura_p90_m": 14.28
+    "altura_p90_m": 14.28,
+    "dosel_alto": true
    },
    "L0236": {
     "n_disparos": 14,
     "altura_mediana_m": 7.89,
-    "altura_p90_m": 9.61
+    "altura_p90_m": 9.61,
+    "dosel_alto": true
    },
    "L0237": {
     "n_disparos": 22,
     "altura_mediana_m": 3.09,
-    "altura_p90_m": 3.45
+    "altura_p90_m": 3.45,
+    "dosel_alto": false
    },
    "L0238": {
     "n_disparos": 3,
     "altura_mediana_m": 2.95,
-    "altura_p90_m": 3.19
+    "altura_p90_m": 3.19,
+    "dosel_alto": false
    },
    "L0239": {
     "n_disparos": 8,
     "altura_mediana_m": 3.5,
-    "altura_p90_m": 3.79
+    "altura_p90_m": 3.79,
+    "dosel_alto": false
    },
    "L0240": {
     "n_disparos": 5,
     "altura_mediana_m": 2.8,
-    "altura_p90_m": 4.13
+    "altura_p90_m": 4.13,
+    "dosel_alto": false
    },
    "L0241": {
     "n_disparos": 6,
     "altura_mediana_m": 3.42,
-    "altura_p90_m": 3.61
+    "altura_p90_m": 3.61,
+    "dosel_alto": false
    },
    "L0242": {
     "n_disparos": 6,
     "altura_mediana_m": 2.93,
-    "altura_p90_m": 3.8
+    "altura_p90_m": 3.8,
+    "dosel_alto": false
    },
    "L0243": {
     "n_disparos": 23,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.93
+    "altura_p90_m": 2.93,
+    "dosel_alto": false
    },
    "L0244": {
     "n_disparos": 4,
     "altura_mediana_m": 9.68,
-    "altura_p90_m": 14.78
+    "altura_p90_m": 14.78,
+    "dosel_alto": true
    },
    "L0245": {
     "n_disparos": 2,
     "altura_mediana_m": 2.56,
-    "altura_p90_m": 2.58
+    "altura_p90_m": 2.58,
+    "dosel_alto": null
    },
    "L0246": {
     "n_disparos": 7,
     "altura_mediana_m": 3.35,
-    "altura_p90_m": 4.04
+    "altura_p90_m": 4.04,
+    "dosel_alto": false
    },
    "L0247": {
     "n_disparos": 7,
     "altura_mediana_m": 2.91,
-    "altura_p90_m": 3.72
+    "altura_p90_m": 3.72,
+    "dosel_alto": false
    },
    "L0249": {
     "n_disparos": 2,
     "altura_mediana_m": 3.37,
-    "altura_p90_m": 3.43
+    "altura_p90_m": 3.43,
+    "dosel_alto": null
    },
    "L0252": {
     "n_disparos": 20,
     "altura_mediana_m": 2.72,
-    "altura_p90_m": 3.2
+    "altura_p90_m": 3.2,
+    "dosel_alto": false
    },
    "L0253": {
     "n_disparos": 3,
     "altura_mediana_m": 3.64,
-    "altura_p90_m": 4.24
+    "altura_p90_m": 4.24,
+    "dosel_alto": false
    },
    "L0254": {
     "n_disparos": 10,
     "altura_mediana_m": 12.06,
-    "altura_p90_m": 15.01
+    "altura_p90_m": 15.01,
+    "dosel_alto": true
    },
    "L0255": {
     "n_disparos": 1,
     "altura_mediana_m": 2.61,
-    "altura_p90_m": 2.61
+    "altura_p90_m": 2.61,
+    "dosel_alto": null
    },
    "L0256": {
     "n_disparos": 11,
     "altura_mediana_m": 5.52,
-    "altura_p90_m": 6.35
+    "altura_p90_m": 6.35,
+    "dosel_alto": true
    },
    "L0257": {
     "n_disparos": 5,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.83
+    "altura_p90_m": 2.83,
+    "dosel_alto": false
    },
    "L0258": {
     "n_disparos": 6,
     "altura_mediana_m": 3.24,
-    "altura_p90_m": 3.5
+    "altura_p90_m": 3.5,
+    "dosel_alto": false
    },
    "L0259": {
     "n_disparos": 7,
     "altura_mediana_m": 2.86,
-    "altura_p90_m": 3.01
+    "altura_p90_m": 3.01,
+    "dosel_alto": false
    },
    "L0260": {
     "n_disparos": 6,
     "altura_mediana_m": 2.97,
-    "altura_p90_m": 3.23
+    "altura_p90_m": 3.23,
+    "dosel_alto": false
    },
    "L0261": {
     "n_disparos": 9,
     "altura_mediana_m": 3.17,
-    "altura_p90_m": 4.22
+    "altura_p90_m": 4.22,
+    "dosel_alto": false
    },
    "L0262": {
     "n_disparos": 6,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 3.02
+    "altura_p90_m": 3.02,
+    "dosel_alto": false
    },
    "L0263": {
     "n_disparos": 33,
     "altura_mediana_m": 3.02,
-    "altura_p90_m": 4.46
+    "altura_p90_m": 4.46,
+    "dosel_alto": false
    },
    "L0264": {
     "n_disparos": 45,
     "altura_mediana_m": 2.79,
-    "altura_p90_m": 3.4
+    "altura_p90_m": 3.4,
+    "dosel_alto": false
    },
    "L0265": {
     "n_disparos": 16,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": false
    },
    "L0267": {
     "n_disparos": 1,
     "altura_mediana_m": 3.28,
-    "altura_p90_m": 3.28
+    "altura_p90_m": 3.28,
+    "dosel_alto": null
    },
    "L0269": {
     "n_disparos": 9,
     "altura_mediana_m": 2.88,
-    "altura_p90_m": 3.01
+    "altura_p90_m": 3.01,
+    "dosel_alto": false
    },
    "L0270": {
     "n_disparos": 8,
     "altura_mediana_m": 3.14,
-    "altura_p90_m": 3.3
+    "altura_p90_m": 3.3,
+    "dosel_alto": false
    },
    "L0271": {
     "n_disparos": 10,
     "altura_mediana_m": 2.96,
-    "altura_p90_m": 3.32
+    "altura_p90_m": 3.32,
+    "dosel_alto": false
    },
    "L0272": {
     "n_disparos": 5,
     "altura_mediana_m": 2.69,
-    "altura_p90_m": 3.22
+    "altura_p90_m": 3.22,
+    "dosel_alto": false
    },
    "L0273": {
     "n_disparos": 9,
     "altura_mediana_m": 3.13,
-    "altura_p90_m": 3.55
+    "altura_p90_m": 3.55,
+    "dosel_alto": false
    },
    "L0275": {
     "n_disparos": 5,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 3.46
+    "altura_p90_m": 3.46,
+    "dosel_alto": false
    },
    "L0276": {
     "n_disparos": 8,
     "altura_mediana_m": 3.24,
-    "altura_p90_m": 3.37
+    "altura_p90_m": 3.37,
+    "dosel_alto": false
    },
    "L0277": {
     "n_disparos": 2,
     "altura_mediana_m": 3.1,
-    "altura_p90_m": 3.25
+    "altura_p90_m": 3.25,
+    "dosel_alto": null
    },
    "L0278": {
     "n_disparos": 2,
     "altura_mediana_m": 6.94,
-    "altura_p90_m": 10.38
+    "altura_p90_m": 10.38,
+    "dosel_alto": null
    },
    "L0279": {
     "n_disparos": 2,
     "altura_mediana_m": 2.77,
-    "altura_p90_m": 2.84
+    "altura_p90_m": 2.84,
+    "dosel_alto": null
    },
    "L0280": {
     "n_disparos": 7,
     "altura_mediana_m": 2.87,
-    "altura_p90_m": 3.85
+    "altura_p90_m": 3.85,
+    "dosel_alto": false
    },
    "L0281": {
     "n_disparos": 9,
     "altura_mediana_m": 3.29,
-    "altura_p90_m": 3.76
+    "altura_p90_m": 3.76,
+    "dosel_alto": false
    },
    "L0282": {
     "n_disparos": 8,
     "altura_mediana_m": 3.22,
-    "altura_p90_m": 3.69
+    "altura_p90_m": 3.69,
+    "dosel_alto": false
    },
    "L0283": {
     "n_disparos": 12,
     "altura_mediana_m": 2.94,
-    "altura_p90_m": 3.19
+    "altura_p90_m": 3.19,
+    "dosel_alto": false
    },
    "L0284": {
     "n_disparos": 22,
     "altura_mediana_m": 2.93,
-    "altura_p90_m": 3.53
+    "altura_p90_m": 3.53,
+    "dosel_alto": false
    },
    "L0285": {
     "n_disparos": 28,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 4.43
+    "altura_p90_m": 4.43,
+    "dosel_alto": false
    },
    "L0286": {
     "n_disparos": 6,
     "altura_mediana_m": 3.02,
-    "altura_p90_m": 3.57
+    "altura_p90_m": 3.57,
+    "dosel_alto": false
    },
    "L0287": {
     "n_disparos": 1,
     "altura_mediana_m": 12.06,
-    "altura_p90_m": 12.06
+    "altura_p90_m": 12.06,
+    "dosel_alto": null
    },
    "L0288": {
     "n_disparos": 3,
     "altura_mediana_m": 2.76,
-    "altura_p90_m": 2.85
+    "altura_p90_m": 2.85,
+    "dosel_alto": false
    },
    "L0289": {
     "n_disparos": 40,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 4.11
+    "altura_p90_m": 4.11,
+    "dosel_alto": false
    },
    "L0290": {
     "n_disparos": 7,
     "altura_mediana_m": 2.84,
-    "altura_p90_m": 7.19
+    "altura_p90_m": 7.19,
+    "dosel_alto": true
    },
    "L0291": {
     "n_disparos": 1,
     "altura_mediana_m": 2.98,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": null
    },
    "L0292": {
     "n_disparos": 4,
     "altura_mediana_m": 2.83,
-    "altura_p90_m": 2.91
+    "altura_p90_m": 2.91,
+    "dosel_alto": false
    },
    "L0293": {
     "n_disparos": 2,
     "altura_mediana_m": 2.93,
-    "altura_p90_m": 2.98
+    "altura_p90_m": 2.98,
+    "dosel_alto": null
    },
    "L0294": {
     "n_disparos": 5,
     "altura_mediana_m": 3.13,
-    "altura_p90_m": 3.38
+    "altura_p90_m": 3.38,
+    "dosel_alto": false
    },
    "L0295": {
     "n_disparos": 3,
     "altura_mediana_m": 3.21,
-    "altura_p90_m": 3.55
+    "altura_p90_m": 3.55,
+    "dosel_alto": false
    },
    "L0296": {
     "n_disparos": 4,
     "altura_mediana_m": 3.39,
-    "altura_p90_m": 3.83
+    "altura_p90_m": 3.83,
+    "dosel_alto": false
    },
    "L0297": {
     "n_disparos": 2,
     "altura_mediana_m": 2.89,
-    "altura_p90_m": 3.03
+    "altura_p90_m": 3.03,
+    "dosel_alto": null
    },
    "L0298": {
     "n_disparos": 4,
     "altura_mediana_m": 3.02,
-    "altura_p90_m": 3.1
+    "altura_p90_m": 3.1,
+    "dosel_alto": false
    },
    "L0299": {
     "n_disparos": 2,
     "altura_mediana_m": 2.54,
-    "altura_p90_m": 2.57
+    "altura_p90_m": 2.57,
+    "dosel_alto": null
    }
   },
   "n_con_dato": 1072,
@@ -23992,7 +25064,27 @@
    "minimo_m": 2.3,
    "mediana_m": 2.76,
    "maximo_m": 23.41
-  }
+  },
+  "criterios": {
+   "archivo": "supuestos.json",
+   "fecha": "2026-11-14",
+   "piso_instrumento": {
+    "valor_m": 2.7,
+    "min_m": 2.5,
+    "max_m": 3.2,
+    "etiqueta": "own analysis (A11)",
+    "fuente": "Análisis propio (datos/colab/A11_gedi_parcelas.py, 14-nov-2026): percentiles 10 y 90 (valor = mediana) de la mediana de rh98 por parcela en las 261 parcelas con 3 o más disparos que las reglas clasifican como alfalfa, barbecho o cereal de invierno (sin árboles). Por debajo de ese nivel rh98 refleja el ancho del pulso del instrumento, no la altura de la planta"
+   },
+   "dosel_alto": {
+    "umbral_m": 5,
+    "min_disparos": 3,
+    "etiqueta": "own analysis (A11), assumption [S]",
+    "fuente": "Criterio propio (A11, 14-nov-2026): percentil 90 de rh98 de la parcela de 5 m o más. Con ese umbral, 57 de 86 parcelas de nogal con 3 o más disparos muestran dosel alto, frente a 7 de 95 de alfalfa y 0 de 11 de cereal de invierno"
+   }
+  },
+  "n_dosel_alto": 198,
+  "n_sin_dosel_alto": 730,
+  "n_pocos_disparos": 144
  },
  "gedi_motivo": null,
  "ecostress": null,
@@ -24500,7 +25592,7 @@
    "id": "gedi",
    "nombre": "GEDI",
    "organismo": "NASA",
-   "papel": "Evidence per field: canopy height (tells an orchard from a low crop)",
+   "papel": "Evidence per field: laser height reading that tells an orchard from a low crop (not a measured crop height)",
    "aplica": true,
    "estado": "in_use",
    "entregas_presentes": [

@@ -1504,12 +1504,171 @@ def regla_rotaciones(obj, ctx, res, esq):
                     res.motivo("rotación con un cultivo que no está en el objeto «cultivos»", f"{donde}: {c}")
 
 
+def regla_opciones_b3(obj, ctx, res, esq):
+    """opciones_b3.json (B3; docs/decisiones/2026-11-14_opciones_b3.md): opciones y filtros oficiales.
+    Valida la ESTRUCTURA con las listas cerradas de su esquema (motor/esquemas.py):
+    - «fuente» del archivo;
+    - «opciones»: {id de rotación: {letra_maestro de su lista, nombre_en, secuencia [{ciclo OI|PV,
+      cultivo, siembra {desde, hasta} en MM-DD o null}], indicadores true/false/null, advertir_si_rojo,
+      fuente, etiqueta}};
+    - «por_cultivo_actual»: {cultivo del contrato: [ids]}, y cada id es una opción definida;
+    - «filtros»: [{id único, tipo de su lista, aplica_a con opciones definidas, regla, necesita,
+      texto_en, fuente, etiqueta}].
+    Lo que la fuente no dice llega en null y solo se avisa. No comprueba que cada opción tenga lámina en
+    rotaciones.json: eso lo hace el motor (motor/b4_cubo.py la omite con aviso)."""
+    if not isinstance(obj, dict):
+        res.motivo("no es un objeto JSON")
+        return
+    if not _texto_lleno(obj.get("fuente")):
+        res.motivo("falta fuente (documento y sección de donde sale todo)")
+
+    def lista(valores):
+        return ", ".join(map(str, valores))
+
+    # --- opciones ---------------------------------------------------------------------------
+    opciones = obj.get("opciones")
+    if not isinstance(opciones, dict) or not opciones:
+        res.motivo("falta opciones (objeto {id de rotación: opción}) o viene vacío")
+        opciones = {}
+    for oid, o in opciones.items():
+        donde = f"opción {oid}"
+        if not isinstance(o, dict):
+            res.motivo("opción que no es objeto", donde)
+            continue
+        if not en_lista(o.get("letra_maestro"), esq["letras_maestro"]):
+            res.motivo(f"letra_maestro fuera de la lista ({lista(esq['letras_maestro'])})",
+                       f"{donde}: {o.get('letra_maestro')!r}")
+        for campo in ("nombre_en", "fuente", "etiqueta"):
+            if not _texto_lleno(o.get(campo)):
+                res.motivo(f"opción sin {campo}", donde)
+        if o.get("por_que_en") is None:
+            res.aviso(f"{donde}: por_que_en es null (la ficha no dirá por qué se sugiere)")
+        elif not _texto_lleno(o.get("por_que_en")):
+            res.motivo("por_que_en debe ser un texto en inglés o null", donde)
+        if not isinstance(o.get("advertir_si_rojo"), bool):
+            res.motivo("advertir_si_rojo debe ser true o false", donde)
+        # Secuencia: lista (vacía = sin cultivo) de pasos con ciclo, cultivo y fechas de siembra.
+        secuencia = o.get("secuencia")
+        if not isinstance(secuencia, list):
+            res.motivo("secuencia debe ser una lista (vacía si la opción no siembra)", donde)
+            secuencia = []
+        for i, paso in enumerate(secuencia):
+            d_paso = f"{donde}, paso {i + 1}"
+            if not isinstance(paso, dict):
+                res.motivo("secuencia con un paso que no es objeto", d_paso)
+                continue
+            if not en_lista(paso.get("ciclo"), esq["ciclos"]):
+                res.motivo(f"ciclo fuera de la lista ({lista(esq['ciclos'])})", f"{d_paso}: {paso.get('ciclo')!r}")
+            if not _texto_lleno(paso.get("cultivo")):
+                res.motivo("secuencia con un paso sin cultivo", d_paso)
+            siembra = paso.get("siembra")
+            if siembra is None:
+                res.aviso(f"{d_paso}: siembra es null (sin fecha no hay probabilidad de helada)")
+            elif not isinstance(siembra, dict):
+                res.motivo("siembra debe ser un objeto {desde, hasta} o null", d_paso)
+            else:
+                # Una ventana que cruza el año (desde > hasta, p. ej. 11-15 a 01-31) es válida: no se compara.
+                for extremo in ("desde", "hasta"):
+                    v = siembra.get(extremo)
+                    if v is None:
+                        res.aviso(f"{d_paso}: siembra.{extremo} es null")
+                    elif not (isinstance(v, str) and es_mes_dia(v)):
+                        res.motivo(f"siembra.{extremo} no es una fecha MM-DD", f"{d_paso}: {v!r}")
+            if not _texto_lleno(paso.get("fuente")):
+                res.aviso(f"{d_paso}: sin fuente de la fecha de siembra")
+        # Indicadores: las llaves de la lista, cada una true, false o null.
+        ind = o.get("indicadores")
+        if not isinstance(ind, dict):
+            res.motivo("indicadores debe ser un objeto", donde)
+        else:
+            for k in esq["indicadores"]:
+                if k not in ind:
+                    res.motivo(f"indicadores sin la llave {k} (true, false o null)", donde)
+                elif ind[k] is not None and not isinstance(ind[k], bool):
+                    res.motivo(f"indicadores.{k} debe ser true, false o null", f"{donde}: {ind[k]!r}")
+            if any(isinstance(ind.get(k), bool) for k in esq["indicadores"]) and not _texto_lleno(ind.get("fuente")):
+                res.motivo("indicadores sin fuente", donde)
+
+    # --- por_cultivo_actual -------------------------------------------------------------------
+    por_cultivo = obj.get("por_cultivo_actual")
+    if not isinstance(por_cultivo, dict) or not por_cultivo:
+        res.motivo("falta por_cultivo_actual (objeto {cultivo actual: [ids de opción]}) o viene vacío")
+        por_cultivo = {}
+    for cultivo, ids in por_cultivo.items():
+        donde = f"por_cultivo_actual.{cultivo}"
+        if not en_lista(cultivo, esq["cultivos"]):
+            res.motivo(f"por_cultivo_actual: cultivo fuera del contrato ({lista(esq['cultivos'])})", cultivo)
+        if not isinstance(ids, list):
+            res.motivo("por_cultivo_actual: el valor debe ser una lista de ids de opción", donde)
+            continue
+        for oid in ids:
+            if not isinstance(oid, str) or oid not in opciones:
+                res.motivo("por_cultivo_actual nombra una opción que no está definida en «opciones»",
+                           f"{donde}: {oid!r}")
+        if len(set(map(str, ids))) != len(ids):
+            res.motivo("por_cultivo_actual: opción repetida", donde)
+        if len(ids) < esq["alternativas_minimas"]:
+            res.aviso(f"{donde}: trae {len(ids)} alternativas; el contrato del cubo pide ACTUAL + "
+                      f"{esq['alternativas_minimas']} (kit §2.3)")
+    faltan = [c for c in esq["cultivos"] if c not in por_cultivo]
+    if por_cultivo and faltan:
+        res.aviso(f"por_cultivo_actual no lista: {lista(faltan)}; esas parcelas seguirán con el diseño provisional")
+
+    # --- filtros ------------------------------------------------------------------------------
+    filtros = obj.get("filtros")
+    if not isinstance(filtros, list):
+        res.motivo("falta filtros (lista; vacía si no hay ninguno)")
+        return
+    vistos = set()
+    for i, f in enumerate(filtros):
+        if not isinstance(f, dict):
+            res.motivo("filtro que no es objeto", f"posición {i}")
+            continue
+        fid = f.get("id")
+        donde = f"filtro {fid}" if _texto_lleno(fid) else f"filtro en la posición {i}"
+        if not _texto_lleno(fid):
+            res.motivo("filtro sin id", donde)
+        elif fid in vistos:
+            res.motivo("id de filtro repetido", fid)
+        vistos.add(fid)
+        if not en_lista(f.get("tipo"), esq["tipos_filtro"]):
+            res.motivo(f"tipo de filtro fuera de la lista ({lista(esq['tipos_filtro'])})", f"{donde}: {f.get('tipo')!r}")
+        for campo in ("texto_en", "fuente", "etiqueta"):
+            if not _texto_lleno(f.get(campo)):
+                res.motivo(f"filtro sin {campo}", donde)
+        aplica = f.get("aplica_a")
+        if not isinstance(aplica, list) or not aplica:
+            res.motivo("aplica_a debe ser una lista no vacía de ids de opción", donde)
+        else:
+            for oid in aplica:
+                if not isinstance(oid, str) or oid not in opciones:
+                    res.motivo("aplica_a nombra una opción que no está definida en «opciones»", f"{donde}: {oid!r}")
+        necesita = f.get("necesita", [])
+        if not isinstance(necesita, list) or not all(_texto_lleno(n) for n in necesita):
+            res.motivo("necesita debe ser una lista de textos (vacía si no necesita nada)", donde)
+        regla = f.get("regla")
+        if regla is not None and not isinstance(regla, dict):
+            res.motivo("regla debe ser un objeto con sus parámetros o null", donde)
+            regla = None
+        if f.get("tipo") == "helada":
+            llave = esq["umbral_helada"]
+            umbral = (regla or {}).get(llave)
+            if isinstance(umbral, dict):
+                umbral = umbral.get("valor")
+            if llave not in (regla or {}):
+                res.aviso(f"{donde}: sin {llave} en «regla»; la ficha mostrará la probabilidad de helada y no decidirá")
+            elif not es_numero(umbral) or not 0 <= umbral <= 1:
+                res.motivo(f"regla.{llave} debe ser una probabilidad entre 0 y 1 (número o {{valor}})",
+                           f"{donde}: {(regla or {}).get(llave)!r}")
+
+
 REGLAS_JSON = {
     "heladas": regla_heladas,
     "dotaciones": regla_dotaciones,
     "supuestos": regla_supuestos,
     "rotaciones": regla_rotaciones,
     "objeto": regla_objeto,
+    "opciones_b3": regla_opciones_b3,
 }
 
 

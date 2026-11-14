@@ -14,7 +14,9 @@ Decisión: docs/decisiones/2026-11-14_recursos_del_reto.md.
 (d) et_contraste lleva la zona piloto a la que pertenece (archivo sin sufijo = zona por omisión) y
     el motivo fijo para las demás zonas; cada bloque dice de qué archivo salió.
 (e) GEDI: el bloque trae la referencia de la propia entrega (mínimo, mediana y máximo de las lecturas
-    de las parcelas con disparos), igual a un cálculo independiente; null si no hay lecturas.
+    de las parcelas con disparos), igual a un cálculo independiente; null si no hay lecturas. Los
+    criterios para leerla (piso del instrumento y umbral de dosel alto) se leen de supuestos.json y
+    la lectura de cada parcela coincide con aplicarlos aquí; sin criterios, nada se clasifica.
 Todo se escribe en tmp_path: nunca en data/processed ni en web/data. Los valores de (b) y (c) son
 DE PRUEBA; los umbrales se leen de motor/esquemas.py y de data/params.json, no se escriben aquí.
 """
@@ -360,16 +362,34 @@ def test_lleno_huecos_no_se_rellenan(lleno):
 
 def test_lleno_gedi_solo_parcelas_con_disparos(lleno):
     gedi = lleno["contexto"]["gedi"]
-    assert gedi["n_total"] == 4 and gedi["n_con_dato"] == len(gedi["parcelas"]) == 2
-    assert gedi["parcelas"]["P0001"] == {"n_disparos": 4, "altura_mediana_m": 6.2, "altura_p90_m": 8.1}
-    assert "P0002" not in gedi["parcelas"] and "L0002" not in gedi["parcelas"], "sin disparos: no es cero, no entra"
+    assert gedi["n_total"] == 4 and gedi["n_con_dato"] == len(gedi["parcelas"]) == 3
+    assert gedi["parcelas"]["P0001"] == {"n_disparos": 4, "altura_mediana_m": 6.2, "altura_p90_m": 8.1,
+                                         "dosel_alto": True}
+    assert "P0002" not in gedi["parcelas"], "sin disparos: no es cero, no entra"
     assert gedi["fuente"] and gedi["fecha"]
+
+
+def filas_de_gedi(ruta):
+    """Filas con disparos de gedi_parcelas.csv, leídas sin pasar por el motor: {id: (n, mediana, p90)}."""
+    with open(ruta, newline="", encoding="utf-8") as f:
+        return {fila["id"]: (int(fila["n_disparos"]), float(fila["altura_mediana_m"]), float(fila["altura_p90_m"]))
+                for fila in csv.DictReader(f) if int(fila["n_disparos"]) > 0}
 
 
 def lecturas_de_gedi(ruta):
     """altura_mediana_m de las parcelas con disparos, leída del CSV sin pasar por el motor."""
-    with open(ruta, newline="", encoding="utf-8") as f:
-        return [float(fila["altura_mediana_m"]) for fila in csv.DictReader(f) if int(fila["n_disparos"]) > 0]
+    return [mediana for _, mediana, _ in filas_de_gedi(ruta).values()]
+
+
+def mediana_independiente(valores):
+    orden = sorted(valores)
+    n = len(orden)
+    return orden[n // 2] if n % 2 else (orden[n // 2 - 1] + orden[n // 2]) / 2
+
+
+def clasificar_independiente(filas, umbral, min_disparos):
+    """El criterio de la sesión de datos aplicado aquí, sin el motor: True, False o None por parcela."""
+    return {pid: (None if n < min_disparos else p90 >= umbral) for pid, (n, _, p90) in filas.items()}
 
 
 def test_lleno_gedi_referencia_de_la_propia_entrega(lleno):
@@ -377,9 +397,86 @@ def test_lleno_gedi_referencia_de_la_propia_entrega(lleno):
     la entrega, para que la ficha compare una lectura con las demás y no la presente como altura del cultivo."""
     gedi = lleno["contexto"]["gedi"]
     lecturas = sorted(lecturas_de_gedi(lleno["processed"] / ARCHIVO_DE["gedi"]))
-    assert len(lecturas) == 2, "la fixture trae dos parcelas con disparos"
-    assert gedi["referencia"] == {"n_parcelas": 2, "minimo_m": lecturas[0],
-                                  "mediana_m": round((lecturas[0] + lecturas[1]) / 2, 2), "maximo_m": lecturas[1]}
+    assert len(lecturas) == 3, "la fixture trae tres parcelas con disparos"
+    assert gedi["referencia"] == {"n_parcelas": 3, "minimo_m": lecturas[0], "mediana_m": lecturas[1],
+                                  "maximo_m": lecturas[2]}
+
+
+def test_lleno_gedi_criterios_de_la_sesion_de_datos(lleno):
+    """El piso del instrumento y el umbral de dosel alto se LEEN de supuestos.json (con su etiqueta y su
+    fuente) y se aplican a cada parcela: nada de eso está escrito en el motor."""
+    gedi = lleno["contexto"]["gedi"]
+    supuestos = json.loads((lleno["processed"] / cw.ARCHIVO_SUPUESTOS).read_text(encoding="utf-8"))
+    piso, umbral = supuestos[cw.CLAVE_PISO_GEDI], supuestos[cw.CLAVE_UMBRAL_GEDI]
+    assert gedi["criterios"] == {
+        "archivo": cw.ARCHIVO_SUPUESTOS, "fecha": GEN.FECHA_PRUEBA,
+        "piso_instrumento": {"valor_m": piso["valor"], "min_m": piso["min"], "max_m": piso["max"],
+                             "etiqueta": piso["etiqueta"], "fuente": piso["fuente"]},
+        "dosel_alto": {"umbral_m": umbral["valor"], "min_disparos": umbral["min_disparos"]["valor"],
+                       "etiqueta": umbral["etiqueta"], "fuente": umbral["fuente"]},
+    }
+    assert (umbral["valor"], umbral["min_disparos"]["valor"]) == (GEN.UMBRAL_GEDI_PRUEBA, GEN.MIN_DISPAROS_PRUEBA)
+    # Las tres lecturas posibles están en la fixture, y coinciden con el criterio aplicado aquí.
+    esperado = clasificar_independiente(filas_de_gedi(lleno["processed"] / ARCHIVO_DE["gedi"]),
+                                        GEN.UMBRAL_GEDI_PRUEBA, GEN.MIN_DISPAROS_PRUEBA)
+    assert {pid: p["dosel_alto"] for pid, p in gedi["parcelas"].items()} == esperado
+    assert esperado == {"P0001": True, "L0001": None, "L0002": False}
+    assert (gedi["n_dosel_alto"], gedi["n_sin_dosel_alto"], gedi["n_pocos_disparos"]) == (1, 1, 1)
+    assert gedi["n_dosel_alto"] + gedi["n_sin_dosel_alto"] + gedi["n_pocos_disparos"] == gedi["n_con_dato"]
+
+
+def test_gedi_sin_supuestos_no_se_clasifica(lleno, tmp_path):
+    """Si la sesión de datos no ha entregado sus criterios, el bloque sale sin ellos: ninguna parcela se
+    clasifica y los conteos van en null (no en cero). La referencia de la entrega sigue estando."""
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    (processed / cw.ARCHIVO_SUPUESTOS).unlink()
+    resumen, contexto, _ = construir_en(tmp_path, processed)
+    gedi = contexto["gedi"]
+    assert resumen["avisos"] == [] and gedi["criterios"] is None
+    assert all(p["dosel_alto"] is None for p in gedi["parcelas"].values())
+    assert (gedi["n_dosel_alto"], gedi["n_sin_dosel_alto"], gedi["n_pocos_disparos"]) == (None, None, None)
+    assert gedi["referencia"] == lleno["contexto"]["gedi"]["referencia"]
+    # Un supuestos.json sin esas dos claves (como el de antes del 14-nov) da lo mismo, sin aviso.
+    (processed / cw.ARCHIVO_SUPUESTOS).write_text(json.dumps({"otra_clave": {"valor": 1, "fuente": "DE PRUEBA"}}),
+                                                  encoding="utf-8")
+    resumen, contexto, _ = construir_en(tmp_path, processed)
+    assert resumen["avisos"] == [] and contexto["gedi"]["criterios"] is None
+
+
+@pytest.mark.parametrize("clave, cambio, queda", [
+    ("gedi_umbral_dosel_alto_m", {"min_disparos": None}, "piso_instrumento"),
+    ("gedi_umbral_dosel_alto_m", {"min_disparos": {"valor": 2.5}}, "piso_instrumento"),
+    ("gedi_umbral_dosel_alto_m", {"valor": "alto"}, "piso_instrumento"),
+    ("gedi_umbral_dosel_alto_m", {"valor": 0}, "piso_instrumento"),
+    ("gedi_piso_instrumento_m", {"max": None}, "dosel_alto"),
+    ("gedi_piso_instrumento_m", {"min": 99}, "dosel_alto"),
+])
+def test_gedi_criterio_incompleto_va_en_null_con_aviso(lleno, tmp_path, clave, cambio, queda):
+    """Un criterio que no trae lo que hace falta no se completa con nada: va en null y el motor avisa."""
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    supuestos = GEN.supuestos()
+    supuestos[clave] = {**supuestos[clave], **cambio}
+    (processed / cw.ARCHIVO_SUPUESTOS).write_text(json.dumps(supuestos, ensure_ascii=False), encoding="utf-8")
+    resumen, contexto, _ = construir_en(tmp_path, processed)
+    gedi = contexto["gedi"]
+    assert any(clave in a for a in resumen["avisos"]), resumen["avisos"]
+    otro = "dosel_alto" if queda == "piso_instrumento" else "piso_instrumento"
+    assert gedi["criterios"][otro] is None and gedi["criterios"][queda] == lleno["contexto"]["gedi"]["criterios"][queda]
+    if otro == "dosel_alto":
+        assert all(p["dosel_alto"] is None for p in gedi["parcelas"].values())
+        assert gedi["n_dosel_alto"] is None
+
+
+def test_gedi_supuestos_ilegible_no_tumba_el_bloque(lleno, tmp_path):
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    (processed / cw.ARCHIVO_SUPUESTOS).write_text("{ no es json", encoding="utf-8")
+    resumen, contexto, _ = construir_en(tmp_path, processed)
+    assert any(cw.ARCHIVO_SUPUESTOS in a for a in resumen["avisos"])
+    assert contexto["gedi"] is not None and contexto["gedi"]["criterios"] is None
+    assert len(contexto["gedi"]["parcelas"]) == lleno["contexto"]["gedi"]["n_con_dato"]
 
 
 def test_gedi_referencia_null_si_ninguna_parcela_tiene_disparos(lleno, tmp_path):
@@ -413,13 +510,39 @@ def test_real_gedi_referencia_coincide_con_un_calculo_independiente(real):
         assert contexto["gedi"] is None and contexto["gedi_motivo"] == cw.MOTIVO_PEDIDO
         pytest.skip("data/processed aún no trae gedi_parcelas.csv")
     lecturas = sorted(lecturas_de_gedi(ruta))
-    n = len(lecturas)
-    mitad = lecturas[n // 2] if n % 2 else (lecturas[n // 2 - 1] + lecturas[n // 2]) / 2
     referencia = contexto["gedi"]["referencia"]
-    assert referencia["n_parcelas"] == n == contexto["gedi"]["n_con_dato"]
+    assert referencia["n_parcelas"] == len(lecturas) == contexto["gedi"]["n_con_dato"]
     assert referencia["minimo_m"] == lecturas[0] and referencia["maximo_m"] == lecturas[-1]
-    assert referencia["mediana_m"] == pytest.approx(mitad, abs=0.005)
+    assert referencia["mediana_m"] == pytest.approx(mediana_independiente(lecturas), abs=0.005)
     assert referencia["minimo_m"] <= referencia["mediana_m"] <= referencia["maximo_m"]
+
+
+def test_real_gedi_criterios_y_lecturas_coinciden_con_la_entrega(real):
+    """Con las entregas reales de hoy (si ya llegaron): los criterios son los de supuestos.json, tal cual,
+    y la lectura de cada parcela coincide con aplicar aquí ese criterio al CSV."""
+    _, contexto, _ = real
+    ruta, ruta_supuestos = PROCESADOS / ARCHIVO_DE["gedi"], PROCESADOS / cw.ARCHIVO_SUPUESTOS
+    if not ruta.is_file():
+        pytest.skip("data/processed aún no trae gedi_parcelas.csv")
+    supuestos = json.loads(ruta_supuestos.read_text(encoding="utf-8")) if ruta_supuestos.is_file() else {}
+    gedi = contexto["gedi"]
+    if cw.CLAVE_UMBRAL_GEDI not in supuestos:
+        assert not (gedi["criterios"] or {}).get("dosel_alto") and gedi["n_dosel_alto"] is None
+        pytest.skip("supuestos.json aún no trae el umbral de dosel alto de GEDI")
+    umbral = supuestos[cw.CLAVE_UMBRAL_GEDI]
+    criterio = gedi["criterios"]["dosel_alto"]
+    assert (criterio["umbral_m"], criterio["min_disparos"]) == (umbral["valor"], umbral["min_disparos"]["valor"])
+    assert criterio["etiqueta"] == umbral["etiqueta"] and criterio["fuente"] == umbral["fuente"]
+    esperado = clasificar_independiente(filas_de_gedi(ruta), umbral["valor"], umbral["min_disparos"]["valor"])
+    assert {pid: p["dosel_alto"] for pid, p in gedi["parcelas"].items()} == esperado
+    cuenta = [sum(1 for v in esperado.values() if v is caso) for caso in (True, False, None)]
+    assert [gedi["n_dosel_alto"], gedi["n_sin_dosel_alto"], gedi["n_pocos_disparos"]] == cuenta
+    assert sum(cuenta) == gedi["n_con_dato"]
+    if cw.CLAVE_PISO_GEDI in supuestos:
+        piso = supuestos[cw.CLAVE_PISO_GEDI]
+        assert gedi["criterios"]["piso_instrumento"] == {
+            "valor_m": piso["valor"], "min_m": piso["min"], "max_m": piso["max"],
+            "etiqueta": piso["etiqueta"], "fuente": piso["fuente"]}
 
 
 def test_lleno_ecostress_alineado_a_los_meses(lleno):

@@ -22,6 +22,10 @@ Fuentes de lo que aquí se exige:
   FUENTE_RECURSOS): contexto_regional.csv (A10), gedi_parcelas.csv (A11), ecostress_parcelas.csv
   (A12) y gaez_zona.csv (A13), cada uno UN archivo para las dos zonas (no van en ARCHIVOS_POR_ZONA).
   No cambian el cálculo del agua: alimentan web/data/contexto.json (motor/contexto_web.py).
+- la decisión de opciones y filtros oficiales (docs/decisiones/2026-11-14_opciones_b3.md, FUENTE_B3):
+  opciones_b3.json (B3), un solo archivo para las dos zonas. Se valida su estructura (regla de JSON
+  «opciones_b3»); que cada opción tenga lámina en rotaciones.json de cada zona lo comprueba el motor
+  (motor/b4_cubo.py omite con aviso la que no la tenga).
 
 Vocabulario de un campo (columna de CSV, propiedad de GeoJSON o llave de un objeto JSON):
   tipo      texto | numero | entero | fecha (AAAA-MM-DD) | mes (AAAA-MM) |
@@ -56,6 +60,9 @@ valores_segun (lista cerrada de una columna según el valor de otra: la zona seg
 vacias_segun (columnas que van vacías cuando otra vale cierto valor y, con «llenas_si_no»,
 llenas en cualquier otro caso). ensamblar.py las aplica por nombre.
 Reglas de JSON («regla»): heladas, dotaciones, supuestos, rotaciones y objeto (valida «campos»).
+Regla de JSON «opciones_b3» (FUENTE_B3): opciones con letra_maestro, secuencia (ciclo y siembra MM-DD),
+indicadores booleanos o null y advertir_si_rojo; por_cultivo_actual que solo nombra opciones definidas;
+filtros con tipo de su lista, aplica_a, texto_en y fuente. Las listas cerradas viven en su esquema.
 Llave de GeoJSON «por_zona» (parcelas_base): si una parcela trae «zona», su id empieza con el
 prefijo_id de esa zona y su centroide cae en el rectángulo (bbox) de esa zona.
 """
@@ -191,6 +198,19 @@ FUENTE_DOS_ZONAS = "decisión de dos zonas piloto (docs/decisiones/2026-11-14_do
 
 FUENTE_RECURSOS = ("decisión de usar las bases de datos del reto "
                    "(docs/decisiones/2026-11-14_recursos_del_reto.md, «Contrato de las entregas nuevas»)")
+
+# opciones_b3.json (B3): listas cerradas del contrato de la decisión, tal cual.
+FUENTE_B3 = ("decisión de opciones y filtros oficiales "
+             "(docs/decisiones/2026-11-14_opciones_b3.md, «Contrato de opciones_b3.json»)")
+LETRAS_MAESTRO = ("ACTUAL", "A", "B", "C", "D", "E", "nogal_no_rota", "no_sembrar")
+CICLOS_SIEMBRA = ("OI", "PV")
+TIPOS_FILTRO = ("helada", "sucesion", "fecha_limite", "residuo_herbicida", "salinidad", "intervalo")
+INDICADORES_OPCION = ("leguminosa", "ruptura_plagas", "raiz_profunda")
+# Llave de «regla» con el umbral del filtro de helada (la misma que lee motor/b4_cubo.py: una prueba
+# compara ambas). Es opcional: la decisión pide NO inventar umbral; sin ella la ficha no decide.
+UMBRAL_HELADA = "prob_helada_max"
+# Contrato del cubo (kit §2.3): mínimo ACTUAL + 2 alternativas. Con menos, el archivo entra y se avisa.
+ALTERNATIVAS_MINIMAS = 2
 
 # contexto_regional.csv: las 12 filas (fuente, variable, unidad) de la tabla de FUENTE_RECURSOS,
 # tal cual. Una fila del archivo con otra combinación se rechaza (regla combinacion_permitida).
@@ -640,6 +660,29 @@ ESQUEMAS = {
         "pieza": "B3", "tipo": "json", "regla": "supuestos",
         "alimenta": "data/params.json: plazos, eficiencias y relación cobertura–Kc del nogal",
         "fuente_reglas": f"{FUENTE_TABLA}; kit B3 paso 4 (valor o rango, fuente o «assumption»)",
+    },
+    "opciones_b3.json": {
+        "pieza": "B3", "tipo": "json", "regla": "opciones_b3",
+        "letras_maestro": LETRAS_MAESTRO,
+        "ciclos": CICLOS_SIEMBRA,
+        "indicadores": INDICADORES_OPCION,
+        "tipos_filtro": TIPOS_FILTRO,
+        "umbral_helada": UMBRAL_HELADA,
+        "alternativas_minimas": ALTERNATIVAS_MINIMAS,
+        # Cultivos actuales que pueden llevar opciones: los del contrato menos la parcela abstenida.
+        "cultivos": tuple(sorted(CULTIVOS - {"sin_clasificar"})),
+        "alimenta": ("cubo.json: alternativas, nombre, secuencia, indicadores, advertir_si_rojo y filtros "
+                     "de cada opción (motor/b4_cubo.py); mientras no llegue, diseño provisional"),
+        "fuente_reglas": (f"{FUENTE_B3}: fuente del archivo; opciones por id de rotación, cada una con "
+                          "letra_maestro (ACTUAL, A–E, nogal_no_rota o no_sembrar), nombre_en, secuencia "
+                          "(ciclo OI o PV, cultivo y siembra desde/hasta en MM-DD o null), indicadores "
+                          "(leguminosa, ruptura_plagas y raiz_profunda: true, false o null), advertir_si_rojo, "
+                          "fuente y etiqueta; por_cultivo_actual con cultivos del contrato (kit §2.2) que solo "
+                          "nombra opciones definidas; filtros con id único, tipo de su lista, aplica_a con "
+                          "opciones definidas, texto_en, fuente y etiqueta. Lo que la fuente no diga va en null "
+                          "(se avisa); el filtro de helada no lleva umbral inventado: prob_helada_max es "
+                          "opcional y, si viene, está entre 0 y 1 (probabilidad). Menos de 2 alternativas por "
+                          "cultivo solo se avisa (contrato del cubo, kit §2.3)"),
     },
     "cifras.csv": {
         "pieza": "P5", "tipo": "csv",

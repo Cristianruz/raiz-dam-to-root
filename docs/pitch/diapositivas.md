@@ -19,6 +19,7 @@
 - Las capturas salen de `tests/e2e/capturas/` (las genera `node tests/e2e/web_smoke.mjs`) o de la página.
 - **Las cifras del texto deben ser las mismas que se ven en la captura.** Las capturas actuales de la ficha se tomaron con la marca «Normal year»; si se vuelven a tomar con otra marca, cambie el texto.
 - «[SI ESTÁ CONECTADO]» marca la captura que depende del gemelo; debajo va su «[ALTERNATIVA]».
+- «[SI EL GOTEO ESTÁ CONECTADO]» y «[SI EL GOTEO NO ESTÁ]» marcan lo que cambia según si el escenario de goteo ya está en «Follow the drop». Se dice una de las dos.
 - Liga del PDF: [LINK: pendiente — responsable de presentación y pitch].
 
 ## 3. Las siete diapositivas
@@ -65,7 +66,7 @@
 | Text on slide | Dam → canal → field → crop → aquifer · More efficient irrigation reduces dam withdrawals. It can also reduce aquifer recharge. |
 | Capture | `tests/e2e/capturas/escritorio_ficha_gota.png` (Field P0757) |
 | Cifra y fuente | Las de la captura: 376,300 m³ salen de la presa; 129,267 m³ consume el cultivo; 75,260 m³ regresan al acuífero (`cubo.json` → `parcelas.P0757`, bloque `gota`). Grafton et al. 2018 (`README.md`, «References») |
-| Nota del orador | Contamos el agua consumida, no nada más la extraída. El escenario de goteo no se muestra: no hay una eficiencia con fuente (`LIMITATIONS.md`). No prometemos que se libere agua. |
+| Nota del orador | Contamos el agua consumida, no nada más la extraída. **[SI EL GOTEO ESTÁ CONECTADO]** El goteo se muestra con una eficiencia indicativa de la FAO, no medida en el distrito (`data/processed/supuestos.json` → `ea_goteo`). **[SI EL GOTEO NO ESTÁ]** El goteo aún no está en la página: tenemos una eficiencia indicativa de la FAO, no medida en el distrito, y falta conectarla (`docs/decisiones/2026-11-14_opciones_b3.md` §3). En los dos casos: no prometemos que se libere agua. |
 
 ### Slide 5 · A digital twin on open NASA data
 
@@ -84,7 +85,7 @@
 |---|---|
 | Title | Five tests, published whatever the result |
 | One idea | Unfavorable results are shown with the same visibility |
-| Text on slide | Back-test 2026 (H1): does not meet its preregistered criterion · 2025 natural experiment (H3): not supported · Crop map: 781 of 1,239 fields not classified · Figure checker: 30 of 30 cases correct, 0 numbers altered · ET contrast: +53 % against SSEBop, a regional comparison |
+| Text on slide | Back-test 2026 (H1): does not meet its preregistered criterion · 2025 natural experiment (H3): not supported · Crop map: 781 of 1,239 fields not classified · Figure checker: 30 of 30 cases correct, 0 numbers altered (tested on templates) · ET contrast: +53 % against SSEBop, a regional comparison |
 | Capture | Captura nueva de «About & Data» → «Tests in sight» (no está en `tests/e2e/capturas/`: `escritorio_acerca.png` muestra la parte de «NASA data»). Como apoyo, `docs/h1_backtest.png` |
 | Cifra y fuente | H1 (`docs/resultado_H1.md`). H3 (`docs/resultado_H3.md`). 781 de 1,239 (`web/data/pruebas.json`). 30 de 30 y 0 de 71 (`docs/figuras/llm_eval.csv`). +53 %: 1,139.3 mm frente a 746.3 mm (`docs/resultado_A8.md`) |
 | Nota del orador | Los criterios se declararon antes de ver los resultados (S9 §6). Lo que no se corrió dice «not run»: Random Forest, exactitud del mapa, WaPOR y el verificador sobre texto de un modelo de lenguaje. El verificador se probó con plantillas. Diga por qué esto da confianza: se sabe hacia dónde falla el modelo. |
@@ -115,4 +116,6 @@
 
 - Tomar las capturas nuevas: vista 3D, línea de tiempo en 2025 y «Tests in sight».
 - Decidir si las capturas de la ficha se quedan con la marca «Normal year» o se vuelven a tomar con «Like 2026», como en la exposición. Con «Like 2026» la página mostraría «Enough for 1 of 7.95 hectares» (`web/reglas.js` con `cubo.json`).
+- **Goteo (diapositiva 4).** La eficiencia del goteo ya tiene fuente (`data/processed/supuestos.json` → `ea_goteo`, valor indicativo de la FAO); falta que el integrador conecte el escenario. La captura actual no lo muestra. Si se vuelve a tomar con el botón «What if this field switches to drip?», las cifras del texto deben ser las de esa captura. `LIMITATIONS.md` todavía dice que no hay una eficiencia con fuente: quedó atrasado y lo corrige el integrador.
+- Las diapositivas usan a P0757. Si se agrega una captura de la parcela «libre», debe ser de P0632 (`docs/decisiones/2026-11-14_opciones_b3.md` §2), no de P0244.
 - Poner las ligas cuando existan.

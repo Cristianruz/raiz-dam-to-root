@@ -109,7 +109,7 @@
    "id": "gedi",
    "nombre": "GEDI",
    "organismo": "NASA",
-   "papel": "Evidence per field: canopy height (tells an orchard from a low crop)",
+   "papel": "Evidence per field: laser height reading that tells an orchard from a low crop (not a measured crop height)",
    "entregas": ["gedi_parcelas.csv"],
    "aplica": true
   },

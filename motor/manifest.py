@@ -34,6 +34,19 @@ De dónde sale cada campo:
   (métricas de cada prueba, número de la prueba, criterios y textos con cifras), con la fuente citada en
   cada una. construir.py vuelve a generar el manifest después del paso 5c para que entren las de la
   corrida actual.
+- Escenario de goteo de La gota (gota_goteo_con_tope, gota_goteo_sin_tope y tope_consumo de cada
+  opción; kit X3.1): la fuente y la etiqueta de las eficiencias de data/processed/supuestos.json
+  («[V] indicative, not local»), que el cubo copia en meta.goteo; fecha y script de la entrega
+  supuestos.json en fuentes.json. Las eficiencias mismas (meta.goteo.*) se registran igual, y el rango
+  con que A5 calculó las láminas de cada zona, con su etiqueta y su archivo.
+- Filtros oficiales (B3) de cada opción: prob_helada (y la de las demás siembras) con la fuente de
+  data/processed/heladas.json; cualquier otra cifra del filtro (su umbral), con la fuente y la etiqueta
+  del propio filtro. cubo.opciones_catalogo y cubo.filtros_catalogo (cifras y textos con cifras: fechas
+  de siembra, reglas): fuente y etiqueta de cada entrada; fecha y script de la entrega opciones_b3.json.
+- cubo.meta.ventana_desnudo (inicio y fin), dotaciones.equivalencia_en y la nota en inglés de cada marca
+  si lleva cifras: fuente y etiqueta de data/params.json (son copias de ahí).
+- relieve.json → rutas_depresiones (profundidad mínima, celdas y retazos omitidos y la nota): fuente,
+  fecha y script de la entrega relieve_meta[_<zona>].json; etiqueta del propio bloque.
 - mock: se decide por bloque con las marcas del propio archivo
   (cubo.meta.mock y cubo.meta.mock_campos; meta.mock de parcelas.geojson y de
   explicaciones.json). Si el cubo no trae la lista por campo, manda
@@ -64,10 +77,14 @@ SCRIPT_SIMULADOS = "motor/simulados.py"
 SCRIPT_ENSAMBLADO = "motor/ensamblar.py"
 SCRIPT_RELIEVE = "motor/relieve_web.py"
 SCRIPT_PRUEBAS = "motor/pruebas_web.py"
+ARCHIVO_CUBO = "web/data/cubo.json"
 ARCHIVO_RELIEVE = "web/data/relieve.json"
 ARCHIVO_PARCELAS = "web/data/parcelas.geojson"
 ARCHIVO_PRUEBAS = "web/data/pruebas.json"
 ENTREGA_RELIEVE_PARCELAS = "relieve_parcelas.csv"  # A9: indicadores de relieve por parcela
+ENTREGA_SUPUESTOS = "supuestos.json"      # eficiencias del escenario de goteo (kit X3.1)
+ENTREGA_HELADAS = "heladas.json"          # A2: probabilidad de helada por fecha (filtro de helada)
+ENTREGA_B3 = "opciones_b3.json"           # B3: opciones y filtros oficiales
 FUENTE_SIMULADA = "Datos simulados (data/simulados.json y data/params.json); no son datos reales"
 ETIQUETA_SIMULADA = "SIMULADO"
 ETIQUETA_CALCULO = "Cálculo"
@@ -81,6 +98,8 @@ ETIQUETA_ROTULO_RELIEVE = "Resolución nominal de NASADEM (NASA, 30 m; S9 §4 bi
 BLOQUES_OPCION = ("agua.lamina_bruta", "agua.plazo_anios", "agua.plazo_restante",
                   "agua.compromiso_millares_ha", "suelo.dias_desnudo", "gota",
                   "gota_goteo_con_tope", "gota_goteo_sin_tope", "tope_consumo")
+# Bloques del escenario de goteo: llevan la fuente y la etiqueta de las eficiencias de supuestos.json.
+BLOQUES_GOTEO = ("gota_goteo_con_tope", "gota_goteo_sin_tope", "tope_consumo")
 # Propiedades numéricas de cada parcela que muestran el mapa y la ficha (kit C1 y C2): cálculo del motor.
 PROPIEDADES_PARCELA = ("area_ha", "ftw_confianza", "prob_max", "dias_suelo_desnudo_feb_abr",
                        "ndvi_ultimo_mes", "dias_suelo_desnudo_mediana", "edad_perenne_anios",
@@ -208,9 +227,15 @@ def cifras_de_params(m, cubo, params, script_cubo, mock_de):
             if es_numero(marca.get(k)):
                 comparar(f"dotaciones.marcas[{i}].{k}", marca[k], ((p_marca or {}).get("valor") or {}).get(k))
                 con_param(f"dotaciones.marcas[{i}].{k}", marca[k], p_marca, "dotaciones")
-    if dot.get("equivalencia"):
-        # Texto con cifras (1 millar/ha = 1,000 m³/ha = 10 cm): se rastrea a params.unidades.millar.
-        con_param("dotaciones.equivalencia", dot["equivalencia"], obtener(params, "unidades.millar"), "dotaciones")
+        if tiene_digito(marca.get("nota_en")):
+            # Nota en inglés con cifras (copia de params.dotaciones.<marca>.nota_en).
+            if marca["nota_en"] != (p_marca or {}).get("nota_en"):
+                m.avisos.append(f"dotaciones.marcas[{i}].nota_en: el cubo no coincide con params.json")
+            con_param(f"dotaciones.marcas[{i}].nota_en", marca["nota_en"], p_marca, "dotaciones")
+    for campo in ("equivalencia", "equivalencia_en"):
+        if dot.get(campo):
+            # Texto con cifras (1 millar/ha = 1,000 m³/ha = 10 cm): se rastrea a params.unidades.millar.
+            con_param(f"dotaciones.{campo}", dot[campo], obtener(params, "unidades.millar"), "dotaciones")
 
     p_lluvia = obtener(params, "lluvia_pct")
     for i, v in enumerate(cubo.get("lluvia_pct") or []):
@@ -278,6 +303,94 @@ def cifras_de_localidades(m, cubo, params, script_cubo, mock_de):
                       p.get("etiqueta"), mock_l)
 
 
+def fecha_y_script(entrega, script_cubo):
+    """(fecha, script) de una cifra que el motor copia o calcula desde una entrega de fuentes.json."""
+    entrega = entrega or {}
+    fecha = entrega.get("fecha_consulta") or entrega.get("fecha")
+    return fecha, "; ".join(x for x in (entrega.get("script"), script_cubo) if x) or None
+
+
+def origen_goteo(meta, fuentes_origen, script_cubo):
+    """(fuente, fecha, script, etiqueta) de los bloques de goteo: los de las eficiencias de
+    data/processed/supuestos.json que el cubo copia en meta.goteo. None si el cubo no trae el escenario."""
+    g = (meta or {}).get("goteo") or {}
+    ea = g.get("ea_goteo") or {}
+    if not g.get("disponible") or not ea.get("fuente"):
+        return None
+    fecha, script = fecha_y_script(entrega_de(fuentes_origen, ENTREGA_SUPUESTOS), script_cubo)
+    return ea["fuente"], fecha or meta.get("generado"), script, ea.get("etiqueta")
+
+
+def cifras_de_meta(m, cubo, params, fuentes_origen, script_cubo, mock_de):
+    """cubo.meta: las eficiencias del escenario de goteo (meta.goteo, copia de supuestos.json y del rango
+    de A5 de cada zona) y la ventana de suelo desnudo (meta.ventana_desnudo, copia de params)."""
+    meta = cubo.get("meta") or {}
+    mock = mock_de("meta")
+    g = meta.get("goteo") or {}
+    if g.get("disponible"):
+        fecha, script = fecha_y_script(entrega_de(fuentes_origen, ENTREGA_SUPUESTOS), script_cubo)
+        for clave in ("ea_goteo", "ea_superficial_referencia"):
+            d = g.get(clave) or {}
+            if es_numero(d.get("valor")):
+                m.agregar(ARCHIVO_CUBO, f"meta.goteo.{clave}.valor", d["valor"], d.get("fuente"),
+                          fecha or meta.get("generado"), script, d.get("etiqueta"), mock)
+        for zid, z in (g.get("zonas") or {}).items():
+            r = (z or {}).get("ea_gravedad") or {}
+            archivo = Path(str(r.get("archivo") or "")).name
+            fecha_r, script_r = fecha_y_script(entrega_de(fuentes_origen, archivo), script_cubo)
+            for ruta, valor in hojas_numericas(r.get("valor"), f"meta.goteo.zonas.{zid}.ea_gravedad.valor"):
+                m.agregar(ARCHIVO_CUBO, ruta, valor, r.get("fuente"), fecha_r or meta.get("generado"), script_r,
+                          r.get("etiqueta"), mock)
+    v = meta.get("ventana_desnudo") or {}
+    p = obtener(params, "suelo.ventana_desnudo") or {}
+    for k in ("inicio", "fin"):
+        if tiene_digito(v.get(k)):
+            if v[k] != (p.get("valor") or {}).get(k):
+                m.avisos.append(f"meta.ventana_desnudo.{k}: el cubo dice {v[k]} y params.json {(p.get('valor') or {}).get(k)}")
+            m.agregar(ARCHIVO_CUBO, f"meta.ventana_desnudo.{k}", v[k], p.get("fuente"),
+                      p.get("fecha") or p.get("fecha_consulta"), script_cubo, p.get("etiqueta"), mock)
+
+
+def cifras_de_filtros(m, base, op, meta, fuentes_origen, script_cubo, mock):
+    """Filtros oficiales de una opción (B3): prob_helada con la fuente de heladas.json (A2); cualquier
+    otra cifra del filtro (su umbral), con la fuente y la etiqueta del propio filtro."""
+    filtros = op.get("filtros") or []
+    if not filtros:
+        return
+    h = meta.get("heladas") or {}
+    entrega_h = entrega_de(fuentes_origen, ENTREGA_HELADAS) or {}
+    fecha_h, script_h = fecha_y_script(entrega_h, script_cubo)
+    fecha_b, script_b = fecha_y_script(entrega_de(fuentes_origen, ENTREGA_B3), script_cubo)
+    for j, fl in enumerate(filtros):
+        if not isinstance(fl, dict):
+            continue
+        for ruta, valor in hojas_numericas(fl, f"{base}.filtros[{j}]"):
+            if ruta.rsplit(".", 1)[-1] == "prob_helada":
+                m.agregar(ARCHIVO_CUBO, ruta, valor, h.get("fuente") or entrega_h.get("fuente"),
+                          fecha_h or meta.get("generado"), script_h, ETIQUETA_CALCULO, mock)
+            else:
+                m.agregar(ARCHIVO_CUBO, ruta, valor, fl.get("fuente"), fecha_b or meta.get("generado"), script_b,
+                          fl.get("etiqueta"), mock)
+
+
+def cifras_de_catalogos(m, cubo, fuentes_origen, script_cubo, mock_de):
+    """cubo.opciones_catalogo y cubo.filtros_catalogo (copia de opciones_b3.json): cifras y textos con
+    cifras (fechas de siembra, parámetros de las reglas, frases), con la fuente y la etiqueta de cada
+    entrada; fecha y script de la entrega opciones_b3.json."""
+    meta = cubo.get("meta") or {}
+    fuente_archivo = (meta.get("opciones") or {}).get("fuente")
+    fecha, script = fecha_y_script(entrega_de(fuentes_origen, ENTREGA_B3), script_cubo)
+    mock = mock_de("parcelas")
+    for bloque in ("opciones_catalogo", "filtros_catalogo"):
+        for clave, d in (cubo.get(bloque) or {}).items():
+            if not isinstance(d, dict):
+                continue
+            base = f"{bloque}.{clave}"
+            for ruta, valor in hojas_numericas(d, base) + textos_con_digitos(d, base):
+                m.agregar(ARCHIVO_CUBO, ruta, valor, d.get("fuente") or fuente_archivo,
+                          fecha or meta.get("generado"), script, d.get("etiqueta"), mock)
+
+
 def entrega_de_relieve(fuentes_origen, zona):
     """Fila de data/processed/fuentes.json de la entrega relieve_meta[_<zona>].json; None si no está.
     La zona es la que registró el ensamblador o, si no la trae, la del sufijo del archivo."""
@@ -315,6 +428,9 @@ def textos_con_digitos(obj, ruta):
             if k.endswith("fuente") or k.endswith("etiqueta"):
                 continue
             salida += textos_con_digitos(v, f"{ruta}.{k}")
+    elif isinstance(obj, list):  # p. ej. la secuencia de una opción del catálogo de B3
+        for i, v in enumerate(obj):
+            salida += textos_con_digitos(v, f"{ruta}[{i}]")
     elif isinstance(obj, str) and re.search(r"\d", obj):
         salida.append((ruta, obj))
     return salida
@@ -337,9 +453,16 @@ def cifras_de_relieve(m, relieve, fuentes_origen):
         fuente_zona = fuente_archivo or entrega.get("fuente")
         t = z.get("tormenta") or {}
         etiqueta_tormenta = t.get("etiqueta") or ETIQUETA_CALCULO  # P95 calculado sobre la serie diaria
+        # rutas_depresiones (A9): la regla que corta las rutas dentro de las depresiones cerradas del
+        # modelo; sus cifras y su nota llevan la fuente de la entrega relieve_meta y la etiqueta del bloque.
+        dep = z.get("rutas_depresiones") or {}
+        fuente_dep = entrega.get("fuente") or fuente_zona
+        etiqueta_dep = dep.get("etiqueta") or ETIQUETA_CALCULO
         base = f"zonas.{zid}"
         for ruta, valor in hojas_numericas(z, base):
-            if ruta == f"{base}.tormenta.mm":
+            if ruta.startswith(f"{base}.rutas_depresiones."):
+                m.agregar(ARCHIVO_RELIEVE, ruta, valor, fuente_dep, fecha, script, etiqueta_dep, mock)
+            elif ruta == f"{base}.tormenta.mm":
                 m.agregar(ARCHIVO_RELIEVE, ruta, valor, t.get("fuente"), fecha, script, etiqueta_tormenta, mock,
                           periodo=t.get("periodo"), definicion=t.get("definicion"))
             elif ruta == f"{base}.umbral_ruta_ha":
@@ -349,6 +472,9 @@ def cifras_de_relieve(m, relieve, fuentes_origen):
                 m.avisos.append(f"relieve.json:{ruta}: cifra sin regla propia en motor/manifest.py")
                 m.agregar(ARCHIVO_RELIEVE, ruta, valor, fuente_zona, fecha, script, None, mock)
         for ruta, texto in textos_con_digitos(z, base):
+            if ruta.startswith(f"{base}.rutas_depresiones."):
+                m.agregar(ARCHIVO_RELIEVE, ruta, texto, fuente_dep, fecha, script, etiqueta_dep, mock)
+                continue
             en_tormenta = ruta.startswith(f"{base}.tormenta.")
             etiqueta_texto = etiqueta_tormenta if en_tormenta else (z.get("rotulo_etiqueta") or ETIQUETA_ROTULO_RELIEVE)
             m.agregar(ARCHIVO_RELIEVE, ruta, texto, t.get("fuente") if en_tormenta else fuente_zona, fecha,
@@ -492,15 +618,23 @@ def generar(raiz=RAIZ, escribir=True, hoy=None):
     cifras_de_zonas(m, cubo, params, script_cubo, mock_cubo, hoy)
     cifras_de_localidades(m, cubo, params, script_cubo, mock_cubo)
 
+    # 2c) cubo.meta (eficiencias del goteo y ventana de suelo desnudo) y catálogos de B3
+    cifras_de_meta(m, cubo, params, fuentes_origen, script_cubo, mock_cubo)
+    cifras_de_catalogos(m, cubo, fuentes_origen, script_cubo, mock_cubo)
+
     # 3) opciones de cada parcela (B4 y X3.1)
     mock_op = mock_cubo("parcelas")
     fuente, fecha, script, etiqueta = origen_calculo(meta, "parcelas", mock_op, hoy)
+    # El escenario de goteo real lleva la fuente y la etiqueta de las eficiencias de supuestos.json.
+    del_goteo = None if mock_op else origen_goteo(meta, fuentes_origen, script_cubo)
     for pid, pc in (cubo.get("parcelas") or {}).items():
         for i, op in enumerate(pc.get("opciones") or []):
             base = f"parcelas.{pid}.opciones[{i}]"
             for bloque in BLOQUES_OPCION:
+                origen = del_goteo if (bloque in BLOQUES_GOTEO and del_goteo) else (fuente, fecha, script, etiqueta)
                 for ruta, valor in hojas_numericas(obtener(op, bloque), f"{base}.{bloque}"):
-                    m.agregar("web/data/cubo.json", ruta, valor, fuente, fecha, script, etiqueta, mock_op)
+                    m.agregar("web/data/cubo.json", ruta, valor, *origen, mock_op)
+            cifras_de_filtros(m, base, op, meta, fuentes_origen, script_cubo, mock_op)
             dinero = op.get("dinero")
             if isinstance(dinero, dict):  # solo existe con fuente (contrato §2.3)
                 for k in ("margen_min", "margen_max"):

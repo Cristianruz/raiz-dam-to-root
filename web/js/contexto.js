@@ -37,14 +37,21 @@
 //       Tabla «Challenge data sources» (Resource · Agency · Role in Raíz · Status · Files), con el
 //       estado en símbolo y texto, ordenada (en uso, pedidas, no aplica) y un resumen cuyos conteos
 //       se calculan de contexto.recursos.
-//   evidenciaDeParcela({ contexto, id }) -> [{ etiqueta, texto, nota, fuente, archivo, fecha }]
+//   evidenciaDeParcela({ contexto, id }) -> [{ etiqueta, texto, nota, lectura, fuente, archivo, fecha }]
 //       Renglones para la ficha: la lectura de altura de GEDI y la ET de ECOSTRESS del último mes con
-//       dato. [] si los dos bloques son null. «nota» (texto o null) es parte del renglón: la ficha la
-//       escribe SIEMPRE junto al valor. La de GEDI dice que el instrumento no marca cero sobre suelo
-//       desnudo (una lectura baja es dosel bajo o ninguno: no es la altura del cultivo) y, si la
-//       entrega la trae (gedi.referencia), entre qué valores leen las parcelas de esa misma entrega.
-//       «fuente» es el texto completo de la entrega (puede ser largo); «archivo» y «fecha» sirven
-//       para citarla en corto.
+//       dato. [] si los dos bloques son null. GEDI (rh, altura relativa) NO marca cero sobre suelo
+//       desnudo: el renglón no se rotula «canopy height» ni se presenta como altura del cultivo.
+//         texto    lo que GEDI vio. Si la sesión de datos entregó su criterio (gedi.criterios, de
+//                  supuestos.json), empieza con la lectura: «tall canopy seen», «no tall canopy seen»
+//                  o «too few shots to tell»; después, la mediana, los disparos y el decil alto.
+//         nota     (texto o null) es parte del renglón: la ficha la escribe SIEMPRE junto al valor.
+//                  La de GEDI = NOTA_GEDI (fija, sin cifras) + lo que GEDI marca en parcelas sin
+//                  árboles y el criterio de dosel alto, cada uno con su etiqueta (criteriosGedi); si
+//                  no hay criterios, entre qué valores leen las parcelas de la entrega (referenciaGedi).
+//         lectura  para la ficha, sin texto: «tall_canopy», «no_tall_canopy», «too_few_shots»,
+//                  «no_shots», o null (GEDI sin criterio entregado; ECOSTRESS).
+//         fuente   texto completo de la entrega (puede ser largo); «archivo» y «fecha» la citan en
+//                  corto. La fuente de cada criterio está en contexto.gedi.criterios.*.fuente.
 //   riesgoDeHelada({ contexto, fechaSiembra, zonaId }) -> { prob, fuente, fecha } | null
 //       Probabilidad de helada después de la fecha de siembra, de heladas.prob_helada_despues_de
 //       (la fecha «MM-DD» más cercana anterior o igual). fechaSiembra: «MM-DD», «AAAA-MM-DD», Date,
@@ -54,8 +61,8 @@
 //       num, climaDelAnio, diferenciaLluvia, anioPorOmision, graficasDeClima, seriesDeZona,
 //       puntosAnuales, valorAnual, modeloTarjetas, modeloContraste, metaDePanel, citasDeTarjeta,
 //       fuentesDeSeccion, escalaY, formatoResolucion, formatoNumero, etiquetaMes, ordenarRecursos,
-//       contarEstados, ultimoMesConDato, referenciaGedi, mesDia. Textos fijos exportados:
-//       NOTA_REGIONAL, NOTA_GEDI, NOTA_GEDI_SIN_DISPAROS.
+//       contarEstados, ultimoMesConDato, lecturaDeGedi, criteriosGedi, referenciaGedi, mesDia.
+//       Textos fijos exportados: NOTA_REGIONAL, NOTA_GEDI, NOTA_GEDI_SIN_DISPAROS.
 //   Las funciones «montar…» insertan css/contexto.css en la página si aún no está enlazada.
 //
 // Reglas de este archivo:
@@ -82,9 +89,16 @@ const TITULO_RECURSOS = "Challenge data sources";
 export const NOTA_REGIONAL =
   "Regional series describe the area or the basin, not a single field. They do not forecast the dam and do not change the water light.";
 // GEDI (rh, altura relativa del retorno): el instrumento no marca cero sobre suelo desnudo, así que el
-// renglón de la ficha no se rotula como altura del cultivo y lleva siempre esta nota (sin cifras: lo
-// que leen las parcelas de la entrega sale de gedi.referencia, ver referenciaGedi).
+// renglón de la ficha no se rotula como altura del cultivo y lleva siempre esta nota (sin cifras: el
+// piso del instrumento y el umbral de dosel alto salen de gedi.criterios; ver criteriosGedi).
 const ETIQUETA_GEDI = "GEDI height reading";
+// Lectura de una parcela con el criterio de la sesión de datos (gedi.criterios.dosel_alto).
+const LECTURAS_GEDI = {
+  tall_canopy: "tall canopy seen",
+  no_tall_canopy: "no tall canopy seen",
+  too_few_shots: "too few shots to tell",
+};
+const LECTURA_SIN_DISPAROS = "no_shots";
 export const NOTA_GEDI =
   "GEDI does not read zero on bare ground: a low value means low or no canopy. It tells an orchard from a low crop; it does not measure crop height.";
 export const NOTA_GEDI_SIN_DISPAROS =
@@ -683,27 +697,79 @@ export function referenciaGedi(contexto) {
 }
 
 /**
+ * Los criterios de la sesión de datos para leer GEDI (gedi.criterios, copiados de supuestos.json), en
+ * frases para la nota del renglón, cada una con la etiqueta de su supuesto:
+ * { piso, dosel } (cada una texto o null).
+ *   piso   lo que GEDI marca en parcelas sin árboles: el piso del instrumento, no la altura de la planta;
+ *   dosel  qué cuenta como dosel alto (decil alto de la parcela y mínimo de disparos).
+ * Los números salen del JSON; si un criterio no llegó o viene incompleto, su frase es null.
+ */
+export function criteriosGedi(contexto) {
+  const k = (contexto && contexto.gedi && contexto.gedi.criterios) || null;
+  const marca = (etiqueta) => (typeof etiqueta === "string" && etiqueta.trim() ? ` (${etiqueta.trim()})` : "");
+  let piso = null;
+  let dosel = null;
+  const p = k && k.piso_instrumento;
+  if (p) {
+    const [valor, minimo, maximo] = [p.valor_m, p.min_m, p.max_m].map(num);
+    if (valor != null && minimo != null && maximo != null) {
+      piso = `Fields without trees read about ${formatoNumero(valor)} m (most between ${formatoNumero(minimo)} and ${formatoNumero(maximo)} m): the floor of the instrument, not plant height${marca(p.etiqueta)}.`;
+    }
+  }
+  const d = k && k.dosel_alto;
+  if (d) {
+    const [umbral, minimo] = [d.umbral_m, d.min_disparos].map(num);
+    if (umbral != null && minimo != null) {
+      dosel = `Tall canopy means a top decile of ${formatoNumero(umbral)} m or more, from at least ${formatoNumero(minimo)} ${plural(minimo, "shot", "shots")}${marca(d.etiqueta)}.`;
+    }
+  }
+  return { piso, dosel };
+}
+
+/**
+ * Lectura de una parcela con el criterio de dosel alto de la entrega: «tall_canopy», «no_tall_canopy»,
+ * «too_few_shots» (menos disparos que el mínimo del criterio), «no_shots» (la parcela no está en
+ * gedi.parcelas) o null (hay bloque pero no hay criterio, o la parcela no trae su clasificación).
+ * La clasificación la hace motor/contexto_web.py (parcela.dosel_alto); aquí no se compara con ningún umbral.
+ */
+export function lecturaDeGedi({ contexto, id } = {}) {
+  const gedi = contexto && contexto.gedi;
+  if (!gedi) return null;
+  const p = (gedi.parcelas || {})[id];
+  if (!p || num(p.altura_mediana_m) == null) return LECTURA_SIN_DISPAROS;
+  const criterio = gedi.criterios && gedi.criterios.dosel_alto;
+  const minimo = criterio ? num(criterio.min_disparos) : null;
+  if (minimo == null) return null;
+  if (p.dosel_alto === true) return "tall_canopy";
+  if (p.dosel_alto === false) return "no_tall_canopy";
+  return (num(p.n_disparos) ?? 0) < minimo ? "too_few_shots" : null;
+}
+
+/**
  * Renglones de evidencia de una parcela para la ficha; [] si GEDI y ECOSTRESS aún no llegan.
- * Cada renglón: { etiqueta, texto, nota, fuente, archivo, fecha }. «nota» (texto o null) va siempre
- * junto al valor: la de GEDI evita leer el piso del instrumento como la altura de un cultivo.
+ * Cada renglón: { etiqueta, texto, nota, lectura, fuente, archivo, fecha }. «nota» (texto o null) va
+ * siempre junto al valor: la de GEDI evita leer el piso del instrumento como la altura de un cultivo.
  */
 export function evidenciaDeParcela({ contexto, id } = {}) {
   const lista = [];
   const gedi = contexto && contexto.gedi;
   if (gedi) {
     const p = (gedi.parcelas || {})[id];
-    const mediana = p ? num(p.altura_mediana_m) : null;
+    const lectura = lecturaDeGedi({ contexto, id });
     let texto = "GEDI: no shots inside this field";
     let nota = NOTA_GEDI_SIN_DISPAROS;
-    if (p && mediana != null) {
+    if (lectura !== LECTURA_SIN_DISPAROS) {
       const disparos = num(p.n_disparos) ?? 0;
       const alta = num(p.altura_p90_m);
       texto =
-        `median ${formatoNumero(mediana)} m from ${formatoNumero(disparos)} ${plural(disparos, "shot", "shots")}` +
+        (lectura ? `${LECTURAS_GEDI[lectura]}: ` : "") +
+        `median ${formatoNumero(p.altura_mediana_m)} m from ${formatoNumero(disparos)} ${plural(disparos, "shot", "shots")}` +
         (alta != null ? `; top decile above ${formatoNumero(alta)} m` : "");
-      nota = [NOTA_GEDI, referenciaGedi(contexto)].filter(Boolean).join(" ");
+      const { piso, dosel } = criteriosGedi(contexto);
+      // Con el piso del instrumento entregado no hace falta la referencia de la entrega: dicen lo mismo.
+      nota = [NOTA_GEDI, piso ?? referenciaGedi(contexto), dosel].filter(Boolean).join(" ");
     }
-    lista.push({ etiqueta: ETIQUETA_GEDI, texto, nota, fuente: gedi.fuente || null, archivo: gedi.archivo || null, fecha: gedi.fecha || null });
+    lista.push({ etiqueta: ETIQUETA_GEDI, texto, nota, lectura, fuente: gedi.fuente || null, archivo: gedi.archivo || null, fecha: gedi.fecha || null });
   }
   const eco = contexto && contexto.ecostress;
   if (eco) {
@@ -714,6 +780,7 @@ export function evidenciaDeParcela({ contexto, id } = {}) {
         ? `${formatoNumero(ultimo.valor)} mm/day, median of the clear scenes of ${etiquetaMes(ultimo.mes)}`
         : "ECOSTRESS: no clear scene over this field",
       nota: null,
+      lectura: null,
       fuente: eco.fuente || null,
       archivo: eco.archivo || null,
       fecha: eco.fecha || null,

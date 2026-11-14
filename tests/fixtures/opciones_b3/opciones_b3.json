@@ -1,0 +1,310 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_nota": "DATOS DE PRUEBA para tests/test_opciones_b3.py y tests/test_ensamblar.py. NO es la entrega de la sesión de datos ni contenido del maestro §5.2: letras, fechas de siembra, indicadores, umbral y textos se escribieron para ejercitar el validador del buzón y el motor. No se copia a data/processed ni se usa en la web. Los id de opción son los de rotaciones.json (A5).",
+ "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+ "opciones": {
+  "alfalfa": {
+   "letra_maestro": "ACTUAL",
+   "nombre_en": "TEST Alfalfa",
+   "secuencia": [
+    {
+     "ciclo": "OI",
+     "cultivo": "alfalfa",
+     "siembra": {
+      "desde": "10-15",
+      "hasta": "11-15"
+     },
+     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+    }
+   ],
+   "indicadores": {
+    "leguminosa": true,
+    "ruptura_plagas": false,
+    "raiz_profunda": true,
+    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+   },
+   "advertir_si_rojo": true,
+   "por_que_en": "TEST ONLY: placeholder reason for alfalfa.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  "alfalfa_corte_verano": {
+   "letra_maestro": "B",
+   "nombre_en": "TEST Alfalfa with a summer irrigation cut",
+   "secuencia": [
+    {
+     "ciclo": "OI",
+     "cultivo": "alfalfa",
+     "siembra": null,
+     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+    }
+   ],
+   "indicadores": {
+    "leguminosa": true,
+    "ruptura_plagas": false,
+    "raiz_profunda": true,
+    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+   },
+   "advertir_si_rojo": false,
+   "por_que_en": "TEST ONLY: placeholder reason for alfalfa with a summer irrigation cut.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  "nogal": {
+   "letra_maestro": "nogal_no_rota",
+   "nombre_en": "TEST Pecan orchard",
+   "secuencia": [
+    {
+     "ciclo": "PV",
+     "cultivo": "nogal",
+     "siembra": null,
+     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+    }
+   ],
+   "indicadores": {
+    "leguminosa": false,
+    "ruptura_plagas": null,
+    "raiz_profunda": true,
+    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+   },
+   "advertir_si_rojo": false,
+   "por_que_en": "TEST ONLY: placeholder reason for pecan orchard.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  "algodon": {
+   "letra_maestro": "A",
+   "nombre_en": "TEST Cotton",
+   "secuencia": [
+    {
+     "ciclo": "PV",
+     "cultivo": "algodon",
+     "siembra": {
+      "desde": "04-25",
+      "hasta": "05-10"
+     },
+     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+    }
+   ],
+   "indicadores": {
+    "leguminosa": false,
+    "ruptura_plagas": true,
+    "raiz_profunda": true,
+    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+   },
+   "advertir_si_rojo": false,
+   "por_que_en": "TEST ONLY: placeholder reason for cotton.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  "chile": {
+   "letra_maestro": "C",
+   "nombre_en": "TEST Chile pepper",
+   "secuencia": [
+    {
+     "ciclo": "PV",
+     "cultivo": "chile",
+     "siembra": {
+      "desde": "03-10",
+      "hasta": "03-31"
+     },
+     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+    }
+   ],
+   "indicadores": {
+    "leguminosa": false,
+    "ruptura_plagas": true,
+    "raiz_profunda": false,
+    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+   },
+   "advertir_si_rojo": false,
+   "por_que_en": "TEST ONLY: placeholder reason for chile pepper.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  "maiz_forrajero": {
+   "letra_maestro": "D",
+   "nombre_en": "TEST Forage maize",
+   "secuencia": [
+    {
+     "ciclo": "PV",
+     "cultivo": "maiz_forrajero",
+     "siembra": {
+      "desde": "04-05",
+      "hasta": "04-30"
+     },
+     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+    }
+   ],
+   "indicadores": {
+    "leguminosa": false,
+    "ruptura_plagas": true,
+    "raiz_profunda": false,
+    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+   },
+   "advertir_si_rojo": false,
+   "por_que_en": "TEST ONLY: placeholder reason for forage maize.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  "sorgo": {
+   "letra_maestro": "E",
+   "nombre_en": "TEST Forage sorghum",
+   "secuencia": [
+    {
+     "ciclo": "PV",
+     "cultivo": "sorgo",
+     "siembra": {
+      "desde": "05-01",
+      "hasta": "05-31"
+     },
+     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+    }
+   ],
+   "indicadores": {
+    "leguminosa": false,
+    "ruptura_plagas": true,
+    "raiz_profunda": null,
+    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+   },
+   "advertir_si_rojo": false,
+   "por_que_en": "TEST ONLY: placeholder reason for forage sorghum.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  "avena_maiz": {
+   "letra_maestro": "E",
+   "nombre_en": "TEST Oats then forage maize",
+   "secuencia": [
+    {
+     "ciclo": "OI",
+     "cultivo": "cereal_invierno",
+     "siembra": {
+      "desde": "10-15",
+      "hasta": "11-15"
+     },
+     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+    },
+    {
+     "ciclo": "PV",
+     "cultivo": "maiz_forrajero",
+     "siembra": {
+      "desde": "04-05",
+      "hasta": "04-30"
+     },
+     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+    }
+   ],
+   "indicadores": {
+    "leguminosa": false,
+    "ruptura_plagas": true,
+    "raiz_profunda": false,
+    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+   },
+   "advertir_si_rojo": false,
+   "por_que_en": "TEST ONLY: placeholder reason for oats then forage maize.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  "descanso": {
+   "letra_maestro": "no_sembrar",
+   "nombre_en": "TEST Do not plant",
+   "secuencia": [],
+   "indicadores": {
+    "leguminosa": null,
+    "ruptura_plagas": null,
+    "raiz_profunda": null,
+    "fuente": null
+   },
+   "advertir_si_rojo": false,
+   "por_que_en": "TEST ONLY: placeholder reason for do not plant.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  }
+ },
+ "por_cultivo_actual": {
+  "alfalfa": [
+   "alfalfa_corte_verano",
+   "chile",
+   "maiz_forrajero"
+  ],
+  "nogal": [
+   "chile",
+   "algodon",
+   "descanso"
+  ],
+  "barbecho": [
+   "maiz_forrajero",
+   "sorgo",
+   "alfalfa"
+  ]
+ },
+ "filtros": [
+  {
+   "id": "helada_siembra",
+   "tipo": "helada",
+   "aplica_a": [
+    "chile",
+    "maiz_forrajero",
+    "sorgo",
+    "algodon",
+    "avena_maiz"
+   ],
+   "regla": {
+    "prob_helada_max": 0.2,
+    "unidad": "probabilidad (umbral de prueba)"
+   },
+   "necesita": [
+    "heladas.json"
+   ],
+   "texto_en": "TEST ONLY: frost after the first sowing date.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  {
+   "id": "helada_sin_umbral",
+   "tipo": "helada",
+   "aplica_a": [
+    "chile"
+   ],
+   "regla": {},
+   "necesita": [
+    "heladas.json"
+   ],
+   "texto_en": "TEST ONLY: frost after sowing, source sets no threshold.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  {
+   "id": "antecedente_local",
+   "tipo": "sucesion",
+   "aplica_a": [
+    "chile"
+   ],
+   "regla": {
+    "anios_sin_hospedante": 5,
+    "unidad": "años (valor de prueba)"
+   },
+   "necesita": [
+    "dato local que no tenemos"
+   ],
+   "texto_en": "TEST ONLY: needs the field's disease history.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  },
+  {
+   "id": "fecha_limite_prueba",
+   "tipo": "fecha_limite",
+   "aplica_a": [
+    "algodon"
+   ],
+   "regla": {
+    "antes_de": "11-30"
+   },
+   "necesita": [],
+   "texto_en": "TEST ONLY: a deadline the engine cannot evaluate.",
+   "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+   "etiqueta": "TEST ONLY"
+  }
+ ]
+}

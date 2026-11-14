@@ -10,6 +10,10 @@
    fuente y periodo; umbral de las rutas con su etiqueta); TODAS las hojas numéricas de
    properties en parcelas.geojson (las de relieve con la fuente de relieve_parcelas.csv) y las
    cifras de web/data/pruebas.json que muestra «About & Data».
+4) Cifras nuevas del motor (escenario de goteo, pendientes de la auditoría): los bloques de goteo llevan
+   la fuente y la etiqueta de data/processed/supuestos.json; cubo.meta (eficiencias y ventana de suelo
+   desnudo) y las variantes en inglés de dotaciones, las de params; rutas_depresiones de relieve.json,
+   la fuente de la entrega relieve_meta y la etiqueta de su bloque.
 """
 import json
 import shutil
@@ -83,6 +87,29 @@ def balance_de_gota_roto(cubo, geo, expl):
     g["m3_otras_perdidas"] = g["m3_otras_perdidas"] + g["m3_salen_presa"]
 
 
+def opcion_con_goteo(cubo):
+    """Primera opción con escenario de goteo; si el cubo no lo trae, la prueba se omite."""
+    for pc in cubo["parcelas"].values():
+        for op in pc["opciones"]:
+            if op.get("gota_goteo_con_tope") and op.get("gota_goteo_sin_tope"):
+                return op
+    pytest.skip("el cubo actual no trae el escenario de goteo")
+
+
+def balance_de_goteo_con_tope_roto(cubo, geo, expl):
+    g = opcion_con_goteo(cubo)["gota_goteo_con_tope"]
+    g["m3_regresan_acuifero"] = g["m3_regresan_acuifero"] + g["m3_salen_presa"]
+
+
+def balance_de_goteo_sin_tope_roto(cubo, geo, expl):
+    g = opcion_con_goteo(cubo)["gota_goteo_sin_tope"]
+    g["m3_consume_cultivo_et"] = g["m3_consume_cultivo_et"] + g["m3_salen_presa"]
+
+
+def tope_sin_veredicto(cubo, geo, expl):
+    opcion_con_goteo(cubo)["tope_consumo"]["cumple_sin_tope"] = None
+
+
 def digito_en_explicacion(cubo, geo, expl):
     llave = next(iter(expl["explicaciones"]))
     expl["explicaciones"][llave]["textos"]["por_que"] += " " + str(cubo["dotaciones"]["deslizador"]["max"])
@@ -133,6 +160,9 @@ ALTERACIONES = {
     "P50 > P90": (p50_mayor_que_p90, "P10 ≤ P50 ≤ P90"),
     "semáforo de agua guardado": (semaforo_de_agua_guardado, "semáforo de agua"),
     "balance de La gota roto": (balance_de_gota_roto, "balance no cierra"),
+    "balance del goteo con tope roto": (balance_de_goteo_con_tope_roto, "gota_goteo_con_tope: el balance no cierra"),
+    "balance del goteo sin tope roto": (balance_de_goteo_sin_tope_roto, "gota_goteo_sin_tope: el balance no cierra"),
+    "tope de consumo sin veredicto": (tope_sin_veredicto, "cumple_sin_tope debe ser bool"),
     "dígito escrito en una explicación": (digito_en_explicacion, "dígitos fuera de los marcadores"),
     "estado_plazo fuera de lista": (estado_plazo_fuera_de_lista, "estado_plazo fuera de lista"),
     "zona de parcela fuera de params": (zona_de_parcela_fuera_de_params, "zona fuera de params.zona_piloto.zonas"),
@@ -442,3 +472,85 @@ def test_manifest_no_altera_el_contrato():
     antes = {n: (RAIZ / "web/data" / n).read_bytes() for n in ARCHIVOS}
     manifest.generar(escribir=False)
     assert all((RAIZ / "web/data" / n).read_bytes() == b for n, b in antes.items())
+
+
+# --- 4) cifras nuevas: goteo, meta, variantes en inglés y rutas cortadas -------------------------
+def test_manifest_goteo_con_la_fuente_y_la_etiqueta_de_supuestos(man):
+    cubo = leer("cubo.json")
+    g = cubo["meta"].get("goteo") or {}
+    if cubo["meta"].get("mock") or not g.get("disponible"):
+        pytest.skip("el cubo actual no trae el escenario de goteo real")
+    sup = json.loads((RAIZ / "data/processed/supuestos.json").read_text(encoding="utf-8"))
+    entrega = manifest.entrega_de(man["fuentes_de_origen"], manifest.ENTREGA_SUPUESTOS) or {}
+    campos = ["m3_salen_presa", "m3_perdidas_canal", "m3_llegan_parcela", "m3_consume_cultivo_et",
+              "m3_regresan_acuifero", "m3_otras_perdidas"]
+    claves = [f"{b}.{c}" for b in ("gota_goteo_con_tope", "gota_goteo_sin_tope") for c in campos]
+    claves += ["tope_consumo.et_historica_m3", "tope_consumo.et_goteo_sin_tope_m3"]
+    n = sum(1 for pc in cubo["parcelas"].values() for op in pc["opciones"] if op["gota_goteo_con_tope"])
+    for clave in claves:
+        e = man["cifras"].get(f"cubo.json:parcelas.*.opciones[*].{clave}")
+        assert e and e["n"] == n, f"{clave}: sin entrada o con otro número de valores"
+        assert e["fuente"] == sup["ea_goteo"]["fuente"], f"{clave}: fuente {e['fuente']}"
+        assert e["etiqueta"] == sup["ea_goteo"]["etiqueta"], f"{clave}: etiqueta {e['etiqueta']}"
+        assert "motor/b4_cubo.py" in e["script"]
+        if entrega:
+            assert entrega["script"] in e["script"] and e["fecha"] == (entrega.get("fecha_consulta") or entrega.get("fecha"))
+    # El bloque «gota» (riego actual) sigue siendo cálculo del motor: no hereda la etiqueta del goteo.
+    actual = man["cifras"]["cubo.json:parcelas.*.opciones[*].gota.m3_salen_presa"]
+    assert actual["etiqueta"] == manifest.ETIQUETA_CALCULO
+    # Las eficiencias mismas, con su fuente y su etiqueta; el rango de A5, con las suyas.
+    for clave in ("ea_goteo", "ea_superficial_referencia"):
+        e = man["cifras"][f"cubo.json:meta.goteo.{clave}.valor"]
+        assert (e["min"], e["fuente"], e["etiqueta"]) == (sup[clave]["valor"], sup[clave]["fuente"], sup[clave]["etiqueta"])
+    rango = man["cifras"]["cubo.json:meta.goteo.zonas.*.ea_gravedad.valor[*]"]
+    valores = [v for z in g["zonas"].values() for v in z["ea_gravedad"]["valor"]]
+    assert rango["n"] == len(valores) and (rango["min"], rango["max"]) == (min(valores), max(valores))
+    assert contiene(rango["etiqueta"], next(iter(g["zonas"].values()))["ea_gravedad"]["etiqueta"])
+
+
+def test_manifest_ventana_de_suelo_y_textos_en_ingles_con_la_fuente_de_params(man):
+    cubo = leer("cubo.json")
+    if cubo["meta"].get("mock") or "ventana_desnudo" not in cubo["meta"]:
+        pytest.skip("cubo simulado: los simulados no llevan estos campos")
+    params = json.loads((RAIZ / "data/params.json").read_text(encoding="utf-8"))
+    p = params["suelo"]["ventana_desnudo"]
+    for k in ("inicio", "fin"):
+        e = man["cifras"][f"cubo.json:meta.ventana_desnudo.{k}"]
+        assert e["textos"] == [p["valor"][k]] and (e["fuente"], e["etiqueta"]) == (p["fuente"], p["etiqueta"])
+    millar = params["unidades"]["millar"]
+    e = man["cifras"]["cubo.json:dotaciones.equivalencia_en"]
+    assert e["textos"] == [millar["nota_en"]] and (e["fuente"], e["etiqueta"]) == (millar["fuente"], millar["etiqueta"])
+    # La nota en inglés de una marca se registra si lleva cifras, con la fuente de su marca.
+    con_cifras = [(i, m) for i, m in enumerate(cubo["dotaciones"]["marcas"]) if any(c.isdigit() for c in m.get("nota_en") or "")]
+    assert con_cifras, "al menos una nota en inglés lleva cifras (la de la marca de pozos)"
+    for i, m in con_cifras:
+        e = entrada(man, "cubo.json", f"dotaciones.marcas[{i}].nota_en")
+        assert e and m["nota_en"] in e["textos"] and contiene(e["fuente"], params["dotaciones"][m["id"]]["fuente"])
+    # Son copias de params: el manifest no debe avisar que el cubo dice otra cosa.
+    distintos = [a for a in man["avisos"] if ("nota_en" in a and "no coincide" in a)
+                 or ("ventana_desnudo" in a and "el cubo dice" in a)]
+    assert not distintos, distintos
+
+
+def test_manifest_rutas_depresiones_con_la_fuente_de_relieve_meta(man):
+    ruta = RAIZ / "web/data/relieve.json"
+    if not ruta.exists():
+        pytest.skip("sin web/data/relieve.json (la capa de relieve no se ha ejecutado)")
+    relieve = json.loads(ruta.read_text(encoding="utf-8"))
+    con_bloque = {z: b["rutas_depresiones"] for z, b in relieve["zonas"].items() if b.get("rutas_depresiones")}
+    if not con_bloque:
+        pytest.skip("relieve.json sin rutas_depresiones (A9 no lo entregó)")
+    for zid, dep in con_bloque.items():
+        entrega = manifest.entrega_de_relieve(man["fuentes_de_origen"], zid) or {}
+        for k, v in dep.items():
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                e = entrada(man, "relieve.json", f"zonas.{zid}.rutas_depresiones.{k}")
+                assert e and e["min"] <= v <= e["max"], f"rutas_depresiones.{k} sin entrada en el manifest"
+                assert contiene(e["etiqueta"], dep["etiqueta"]), f"{k}: etiqueta {e['etiqueta']}"
+                if entrega:
+                    assert contiene(e["fuente"], entrega["fuente"]), f"{k}: fuente {e['fuente']}"
+                    assert entrega["script"] in str(e["script"])
+        if any(c.isdigit() for c in dep.get("nota") or ""):
+            e = entrada(man, "relieve.json", f"zonas.{zid}.rutas_depresiones.nota")
+            assert e and dep["nota"] in e["textos"] and contiene(e["etiqueta"], dep["etiqueta"])
+    assert not [a for a in man["avisos"] if "rutas_depresiones" in a and "sin regla propia" in a], man["avisos"]

@@ -10,7 +10,9 @@
 // - formato: resolución (m → km), números, meses; eje vertical;
 // - recursos del reto: orden y conteos por estado;
 // - evidencia por parcela (GEDI y ECOSTRESS) con y sin dato; la lectura de GEDI no se presenta como
-//   altura del cultivo y lleva su nota y la referencia de la entrega; riesgo de helada por fecha de siembra.
+//   altura del cultivo: lleva su nota, los criterios de la sesión de datos (piso del instrumento y
+//   umbral de dosel alto, de contexto.json) y, sin ellos, la referencia de la entrega;
+// - riesgo de helada por fecha de siembra.
 // Datos: tests/fixtures/contexto_reto/contexto_lleno.json (DE PRUEBA, lo genera el motor con datos de
 // prueba) y, si existe, web/data/contexto.json (lo real de hoy). Los valores esperados se leen de ahí.
 import { test } from "node:test";
@@ -25,6 +27,7 @@ import {
   citasDeTarjeta,
   climaDelAnio,
   contarEstados,
+  criteriosGedi,
   diferenciaLluvia,
   escalaY,
   etiquetaMes,
@@ -33,6 +36,7 @@ import {
   formatoResolucion,
   fuentesDeSeccion,
   graficasDeClima,
+  lecturaDeGedi,
   mesDia,
   metaDePanel,
   modeloContraste,
@@ -584,16 +588,33 @@ test("ultimoMesConDato", () => {
   assert.equal(ultimoMesConDato(undefined, undefined), null);
 });
 
-const CLAVES_EVIDENCIA = ["etiqueta", "texto", "nota", "fuente", "archivo", "fecha"];
+const CLAVES_EVIDENCIA = ["etiqueta", "texto", "nota", "lectura", "fuente", "archivo", "fecha"];
 // Lo que la ficha no debe decir de GEDI: que su lectura es la altura (medida) del dosel o del cultivo.
 const COMO_ALTURA_DE_CULTIVO = /canopy height|crop height \(|height of the crop/i;
+const TEXTO_DE_LECTURA = { tall_canopy: "tall canopy seen", no_tall_canopy: "no tall canopy seen", too_few_shots: "too few shots to tell" };
+const medidaDeGedi = (p) => `median ${formatoNumero(p.altura_mediana_m)} m from ${formatoNumero(p.n_disparos)} ${p.n_disparos === 1 ? "shot" : "shots"}; top decile above ${formatoNumero(p.altura_p90_m)} m`;
+// El criterio de dosel alto aplicado aquí al JSON (sin el módulo): la lectura que debe salir de cada parcela.
+function lecturaIndependiente(gedi, id) {
+  const p = gedi.parcelas[id];
+  if (!p) return "no_shots";
+  const k = gedi.criterios && gedi.criterios.dosel_alto;
+  if (!k) return null;
+  if (p.n_disparos < k.min_disparos) return "too_few_shots";
+  return p.altura_p90_m >= k.umbral_m ? "tall_canopy" : "no_tall_canopy";
+}
+// Variantes del contexto de prueba: sin los criterios de la sesión de datos, y además sin la referencia.
+const SIN_CRITERIOS = {
+  ...LLENO,
+  gedi: { ...LLENO.gedi, criterios: null, parcelas: Object.fromEntries(Object.entries(LLENO.gedi.parcelas).map(([id, p]) => [id, { ...p, dosel_alto: null }])) },
+};
+const SIN_CRITERIOS_NI_REFERENCIA = { ...SIN_CRITERIOS, gedi: { ...SIN_CRITERIOS.gedi, referencia: null } };
 
 test("evidenciaDeParcela: lectura de GEDI con su nota y ET de ECOSTRESS del último mes con dato", () => {
   const [conDato] = Object.entries(LLENO.gedi.parcelas).filter(([, p]) => p.n_disparos > 1);
   const [id, p] = conDato;
   const filas = evidenciaDeParcela({ contexto: LLENO, id });
   assert.deepEqual(filas.map((f) => f.etiqueta), ["GEDI height reading", "Evapotranspiration (ECOSTRESS)"]);
-  assert.equal(filas[0].texto, `median ${p.altura_mediana_m} m from ${p.n_disparos} shots; top decile above ${p.altura_p90_m} m`);
+  assert.equal(filas[0].texto, `${TEXTO_DE_LECTURA[lecturaIndependiente(LLENO.gedi, id)]}: ${medidaDeGedi(p)}`);
   assert.equal(filas[0].fuente, LLENO.gedi.fuente);
   assert.deepEqual([filas[0].archivo, filas[0].fecha], [LLENO.gedi.archivo, LLENO.gedi.fecha]);
   assert.deepEqual([filas[1].archivo, filas[1].fecha], [LLENO.ecostress.archivo, LLENO.ecostress.fecha]);
@@ -601,29 +622,78 @@ test("evidenciaDeParcela: lectura de GEDI con su nota y ET de ECOSTRESS del últ
   const ultimo = ultimoMesConDato(LLENO.ecostress.meses, LLENO.ecostress.parcelas[id]);
   assert.equal(filas[1].texto, `${formatoNumero(ultimo.valor)} mm/day, median of the clear scenes of ${etiquetaMes(ultimo.mes)}`);
   assert.equal(filas[1].fuente, LLENO.ecostress.fuente);
-  assert.equal(filas[1].nota, null, "ECOSTRESS no lleva nota");
+  assert.deepEqual([filas[1].nota, filas[1].lectura], [null, null], "ECOSTRESS no lleva nota ni lectura");
   // Un solo disparo: singular.
-  const [unoId, uno] = Object.entries(LLENO.gedi.parcelas).find(([, q]) => q.n_disparos === 1);
-  assert.ok(evidenciaDeParcela({ contexto: LLENO, id: unoId })[0].texto.startsWith(`median ${uno.altura_mediana_m} m from 1 shot;`));
+  const [unoId] = Object.entries(LLENO.gedi.parcelas).find(([, q]) => q.n_disparos === 1);
+  assert.ok(evidenciaDeParcela({ contexto: LLENO, id: unoId })[0].texto.includes(" from 1 shot;"));
+  // Sin el criterio de la sesión de datos, el texto es la medida sola (no se clasifica nada).
+  assert.equal(evidenciaDeParcela({ contexto: SIN_CRITERIOS, id })[0].texto, medidaDeGedi(p));
+  assert.equal(evidenciaDeParcela({ contexto: SIN_CRITERIOS, id })[0].lectura, null);
+});
+
+test("lecturaDeGedi: dosel alto, sin dosel alto, pocos disparos, sin disparos; null sin criterio", () => {
+  const ids = [...Object.keys(LLENO.gedi.parcelas), ...Object.keys(LLENO.ecostress.parcelas).filter((id) => !(id in LLENO.gedi.parcelas))];
+  const lecturas = Object.fromEntries(ids.map((id) => [id, lecturaDeGedi({ contexto: LLENO, id })]));
+  for (const id of ids) assert.equal(lecturas[id], lecturaIndependiente(LLENO.gedi, id), id);
+  assert.deepEqual(new Set(Object.values(lecturas)), new Set(["tall_canopy", "no_tall_canopy", "too_few_shots", "no_shots"]), "la fixture trae las cuatro lecturas");
+  // El texto del renglón empieza con la lectura; la medida va después, completa.
+  for (const id of Object.keys(LLENO.gedi.parcelas)) {
+    const [gedi] = evidenciaDeParcela({ contexto: LLENO, id });
+    assert.equal(gedi.lectura, lecturas[id]);
+    assert.equal(gedi.texto, `${TEXTO_DE_LECTURA[lecturas[id]]}: ${medidaDeGedi(LLENO.gedi.parcelas[id])}`);
+  }
+  // Sin criterio entregado: null para las parcelas con disparos (no se clasifica); «no_shots» sigue diciéndose.
+  for (const id of Object.keys(LLENO.gedi.parcelas)) assert.equal(lecturaDeGedi({ contexto: SIN_CRITERIOS, id }), null);
+  assert.equal(lecturaDeGedi({ contexto: SIN_CRITERIOS, id: "NO_EXISTE" }), "no_shots");
+  // Con criterio pero una parcela sin clasificar y con disparos de sobra (un JSON anterior): null, no se adivina.
+  const [idAlto] = Object.entries(LLENO.gedi.parcelas).find(([, p]) => p.dosel_alto === true);
+  const sinClasificar = { ...LLENO, gedi: { ...LLENO.gedi, parcelas: { ...LLENO.gedi.parcelas, [idAlto]: { ...LLENO.gedi.parcelas[idAlto], dosel_alto: null } } } };
+  assert.equal(lecturaDeGedi({ contexto: sinClasificar, id: idAlto }), null);
+  // Sin bloque: null.
+  assert.equal(lecturaDeGedi({ contexto: SIN_ENTREGAS, id: idAlto }), null);
+  assert.equal(lecturaDeGedi(), null);
+});
+
+test("criteriosGedi: piso del instrumento y umbral de dosel alto, con los números y la etiqueta del JSON", () => {
+  const k = LLENO.gedi.criterios;
+  const { piso, dosel } = criteriosGedi(LLENO);
+  assert.equal(piso, `Fields without trees read about ${formatoNumero(k.piso_instrumento.valor_m)} m (most between ${formatoNumero(k.piso_instrumento.min_m)} and ${formatoNumero(k.piso_instrumento.max_m)} m): the floor of the instrument, not plant height (${k.piso_instrumento.etiqueta}).`);
+  assert.equal(dosel, `Tall canopy means a top decile of ${formatoNumero(k.dosel_alto.umbral_m)} m or more, from at least ${formatoNumero(k.dosel_alto.min_disparos)} shots (${k.dosel_alto.etiqueta}).`);
+  const con = (criterios) => ({ ...LLENO, gedi: { ...LLENO.gedi, criterios } });
+  // Lo que no llegó o llegó incompleto no se dice (ni se completa con nada).
+  assert.deepEqual(criteriosGedi(con(null)), { piso: null, dosel: null });
+  assert.deepEqual(criteriosGedi(con({ ...k, piso_instrumento: null })), { piso: null, dosel });
+  assert.deepEqual(criteriosGedi(con({ ...k, dosel_alto: null })), { piso, dosel: null });
+  assert.equal(criteriosGedi(con({ ...k, piso_instrumento: { ...k.piso_instrumento, max_m: null } })).piso, null);
+  assert.equal(criteriosGedi(con({ ...k, dosel_alto: { ...k.dosel_alto, min_disparos: null } })).dosel, null);
+  // Sin etiqueta, la frase va sin paréntesis; un mínimo de un disparo, en singular.
+  assert.ok(criteriosGedi(con({ ...k, piso_instrumento: { ...k.piso_instrumento, etiqueta: null } })).piso.endsWith("not plant height."));
+  assert.ok(criteriosGedi(con({ ...k, dosel_alto: { ...k.dosel_alto, min_disparos: 1, etiqueta: "" } })).dosel.endsWith("from at least 1 shot."));
+  assert.deepEqual(criteriosGedi(SIN_ENTREGAS), { piso: null, dosel: null });
+  assert.deepEqual(criteriosGedi(), { piso: null, dosel: null });
 });
 
 test("evidenciaDeParcela: la lectura de GEDI no se presenta como altura del cultivo y lleva su nota", () => {
-  // La nota fija no trae cifras: lo que leen las parcelas sale de la entrega (gedi.referencia).
+  // La nota fija no trae cifras: el piso del instrumento y el umbral salen de la entrega (gedi.criterios).
   for (const nota of [NOTA_GEDI, NOTA_GEDI_SIN_DISPAROS]) assert.ok(!/\d/.test(nota), nota);
   assert.ok(NOTA_GEDI.includes("does not read zero on bare ground") && NOTA_GEDI.includes("does not measure crop height"));
+  const { piso, dosel } = criteriosGedi(LLENO);
   const referencia = referenciaGedi(LLENO);
-  assert.ok(referencia, "la fixture trae gedi.referencia");
-  for (const [id] of Object.entries(LLENO.gedi.parcelas)) {
+  assert.ok(piso && dosel && referencia, "la fixture trae los criterios y la referencia");
+  for (const id of Object.keys(LLENO.gedi.parcelas)) {
     const [gedi] = evidenciaDeParcela({ contexto: LLENO, id });
     assert.ok(!COMO_ALTURA_DE_CULTIVO.test(`${gedi.etiqueta} ${gedi.texto}`), `${gedi.etiqueta}: ${gedi.texto}`);
-    assert.equal(gedi.nota, `${NOTA_GEDI} ${referencia}`, "nota fija + referencia de la entrega");
+    assert.equal(gedi.nota, `${NOTA_GEDI} ${piso} ${dosel}`, "nota fija + piso del instrumento + criterio de dosel alto");
+    // Sin criterios: nota fija + referencia de la entrega. Sin nada: la nota fija; nunca el valor solo.
+    assert.equal(evidenciaDeParcela({ contexto: SIN_CRITERIOS, id })[0].nota, `${NOTA_GEDI} ${referencia}`);
+    assert.equal(evidenciaDeParcela({ contexto: SIN_CRITERIOS_NI_REFERENCIA, id })[0].nota, NOTA_GEDI);
   }
-  // Si la entrega no trae la referencia (un contexto.json anterior), queda la nota fija: nunca el valor solo.
-  const sinReferencia = { ...LLENO, gedi: { ...LLENO.gedi, referencia: null } };
-  const [conNota] = evidenciaDeParcela({ contexto: sinReferencia, id: Object.keys(LLENO.gedi.parcelas)[0] });
-  assert.equal(conNota.nota, NOTA_GEDI);
-  const { referencia: _quitada, ...gediViejo } = LLENO.gedi;
-  assert.equal(evidenciaDeParcela({ contexto: { ...LLENO, gedi: gediViejo }, id: Object.keys(LLENO.gedi.parcelas)[0] })[0].nota, NOTA_GEDI);
+  // Un contexto.json anterior a esta corrección (sin «referencia» ni «criterios» ni «dosel_alto»): la nota fija sigue.
+  const { referencia: _r, criterios: _k, ...gediViejo } = LLENO.gedi;
+  gediViejo.parcelas = Object.fromEntries(Object.entries(LLENO.gedi.parcelas).map(([id, { dosel_alto: _d, ...p }]) => [id, p]));
+  const [idViejo, pViejo] = Object.entries(gediViejo.parcelas)[0];
+  const [viejo] = evidenciaDeParcela({ contexto: { ...LLENO, gedi: gediViejo }, id: idViejo });
+  assert.deepEqual([viejo.texto, viejo.nota, viejo.lectura], [medidaDeGedi(pViejo), NOTA_GEDI, null]);
 });
 
 test("referenciaGedi: entre qué valores leen las parcelas de la entrega; null si no hay con qué comparar", () => {
@@ -642,21 +712,38 @@ test("referenciaGedi: entre qué valores leen las parcelas de la entrega; null s
   assert.equal(referenciaGedi(), null);
 });
 
-test("GEDI de hoy (web/data/contexto.json): todas las parcelas con lectura llevan la nota y la referencia", { skip: !(REAL && REAL.gedi) && "sin gedi en web/data/contexto.json" }, () => {
-  const referencia = referenciaGedi(REAL);
-  const r = REAL.gedi.referencia;
-  assert.ok(r && referencia, "la entrega real trae su referencia");
-  for (const v of [r.n_parcelas, r.minimo_m, r.mediana_m, r.maximo_m]) assert.ok(referencia.includes(formatoNumero(v)), `${v} en: ${referencia}`);
+test("GEDI de hoy (web/data/contexto.json): ninguna parcela se presenta como altura de cultivo; lecturas según el criterio entregado", { skip: !(REAL && REAL.gedi) && "sin gedi en web/data/contexto.json" }, () => {
+  const g = REAL.gedi;
   // La referencia sale de las mismas parcelas del bloque (cálculo independiente, aquí).
-  const lecturas = Object.values(REAL.gedi.parcelas).map((p) => p.altura_mediana_m).sort((a, b) => a - b);
-  assert.equal(r.n_parcelas, lecturas.length);
-  assert.deepEqual([r.minimo_m, r.maximo_m], [lecturas[0], lecturas.at(-1)]);
+  const lecturas = Object.values(g.parcelas).map((p) => p.altura_mediana_m).sort((a, b) => a - b);
+  assert.equal(g.referencia.n_parcelas, lecturas.length);
+  assert.deepEqual([g.referencia.minimo_m, g.referencia.maximo_m], [lecturas[0], lecturas.at(-1)]);
   const mitad = lecturas.length % 2 ? lecturas[(lecturas.length - 1) / 2] : (lecturas[lecturas.length / 2 - 1] + lecturas[lecturas.length / 2]) / 2;
-  assert.ok(Math.abs(r.mediana_m - mitad) < 0.006, `${r.mediana_m} vs ${mitad}`);
-  for (const id of Object.keys(REAL.gedi.parcelas)) {
+  assert.ok(Math.abs(g.referencia.mediana_m - mitad) < 0.006, `${g.referencia.mediana_m} vs ${mitad}`);
+  const referencia = referenciaGedi(REAL);
+  for (const v of [g.referencia.n_parcelas, g.referencia.minimo_m, g.referencia.mediana_m, g.referencia.maximo_m]) assert.ok(referencia.includes(formatoNumero(v)), `${v} en: ${referencia}`);
+  // La nota de toda parcela con lectura: la fija, más los criterios entregados o, si no llegaron, la referencia.
+  const { piso, dosel } = criteriosGedi(REAL);
+  const notaEsperada = [NOTA_GEDI, piso ?? referencia, dosel].filter(Boolean).join(" ");
+  assert.ok(notaEsperada.length > NOTA_GEDI.length, "con la entrega real, la nota trae algo con qué comparar la lectura");
+  if (g.criterios && g.criterios.piso_instrumento) for (const v of [g.criterios.piso_instrumento.valor_m, g.criterios.piso_instrumento.min_m, g.criterios.piso_instrumento.max_m]) assert.ok(piso.includes(`${formatoNumero(v)} `), `${v} en: ${piso}`);
+  const cuenta = { tall_canopy: 0, no_tall_canopy: 0, too_few_shots: 0, null: 0 };
+  for (const id of Object.keys(g.parcelas)) {
     const [gedi] = evidenciaDeParcela({ contexto: REAL, id });
     assert.ok(!COMO_ALTURA_DE_CULTIVO.test(`${gedi.etiqueta} ${gedi.texto}`), `${id}: ${gedi.etiqueta}: ${gedi.texto}`);
-    assert.equal(gedi.nota, `${NOTA_GEDI} ${referencia}`, id);
+    assert.equal(gedi.nota, notaEsperada, id);
+    assert.equal(gedi.lectura, lecturaIndependiente(g, id), id);
+    assert.ok(gedi.texto.endsWith(medidaDeGedi(g.parcelas[id])), `${id}: ${gedi.texto}`);
+    cuenta[String(gedi.lectura)] += 1;
+  }
+  // Los conteos del motor y las lecturas de la página dicen lo mismo.
+  if (g.criterios && g.criterios.dosel_alto) {
+    assert.deepEqual([cuenta.tall_canopy, cuenta.no_tall_canopy, cuenta.too_few_shots, cuenta.null], [g.n_dosel_alto, g.n_sin_dosel_alto, g.n_pocos_disparos, 0]);
+    // El caso del hallazgo: una lectura en el piso del instrumento no se dice «dosel alto».
+    const enElPiso = Object.entries(g.parcelas).find(([, p]) => p.dosel_alto === false);
+    if (enElPiso) assert.ok(evidenciaDeParcela({ contexto: REAL, id: enElPiso[0] })[0].texto.startsWith("no tall canopy seen: "));
+  } else {
+    assert.equal(cuenta.null, Object.keys(g.parcelas).length, "sin criterio no se clasifica ninguna parcela");
   }
 });
 
@@ -666,6 +753,7 @@ test("evidenciaDeParcela: sin dato se dice (no es cero) y sin bloques devuelve [
   const filas = evidenciaDeParcela({ contexto: LLENO, id: sinDisparos });
   assert.equal(filas[0].texto, "GEDI: no shots inside this field");
   assert.equal(filas[0].nota, NOTA_GEDI_SIN_DISPAROS, "sin disparos: es «sin dato», y se explica por qué");
+  assert.equal(filas[0].lectura, "no_shots");
   assert.equal(filas[0].fuente, LLENO.gedi.fuente);
   assert.deepEqual(Object.keys(filas[0]), CLAVES_EVIDENCIA);
   // Parcela con sus últimos meses sin escena: se usa el último mes que sí tiene dato.

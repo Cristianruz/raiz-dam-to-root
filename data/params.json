@@ -105,7 +105,8 @@
       "unidad": "1 millar/ha",
       "fuente": "S9 §5",
       "etiqueta": "Definición",
-      "nota": "1 millar/ha = 1,000 m³/ha = 10 cm de lámina; 100 mm = 1 millar/ha (kit B4)"
+      "nota": "1 millar/ha = 1,000 m³/ha = 10 cm de lámina; 100 mm = 1 millar/ha (kit B4)",
+      "nota_en": "1 millar/ha = 1,000 m³/ha = 10 cm of water depth; 100 mm = 1 millar/ha (kit B4)"
     }
   },
   "dotaciones": {
@@ -130,7 +131,8 @@
       "fuente": "El Diario de Chihuahua, 28-oct-2024, según la investigación (S8 §2). Referencia: Módulo 4, 1 millar/ha a 4,976 ha desde 11 pozos",
       "fecha_consulta": null,
       "etiqueta": "[P]",
-      "nota": "≈1 millar/ha, de pozos; sin agua de las presas"
+      "nota": "≈1 millar/ha, de pozos; sin agua de las presas",
+      "nota_en": "≈1 millar/ha, from wells; no water from the dams"
     },
     "como_2026": {
       "valor": {
@@ -142,7 +144,8 @@
       "fuente": "El Diario de Chihuahua, 27-jul-2026; nota no leída directamente (S8 §2)",
       "fecha_consulta": null,
       "etiqueta": "[P], por confirmar",
-      "nota": "valor = punto medio del rango"
+      "nota": "valor = punto medio del rango",
+      "nota_en": "value = midpoint of the range"
     },
     "anio_normal": {
       "valor": {
@@ -154,14 +157,17 @@
       "fuente": "El Diario de Chihuahua, 27-jul-2026; nota no leída directamente (S8 §2)",
       "fecha_consulta": null,
       "etiqueta": "[P], por confirmar",
-      "nota": "valor = punto medio del rango"
+      "nota": "valor = punto medio del rango",
+      "nota_en": "value = midpoint of the range"
     },
     "punto_medicion": {
       "valor": "Toma de la parcela",
+      "valor_en": "Field turnout (the field's water intake)",
       "unidad": null,
       "fuente": "S8, decisión 2",
       "etiqueta": "[S]",
-      "nota": "Por confirmar con un técnico de módulo en la mentoría"
+      "nota": "Por confirmar con un técnico de módulo en la mentoría",
+      "nota_en": "To be confirmed with an irrigation module technician at the mentoring session"
     }
   },
   "lluvia_pct": {

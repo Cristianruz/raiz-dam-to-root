@@ -5,10 +5,11 @@
 
 ## Cómo usar este documento
 
-- **Respuesta:** de 2 a 4 frases, para decir en unos 20 segundos. Los 3 minutos alcanzan para unas ocho preguntas.
+- **Respuesta:** de 2 a 4 frases, para decir en 15 a 35 segundos. Los 3 minutos alcanzan para unas seis a ocho preguntas.
 - **Cifra** y **Archivo:** no se leen; sirven si el jurado pide el dato o la fuente.
 - **Pendiente:** lo que todavía no está, con la frase honesta que el equipo puede decir tal cual.
 - **«[SI ESTÁ CONECTADO]»:** la respuesta cambia si esa pieza del gemelo ya está en la página.
+- **«[CON P0632]» y «[MIENTRAS SIGA P0244]»; «[SI EL GOTEO ESTÁ CONECTADO]» y «[SI EL GOTEO NO ESTÁ]»:** la respuesta cambia según la parcela «libre» que la página marque como protagonista y según si el escenario de goteo ya está en «Follow the drop» (`docs/decisiones/2026-11-14_opciones_b3.md` §2 y §3). Diga una de las dos variantes.
 - Si no sabe la respuesta, dígalo: «Eso todavía no lo sabemos; para saberlo necesitamos…». Es mejor que improvisar un número.
 - Etiquetas de las cifras: [V] verificada en fuente primaria, [P] prensa, [S] supuesto declarado, [NE] no encontrada.
 
@@ -30,7 +31,7 @@
 - **Respuesta.** No. Son comparaciones: la rotación de hoy y dos o tres alternativas, con el agua que pide cada una. Además, la lista de alternativas es provisional: la armó el integrador mientras llega la tabla de rotaciones del equipo. Hoy no se aplica ningún filtro, tampoco el de heladas.
 - **Cifra.** 1,492 opciones en la página; ninguna lleva filtro. El renglón «Money» va vacío en todas.
 - **Archivo.** `data/opciones_b4.json` (etiqueta [S]); `LIMITATIONS.md`, «Crop options»; `web/data/cubo.json`.
-- **Pendiente.** «Las alternativas que ve son provisionales. La tabla oficial de rotaciones del equipo depende de documentos que todavía no están en el repositorio.» (`docs/reparto_faltantes.md`, H4 e I9).
+- **Pendiente.** «Las alternativas que ve son provisionales. La tabla oficial de rotaciones del equipo depende de documentos que todavía no están en el repositorio.» (`docs/reparto_faltantes.md`, H4 e I9). La sesión de datos la prepara como `opciones_b3.json` (`docs/decisiones/2026-11-14_opciones_b3.md` §1); todavía no llega a `data/processed/`.
 
 ### 4. ¿De dónde salen las dotaciones del deslizador?
 - **Respuesta.** De la prensa local, y así están rotuladas. «Like 2025» es un millar por hectárea, de pozos. «Like 2026» y «Normal year» vienen de una nota que no leímos directamente, por eso dicen «por confirmar». Usted puede mover el deslizador a la dotación que le confirme su módulo.
@@ -52,9 +53,9 @@
 
 ### 7. ¿Los límites de mi parcela están bien?
 - **Respuesta.** Son estimados, no un catastro. Vienen de un modelo de Fields of The World que aquí trabaja fuera de la región donde se entrenó: su conjunto de referencia no incluye a México. Por eso cada parcela trae su confianza y las de confianza baja se abstienen.
-- **Cifra.** 137 de 1,239 parcelas tienen confianza menor de 50. Las tres protagonistas tienen 55 o 56.
+- **Cifra.** 137 de 1,239 parcelas tienen confianza menor de 50. Las tres protagonistas: **[CON P0632]** 54 o 55 (P0757, 55; P0632, 54; L0175, 55). **[MIENTRAS SIGA P0244]** 55 o 56 (P0244, 56).
 - **Archivo.** `LIMITATIONS.md`; `web/data/parcelas.geojson` → `ftw_confianza`; `data/params.json` → `mapa.ftw_confianza_min`.
-- **Pendiente.** «La revisión a ojo, en color verdadero, de las tres parcelas que mostramos todavía no está hecha.» (`docs/reparto_faltantes.md`, D3).
+- **Pendiente.** «Una persona del equipo todavía no revisa a ojo, en color verdadero, las tres parcelas que mostramos.» Son P0757, P0632 y L0175 (`docs/decisiones/2026-11-14_opciones_b3.md` §2; `docs/reparto_faltantes.md`, D3). Una sesión de IA sí las comparó con imágenes de Sentinel-2 (rama `datos-satelite`, `docs/revision_protagonistas.md`). De ahí salió el cambio de P0244 por P0632, y también una advertencia: el contorno de L0175 incluye un lote sin cultivo, así que su nogal ocupa menos que el polígono.
 
 ### 8. Su alfalfa pide mucha más agua que la del INIFAP. ¿Por qué?
 - **Respuesta.** Es cierto y lo publicamos. Antes de dividir entre la eficiencia de riego en la parcela, nuestra lámina queda cerca de la del INIFAP; casi toda la diferencia aparece en esa división. Esa eficiencia la supusimos, porque no hay un valor medido para el distrito. Si la supusimos baja, las hectáreas que «alcanzan» son más de las que marca la página.
@@ -63,9 +64,10 @@
 - **Pendiente.** «Necesitamos que un técnico del distrito nos diga qué eficiencia es realista en riego por gravedad y en qué condiciones valen las láminas del INIFAP.»
 
 ### 9. ¿Por qué no hay dinero en la ficha? ¿Y el goteo?
-- **Respuesta.** Porque no tenemos datos verificados, y un número sin fuente no entra. El renglón «Money» dice «no data». El goteo aparece como «not available» hasta tener una eficiencia con fuente. Y con goteo hay que contar las dos cosas: saca menos agua de la presa, pero también recarga menos el acuífero.
-- **Cifra.** 83.3 % de la recarga del acuífero viene de los retornos del riego [V].
-- **Archivo.** `LIMITATIONS.md`, «Crop options»; `data/params.json` → `eficiencia.goteo` (es `null`); S9 §2; `docs/referencias/ref_cultivos_sdr.md`.
+- **Respuesta.** Dinero: no tenemos datos verificados, y un número sin fuente no entra; el renglón «Money» dice «no data». **[SI EL GOTEO ESTÁ CONECTADO]** El goteo sí se muestra en «Follow the drop», con una eficiencia indicativa de la FAO que no se midió en el distrito, y así va rotulado. **[SI EL GOTEO NO ESTÁ]** El goteo aún no está en la página: tenemos una eficiencia indicativa de la FAO, no medida en el distrito, y falta conectarla. En los dos casos, con goteo hay que contar las dos cosas: sale menos agua de la presa, pero también regresa menos al acuífero.
+- **Cifra.** Eficiencia de aplicación indicativa: 0.9 con goteo y 0.6 con riego superficial, las dos [V] «indicative, not local». 83.3 % de la recarga del acuífero viene de los retornos del riego [V].
+- **Archivo.** `data/processed/supuestos.json` → `ea_goteo` y `ea_superficial_referencia` (FAO, Irrigation Water Management Training Manual No. 4, Anexo I, Tabla 8); `docs/decisiones/2026-11-14_opciones_b3.md` §3; `data/params.json` → `eficiencia.goteo` (sigue en `null`); `LIMITATIONS.md`, «Crop options»; S9 §2; `docs/referencias/ref_cultivos_sdr.md`.
+- **Pendiente.** «La eficiencia del goteo es un valor general de la FAO; no tenemos una medida del distrito.» Si alguien lee en la página o en `LIMITATIONS.md` que no hay una eficiencia con fuente: «Ese texto quedó atrasado; la fuente entró al repositorio el 14 de noviembre.»
 
 ### 10. ¿Por qué estas dos zonas y no todo el distrito?
 - **Respuesta.** Son dos rectángulos de diseño, trazados alrededor de localidades que propuso el equipo. El límite de los módulos de riego no es público, así que no podíamos usarlo. Las dos zonas pueden no representar a todo el distrito, y lo declaramos.
@@ -212,3 +214,6 @@ Los límites de parcela son de Fields of The World, un dato de terceros que no e
 - Anotar lo que respondieron las mentorías: eficiencia parcelaria, punto de medición del millar y cómo presentar H1.
 - Confirmar las preguntas 11, 18 y 20 cuando el gemelo y el contexto regional queden conectados.
 - Volver a leer las cifras de la pregunta 24 en la página final.
+- Respuesta 9: escoja la variante según si el goteo quedó conectado. La fuente de su eficiencia ya está en `data/processed/supuestos.json`; la página, `README.md` y `LIMITATIONS.md` todavía dicen que no la hay, y los corrige el integrador.
+- Respuesta 7: diga «54 o 55» cuando la página marque a P0632; hoy `web/data/parcelas.geojson` marca a P0244.
+- Si esta noche entra la tabla oficial de rotaciones (`opciones_b3.json`, pieza B3), cambie la respuesta 3 y vuelva a contar las opciones y los filtros.

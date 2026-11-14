@@ -39,11 +39,19 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                    decisión): va bajo la llave «cuenca» (esquemas.ZONA_CUENCA) con ambito «cuenca», y
                    la página la muestra igual en las dos zonas; las demás series llevan ambito «zona».
   gedi             null + gedi_motivo, o {archivo, fuente, fecha, parcelas: {id: {n_disparos,
-                   altura_mediana_m, altura_p90_m}} (solo n_disparos > 0), n_con_dato, n_total,
-                   referencia: {n_parcelas, minimo_m, mediana_m, maximo_m} | null}. «referencia» es
-                   cómo se reparte altura_mediana_m entre las parcelas con disparos de ESA entrega:
-                   GEDI (rh98) no marca cero sobre suelo desnudo, y con esto la ficha deja comparar
-                   la lectura de una parcela con las demás en vez de leerla como altura del cultivo.
+                   altura_mediana_m, altura_p90_m, dosel_alto}} (solo n_disparos > 0), n_con_dato,
+                   n_total, referencia, criterios, n_dosel_alto, n_sin_dosel_alto, n_pocos_disparos}.
+                   GEDI (rh98) no marca cero sobre suelo desnudo: su lectura NO es la altura del
+                   cultivo, y la ficha no la presenta así. Para leerla, el bloque trae:
+                   · referencia {n_parcelas, minimo_m, mediana_m, maximo_m} | null: cómo se reparte
+                     altura_mediana_m entre las parcelas con disparos de ESA entrega;
+                   · criterios | null: los de la sesión de datos (análisis propio de A11), tal como
+                     llegaron en supuestos.json: {archivo, fecha, piso_instrumento: {valor_m, min_m,
+                     max_m, etiqueta, fuente} | null, dosel_alto: {umbral_m, min_disparos, etiqueta,
+                     fuente} | null}. null si supuestos.json no los trae: entonces no se clasifica;
+                   · dosel_alto de cada parcela: true si su altura_p90_m llega al umbral, false si
+                     no, null si tiene menos disparos que min_disparos o no hay criterio. Los tres
+                     conteos (null sin criterio) suman n_con_dato.
   ecostress        null + ecostress_motivo, o {archivo, fuente, fecha, meses, parcelas: {id: [valores
                    por mes]}}
   gaez             null + gaez_motivo, o {archivo, fuente, fecha, zonas: {zona: [{cultivo, variable,
@@ -70,7 +78,8 @@ Reglas:
 - Un año con días faltantes (−999 o fila ausente) desde la fracción que ya usa el validador para
   eto_diaria.csv (esquemas.FALTANTES_MAX_FRACCION) va con su suma en null y su «dias_con_dato» real.
 - Los únicos números escritos aquí son definiciones con su fuente (inicio del año agrícola, umbral
-  de helada, 12 meses) y decimales de redondeo; ninguno es un dato.
+  de helada, 12 meses) y decimales de redondeo; ninguno es un dato. Los criterios para leer GEDI
+  (piso del instrumento y umbral de dosel alto) se LEEN de data/processed/supuestos.json.
 """
 import argparse
 import csv
@@ -138,6 +147,10 @@ ARCHIVO_GEDI = "gedi_parcelas.csv"
 ARCHIVO_ECOSTRESS = "ecostress_parcelas.csv"
 ARCHIVO_GAEZ = "gaez_zona.csv"
 ARCHIVO_HELADAS = "heladas.json"
+# Criterios para leer la altura de GEDI: entrega de la sesión de datos (pieza A11), ya validada.
+ARCHIVO_SUPUESTOS = "supuestos.json"
+CLAVE_PISO_GEDI = "gedi_piso_instrumento_m"
+CLAVE_UMBRAL_GEDI = "gedi_umbral_dosel_alto_m"
 ARCHIVO_ET_CONTRASTE = "et_contraste.csv"
 ARCHIVO_POWER = "eto_diaria.csv"
 ARCHIVO_IMERG = "imerg_diaria.csv"
@@ -463,19 +476,98 @@ def referencia_gedi(parcelas):
     }
 
 
-def bloque_gedi(ruta, registro):
+def _finito(v):
+    """El número tal cual (entero o decimal) si es finito; None en otro caso (los booleanos no cuentan)."""
+    return v if isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) else None
+
+
+def criterios_gedi(processed, registradas, avisos):
+    """Cómo leer la altura de GEDI según la sesión de datos (supuestos.json, análisis propio de A11):
+    - piso_instrumento: lo que rh98 marca en parcelas sin árboles (valor y rango). Por debajo de ese
+      nivel la lectura refleja el ancho del pulso del instrumento, no la altura de la planta;
+    - dosel_alto: el umbral del percentil 90 de la parcela y el mínimo de disparos para leerla.
+    Se copian con su etiqueta y su fuente; aquí no se escribe ningún valor. Devuelve None si el
+    archivo no está o no trae ninguno de los dos; un criterio incompleto va en None con su aviso."""
+    ruta = Path(processed) / ARCHIVO_SUPUESTOS
+    if not ruta.is_file():
+        return None
+    try:
+        supuestos = leer_json(ruta)
+    except (json.JSONDecodeError, UnicodeDecodeError) as ex:
+        avisos.append(f"{ARCHIVO_SUPUESTOS}: no se pudo leer ({type(ex).__name__}: {ex}); GEDI va sin criterios")
+        return None
+    if not isinstance(supuestos, dict):
+        avisos.append(f"{ARCHIVO_SUPUESTOS}: no es un objeto; GEDI va sin criterios")
+        return None
+
+    def texto(nodo, llave):
+        v = nodo.get(llave)
+        return v.strip() if isinstance(v, str) and v.strip() else None
+
+    piso = None
+    crudo = supuestos.get(CLAVE_PISO_GEDI)
+    if isinstance(crudo, dict):
+        valor, minimo, maximo = (_finito(crudo.get(k)) for k in ("valor", "min", "max"))
+        if None not in (valor, minimo, maximo) and minimo <= valor <= maximo:
+            piso = {"valor_m": valor, "min_m": minimo, "max_m": maximo,
+                    "etiqueta": texto(crudo, "etiqueta"), "fuente": texto(crudo, "fuente")}
+        else:
+            avisos.append(f"{ARCHIVO_SUPUESTOS} → {CLAVE_PISO_GEDI}: se esperaba valor, min y max con "
+                          "min ≤ valor ≤ max; el piso del instrumento va en null")
+    elif crudo is not None:
+        avisos.append(f"{ARCHIVO_SUPUESTOS} → {CLAVE_PISO_GEDI}: no es un objeto; va en null")
+
+    dosel = None
+    crudo = supuestos.get(CLAVE_UMBRAL_GEDI)
+    if isinstance(crudo, dict):
+        umbral = _finito(crudo.get("valor"))
+        minimo = crudo.get("min_disparos")
+        disparos = _finito(minimo.get("valor")) if isinstance(minimo, dict) else None
+        if umbral is not None and umbral > 0 and disparos is not None and disparos >= 1 and float(disparos).is_integer():
+            dosel = {"umbral_m": umbral, "min_disparos": int(disparos),
+                     "etiqueta": texto(crudo, "etiqueta"), "fuente": texto(crudo, "fuente")}
+        else:
+            avisos.append(f"{ARCHIVO_SUPUESTOS} → {CLAVE_UMBRAL_GEDI}: se esperaba valor > 0 y min_disparos.valor "
+                          "entero ≥ 1; el umbral de dosel alto va en null")
+    elif crudo is not None:
+        avisos.append(f"{ARCHIVO_SUPUESTOS} → {CLAVE_UMBRAL_GEDI}: no es un objeto; va en null")
+
+    if piso is None and dosel is None:
+        return None
+    return {"archivo": ARCHIVO_SUPUESTOS, "fecha": (registradas.get(ARCHIVO_SUPUESTOS) or {}).get("fecha"),
+            "piso_instrumento": piso, "dosel_alto": dosel}
+
+
+def dosel_alto(parcela, criterio):
+    """Aplica el criterio de la sesión de datos a una parcela: True si el percentil 90 de sus disparos
+    llega al umbral, False si no, None si no hay criterio, si tiene menos disparos que el mínimo para
+    leerla o si no trae el percentil 90. No decide nada por su cuenta: el umbral viene de la entrega."""
+    if not criterio or parcela["altura_p90_m"] is None or parcela["n_disparos"] < criterio["min_disparos"]:
+        return None
+    return parcela["altura_p90_m"] >= criterio["umbral_m"]
+
+
+def bloque_gedi(ruta, registro, criterios=None):
     filas = leer_csv(ruta)
+    criterio = (criterios or {}).get("dosel_alto")
     parcelas = {}
     for fila in filas:
         n = entero(fila["n_disparos"])
         if n:   # sin disparos no hay altura: la parcela no entra (la página dice «no shots»)
-            parcelas[fila["id"].strip()] = {
+            parcela = {
                 "n_disparos": n,
                 "altura_mediana_m": numero(fila["altura_mediana_m"]),
                 "altura_p90_m": numero(fila["altura_p90_m"]),
             }
+            parcela["dosel_alto"] = dosel_alto(parcela, criterio)
+            parcelas[fila["id"].strip()] = parcela
+    lecturas = Counter(p["dosel_alto"] for p in parcelas.values())
     return {**procedencia(registro), "parcelas": parcelas, "n_con_dato": len(parcelas), "n_total": len(filas),
-            "referencia": referencia_gedi(parcelas)}
+            "referencia": referencia_gedi(parcelas), "criterios": criterios or None,
+            # Con criterio: cuántas parcelas muestran dosel alto, cuántas no y cuántas tienen pocos disparos.
+            "n_dosel_alto": lecturas[True] if criterio else None,
+            "n_sin_dosel_alto": lecturas[False] if criterio else None,
+            "n_pocos_disparos": lecturas[None] if criterio else None}
 
 
 def bloque_ecostress(ruta, registro):
@@ -647,7 +739,8 @@ def armar(processed, params, catalogo):
         return bloque
 
     bloque_opcional("contexto_regional", ARCHIVO_CONTEXTO, leer_contexto)
-    bloque_opcional("gedi", ARCHIVO_GEDI, bloque_gedi)
+    bloque_opcional("gedi", ARCHIVO_GEDI, lambda ruta, registro: bloque_gedi(
+        ruta, registro, criterios_gedi(processed, registradas, avisos)))
     bloque_opcional("ecostress", ARCHIVO_ECOSTRESS, bloque_ecostress)
     bloque_opcional("gaez", ARCHIVO_GAEZ, lambda ruta, registro: bloque_gaez(ruta, zonas, registro, avisos))
     bloque_opcional("heladas", ARCHIVO_HELADAS, bloque_heladas)

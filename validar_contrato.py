@@ -13,6 +13,11 @@ de una sola zona y los simulados sigan pasando:
   sus superficies, demandas y conteos suman los de «zona» (tolerancia de redondeo).
 - cubo.json «localidades»: [{nombre, municipio, lat, lon, fuente}].
 - cubo.json parcelas.<id>.sin_opciones: motivo (código) de una parcela clasificada sin opciones.
+
+Opciones y filtros oficiales (decisión docs/decisiones/2026-11-14_opciones_b3.md), también opcional:
+- opciones[].filtros[]: además de «motivo» y «fuente» (kit §2.3), si trae «estado» es uno de
+  ESTADOS_FILTRO; «pasa», si viene, concuerda con él (true = passes, false = warning, null = sin
+  decidir) y «prob_helada», si viene, es null o una probabilidad entre 0 y 1.
 """
 import json
 import re
@@ -36,6 +41,8 @@ CONTEOS = ("total", "libre", "por_vencer", "comprometida", "abstenida")
 ZONA_SIN_SUFIJO = "delicias_saucillo"
 # Motivos (códigos) por los que una parcela clasificada puede quedar sin opciones (motor/b4_cubo.py).
 MOTIVOS_SIN_OPCIONES = {"sin_clima_zona"}
+# Estados de un filtro de B3 (decisión del 14-nov) y el valor de «pasa» que corresponde a cada uno.
+ESTADOS_FILTRO = {"passes": True, "warning": False, "needs_local_check": None}
 
 
 def zonas_de_params(ruta):
@@ -384,6 +391,14 @@ class Validador:
                     for fl in o["filtros"]:
                         if not (fl.get("motivo") and fl.get("fuente")):
                             self.error(w, f"filtro sin motivo o fuente: {fl}")
+                        if "estado" in fl:
+                            if fl["estado"] not in ESTADOS_FILTRO:
+                                self.error(w, f"filtro con estado fuera de {sorted(ESTADOS_FILTRO)}: {fl['estado']!r}")
+                            elif "pasa" in fl and fl["pasa"] is not ESTADOS_FILTRO[fl["estado"]]:
+                                self.error(w, f"filtro {fl.get('id')}: «pasa» = {fl['pasa']!r} no concuerda con el "
+                                              f"estado {fl['estado']!r}")
+                        if fl.get("prob_helada") is not None:
+                            self.num(fl["prob_helada"], f"{w}.filtros[{fl.get('id')}].prob_helada", 0, 1)
                 if not o.get("preguntas_ref"):
                     self.error(w, "falta preguntas_ref")
                 llaves.add(o.get("preguntas_ref"))
