@@ -65,9 +65,9 @@
 
 ### 9. ¿Por qué no hay dinero en la ficha? ¿Y el goteo?
 - **Respuesta.** Dinero: no tenemos datos verificados, y un número sin fuente no entra; el renglón «Money» dice «no data». **[SI EL GOTEO ESTÁ CONECTADO]** El goteo sí se muestra en «Follow the drop», con una eficiencia indicativa de la FAO que no se midió en el distrito, y así va rotulado. **[SI EL GOTEO NO ESTÁ]** El goteo aún no está en la página: tenemos una eficiencia indicativa de la FAO, no medida en el distrito, y falta conectarla. En los dos casos, con goteo hay que contar las dos cosas: sale menos agua de la presa, pero también regresa menos al acuífero.
-- **Cifra.** Eficiencia de aplicación indicativa: 0.9 con goteo y 0.6 con riego superficial, las dos [V] «indicative, not local». 83.3 % de la recarga del acuífero viene de los retornos del riego [V].
-- **Archivo.** `data/processed/supuestos.json` → `ea_goteo` y `ea_superficial_referencia` (FAO, Irrigation Water Management Training Manual No. 4, Anexo I, Tabla 8); `docs/decisiones/2026-11-14_opciones_b3.md` §3; `data/params.json` → `eficiencia.goteo` (sigue en `null`); `LIMITATIONS.md`, «Crop options»; S9 §2; `docs/referencias/ref_cultivos_sdr.md`.
-- **Pendiente.** «La eficiencia del goteo es un valor general de la FAO; no tenemos una medida del distrito.» Si alguien lee en la página o en `LIMITATIONS.md` que no hay una eficiencia con fuente: «Ese texto quedó atrasado; la fuente entró al repositorio el 14 de noviembre.»
+- **Cifra.** Eficiencia de aplicación indicativa: 0.9 con goteo y 0.6 con riego superficial, las dos [V] «indicative, not local». En la huerta L0175, con goteo y tope de consumo, la página muestra −33 % de agua de la presa y −33 % de regreso al acuífero; sin tope, +50 % de consumo y el aviso «Not recommended». 83.3 % de la recarga del acuífero viene de los retornos del riego [V].
+- **Archivo.** `data/processed/supuestos.json` → `ea_goteo` y `ea_superficial_referencia` (FAO, Irrigation Water Management Training Manual No. 4, Anexo I, Tabla 8); `web/data/cubo.json` → `meta.goteo` y `parcelas.L0175` (bloques `gota_goteo_con_tope`, `gota_goteo_sin_tope` y `tope_consumo`; corrida de las 22:46 del 14-nov, motor en revisión); `docs/decisiones/2026-11-14_opciones_b3.md` §3; `LIMITATIONS.md`, «Crop options»; S9 §2; `docs/referencias/ref_cultivos_sdr.md`.
+- **Pendiente.** «La eficiencia del goteo es un valor general de la FAO; no tenemos una medida del distrito.» Si alguien lee en `README.md` o en `LIMITATIONS.md` que no hay escenario de goteo ni eficiencia con fuente: «Ese texto quedó atrasado; la fuente entró al repositorio el 14 de noviembre.»
 
 ### 10. ¿Por qué estas dos zonas y no todo el distrito?
 - **Respuesta.** Son dos rectángulos de diseño, trazados alrededor de localidades que propuso el equipo. El límite de los módulos de riego no es público, así que no podíamos usarlo. Las dos zonas pueden no representar a todo el distrito, y lo declaramos.
@@ -214,6 +214,6 @@ Los límites de parcela son de Fields of The World, un dato de terceros que no e
 - Anotar lo que respondieron las mentorías: eficiencia parcelaria, punto de medición del millar y cómo presentar H1.
 - Confirmar las preguntas 11, 18 y 20 cuando el gemelo y el contexto regional queden conectados.
 - Volver a leer las cifras de la pregunta 24 en la página final.
-- Respuesta 9: escoja la variante según si el goteo quedó conectado. La fuente de su eficiencia ya está en `data/processed/supuestos.json`; la página, `README.md` y `LIMITATIONS.md` todavía dicen que no la hay, y los corrige el integrador.
+- Respuesta 9: escoja la variante según si el goteo quedó conectado. Desde las 22:46 del 14-nov, `web/data/cubo.json` ya trae el escenario, con el motor en revisión; vuelva a leer los porcentajes de L0175 en la página final. `README.md` y `LIMITATIONS.md` todavía dicen que no hay escenario ni eficiencia con fuente, y los corrige el integrador.
 - Respuesta 7: diga «54 o 55» cuando la página marque a P0632; hoy `web/data/parcelas.geojson` marca a P0244.
 - Si esta noche entra la tabla oficial de rotaciones (`opciones_b3.json`, pieza B3), cambie la respuesta 3 y vuelva a contar las opciones y los filtros.

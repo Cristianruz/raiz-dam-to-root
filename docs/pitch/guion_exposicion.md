@@ -18,7 +18,7 @@
 - **Columna «Cifra y fuente»:** no se lee. Es para contestar si alguien pregunta de dónde sale un número.
 - **«[SI ESTÁ CONECTADO]»:** la toma o la frase depende de una pieza del gemelo que se conecta esta noche (vista 3D, línea de tiempo, tarjeta de estado, contexto regional, app sin conexión). Debajo va su **«[ALTERNATIVA]»** con lo que ya funciona hoy. Se usa una de las dos, nunca ambas.
 - **«[CON P0632]» y «[MIENTRAS SIGA P0244]»:** la parcela «libre» de la historia. La decisión del 14-nov la cambia de P0244 a P0632 (`docs/decisiones/2026-11-14_opciones_b3.md` §2): el polígono de P0244 junta unas siete parcelas chicas y su rotación actual pide cero agua. Hoy `web/data/parcelas.geojson` todavía marca a P0244; cambia cuando la sesión de datos regenere `parcelas_base.geojson`. Use la fila de la parcela que la página marque «story field» el día de la exposición, nunca las dos.
-- **«[SI EL GOTEO ESTÁ CONECTADO]» y «[SI EL GOTEO NO ESTÁ]»:** el escenario de goteo de «Follow the drop». La eficiencia del goteo ya tiene fuente en el repo (`data/processed/supuestos.json` → `ea_goteo`, un valor indicativo de la FAO) y la misma decisión (§3) ordena conectarlo con el rótulo «indicative, not local». Hoy la página todavía muestra «Drip scenario not available yet». Use una de las dos filas.
+- **«[SI EL GOTEO ESTÁ CONECTADO]» y «[SI EL GOTEO NO ESTÁ]»:** el escenario de goteo de «Follow the drop». La eficiencia del goteo ya tiene fuente en el repo (`data/processed/supuestos.json` → `ea_goteo`, un valor indicativo de la FAO) y la misma decisión (§3) ordena conectarlo con el rótulo «indicative, not local». Desde la corrida de las 22:46 del 14-nov, `web/data/cubo.json` ya trae el escenario (`meta.goteo` y los bloques de goteo de cada opción), con el motor todavía en revisión. La fila «[SI EL GOTEO NO ESTÁ]» queda de respaldo, por si la revisión lo retira. Use una de las dos filas.
 - Los nombres de los controles del gemelo («Twin status», «Play») son los de los módulos en construcción (`web/js/estado_gemelo.js`, `web/js/tiempo.js`). Verifíquelos en la página cuando queden conectados.
 - Sugerencia: una persona narra y otra maneja la pantalla.
 
@@ -68,8 +68,8 @@ Los tiempos de inicio están calculados a 135 palabras por minuto con la versió
 | 1:42 | ¿A dónde va cada millar? Sigamos la gota. | Ficha L0175, bajar a «Follow the drop» con la opción «Current rotation: Pecan orchard». | — |
 | 1:46 | Para regar completa esta huerta saldrían de la presa trescientos treinta y ocho mil metros cúbicos al año. Los árboles consumen ciento quince mil. Sesenta y ocho mil regresan al acuífero. | Diagrama: «La Boquilla (dam)», «Canal losses», «Field», «Crop (ET)», «Back to aquifer», «Other losses», cada uno con sus m³. | 337,864 m³ salen de la presa; 114,916.8 m³ consume el cultivo; 67,572.8 m³ regresan al acuífero (`cubo.json` → `parcelas.L0175`, opción ACTUAL, bloque `gota`). Conducción 0.60 [V] y retorno 0.2 [V] (`data/params.json` → `eficiencia.conduccion`, `gota.c_retorno_superficial`) |
 | 2:00 | Por eso contamos el agua que se consume. Un riego más eficiente saca menos de la presa, pero también recarga menos el acuífero. | Texto bajo el diagrama: «Efficiency reduces dam withdrawals but can reduce aquifer recharge (Grafton et al., Science 2018). We count consumption (ET), not just withdrawals.» | Sin cifra. Grafton et al. 2018 (`README.md`, «References»; `LIMITATIONS.md`) |
-| 2:10 | **[SI EL GOTEO ESTÁ CONECTADO]** El goteo se muestra con una eficiencia indicativa de la FAO, no medida aquí. | Clic en «What if this field switches to drip?». Cambian «Dam water» y «Back to aquifer», cada una con «vs. current irrigation». Esas cifras se ven en la pantalla y no se dicen. Compruebe antes que la página muestre el rótulo «indicative, not local». | Eficiencias de aplicación indicativas: goteo 0.9 y riego superficial 0.6, [V] indicative, not local (`data/processed/supuestos.json` → `ea_goteo`, `ea_superficial_referencia`: FAO, Training Manual No. 4, Anexo I, Tabla 8). Conexión ordenada en `docs/decisiones/2026-11-14_opciones_b3.md` §3. Las cifras del escenario saldrán de `cubo.json` → `parcelas.L0175` (`gota_goteo_con_tope`), que hoy está en `null` |
-| 2:10 | **[SI EL GOTEO NO ESTÁ]** El goteo aún no se muestra: tenemos una eficiencia indicativa de la FAO, no medida aquí. | Nota de la página: «Drip scenario not available yet: no sourced drip efficiency.» No se detenga en ella: quedó atrasada frente al repo. | La eficiencia ya tiene fuente: `data/processed/supuestos.json` → `ea_goteo` (la misma tabla de la FAO). La página muestra esa nota mientras los bloques de goteo de `cubo.json` sigan en `null`; `cubo.json` → `meta.notas` y `data/params.json` → `eficiencia.goteo` (`null`) todavía dicen lo mismo |
+| 2:10 | **[SI EL GOTEO ESTÁ CONECTADO]** El goteo se muestra con una eficiencia indicativa de la FAO, no medida aquí. | Clic en «What if this field switches to drip?», con «Consumption cap: on». Aparecen «Dam water: −33% vs. current irrigation» y «Back to aquifer: −33% vs. current irrigation». Esas cifras se ven y no se dicen. En «Assumptions behind these flows» se lee «Drip and surface field efficiencies: [V] indicative, not local». | Con goteo y tope: 225,242.7 m³ salen de la presa (frente a 337,864) y 45,048.5 m³ regresan al acuífero (frente a 67,572.8); la página lo muestra como −33 % en los dos (`cubo.json` → `parcelas.L0175`, opción ACTUAL, bloque `gota_goteo_con_tope`; corrida de las 22:46 del 14-nov, motor en revisión). Eficiencias de aplicación indicativas: goteo 0.9 y riego superficial 0.6, [V] indicative, not local (`data/processed/supuestos.json` → `ea_goteo`, `ea_superficial_referencia`: FAO, Training Manual No. 4, Anexo I, Tabla 8; `cubo.json` → `meta.goteo`). Decisión: `docs/decisiones/2026-11-14_opciones_b3.md` §3 |
+| 2:10 | **[SI EL GOTEO NO ESTÁ]** El goteo aún no se muestra: tenemos una eficiencia indicativa de la FAO, no medida aquí. | Respaldo, si la revisión del motor retira el escenario: la página vuelve a mostrar la nota «Drip scenario not available yet: no sourced drip efficiency.» No se detenga en ella: la fuente sí está en el repo. | La eficiencia tiene fuente: `data/processed/supuestos.json` → `ea_goteo` (la misma tabla de la FAO). La página muestra esa nota cuando los bloques de goteo de `cubo.json` vienen en `null`. `data/params.json` → `eficiencia.goteo` sigue en `null`: el valor vive en `supuestos.json` |
 
 ### Bloque 4 · Las pruebas (2:16 a 3:21)
 
@@ -113,15 +113,17 @@ Regla del conteo: una palabra por cada grupo de letras; un año con cifras («20
 | Versión | P0632, goteo conectado | P0632, goteo sin conectar | P0244, goteo conectado | P0244, goteo sin conectar |
 |---|---|---|---|---|
 | Con el gemelo conectado | **516** (referencia) | 518 | 510 | 512 |
-| Con lo que ya existe | 512 | 514 | 506 | 508 (la página de hoy) |
+| Con lo que ya existe | 512 | 514 | 506 (la página de hoy) | 508 |
 
 **Duración**
 
-| Ritmo | La más larga (518 palabras) | La de referencia (516) | La página de hoy (508) | La más corta (506) |
-|---|---|---|---|---|
-| 130 palabras por minuto | 3:59 | 3:58 | 3:54 | 3:54 |
-| 135 palabras por minuto | 3:50 | 3:49 | 3:46 | 3:45 |
-| 140 palabras por minuto | 3:42 | 3:41 | 3:38 | 3:37 |
+| Ritmo | La más larga (518 palabras) | La de referencia (516) | La más corta, que es la página de hoy (506) |
+|---|---|---|---|
+| 130 palabras por minuto | 3:59 | 3:58 | 3:54 |
+| 135 palabras por minuto | 3:50 | 3:49 | 3:45 |
+| 140 palabras por minuto | 3:42 | 3:41 | 3:37 |
+
+«La página de hoy» es el corte de las 22:46 del 14-nov: sin las piezas del gemelo, con P0244 marcada y con el goteo ya en `web/data/cubo.json`.
 
 **Verificación:** las ocho combinaciones caben en 4:00 a cualquier ritmo entre 130 y 140 palabras por minuto. A 130, la más larga deja un segundo de margen, así que conviene ensayar a 135.
 
@@ -171,6 +173,7 @@ Las dos versiones no llevan cifras: no dependen de qué zona o qué marca esté 
 | L0175 | 10.76 ha; nogal; comprometida; horizonte de 10 años [S] | `web/data/parcelas.geojson`; `cubo.json`; S9 §5 |
 | La gota de L0175 | 337,864 m³ salen de la presa; 114,916.8 m³ consume el cultivo; 67,572.8 m³ regresan al acuífero | `web/data/cubo.json` → `parcelas.L0175`, bloque `gota` |
 | Eficiencia indicativa del goteo (no se lee) | 0.9, frente a 0.6 del riego superficial; [V] indicative, not local | `data/processed/supuestos.json` → `ea_goteo`, `ea_superficial_referencia` (FAO, Training Manual No. 4, Anexo I, Tabla 8) |
+| Goteo en L0175, con tope (pantalla, no se lee) | 225,242.7 m³ salen de la presa y 45,048.5 m³ regresan al acuífero; la página muestra −33 % en los dos | `web/data/cubo.json` → `parcelas.L0175`, bloque `gota_goteo_con_tope` (corrida de las 22:46 del 14-nov; motor en revisión) |
 | Agua ya comprometida (pantalla, no se lee) | «at least 378%» en «All areas» y «at least 437%» en «Delicias – Saucillo», con 1 millar/ha | Calculado por `web/reglas.js` con `cubo.json` → `zona`, `zonas` |
 | H1 | Modelo 904.6 hm³; referencia de prensa 447.65 hm³; líneas base 404.5 y 367.2 | `docs/resultado_H1.md` |
 | H3 | −1.6 puntos (82.6 % frente a 84.2 %); el criterio pedía −25; 184 parcelas | `docs/resultado_H3.md` |
@@ -185,5 +188,5 @@ Las dos versiones no llevan cifras: no dependen de qué zona o qué marca esté 
 - La liga pública todavía no existe (`docs/reparto_faltantes.md`, H1).
 - Si la mentoría dio una eficiencia parcelaria o el punto de medición del millar, actualice la petición del bloque 5.
 - **Protagonista libre.** La decisión ya la cambió a P0632, pero hoy `web/data/parcelas.geojson` marca a P0244. Cuando la sesión de datos regenere `parcelas_base.geojson`, use las filas «[CON P0632]» y vuelva a leer en la página su superficie, su lámina y las hectáreas que alcanzan. Falta además que una persona revise en imagen a P0757, P0632 y L0175.
-- **Goteo.** La eficiencia ya tiene fuente (`data/processed/supuestos.json`); falta que el integrador conecte el escenario a «Follow the drop». Mientras tanto la página, `README.md` y `LIMITATIONS.md` todavía dicen que no hay una eficiencia con fuente: quedaron atrasados y los corrige el integrador, porque están fuera de `docs/pitch/`.
+- **Goteo.** Desde las 22:46 del 14-nov, `web/data/cubo.json` ya trae el escenario, con el motor en revisión (commit `3924ef6`). Vuelva a leer en la página final los dos porcentajes de L0175. `README.md` y `LIMITATIONS.md` todavía dicen que no hay escenario de goteo ni eficiencia con fuente: quedaron atrasados y los corrige el integrador, porque están fuera de `docs/pitch/`.
 - **Opciones.** Si esta noche entra la tabla oficial de rotaciones (`opciones_b3.json`, pieza B3), cambia la frase del maíz forrajero (bloque 2) y pueden cambiar las tarjetas de P0632. Vuelva a leer las tarjetas de P0757 y de P0632 antes de ensayar.

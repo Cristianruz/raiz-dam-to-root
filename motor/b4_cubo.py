@@ -101,6 +101,10 @@ RAZON_SIN_UMBRAL = "sin_umbral"            # la fuente no fija umbral: se muestr
 RAZON_SIN_PROBABILIDAD = "sin_probabilidad"  # sin fecha de siembra, fuera de las fechas calculadas o sin heladas.json
 RAZON_SIN_EVALUADOR = "sin_evaluador"      # tipo de filtro que el motor no sabe evaluar
 ORIGEN_B3, ORIGEN_PROVISIONAL = "b3", "provisional"
+# Contrato §2.3: cubo.json pesa menos de 5 MB (lo comprueba validar_contrato.py). Los bloques de goteo y
+# los filtros se repiten en cada opción: desde esta fracción del límite se avisa, antes de que falle.
+LIMITE_CUBO_BYTES = 5 * 1024 * 1024
+FRACCION_AVISO_PESO = 0.9
 
 
 def leer_json(p):
@@ -890,6 +894,12 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                      "nota": "Template texts written by the team (no LLM yet); every number comes from 'valores' or from the slider."},
             "explicaciones": {llave_expl(z, rid): explicacion(rid, clave, datos_zona[z], params, nombre_en(rid))
                               for z, rid, clave in sorted(usadas)}}
+    peso = len(json.dumps(cubo, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
+    if peso > FRACCION_AVISO_PESO * LIMITE_CUBO_BYTES:
+        aviso = (f"cubo.json pesa {peso} bytes: está cerca del límite del contrato ({LIMITE_CUBO_BYTES} bytes, kit §2.3). "
+                 "Lo que más pesa se repite en cada opción: los bloques de La gota y los filtros con su motivo y su fuente")
+        avisos.append(aviso)
+        meta["notas"].append(aviso)
     if escribir:
         web.mkdir(parents=True, exist_ok=True)
         for nombre, datos in (("parcelas.geojson", geo), ("cubo.json", cubo), ("explicaciones.json", expl)):
@@ -902,7 +912,7 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
             "opciones_origen": meta_opciones["origen"], "goteo": hay_goteo,
             "con_goteo": sum(1 for v in cubo_parcelas.values() for o in v["opciones"] if o["gota_goteo_con_tope"]),
             "filtros": sum(len(o["filtros"]) for v in cubo_parcelas.values() for o in v["opciones"]),
-            "avisos": avisos}
+            "cubo_bytes": peso, "avisos": avisos}
 
 
 def explicacion(rot_id, plazo_clave, dz, params, nombre):

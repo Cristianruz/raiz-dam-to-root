@@ -44,7 +44,7 @@ Notas de la tabla:
 - **Toma 1.** La línea de tiempo avanza un año al pulsar «Play» y otro cada intervalo de `web/data/gemelo.json` → `tiempo.intervalo_ms`. Por eso se coloca en 2023: llega a 2025 dentro de la toma.
 - **Toma 3.** La vista 3D trabaja con una zona a la vez y L0175 está en la otra zona. Por eso las tomas 3 a 8 se graban en «All areas».
 - **Toma 4.** P0632 ya está en la página. En la grabación final debe aparecer arriba en la lista «Fields», con la etiqueta «story field». Para un ensayo de grabación antes de que la lleve, el script la abre por su `data-id` (sección 6). «annual-crop» se cuenta como una palabra.
-- **Toma 6.** El video no pulsa el botón del goteo, así que esta toma no agrega cifras. **[SI EL GOTEO ESTÁ CONECTADO]** bajo el diagrama aparece el botón «What if this field switches to drip?». **[SI EL GOTEO NO ESTÁ]** aparece la nota «Drip scenario not available yet: no sourced drip efficiency.», que quedó atrasada: la eficiencia ya tiene fuente (`data/processed/supuestos.json` → `ea_goteo`, valor indicativo de la FAO). Encuadre el diagrama, no la nota.
+- **Toma 6.** El video no pulsa el botón del goteo, así que esta toma no agrega cifras. **[SI EL GOTEO ESTÁ CONECTADO]** bajo el diagrama aparece el botón «What if this field switches to drip?»; es lo que pasa desde la corrida de las 22:46 del 14-nov, porque `web/data/cubo.json` ya trae el escenario (motor en revisión). **[SI EL GOTEO NO ESTÁ]** si la revisión lo retira, vuelve la nota «Drip scenario not available yet: no sourced drip efficiency.», que contradice al repo: la eficiencia tiene fuente (`data/processed/supuestos.json` → `ea_goteo`, valor indicativo de la FAO). En ese caso, encuadre el diagrama y no la nota.
 - **Toma 7.** «Five» es el número de pruebas de S9 §6 y la sección muestra cinco tarjetas.
 
 ## 4. Cifras que la página muestra en cada toma
@@ -169,6 +169,6 @@ Toma opcional, si sobra tiempo al editar y sin pasar de 30 segundos: «Terrain &
 - Grabar después de conectar el gemelo y de la última corrida de `python construir.py`; si no queda conectado, se graba la variante de la sección 7.
 - Anotar los selectores de la vista 3D y de la línea de tiempo.
 - **Protagonista «libre».** La decisión ya la cambió a P0632; hoy la página marca a P0244. Cuando la sesión de datos regenere `parcelas_base.geojson`, grabe la toma 4 con P0632 y vuelva a leer sus cifras en la página (sección 4).
-- **Goteo.** La eficiencia ya tiene fuente en `data/processed/supuestos.json`; falta que el integrador conecte el escenario (`docs/decisiones/2026-11-14_opciones_b3.md` §3). La nota «no sourced drip efficiency» de la página quedó atrasada y la corrige el integrador.
+- **Goteo.** Desde las 22:46 del 14-nov, `web/data/cubo.json` ya trae el escenario (`docs/decisiones/2026-11-14_opciones_b3.md` §3), con el motor en revisión. Antes de grabar, confirme en la página final si la toma 6 muestra el botón o la nota.
 - Si cambian las opciones de rotación (`opciones_b3.json`), vuelva a llenar la tabla de la sección 4 con lo que muestre la página.
 - Subir el video y pasar la liga al integrador para el formulario de envío.

@@ -25,9 +25,13 @@
 //     con movimiento reducido no hay animación (solo se resaltan las rutas); sin relieve.json: «Terrain layer: not run»;
 //     con dos zonas, la zona sin relieve dice «not run for this pilot area»; la línea de relieve en el renglón Soil;
 //   · La gota (X3.2): Sankey con d3-sankey; cada nodo lleva los m³ del cubo y su alto y el ancho de cada banda son la
-//     escala común por los m³; las gotas recorren las bandas una sola vez (o se omiten con movimiento reducido); sin
-//     bloques de goteo, la nota «Drip scenario not available yet»; con ellos (variante en memoria), el botón, las
-//     cifras grandes, la misma escala para las variantes, el tope y el aviso «Not recommended»;
+//     escala común por los m³; las gotas recorren las bandas una sola vez (o se omiten con movimiento reducido); con
+//     bloques de goteo (los del cubo: escritorio con la transición de d3 y teléfono con movimiento reducido), el
+//     botón, las cifras grandes, la misma escala para las variantes, el tope, el aviso «Not recommended» y la
+//     etiqueta de las eficiencias (cubo.meta.goteo: «indicative, not local») en los supuestos; sin ellos, la nota
+//     «Drip scenario not available yet». El caso que los datos NO traen se prueba con la variante en memoria;
+//   · filtros oficiales (B3; decisión docs/decisiones/2026-11-14_opciones_b3.md): si el cubo trae filtros con
+//     «estado», uno que no pasa nunca se dibuja como aprobado y «needs_local_check» dice «needs a local check»;
 //   · mensaje (C4): maqueta de WhatsApp en español con las opciones numeradas, «Responda 1, 2 o 3.» y el aviso de
 //     Conagua, que cambia con el deslizador y cabe en el teléfono; «Print field sheet» con emulación de impresión:
 //     sin mapa, panel ni controles, con la ficha, los valores usados y La gota estática, en UNA hoja (carta y A4);
@@ -324,12 +328,34 @@ async function pruebaFichaAbstenida(page, id, prefijo, captura = null, p = porId
 }
 
 /**
+ * Espera a que el Sankey de La gota termine su transición de d3 (sus medidas dejan de cambiar) antes de medirlo.
+ * Con movimiento reducido no hay transición y vuelve enseguida. Con el goteo del cubo, el cambio de variante se
+ * prueba también en escritorio (con transición): medir a media transición daría los altos de la variante anterior.
+ */
+async function esperarSankeyQuieto(page) {
+  const medidas = () =>
+    page.locator("#gota-modulo svg.gota-svg").evaluate((svg) =>
+      [...svg.querySelectorAll("rect[data-gota-nodo], path[data-gota-banda]")]
+        .map((e) => ["y", "height", "stroke-width"].map((a) => e.getAttribute(a) ?? "").join("|"))
+        .join(";"),
+    );
+  let previas = await medidas();
+  for (let intento = 0; intento < 40; intento++) {
+    await page.waitForTimeout(100);
+    const ahora = await medidas();
+    if (ahora === previas) return;
+    previas = ahora;
+  }
+}
+
+/**
  * Lee el Sankey de La gota que está en pantalla y lo compara con un bloque del cubo:
  * - cada nodo lleva en data-valor los m³ del cubo (y están todos los flujos con valor > 0);
  * - el ancho de cada banda es la escala común (data-escala, px por m³) por sus m³ (mínimo 1 px);
  * - el alto de La Boquilla es la escala por los m³ que salen de la presa, y sus bandas suman ese valor.
  */
 async function revisarSankey(page, bloque, variante, etiqueta) {
+  await esperarSankeyQuieto(page);
   const d = await page.locator("#gota-modulo svg.gota-svg").evaluate((svg) => ({
     variante: svg.dataset.variante,
     escala: Number(svg.dataset.escala),
@@ -372,8 +398,15 @@ async function revisarSankey(page, bloque, variante, etiqueta) {
 /**
  * La gota de una parcela (la ficha debe estar abierta). Sankey con los números del cubo; gotas una sola vez (o
  * ninguna con movimiento reducido); sin bloques de goteo, la nota; con ellos, botón, cifras, misma escala, tope.
+ * capturas: { con, sin } = nombres de archivo para guardar La gota con goteo (tope encendido y apagado).
  */
-async function pruebaGota(page, id, c, prefijo, reducida) {
+async function pruebaGota(page, id, c, prefijo, reducida, capturas = null) {
+  const capturar = async (nombre) => {
+    if (!nombre) return;
+    await page.locator("#gota-cifras").scrollIntoViewIfNeeded();
+    await esperarSankeyQuieto(page);
+    await page.screenshot({ path: path.join(CAPTURAS, nombre) });
+  };
   const op = opcionGota(id, c);
   await page.locator("#seccion-gota").scrollIntoViewIfNeeded();
   if (!op?.gota) {
@@ -437,6 +470,24 @@ async function pruebaGota(page, id, c, prefijo, reducida) {
     goteo.escala === actual.escala && Math.abs(proporcion - esperada) < 0.01,
     `${(proporcion * 100).toFixed(1)} %`,
   );
+  await capturar(capturas?.[variante === "con_tope" ? "con" : "sin"]);
+  // Etiqueta de las eficiencias del goteo (cubo.meta.goteo, de supuestos.json: «indicative, not local»): La gota la
+  // muestra desde los datos, en los supuestos de la variante. Solo aplica al goteo del cubo (no a los bloques de prueba).
+  const etiquetaGoteo = c.meta?.goteo?.disponible ? c.meta.goteo.ea_goteo?.etiqueta : null;
+  if (etiquetaGoteo && (g.supuestos ?? []).some((x) => String(x).includes(etiquetaGoteo))) {
+    const detalle = page.locator("#gota-modulo details.gota-mod-supuestos");
+    if (!(await detalle.evaluate((el) => el.open))) {
+      await detalle.locator("summary").focus();
+      await page.keyboard.press("Enter");
+    }
+    const renglon = page.locator("#gota-supuestos li", { hasText: etiquetaGoteo });
+    check(
+      `${prefijo}el goteo lleva a la vista su etiqueta «${etiquetaGoteo}» (de los datos) en «Assumptions behind these flows»`,
+      (await renglon.count()) > 0 && (await renglon.first().isVisible()),
+    );
+  } else if (c.meta?.goteo?.disponible) {
+    check(`${prefijo}los bloques de goteo de ${id} llevan la etiqueta de cubo.meta.goteo en sus supuestos`, false, "ningún supuesto la trae");
+  }
   if (con && sin && op.tope_consumo) {
     await page.locator("#gota-tope").click();
     const sinTope = await texto(page, "#gota-cifras");
@@ -445,6 +496,7 @@ async function pruebaGota(page, id, c, prefijo, reducida) {
     const alerta = page.locator("#gota-alerta");
     check(`${prefijo}sin tope: aviso «Not recommended» solo si cumple_sin_tope = false`, (await alerta.isVisible()) === (op.tope_consumo.cumple_sin_tope === false));
     await revisarSankey(page, sin, "sin_tope", `${prefijo}La gota de ${id}, goteo sin tope`);
+    await capturar(capturas?.sin);
     await page.locator("#gota-tope").click();
   }
   await boton.click();
@@ -1035,6 +1087,29 @@ async function pruebasEscritorio(page, peticiones) {
   }
   if (!conAviso.length) omitir("advertir_si_rojo", "ninguna opción lo trae en estos datos");
 
+  // Filtros oficiales (B3) con «estado»: la decisión pide tres estados y que «needs local check» NUNCA se vea
+  // como aprobado. Se revisa una opción de cada estado que el cubo traiga, leyendo el renglón por su texto.
+  const conEstado = Object.entries(cubo.parcelas).flatMap(([pid, p]) =>
+    p.opciones.flatMap((o) => (o.filtros ?? []).filter((f) => f.estado).map((f) => ({ pid, o, f }))),
+  );
+  for (const estado of ["needs_local_check", "warning", "passes"]) {
+    const caso = conEstado.find((x) => x.f.estado === estado);
+    if (!caso) continue;
+    await abrirDesdeLista(page, caso.pid);
+    const renglon = tarjeta(page, caso.o.id).locator(".filtros li", { hasText: caso.f.motivo }).first();
+    const visto = (await renglon.count()) ? (await renglon.innerText()).replace(/\s+/g, " ").trim() : "";
+    const comoAprobado = visto.includes("✓") || /\bpass(es|ed)?\b/i.test(visto.replace(caso.f.motivo, ""));
+    if (estado === "passes") {
+      check(`filtro «${caso.f.id}» (passes) en ${caso.pid}/${caso.o.id}: se ve con su texto`, visto.includes(caso.f.motivo), visto);
+    } else {
+      check(`filtro «${caso.f.id}» (${estado}) en ${caso.pid}/${caso.o.id}: NO se dibuja como aprobado`, visto !== "" && !comoAprobado, visto || "sin renglón");
+      if (estado === "needs_local_check") check(`filtro «${caso.f.id}» en ${caso.pid}/${caso.o.id}: dice «needs a local check»`, /needs a local check/i.test(visto), visto);
+      else check(`filtro «${caso.f.id}» en ${caso.pid}/${caso.o.id}: se ve como advertencia`, /warning/i.test(visto), visto);
+    }
+    await cerrarFicha(page);
+  }
+  if (!conEstado.length) omitir("filtros oficiales con estado (passes / warning / needs local check)", "el cubo no trae filtros: opciones_b3.json no ha llegado");
+
   // Clic en el mapa abre la ficha: una parcela clasificada (protagonista si hay) y una abstenida
   const clasificada = candidatos.find((id) => !porId.get(id).abstencion) ?? candidatos[0];
   const aClicar = [clasificada];
@@ -1075,7 +1150,7 @@ async function pruebasEscritorio(page, peticiones) {
     await cerrarFicha(page);
   }
   await abrirDesdeLista(page, idFicha);
-  await pruebaGota(page, idFicha, cubo, "", false);
+  await pruebaGota(page, idFicha, cubo, "", false, { con: "escritorio_gota_goteo_con_tope.png", sin: "escritorio_gota_goteo_sin_tope.png" });
   await pruebaRelieveFicha(page, idFicha, "");
   await pruebaWhatsApp(page, idFicha, "", false, "escritorio_ficha_whatsapp.png");
   if (await tarjeta(page, "ACTUAL").count()) await tarjeta(page, "ACTUAL").locator(".porque summary").click();
@@ -1162,7 +1237,7 @@ async function pruebasTelefono(page, peticiones) {
     await tarjeta(page, "ACTUAL").scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(CAPTURAS, "telefono_ficha_tarjeta.png") });
   }
-  await pruebaGota(page, id, cubo, "teléfono: ", true);
+  await pruebaGota(page, id, cubo, "teléfono: ", true, { con: "telefono_gota_goteo_con_tope.png", sin: "telefono_gota_goteo_sin_tope.png" });
   await page.locator("#seccion-gota").scrollIntoViewIfNeeded();
   await page.screenshot({ path: path.join(CAPTURAS, "telefono_ficha_gota.png") });
   await pruebaWhatsApp(page, id, "teléfono: ", true, "telefono_ficha_whatsapp.png");
@@ -1190,8 +1265,9 @@ function htmlSinCifras() {
  * Variante de los datos para los casos que estos datos no traen. Solo vive en la memoria de la prueba:
  * - superficie abstenida > 0 («at least») y una capa quitada de capas_disponibles;
  * - una parcela abstenida (si los datos no traen ninguna, se marca así la última; sus opciones quedan vacías);
- * - el escenario de goteo en la opción ACTUAL de una parcela clasificada (si los datos no lo traen, se derivan
- *   bloques de prueba escalando su bloque «gota»; NO son datos: solo ejercitan el botón y las barras).
+ * - el caso de goteo que los datos NO traen, en la opción ACTUAL de una parcela clasificada que pide agua: si el
+ *   cubo no trae goteo, se derivan bloques de prueba escalando su bloque «gota» (NO son datos: solo ejercitan el
+ *   botón y las barras); si lo trae, se le quitan, para probar la nota «Drip scenario not available yet».
  */
 function variante() {
   const c = structuredClone(cubo);
@@ -1209,9 +1285,14 @@ function variante() {
   }
   const pAbst = g.features.find((f) => f.properties.id === idAbst).properties;
 
-  const idGoteo = candidatos.find((id) => id !== idAbst && !porId.get(id).abstencion && actualDe(id, c)?.gota);
+  const conGota = candidatos.filter((id) => id !== idAbst && !porId.get(id).abstencion && actualDe(id, c)?.gota);
+  // Primero una parcela cuya opción actual pide agua: sin flujo no hay botón de goteo ni nota que probar.
+  const idGoteo = conGota.find((id) => actualDe(id, c).gota.m3_salen_presa > 0) ?? conGota[0];
   const op = idGoteo && actualDe(idGoteo, c);
-  if (op && !op.gota_goteo_con_tope) {
+  if (op && op.gota_goteo_con_tope) {
+    // El cubo ya trae goteo (se prueba con los datos): aquí se quita, para probar la nota de «no disponible».
+    Object.assign(op, { gota_goteo_con_tope: null, gota_goteo_sin_tope: null, tope_consumo: null });
+  } else if (op) {
     const escalar = (gota, k) =>
       Object.fromEntries(Object.entries(gota).map(([llave, v]) => [llave, typeof v === "number" ? v * k : ["TEST ONLY: scaled copy of the current block"]]));
     op.gota_goteo_con_tope = escalar(op.gota, 0.8);
@@ -1508,7 +1589,8 @@ async function main() {
       "boton",
     );
 
-    // Variante en memoria: superficie abstenida > 0, capa ausente, parcela abstenida y escenario de goteo.
+    // Variante en memoria: superficie abstenida > 0, capa ausente, parcela abstenida y el caso de goteo que los
+    // datos no traen (bloques de prueba si el cubo no trae goteo; sin bloques si sí lo trae).
     const v = variante();
     const alt = await abrir(
       navegador,
@@ -1529,7 +1611,7 @@ async function main() {
       await pruebaGota(alt.page, v.idGoteo, v.c, "variante: ", true);
       await cerrarFicha(alt.page);
     } else {
-      omitir("variante: escenario de goteo", "ninguna parcela clasificada con bloque gota");
+      omitir("variante: el otro caso de goteo", "ninguna parcela clasificada con bloque gota");
     }
     if (v.idSinCalculo) await pruebaSinCalculo(alt.page, v);
     else omitir("variante: parcela clasificada sin opciones", "ninguna parcela clasificada con opción ACTUAL");

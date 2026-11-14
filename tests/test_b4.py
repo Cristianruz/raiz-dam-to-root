@@ -559,3 +559,16 @@ def test_ventana_de_suelo_desnudo_copiada_de_params(dos_zonas):
     p = PARAMS["suelo"]["ventana_desnudo"]
     assert (v["inicio"], v["fin"]) == (p["valor"]["inicio"], p["valor"]["fin"])
     assert (v["fuente"], v["etiqueta"]) == (p["fuente"], p["etiqueta"])
+
+
+def test_avisa_cuando_el_cubo_se_acerca_al_limite_de_peso(tmp_path, monkeypatch):
+    """El contrato pide cubo.json < 5 MB; el motor avisa antes de llegar (los filtros y La gota se repiten por opción)."""
+    rep = b4_cubo.construir(FIXTURE, tmp_path / "a")
+    assert rep["cubo_bytes"] == (tmp_path / "a/cubo.json").stat().st_size - 1   # menos el salto de línea final
+    assert not [a for a in rep["avisos"] if "cerca del límite" in a]
+    assert b4_cubo.LIMITE_CUBO_BYTES == 5 * 1024 * 1024, "el límite es el del contrato (kit §2.3; validar_contrato.py)"
+    # Con un límite de prueba menor que el peso de la fixture, el aviso sale en el reporte y en las notas.
+    monkeypatch.setattr(b4_cubo, "LIMITE_CUBO_BYTES", rep["cubo_bytes"])
+    rep2 = b4_cubo.construir(FIXTURE, tmp_path / "b")
+    aviso = [a for a in rep2["avisos"] if "cerca del límite" in a]
+    assert aviso and aviso[0] in leer(tmp_path / "b", "cubo.json")["meta"]["notas"]

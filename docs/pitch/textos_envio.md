@@ -86,7 +86,7 @@ Each criterion was declared before seeing the result.
 5. Regional ET contrast and automated checks: partial. Modeled crop ET of 1,139.3 mm against SSEBop VIIRS v6 of 746.3 mm over October 2025 to September 2026 (+53 %), as a regional comparison, not a field-level validation. WaPOR v3 and the FAO-56 worked examples: not run. Water balance of the drop: passed.
 
 LIMITATIONS
-The tool does not allocate, sell or trade water. It does not forecast the dam. It does not promise that any water will be freed. The twin has no field sensors and no real-time data: it is refreshed on each run, from satellite and climate data. 63 % of the fields are not classified and have no options. Field boundaries are estimated by a model outside its training domain. Crop options are provisional. The field-efficiency range is an assumption, and the model's alfalfa depth (28.4 thousand m³/ha) is above INIFAP's (17.5). The drip scenario is not on the page yet: the drip efficiency in the data is an indicative FAO value that was not measured in the district. The Money row has no data. The full list is in LIMITATIONS.md.
+The tool does not allocate, sell or trade water. It does not forecast the dam. It does not promise that any water will be freed. The twin has no field sensors and no real-time data: it is refreshed on each run, from satellite and climate data. 63 % of the fields are not classified and have no options. Field boundaries are estimated by a model outside its training domain. Crop options are provisional. The field-efficiency range is an assumption, and the model's alfalfa depth (28.4 thousand m³/ha) is above INIFAP's (17.5). The drip scenario uses indicative FAO efficiencies that were not measured in the district. The Money row has no data. The full list is in LIMITATIONS.md.
 
 WHAT COMES NEXT
 Ask a district technician which on-farm efficiency is realistic for gravity irrigation; classify the remaining fields with the team's blind labels and assess the accuracy of the crop map; review fields and options with farmers of the two pilot areas.
@@ -106,16 +106,16 @@ Frases que se agregan si la pieza ya está en la página:
 
 Si ninguna queda conectada, agregue esta frase al final de «LIMITATIONS»: `A 3D view, a timeline, a status card, an installable app and a regional context panel are being built; the page does not have them yet.`
 
-**La frase del goteo en «LIMITATIONS» tiene dos variantes.** El bloque de arriba trae la de la página de hoy.
+**La frase del goteo en «LIMITATIONS» tiene dos variantes.** El bloque de arriba trae la del goteo conectado: desde la corrida de las 22:46 del 14-nov, `web/data/cubo.json` ya trae el escenario de goteo (`meta.goteo`), con el motor todavía en revisión.
 
 | Marca | Frase en inglés |
 |---|---|
-| [SI EL GOTEO NO ESTÁ] (la del bloque) | `The drip scenario is not on the page yet: the drip efficiency in the data is an indicative FAO value that was not measured in the district.` |
-| [SI EL GOTEO ESTÁ CONECTADO] | `The drip scenario uses indicative FAO efficiencies that were not measured in the district.` |
+| [SI EL GOTEO ESTÁ CONECTADO] (la del bloque) | `The drip scenario uses indicative FAO efficiencies that were not measured in the district.` |
+| [SI EL GOTEO NO ESTÁ] (respaldo, si la revisión lo retira) | `The drip scenario is not on the page yet: the drip efficiency in the data is an indicative FAO value that was not measured in the district.` |
 
-Si el goteo queda conectado, agregue además al punto 2 de «WHAT RAÍZ DOES»: `"Follow the drop" also shows a drip scenario, labeled "indicative, not local".`
+Con el goteo conectado, agregue además al punto 2 de «WHAT RAÍZ DOES»: `"Follow the drop" also shows a drip scenario, labeled "indicative, not local".`
 
-Por qué esta frase no copia al README: `README.md` («No drip scenario») y `LIMITATIONS.md` («There is no sourced drip efficiency») quedaron atrasados. La eficiencia ya tiene fuente en `data/processed/supuestos.json` → `ea_goteo` (un valor indicativo de la FAO, no local) y la decisión `docs/decisiones/2026-11-14_opciones_b3.md` §3 ordena conectar el escenario. El integrador corrige esos dos archivos; antes del envío, compruebe que el formulario y el README digan lo mismo.
+Por qué esta frase no copia al README: `README.md` («No drip scenario») y `LIMITATIONS.md` («There is no sourced drip efficiency») quedaron atrasados. La eficiencia tiene fuente en `data/processed/supuestos.json` → `ea_goteo` (un valor indicativo de la FAO, no local) y la decisión `docs/decisiones/2026-11-14_opciones_b3.md` §3 ordena conectar el escenario. El integrador corrige esos dos archivos; antes del envío, compruebe que el formulario y el README digan lo mismo.
 
 Nota sobre la palabra «preregistered»: el `README.md` la usa para H1 y H3, y la liga pública de OSF todavía no está en el repo. Si la liga no llega antes del envío, el integrador decide si se conserva la palabra o se cambia por «declared beforehand in the project documents».
 
