@@ -107,7 +107,7 @@ Debajo va **una línea por archivo**. Ejemplo acordado:
 ```text
 eto_diaria.csv | NASA POWER Daily API (community=AG), 28.19 N −105.45 O, 1981–2026 | 2026-11-14 | colab/A1_power_eto.ipynb
 ```
-- **archivo:** el nombre exacto, igual al de la tabla 0.4-B. También llevan línea `fuentes_<pieza>.csv` y cada figura `.png`.
+- **archivo:** el nombre exacto, igual al de la tabla 0.4-B. También llevan línea `fuentes_<pieza>.csv` y cada figura `.png`. En `<pieza>` va el código de la pieza sin puntos ni guiones: `fuentes_A1.csv`, `fuentes_A3M.csv`, `fuentes_A41.csv`, `fuentes_B2.csv`…
 - **fuente:**
   - de dónde salen los datos: API, colección o documento, con su periodo y lugar;
   - para una tabla derivada, de qué entregas sale;
@@ -131,8 +131,9 @@ eto_diaria.csv | NASA POWER Daily API (community=AG), 28.19 N −105.45 O, 1981�
 | (c) | **Nombres de archivo y columnas exactos de la tabla 0.4-B.** Se acordaron además, para A9: `nasadem_zona_piloto.tif` (30 m, EPSG:4326, zona piloto + 2 km), `relieve_parcelas.csv` (`id, pendiente_media_pct, aportacion_externa_ha, frac_depresion`) y `relieve_rutas.geojson`. Los `id` de todos los CSV son los de `parcelas_base.geojson` | Los prompts dicen `data/processed/…`, `docs/figuras/…`, `docs/resultado_…md` o `data/raw/…`. Cada bloque de esta guía cambia solo esas rutas y las lista bajo «Ajustes de ruta» |
 | (d) | **El validador del repo (`motor/ensamblar.py`) rechaza con motivo** lo que no cumpla. Nunca corrige en silencio | Kit K-ENS, paso 2 (ya lo decía) |
 | — | P6 trabaja con la app de Gemini **o con Claude en el navegador** | Tabla del kit §0.3: «Claude (chat del Project)» |
+| — | **G0 ya completado en cada bloque.** Se ajustaron sus reglas a los cambios (a) y (b): reglas 1, 3, 6, 7 y 9 (`entregas/` plana; sin Earth Engine; archivos de trabajo en `cuadernos/` solo si la tarea lo pide). Se agregó la regla 11: escribir la línea de `LEEME.md` | Kit §4, G0 |
 
-**Documentos que el kit cita y no están en el repo** (`CLAUDE.md`): 33 (especificación técnica), 27 y 29 (cifras verificadas), 30 (preregistro H1), maestro §5.2 (rotaciones), 31 (borrador de la página) y el PDF de FAO-56. Si su pieza los necesita, **pídalos a Cristian**. No los reconstruya de memoria ni deje que Gemini los «recuerde».
+**Documentos que el kit cita y no están en el repo:** 33 (especificación técnica), 27 y 29 (cifras verificadas), 30 (preregistro H1), maestro §5.2 (rotaciones) y el PDF de FAO-56, según la lista de `CLAUDE.md`. Faltan también el borrador de la página (archivo 31, kit C6), el manual de etiquetado (39) y el protocolo Olofsson (22), que cita el kit A4.1. Si su pieza los necesita, **pídalos a Cristian**. No los reconstruya de memoria ni deje que Gemini los «recuerde».
 
 ## 7. Las 10 reglas del kit (§0.1), en corto
 

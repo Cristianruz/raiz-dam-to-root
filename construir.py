@@ -182,10 +182,27 @@ def contar(x):
 
 # --- (b) simulados ------------------------------------------------------------
 def paso_simulados(reporte):
-    titulo("(b) Datos simulados (motor/simulados.py)")
-    if reporte and contar(reporte.get("entraron")):
-        print("  El ensamblador metió entregas reales: se conservan los datos ensamblados.")
-        return Paso("simulados", OMITIDO, f"entraron {contar(reporte['entraron'])} entregas; no se regeneran")
+    titulo("(b) Cubo: motor B4 con datos reales (motor/b4_cubo.py) o simulados (motor/simulados.py)")
+    # Si data/processed ya tiene las entradas obligatorias de B4 (validadas por el ensamblador),
+    # el cubo se arma con datos REALES; si no, se regeneran los simulados.
+    try:
+        b4 = importar("motor.b4_cubo")
+        faltan = [f for f in b4.OBLIGATORIAS if not (RAIZ / "data/processed" / f).exists()]
+    except Exception as ex:  # noqa: BLE001
+        print(f"  No se pudo importar motor/b4_cubo.py: {type(ex).__name__}: {ex}")
+        return Paso("simulados", FALLA, f"no se pudo importar B4 ({type(ex).__name__}: {ex})")
+    if not faltan:
+        try:
+            rep = b4.construir()
+        except Exception as ex:  # noqa: BLE001
+            print(f"  b4_cubo.construir() falló: {type(ex).__name__}: {ex}")
+            return Paso("simulados", FALLA, f"B4 falló ({type(ex).__name__}: {ex})")
+        for a in rep.get("avisos", []):
+            print(f"  aviso: {a}")
+        print(f"  DATOS REALES: {rep['parcelas']} parcelas ({rep['clasificadas']} clasificadas), {rep['opciones']} opciones")
+        return Paso("simulados", OK, f"cubo REAL: {rep['parcelas']} parcelas, {rep['clasificadas']} clasificadas, "
+                                     f"{rep['opciones']} opciones")
+    print(f"  Faltan entradas de B4 en data/processed ({', '.join(faltan)}): se usan los datos simulados.")
     try:
         geo, cubo, expl = importar("motor.simulados").generar()
     except Exception as ex:  # noqa: BLE001

@@ -55,7 +55,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
@@ -190,7 +190,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
@@ -312,7 +312,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
@@ -355,7 +355,7 @@ S8 §2 "Cifras" (copiado tal cual):
 [PEGA AQUÍ data/params.json completo (GitHub del proyecto).]
 
 TAREA
-Tarea cifras. Arma cifras.csv con UNA fila por cada cifra que puede aparecer en la página, la interfaz, el video, el póster o la ficha impresa: las de S9 §2, S8 §2 y data/params.json que te pegué. Cada fila con clave, valor (tal como lo da la fuente, sin redondear), unidad, fuente (documento y sección, o URL), fecha y etiqueta. No agregues ninguna cifra que no esté en lo pegado. Si dos documentos dan valores distintos, pon las dos filas y avísame. Cuando lleguen entregas con resultados (resultado_H1.md, resultado_H3.md, olofsson.csv, tabla_metodos.csv, et_contraste.csv), agrega sus cifras con la fuente "<archivo> (entrega de <rol>)".
+Tarea cifras. Arma cifras.csv con UNA fila por cada cifra que puede aparecer en la página, la interfaz, el video, el póster o la ficha impresa: las de S9 §2, S8 §2 y data/params.json que te pegué. Cada fila con clave, valor (tal como lo da la fuente, sin redondear), unidad, fuente (documento y sección, o URL), fecha y etiqueta. No agregues ninguna cifra que no esté en lo pegado. Si dos documentos dan valores distintos, pon las dos filas y avísame. Cuando lleguen entregas con resultados (resultado_H1.md, resultado_H3.md, olofsson.csv, tabla_metodos.csv, et_contraste.csv) o cifras sueltas de otra pieza (por ejemplo, la lámina de la tormenta P95 de A9, que P4 te pasa con su fuente y periodo), agrega sus cifras con la fuente "<archivo o pieza> (entrega de <rol>)".
 PRUEBA: (a) ninguna clave repetida; (b) ninguna fila sin fuente ni etiqueta; (c) lista de las cifras de S9 §2 y S8 §2 que NO están en la tabla (debe quedar vacía); (d) número de filas por etiqueta.
 ```
 
@@ -393,7 +393,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
@@ -421,5 +421,11 @@ TAREA
 Sigue EXACTAMENTE el procedimiento de calibración del párrafo pegado, sin cambiar criterio ni periodo, y guarda calibracion.csv con las columnas que ahí se indican.
 PRUEBA: imprime cómo se cumple cada punto del procedimiento del preregistro, uno por uno.
 ```
-**Prueba de aceptación:** la del preregistro. **Plan B:** no se hace, y se dice.
-**Línea de LEEME.md:** `calibracion.csv | Preregistro H1 (archivo 30), procedimiento de calibración | 2026-11-14 | colab/B2_dotaciones.ipynb`.
+- **Hora límite:** antes de que A6 (P4) la necesite, de modo que el back-test no se retrase: sáb 18:00 (arranque de A6, kit §3).
+- **Prueba de aceptación:** la del preregistro.
+- **Plan B:** no se hace, y se dice.
+
+**Línea de LEEME.md:**
+```text
+calibracion.csv | Preregistro H1 (archivo 30), procedimiento de calibración | 2026-11-14 | colab/B2_dotaciones.ipynb
+```

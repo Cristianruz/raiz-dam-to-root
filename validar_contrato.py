@@ -71,6 +71,7 @@ class Validador:
         if not feats:
             self.error(d, "no hay features")
         ids = set()
+        self.abstenidas = set()
         for i, f in enumerate(feats):
             p = f.get("properties") or {}
             w = f"{d}[{p.get('id', i)}]"
@@ -90,11 +91,15 @@ class Validador:
                 self.error(w, "protagonista debe ser bool")
             if p.get("cultivo_actual") not in CULTIVOS:
                 self.error(w, f"cultivo_actual fuera de lista: {p.get('cultivo_actual')}")
-            self.num(p.get("prob_max"), f"{w}.prob_max", 0, 1)
-            if p.get("acuerdo_metodos") not in ("2/2", "1/2"):
-                self.error(w, f"acuerdo_metodos debe ser '2/2' o '1/2': {p.get('acuerdo_metodos')}")
+            # Extensión del contrato (14-nov, integrador): "1/1" = solo reglas fenológicas mientras el
+            # Random Forest (A4.2) no está; en ese caso prob_max puede ser null.
+            if p.get("acuerdo_metodos") not in ("2/2", "1/2", "1/1"):
+                self.error(w, f"acuerdo_metodos debe ser '2/2', '1/2' o '1/1': {p.get('acuerdo_metodos')}")
+            self.num(p.get("prob_max"), f"{w}.prob_max", 0, 1, nulo=(p.get("acuerdo_metodos") == "1/1"))
             if not isinstance(p.get("abstencion"), bool):
                 self.error(w, "abstencion debe ser bool")
+            elif p["abstencion"]:
+                self.abstenidas.add(pid)
             elif p["abstencion"] and p.get("estado_plazo") is not None:
                 self.error(w, "parcela abstenida debe tener estado_plazo null")
             self.num(p.get("dias_suelo_desnudo_feb_abr"), f"{w}.dias_suelo_desnudo_feb_abr", 0, 90, nulo=True, entero=True)
@@ -187,6 +192,8 @@ class Validador:
         for pid, pc in parcelas.items():
             ops = pc.get("opciones") or []
             w0 = f"{d}.parcelas.{pid}"
+            if not ops and pid in getattr(self, "abstenidas", set()):
+                continue  # parcela abstenida: sin opciones (kit B4, paso 1: solo parcelas NO abstenidas)
             if not any(o.get("id") == "ACTUAL" for o in ops):
                 self.error(w0, "falta la opción ACTUAL")
             if len(ops) < 3:
@@ -227,6 +234,8 @@ class Validador:
                     self.error(w, "falta preguntas_ref")
                 llaves.add(o.get("preguntas_ref"))
                 for bloque in ("gota", "gota_goteo_con_tope", "gota_goteo_sin_tope"):
+                    if bloque != "gota" and o.get(bloque) is None:
+                        continue  # escenario de goteo no disponible (sin eficiencia de goteo con fuente)
                     g = o.get(bloque) or {}
                     for k in CAMPOS_GOTA:
                         self.num(g.get(k), f"{w}.{bloque}.{k}", minimo=0)
@@ -235,6 +244,8 @@ class Validador:
                         sale = g["m3_salen_presa"]
                         if abs(destinos - sale) > max(1.0, 0.01 * sale):
                             self.error(w, f"{bloque}: el balance no cierra (destinos {destinos} vs presa {sale})")
+                if o.get("tope_consumo") is None and o.get("gota_goteo_sin_tope") is None:
+                    continue
                 t = o.get("tope_consumo") or {}
                 for k in ("et_historica_m3", "et_goteo_sin_tope_m3"):
                     self.num(t.get(k), f"{w}.tope_consumo.{k}", minimo=0)

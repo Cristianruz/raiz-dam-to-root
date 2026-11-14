@@ -193,35 +193,15 @@ def generar():
                     "abstenida": estados.count(None)},
     }
 
-    dz = params["dotaciones"]
-    marcas = []
-    for clave, nombre in (("como_2025", "Like 2025"), ("como_2026", "Like 2026"), ("anio_normal", "Normal year")):
-        d = dz[clave]
-        marcas.append({"id": clave, "nombre": nombre, "min": d["valor"]["min"], "max": d["valor"]["max"],
-                       "valor": d["valor"]["valor"], "nota": d["nota"], "fuente": d["fuente"],
-                       "fecha_consulta": d["fecha_consulta"], "etiqueta": d["etiqueta"]})
-    distrito = params["distrito"]
+    distrito_blk, dotaciones_blk = bloques_distrito_dotaciones(params)
+    distrito_blk["capas_disponibles"] = ["cultivos", "suelo_desnudo", "memoria_2025"]
     cubo = {
         "meta": {"version": "4.0", "generado": None, "mock": True,
                  "mock_campos": ["parcelas", "zona", "explicaciones", "geometria"],
                  "fuentes": ["data/params.json", "data/simulados.json"],
                  "notas": [sim["_nota"]]},
-        "distrito": {
-            "boquilla": {"namo_hm3": distrito["namo_hm3"]["valor"], "fuente_namo": distrito["namo_hm3"]["fuente"],
-                         "almacenamiento_hm3": distrito["almacenamiento_hm3"]["valor"],
-                         "fecha_almacenamiento": distrito["almacenamiento_hm3"]["fecha"],
-                         "fuente_almacenamiento": distrito["almacenamiento_hm3"]["fuente"]},
-            "acuifero_0831": {"disponibilidad_hm3_anio": params["acuifero"]["disponibilidad_hm3_anio"]["valor"],
-                              "fuente": params["acuifero"]["disponibilidad_hm3_anio"]["fuente"]},
-            "capas_disponibles": ["cultivos", "suelo_desnudo", "memoria_2025"],
-        },
-        "dotaciones": {
-            "unidad": "millares_por_ha",
-            "equivalencia": params["unidades"]["millar"]["nota"],
-            "deslizador": dz["deslizador"]["valor"],
-            "marcas": marcas,
-            "punto_medicion": f"{dz['punto_medicion']['valor']} {dz['punto_medicion']['etiqueta']}; {dz['punto_medicion']['nota']}",
-        },
+        "distrito": distrito_blk,
+        "dotaciones": dotaciones_blk,
         "lluvia_pct": params["lluvia_pct"]["valor"],
         "zona": zona,
         "parcelas": cubo_parcelas,
@@ -234,6 +214,36 @@ def generar():
     escribir_json(RAIZ / "web/data/cubo.json", cubo)
     escribir_json(RAIZ / "web/data/explicaciones.json", expl)
     return geo, cubo, expl
+
+
+def bloques_distrito_dotaciones(params):
+    """Bloques «distrito» y «dotaciones» del cubo (kit §2.3), copiados de params con su fuente.
+    Los usan los simulados y el motor real (motor/b4_cubo.py)."""
+    dz = params["dotaciones"]
+    marcas = []
+    for clave, nombre in (("como_2025", "Like 2025"), ("como_2026", "Like 2026"), ("anio_normal", "Normal year")):
+        d = dz[clave]
+        marcas.append({"id": clave, "nombre": nombre, "min": d["valor"]["min"], "max": d["valor"]["max"],
+                       "valor": d["valor"]["valor"], "nota": d["nota"], "fuente": d["fuente"],
+                       "fecha_consulta": d["fecha_consulta"], "etiqueta": d["etiqueta"]})
+    distrito = params["distrito"]
+    distrito_blk = {
+        "boquilla": {"namo_hm3": distrito["namo_hm3"]["valor"], "fuente_namo": distrito["namo_hm3"]["fuente"],
+                     "almacenamiento_hm3": distrito["almacenamiento_hm3"]["valor"],
+                     "fecha_almacenamiento": distrito["almacenamiento_hm3"]["fecha"],
+                     "fuente_almacenamiento": distrito["almacenamiento_hm3"]["fuente"]},
+        "acuifero_0831": {"disponibilidad_hm3_anio": params["acuifero"]["disponibilidad_hm3_anio"]["valor"],
+                          "fuente": params["acuifero"]["disponibilidad_hm3_anio"]["fuente"]},
+        "capas_disponibles": [],
+    }
+    dotaciones_blk = {
+        "unidad": "millares_por_ha",
+        "equivalencia": params["unidades"]["millar"]["nota"],
+        "deslizador": dz["deslizador"]["valor"],
+        "marcas": marcas,
+        "punto_medicion": f"{dz['punto_medicion']['valor']} {dz['punto_medicion']['etiqueta']}; {dz['punto_medicion']['nota']}",
+    }
+    return distrito_blk, dotaciones_blk
 
 
 def explicacion_simulada(o, plazo, restante):

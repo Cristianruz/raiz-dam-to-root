@@ -70,7 +70,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
@@ -161,7 +161,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
@@ -257,7 +257,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
@@ -363,9 +363,10 @@ Núcleo: pasos 1 a 4 (S9 §4 bis y §8). Segunda línea: pasos 5 y 6.
 | **Hora límite** | Pasos 1–4: sáb 15:00–20:30. Pasos 5–6: dom 8:00 |
 | **Verificación de datos** | [NASADEM](verificar_datos_nasa.md#3-nasadem-a9-y-elevación-de-a1) y [GPM IMERG](verificar_datos_nasa.md#4-gpm-imerg-v07-a9) |
 
-**Dos cuidados:**
+**Tres cuidados:**
 1. **Pendiente.** El TIF viene en grados (EPSG:4326). Para la pendiente en %, reproyecte a metros (UTM) o convierta el tamaño de celda a metros antes de calcular. Si no, la pendiente sale mal (kit A9, prueba).
-2. **«Día con lluvia».** El kit no define el umbral, y el de acumulación de las rutas se declara en `supuestos.json`. Pida a P5 que declare los dos. No los invente.
+2. **Umbrales.** El de acumulación de las rutas se declara en `supuestos.json` (kit A9, paso 3). El de «día con lluvia» no lo fija el kit. Pida a P5 que declare los dos, con fuente o «assumption». No los invente.
+3. **La lámina de la tormenta (paso 4) no tiene archivo propio en la tabla 0.4-B.** Un archivo nuevo se rechazaría. Imprímala con su fuente y periodo y pásesela a P5 para `cifras.csv` (por ejemplo, con la clave `tormenta_p95_mm`).
 
 **Bloque para pegar en Gemini:**
 ```text
@@ -382,7 +383,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
@@ -404,7 +405,7 @@ A9 no tiene fila en la tabla 0.4-B. Los nombres y columnas salen del prompt A9 y
 - relieve_rutas.geojson: líneas (LineString o MultiLineString), < 1 MB, geometrías simplificadas.
 - relieve_parcelas.csv: id, pendiente_media_pct, aportacion_externa_ha, frac_depresion (más fuente_dem solo si se usa LiDAR, paso 6).
 - fuentes_A9.csv: archivo, url_o_api, fecha_consulta, sha256.
-La lámina de la tormenta de referencia (paso 4) va en el texto de explicación y en fuentes_A9.csv, con su fuente y periodo, para que Cristian la pase a los datos. No crees otro archivo.
+La lámina de la tormenta de referencia (paso 4) NO lleva archivo propio: imprímela con su fuente y periodo en la explicación final, para que P5 la agregue a cifras.csv. No crees otro archivo.
 
 DOCUMENTOS DE REFERENCIA (pegados)
 S9 §4 bis, tabla de las capas (copiada tal cual):
@@ -446,7 +447,7 @@ PRUEBA: el mapa de acumulación sigue los drenes y canales visibles en la imagen
 ```text
 relieve_rutas.geojson | NASADEM (NASA/NASADEM_HGT/001, 30 m) exportado por la sesión de Chrome; acumulación D8 ≥ umbral de supuestos.json; regional, 30 m (NASADEM); not field drainage design | 2026-11-14 | colab/A9_relieve.ipynb
 relieve_parcelas.csv | NASADEM 30 m + parcelas_base.geojson; indicadores de contexto, no medición | 2026-11-15 | colab/A9_relieve.ipynb
-fuentes_A9.csv | Fuentes de A9: nasadem_zona_piloto.tif, serie de GPM IMERG V07 (o eto_diaria.csv), supuestos.json (sha256); tormenta P95 con su periodo | 2026-11-14 | colab/A9_relieve.ipynb
+fuentes_A9.csv | Fuentes de A9: nasadem_zona_piloto.tif, serie de GPM IMERG V07 (o eto_diaria.csv), supuestos.json (sha256) | 2026-11-14 | colab/A9_relieve.ipynb
 ```
 Aviso: `ENTREGA: relieve_rutas.geojson — prueba OK`.
 
@@ -477,7 +478,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
@@ -541,7 +542,7 @@ PRUEBA: la gráfica es clara y el texto indica explícitamente "meets / does not
 
 **Plan B:** el kit no trae uno para A6, y el back-test es núcleo: no se corta (S9 §8; kit R3).
 - Si la serie del SIH no sirve, se usa el respaldo de prensa que el prompt indica, con su rótulo.
-- Si el Monte Carlo de A5 no está, se usa su rango simple, rotulado.
+- Si A5 se entregó con su plan B (rango simple), A6 usa ese rango con el mismo rótulo, «simple range».
 
 **Líneas de LEEME.md:**
 ```text
@@ -581,7 +582,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.

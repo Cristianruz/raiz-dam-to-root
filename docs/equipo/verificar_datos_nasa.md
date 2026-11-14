@@ -43,7 +43,7 @@ Así el ensamblador no lo rechaza y nadie tiene que defender ante el jurado una 
 | Revisar | Cómo |
 |---|---|
 | Unidades | Imprima las unidades que trae el propio archivo (encabezado, metadatos o ficha). Una conversión se escribe con su explicación; por ejemplo, «100 mm = 1 millar/ha» (kit B4) |
-| Rango | Mínimo, máximo y percentiles 1 y 99 de cada columna numérica. Compárelos solo con el rango de control del kit, si existe |
+| Rango | Mínimo y máximo de cada columna numérica. Compárelos solo con el rango de control del kit, si existe |
 | Faltantes | Cuente los nulos y los centinelas (por ejemplo, −999 de POWER o el valor de «sin dato» de una exportación). Conviértalos a NaN y repórtelos; nunca los rellene ni los borre en silencio |
 | Fechas | Primera y última fecha, días o meses que faltan, fechas repetidas y zona horaria (UTC o local) |
 | CRS y escala | CRS del archivo (EPSG) y tamaño de celda. En grados (EPSG:4326), las áreas y pendientes se calculan en metros (reproyectar) |

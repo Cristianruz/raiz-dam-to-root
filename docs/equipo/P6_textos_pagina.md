@@ -498,10 +498,12 @@ Texto del kit (§3, copiado tal cual):
 
 Y de S9 §7:
 
+| Premio | Pieza que lo sostiene |
+|---|---|
 | People's Choice (17–20 nov) | Video de 30 s y publicaciones del equipo; sin bots, que descalifican |
 | #MejorMeme | Historias en Instagram durante el evento, con el nombre del equipo y la etiqueta (P6) |
 
-- **Sin bots y sin compra de votos:** descalifican.
+- **Sin bots:** descalifican de la fase local (kit §3).
 - Cada historia lleva el nombre del equipo y la etiqueta, sin logotipos de NASA y sin cifras que no estén en `cifras.csv`.
 - Las historias del meme se preparan el sábado entre las 20:30 y la 1:00 (kit §3), en los ratos definidos para redes (S10 §9).
 
@@ -533,9 +535,10 @@ S9 §1 (copiado tal cual):
 - Nombre: Raíz – From Dam to Root. Equipo: Los Norteados. Reto: Field Shift.
 
 TAREA
-Tarea PC. Escribe varias ideas de historia para #MejorMeme durante el evento (humor sobre el agua, la presa y la parcela, sin burlarse de los agricultores ni de las instituciones), cada una con el nombre del equipo (Los Norteados) y la etiqueta #MejorMeme, y un texto corto para pedir el voto del People's Choice con la liga del video. Sin cifras, sin logotipos de NASA, sin "first"/"only", sin promesas de ahorro, sin pedir votos a cambio de nada.
+Tarea PC. Escribe varias ideas de historia para #MejorMeme durante el evento (humor sobre el agua, la presa y la parcela, sin burlarse de los agricultores ni de las instituciones), cada una con el nombre del equipo (Los Norteados) y la etiqueta #MejorMeme, y un texto corto para pedir el voto del People's Choice con la liga del video. Sin cifras, sin logotipos de NASA, sin "first"/"only", sin promesas de ahorro.
 PRUEBA: AUTOVERIFICACIÓN de la regla 7.
 ```
+- **Hora límite:** las historias, durante el evento (sáb 20:30–1:00, kit §3); la publicación del People's Choice, lista con la liga del video el dom 12:00, para la votación del 17 al 20-nov.
 - **Prueba de aceptación:** la del bloque.
 - **Plan B:** una sola historia por día.
 - **Línea de LEEME.md:** no aplica.
