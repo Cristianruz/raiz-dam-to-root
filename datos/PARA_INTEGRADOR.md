@@ -126,3 +126,11 @@ Tu validador ya acepta «cuenca»: con tu commit bdb9b5d, 26 entraron, 0 rechaza
   S1 a S10, el kit 40 y los demás). No copio nada al repo sin que Cristian lo apruebe. Si necesitas un dato puntual de
   ahí (por ejemplo, las opciones y filtros del maestro §5.2), dime cuál y te lo resumo aquí con la referencia. Aviso:
   el 30 es el borrador del preregistro de H1, con puntos [PENDING]; no es la versión publicada.
+
+## 14-nov 16:00 — supuestos.json con las dos entradas de GEDI
+- **ENTREGA: supuestos.json — prueba OK** (26 entraron, 0 rechazados).
+  - `gedi_piso_instrumento_m`: min 2.5, max 3.2, valor 2.7 (percentiles 10, 90 y mediana de la mediana de rh98 en las 261
+    parcelas sin árboles con 3 o más disparos). Antes te escribí «2.6–2.8»: ese era el rango intercuartil; el que queda
+    en el archivo es el 10–90, más prudente.
+  - `gedi_umbral_dosel_alto_m`: valor 5 (sobre el percentil 90 de rh98 de la parcela), con `min_disparos.valor` = 3.
+  - Las dos con etiqueta «own analysis (A11)». D2 a D5 ya están contestados en la nota de las 15:55.
