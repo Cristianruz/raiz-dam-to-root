@@ -114,9 +114,19 @@ def main():
             m = ~geometry_mask([f["geometry"]], out_shape=z.shape, transform=tr, all_touched=False)
             if not m.any():
                 m = ~geometry_mask([f["geometry"]], out_shape=z.shape, transform=tr, all_touched=True)
-            # Aportación externa: máximo flujo que entra a la parcela desde celdas de fuera
+            # Aportación externa: máximo flujo que entra a la parcela desde celdas de fuera.
+            # Solo se revisa el anillo de 1 celda alrededor (las únicas que pueden drenar hacia dentro).
             externa = 0.0
-            for i, j in zip(*np.where(~m)):
+            ii, jj = np.where(m)
+            i0, i1 = max(ii.min() - 1, 0), min(ii.max() + 2, z.shape[0])
+            j0, j1 = max(jj.min() - 1, 0), min(jj.max() + 2, z.shape[1])
+            sub = m[i0:i1, j0:j1]
+            anillo = np.zeros_like(sub)
+            for di, dj in VECINOS:
+                anillo |= np.roll(np.roll(sub, di, 0), dj, 1)
+            anillo &= ~sub
+            wi, wj = np.where(anillo)
+            for i, j in zip(wi + i0, wj + j0):
                 a, b = destino[i, j]
                 if a >= 0 and m[a, b]:
                     externa = max(externa, acum[i, j])
