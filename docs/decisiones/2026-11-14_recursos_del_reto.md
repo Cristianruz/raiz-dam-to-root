@@ -45,7 +45,7 @@ Promedio mensual sobre el rectángulo de cada zona (`data/params.json`, `zona_pi
 
 | Columna | Contenido |
 |---|---|
-| `zona` | `delicias_saucillo` o `lazaro_cardenas` |
+| `zona` | `delicias_saucillo` o `lazaro_cardenas`. Solo para `grace`: `cuenca` (ver la nota de GRACE) |
 | `fuente` | `smap`, `modis`, `grace`, `gldas`, `nldas` o `era5_land` |
 | `variable` | ver la tabla siguiente |
 | `mes` | `AAAA-MM` |
@@ -70,6 +70,13 @@ Promedio mensual sobre el rectángulo de cada zona (`data/params.json`, `zona_pi
 | `era5_land` | `dias_helada` | `dias` | días del mes con temperatura mínima ≤ 0 °C (misma definición que el kit A2) |
 
 Periodo: desde 2000-01, o desde el primer mes del producto si empieza después, hasta el último mes disponible. Llave única: (`zona`, `fuente`, `variable`, `mes`).
+
+**Nota de GRACE (acordada con la sesión de datos, 14-nov 15:35):** el límite entre dos celdas de GRACE (mascons de 3°) pasa por la zona, así que la diferencia entre Delicias–Saucillo y Lázaro Cárdenas sería un efecto de la malla y no información local. GRACE se entrega como **una sola serie**, con `zona` = `cuenca`: el promedio sobre el rectángulo que envuelve las dos zonas (`zona_piloto.bbox`), ponderado por la fracción cubierta. La página la muestra igual para las dos zonas y la rotula como dato de cuenca.
+
+**Otras precisiones:**
+- `dias_helada` de ERA5-Land se cuenta por celda y se promedia en la zona: puede traer decimales.
+- ERA5-Land es de ECMWF/Copernicus, no de NASA; la tabla de recursos lo rotula así.
+- Los archivos intermedios que Earth Engine deja en el buzón (`ctx_*.csv`, `gedi_disparos_*.csv`) son crudos: el validador los lista aparte y no los toma como entregas.
 
 ### `gedi_parcelas.csv` (un solo archivo, las dos zonas)
 | Columna | Contenido |
