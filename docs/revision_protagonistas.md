@@ -38,7 +38,7 @@ P0244 es «libre», pero su opción actual es descanso: lámina 0 y La gota sin 
 Observación sobre la clase: lo que las reglas llaman `cereal_invierno` en estas parcelas es un cultivo de fines de invierno
 y primavera (verde de febrero a abril o mayo). El nombre del cultivo no se puede confirmar con la imagen.
 
-No cambié `protagonista` en `parcelas_base.geojson`: cambiar la protagonista libre es decisión del equipo.
+**Actualización, 14-nov 16:45:** por decisión del integrador (`docs/decisiones/2026-11-14_opciones_b3.md` en su rama), la protagonista «libre» pasa a ser **P0632** y P0244 deja de serlo (sigue en el mapa como cualquier parcela). `parcelas_base.geojson` se regeneró con las marcas P0757, P0632 y L0175. La revisión de P0632 es la de la tabla de arriba y vale lo mismo que las otras: hecha por la sesión de datos sobre Sentinel-2; falta la de una persona.
 
 ## Lo que falta
 - Que una persona del equipo que conozca Km 92, El Molino y Lázaro Cárdenas confirme el cultivo de estas parcelas.

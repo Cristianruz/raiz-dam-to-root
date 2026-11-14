@@ -148,3 +148,41 @@ correr (`docs/h1b_especificacion.md`, commit 695caf8, 16:20) y resultado en `doc
   sigue la salida de La Boquilla con una mediana de error de 3.3 puntos porcentuales en 26 ciclos (mejor que la lineal en
   19 de 26). No es una hipótesis registrada; va como descripción.
 - Archivos nuevos: `docs/resultado_H1b.md`, `docs/h1b_forma.png`, `datos/colab/A6b_forma_historica.py`. No hay entrega al buzón.
+
+## 14-nov 16:50 — opciones_b3.json, P0632 como protagonista y tres rotaciones nuevas
+Con tu commit 9b1c169: 26 entraron, 0 retenidos; `opciones_b3.json` sale «no está en la tabla 0.4-B» (lo esperado: aún no tiene esquema).
+
+- **ENTREGA: opciones_b3.json** (sin prueba contra tu ensamblador, como pediste). 12 opciones, 10 filtros.
+  Fuente: maestro §5.2 (v3.1, 29-oct) y expediente 27 §2.3; la fuente primaria va en cada opción y en cada filtro.
+  | Letra del maestro | id en rotaciones.json | Estado |
+  |---|---|---|
+  | ACTUAL | `alfalfa`, `chile`, `algodon`, `maiz_forrajero`, `sorgo`, `cereal_invierno` | con ventana de siembra y fuente donde la hay |
+  | A | `avena_maiz` | entregada |
+  | B | `alfalfa_corte_verano` | entregada, con `advertir_si_rojo` = true |
+  | C | `cereal_algodon` y `cereal_sorgo` | **rotaciones nuevas en A5** (el maestro pide cereal de invierno y luego algodón o sorgo) |
+  | D (avena-veza) | — | **fuera**: A5 no tiene Kc con fuente para la mezcla y el maestro la marca como no verificada en Delicias |
+  | E (sorgo con 1–2 auxilios) | — | **fuera como tal**: no hay lámina de auxilio de sorgo con fuente. Su parte «el resto descansa» es `descanso` |
+  | nogal_no_rota | `nogal` | sin alternativas (el maestro dice que no rota) |
+  | no_sembrar | `descanso` | entregada |
+  - **Aviso 1: pocas alternativas fuera de alfalfa y chile.** El maestro solo define alternativas para alfalfa (B, A) y chile (C).
+    Para algodón, maíz, sorgo y cereal de invierno solo queda `descanso`; para barbecho y nogal, ninguna. Si quieres tres
+    estrategias en todas las fichas, hay que completar con tu diseño provisional y rotularlo [S]: yo no lo invento.
+  - **Aviso 2: la opción C pide MÁS agua que el chile solo** (son dos cultivos en el año): `cereal_algodon` 20.9 y `cereal_sorgo`
+    17.7 millares/ha (P50, Delicias) frente a 14.3 del chile. Se sugiere por la plaga, no por el agua; `por_que_en` ya lo dice.
+  - **Aviso 3: huecos que van en null.** Sin fecha de siembra de sorgo en las fuentes; chile solo «desde febrero» (sin fecha
+    límite); el cereal de invierno con riego en Delicias no está verificado (ventana «nov–dic» del maestro, lámina de La Laguna).
+    Ojo: A5 siembra el cereal el 15-oct [S], no en nov–dic; la lámina cambia poco, pero la fecha no coincide con la del maestro.
+  - **Aviso 4: `indicadores`.** `leguminosa` = true en alfalfa por clasificación botánica (no viene del maestro; va dicho en su
+    fuente). `ruptura_plagas` = true solo en la opción C. `raiz_profunda` = null en todas: el maestro lo nombra como indicador
+    pero no lo asigna a ninguna opción.
+  - **Propuesta de contrato:** el filtro «no establecer alfalfa en año seco» compara 40 cm de establecimiento con la dotación
+    elegida. Lo puse con `tipo` = «intervalo» y `necesita` = [«dotación elegida en el deslizador»], que no está en tu lista.
+    Si prefieres un tipo nuevo («dotacion_minima»), cámbialo. Los filtros de fecha y de soca del algodón van con `necesita` = []:
+    son avisos, no dependen de ningún dato.
+  - Bloque adicional `opciones_del_maestro_no_entregadas` con el motivo de D y E, por si la página quiere decirlo.
+- **ENTREGA: rotaciones.json y rotaciones_lazaro_cardenas.json — prueba OK.** Tres rotaciones nuevas: `cereal_invierno` (6.28
+  millares/ha P50 en Delicias), `cereal_algodon` (20.88) y `cereal_sorgo` (17.65). Las nueve anteriores salen idénticas.
+- **ENTREGA: parcelas_base.geojson — prueba OK.** Protagonistas: P0757, **P0632** y L0175; P0244 ya no. Lo demás del archivo no cambia.
+  `docs/revision_protagonistas.md` actualizado.
+- Nota de proceso: usé contenido del proyecto de Claude de Cristian (maestro y expediente 27) solo como hechos con su
+  referencia, sin copiar los documentos. Se lo avisé a Cristian.

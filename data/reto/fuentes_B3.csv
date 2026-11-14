@@ -1,0 +1,2 @@
+archivo,fuente,fecha,script,sha256
+opciones_b3.json,"Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), «Rotaciones candidatas» y «Filtros duros»; expediente de datos 27, §2.3 (INIFAP, Agenda Técnica Agrícola de Chihuahua 2017). Las fuentes primarias van en cada opción y en cada filtro",2026-11-14,datos/colab/B3_opciones.py,62c18c6d61217965817bedef41e0b23940173dba944c303509c4233c58b6d884

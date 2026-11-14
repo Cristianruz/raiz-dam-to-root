@@ -78,8 +78,14 @@ ROTACIONES = [
     {"id": "chile", "nombre": "Chile", "cultivos": ["chile"], "plazo": "anual"},
     {"id": "maiz_forrajero", "nombre": "Maíz forrajero", "cultivos": ["maiz_forrajero"], "plazo": "anual"},
     {"id": "sorgo", "nombre": "Sorgo forrajero", "cultivos": ["sorgo"], "plazo": "anual"},
+    {"id": "cereal_invierno", "nombre": "Cereal de invierno", "cultivos": ["cereal_invierno"], "plazo": "anual"},
     {"id": "avena_maiz", "nombre": "Avena (invierno) + maíz forrajero (verano)",
      "cultivos": ["cereal_invierno", "maiz_forrajero"], "plazo": "anual"},
+    # Opción C del maestro §5.2 (romper el ciclo del chile): cereal de invierno y después algodón o sorgo
+    {"id": "cereal_algodon", "nombre": "Cereal de invierno + algodón (verano)",
+     "cultivos": ["cereal_invierno", "algodon"], "plazo": "anual"},
+    {"id": "cereal_sorgo", "nombre": "Cereal de invierno + sorgo forrajero (verano)",
+     "cultivos": ["cereal_invierno", "sorgo"], "plazo": "anual"},
     {"id": "descanso", "nombre": "Descanso con rastrojo en pie", "cultivos": [], "plazo": "anual"},
 ]
 

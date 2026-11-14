@@ -43,9 +43,9 @@ comprometida) y P0118 (barbecho en 2026 tras años perenne, libre), elegidas por
 - Cada zona se procesa en `data/zonas/<zona>/` con los mismos scripts (B1 `--zona`, A1 con `--lat/--lon/--patron`, A3, A4, A5, A9).
 - `colab/unir_zonas.py --salida data/entrega_zonas` arma la entrega: un solo archivo con las dos zonas para parcelas, CSV por
   parcela y rutas; con sufijo `_lazaro_cardenas` para clima, demanda, relieve_meta y NASADEM; y el `LEEME.md`.
-- Corrida real: 940 + 299 parcelas. Protagonistas: P0757 (alfalfa de 3 años, por vencer, a 0.25 km de Km 92), P0244 (descanso en
-  2026 tras años con cultivo, libre, a 0.7 km de El Molino) y L0175 (nogal, comprometida, a 2.6 km de Lázaro Cárdenas).
-  No hay «anual libre» con nombre de cultivo: las anuales de verano se abstienen; la protagonista libre es una parcela en descanso.
+- Corrida real: 940 + 299 parcelas. Protagonistas: P0757 (alfalfa de 3 años, por vencer, a 0.25 km de Km 92), P0632 (cereal de
+  fines de invierno, libre, a 3.2 km de Km 92; sustituye a P0244 desde el 14-nov a las 16:45, ver `docs/revision_protagonistas.md`)
+  y L0175 (nogal, comprometida, a 2.6 km de Lázaro Cárdenas).
 - La entrega pasa `motor/ensamblar.py` de la rama del integrador: 22 archivos, 0 rechazados, 0 retenidos.
 - **Un comando la rehace desde los crudos** (unos 55 s): `python datos/colab/correr_zonas.py`. Comprobado el 14-nov-2026 en una
   carpeta vacía: los 20 archivos de datos salen idénticos, byte por byte, a los entregados en `Raiz_entregas`. El `LEEME.md`
@@ -61,4 +61,4 @@ comprometida) y P0118 (barbecho en 2026 tras años perenne, libre), elegidas por
 - `colab/A10_contexto_regional.py --dir data/reto --crudo data/raw/reto` → `contexto_regional.csv` (series regionales, nunca por parcela;
   GRACE como una sola serie «cuenca»).
 - `colab/A11_gedi_parcelas.py --dir data/reto --crudo data/raw/reto` (con `parcelas_base.geojson` en la carpeta) → `gedi_parcelas.csv`.
-
+- `colab/B3_opciones.py --dir data/reto --rotaciones <rotaciones.json de cada zona>` → `opciones_b3.json`: opciones y filtros del maestro §5.2, cada uno con su fuente.

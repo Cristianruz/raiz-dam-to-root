@@ -23,7 +23,7 @@ R = lambda *p: os.path.join(RAIZ, *p)
 # Por zona: punto y crudo de NASA POWER, y parcelas protagonistas (elegidas a mano; datos/LEEME.md).
 ZONAS = {
     "delicias_saucillo": {"lat": 28.19, "lon": -105.45, "power": ("data/raw/power", "power_crudo_*.json"),
-                          "protagonistas": "P0757,P0244"},
+                          "protagonistas": "P0757,P0632"},
     "lazaro_cardenas": {"lat": 28.39, "lon": -105.61, "power": ("data/raw/zonas", "power_crudo_lazaro_cardenas_*.json"),
                         "protagonistas": "L0175"},
 }
