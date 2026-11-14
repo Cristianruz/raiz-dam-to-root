@@ -68,5 +68,12 @@ def test_la_gota_usa_la_misma_unidad():
 
 
 def test_conversion_mm_de_b4():
-    pytest.skip("pendiente: el motor B4 aún no existe; cuando exista, probar su conversión de "
-                "demanda_parcelas.csv (mm) a millares/ha con unidades.millar.lamina_mm")
+    """B4 convierte la lámina neta en mm a m³ con unidades.millar (lamina_mm y m3_por_ha) de params."""
+    import sys
+    sys.path.insert(0, str(RAIZ / "motor"))
+    import b4_cubo
+    params = json.loads((RAIZ / "data/params.json").read_text(encoding="utf-8"))
+    mm = MILLAR["lamina_mm"]  # una lámina neta igual a 1 millar/ha expresada en mm
+    g = b4_cubo.bloque_gota(1.0, 1.0, mm, params, MILLAR["m3_por_ha"])
+    assert g["m3_consume_cultivo_et"] == pytest.approx(MILLAR["m3_por_ha"]), "mm → m³/ha no usa params.unidades.millar"
+    assert g["m3_llegan_parcela"] == pytest.approx(MILLAR["m3_por_ha"])

@@ -20,3 +20,9 @@ Una línea por tarea (CLAUDE.md, regla 11; kit v4 §0.1, regla 9). Cristian expo
 | 2026-11-14 | Cristian | Claude Code (agente) | Web con datos reales: goteo no disponible, encuadre del mapa, ficha de abstenidas, lista con buscador, prueba de humo independiente de los datos | `web/app.js`, `web/style.css`, `web/index.html`, `tests/e2e/web_smoke.mjs` |
 | 2026-11-14 | Cristian | Claude Code (agente) | Guía del equipo actualizada al estado real | `docs/equipo/` |
 | 2026-11-14 | Sesión de datos | Claude (navegador, Chrome de Cristian) | Earth Engine (HLS, memoria, NASADEM), FTW, NASA POWER, A1, A3, A4 reglas, A5, A9 | rama `datos-satelite`, Drive `Raiz_entregas` |
+| 2026-11-14 | Cristian | Claude Code (integrador) | Decisión de dos zonas, localidades del equipo en params, referencias del reto y de la SDR | `docs/decisiones/2026-11-14_dos_zonas.md`, `data/params.json`, `docs/referencias/` |
+| 2026-11-14 | Cristian | Claude Code (flujo multiagente: implementador + revisor + corrección por pieza) | Dos zonas en buzón, motor B4, contrato y web (selector de zona, localidades) | `motor/esquemas.py`, `motor/ensamblar.py`, `motor/b4_cubo.py`, `validar_contrato.py`, `web/app.js`, `tests/test_b4.py`, `tests/fixtures/` |
+| 2026-11-14 | Cristian | Claude Code (integrador) | Relieve para la web y verificador conectados al comando único; docs/pruebas.md generado | `motor/relieve_web.py`, `construir.py`, `docs/pruebas.md` |
+| 2026-11-14 | Cristian | Claude Code (agente) | Verificador de cifras con set dorado de 30 casos (5 trampas) | `motor/verificador.py`, `tests/casos/set_dorado.json`, `tests/test_verificador.py`, `docs/figuras/llm_eval.csv` |
+| 2026-11-14 | Cristian | Claude Code (agente redactor + agente revisor-cifras) | Página del proyecto en inglés y limitaciones | `README.md`, `LIMITATIONS.md` |
+| 2026-11-14 | P2–P6 | Gemini en Colab / Claude en el navegador | [PENDING: cada integrante agrega aquí sus líneas al entregar] | `Raiz_entregas/` |

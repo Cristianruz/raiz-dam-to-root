@@ -46,6 +46,7 @@ ANIO_VENTANA = 2026  # año no bisiesto de referencia para contar días; solo de
 ZONA_SIN_SUFIJO = "delicias_saucillo"
 # Motivo (código, no texto) de una parcela clasificada que queda sin opciones; la web pone el texto.
 SIN_CLIMA_ZONA = "sin_clima_zona"
+SIN_ACTUAL = "sin_actual"  # la opción ACTUAL no se pudo armar con los archivos de la zona
 
 
 def leer_json(p):
@@ -417,7 +418,13 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                     "gota": bloque_gota(props["area_ha"], lam["0"]["p50"], neta, params, m3_millar),
                     "gota_goteo_con_tope": None, "gota_goteo_sin_tope": None, "tope_consumo": None,
                 })
-        cubo_parcelas[pid] = {"opciones": opciones}
+        if opciones and not any(o["id"] == "ACTUAL" for o in opciones):
+            # Sin la opción ACTUAL no hay comparación posible (kit B4: ACTUAL nunca se elimina):
+            # la parcela queda sin opciones y se avisa; nunca se publica un cubo que rompa el contrato.
+            avisos.append(f"{pid}: no se pudo armar la opción ACTUAL ({cultivo}) con los archivos de su zona; queda sin opciones")
+            cubo_parcelas[pid] = {"opciones": [], "sin_opciones": SIN_ACTUAL}
+        else:
+            cubo_parcelas[pid] = {"opciones": opciones}
 
     # Bloque «zona» (todas las parcelas; compatibilidad) y bloque «zonas» (uno por zona con parcelas).
     props_all = [f["properties"] for f in features]
