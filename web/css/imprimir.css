@@ -69,7 +69,8 @@
     border: none !important;
   }
   #ficha .ficha-cabeza h2 { font-size: 12pt; }
-  #ficha .ficha-cuerpo { padding: 0 !important; gap: 1.8mm !important; }
+  /* Separación entre bloques: 1.2 mm. Con las fuentes de las dos zonas piloto, 1.8 mm pasaba la ficha de 4 tarjetas a una segunda hoja en carta. */
+  #ficha .ficha-cuerpo { padding: 0 !important; gap: 1.2mm !important; }
   #ficha .ficha-cuerpo h3 { font-size: 9pt; margin-bottom: 1mm; }
   #ficha p { margin: 0; }
 
@@ -196,8 +197,8 @@
   #ficha .impresion-fuentes-lista {
     margin: 0;
     padding-left: 3.5mm;
-    columns: 3;
-    column-gap: 5mm;
+    columns: 4;
+    column-gap: 4mm;
     font-size: 6pt;
     line-height: 1.15;
   }

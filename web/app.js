@@ -105,6 +105,8 @@ const GLOSARIO = [
 ];
 
 const AVISO_JUICIO = "This tool supports, never replaces, the judgment of farmers and local experts.";
+// Holgura del clic sobre el mapa, en píxeles de pantalla (no es un dato del proyecto): alcanza parcelas muy pequeñas.
+const TOLERANCIA_CLIC_PX = 4;
 
 // ---------------------------------------------------------------------------
 // Estado de la página
@@ -1017,8 +1019,16 @@ function crearMapa() {
         "line-width": ["case", ["==", ["get", "_sel"], true], 4, ["==", ["get", "protagonista"], true], 2, 1],
       },
     });
-    mapa.on("click", "parcelas-relleno", (e) => {
-      const id = e.features?.[0]?.properties?.id;
+    // Clic con tolerancia: en la vista de las dos zonas hay parcelas de menos de un píxel de alto y el clic
+    // exacto no las alcanza. Si en el punto no hay parcela, se busca en cuadros cada vez más grandes alrededor
+    // (de 1 px hasta la tolerancia) y se abre la primera que aparezca, es decir, la más cercana al clic.
+    mapa.on("click", (e) => {
+      const capas = { layers: ["parcelas-relleno"] };
+      let hallados = mapa.queryRenderedFeatures(e.point, capas);
+      for (let t = 1; !hallados.length && t <= TOLERANCIA_CLIC_PX; t++) {
+        hallados = mapa.queryRenderedFeatures([[e.point.x - t, e.point.y - t], [e.point.x + t, e.point.y + t]], capas);
+      }
+      const id = hallados[0]?.properties?.id;
       if (id) abrirFicha(id);
     });
     mapa.on("mouseenter", "parcelas-relleno", () => { mapa.getCanvas().style.cursor = "pointer"; });
