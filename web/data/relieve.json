@@ -10,7 +10,7 @@
     "mm": 20.2,
     "definicion": "95th percentile of days with rain >= 1 mm",
     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), mean over the pilot area rectangle",
-    "periodo": "2001-01-01 a 2026-11-13"
+    "periodo": "2001-01-01 to 2026-11-13"
    }
   },
   "lazaro_cardenas": {
@@ -21,7 +21,7 @@
     "mm": 20.7,
     "definicion": "95th percentile of days with rain >= 1 mm",
     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), mean over the pilot area rectangle",
-    "periodo": "2001-01-01 a 2026-11-13"
+    "periodo": "2001-01-01 to 2026-11-13"
    }
   }
  }
