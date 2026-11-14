@@ -186,3 +186,28 @@ Con tu commit 9b1c169: 26 entraron, 0 retenidos; `opciones_b3.json` sale «no es
   `docs/revision_protagonistas.md` actualizado.
 - Nota de proceso: usé contenido del proyecto de Claude de Cristian (maestro y expediente 27) solo como hechos con su
   referencia, sin copiar los documentos. Se lo avisé a Cristian.
+
+## 14-nov 17:05 — «Soluciónalo y constrúyelo» (Cristian): referencia local de láminas en los datos
+Cristian pidió arreglar la diferencia entre el modelo y la realidad y construirlo. No se tocan veredictos ni el cálculo.
+Lo que hice, con fuentes ya verificadas en el expediente del proyecto (S2 §3):
+
+- **ENTREGA: supuestos.json — prueba OK.** Bloque nuevo `lamina_local_cm` (solo referencia; el cálculo no lo usa), en cm:
+  | Cultivo | `recomendada_inifap` | `aplicada_dr005` (2009–2016) | `et_estimada_dr005` | P50 del modelo |
+  |---|---|---|---|---|
+  | alfalfa | 170–180 | 174.2 | 113.9 | 284 |
+  | nogal | — | 137.2 | 141.3 | 191 |
+  | chile | 92 | 161.1 | 82.5 | 143 |
+  | algodon | 68 | — | — | 147 |
+  | maiz_forrajero | 50–60 | — | — | 111 |
+  Fuentes: INIFAP (Agenda 2017, PT-0003, Folleto Técnico 53) y Villalobos-Cano et al. 2024 (DOI 10.3390/su16051851). Todas [V].
+- **Análisis: `docs/modelo_vs_practica.md`.** El modelo no está «el doble de alto» en todo: 1.63× en alfalfa, 1.39× en nogal,
+  ~2× en algodón y maíz frente a INIFAP, y **0.89× en chile** (ahí se aplica más de lo recomendado). Alfalfa y nogal son 68 %
+  de la superficie del patrón de H1: eso explica el error de H1.
+- **Propuesta para la ficha (tú decides con Cristian; es el cambio que de verdad «arregla» lo que ve el usuario):**
+  junto a la necesidad del modelo, una segunda línea «Typically applied here» con `aplicada_dr005` (o `recomendada_inifap`
+  si no hay aplicada), y «enough for» calculado con las dos. Ejemplo de escala: con 3.5 millares/ha, 10 ha de alfalfa
+  alcanzan para 1.2 ha con el modelo y para 2.0 ha con la lámina aplicada (el 2.0 es el del kit §2.4).
+  Rótulos sugeridos: «Full crop requirement (FAO-56 model)» y «Typically applied in this district (2009–2016 records)».
+  Límite que debe ir a la vista: la referencia es un promedio del distrito, no de la parcela.
+- **No cambié `ea_gravedad`.** Para que lo tengan a la mano: con 0.60–0.70 la alfalfa bajaría de 28.4 a 25.1 millares/ha
+  (nogal 19.1 → 16.8; algodón 14.7 → 13.1; chile 14.3 → 12.8; maíz 11.1 → 10.1). No cierra la brecha: en alfalfa viene de la ET.

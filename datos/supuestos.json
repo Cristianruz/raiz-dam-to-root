@@ -144,5 +144,70 @@
   },
   "etiqueta": "own analysis (A11), assumption [S]",
   "fuente": "Criterio propio (A11, 14-nov-2026): percentil 90 de rh98 de la parcela de 5 m o más. Con ese umbral, 57 de 86 parcelas de nogal con 3 o más disparos muestran dosel alto, frente a 7 de 95 de alfalfa y 0 de 11 de cereal de invierno"
+ },
+ "lamina_local_cm": {
+  "_nota": "Láminas publicadas para la región, en cm por año o por ciclo. Son REFERENCIA para comparar con la lámina del modelo; el cálculo no las usa. 10 cm = 1 millar/ha",
+  "alfalfa": {
+   "recomendada_inifap": {
+    "min": 170,
+    "max": 180,
+    "etiqueta": "[V]",
+    "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (verificado en el expediente del proyecto, S2 §3): lámina anual de 170–180 cm"
+   },
+   "aplicada_dr005": {
+    "valor": 174.2,
+    "etiqueta": "[V]",
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+   },
+   "et_estimada_dr005": {
+    "valor": 113.9,
+    "etiqueta": "[V]",
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+   }
+  },
+  "chile": {
+   "recomendada_inifap": {
+    "valor": 92,
+    "etiqueta": "[V]",
+    "fuente": "INIFAP, paquete tecnológico PT-0003 (2015): 12–14 riegos y 92 cm por gravedad (expediente del proyecto, S2 §3)"
+   },
+   "aplicada_dr005": {
+    "valor": 161.1,
+    "etiqueta": "[V]",
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+   },
+   "et_estimada_dr005": {
+    "valor": 82.5,
+    "etiqueta": "[V]",
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+   }
+  },
+  "nogal": {
+   "aplicada_dr005": {
+    "valor": 137.2,
+    "etiqueta": "[V]",
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+   },
+   "et_estimada_dr005": {
+    "valor": 141.3,
+    "etiqueta": "[V]",
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+   }
+  },
+  "algodon": {
+   "recomendada_inifap": {
+    "valor": 68,
+    "etiqueta": "[V]",
+    "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (verificado en el expediente del proyecto, S2 §3): ~68 cm (20 cm de presiembra + 48 cm en 4–5 auxilios)"
+   }
+  },
+  "maiz_forrajero": {
+   "recomendada_inifap": {
+    "min": 50,
+    "max": 60,
+    "etiqueta": "[V]",
+    "fuente": "INIFAP, Folleto Técnico 53 (2014): 5 riegos de 10–12 cm, incluida la presiembra (documento maestro del proyecto, §5.2)"
+   }
+  }
  }
 }
