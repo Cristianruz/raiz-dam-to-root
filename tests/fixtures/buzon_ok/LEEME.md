@@ -5,6 +5,8 @@ Fixture de `tests/test_ensamblar.py`. TODOS LOS VALORES SON DE PRUEBA: se escrib
 validador del buzón (`motor/ensamblar.py`); no son datos reales, no tienen fuente y no se usan en la web.
 Imita el buzón de Drive `Raiz/entregas/`: cada archivo tiene su línea «archivo | fuente | fecha | script».
 El GeoTIFF se genera con Pillow: `python tests/test_ensamblar.py --regenerar-tif`.
+`hls_ndvi_memoria_2016.tif` imita un crudo de Earth Engine (texto, no un TIFF): no lleva línea aquí,
+no se valida ni se copia; el ensamblador lo lista aparte como «crudo».
 
 | archivo | fuente | fecha | script |
 |---|---|---|---|
@@ -15,3 +17,9 @@ El GeoTIFF se genera con Pillow: `python tests/test_ensamblar.py --regenerar-tif
 | relieve_parcelas.csv | Valores de prueba (fixture) | 2026-11-14 | tests/fixtures (a mano) |
 | relieve_rutas.geojson | Valores de prueba (fixture): 2 rutas | 2026-11-14 | tests/fixtures (a mano) |
 | nasadem_zona_piloto.tif | Valores de prueba (fixture): malla de 1 arcosegundo en EPSG:4326 que cubre zona_piloto.bbox | 2026-11-14 | tests/test_ensamblar.py --regenerar-tif |
+| rotaciones.json | Valores de prueba (fixture): 3 rotaciones (perenne, anual y descanso sin cultivos) | 2026-11-14 | tests/fixtures (a mano) |
+| demanda_cultivos.csv | Valores de prueba (fixture): 2 cultivos con lluvia 0 y -20 | 2026-11-14 | tests/fixtures (a mano) |
+| memoria_parcelas.csv | Valores de prueba (fixture): incluye 90 días en 2024 (bisiesto) y celdas vacías | 2026-11-14 | tests/fixtures (a mano) |
+| memoria_resumen.csv | Valores de prueba (fixture) | 2026-11-14 | tests/fixtures (a mano) |
+| cultivos_parcelas.csv | Valores de prueba (fixture): «1/1 (reglas)» con prob_max vacío y una parcela abstenida | 2026-11-14 | tests/fixtures (a mano) |
+| relieve_meta.json | Valores de prueba (fixture) | 2026-11-14 | tests/fixtures (a mano) |

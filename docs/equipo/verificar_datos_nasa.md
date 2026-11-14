@@ -48,7 +48,7 @@ Así el ensamblador no lo rechaza y nadie tiene que defender ante el jurado una 
 | Fechas | Primera y última fecha, días o meses que faltan, fechas repetidas y zona horaria (UTC o local) |
 | CRS y escala | CRS del archivo (EPSG) y tamaño de celda. En grados (EPSG:4326), las áreas y pendientes se calculan en metros (reproyectar) |
 | Cobertura de la zona | ¿El dato cubre el rectángulo `zona_piloto.bbox` de `data/params.json` y todas las parcelas de `parcelas_base.geojson`? |
-| `id` | Todos existen en `parcelas_base.geojson` (cambio c) |
+| `id` | Todos existen en `parcelas_base.geojson` (cambio c). Excepción: en `etiquetas_unidas.csv`, el `id` es el del polígono de `parcelas_muestra.geojson` |
 | Licencia y cita | La línea de `LEEME.md` (fuente), `fuentes_<pieza>.csv` (`url_o_api`, `fecha_consulta`, `sha256`) y la cita para «References» del README (§10) |
 
 ---

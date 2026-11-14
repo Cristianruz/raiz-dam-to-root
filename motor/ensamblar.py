@@ -3,9 +3,12 @@
 """Ensamblador del buzón de entregas (kit v4: K-ENS pasos 1, 2 y 6(a); tabla 0.4-B).
 
 Qué hace:
-1) Lee el buzón: la carpeta sincronizada de Drive Raiz/entregas/ (plana, o con
-   subcarpetas entregas/<rol>/) y su LEEME.md, con una línea por archivo:
+1) Lee el buzón: la carpeta sincronizada de Drive Raiz_entregas (antes Raiz/entregas/; plana,
+   o con subcarpetas <rol>/) y su LEEME.md, con una línea por archivo:
    «archivo | fuente | fecha | script» (fecha AAAA-MM-DD). Un archivo SIN línea no entra.
+   Las exportaciones crudas de Earth Engine (hls_*.tif, piloto_consumo.tif; ver
+   esquemas.CRUDOS_EARTH_ENGINE) no son entregas: se listan aparte como «crudos», sin
+   validarlas, sin copiarlas y sin pedirles línea en LEEME.md.
 2) Valida cada archivo contra motor/esquemas.py. parcelas_base.geojson va PRIMERO: los
    demás comprueban sus id contra él; si aún no llega (o se rechazó), los CSV con id
    quedan «retenidos» (no rechazados) hasta la siguiente corrida.
@@ -55,6 +58,8 @@ LOG_POR_OMISION = RAIZ / "docs/entregas_log.md"
 PARAMS_POR_OMISION = RAIZ / "data/params.json"
 NOMBRE_FUENTES = "fuentes.json"
 NOMBRE_LOG_SALIDA = "entregas_log.md"
+# Título de la sección de crudos de Earth Engine en el reporte impreso (acuerdo de formatos).
+TITULO_CRUDOS = "CRUDOS DE EARTH ENGINE (se procesan con A3; no entran al contrato)"
 
 # Celdas que cuentan como vacías (pandas escribe NaN; Earth Engine deja la celda vacía).
 VACIOS = {"", "nan", "na", "n/a", "null", "none"}
@@ -268,6 +273,8 @@ def cota(valor, ctx, res, que):
 
 
 def en_lista(valor, permitidos):
+    if isinstance(valor, tuple):          # k_de_n ya convertido: se compara como «k/n»
+        valor = "/".join(map(str, valor))
     for p in permitidos:
         if es_numero(valor) and es_numero(p):
             if math.isclose(valor, p, rel_tol=0, abs_tol=1e-9):
@@ -290,6 +297,10 @@ def revisar_valor(nombre, valor, campo, ctx, res, donde):
                 res.motivo(f"{nombre} menor que {fmt(mn)}", donde)
             else:
                 res.motivo(f"{nombre} mayor que {fmt(mx)}", donde)
+        # Cota inferior exclusiva (p. ej., un área debe ser > 0).
+        mq = cota(campo.get("mayor_que"), ctx, res, f"el mínimo exclusivo de {nombre}")
+        if mq is not None and not valor > mq:
+            res.motivo(f"{nombre} debe ser mayor que {fmt(mq)}", donde)
     if campo.get("valores") is not None:
         permitidos = cota(campo["valores"], ctx, res, f"la lista de {nombre}")
         if permitidos is not None and not en_lista(valor, permitidos):
@@ -304,6 +315,8 @@ def revisar_valor(nombre, valor, campo, ctx, res, donde):
 def leer_celda(texto, campo):
     """Convierte una celda de CSV según su tipo: (estado, valor, error)."""
     t = (texto or "").strip()
+    # Equivalencia acordada (p. ej., «1/1 (reglas)» se lee como «1/1»): antes de convertir.
+    t = (campo.get("alias") or {}).get(t, t)
     if t.lower() in VACIOS:
         return VACIO, None, None
     tipo = campo["tipo"]
@@ -430,20 +443,23 @@ def validar_csv(ruta, esq, ctx):
 
     convertidas = []
     faltantes = Counter()
+    alias_usados = Counter()   # (columna, texto entregado, texto leído): celdas leídas por «alias»
     vistos = {c: {} for c, campo in columnas.items() if campo.get("unico")}
     ids_vistos = set()
     for n, celdas in datos:
         fila = {}
         for col, campo in columnas.items():
             crudo = celdas[col]
+            if crudo.strip() in (campo.get("alias") or {}):
+                alias_usados[(col, crudo.strip(), campo["alias"][crudo.strip()])] += 1
             estado, valor, error = leer_celda(crudo, campo)
             if estado == ERROR:
                 res.motivo(f"{col}: {error}", f"fila {n}: {crudo.strip()!r}")
             elif estado == FALTANTE or (estado == VACIO and "faltante" in campo):
                 faltantes[col] += 1
             elif estado == VACIO:
-                if not campo.get("nulo"):
-                    res.motivo(f"{col}: celda vacía no permitida", f"fila {n}")
+                if not campo.get("nulo") and not vacio_admitido(campo, celdas, columnas):
+                    res.motivo(texto_vacio_no_permitido(col, campo), f"fila {n}")
             else:
                 revisar_valor(col, valor, campo, ctx, res, f"fila {n}: {crudo.strip()}")
                 if col in vistos:
@@ -472,6 +488,10 @@ def validar_csv(ruta, esq, ctx):
     for regla in esq.get("reglas", []):
         REGLAS_CSV[regla["regla"]](regla, convertidas, ctx, res, faltantes)
 
+    for (col, entregado, leido), k in alias_usados.items():
+        res.aviso(f"{col}: {k} celdas «{entregado}» se leyeron como «{leido}» (equivalencia acordada; "
+                  "el archivo se copia tal cual)")
+
     total = len(convertidas)
     tiene_maximo = any(r["regla"] == "faltantes_max" for r in esq.get("reglas", []))
     for col, k in faltantes.items():
@@ -484,6 +504,24 @@ def validar_csv(ruta, esq, ctx):
         if sin_fila:
             res.aviso(f"{len(sin_fila)} de {len(ctx.ids)} parcelas de {E.ARCHIVO_PARCELAS} sin filas en este archivo")
     return res
+
+
+def vacio_admitido(campo, celdas, columnas):
+    """«nulo_si»: la celda puede venir vacía solo si otra columna de la fila trae uno de los
+    valores dados (p. ej., prob_max vacío con acuerdo_metodos «1/1»)."""
+    cond = campo.get("nulo_si")
+    if not cond:
+        return False
+    otra = cond["columna"]
+    estado, valor, _ = leer_celda(celdas.get(otra, ""), columnas.get(otra, {"tipo": "texto"}))
+    return estado == VALIDO and en_lista(valor, cond["valores"])
+
+
+def texto_vacio_no_permitido(col, campo):
+    cond = campo.get("nulo_si")
+    if cond:
+        return f"{col}: celda vacía no permitida salvo con {cond['columna']} {' o '.join(cond['valores'])}"
+    return f"{col}: celda vacía no permitida"
 
 
 def regla_orden(regla, filas, ctx, res, faltantes):
@@ -561,6 +599,10 @@ def regla_abstencion_a42(regla, filas, ctx, res, faltantes):
                        f"fila {n}: {cultivo}")
         if not abst and cultivo == "sin_clasificar":
             res.motivo("cultivo_actual sin_clasificar con abstencion = false (kit A4.2)", f"fila {n}")
+        # Sin cultivo no hay edad de la perenne ni estado del plazo (acuerdo de formatos).
+        for col in regla.get("vacias_si_abstenida", ()):
+            if abst and fila.get(col) is not None:
+                res.motivo(f"parcela abstenida con {col} (debe ir vacío)", f"fila {n}: {fmt(fila[col])}")
 
 
 def regla_un_solo_valor_por(regla, filas, ctx, res, faltantes):
@@ -918,13 +960,78 @@ def validar_geotiff(ruta, esq, ctx):
 
 
 # =========================================================================================
-# JSON de P2–P5 (heladas, dotaciones, supuestos, rotaciones)
+# JSON (heladas, dotaciones, supuestos, rotaciones y objetos con «campos»)
+# Cada regla recibe (obj, ctx, res, esq): esq es el esquema del archivo (motor/esquemas.py).
 # =========================================================================================
 def _texto_lleno(v):
     return isinstance(v, str) and bool(v.strip())
 
 
-def regla_heladas(obj, ctx, res):
+def _revisar_orden(valores, orden, res, nombre, donde):
+    """c1 ≤ c2 ≤ … entre los valores numéricos presentes de un objeto JSON."""
+    presentes = [(c, valores.get(c)) for c in orden if es_numero(valores.get(c))]
+    for (ca, va), (cb, vb) in zip(presentes, presentes[1:]):
+        if va > vb:
+            prefijo = f"{donde}: " if donde else ""
+            res.motivo(f"{nombre}: no se cumple {' ≤ '.join(orden)}", f"{prefijo}{ca}={fmt(va)} > {cb}={fmt(vb)}")
+            return
+
+
+def revisar_objeto(obj, campos, ctx, res, ruta="", donde=None):
+    """Valida las llaves de un objeto JSON contra «campos» (vocabulario de motor/esquemas.py:
+    tipos de campo más «objeto» y «lista»). ruta: prefijo de los nombres en los motivos
+    (p. ej. «tormenta.»); donde: a qué elemento pertenece (p. ej. «rotación alfalfa»)."""
+    for nombre, campo in campos.items():
+        nom = f"{ruta}{nombre}"
+        if nombre not in obj:
+            res.motivo(f"falta {nom}", donde)
+            continue
+        v, tipo = obj[nombre], campo["tipo"]
+        if tipo == "objeto":
+            if not isinstance(v, dict):
+                res.motivo(f"{nom} debe ser un objeto", donde)
+                continue
+            if campo.get("llaves_exactas") and set(v) != set(campo["campos"]):
+                prefijo = f"{donde}: " if donde else ""
+                res.motivo(f"{nom}: se esperan exactamente las llaves {', '.join(campo['campos'])}",
+                           f"{prefijo}trae {', '.join(map(str, v)) or 'ninguna'}")
+            revisar_objeto(v, campo["campos"], ctx, res, f"{nom}.", donde)
+            if campo.get("orden"):
+                _revisar_orden(v, campo["orden"], res, nom, donde)
+        elif tipo == "lista":
+            if not isinstance(v, list):
+                res.motivo(f"{nom} debe ser una lista", donde)
+            elif not v and not campo.get("vacia"):
+                res.motivo(f"{nom}: lista vacía", donde)
+            else:
+                for elemento in v:
+                    _revisar_valor_json(nom, elemento, campo["elemento"], ctx, res, donde)
+        else:
+            _revisar_valor_json(nom, v, campo, ctx, res, donde)
+
+
+def _revisar_valor_json(nombre, v, campo, ctx, res, donde):
+    """Tipo, vacío, rango y lista de un valor suelto de JSON."""
+    estado, valor, error = leer_valor_json(v, campo)
+    prefijo = f"{donde}: " if donde else ""
+    if estado == ERROR:
+        res.motivo(f"{nombre}: {error}", f"{prefijo}{v!r}"[:120])
+    elif estado == VACIO:
+        if not campo.get("nulo"):
+            res.motivo(f"{nombre}: vacío o null no permitido", donde)
+    else:
+        revisar_valor(nombre, valor, campo, ctx, res, f"{prefijo}{fmt(valor)}")
+
+
+def regla_objeto(obj, ctx, res, esq):
+    """Objeto JSON con llaves fijas (relieve_meta.json): valida esq["campos"]."""
+    if not isinstance(obj, dict):
+        res.motivo("no es un objeto JSON")
+        return
+    revisar_objeto(obj, esq["campos"], ctx, res)
+
+
+def regla_heladas(obj, ctx, res, esq=None):
     if not isinstance(obj, dict):
         res.motivo("no es un objeto JSON")
         return
@@ -952,7 +1059,7 @@ def regla_heladas(obj, ctx, res):
         res.motivo("falta fuente")
 
 
-def regla_dotaciones(obj, ctx, res):
+def regla_dotaciones(obj, ctx, res, esq=None):
     lim = ctx.limites
     if not isinstance(obj, dict) or not isinstance(obj.get("dotaciones"), dict):
         res.motivo("falta el bloque «dotaciones» del contrato (kit §2.3)")
@@ -1037,7 +1144,7 @@ LLAVES_DESCRIPTIVAS = ("nota", "fuente", "etiqueta", "unidad", "descripcion", "d
                        "fecha", "fecha_consulta", "version", "versión")
 
 
-def regla_supuestos(obj, ctx, res):
+def regla_supuestos(obj, ctx, res, esq=None):
     if not isinstance(obj, dict):
         res.motivo("no es un objeto JSON")
         return
@@ -1073,34 +1180,59 @@ def regla_supuestos(obj, ctx, res):
                 res.motivo("rango con min > max", f"{ruta}: [{fmt(mn)}, {fmt(mx)}]")
 
 
-def regla_rotaciones(obj, ctx, res):
-    opciones = obj.get("opciones") if isinstance(obj, dict) else obj
-    if isinstance(opciones, dict):
-        items = [(k, v) for k, v in opciones.items() if not str(k).startswith("_")]
-    elif isinstance(opciones, list):
-        items = [((o.get("id") if isinstance(o, dict) else None), o) for o in opciones]
-    else:
-        res.motivo("no trae opciones (lista u objeto «opciones»)")
+def regla_rotaciones(obj, ctx, res, esq):
+    """rotaciones.json (A5, acuerdo de formatos del 14-nov-2026): llaves de primer nivel,
+    params con valor y etiqueta, y cada rotación según esq["rotacion"] (id único, plazo en su
+    lista, plazo_anios min ≤ max, lámina con llaves «0» y «-20» y P10 ≤ P50 ≤ P90). Los
+    cultivos de cada rotación deben estar en el objeto «cultivos» del mismo archivo."""
+    if not isinstance(obj, dict):
+        res.motivo("no es un objeto JSON")
         return
-    if not items:
-        res.motivo("la lista de opciones está vacía")
+    for llave, tipo in esq["llaves"].items():
+        if llave not in obj:
+            res.motivo(f"falta la llave {llave}")
+        elif tipo == "objeto" and not isinstance(obj[llave], dict):
+            res.motivo(f"{llave} debe ser un objeto")
+        elif tipo == "lista" and not isinstance(obj[llave], list):
+            res.motivo(f"{llave} debe ser una lista")
+
+    params = obj.get("params")
+    if isinstance(params, dict):
+        for k, p in params.items():
+            if str(k).startswith("_"):
+                continue
+            faltan = [c for c in esq["llaves_param"] if not isinstance(p, dict) or c not in p]
+            if faltan:
+                res.motivo(f"params: entrada sin {' ni '.join(faltan)}", k)
+            elif not _texto_lleno(p.get("etiqueta")):
+                res.motivo("params: etiqueta vacía", k)
+
+    rotaciones = obj.get("rotaciones")
+    if not isinstance(rotaciones, list):
         return
-    conteo = Counter(oid for oid, _ in items if oid)
-    for oid, n in conteo.items():
-        if n > 1:
-            res.motivo("opción repetida", str(oid))
-    for oid, o in items:
-        if not oid:
-            res.motivo("opción sin id")
-        if not isinstance(o, dict):
-            res.motivo("opción que no es objeto", str(oid))
+    if not rotaciones:
+        res.motivo("la lista rotaciones está vacía")
+        return
+    cultivos = obj.get("cultivos") if isinstance(obj.get("cultivos"), dict) else None
+    campos = esq["rotacion"]
+    vistos = {c: {} for c, campo in campos.items() if campo.get("unico")}
+    for i, r in enumerate(rotaciones):
+        if not isinstance(r, dict):
+            res.motivo("rotación que no es objeto", f"posición {i}")
             continue
-        if not isinstance(o.get("secuencia"), list) or not o["secuencia"]:
-            res.motivo("opción sin secuencia de cultivos", str(oid))
-        if not _texto_lleno(o.get("fuente")):
-            res.motivo("opción sin fuente", str(oid))
-    if "ACTUAL" not in conteo:
-        res.aviso("no trae la opción ACTUAL (kit B3 paso 1)")
+        donde = f"rotación {r['id']}" if _texto_lleno(r.get("id")) else f"rotación en la posición {i}"
+        revisar_objeto(r, campos, ctx, res, donde=donde)
+        for c, ya in vistos.items():
+            v = r.get(c)
+            if isinstance(v, str) and v.strip():
+                if v in ya:
+                    res.motivo(f"{c} repetido en rotaciones", f"{v} (posiciones {ya[v]} y {i})")
+                else:
+                    ya[v] = i
+        if cultivos is not None and isinstance(r.get("cultivos"), list):
+            for c in r["cultivos"]:
+                if isinstance(c, str) and c not in cultivos:
+                    res.motivo("rotación con un cultivo que no está en el objeto «cultivos»", f"{donde}: {c}")
 
 
 REGLAS_JSON = {
@@ -1108,6 +1240,7 @@ REGLAS_JSON = {
     "dotaciones": regla_dotaciones,
     "supuestos": regla_supuestos,
     "rotaciones": regla_rotaciones,
+    "objeto": regla_objeto,
 }
 
 
@@ -1118,7 +1251,7 @@ def validar_json(ruta, esq, ctx):
     except (UnicodeDecodeError, json.JSONDecodeError) as ex:
         res.motivo(f"no es JSON válido: {ex}")
         return res
-    REGLAS_JSON[esq["regla"]](obj, ctx, res)
+    REGLAS_JSON[esq["regla"]](obj, ctx, res, esq)
     return res
 
 
@@ -1236,9 +1369,15 @@ def leer_leeme(buzon):
     return entradas, None, avisos
 
 
+def es_crudo(nombre):
+    """True si el nombre es una exportación cruda de Earth Engine (E.CRUDOS_EARTH_ENGINE)."""
+    return any(fnmatch.fnmatchcase(nombre.lower(), patron) for patron in E.CRUDOS_EARTH_ENGINE)
+
+
 def inventario(buzon):
-    """Archivos del buzón (raíz y entregas/<rol>/) e ignorados con su motivo."""
-    archivos, ignorados = [], []
+    """(archivos, ignorados, crudos) del buzón (raíz y <rol>/). Los crudos de Earth Engine
+    no son entregas: se listan aparte, sin validarlos, sin copiarlos y sin pedirles LEEME."""
+    archivos, ignorados, crudos = [], [], []
     for ruta in sorted(buzon.rglob("*")):
         if not ruta.is_file():
             continue
@@ -1256,9 +1395,12 @@ def inventario(buzon):
             ignorados.append({"archivo": rel.as_posix(),
                               "motivo": "código: no entra por el buzón; Cristian lo revisa y lo copia a mano"})
             continue
-        archivos.append({"ruta": ruta, "rel": rel.as_posix(), "nombre": nombre,
-                         "rol": rel.parts[0] if len(rel.parts) > 1 else None})
-    return archivos, ignorados
+        rol = rel.parts[0] if len(rel.parts) > 1 else None
+        if es_crudo(nombre):
+            crudos.append({"archivo": rel.as_posix(), "rol": rol, "bytes": ruta.stat().st_size})
+            continue
+        archivos.append({"ruta": ruta, "rel": rel.as_posix(), "nombre": nombre, "rol": rol})
+    return archivos, ignorados, crudos
 
 
 # =========================================================================================
@@ -1384,13 +1526,13 @@ def ensamblar(buzon=None, salida=None, log=None, params=None):
             <salida>/entregas_log.md).
     params: dict o ruta de params.json (por omisión data/params.json).
     Devuelve un dict con 'entraron', 'rechazados', 'retenidos', 'sigue_simulado' y 'fuentes'
-    (más 'ignorados', 'avisos' y rutas)."""
+    (más 'crudos' de Earth Engine, 'ignorados', 'avisos' y rutas)."""
     hora = ahora()
     limites = limites_derivados(cargar_params(params))
     salida = Path(salida) if salida else SALIDA_POR_OMISION
     rep = {
         "hora": hora, "buzon": None, "salida": str(salida), "log": None, "fuentes_json": None,
-        "entraron": [], "rechazados": [], "retenidos": [], "ignorados": [],
+        "entraron": [], "rechazados": [], "retenidos": [], "crudos": [], "ignorados": [],
         "sigue_simulado": esperados_simulados(), "fuentes": [], "avisos": [],
         "nota": "web/data/ no se toca todavía: la integración al contrato llega con el motor B4.",
     }
@@ -1406,12 +1548,13 @@ def ensamblar(buzon=None, salida=None, log=None, params=None):
     rep.update({"buzon": str(buzon), "log": str(log), "fuentes_json": str(salida / NOMBRE_FUENTES)})
 
     leeme, error_leeme, avisos = leer_leeme(buzon)
-    archivos, ignorados = inventario(buzon)
-    rep["ignorados"] = ignorados
+    archivos, ignorados, crudos = inventario(buzon)
+    rep["ignorados"], rep["crudos"] = ignorados, crudos
     repetidos = Counter(a["nombre"] for a in archivos)
     # parcelas_base.geojson primero: los demás comprueban sus ids contra él.
     archivos.sort(key=lambda a: (a["nombre"] != E.ARCHIVO_PARCELAS, a["nombre"], a["rel"]))
-    presentes = {a["nombre"] for a in archivos}
+    # Un crudo mencionado en LEEME.md sí está en el buzón (no se avisa como faltante).
+    presentes = {a["nombre"] for a in archivos} | {PurePosixPath(c["archivo"]).name for c in crudos}
     sobran = sorted(set(leeme) - presentes)
     if sobran:
         avisos.append(f"{E.NOMBRE_LEEME} menciona archivos que no están en el buzón: {', '.join(sobran)}")
@@ -1514,6 +1657,9 @@ def texto_reporte(rep):
     lineas.append(f"RETENIDOS ({len(rep['retenidos'])})")
     for x in rep["retenidos"]:
         lineas.append(f"  ~ {x['archivo']} {etiqueta(x)}: {x['motivo']}")
+    if rep.get("crudos"):
+        lineas.append(f"{TITULO_CRUDOS}: {len(rep['crudos'])}")
+        lineas += [f"  · {x['archivo']} ({x['bytes'] / 1e6:.1f} MB)" for x in rep["crudos"]]
     if rep["ignorados"]:
         lineas.append(f"IGNORADOS ({len(rep['ignorados'])})")
         lineas += [f"  - {x['archivo']}: {x['motivo']}" for x in rep["ignorados"]]

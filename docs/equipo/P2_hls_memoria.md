@@ -282,8 +282,9 @@ Es segunda línea (S9 §8): no se pone por delante de A3 ni de A4.2.
 |---|---|
 | **Lo hace la sesión de Chrome** | La parte A (pasos 1 a 5): extracción en Earth Engine, piloto de consumo y una exportación por año agrícola, de 2025 hacia atrás. El consumo de EECU lo anota esa sesión en `docs/ee_uso.md` |
 | **Le toca a usted** | Las partes B (reglas, pasos 6 a 9) y C (validación y sensibilidad, pasos 10 y 11), en pandas, con cada año que llega |
-| **Entradas** | Las exportaciones anuales de NDVI mensual de la sesión de Chrome; `hls_mensual_parcelas.csv` y `suelo_desnudo.csv` (A3, para 2026); `cultivos_parcelas.csv` (A4.2, para la edad); `etiquetas_unidas.csv` (P3, para el paso 10) |
+| **Entradas** | Las exportaciones anuales de NDVI mensual de la sesión de Chrome; `hls_mensual_parcelas.csv` y `suelo_desnudo.csv` (A3, para 2026); `cultivos_parcelas.csv` (A4.2, para la edad); `etiquetas_unidas.csv` (P3) y `parcelas_muestra.geojson` (B1), para el paso 10 |
 | **Cuaderno** | `A3M_memoria.ipynb` en `Raiz/cuadernos/` |
+| **Paso 10: etiquetas y parcelas tienen `id` distintos** | El `id` de `etiquetas_unidas.csv` es el del polígono de `parcelas_muestra.geojson`; el de la memoria, el de `parcelas_base.geojson`. El bloque pide una unión espacial (punto representativo del polígono de la muestra dentro de una parcela de `parcelas_base`) e imprimir cuántas etiquetas coinciden. Si son pocas o ninguna, avise a Cristian |
 | **Hora límite** | Cada año se entrega en cuanto llega. **Si a las 20:30 del sábado no hay ningún año exportado, se aplica el plan B general.** Años restantes: sáb 20:30 a 1:00. Funciones congeladas: dom 8:00 |
 | **Verificación de datos** | [verificar_datos_nasa.md → HLS](verificar_datos_nasa.md#2-hls-l30-y-s30-v002-a3-a3-m-y-a42) (fecha de inicio de cada colección) |
 
@@ -341,7 +342,8 @@ S9 §5 "Cálculo: lo que cambia" (copiado tal cual; de aquí salen los umbrales)
 - **Ejemplo de escala** (láminas del INIFAP [V]; la herramienta usa su propio cálculo): 10 ha con 3.5 millares/ha reciben 35 millares, que alcanzan para 2.0 ha de alfalfa (17.5), 5.1 ha de algodón (6.8) o 6.4 ha de maíz forrajero (5.5).
 
 TAREA
-NOTA DEL EQUIPO: la parte A (pasos 1 a 5, Earth Engine) la hace la sesión de Chrome. Yo hago las partes B y C en pandas con los años exportados que haya en Drive. Primero imprime qué años agrícolas hay, cuántas parcelas trae cada uno y si algún año usa una sola colección (L30 o S30). Si falta cultivos_parcelas.csv, deja edad_perenne_anios en null. Si falta etiquetas_unidas.csv, no hagas el paso 10 y avísame. En la prueba, el consumo de EECU lo reporta la sesión de Chrome (docs/ee_uso.md).
+NOTA DEL EQUIPO: la parte A (pasos 1 a 5, Earth Engine) la hace la sesión de Chrome. Yo hago las partes B y C en pandas con los años exportados que haya en Drive. Primero imprime qué años agrícolas hay, cuántas parcelas trae cada uno y si algún año usa una sola colección (L30 o S30). Si falta cultivos_parcelas.csv, deja edad_perenne_anios en null. Si falta etiquetas_unidas.csv (o parcelas_muestra.geojson), no hagas el paso 10 y avísame. En la prueba, el consumo de EECU lo reporta la sesión de Chrome (docs/ee_uso.md).
+NOTA DEL EQUIPO (paso 10): UNIÓN ETIQUETA → PARCELA: etiquetas_unidas.csv trae en id el polígono de parcelas_muestra.geojson (la muestra del distrito), no el de parcelas_base.geojson. Para cada etiqueta: (1) únela por punto_id con entregas/parcelas_muestra.geojson para obtener su polígono; (2) toma su punto representativo (geometry.representative_point(), que siempre cae dentro del polígono); (3) haz geopandas.sjoin con entregas/parcelas_base.geojson (predicate="within"; si el CRS difiere, reproyecta antes) y llama id_base al id que resulte; (4) imprime: etiquetas totales, etiquetas con id_base (zona piloto), etiquetas sin id_base (fuera de la zona piloto) e id_base con más de una etiqueta. No cambies la columna id de etiquetas_unidas.csv: id_base vive solo en el cuaderno. En el paso 10, "solo las de la zona piloto" son las etiquetas con id_base; el estado de 2026 y cultivo_actual se leen por id_base. Si ninguna etiqueta tiene id_base, no armes la tabla de acuerdo: escribe que no hay etiquetas en la zona piloto y avísame.
 Tarea A3-M. En A3M_memoria.ipynb, en Raiz/cuadernos/ (Earth Engine con Python `ee` desde Colab; después, pandas).
 
 A) EXTRACCIÓN (Earth Engine)
@@ -434,6 +436,7 @@ Aviso: `ENTREGA: memoria_parcelas.csv — prueba OK (años …)`.
 - **HLS de la muestra.** Para entrenar hace falta el HLS de los polígonos de `parcelas_muestra.geojson` (los puntos etiquetados). Si la sesión de Chrome solo exportó la zona piloto, no hay con qué entrenar.
 - **Referencia de Conagua.** La comparación usa la Estadística Agrícola 2016-2017, Cuadro 3.5 (archivo 29). No está en el repo: pídala.
 - **Presto.** El enfoque C («solo si sobra tiempo») no se inicia antes del hito de las 20:30 (kit §3).
+- **Predicciones sobre la muestra de validación.** A4.3 (P3) necesita la clase que el mapa asigna a cada polígono de validación de `parcelas_muestra.geojson`. Esas predicciones **no caben en `cultivos_parcelas.csv`**: su `id` debe existir en `parcelas_base.geojson` y el validador rechaza el archivo si no. Tampoco tienen fila en la tabla 0.4-B. Pregunte a Cristian dónde guardarlas.
 
 **Bloque para pegar en Gemini:**
 ```text
@@ -480,7 +483,7 @@ Advertencia del kit v4, sección A4 (copiada tal cual):
 [PEGA AQUÍ, si Cristian te la pasó, la tabla de la Estadística Agrícola 2016-2017 de Conagua, Cuadro 3.5 (archivo 29). Si no está, la comparación se reporta como "no realizada: falta la referencia".]
 
 TAREA
-NOTA DEL EQUIPO: trabajo con las tablas de entregas/; no uso Earth Engine. Si no hay HLS para los polígonos de la muestra etiquetada, detente y avísame.
+NOTA DEL EQUIPO: trabajo con las tablas de entregas/; no uso Earth Engine. Si no hay HLS para los polígonos de la muestra etiquetada, detente y avísame. El id de etiquetas_unidas.csv es el del polígono de parcelas_muestra.geojson, no el de parcelas_base.geojson. En cultivos_parcelas.csv van SOLO id de parcelas_base.geojson: no metas ahí predicciones de polígonos de la muestra (el validador rechaza el archivo). Las predicciones sobre los polígonos de validación de la muestra las necesita A4.3: guárdalas solo donde Cristian indique; si no lo ha dicho, avísame.
 Tarea A4.2. En A4_mapa_cultivos.ipynb (Raiz/cuadernos/), con hls_mensual_parcelas.csv de Raiz/entregas/ y las etiquetas acordadas (etiquetas_unidas.csv de Raiz/entregas/). Los enfoques A y B son OBLIGATORIOS; el C, SOLO SI SOBRA TIEMPO.
 A) REGLAS FENOLÓGICAS (interpretables):
 - reglas simples con pico de NDVI, meses verdes y meses de suelo desnudo para cada clase;

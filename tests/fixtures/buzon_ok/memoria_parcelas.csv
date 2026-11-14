@@ -1,0 +1,6 @@
+id,anio_agricola,estado,meses_verdes,max_verano,max_invierno,dias_suelo_desnudo_feb_abr,meses_validos
+T0001,2025,perenne,10,0.7,0.5,0,12
+T0001,2026,perenne,11,0.72,0.55,0,12
+T0002,2024,verano,4,0.6,0.1,90,11
+T0002,2025,descanso,0,0.15,0.1,,10
+T0003,2025,sin_dato,0,,,,0

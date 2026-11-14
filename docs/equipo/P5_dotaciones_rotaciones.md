@@ -84,7 +84,7 @@ Filas del contrato, kit §2.3 (copiadas tal cual), para los bloques "distrito" y
 | `dotaciones.deslizador.min`, `.max`, `.paso` | number | 0, 12 y el paso (valor de diseño, no dato) | B2 |
 | `dotaciones.marcas[]` | lista de 3 | Por marca: `id` (`como_2025`, `como_2026`, `anio_normal`), `nombre`, `min`, `max`, `valor` (punto medio del rango), `nota`, `fuente`, `fecha_consulta`, `etiqueta` | B2 |
 | `dotaciones.punto_medicion` | texto | «Toma de la parcela [S]; por confirmar con un técnico de módulo» | B2 |
-Además: fuentes_B2.csv (archivo, url_o_api, fecha_consulta, sha256; para una nota de prensa: la URL, la fecha de lectura y el sha256 del texto guardado, o vacío si no se pudo guardar). Cada marca debe quedar dentro del deslizador.
+Además: fuentes_B2.csv (archivo, url_o_api, fecha_consulta, sha256). Ninguna celda puede quedar vacía: el validador rechaza el archivo si falta un sha256. Para una nota de prensa: guarda una copia en cuadernos/ (el texto de la nota en .txt o la página en PDF) y escribe la URL, la fecha de lectura y el sha256 de esa copia. Si la nota no se pudo abrir, la fuente que usaste es el texto pegado de S8 §2: guárdalo en cuadernos/ como .txt y registra su sha256, con "S8 §2 (nota no leída directamente)" en url_o_api. Si no hay copia que guardar, NO pongas la fila con el sha256 vacío: detente y avísame para avisar a Cristian. Cada marca debe quedar dentro del deslizador.
 
 DOCUMENTOS DE REFERENCIA (pegados)
 S8 §2 "Cifras" (copiado tal cual):
@@ -210,7 +210,7 @@ ESQUEMA DE SALIDA DE ESTA TAREA
 Filas de la tabla 0.4-B del kit (copiadas tal cual):
 | B3 (P5) | `rotaciones.json` y `filtros.py` (con sus 8 pruebas impresas) | Estructura del prompt B3, más la opción «no sembrar / rastrojo en pie» |
 | Supuestos (P5) | `supuestos.json` | Valor o rango, fuente o «assumption». Incluye plazos, edad «por vencer», eficiencia parcelaria, eficiencia de goteo y punto de medición del millar |
-Además: fuentes_B3.csv (archivo, url_o_api, fecha_consulta, sha256). En supuestos.json, cada clave con: valor (o rango min/max, o null), unidad, fuente (o "assumption") y etiqueta ([V], [P], [S] o [NE]).
+Además: fuentes_B3.csv (archivo, url_o_api, fecha_consulta, sha256). Ninguna celda puede quedar vacía: el validador rechaza el archivo si falta un sha256. Para un documento que solo te pegué (maestro §5.2, archivo 29), guarda el texto pegado en cuadernos/ como .txt y registra su sha256; si no hay copia que guardar, no pongas la fila: detente y avísame. En supuestos.json, cada clave con: valor (o rango min/max, o null), unidad, fuente (o "assumption") y etiqueta ([V], [P], [S] o [NE]).
 
 DOCUMENTOS DE REFERENCIA (pegados)
 S9 §5, viñetas de plazo y estado (copiadas tal cual):
@@ -277,7 +277,7 @@ Imprima una tabla opción × filtro para una parcela de ejemplo y la tabla de pl
 supuestos.json | Plazos (S9 §5; FIRA [P]); eficiencias, relación cobertura–Kc del nogal y umbrales con su fuente o "assumption" (kit B3, paso 4) | 2026-11-14 | colab/B3_rotaciones.ipynb
 rotaciones.json | Maestro §5.2 e INIFAP 2017 (fechas de siembra), con la opción "no sembrar / rastrojo en pie" | 2026-11-14 | colab/B3_rotaciones.ipynb
 filtros.py | Filtros duros de maestro §5.2, INIFAP 2017, NOM-026, Silva-Rojas et al. 2009 y archivo 29, con 8 pruebas | 2026-11-14 | colab/B3_rotaciones.ipynb
-fuentes_B3.csv | Fuentes de B3: heladas.json y documentos citados (sha256 o URL) | 2026-11-14 | colab/B3_rotaciones.ipynb
+fuentes_B3.csv | Fuentes de B3: heladas.json y documentos citados (URL o copia en cuadernos/, con sha256) | 2026-11-14 | colab/B3_rotaciones.ipynb
 ```
 Aviso: `ENTREGA: supuestos.json — prueba OK` (primero) y `ENTREGA: rotaciones.json — prueba OK`.
 

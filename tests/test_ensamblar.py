@@ -8,7 +8,11 @@ Cubre:
   propósito: es la referencia de ids);
 - CSV que llegan antes que parcelas_base.geojson: quedan retenidos, no rechazados;
 - los demás esquemas de la tabla 0.4-B (un caso válido y uno inválido de cada uno), el GeoTIFF
-  (EPSG, escala, extensión, BigTIFF y lector sin Pillow), LEEME.md, subcarpetas de rol y la CLI.
+  (EPSG, escala, extensión, BigTIFF y lector sin Pillow), LEEME.md, subcarpetas de rol y la CLI;
+- los formatos del acuerdo con la sesión de datos (14-nov-2026): rotaciones.json y
+  demanda_cultivos.csv (A5), memoria_parcelas.csv y memoria_resumen.csv (A3-M),
+  cultivos_parcelas.csv con «1/1 (reglas)» (A4) y relieve_meta.json (A9), y los crudos de
+  Earth Engine (hls_*.tif, piloto_consumo.tif), que se listan aparte y no se rechazan.
 Todas escriben en tmp_path: nunca en data/processed ni en docs/entregas_log.md.
 
 Los valores de las pruebas son DE PRUEBA (no son datos). Los límites que dependen de
@@ -20,6 +24,7 @@ Regenerar los GeoTIFF de las fixtures (necesita Pillow):
 import hashlib
 import json
 import math
+import re
 import shutil
 import subprocess
 import sys
@@ -162,10 +167,15 @@ def test_sin_leeme_nada_entra(tmp_path):
 # ---------------------------------------------------------------------------------------
 # buzon_ok: todo entra, se copia sin modificar y con sha256
 # ---------------------------------------------------------------------------------------
+def entregas_de(buzon):
+    """Archivos de la fixture que son entregas (sin los crudos de Earth Engine)."""
+    return [n for n in archivos_de(buzon) if not ens.es_crudo(n)]
+
+
 def test_buzon_ok_todo_entra_y_se_copia_con_sha256(tmp_path):
     rep = correr(BUZON_OK, tmp_path)
-    esperados = archivos_de(BUZON_OK)
-    assert len(esperados) == 7
+    esperados = entregas_de(BUZON_OK)
+    assert len(esperados) == 13
     assert rep["rechazados"] == [], rep["rechazados"]
     assert rep["retenidos"] == []
     assert nombres(rep["entraron"]) == esperados
@@ -184,10 +194,13 @@ def test_buzon_ok_todo_entra_y_se_copia_con_sha256(tmp_path):
     # Lo que entró ya no está en «sigue simulado»; lo demás sí.
     for n in esperados:
         assert n not in rep["sigue_simulado"]
-    assert "cultivos_parcelas.csv" in rep["sigue_simulado"]
+    assert "dotaciones.json" in rep["sigue_simulado"]
+    # El crudo de Earth Engine se lista aparte: no entra, no se rechaza y no se copia.
+    assert [c["archivo"] for c in rep["crudos"]] == ["hls_ndvi_memoria_2016.tif"]
+    assert not (salida / "hls_ndvi_memoria_2016.tif").exists()
     # Bitácora: encabezado y una línea por corrida.
     log = (tmp_path / "log.md").read_text(encoding="utf-8")
-    assert log.startswith("<!-- AI-assisted") and "| 7: " in log
+    assert log.startswith("<!-- AI-assisted") and "| 13: " in log
 
 
 def test_buzon_ok_avisa_faltante_power_menor_al_5pct(tmp_path):
@@ -231,6 +244,11 @@ MOTIVOS_MALO = {
     "relieve_rutas.geojson": ["sin línea en LEEME.md"],
     "cultivos_parcelas.csv": ["LEEME.md", "14/11/2026", "AAAA-MM-DD"],
     "nasadem_zona_piloto.tif": ["34735", "no está georreferenciado"],
+    "rotaciones.json": ["lamina_bruta_millares.0: no se cumple p10 ≤ p50 ≤ p90", "R_PRUEBA_A", "p10=13 > p50=12"],
+    "demanda_cultivos.csv": ["lluvia_pct fuera de la lista permitida", "-10"],
+    "memoria_parcelas.csv": ["estado fuera de la lista permitida", "cultivado"],
+    "memoria_resumen.csv": ["anios_con_dato menor que 0"],
+    "relieve_meta.json": ["umbral_ruta_ha debe ser mayor que 0"],
 }
 
 
@@ -248,6 +266,8 @@ def test_buzon_malo_cada_archivo_rechazado_con_su_motivo(tmp_path):
     assert sorted(p.name for p in salida.iterdir() if p.name != "fuentes.json") == ["parcelas_base.geojson"]
     fuentes = json.loads((salida / "fuentes.json").read_text(encoding="utf-8"))["fuentes"]
     assert [f["archivo"] for f in fuentes] == ["parcelas_base.geojson"]
+    # El crudo sin línea en LEEME.md no es un rechazo: va a «crudos».
+    assert [c["archivo"] for c in rep["crudos"]] == ["piloto_consumo.tif"]
 
 
 def test_rechazo_conserva_copia_anterior_y_lo_dice(tmp_path):
@@ -260,13 +280,14 @@ def test_rechazo_conserva_copia_anterior_y_lo_dice(tmp_path):
     assert (salida / "suelo_desnudo.csv").read_bytes() == (BUZON_OK / "suelo_desnudo.csv").read_bytes()
     fuentes = {f["archivo"]: f for f in json.loads((salida / "fuentes.json").read_text(encoding="utf-8"))["fuentes"]}
     # Las fuentes de la corrida anterior se conservan mientras su copia siga igual.
-    assert set(fuentes) == set(archivos_de(BUZON_OK))
+    assert set(fuentes) == set(entregas_de(BUZON_OK))
 
 
 # ---------------------------------------------------------------------------------------
 # Retenidos: los CSV con id llegan antes que parcelas_base.geojson
 # ---------------------------------------------------------------------------------------
-CON_ID = ["hls_mensual_parcelas.csv", "relieve_parcelas.csv", "suelo_desnudo.csv"]
+CON_ID = ["cultivos_parcelas.csv", "hls_mensual_parcelas.csv", "memoria_parcelas.csv", "memoria_resumen.csv",
+          "relieve_parcelas.csv", "suelo_desnudo.csv"]
 
 
 def test_csv_antes_que_parcelas_quedan_retenidos(tmp_path):
@@ -276,7 +297,8 @@ def test_csv_antes_que_parcelas_quedan_retenidos(tmp_path):
     rep = correr(b, tmp_path)
     assert nombres(rep["retenidos"]) == CON_ID
     assert rep["rechazados"] == []
-    assert nombres(rep["entraron"]) == ["eto_diaria.csv", "nasadem_zona_piloto.tif", "relieve_rutas.geojson"]
+    assert nombres(rep["entraron"]) == ["demanda_cultivos.csv", "eto_diaria.csv", "nasadem_zona_piloto.tif",
+                                        "relieve_meta.json", "relieve_rutas.geojson", "rotaciones.json"]
     for x in rep["retenidos"]:
         assert "aún no llega" in x["motivo"]
         assert not (tmp_path / "salida" / x["archivo"]).exists()
@@ -502,13 +524,13 @@ VALIDOS = {
     "memoria_mensual.csv": "id,anio_agricola,mes,ndvi_mediana,n_validos\nT0001,2025,2024-10,0.45,3\nT0001,2025,11,,0\n",
     "memoria_parcelas.csv": ("id,anio_agricola,estado,meses_verdes,max_verano,max_invierno,dias_suelo_desnudo_feb_abr,meses_validos\n"
                              "T0001,2025,perenne,10,0.7,0.5,0,12\nT0002,2024,verano,4,0.6,0.1,90,11\n"),
-    "memoria_resumen.csv": "id,edad_perenne_anios,dias_suelo_desnudo_mediana,estado_2025\nT0001,4,0,perenne\nT0002,,55.5,verano\n",
+    "memoria_resumen.csv": ("id,dias_suelo_desnudo_mediana,anios_con_dato,estado_2025\n"
+                            "T0001,0,4,perenne\nT0002,,0,\nT0003,55.0,11,verano\n"),
     "memoria_validacion.csv": "clase,estado,n\nalfalfa,perenne,1\n",
     "etiquetas_unidas.csv": ("id,punto_id,bloque,uso,clase_P2,clase_P3,clase_desempate,clase_final,acuerdo\n"
                              "M01,pt1,B1,entrenamiento,alfalfa,alfalfa,,alfalfa,true\n"
                              "M02,pt2,B2,validación,chile,nogal,chile,chile,false\n"),
-    "cultivos_parcelas.csv": ("id,cultivo_actual,prob_max,acuerdo_metodos,abstencion\n"
-                              "T0001,alfalfa,0.81,2/2,false\nT0002,sin_clasificar,0.55,1/2,true\nT0003,nogal,0.92,2/2,False\n"),
+    "cultivos_parcelas.csv": None,   # se arma con cultivos_csv (8 columnas)
     "tabla_metodos.csv": "enfoque,f1_macro,f1_por_clase,tiempo\nreglas,0.61,alfalfa:0.8,1 min\nrandom_forest,0.72,alfalfa:0.9,3 min\n",
     "olofsson.csv": "clase,exactitud_usuario\nalfalfa,0.9\n",
     "demanda_parcelas.csv": ("id,opcion,lluvia_pct,bruta_mm_p10,bruta_mm_p50,bruta_mm_p90,neta_mm_p50,etc_mm_p50\n"
@@ -527,8 +549,9 @@ VALIDOS = {
         "parcelaria": {"valor": {"min": 0.4, "max": 0.7}, "fuente": "assumption", "etiqueta": "[S]"},
         "goteo": {"valor": None, "fuente": None, "etiqueta": "[S]", "nota": "pendiente"}},
         "plazo_alfalfa": {"min": 3, "max": 4, "fuente": "FIRA", "etiqueta": "[P]"}}),
-    "rotaciones.json": json.dumps({"opciones": [{"id": "ACTUAL", "secuencia": ["alfalfa"], "fuente": "maestro §5.2"},
-                                                {"id": "A", "secuencia": ["chile", "cereal_invierno"], "fuente": "INIFAP 2017"}]}),
+    "rotaciones.json": (BUZON_OK / "rotaciones.json").read_text(encoding="utf-8"),
+    "demanda_cultivos.csv": (BUZON_OK / "demanda_cultivos.csv").read_text(encoding="utf-8"),
+    "relieve_meta.json": (BUZON_OK / "relieve_meta.json").read_text(encoding="utf-8"),
     "fuentes_A1.csv": f"archivo,url_o_api,fecha_consulta,sha256\npower.json,https://power.larc.nasa.gov/api/temporal/daily/point,2026-11-14,{'a' * 64}\n",
     "resultado_H1.md": "# Resultado H1\nmeets the preregistered criterion (prueba)\n",
     "plantillas_explicaciones.md": "<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->\n¿Por qué? Pide {{f1}} millares por {{f2}}.\n",
@@ -539,11 +562,12 @@ INVALIDOS = {
     "memoria_mensual.csv": ("id,anio_agricola,mes,ndvi_mediana,n_validos\nT0001,2025,13,0.45,3\n", "mes"),
     "memoria_parcelas.csv": ("id,anio_agricola,estado,meses_verdes,max_verano,max_invierno,dias_suelo_desnudo_feb_abr,meses_validos\n"
                              "T0001,2025,perennial,10,0.7,0.5,0,12\n", "estado fuera de la lista"),
-    "memoria_resumen.csv": ("id,edad_perenne_anios,dias_suelo_desnudo_mediana,estado_2025\nT0001,-1,0,perenne\n", "edad_perenne_anios"),
+    "memoria_resumen.csv": ("id,dias_suelo_desnudo_mediana,anios_con_dato,estado_2025\nT0001,0,11,perennial\n",
+                            "estado_2025 fuera de la lista"),
     "etiquetas_unidas.csv": ("id,punto_id,bloque,uso,clase_P2,clase_P3,clase_desempate,clase_final,acuerdo\n"
                              "M01,pt1,B1,entrenamiento,alfalfa,alfalfa,,alfalfa,true\n"
                              "M02,pt2,B1,validacion,chile,chile,,chile,true\n", "un mismo bloque con más de un uso"),
-    "cultivos_parcelas.csv": ("id,cultivo_actual,prob_max,acuerdo_metodos,abstencion\nT0001,alfalfa,1.3,2/2,false\n", "prob_max fuera de [0, 1]"),
+    "cultivos_parcelas.csv": (None, "prob_max fuera de [0, 1]"),   # se arma con cultivos_csv
     "tabla_metodos.csv": ("enfoque,f1_macro,f1_por_clase,tiempo\nreglas,1.2,x,1 min\n", "f1_macro"),
     "demanda_parcelas.csv": ("id,opcion,lluvia_pct,bruta_mm_p10,bruta_mm_p50,bruta_mm_p90,neta_mm_p50,etc_mm_p50\n"
                              "T0001,ACTUAL,0,1800,1700,1900,1200,1300\n", "bruta_mm_p10 ≤ bruta_mm_p50 ≤ bruta_mm_p90"),
@@ -557,7 +581,11 @@ INVALIDOS = {
                                  "prob_helada_despues_de": {"02-01": 1.5}, "fuente": "x"}), "probabilidad fuera de [0, 1]"),
     "dotaciones.json": (None, "fuera del deslizador"),
     "supuestos.json": (json.dumps({"eficiencia_parcelaria": {"valor": 0.5}}), "sin fuente ni marca"),
-    "rotaciones.json": (json.dumps({"opciones": [{"id": "A", "secuencia": [], "fuente": "x"}]}), "sin secuencia"),
+    "rotaciones.json": (None, "plazo fuera de la lista"),   # se arma con rotaciones_con
+    "demanda_cultivos.csv": ("cultivo,lluvia_pct,etc_mm_p50,neta_mm_p50,bruta_millares_p10,bruta_millares_p50,bruta_millares_p90\n"
+                             "alfalfa,0,1000,900,10,12,14\nalfalfa,0,1000,900,10,12,14\n",
+                             "fila repetida para (cultivo, lluvia_pct)"),
+    "relieve_meta.json": (None, "falta tormenta.fuente"),   # se arma desde la fixture
     "fuentes_A1.csv": ("archivo,url_o_api,fecha_consulta,sha256\npower.json,https://x,2026-11-14,abc\n", "sha256"),
     "plantillas_explicaciones.md": ("¿Por qué? Pide 7 millares (valor de prueba).\n", "cifras escritas a mano"),
     "figura_tornado.png": (b"no soy un png", "no es PNG"),
@@ -576,7 +604,24 @@ def contenido_valido(nombre):
         return dotaciones_desde_params()
     if nombre == "figura_tornado.png":
         return ens.FIRMA_PNG + b"\0" * 16
+    if nombre == "cultivos_parcelas.csv":
+        return cultivos_csv("T0001,alfalfa,0.81,2/2,false,4,libre,alfalfa\n"
+                            "T0002,sin_clasificar,0.55,1/2,true\nT0003,nogal,0.92,2/2,False,9,comprometida,")
     return VALIDOS[nombre]
+
+
+def rotaciones_con(cambio):
+    """rotaciones.json de la fixture buzon_ok con un cambio aplicado (función sobre el dict)."""
+    obj = json.loads((BUZON_OK / "rotaciones.json").read_text(encoding="utf-8"))
+    cambio(obj)
+    return json.dumps(obj, ensure_ascii=False)
+
+
+def relieve_meta_con(cambio):
+    """relieve_meta.json de la fixture buzon_ok con un cambio aplicado."""
+    obj = json.loads((BUZON_OK / "relieve_meta.json").read_text(encoding="utf-8"))
+    cambio(obj)
+    return json.dumps(obj, ensure_ascii=False)
 
 
 @pytest.mark.parametrize("nombre", sorted(VALIDOS))
@@ -592,6 +637,12 @@ def test_resto_de_la_tabla_invalido_se_rechaza(tmp_path, nombre):
     if nombre == "dotaciones.json":
         tope = LIMITES["deslizador_max"]
         contenido = dotaciones_desde_params(anio_normal={"min": tope, "max": tope + 2, "valor": tope + 1})
+    elif nombre == "cultivos_parcelas.csv":
+        contenido = cultivos_csv("T0001,alfalfa,1.3,2/2,false")
+    elif nombre == "rotaciones.json":
+        contenido = rotaciones_con(lambda o: o["rotaciones"][1].update(plazo="bienal"))
+    elif nombre == "relieve_meta.json":
+        contenido = relieve_meta_con(lambda o: o["tormenta"].pop("fuente"))
     b = buzon_con(tmp_path, {nombre: contenido})
     rep = correr(b, tmp_path)
     assert nombre in nombres(rep["rechazados"]), rep["entraron"]
@@ -600,19 +651,84 @@ def test_resto_de_la_tabla_invalido_se_rechaza(tmp_path, nombre):
 
 def test_cultivos_regla_de_abstencion(tmp_path):
     umbral = LIMITES["umbral_abstencion"]
-    texto = ("id,cultivo_actual,prob_max,acuerdo_metodos,abstencion\n"
-             f"T0001,alfalfa,{umbral / 2},2/2,false\nT0002,chile,0.9,1/2,false\nT0003,nogal,0.9,2/2,true\n")
+    texto = cultivos_csv(f"T0001,alfalfa,{umbral / 2},2/2,false\nT0002,chile,0.9,1/2,false\nT0003,nogal,0.9,2/2,true\n")
     b = buzon_con(tmp_path, {"cultivos_parcelas.csv": texto})
     m = motivos_de(correr(b, tmp_path), "cultivos_parcelas.csv")
     assert "abstencion debe ser true" in m and "2 casos" in m
     assert "abstenida con cultivo_actual distinto de sin_clasificar" in m
 
 
+ENC_CULTIVOS = ("id,cultivo_actual,prob_max,acuerdo_metodos,abstencion,"
+                "edad_perenne_anios,estado_plazo,grupo_fenologico\n")
+
+
+def cultivos_csv(filas):
+    """cultivos_parcelas.csv de prueba. Las filas con solo las 5 columnas del kit reciben
+    vacías las 3 que agrega A4 (edad_perenne_anios, estado_plazo, grupo_fenologico)."""
+    return ENC_CULTIVOS + "".join(f + (",,," if f.count(",") == 4 else "") + "\n"
+                                  for f in filas.strip("\n").split("\n"))
+
+
+def test_cultivos_solo_reglas_1_de_1_admite_prob_max_vacio(tmp_path):
+    """Extensión del contrato (validar_contrato.py, 14-nov): «1/1» = solo reglas fenológicas
+    mientras no está el Random Forest; entonces prob_max puede venir vacío."""
+    texto = cultivos_csv("T0001,alfalfa,,1/1,false\nT0002,nogal,,1/1,false\nT0003,sin_clasificar,,1/1,true\n")
+    b = buzon_con(tmp_path, {"cultivos_parcelas.csv": texto})
+    rep = correr(b, tmp_path)
+    assert "cultivos_parcelas.csv" in nombres(rep["entraron"]), rep["rechazados"]
+
+
+@pytest.mark.parametrize("acuerdo", ["2/2", "1/2"])
+def test_cultivos_prob_max_vacio_sin_1_de_1_se_rechaza(tmp_path, acuerdo):
+    abst, cultivo = ("true", "sin_clasificar") if acuerdo == "1/2" else ("false", "alfalfa")
+    texto = cultivos_csv(f"T0001,{cultivo},,{acuerdo},{abst}")
+    b = buzon_con(tmp_path, {"cultivos_parcelas.csv": texto})
+    rep = correr(b, tmp_path)
+    assert "cultivos_parcelas.csv" in nombres(rep["rechazados"]), rep["entraron"]
+    assert "prob_max: celda vacía no permitida salvo con acuerdo_metodos 1/1" in motivos_de(rep, "cultivos_parcelas.csv")
+
+
+def test_cultivos_prob_max_invalido_con_1_de_1_dice_el_error_real(tmp_path):
+    """Una celda mal escrita no se confunde con una vacía."""
+    texto = cultivos_csv("T0001,alfalfa,abc,1/1,false")
+    m = motivos_de(correr(buzon_con(tmp_path, {"cultivos_parcelas.csv": texto}), tmp_path), "cultivos_parcelas.csv")
+    assert "prob_max: no es un número" in m and "celda vacía" not in m
+
+
+@pytest.mark.parametrize("acuerdo", ["3/3", "0/2", "2/3"])
+def test_cultivos_acuerdo_fuera_de_la_lista_del_contrato(tmp_path, acuerdo):
+    texto = cultivos_csv(f"T0001,sin_clasificar,0.9,{acuerdo},true")
+    m = motivos_de(correr(buzon_con(tmp_path, {"cultivos_parcelas.csv": texto}), tmp_path), "cultivos_parcelas.csv")
+    assert "acuerdo_metodos fuera de la lista permitida" in m
+
+
+def test_acuerdos_metodos_iguales_a_validar_contrato():
+    """La lista del buzón es la misma que acepta validar_contrato.py (allí está escrita en línea)."""
+    fuente = (RAIZ / "validar_contrato.py").read_text(encoding="utf-8")
+    lista = re.search(r'acuerdo_metodos"\) not in \(([^)]*)\)', fuente)
+    assert lista, "no se encontró la lista de acuerdo_metodos en validar_contrato.py"
+    assert set(re.findall(r'"([^"]+)"', lista.group(1))) == set(esquemas.ACUERDOS_METODOS)
+
+
+@pytest.mark.parametrize("nombre,encabezado,fila", [
+    ("memoria_resumen.csv", "id,dias_suelo_desnudo_mediana,anios_con_dato,estado_2025", "T0001,55.5,4,perenne"),
+    ("memoria_parcelas.csv",
+     "id,anio_agricola,estado,meses_verdes,max_verano,max_invierno,dias_suelo_desnudo_feb_abr,meses_validos",
+     "T0001,2025,verano,4,0.6,0.1,55.5,11"),
+])
+def test_memoria_dias_deben_ser_enteros(tmp_path, nombre, encabezado, fila):
+    """Contrato §2.2: los días de suelo desnudo son enteros (validar_contrato los pide con entero=True)."""
+    b = buzon_con(tmp_path, {nombre: f"{encabezado}\n{fila}\n"})
+    rep = correr(b, tmp_path)
+    assert nombre in nombres(rep["rechazados"]), rep["entraron"]
+    assert "debe ser entero" in motivos_de(rep, nombre)
+
+
 def test_cultivos_abstencion_por_ftw(tmp_path):
     """ftw_confianza (de parcelas_base) < umbral obliga a abstenerse."""
     geo = json.loads((BUZON_OK / "parcelas_base.geojson").read_text(encoding="utf-8"))
     geo["features"][0]["properties"]["ftw_confianza"] = LIMITES["ftw_confianza_min"] - 1
-    texto = "id,cultivo_actual,prob_max,acuerdo_metodos,abstencion\nT0001,alfalfa,0.9,2/2,false\n"
+    texto = cultivos_csv("T0001,alfalfa,0.9,2/2,false")
     b = buzon_con(tmp_path, {"parcelas_base.geojson": json.dumps(geo), "cultivos_parcelas.csv": texto}, copiar=())
     assert "ftw_confianza" in motivos_de(correr(b, tmp_path), "cultivos_parcelas.csv")
 
@@ -674,6 +790,140 @@ def test_parcelas_coordenadas_proyectadas(tmp_path):
                                                      [400000, 3110000]]]
     b = buzon_con(tmp_path, {"parcelas_base.geojson": json.dumps(geo)}, copiar=())
     assert "proyectadas" in motivos_de(correr(b, tmp_path), "parcelas_base.geojson")
+
+
+# ---------------------------------------------------------------------------------------
+# Formatos del acuerdo con la sesión de datos (14-nov-2026) y crudos de Earth Engine
+# ---------------------------------------------------------------------------------------
+def test_cultivos_1_de_1_reglas_entra_con_prob_max_vacio_y_avisa(tmp_path):
+    """«1/1 (reglas)» (solo reglas; Random Forest pendiente) se lee como «1/1»: prob_max puede
+    venir vacío y el reporte dice cuántas celdas se leyeron así. El archivo se copia tal cual."""
+    texto = cultivos_csv("T0001,alfalfa,,1/1 (reglas),False,3,por_vencer,alfalfa\n"
+                         "T0002,sin_clasificar,,1/1 (reglas),True,,,anual_verano")
+    b = buzon_con(tmp_path, {"cultivos_parcelas.csv": texto})
+    rep = correr(b, tmp_path)
+    x = next(x for x in rep["entraron"] if x["archivo"] == "cultivos_parcelas.csv")
+    assert any("2 celdas «1/1 (reglas)» se leyeron como «1/1»" in a for a in x["avisos"]), x["avisos"]
+    assert (tmp_path / "salida/cultivos_parcelas.csv").read_text(encoding="utf-8") == texto
+
+
+@pytest.mark.parametrize("fila, clave", [
+    ("T0002,sin_clasificar,,1/1 (reglas),True,,por_vencer,anual_verano", "abstenida con estado_plazo"),
+    ("T0002,sin_clasificar,,1/1 (reglas),True,4,,anual_verano", "abstenida con edad_perenne_anios"),
+    ("T0002,alfalfa,,1/1 (reglas),False,3,vencida,alfalfa", "estado_plazo fuera de la lista"),
+    ("T0002,alfalfa,,1/1 (regla),False,3,libre,alfalfa", "acuerdo_metodos"),
+    ("T0002,alfalfa,,2/2 (reglas),False,3,libre,alfalfa", "acuerdo_metodos"),
+    ("T0002,alfalfa,,1/1 (reglas),False,-1,libre,alfalfa", "edad_perenne_anios menor que 0"),
+])
+def test_cultivos_formato_a4_invalido(tmp_path, fila, clave):
+    b = buzon_con(tmp_path, {"cultivos_parcelas.csv": cultivos_csv(fila)})
+    rep = correr(b, tmp_path)
+    assert "cultivos_parcelas.csv" in nombres(rep["rechazados"]), rep["entraron"]
+    assert clave in motivos_de(rep, "cultivos_parcelas.csv")
+
+
+def test_cultivos_sin_columnas_de_a4_se_rechaza(tmp_path):
+    texto = "id,cultivo_actual,prob_max,acuerdo_metodos,abstencion\nT0001,alfalfa,0.9,2/2,false\n"
+    m = motivos_de(correr(buzon_con(tmp_path, {"cultivos_parcelas.csv": texto}), tmp_path), "cultivos_parcelas.csv")
+    assert "faltan columnas obligatorias: edad_perenne_anios, estado_plazo, grupo_fenologico" in m
+
+
+@pytest.mark.parametrize("cambio, clave", [
+    (lambda o: o["rotaciones"][0]["lamina_bruta_millares"]["-20"].update(p90=1), "lamina_bruta_millares.-20: no se cumple p10 ≤ p50 ≤ p90"),
+    (lambda o: o["rotaciones"][0]["lamina_bruta_millares"].pop("-20"), "se esperan exactamente las llaves 0, -20"),
+    (lambda o: o["rotaciones"][0]["lamina_bruta_millares"].update({"-10": {}}), "se esperan exactamente las llaves"),
+    (lambda o: o["rotaciones"][0]["lamina_bruta_millares"]["0"].update(etc_mm_p50=-5), "lamina_bruta_millares.0.etc_mm_p50 menor que 0"),
+    (lambda o: o["rotaciones"][0]["lamina_bruta_millares"]["0"].pop("neta_mm_p50"), "falta lamina_bruta_millares.0.neta_mm_p50"),
+    (lambda o: o["rotaciones"][0].update(plazo_anios={"min": 4, "max": 3}), "plazo_anios: no se cumple min ≤ max"),
+    (lambda o: o["rotaciones"][1].update(id="R_PRUEBA_A"), "id repetido en rotaciones"),
+    (lambda o: o["rotaciones"][1].update(cultivos=["sorgo"]), "cultivo que no está en el objeto «cultivos»"),
+    (lambda o: o["rotaciones"][1].update(cultivos="chile"), "cultivos debe ser una lista"),
+    (lambda o: o["rotaciones"][1].pop("nombre"), "falta nombre"),
+    (lambda o: o["params"].update(sin_etiqueta={"valor": 1}), "params: entrada sin etiqueta"),
+    (lambda o: o["params"].update(suelto=2000), "params: entrada sin valor ni etiqueta"),
+    (lambda o: o.pop("anios_clima"), "falta la llave anios_clima"),
+    (lambda o: o.update(rotaciones={}), "rotaciones debe ser una lista"),
+    (lambda o: o.update(opciones=[]) or o.pop("rotaciones"), "falta la llave rotaciones"),
+])
+def test_rotaciones_invalidas(tmp_path, cambio, clave):
+    b = buzon_con(tmp_path, {"rotaciones.json": rotaciones_con(cambio)}, copiar=())
+    rep = correr(b, tmp_path)
+    assert "rotaciones.json" in nombres(rep["rechazados"]), rep["entraron"]
+    assert clave in motivos_de(rep, "rotaciones.json")
+
+
+def test_rotaciones_descanso_sin_cultivos_entra(tmp_path):
+    """Una rotación de descanso trae «cultivos» vacía y lámina 0: es válida."""
+    obj = json.loads((BUZON_OK / "rotaciones.json").read_text(encoding="utf-8"))
+    assert any(r["cultivos"] == [] for r in obj["rotaciones"])
+    b = buzon_con(tmp_path, {"rotaciones.json": json.dumps(obj)}, copiar=())
+    assert nombres(correr(b, tmp_path)["entraron"]) == ["rotaciones.json"]
+
+
+@pytest.mark.parametrize("cambio, clave", [
+    (lambda o: o.update(celda_ha=-0.1), "celda_ha debe ser mayor que 0"),
+    (lambda o: o["tormenta"].update(mm=-1), "tormenta.mm menor que 0"),
+    (lambda o: o.update(tormenta=15), "tormenta debe ser un objeto"),
+    (lambda o: o.update(rotulo=""), "rotulo: vacío o null no permitido"),
+    (lambda o: o.pop("umbral_ruta_etiqueta"), "falta umbral_ruta_etiqueta"),
+])
+def test_relieve_meta_invalido(tmp_path, cambio, clave):
+    b = buzon_con(tmp_path, {"relieve_meta.json": relieve_meta_con(cambio)}, copiar=())
+    assert clave in motivos_de(correr(b, tmp_path), "relieve_meta.json")
+
+
+@pytest.mark.parametrize("cambio, clave", [
+    (lambda t: t.replace("chile,0,500,450,5,6,7", "chile,0,500,450,8,6,7"),
+     "bruta_millares_p10 ≤ bruta_millares_p50 ≤ bruta_millares_p90"),
+    (lambda t: t.replace("chile,0,500,450,", "chile,0,500,-450,"), "neta_mm_p50 menor que 0"),
+    (lambda t: t.replace("bruta_millares_p90", "bruta_mm_p90"), "faltan columnas obligatorias: bruta_millares_p90"),
+])
+def test_demanda_cultivos_invalida(tmp_path, cambio, clave):
+    texto = cambio((BUZON_OK / "demanda_cultivos.csv").read_text(encoding="utf-8"))
+    b = buzon_con(tmp_path, {"demanda_cultivos.csv": texto}, copiar=())
+    assert clave in motivos_de(correr(b, tmp_path), "demanda_cultivos.csv")
+
+
+@pytest.mark.parametrize("nombre, cambio, clave", [
+    ("memoria_parcelas.csv", lambda t: t.replace("T0001,2025,perenne,10,", "T0001,2025,perenne,13,"), "meses_verdes fuera de [0, 12]"),
+    ("memoria_parcelas.csv", lambda t: t.replace("T0001,2025,perenne,10,0.7,", "T0001,2025,perenne,10,1.7,"), "max_verano fuera de [-1, 1]"),
+    ("memoria_parcelas.csv", lambda t: t + "T0001,2025,perenne,10,0.7,0.5,0,12\n", "fila repetida para (id, anio_agricola)"),
+    ("memoria_parcelas.csv", lambda t: t.replace("T0001,2025,", "T0001,2025.5,"), "anio_agricola: debe ser entero"),
+    ("memoria_resumen.csv", lambda t: t.replace("T0002,45,", "T0002,91,"), "dias_suelo_desnudo_mediana fuera de [0, "),
+    ("memoria_resumen.csv", lambda t: t.replace("T0002,45,2,", "T0002,45,,"), "anios_con_dato: celda vacía no permitida"),
+])
+def test_memoria_formato_invalido(tmp_path, nombre, cambio, clave):
+    texto = cambio((BUZON_OK / nombre).read_text(encoding="utf-8"))
+    b = buzon_con(tmp_path, {nombre: texto})
+    assert clave in motivos_de(correr(b, tmp_path), nombre)
+
+
+@pytest.mark.parametrize("nombre", ["hls_mensual_2025_10_a_2026_09.tif", "hls_reflect_2026_03.tif",
+                                    "hls_ndvi_memoria_2019.tif", "piloto_consumo.tif", "HLS_NDVI_MEMORIA_2020.TIF"])
+def test_crudos_de_earth_engine_se_listan_aparte(tmp_path, nombre):
+    """Sin línea en LEEME.md y sin ser TIFF válidos: no se rechazan, no se copian, no van a fuentes.json."""
+    b = buzon_con(tmp_path, {nombre: b"crudo de prueba (fixture)"}, copiar=())
+    (b / "P2").mkdir()
+    (b / "P2" / "piloto_consumo.tif").write_bytes(b"crudo de prueba (fixture)")
+    rep = correr(b, tmp_path)
+    assert rep["rechazados"] == [] and rep["entraron"] == [] and rep["fuentes"] == []
+    assert sorted((c["archivo"], c["rol"]) for c in rep["crudos"]) == sorted([(nombre, None), ("P2/piloto_consumo.tif", "P2")])
+    assert sorted(p.name for p in (tmp_path / "salida").iterdir()) == ["fuentes.json"]
+    # Que LEEME.md los mencione tampoco es problema (ni aviso de «no están en el buzón»).
+    assert not any("no están en el buzón" in a for a in rep["avisos"])
+    assert ens.TITULO_CRUDOS in ens.texto_reporte(rep)
+
+
+def test_nasadem_no_es_crudo_y_se_sigue_validando():
+    assert not ens.es_crudo("nasadem_zona_piloto.tif") and not ens.es_crudo("hls_mensual_parcelas.csv")
+
+
+def test_parcelas_con_ftw_null_se_sigue_rechazando(tmp_path):
+    """Una parcela con ftw_confianza null se rechaza (la sesión de datos lo corrige en el origen)."""
+    geo = json.loads((BUZON_OK / "parcelas_base.geojson").read_text(encoding="utf-8"))
+    geo["features"][2]["properties"]["ftw_confianza"] = None
+    b = buzon_con(tmp_path, {"parcelas_base.geojson": json.dumps(geo)}, copiar=())
+    assert "ftw_confianza: vacío o null no permitido" in motivos_de(correr(b, tmp_path), "parcelas_base.geojson")
 
 
 # ---------------------------------------------------------------------------------------
@@ -766,17 +1016,33 @@ def test_params_sin_clave_avisa_y_no_inventa(tmp_path):
     assert any("area_min_ha" in a for a in parcelas["avisos"])
 
 
+def _campos_json(campos):
+    """Todos los campos de un esquema de objeto JSON, incluidos los anidados."""
+    for campo in campos.values():
+        yield campo
+        if campo["tipo"] == "objeto":
+            yield from _campos_json(campo["campos"])
+        elif campo["tipo"] == "lista":
+            yield campo["elemento"]
+
+
 def test_esquemas_usan_reglas_y_tipos_conocidos():
     tipos_campo = {"texto", "numero", "entero", "fecha", "mes", "mes_o_numero", "bool", "k_de_n", "sha256"}
     todos = list(esquemas.ESQUEMAS.items()) + list(esquemas.PATRONES)
     for nombre, esq in todos:
         assert esq["tipo"] in ens.VALIDADORES, nombre
         assert esq.get("fuente_reglas"), nombre
-        for campo in [*esq.get("columnas", {}).values(), *esq.get("propiedades", {}).values()]:
+        json_campos = list(_campos_json({**esq.get("campos", {}), **esq.get("rotacion", {})}))
+        for campo in json_campos:
+            assert campo["tipo"] in tipos_campo | {"objeto", "lista"}, (nombre, campo)
+        for campo in [*esq.get("columnas", {}).values(), *esq.get("propiedades", {}).values(),
+                      *(c for c in json_campos if c["tipo"] not in ("objeto", "lista"))]:
             assert campo["tipo"] in tipos_campo, (nombre, campo)
-            for cota in (campo.get("min"), campo.get("max"), campo.get("valores")):
+            for cota in (campo.get("min"), campo.get("max"), campo.get("mayor_que"), campo.get("valores")):
                 if isinstance(cota, str):
                     assert cota[1:] in esquemas.LIMITES_DERIVADOS, (nombre, cota)
+            if "nulo_si" in campo:   # solo CSV, y la columna de la condición existe
+                assert esq["tipo"] == "csv" and campo["nulo_si"]["columna"] in esq["columnas"], (nombre, campo)
         for regla in esq.get("reglas", []):
             assert regla["regla"] in ens.REGLAS_CSV, (nombre, regla)
         if esq["tipo"] == "json":
@@ -797,20 +1063,23 @@ def cli(*args, env=None):
 def test_cli_buzon_ok(tmp_path):
     p = cli("--buzon", str(BUZON_OK), "--salida", str(tmp_path / "s"))
     assert p.returncode == 0, p.stderr
-    assert "ENTRARON (7)" in p.stdout and "RECHAZADOS (0)" in p.stdout
+    assert "ENTRARON (13)" in p.stdout and "RECHAZADOS (0)" in p.stdout
+    assert "CRUDOS DE EARTH ENGINE (se procesan con A3; no entran al contrato): 1" in p.stdout
+    assert "hls_ndvi_memoria_2016.tif" in p.stdout
     assert (tmp_path / "s/entregas_log.md").exists()
 
 
 def test_cli_buzon_malo_sale_con_1(tmp_path):
     p = cli("--buzon", str(BUZON_MALO), "--salida", str(tmp_path / "s"))
-    assert p.returncode == 1 and "RECHAZADOS (7)" in p.stdout
+    assert p.returncode == 1 and "RECHAZADOS (12)" in p.stdout
+    assert "CRUDOS DE EARTH ENGINE (se procesan con A3; no entran al contrato): 1" in p.stdout
 
 
 def test_cli_variable_raiz_buzon_y_json(tmp_path):
     p = cli("--salida", str(tmp_path / "s"), "--json", env={"RAIZ_BUZON": str(BUZON_OK)})
     assert p.returncode == 0, p.stderr
     rep = json.loads(p.stdout)
-    assert len(rep["entraron"]) == 7
+    assert len(rep["entraron"]) == 13 and [c["archivo"] for c in rep["crudos"]] == ["hls_ndvi_memoria_2016.tif"]
 
 
 def test_cli_sin_buzon_no_escribe(tmp_path):

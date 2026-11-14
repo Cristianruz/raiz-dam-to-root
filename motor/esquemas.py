@@ -8,18 +8,30 @@ Fuentes de lo que aquí se exige:
 - el contrato v4 (kit §2.2–2.5) para las listas de valores, que se importan de
   validar_contrato.py para no tenerlas dos veces;
 - el acuerdo vigente con la sesión que corre Earth Engine y Colab (14-nov-2026): carpeta
-  Raiz/entregas/ (plana o con entregas/<rol>/), una línea por archivo en LEEME.md con
-  «archivo | fuente | fecha | script» y los rangos de cada archivo (ver «fuente_reglas»).
+  de Drive Raiz_entregas (antes Raiz/entregas/; plana o con <rol>/), una línea por archivo en
+  LEEME.md con «archivo | fuente | fecha | script» y los rangos de cada archivo (ver «fuente_reglas»);
+- el acuerdo de formatos entre la sesión de datos y el integrador (14-nov-2026, FUENTE_FORMATOS):
+  rotaciones.json y demanda_cultivos.csv (A5), memoria_parcelas.csv y memoria_resumen.csv (A3-M),
+  cultivos_parcelas.csv (A4) y relieve_meta.json (A9) reemplazan o amplían sus filas de la
+  tabla 0.4-B; los crudos de Earth Engine (CRUDOS_EARTH_ENGINE) no son entregas.
 
-Vocabulario de un campo (columna de CSV o propiedad de GeoJSON):
+Vocabulario de un campo (columna de CSV, propiedad de GeoJSON o llave de un objeto JSON):
   tipo      texto | numero | entero | fecha (AAAA-MM-DD) | mes (AAAA-MM) |
-            mes_o_numero (AAAA-MM o 1–12) | bool | k_de_n ("2/2") | sha256 (64 hex)
+            mes_o_numero (AAAA-MM o 1–12) | bool | k_de_n ("2/2") | sha256 (64 hex);
+            solo en objetos JSON, además: objeto (con «campos», «orden» y «llaves_exactas»)
+            y lista (con «elemento» y «vacia»: True si puede venir vacía)
   min, max  cota inclusiva. Un número escrito aquí es una cota de definición
             (NDVI ∈ [−1, 1], fracción ∈ [0, 1], 12 meses) o una cota del kit o del acuerdo,
             citada en «fuente_reglas». Un texto «@nombre» es un límite derivado de
             data/params.json (ver LIMITES_DERIVADOS); si params no lo trae, la comprobación
             se omite y se avisa (nunca se inventa el valor).
+  mayor_que cota inferior EXCLUSIVA (p. ej., un área > 0).
+  alias     {texto entregado: texto que se valida}: equivalencias acordadas (p. ej.,
+            «1/1 (reglas)» se lee como «1/1»); el reporte avisa cuántas celdas se leyeron así.
   nulo      True: la celda puede venir vacía (o null en JSON).
+  nulo_si   {"columna": c, "valores": [...]} (solo CSV): la celda puede venir vacía SOLO si la
+            columna c de la misma fila trae uno de esos valores (p. ej., prob_max vacío solo
+            con acuerdo_metodos «1/1»). Una celda mal escrita sigue siendo error, no «vacía».
   faltante  valor centinela que cuenta como faltante (−999 de NASA POWER).
   valores   lista cerrada de valores permitidos.
   unico     True: no se repite en el archivo.
@@ -28,6 +40,7 @@ Vocabulario de un campo (columna de CSV o propiedad de GeoJSON):
 
 Reglas de tabla («reglas»): orden (c1 ≤ c2 ≤ …), rango_por_banda, dias_ventana_por_anio,
 abstencion_a42, un_solo_valor_por y faltantes_max. ensamblar.py las aplica por nombre.
+Reglas de JSON («regla»): heladas, dotaciones, supuestos, rotaciones y objeto (valida «campos»).
 """
 import sys
 from pathlib import Path
@@ -37,7 +50,7 @@ if str(_RAIZ) not in sys.path:
     sys.path.insert(0, str(_RAIZ))
 
 # Listas del contrato v4 (kit §2.2 y §2.3): una sola fuente, el validador del contrato.
-from validar_contrato import CULTIVOS, ESTADOS_MEMORIA, MARCAS  # noqa: E402
+from validar_contrato import CULTIVOS, ESTADOS_MEMORIA, ESTADOS_PLAZO, LLUVIAS, MARCAS  # noqa: E402
 
 # ---------------------------------------------------------------------------------------
 # Buzón y LEEME.md (acuerdo con la sesión de Earth Engine)
@@ -51,6 +64,13 @@ EXTENSIONES_CODIGO = (".py", ".ipynb", ".js", ".sh")
 
 # El archivo que se valida PRIMERO: los demás validan sus ids contra él.
 ARCHIVO_PARCELAS = "parcelas_base.geojson"
+
+# Exportaciones crudas de Earth Engine que la sesión de datos deja en la misma carpeta de Drive
+# (FUENTE_FORMATOS). NO son entregas: A3 las procesa y entrega sus CSV. El ensamblador las lista
+# aparte («crudos»): no las valida, no las copia y no les pide línea en LEEME.md. Patrones de
+# fnmatch sobre el nombre en minúsculas. nasadem_zona_piloto.tif SÍ es entrega (A9) y se valida.
+CRUDOS_EARTH_ENGINE = ("hls_mensual_*.tif", "hls_reflect_*.tif", "hls_ndvi_memoria_*.tif",
+                       "piloto_consumo.tif")
 
 # ---------------------------------------------------------------------------------------
 # Límites derivados de data/params.json. ensamblar.limites_derivados() los calcula.
@@ -112,9 +132,24 @@ CLASES_ETIQUETA = ("alfalfa", "nogal", "maiz_forrajero", "sorgo", "chile", "algo
                    "cereal_invierno", "barbecho", "no_se", "forraje_verano")
 USOS_ETIQUETA = ("entrenamiento", "validacion", "validación")
 
+# acuerdo_metodos (kit §2.2: "2/2" y "1/2" = reglas + Random Forest) más la extensión del
+# contrato del integrador (validar_contrato.py, 14-nov): "1/1" = solo reglas fenológicas
+# mientras el Random Forest (A4.2) no está; solo entonces prob_max puede venir vacío.
+# validar_contrato.py la tiene escrita en línea (no exporta constante): una prueba compara ambas.
+ACUERDO_SOLO_REGLAS = "1/1"
+ACUERDOS_METODOS = ("2/2", "1/2", ACUERDO_SOLO_REGLAS)
+# Texto que entrega hoy A4 (solo reglas; el Random Forest está pendiente): se lee como «1/1».
+ALIAS_ACUERDO = {"1/1 (reglas)": ACUERDO_SOLO_REGLAS}
+
+# Plazo de compromiso de cada rotación de rotaciones.json (A5): las tres llaves con que
+# data/params.json y motor/b4_cubo.py buscan el plazo (alfalfa 3–4 años, nogal, anual).
+PLAZOS_ROTACION = ("alfalfa", "nogal", "anual")
+
 FUENTE_TABLA = "kit v4, tabla 0.4-B"
 FUENTE_KENS = "kit v4, K-ENS paso 2"
 FUENTE_ACUERDO = "acuerdo con la sesión de Earth Engine y Colab (14-nov-2026)"
+FUENTE_FORMATOS = ("acuerdo de formatos entre la sesión de datos y el integrador (14-nov-2026; "
+                   "reemplaza o amplía la fila de la tabla 0.4-B)")
 
 ID = {"tipo": "texto", "id_parcela": True}
 INDICE = {"tipo": "numero", "min": -1, "max": 1}     # NDVI y demás diferencias normalizadas
@@ -248,7 +283,7 @@ ESQUEMAS = {
             "meses_verdes": MESES_ANIO,
             "max_verano": _con(INDICE, nulo=True),
             "max_invierno": _con(INDICE, nulo=True),
-            "dias_suelo_desnudo_feb_abr": {"tipo": "numero", "min": 0, "nulo": True},
+            "dias_suelo_desnudo_feb_abr": {"tipo": "entero", "min": 0, "nulo": True},
             "meses_validos": MESES_ANIO,
         },
         "llave": ("id", "anio_agricola"),
@@ -258,19 +293,26 @@ ESQUEMAS = {
              "anio": "anio_agricola"},
         ],
         "alimenta": "parcelas.geojson: memoria",
-        "fuente_reglas": f"{FUENTE_TABLA}; {FUENTE_KENS} (estados de la memoria en su lista); kit A3-M",
+        "fuente_reglas": (f"{FUENTE_TABLA}; {FUENTE_KENS} (estados de la memoria en su lista); kit A3-M; "
+                          "días de suelo desnudo enteros como en suelo_desnudo.csv (kit §2.2); "
+                          f"{FUENTE_FORMATOS}: días entre 0 y los de la ventana de cada año (89; 90 en "
+                          "año bisiesto, derivados de params)"),
     },
     "memoria_resumen.csv": {
         "pieza": "A3-M", "tipo": "csv",
         "columnas": {
             "id": _con(ID, unico=True),
-            "edad_perenne_anios": {"tipo": "entero", "min": 0, "nulo": True},
-            "dias_suelo_desnudo_mediana": {"tipo": "numero", "min": 0, "max": "@dias_ventana_max",
+            "dias_suelo_desnudo_mediana": {"tipo": "entero", "min": 0, "max": "@dias_ventana_max",
                                            "nulo": True},
+            "anios_con_dato": {"tipo": "entero", "min": 0},
             "estado_2025": {"tipo": "texto", "valores": sorted(ESTADOS_MEMORIA), "nulo": True},
         },
-        "alimenta": "parcelas.geojson: edad_perenne_anios, dias_suelo_desnudo_mediana",
-        "fuente_reglas": f"{FUENTE_TABLA}; {FUENTE_KENS}; kit §2.2",
+        # La edad de la perenne ya no viene aquí: la trae cultivos_parcelas.csv (A4).
+        "alimenta": "parcelas.geojson: dias_suelo_desnudo_mediana",
+        "fuente_reglas": (f"{FUENTE_TABLA}; {FUENTE_KENS}; kit §2.2 (dias_suelo_desnudo_mediana es "
+                          "«integer o null»: la mediana de un número par de años debe redondearse "
+                          f"en el origen, no aquí); {FUENTE_FORMATOS} (anios_con_dato; la edad pasa "
+                          "a cultivos_parcelas.csv)"),
     },
     "memoria_validacion.csv": {
         "pieza": "A3-M", "tipo": "csv", "columnas": {},
@@ -298,15 +340,27 @@ ESQUEMAS = {
         "columnas": {
             "id": _con(ID, unico=True),
             "cultivo_actual": {"tipo": "texto", "valores": sorted(CULTIVOS)},
-            "prob_max": FRACCION,
-            "acuerdo_metodos": {"tipo": "k_de_n"},
+            "prob_max": _con(FRACCION, nulo_si={"columna": "acuerdo_metodos",
+                                                "valores": (ACUERDO_SOLO_REGLAS,)}),
+            "acuerdo_metodos": {"tipo": "k_de_n", "valores": ACUERDOS_METODOS, "alias": ALIAS_ACUERDO},
             "abstencion": {"tipo": "bool"},
+            # Columnas que A4 agrega (FUENTE_FORMATOS): la edad de la perenne viene aquí, no en
+            # memoria_resumen.csv; estado_plazo con la lista del contrato (kit §2.2).
+            "edad_perenne_anios": {"tipo": "entero", "min": 0, "nulo": True},
+            "estado_plazo": {"tipo": "texto", "valores": sorted(e for e in ESTADOS_PLAZO if e), "nulo": True},
+            "grupo_fenologico": {"tipo": "texto", "nulo": True},
         },
-        "reglas": [{"regla": "abstencion_a42"}],
-        "alimenta": "parcelas.geojson: cultivo_actual, prob_max, acuerdo_metodos, abstencion",
+        # Una parcela abstenida no tiene cultivo: tampoco edad ni estado del plazo.
+        "reglas": [{"regla": "abstencion_a42", "vacias_si_abstenida": ["edad_perenne_anios", "estado_plazo"]}],
+        "alimenta": ("parcelas.geojson: cultivo_actual, prob_max, acuerdo_metodos, abstencion, "
+                     "edad_perenne_anios"),
         "fuente_reglas": (f"{FUENTE_TABLA}; {FUENTE_KENS} (prob_max entre 0 y 1); kit §2.2 y A4.2 "
                           "(abstención si prob_max < umbral, si los métodos no coinciden o si "
-                          "ftw_confianza < umbral; la abstenida es «sin_clasificar»)"),
+                          "ftw_confianza < umbral; la abstenida es «sin_clasificar»); extensión del "
+                          "contrato en validar_contrato.py (14-nov): acuerdo_metodos «1/1» = solo "
+                          f"reglas, y entonces prob_max puede venir vacío; {FUENTE_FORMATOS}: «1/1 (reglas)» "
+                          "se lee como «1/1»; edad_perenne_anios, estado_plazo y grupo_fenologico; la "
+                          "abstenida lleva edad y estado_plazo vacíos"),
     },
     "tabla_metodos.csv": {
         "pieza": "A4.2", "tipo": "csv",
@@ -337,8 +391,27 @@ ESQUEMAS = {
         },
         "llave": ("id", "opcion", "lluvia_pct"),
         "reglas": [{"regla": "orden", "columnas": ["bruta_mm_p10", "bruta_mm_p50", "bruta_mm_p90"]}],
-        "alimenta": "cubo.json: opciones[].agua.lamina_bruta (y La gota)",
+        # Sin «alimenta»: el motor B4 toma la lámina de rotaciones.json y demanda_cultivos.csv
+        # (FUENTE_FORMATOS). Si llega, se sigue validando con la fila del kit.
         "fuente_reglas": f"{FUENTE_TABLA}; {FUENTE_KENS} (P10 ≤ P50 ≤ P90); kit A5 (lluvia 0 y −20)",
+    },
+    "demanda_cultivos.csv": {
+        "pieza": "A5", "tipo": "csv",
+        "columnas": {
+            "cultivo": {"tipo": "texto"},
+            "lluvia_pct": {"tipo": "numero", "valores": "@lluvia_pct"},
+            "etc_mm_p50": NO_NEGATIVO,
+            "neta_mm_p50": NO_NEGATIVO,
+            "bruta_millares_p10": NO_NEGATIVO,
+            "bruta_millares_p50": NO_NEGATIVO,
+            "bruta_millares_p90": NO_NEGATIVO,
+        },
+        "llave": ("cultivo", "lluvia_pct"),
+        "reglas": [{"regla": "orden", "columnas": ["bruta_millares_p10", "bruta_millares_p50",
+                                                   "bruta_millares_p90"]}],
+        "alimenta": "cubo.json: lámina de los cultivos sueltos sin rotación (motor/b4_cubo.py)",
+        "fuente_reglas": (f"{FUENTE_FORMATOS}: lámina por cultivo y variante de lluvia (0 y −20, de "
+                          f"params); {FUENTE_KENS} (P10 ≤ P50 ≤ P90); láminas y ETc ≥ 0 por definición"),
     },
     "etc_mensual.csv": {
         "pieza": "A5", "tipo": "csv",
@@ -407,6 +480,24 @@ ESQUEMAS = {
         "alimenta": "capa «Terrain & runoff» y botón «Simulate a storm»",
         "fuente_reglas": f"{FUENTE_ACUERDO}; kit A9 paso 3 (< 1 MB)",
     },
+    "relieve_meta.json": {
+        "pieza": "A9", "tipo": "json", "regla": "objeto",
+        "campos": {
+            "rotulo": {"tipo": "texto"},
+            "umbral_ruta_ha": {"tipo": "numero", "mayor_que": 0},
+            "umbral_ruta_etiqueta": {"tipo": "texto"},
+            "celda_ha": {"tipo": "numero", "mayor_que": 0},
+            "tormenta": {"tipo": "objeto", "campos": {
+                "mm": NO_NEGATIVO,
+                "definicion": {"tipo": "texto"},
+                "fuente": {"tipo": "texto"},
+                "periodo": {"tipo": "texto"},
+            }},
+        },
+        "alimenta": "capa «Terrain & runoff» y botón «Simulate a storm» (rótulo, umbral de ruta y tormenta)",
+        "fuente_reglas": (f"{FUENTE_FORMATOS}: rótulo, umbral de ruta con su etiqueta, celda y tormenta "
+                          "con definición, fuente y periodo; áreas > 0 y lluvia ≥ 0 por definición"),
+    },
     # ---- B2 y B3 (P5) ----------------------------------------------------------------
     "dotaciones.json": {
         "pieza": "B2", "tipo": "json", "regla": "dotaciones",
@@ -415,9 +506,33 @@ ESQUEMAS = {
                           "deslizador de data/params.json)"),
     },
     "rotaciones.json": {
-        "pieza": "B3", "tipo": "json", "regla": "rotaciones",
-        "alimenta": "cubo.json: opciones[] (secuencia y filtros)",
-        "fuente_reglas": f"{FUENTE_TABLA}; kit B3 paso 1 (cada opción con secuencia y fuente)",
+        # Formato acordado (FUENTE_FORMATOS); sustituye a la lista «opciones» del kit B3.
+        "pieza": "A5", "tipo": "json", "regla": "rotaciones",
+        # Llaves de primer nivel y su tipo.
+        "llaves": {"params": "objeto", "cultivos": "objeto", "rotaciones": "lista", "anios_clima": "lista"},
+        # Cada entrada de «params» trae al menos estas llaves.
+        "llaves_param": ("valor", "etiqueta"),
+        # Campos de cada rotación (mismo vocabulario de campo; «unico» se cuenta en la lista).
+        "rotacion": {
+            "id": {"tipo": "texto", "unico": True},
+            "nombre": {"tipo": "texto"},
+            # Ids de «cultivos» del mismo archivo; vacía = descanso (sin cultivo).
+            "cultivos": {"tipo": "lista", "elemento": {"tipo": "texto"}, "vacia": True},
+            "plazo": {"tipo": "texto", "valores": PLAZOS_ROTACION},
+            "plazo_anios": {"tipo": "objeto", "orden": ("min", "max"),
+                            "campos": {"min": NO_NEGATIVO, "max": NO_NEGATIVO}},
+            # Llaves exactamente "0" y "-20" (variantes de lluvia del contrato, LLUVIAS).
+            "lamina_bruta_millares": {"tipo": "objeto", "llaves_exactas": True, "campos": {
+                lluvia: {"tipo": "objeto", "orden": ("p10", "p50", "p90"), "campos": {
+                    c: NO_NEGATIVO for c in ("p10", "p50", "p90", "neta_mm_p50", "etc_mm_p50")}}
+                for lluvia in LLUVIAS}},
+        },
+        "alimenta": "cubo.json: opciones[] (secuencia, plazo y lámina bruta P10/P50/P90)",
+        "fuente_reglas": (f"{FUENTE_FORMATOS}: params (cada uno con valor y etiqueta), cultivos, "
+                          "rotaciones y anios_clima; cada rotación con id único, nombre, cultivos, plazo "
+                          "(alfalfa, nogal o anual), plazo_anios con min ≤ max y lamina_bruta_millares "
+                          f"con llaves «0» y «-20» (contrato); {FUENTE_KENS} (P10 ≤ P50 ≤ P90); "
+                          "láminas, años y mm ≥ 0 por definición"),
     },
     "supuestos.json": {
         "pieza": "B3", "tipo": "json", "regla": "supuestos",

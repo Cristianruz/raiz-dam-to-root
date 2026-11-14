@@ -37,7 +37,8 @@ El flujo completo está en [README §4](README.md#4-flujo-de-trabajo-de-una-piez
 
 | | |
 |---|---|
-| **Entradas** | Las hojas de etiquetas de cada persona, en `Raiz/entradas/`. Se hicieron a ciegas en Copernicus Browser antes del evento |
+| **Entradas** | Las hojas de etiquetas de cada persona, en `Raiz/entradas/`. Se hicieron a ciegas en Copernicus Browser antes del evento. `parcelas_muestra.geojson` de `Raiz/entregas/` (sesión de Chrome), para el `id` |
+| **Excepción del `id`** | En `etiquetas_unidas.csv`, `id` es el del polígono de `parcelas_muestra.geojson` que contiene el punto, **no** el de `parcelas_base.geojson` (README §6, cambio c). `id` no puede quedar vacío: si falta `parcelas_muestra.geojson`, el archivo no se entrega todavía |
 | **Documentos que no están en el repo** | Manual de etiquetado (archivo 39) y protocolo Olofsson (archivo 22, P4). Pídalos a Cristian. Sin el archivo 22 se usan 50 puntos por clase (lo dice el prompt) |
 | **Cuaderno** | `A4_etiquetas.ipynb` en `Raiz/cuadernos/` |
 | **Hora límite** | Sáb 12:00. P2 la necesita para A4.2 a las 15:00 |
@@ -57,7 +58,7 @@ Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chr
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson, CON UNA EXCEPCIÓN en esta tarea: en etiquetas_unidas.csv, id es el id del polígono de entregas/parcelas_muestra.geojson que contiene el punto (la muestra del distrito; así lo valida el ensamblador).
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
@@ -83,7 +84,7 @@ DOCUMENTOS DE REFERENCIA (pegados)
 [PEGA AQUÍ los nombres de las hojas de etiquetas que hay en entradas/ y sus columnas (encabezados).]
 
 TAREA
-NOTA DEL EQUIPO: la columna id es el id del polígono de parcelas_muestra.geojson que contiene el punto (lo entrega la sesión de Chrome en entregas/). Si ese archivo aún no está, deja id vacío y avísame.
+NOTA DEL EQUIPO: la columna id es el id del polígono de parcelas_muestra.geojson que contiene el punto (lo entrega la sesión de Chrome en entregas/), NO un id de parcelas_base.geojson. Asígnalo uniendo por punto_id con parcelas_muestra.geojson (la muestra trae punto_id); si los punto_id no coinciden y las hojas traen coordenadas, usa una unión espacial punto-en-polígono (geopandas.sjoin, predicate="within", mismo CRS). Imprime cuántos puntos recibieron id y cuántos no. id NO puede quedar vacío: el validador rechaza el archivo entero. Si parcelas_muestra.geojson aún no está en entregas/, haz los pasos 1 a 4 en el cuaderno, NO guardes etiquetas_unidas.csv y avísame: se entrega cuando llegue ese archivo. Si un punto no cae en ningún polígono, déjalo fuera del archivo, lístalo (punto_id, clase_final, bloque, uso) y avísame: Cristian decide qué hacer con él.
 Tarea A4.1. En A4_etiquetas.ipynb (Raiz/cuadernos/). Las etiquetas se hicieron A CIEGAS antes del evento, en Copernicus Browser, por dos personas (manual 39). No se generan miniaturas en Earth Engine.
 1) Lea de entradas/ las hojas de etiquetas de cada persona. Reporte cuántos puntos tiene cada una y cuántos comparten.
 2) Compare a las dos personas: calcule el % de acuerdo global y por clase. Donde no coincidan, use la columna de desempate (tercera persona) si existe; si no, asigne "no_se" y descarte el punto.
@@ -129,7 +130,7 @@ Aviso: `ENTREGA: etiquetas_unidas.csv — prueba OK`.
 
 - **Qué es:** el paso 10 de A3-M (kit). El bloque está en [P2 → A3-M](P2_hls_memoria.md#a3-m--memoria-de-la-parcela-20162026) y el archivo `memoria_validacion.csv` lo entrega P2.
 - **Su parte:**
-  - confirmar que solo se usan las etiquetas de la zona piloto;
+  - confirmar que solo se usan las etiquetas de la zona piloto. Como el `id` de `etiquetas_unidas.csv` es el de la muestra, el paso 10 hace una unión espacial (punto representativo del polígono de `parcelas_muestra.geojson` dentro de una parcela de `parcelas_base.geojson`) e imprime cuántas etiquetas coinciden. Revise ese número: si son pocas o ninguna, avise a Cristian antes de que P2 entregue;
   - revisar las correspondencias: alfalfa ↔ perenne; maíz, sorgo, algodón y chile ↔ verano o doble; cereal de invierno ↔ invierno o doble; barbecho ↔ descanso; nogal ↔ verano o perenne;
   - revisar la tabla de acuerdo antes de que P2 la entregue.
 - **Hora:** sáb 18:00–20:30 (kit §3).
@@ -247,7 +248,8 @@ Aviso: `ENTREGA: resultado_H3.md — prueba OK`.
 
 | | |
 |---|---|
-| **Entradas** | `etiquetas_unidas.csv` (solo `uso = validacion`) y `cultivos_parcelas.csv`. Para las proporciones de área, la superficie por clase del mapa (`area_ha` de `parcelas_base.geojson`) |
+| **Entradas** | `etiquetas_unidas.csv` (solo `uso = validacion`), `parcelas_muestra.geojson` y `cultivos_parcelas.csv`. Para las proporciones de área, la superficie por clase del mapa (`area_ha` de `parcelas_base.geojson`) |
+| **Pendiente con Cristian** (avísele al preparar A4.3, sáb 12:00–14:30) | `cultivos_parcelas.csv` solo trae parcelas de `parcelas_base.geojson` (zona piloto). Las etiquetas de validación que caen fuera de la zona piloto no tienen clase del mapa en ese archivo. A4.3 necesita las predicciones de A4.2 sobre los polígonos de validación de la muestra, que no caben en `cultivos_parcelas.csv`. Pregunte dónde quedarán. Mientras no lleguen, el bloque calcula solo con las etiquetas que coinciden con una parcela de la zona piloto y dice cuántas son |
 | **Documento** | Olofsson et al. 2014 y el protocolo del archivo 22, P4 (pídalo a Cristian) |
 | **Cuaderno** | `A4_olofsson.ipynb` en `Raiz/cuadernos/` (el kit no le da nombre) |
 | **Hora límite** | Dom, antes de las 11:00 (kit A4.3). Se prepara el sáb 12:00–14:30 |
@@ -295,6 +297,7 @@ S9 §6, prueba 1 (copiada tal cual):
 
 TAREA
 NOTA DEL EQUIPO: uso SOLO la muestra de validación (uso = "validacion"), nunca la de entrenamiento. Las etiquetas son fotointerpretación a ciegas, no datos de campo.
+NOTA DEL EQUIPO (clase del mapa de cada etiqueta): cultivos_parcelas.csv solo trae id de parcelas_base.geojson (zona piloto). Si te pego otro archivo con las predicciones de A4.2 sobre los polígonos de validación de la muestra, úsalo (une por el id de la muestra) y dilo. Si no, UNIÓN ETIQUETA → PARCELA: etiquetas_unidas.csv trae en id el polígono de parcelas_muestra.geojson (la muestra del distrito), no el de parcelas_base.geojson. Para cada etiqueta: (1) únela por punto_id con entregas/parcelas_muestra.geojson para obtener su polígono; (2) toma su punto representativo (geometry.representative_point(), que siempre cae dentro del polígono); (3) haz geopandas.sjoin con entregas/parcelas_base.geojson (predicate="within"; si el CRS difiere, reproyecta antes) y llama id_base al id que resulte; (4) imprime: etiquetas totales, etiquetas con id_base (zona piloto), etiquetas sin id_base (fuera de la zona piloto) e id_base con más de una etiqueta. No cambies la columna id de etiquetas_unidas.csv: id_base vive solo en el cuaderno. La clase del mapa de cada etiqueta es el cultivo_actual de su id_base. Imprime, antes de calcular: etiquetas de validación totales, con clase del mapa y sin ella, y su número por clase de referencia y por clase del mapa. Calcula solo con las que tienen clase del mapa y escribe en la prueba y en la nota de la figura cuántas se usaron de cuántas. Una etiqueta sin clase del mapa nunca se rellena ni se cuenta como acierto o error. Si alguna clase queda con muy pocas etiquetas o ninguna, detente y avísame antes de calcular.
 Tarea A4.3. Con la muestra de VALIDACIÓN etiquetada a ciegas (independiente del entrenamiento), calcule según Olofsson et al. 2014:
 - la matriz de error en proporción de área;
 - la exactitud del usuario y del productor por clase y la exactitud global, cada una con IC 95%;
@@ -311,6 +314,7 @@ Etiqueta: "accuracy vs. blind photo-interpretation (not field data)".
 - exactitud del usuario y del productor por clase y exactitud global, cada una con IC 95 %;
 - área ajustada por clase con IC 95 %;
 - sin kappa;
+- cuántas etiquetas de validación se usaron de cuántas (las que tienen clase del mapa), por clase;
 - la etiqueta "accuracy vs. blind photo-interpretation (not field data)".
 
 **Plan B:** el kit no trae uno. Si no se termina antes de las 11:00, la página dice «not run» en esa parte de la prueba 1 (kit C6).

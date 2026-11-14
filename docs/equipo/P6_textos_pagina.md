@@ -47,6 +47,7 @@ Revisa el texto que pego abajo. NO lo reescribas. Devuélveme cuatro listas:
 (d) cada frase que prometa un resultado o diga que la herramienta decide por el agricultor.
 Al final: "LISTO" si (a), (b) y (d) están vacías; si no, "CORREGIR".
 ```
+En `plantillas_explicaciones.md`, la lista (a) tiene que quedar vacía, sin excepciones. En `whatsapp_plantilla.md` se aceptan solo los dígitos del texto fijo de C4: la numeración de las 3 opciones y «Responda 1, 2 o 3».
 
 ---
 
@@ -215,13 +216,13 @@ REGLAS OBLIGATORIAS
 4. Prohibido: "first" y "only" (ni "primero" ni "único"); prometer ahorros ("save", "saves", "savings", "ahorro"; se dice "reduces dam withdrawals"); decir que la herramienta reparte, vende o intercambia agua o que pronostica la presa; logotipos, banderas o identificadores de misión de NASA.
 5. Cada ficha y la página llevan el aviso: "This tool supports, never replaces, the judgment of farmers and local experts."
 6. La sección de IA se titula "SI/AI tools used". La IA nunca produce los números ni toma la decisión.
-7. Al final imprime una AUTOVERIFICACIÓN: (a) cada dígito que aparezca fuera de los marcadores {{…}} (debe ser cero o estar en la lista de texto fijo del kit que te pego); (b) cada palabra prohibida de la regla 4 (debe ser cero); (c) cada marcador usado y qué dato representa.
-8. Al final escribe, para CADA archivo, su línea para Raiz/entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque T2). Sin esa línea el archivo no entra.
+7. Al final imprime una AUTOVERIFICACIÓN: (a) cada dígito que aparezca fuera de los marcadores {{…}} en CUALQUIER línea del archivo, incluidas la lista marcador → hecho y las citas de fuentes. Debe ser CERO, sin excepciones: este archivo no tiene texto fijo con dígitos, y un solo dígito hace que el validador lo rechace; (b) cada palabra prohibida de la regla 4 (debe ser cero); (c) cada marcador usado y qué dato representa.
+8. Al final escribe, para CADA archivo, su línea para Raiz/entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; en script, el bloque de esta guía que usaste: docs/equipo/P6_textos_pagina.md, bloque T2). Sin esa línea el archivo no entra. La AUTOVERIFICACIÓN y la línea de LEEME.md van en tu respuesta, FUERA del archivo plantillas_explicaciones.md: llevan dígitos.
 
 ESQUEMA DE SALIDA DE ESTA TAREA
 Fila de la tabla 0.4-B del kit (copiada tal cual; aquí solo plantillas_explicaciones.md):
 | Textos (P6) | `textos_ui.md`, `plantillas_explicaciones.md` (5 preguntas con marcadores `{{f1}}`, sin números) y `whatsapp_plantilla.md` | — |
-El validador del repo rechaza el archivo si encuentra un dígito fuera de los marcadores {{…}} (salvo en la línea del encabezado AI-assisted).
+El validador del repo revisa CADA línea del archivo y lo rechaza si encuentra un dígito fuera de los marcadores {{…}}. La única línea exenta es la del encabezado AI-assisted. También lo rechazan los dígitos dentro de nombres y citas: «P50», «P10–P90», «FAO-56», «v002», un año entre paréntesis o un número de artículo de ley.
 
 DOCUMENTOS DE REFERENCIA (pegados)
 Kit v4, C3 (copiado tal cual):
@@ -247,13 +248,15 @@ S9 §11 "Límites que se declaran" (copiado tal cual):
 No reparte, vende ni intercambia agua (art. 22 de la LAN). No pronostica la presa. No promete ahorros. No sustituye al agricultor ni al técnico. Las parcelas son estimadas; el mapa se valida contra fotointerpretación, no contra campo. OpenET aún no cubre México.
 
 TAREA
-Tarea T2. Escribe plantillas_explicaciones.md, en inglés sencillo, con una plantilla por tipo de opción: rotación actual (ACTUAL), alternativa anual, alfalfa (nueva o establecida, con corte de riego en verano) y nogal. En cada una van las 5 respuestas: why it's suggested · evidence (with source) · benefits · what we don't know · risks needing local review. Reglas: (1) cero dígitos fuera de los marcadores; (2) cada número es un marcador {{f1}}, {{f2}}… y debajo de cada plantilla va la lista "marcador → hecho" (lámina P50, rango P10–P90, plazo mínimo y máximo, plazo restante, compromiso, estado del plazo, días de suelo desnudo, estado de la memoria); (3) lo que depende del deslizador usa solo {{d}}, {{ha}} y {{cobertura}}; (4) la evidencia cita solo fuentes de la lista de fuentes permitidas de C3 (la tiene Cristian); mientras llega, solo las que citan S9 §4 y §5: NASA POWER, NASA HLS, FAO-56, INIFAP, FIRA, IMTA y Conagua; (5) "what we don't know" dice al menos que la eficiencia parcelaria no está medida en el distrito y que las parcelas son estimadas; (6) "risks needing local review" termina con el aviso fijo de la regla 5; (7) nada de ahorros ni de repartir, vender o intercambiar agua, ni "first" u "only".
-PRUEBA: la AUTOVERIFICACIÓN de la regla 7, y la tabla marcador → hecho completa (ningún marcador sin hecho).
+Tarea T2. Escribe plantillas_explicaciones.md, en inglés sencillo, con una plantilla por tipo de opción: rotación actual (ACTUAL), alternativa anual, alfalfa (nueva o establecida, con corte de riego en verano) y nogal. En cada una van las 5 respuestas: why it's suggested · evidence (with source) · benefits · what we don't know · risks needing local review. Reglas: (1) cero dígitos fuera de los marcadores, en todo el archivo, sin excepciones; (2) cada número es un marcador {{f1}}, {{f2}}… y debajo de cada plantilla va la lista "marcador → hecho", con los hechos nombrados en inglés y SIN dígitos: median applied depth; low–high range of the applied depth; shortest and longest water term; remaining water term; water commitment; water term status; bare-soil days; field memory status. No escribas «P50», «P10», «P90» ni ningún otro nombre con dígitos; (3) lo que depende del deslizador usa solo {{d}}, {{ha}} y {{cobertura}}; (4) la evidencia cita solo fuentes de la lista de fuentes permitidas de C3 (la tiene Cristian); mientras llega, solo las que citan S9 §4 y §5: NASA POWER, NASA HLS, FAO, INIFAP, FIRA, IMTA y Conagua. Cita cada fuente por su nombre, sin año, sin número de serie, versión ni artículo. La de FAO se escribe "FAO, Crop evapotranspiration: guidelines for computing crop water requirements (Irrigation and Drainage Paper)", sin su número. Si hace falta mencionar la ley de aguas, escribe "Mexico's National Water Law", sin número de artículo; (5) "what we don't know" dice al menos que la eficiencia parcelaria no está medida en el distrito y que las parcelas son estimadas; (6) "risks needing local review" termina con el aviso fijo de la regla 5; (7) nada de ahorros ni de repartir, vender o intercambiar agua, ni "first" u "only".
+PRUEBA: la AUTOVERIFICACIÓN de la regla 7 con CERO dígitos fuera de los marcadores, y la tabla marcador → hecho completa (ningún marcador sin hecho, ningún hecho nombrado con dígitos).
 ```
+
+**Por qué los hechos y las citas van sin dígitos:** el ensamblador revisa todas las líneas del archivo, también la lista marcador → hecho y las citas. «{{f1}} → lámina P50» o «Evidence: FAO-56» bastan para rechazar el archivo con el motivo «trae cifras escritas a mano». En el kit, esos hechos se llaman P50 y P10–P90 (S9 §5); en este archivo se nombran con palabras.
 
 **Prueba de aceptación:**
 - la del bloque;
-- la autoverificación de arriba en un chat nuevo, con cero dígitos fuera de los marcadores y cero palabras prohibidas.
+- la autoverificación de arriba en un chat nuevo, con cero dígitos fuera de los marcadores y cero palabras prohibidas. Pegue **solo el contenido del archivo**, sin la autoverificación ni la línea de `LEEME.md`, porque esas sí llevan dígitos.
 
 **Plan B:** si no da tiempo de hacer los cuatro tipos, una sola plantilla general con las 5 respuestas. C3 la usa para todas las opciones.
 

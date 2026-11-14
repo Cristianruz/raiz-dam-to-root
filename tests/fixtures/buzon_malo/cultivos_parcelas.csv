@@ -1,4 +1,4 @@
-id,cultivo_actual,prob_max,acuerdo_metodos,abstencion
-T0001,alfalfa,0.81,2/2,false
-T0002,chile,0.74,2/2,false
-T0003,nogal,0.92,2/2,false
+id,cultivo_actual,prob_max,acuerdo_metodos,abstencion,edad_perenne_anios,estado_plazo,grupo_fenologico
+T0001,alfalfa,,1/1 (reglas),False,3,por_vencer,alfalfa
+T0002,sin_clasificar,,1/1 (reglas),True,,,anual_verano
+T0003,nogal,0.9,2/2,false,8,comprometida,
