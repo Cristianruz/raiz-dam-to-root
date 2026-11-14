@@ -263,6 +263,7 @@ function fijarMedidas() {
   const raiz = document.documentElement.style;
   const controles = $("#controles");
   raiz.setProperty("--alto-cabecera", `${$("#marca").offsetHeight + controles.offsetHeight}px`);
+  raiz.setProperty("--alto-controles", `${controles.offsetHeight}px`);
   raiz.setProperty("--tope-ficha", `${Math.max(0, controles.getBoundingClientRect().bottom)}px`);
 }
 
@@ -882,8 +883,8 @@ function crearMapa() {
     crearMarcadores();
     estado.mapaListo = true;
     pintarMapa();
-    // «listo» cuando las parcelas ya están dibujadas (la fuente GeoJSON se procesa aparte, después de «load»).
-    mapa.once("idle", () => { document.body.dataset.mapa = "listo"; });
+    // «listo» cuando la fuente de las parcelas ya está procesada (el GeoJSON se tesela aparte, después de «load»).
+    esperarMapa().then(() => { document.body.dataset.mapa = "listo"; });
   });
 }
 
@@ -1516,24 +1517,30 @@ function conectarEventos() {
   });
 }
 
-// Ganchos mínimos para la prueba de humo (tests/e2e/web_smoke.mjs): solo leen; no cambian el comportamiento.
-/** Espera a que el mapa termine de dibujar lo pendiente (repintado programado y teselas de la fuente). */
+/**
+ * Espera a que el mapa termine lo pendiente: el repintado programado (setData) y el teselado de la
+ * fuente de las parcelas. No se usa el evento «idle»: sin red, una tesela fallida del mapa base
+ * puede dejarlo sin dispararse nunca. Se revisa cuadro a cuadro, con un límite de unos segundos.
+ */
 function esperarMapa() {
   return new Promise((ok) => {
     if (!estado.mapaListo) {
       ok(false);
       return;
     }
-    // Dos cuadros: el repintado programado con requestAnimationFrame ya llamó a setData.
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        if (estado.mapa.loaded()) ok(true);
-        else estado.mapa.once("idle", () => ok(true));
-      }),
-    );
+    let cuadros = 0;
+    const revisar = () => {
+      cuadros += 1;
+      // Dos cuadros como mínimo: el repintado programado con requestAnimationFrame ya llamó a setData.
+      if (cuadros > 2 && !estado.pintadoPendiente && estado.mapa.isSourceLoaded("parcelas")) ok(true);
+      else if (cuadros > 600) ok(false);
+      else requestAnimationFrame(revisar);
+    };
+    requestAnimationFrame(revisar);
   });
 }
 
+// Ganchos mínimos para la prueba de humo (tests/e2e/web_smoke.mjs): solo leen; no cambian el comportamiento.
 window.raizDepuracion = {
   esperarMapa,
   /** Número de parcelas distintas dibujadas en la vista actual del mapa. */

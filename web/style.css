@@ -73,6 +73,7 @@
   --radio: 10px;
   --sombra: 0 2px 10px rgba(29, 35, 41, 0.12);
   --alto-cabecera: 0px; /* marca + controles (lo fija app.js) */
+  --alto-controles: 0px; /* solo los controles fijos (lo fija app.js) */
   --tope-ficha: 0px;    /* borde inferior de los controles en pantalla (lo fija app.js) */
   --ancho-panel: 380px;
 
@@ -83,6 +84,9 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+
+/* Al llevar el foco o desplazar hasta un elemento, que no quede bajo los controles fijos. */
+html { scroll-padding-top: calc(var(--alto-controles) + 8px); }
 
 body {
   margin: 0;
@@ -360,6 +364,7 @@ button, input, select { font: inherit; color: inherit; }
   background: var(--blanco);
   box-shadow: -6px 0 24px rgba(29, 35, 41, 0.22);
   overflow-y: auto; overscroll-behavior: contain;
+  scroll-padding-top: 72px; /* lo que tapa la cabecera fija de la ficha */
   animation: entrar-lado 0.25s ease-out;
 }
 @keyframes entrar-lado { from { transform: translateX(24px); } to { transform: none; } }

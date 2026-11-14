@@ -380,9 +380,16 @@ def explicacion(rot_id, plazo_clave, rotaciones, demanda, params, cfg):
         lam = {"p10": num(d["bruta_millares_p10"]), "p50": num(d["bruta_millares_p50"]), "p90": num(d["bruta_millares_p90"])}
     plazo = plazo_params(params, plazo_clave)
     nombre = cfg["nombres_en"].get(rot_id, rot_id)
+    # Plazo en palabras sin dígitos: una temporada, N años o de N a M años.
+    if plazo["min"] == plazo["max"] == params["plazo"]["anual"]["valor"]:
+        plazo_txt = "for one season"
+    elif plazo["min"] == plazo["max"]:
+        plazo_txt = "for {{f2}} years"
+    else:
+        plazo_txt = "for {{f2}} to {{f3}} years"
     return {
         "textos": {
-            "por_que": f"{nombre} asks for {{{{f1}}}} thousand m³ per hectare per year and commits water for {{{{f2}}}} to {{{{f3}}}} years. With your allocation of {{{{d}}}} thousand m³/ha it covers {{{{cobertura}}}} of the need: enough for {{{{ha}}}} hectares.",
+            "por_que": f"{nombre} asks for {{{{f1}}}} thousand m³ per hectare per year and commits water {plazo_txt}. With your allocation of {{{{d}}}} thousand m³/ha it covers {{{{cobertura}}}} of the need: enough for {{{{ha}}}} hectares.",
             "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER daily climate and a Monte Carlo band (low {{f4}}, high {{f5}} thousand m³/ha). Field history from NASA HLS greenness.",
             "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation you expect.",
             "que_no_sabemos": "On-farm irrigation efficiency has not been measured in this district; the band reflects that assumption. Field boundaries are estimated by a neural network outside its training region.",

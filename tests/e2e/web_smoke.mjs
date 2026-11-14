@@ -510,7 +510,8 @@ async function pruebasEscritorio(page) {
   await page.locator("#ficha").evaluate((el) => { el.scrollTop = 0; });
   await esperarAnimaciones(page);
   await page.screenshot({ path: path.join(CAPTURAS, "escritorio_ficha.png") });
-  await page.locator(".tarjetas, #t-opciones").first().scrollIntoViewIfNeeded();
+  // Tarjetas arriba de la ficha (bajo su cabecera fija), con el panel Why? abierto en la opción actual.
+  await page.locator("#t-opciones").evaluate((el) => el.scrollIntoView({ block: "start" }));
   await page.screenshot({ path: path.join(CAPTURAS, "escritorio_ficha_tarjetas.png") });
   await page.locator("#seccion-gota").scrollIntoViewIfNeeded();
   await esperarAnimaciones(page);
@@ -537,7 +538,7 @@ async function pruebasTelefono(page) {
   check("teléfono: la lista de parcelas se desplaza dentro de su caja (más baja que la pantalla)", lista.alto < lista.ventana && ["auto", "scroll"].includes(lista.desborde), JSON.stringify(lista));
   await page.evaluate(() => window.raizDepuracion.esperarMapa());
   await page.screenshot({ path: path.join(CAPTURAS, "telefono_centro_control.png") });
-  await page.locator("#t-campos").scrollIntoViewIfNeeded();
+  await page.locator("#t-campos").evaluate((el) => el.scrollIntoView({ block: "start" }));
   await page.screenshot({ path: path.join(CAPTURAS, "telefono_lista.png") });
   await page.screenshot({ path: path.join(CAPTURAS, "telefono_centro_control_completa.png"), fullPage: true });
 
