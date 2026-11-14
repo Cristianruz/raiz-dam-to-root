@@ -327,6 +327,11 @@ async function pruebaGota(page, id, c, prefijo, reducida) {
     check(`${prefijo}La gota de ${id} sin bloque gota: dice «Not available»`, (await texto(page, "#seccion-gota")).includes("Not available"));
     return;
   }
+  if (!(op.gota.m3_salen_presa > 0)) {
+    // Opción sin agua de presa (descanso o barbecho): no hay flujo que dibujar y la página lo dice.
+    check(`${prefijo}La gota de ${id} sin agua de presa: dice que no hay flujo que seguir`, (await texto(page, "#seccion-gota")).includes("no flow to follow"));
+    return;
+  }
   const plan = await page.locator("#gota-modulo .gota-modulo").getAttribute("data-gota-plan");
   check(`${prefijo}La gota de ${id} se dibuja como Sankey (d3-sankey)`, plan === "sankey", plan ?? "sin módulo");
   const actual = await revisarSankey(page, op.gota, "actual", `${prefijo}La gota de ${id}, riego actual`);
@@ -942,7 +947,7 @@ async function pruebasEscritorio(page, peticiones) {
   // Clic en el mapa abre la ficha: una parcela clasificada (protagonista si hay) y una abstenida
   const clasificada = candidatos.find((id) => !porId.get(id).abstencion) ?? candidatos[0];
   const aClicar = [clasificada];
-  for (const id of abstenidas.slice(0, 5)) {
+  for (const id of [...abstenidas].sort((x, y) => porId.get(y).area_ha - porId.get(x).area_ha).slice(0, 5)) {
     // la primera abstenida que se vea en el mapa (las muy pequeñas pueden quedar bajo un píxel)
     if (await page.evaluate((x) => window.raizDepuracion.pixelDeParcela(x), id)) {
       aClicar.push(id);
@@ -970,7 +975,14 @@ async function pruebasEscritorio(page, peticiones) {
   await cerrarFicha(page);
 
   // Ficha de la primera protagonista (o de la parcela clasificada): La gota (Sankey), relieve, WhatsApp, Why?
-  const idFicha = clasificada;
+  const conFlujo = candidatos.find((id) => !porId.get(id).abstencion && opcionGota(id)?.gota?.m3_salen_presa > 0);
+  const idFicha = conFlujo ?? clasificada;
+  if (conFlujo && conFlujo !== clasificada && opcionGota(clasificada)?.gota) {
+    // La protagonista en descanso también se prueba: su Gota no tiene flujo y debe decirlo.
+    await abrirDesdeLista(page, clasificada);
+    await pruebaGota(page, clasificada, cubo, "", false);
+    await cerrarFicha(page);
+  }
   await abrirDesdeLista(page, idFicha);
   await pruebaGota(page, idFicha, cubo, "", false);
   await pruebaRelieveFicha(page, idFicha, "");
@@ -1171,6 +1183,11 @@ function varianteDosZonas() {
   const [za, zb] = zonas;
   const c = structuredClone(cubo);
   const g = structuredClone(parcelas);
+  if (Object.keys(cubo.zonas ?? {}).length >= 2) {
+    // Los datos ya traen dos zonas REALES: se prueban tal cual, sin derivar ni reetiquetar nada.
+    const zonaDe = (f) => f.properties.zona ?? za.id;
+    return { c, g, za, zb, porZona: { [za.id]: g.features.filter((f) => zonaDe(f) === za.id), [zb.id]: g.features.filter((f) => zonaDe(f) === zb.id) } };
+  }
   const corte = Math.floor(g.features.length * 0.6);
   const mudar = g.features.filter((f, i) => i >= corte && !f.properties.protagonista);
   const quedan = g.features.filter((f) => !mudar.includes(f));

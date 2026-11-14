@@ -1,0 +1,18 @@
+{
+ "rotulo": "regional, 30 m (NASADEM); not field drainage design",
+ "umbral_ruta_ha": 50.0,
+ "umbral_ruta_etiqueta": "assumption [S]",
+ "pendiente": "por parcela: plano ajustado por mínimos cuadrados a las celdas de NASADEM; zona: DEM suavizado 5 × 5 celdas (~150 m) [S]",
+ "celda_ha": 0.0786,
+ "tormenta": {
+  "mm": 20.7,
+  "definicion": "percentil 95 de los días con lluvia >= 1 mm",
+  "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), media sobre el rectángulo de la zona",
+  "periodo": "2001-01-01 a 2026-11-13",
+  "contraste": {
+   "mm": 15.9,
+   "fuente": "NASA POWER PRECTOTCORR, punto de la zona piloto",
+   "periodo": "1984-01-01 a 2026-11-09"
+  }
+ }
+}

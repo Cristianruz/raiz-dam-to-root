@@ -5,9 +5,14 @@
  "pendiente": "por parcela: plano ajustado por mínimos cuadrados a las celdas de NASADEM; zona: DEM suavizado 5 × 5 celdas (~150 m) [S]",
  "celda_ha": 0.0788,
  "tormenta": {
-  "mm": 15.5,
+  "mm": 20.2,
   "definicion": "percentil 95 de los días con lluvia >= 1 mm",
-  "fuente": "NASA POWER PRECTOTCORR, punto de la zona piloto",
-  "periodo": "1984-01-01 a 2026-11-09"
+  "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), media sobre el rectángulo de la zona",
+  "periodo": "2001-01-01 a 2026-11-13",
+  "contraste": {
+   "mm": 15.5,
+   "fuente": "NASA POWER PRECTOTCORR, punto de la zona piloto",
+   "periodo": "1984-01-01 a 2026-11-09"
+  }
  }
 }

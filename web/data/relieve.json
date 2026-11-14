@@ -7,10 +7,21 @@
    "umbral_ruta_ha": 50.0,
    "umbral_ruta_etiqueta": "assumption [S]",
    "tormenta": {
-    "mm": 15.5,
+    "mm": 20.2,
     "definicion": "percentil 95 de los días con lluvia >= 1 mm",
-    "fuente": "NASA POWER PRECTOTCORR, punto de la zona piloto",
-    "periodo": "1984-01-01 a 2026-11-09"
+    "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), media sobre el rectángulo de la zona",
+    "periodo": "2001-01-01 a 2026-11-13"
+   }
+  },
+  "lazaro_cardenas": {
+   "rotulo": "regional, 30 m (NASADEM); not field drainage design",
+   "umbral_ruta_ha": 50.0,
+   "umbral_ruta_etiqueta": "assumption [S]",
+   "tormenta": {
+    "mm": 20.7,
+    "definicion": "percentil 95 de los días con lluvia >= 1 mm",
+    "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), media sobre el rectángulo de la zona",
+    "periodo": "2001-01-01 a 2026-11-13"
    }
   }
  }

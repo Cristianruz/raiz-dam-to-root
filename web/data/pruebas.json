@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-14T20:22:34+00:00",
+ "generado": "2026-11-14T20:32:20+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -39,9 +39,27 @@
     {
      "id": "abstenidas",
      "etiqueta": "Fields where the crop map abstains",
-     "valor": 218,
-     "total": 338,
-     "fraccion": 0.645,
+     "valor": 781,
+     "total": 1239,
+     "fraccion": 0.6303,
+     "fuente": "web/data/parcelas.geojson"
+    },
+    {
+     "id": "abstenidas_zona",
+     "etiqueta": "Fields where the crop map abstains",
+     "valor": 583,
+     "total": 940,
+     "fraccion": 0.6202,
+     "zona": "delicias_saucillo",
+     "fuente": "web/data/parcelas.geojson"
+    },
+    {
+     "id": "abstenidas_zona",
+     "etiqueta": "Fields where the crop map abstains",
+     "valor": 198,
+     "total": 299,
+     "fraccion": 0.6622,
+     "zona": "lazaro_cardenas",
      "fuente": "web/data/parcelas.geojson"
     }
    ],
@@ -158,8 +176,9 @@
     {
      "id": "contraste_et",
      "nombre": "Regional ET contrast (SSEBop VIIRS, WaPOR v3)",
-     "estado": "not run",
-     "nota": "Regional ET contrast: not run (no et_contraste.csv in data/processed)."
+     "estado": "run",
+     "nota": "Regional comparison; not field-level validation. Satellite ET includes unclassified fields, roads and non-crop vegetation; modeled ET is potential crop ET.",
+     "fuente": "data/processed/et_contraste.csv"
     },
     {
      "id": "fao56",
@@ -175,8 +194,30 @@
      "fuente": "docs/pruebas.md"
     }
    ],
-   "metricas": [],
+   "metricas": [
+    {
+     "id": "meses",
+     "etiqueta": "Months compared",
+     "valor": 12,
+     "fuente": "data/processed/et_contraste.csv"
+    },
+    {
+     "id": "et_modelo_mm",
+     "etiqueta": "Modeled crop ET, pilot-area total",
+     "valor": 1139.3,
+     "unidad": "mm",
+     "fuente": "data/processed/et_contraste.csv"
+    },
+    {
+     "id": "et_ssebop_mm",
+     "etiqueta": "SSEBop VIIRS ET, pilot-area total",
+     "valor": 746.3,
+     "unidad": "mm",
+     "fuente": "data/processed/et_contraste.csv"
+    }
+   ],
    "fuentes": [
+    "data/processed/et_contraste.csv",
     "docs/pruebas.md"
    ]
   }
@@ -185,7 +226,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-14T20:22:34+00:00",
+  "corrida": "2026-11-14T20:32:20+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -206,21 +247,21 @@
     "nombre": "Cube engine",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "cubo REAL: 338 parcelas, 120 clasificadas, 399 opciones"
+    "detalle": "cubo REAL: 1239 parcelas, 458 clasificadas, 1492 opciones"
    },
    {
     "id": "relieve",
     "nombre": "Terrain & runoff layer",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "zonas: delicias_saucillo"
+    "detalle": "zonas: delicias_saucillo, lazaro_cardenas"
    },
    {
     "id": "manifest",
     "nombre": "Manifest of every figure",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "13935 cifras (0 simuladas), 14 fuentes de origen, 29 avisos"
+    "detalle": "51427 cifras (0 simuladas), 22 fuentes de origen, 33 avisos"
    },
    {
     "id": "contrato",
@@ -241,7 +282,7 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "342 passed in 4.29s"
+    "detalle": "342 passed in 7.99s"
    },
    {
     "id": "node",
