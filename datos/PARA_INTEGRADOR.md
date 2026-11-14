@@ -134,3 +134,17 @@ Tu validador ya acepta «cuenca»: con tu commit bdb9b5d, 26 entraron, 0 rechaza
     en el archivo es el 10–90, más prudente.
   - `gedi_umbral_dosel_alto_m`: valor 5 (sobre el percentil 90 de rh98 de la parcela), con `min_disparos.valor` = 3.
   - Las dos con etiqueta «own analysis (A11)». D2 a D5 ya están contestados en la nota de las 15:55.
+
+## 14-nov 16:40 — H1-b: prueba nueva de la forma estacional (no cambia H1) → también falla
+Cristian pidió que H1 y H3 «sí sean resultados». No se cambian criterios ni veredictos. Lo que sí hice fue una prueba
+nueva y honesta de la única señal positiva que había (la variante «anclada» de 2026): especificación subida antes de
+correr (`docs/h1b_especificacion.md`, commit 695caf8, 16:20) y resultado en `docs/resultado_H1b.md`.
+- **H1-b does not hold.** En 1999–2024 el modelo de demanda gana a las formas simples en 6 de 26 años; mediana del error
+  8.66 puntos porcentuales, frente a 3.34 de L1-s y 7.90 de L1. El modelo adelanta la demanda (76 % del ciclo al 14-jul;
+  lo observado es 68 %). La cercanía de 2026 fue de un año.
+- **Para el README:** corrige la frase que diga que la forma estacional del modelo «es informativa». En mi
+  `docs/resultado_H1.md` ya quedó corregida y con el enlace a H1-b.
+- Dato descriptivo que sí es firme y se puede decir: el volumen del ciclo repartido con la curva de ETo de NASA POWER
+  sigue la salida de La Boquilla con una mediana de error de 3.3 puntos porcentuales en 26 ciclos (mejor que la lineal en
+  19 de 26). No es una hipótesis registrada; va como descripción.
+- Archivos nuevos: `docs/resultado_H1b.md`, `docs/h1b_forma.png`, `datos/colab/A6b_forma_historica.py`. No hay entrega al buzón.

@@ -26,7 +26,12 @@ ya preveía. La salida integrada del SIH (296.31 hm³) se reporta al lado; es un
 ## Por qué falla: el nivel, no la forma
 - El modelo calcula la demanda **completa** del cultivo: para todo el ciclo da 1185.7 hm³ en presa atribuibles a La Boquilla, casi el doble de los 600 hm³ autorizados. La lámina que resulta en presa ronda 2.8 m, frente a 1.514 m de mediana histórica en la serie de Conagua (27 años con entrega).
 - Es decir: el distrito opera con mucha menos agua de la que la cadena FAO-56 ÷ eficiencia de parcela ÷ eficiencia de conducción supone necesaria. Apunta en la misma dirección que el contraste de ET (A8: la ETc modelada supera en 53 % a la ET de SSEBop) y que Villalobos-Cano et al. 2024 (ET ÷ agua aplicada = 65.6 % en alfalfa). No distingue entre riego por debajo de la demanda, eficiencias reales mayores que las supuestas, agua de pozo o reúso.
-- **Variante «anclada» (sensibilidad declarada antes de correr; no decide):** si el total del modelo se iguala al total de L1 y solo se compara la forma dentro del ciclo, el modelo da 457.7 hm³ al 14-jul: queda a 10.1 hm³ de la cifra de prensa, más cerca que L1-s (43.2) y que L1 (80.5). Frente a la integral del SIH no mejora a las líneas base. La forma estacional de la demanda por cultivo es informativa; el nivel no.
+- **Variante «anclada» (sensibilidad declarada antes de correr; no decide):** si el total del modelo se iguala al total de L1 y solo se compara la forma dentro del ciclo, el modelo da 457.7 hm³ al 14-jul: queda a 10.1 hm³ de la cifra de prensa, más cerca que L1-s (43.2) y que L1 (80.5). Frente a la integral del SIH no mejora a las líneas base. En 2026 la forma quedó cerca de la cifra de prensa; el nivel no. Que la forma sirva en general se probó aparte y no se sostiene (punto siguiente).
+
+- **La forma tampoco se sostiene en otros años (H1-b, prueba nueva del 14-nov, `docs/resultado_H1b.md`):** se probó si esa
+  forma describe los ciclos 1999–2024. No: el modelo gana a las formas simples en 6 de 26 años y adelanta la demanda (da
+  76 % del ciclo al 14-jul; lo observado es 68 %). La cercanía de 2026 fue de un año. La forma que mejor sigue a la presa
+  es la más simple: la curva de ETo de NASA POWER (mediana de error de 3.3 puntos porcentuales).
 
 ## Sensibilidades (declaradas antes de correr; ninguna cambia el veredicto principal)
 | Variante | Modelo P50 (P10–P90) | L1-s | L1 | Con prensa | Con SIH |
