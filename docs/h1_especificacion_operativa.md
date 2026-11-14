@@ -1,7 +1,7 @@
 <!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
 # H1 · Especificación operativa del back-test (escrita y subida ANTES de correr el modelo)
 
-**Fecha y hora:** 14-nov-2026, ~14:30 (hora de Chihuahua). El commit que introduce este archivo es anterior al commit
+**Fecha y hora:** 14-nov-2026, 14:11 (hora de Chihuahua; commit b9baced). El commit que introduce este archivo es anterior al commit
 de `datos/colab/A6_backtest.py` y de `docs/resultado_H1.md`; el orden se puede comprobar en el historial de git.
 
 **Por qué existe este archivo.** El texto del preregistro disponible en el repositorio de investigación
