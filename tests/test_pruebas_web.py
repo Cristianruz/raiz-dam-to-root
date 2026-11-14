@@ -128,7 +128,41 @@ def test_h1_y_h3_leen_el_veredicto_del_documento(tmp_path):
 def test_documento_sin_veredicto_queda_run(tmp_path):
     escribir(tmp_path, "docs/resultado_H1.md", "# H1\n\nEn proceso: faltan datos del SIH.\n")
     h1 = por_id(pruebas_web.calcular(tmp_path))["backtest_h1"]
-    assert h1["estado"] == "run" and h1["resumen"] == "En proceso: faltan datos del SIH."
+    # La web está en inglés (CLAUDE.md regla 9): sin veredicto, una nota en inglés, no el texto del documento.
+    assert h1["estado"] == "run"
+    assert h1["resumen"] == "Run: docs/resultado_H1.md does not state a verdict yet."
+
+
+def test_resumen_usa_el_rotulo_para_la_pagina(tmp_path):
+    escribir(tmp_path, "docs/resultado_H1.md",
+             "# Resultado\n\n**H1: does not meet the preregistered criterion.** En el punto principal el error\n"
+             "es mayor.\n\nRótulo para la página: \"H1 does not meet the preregistered criterion (partial back-test)\".\n")
+    h1 = por_id(pruebas_web.calcular(tmp_path))["backtest_h1"]
+    assert h1["estado"] == "failed"
+    assert h1["resumen"] == "H1 does not meet the preregistered criterion (partial back-test)"
+
+
+def test_resumen_sin_rotulo_toma_solo_la_frase_en_negrita(tmp_path):
+    # Sin «Rótulo para la página», el resumen es la frase en negrita del veredicto, sin el párrafo en español.
+    escribir(tmp_path, "docs/resultado_H3.md",
+             "# H3\n\n**H3 not supported.** El criterio (a) no se cumple; el (b) sí. Resultado tal como se obtuvo,\n"
+             "con el criterio preregistrado.\n")
+    h3 = por_id(pruebas_web.calcular(tmp_path))["experimento_h3"]
+    assert h3["estado"] == "failed" and h3["resumen"] == "H3 not supported."
+
+
+ESPANOL = re.compile(r"\b(el|los|las|que|del|criterio|cumple|resultado|según|mayor|punto|se obtuvo)\b", re.I)
+
+
+def test_resumen_real_en_ingles_y_completo():
+    # Los resúmenes de H1 y H3 que muestra «About & Data»: en inglés y sin cortar a media frase.
+    d = por_id(pruebas_web.calcular(RAIZ))
+    for id_ in ("backtest_h1", "experimento_h3"):
+        resumen = d[id_]["resumen"] or ""
+        if d[id_]["estado"] == "not run":
+            continue
+        assert not ESPANOL.search(resumen), f"{id_}: resumen con palabras en español: {resumen!r}"
+        assert re.search(r"[.!?)]$", resumen.strip()), f"{id_}: resumen cortado: {resumen!r}"
 
 
 # --- Prueba 4: verificador ---------------------------------------------------------------
@@ -161,17 +195,35 @@ def test_et_con_contraste_y_puerta(tmp_path):
     escribir(tmp_path, "tests/test_fao56_ejemplos.py", "def test_x():\n    assert True\n")
     pruebas_md(tmp_path, [("contrato", "OK", "CONTRATO OK"), ("pytest", "OK", "3 passed")])
     et = por_id(pruebas_web.calcular(tmp_path))["contraste_et"]
-    assert partes(et) == {"contraste_et": "run", "fao56": "passed", "balance": "passed"}
-    assert et["estado"] == "run"
+    # WaPOR v3 es su propia parte: con la columna vacía dice «not run» (kit Q1, punto 5).
+    assert partes(et) == {"contraste_et": "run", "contraste_wapor": "not run", "fao56": "passed", "balance": "passed"}
+    assert et["estado"] == "partial"
+    nombres = {x["id"]: x["nombre"] for x in et["partes"]}
+    assert nombres["contraste_et"] == "Regional ET contrast (SSEBop VIIRS)"
     m = {x["id"]: x["valor"] for x in et["metricas"]}
     assert m["meses"] == 12 and m["et_modelo_mm"] == 780.0 and m["et_ssebop_mm"] == 702.0
     assert "et_wapor_mm" not in m, "una columna vacía no produce cifra"
+    # Sin fuente registrada no se supone el área; el periodo sale de la columna mes.
+    etiqueta = next(x["etiqueta"] for x in et["metricas"] if x["id"] == "et_modelo_mm")
+    assert etiqueta == "Modeled crop ET, area of the delivered file, Jan 2026–Dec 2026 total"
+
+
+def test_et_rotulo_con_el_rectangulo_de_la_fuente(tmp_path):
+    escribir(tmp_path, "data/processed/et_contraste.csv",
+             "mes,et_modelo_mm,et_ssebop_mm,et_wapor_mm\n2025-10,10,9,\n2026-09,20,18,\n")
+    escribir(tmp_path, "data/processed/fuentes.json", json.dumps({"fuentes": [
+        {"archivo": "et_contraste.csv", "fuente": "SSEBop, media del rectángulo original [-1.5, 2, -1, 2.5]; oct-sep"}]}))
+    et = por_id(pruebas_web.calcular(tmp_path))["contraste_et"]
+    etiquetas = {x["id"]: x["etiqueta"] for x in et["metricas"]}
+    assert etiquetas["et_ssebop_mm"] == "SSEBop VIIRS ET, original pilot rectangle [-1.5, 2, -1, 2.5], Oct 2025–Sep 2026 total"
+    assert "pilot-area total" not in json.dumps(etiquetas)
 
 
 def test_et_sin_contraste_dice_not_run_y_balance_fallido(tmp_path):
     pruebas_md(tmp_path, [("contrato", "FALLA", "el balance no cierra")])
     et = por_id(pruebas_web.calcular(tmp_path))["contraste_et"]
-    assert partes(et) == {"contraste_et": "not run", "fao56": "not run", "balance": "failed"}
+    assert partes(et) == {"contraste_et": "not run", "contraste_wapor": "not run", "fao56": "not run",
+                          "balance": "failed"}
     assert et["estado"] == "failed"
     nota = next(x["nota"] for x in et["partes"] if x["id"] == "contraste_et")
     assert "Regional ET contrast: not run" in nota  # rótulo del kit A8

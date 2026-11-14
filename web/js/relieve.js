@@ -6,14 +6,20 @@
 //       Lee relieve_rutas.geojson y relieve.json, agrega al mapa de MapLibre la capa
 //       «Terrain & runoff» (oculta por omisión) y dibuja en ctx.contenedor el interruptor,
 //       el botón «Simulate a storm», la leyenda y la tarjeta de la tormenta.
-//       Si falta cualquiera de los dos archivos, la capa no se agrega y el bloque dice
-//       «Terrain layer: not run» (kit A9, PRUEBA).
+//       Si falta cualquiera de los dos archivos (HTTP 404), la capa no se agrega y el bloque dice
+//       «Terrain layer: not run» (kit A9, PRUEBA). Cualquier otra falla (HTTP 500, red, JSON roto) NO es
+//       «not run»: el bloque dice «Terrain layer: could not be loaded (…)» y queda en la consola (console.error).
+//       Si MapLibre no puede agregar la capa: «Terrain layer: could not be drawn (…)».
 //   htmlRelieveParcela(p, opciones) -> string
 //       Línea para el renglón Soil de la ficha con properties.relieve (pendiente media, área que
 //       escurre hacia la parcela y fracción en depresión) y el rótulo de escala de relieve.json.
 //       Cadena vacía si la parcela no trae relieve.
 //   cargarRelieve(url) -> Promise<objeto de relieve.json | null>
-//       Lee relieve.json una sola vez por URL; htmlRelieveParcela usa lo último leído.
+//       Lee relieve.json una sola vez por URL; htmlRelieveParcela usa lo último leído. Una lectura fallida
+//       (que no sea 404) no se guarda: se reintenta la próxima vez.
+//   leerOpcional(url) -> Promise<{estado: "ok", datos} | {estado: "ausente" | "error", detalle}>
+//       Lectura de un JSON opcional que distingue «no existe» (404) de «no se pudo leer».
+//   prepararRutas(fc), puntoEn(camino, s): funciones puras (sin DOM) que prueba tests/relieve.test.js.
 //
 // Reglas de este archivo:
 // - Ninguna cifra escrita a mano: el umbral de las rutas, la lámina de la tormenta, su definición,
@@ -103,14 +109,30 @@ function nombrePorOmision(id) {
   return String(id ?? "").replace(/_/g, " ");
 }
 
-async function leerJSON(url) {
+/**
+ * Lee un JSON opcional. Distingue «no existe» de «no se pudo leer»:
+ *   {estado: "ok", datos} · {estado: "ausente", detalle} (HTTP 404: la pieza no se ha corrido)
+ *   {estado: "error", detalle} (otro código HTTP, red caída o JSON inválido: NO es «not run»)
+ */
+export async function leerOpcional(url) {
+  let resp;
   try {
-    const resp = await fetch(url);
-    if (!resp.ok) return null;
-    return await resp.json();
-  } catch {
-    return null; // sin red o archivo ilegible: se trata como «no corrido»
+    resp = await fetch(url);
+  } catch (err) {
+    return { estado: "error", detalle: `network error: ${err?.message ?? err}` };
   }
+  if (resp.status === 404) return { estado: "ausente", detalle: `HTTP ${resp.status}` };
+  if (!resp.ok) return { estado: "error", detalle: `HTTP ${resp.status}` };
+  try {
+    return { estado: "ok", datos: await resp.json() };
+  } catch (err) {
+    return { estado: "error", detalle: `invalid JSON: ${err?.message ?? err}` };
+  }
+}
+
+/** Nombre del archivo de una URL (para los avisos): «data/relieve.json» -> «relieve.json». */
+function nombreArchivo(url) {
+  return String(url ?? "").split("?")[0].split("/").pop();
 }
 
 // ---------------------------------------------------------------------------
@@ -120,19 +142,31 @@ function relieveValido(d) {
   return Boolean(d && d.zonas && typeof d.zonas === "object" && Object.keys(d.zonas).length > 0);
 }
 
-/** Lee relieve.json (una vez por URL). Devuelve el objeto, o null si falta o no trae zonas. */
-export function cargarRelieve(url = "data/relieve.json") {
+/**
+ * Lectura de relieve.json con su estado (una vez por URL; los errores no se guardan y se reintentan).
+ * {estado: "ok", datos} con zonas · {estado: "ausente"} (404 o sin zonas: «not run») · {estado: "error", detalle}.
+ */
+function leerRelieve(url) {
   if (!lecturas.has(url)) {
-    lecturas.set(
-      url,
-      leerJSON(url).then((d) => {
-        if (!relieveValido(d)) return null;
-        ultimoRelieve = d;
-        return d;
-      }),
-    );
+    const promesa = leerOpcional(url).then((r) => {
+      if (r.estado === "error") {
+        lecturas.delete(url); // que la próxima lectura lo vuelva a intentar
+        return r;
+      }
+      if (r.estado === "ok" && relieveValido(r.datos)) {
+        ultimoRelieve = r.datos;
+        return r;
+      }
+      return { estado: "ausente", detalle: r.estado === "ok" ? "no zones in the file" : r.detalle };
+    });
+    lecturas.set(url, promesa);
   }
   return lecturas.get(url);
+}
+
+/** Lee relieve.json (una vez por URL). Devuelve el objeto, o null si falta, no trae zonas o no se pudo leer. */
+export function cargarRelieve(url = "data/relieve.json") {
+  return leerRelieve(url).then((r) => (r.estado === "ok" ? r.datos : null));
 }
 
 /** [[id, bloque]] de la zona activa; con zona null, todas las zonas de relieve.json. */
@@ -161,7 +195,7 @@ function rotuloDeZona(relieve, zona) {
  * Funciona también con líneas largas ya simplificadas (LineString o MultiLineString de varios puntos).
  * Si un Feature trae properties.zona, la pieza y el camino la conservan (filtro por zona activa).
  */
-function prepararRutas(fc) {
+export function prepararRutas(fc) {
   const llave = (c) => `${c[0]},${c[1]}`;
   const segs = [];
   for (const f of fc?.features ?? []) {
@@ -261,7 +295,7 @@ function medirCamino(coords, zona) {
 }
 
 /** Punto a la distancia s del inicio del camino (búsqueda binaria en las longitudes acumuladas). */
-function puntoEn(camino, s) {
+export function puntoEn(camino, s) {
   const { coords, acum, largo } = camino;
   if (s <= 0) return coords[0];
   if (s >= largo) return coords[coords.length - 1];
@@ -485,7 +519,7 @@ function htmlLeyenda(relieve, bloques, nombreZona) {
     `</ul>` +
     `<p class="relieve-escala">Scale: ${escala}</p>` +
     `<p class="fuente">Thicker lines: more runoff paths have joined. Zone context, not a field measurement.` +
-    `${relieve?.fuente ? ` Source: ${esc(relieve.fuente)}` : ""}</p>`
+    `${relieve?.fuente ? ` Source: <span lang="es">${esc(relieve.fuente)}</span>` : ""}</p>`
   );
 }
 
@@ -498,10 +532,12 @@ function htmlTormenta(bloques, nombreZona) {
       return (
         `<div class="relieve-tormenta-zona">` +
         `<p class="relieve-tormenta-titulo">Reference storm${varias ? ` — ${esc(nombreZona(id))}` : ""}</p>` +
-        `<p class="relieve-tormenta-cifra">${mm == null ? "<strong>no data</strong>" : `<strong>${esc(fmt(mm, 3))} mm</strong>`}` +
-        `${t.definicion ? ` <span class="relieve-tormenta-def">${esc(t.definicion)}</span>` : ""}</p>` +
-        `${t.periodo ? `<p class="relieve-tormenta-periodo">Period: ${esc(t.periodo)}</p>` : ""}` +
-        `<p class="fuente">Source: ${t.fuente ? esc(t.fuente) : "not available"}</p>` +
+        `<p class="relieve-tormenta-cifra">${mm == null ? "<strong>no data</strong>" : `<strong>${esc(fmt(mm, 3))} mm</strong>`}</p>` +
+        // Definición, periodo y fuente: texto del archivo de datos, citado tal cual (viene en español, con
+        // lang="es" para el lector de pantalla); la web no lo traduce ni lo reescribe.
+        `${t.definicion ? `<p class="relieve-tormenta-def">Definition, as reported in the data: <q lang="es">${esc(t.definicion)}</q></p>` : ""}` +
+        `${t.periodo ? `<p class="relieve-tormenta-periodo">Period, as reported in the data: <q lang="es">${esc(t.periodo)}</q></p>` : ""}` +
+        `<p class="fuente">Source: ${t.fuente ? `<span lang="es">${esc(t.fuente)}</span>` : "not available"}</p>` +
         `</div>`
       );
     })
@@ -582,7 +618,9 @@ export async function agregarCapaRelieve(mapa, ctx = {}) {
     mapa.getContainer().append(elemento);
   }
 
-  const [relieve, rutasFc] = await Promise.all([cargarRelieve(relieveUrl), leerJSON(rutasUrl)]);
+  const [lecturaRelieve, lecturaRutas] = await Promise.all([leerRelieve(relieveUrl), leerOpcional(rutasUrl)]);
+  const relieve = lecturaRelieve.estado === "ok" ? lecturaRelieve.datos : null;
+  const rutasFc = lecturaRutas.estado === "ok" ? lecturaRutas.datos : null;
   const rutasOk = Array.isArray(rutasFc?.features) && rutasFc.features.length > 0;
   const estado = {
     disponible: false,
@@ -597,6 +635,12 @@ export async function agregarCapaRelieve(mapa, ctx = {}) {
     elemento.dataset.relieve = "no-corrido";
     elemento.innerHTML = `<p class="relieve-no-corrido" role="note">${esc(texto)}</p>`;
   };
+  // Falla de lectura o de dibujo: no es «not run». Se dice en la página y en la consola.
+  const conError = (texto, err) => {
+    console.error(`Raíz: ${texto}`, err ?? "");
+    elemento.dataset.relieve = "error";
+    elemento.innerHTML = `<p class="relieve-no-corrido relieve-error" role="alert">${esc(texto)}</p>`;
+  };
 
   const controlador = {
     disponible: false,
@@ -610,6 +654,15 @@ export async function agregarCapaRelieve(mapa, ctx = {}) {
     estado: () => ({ disponible: false, visible: false, animando: false, resaltado: false, zona: estado.zona, caminos: 0, gotas: 0 }),
   };
 
+  const errores = [
+    [relieveUrl, lecturaRelieve],
+    [rutasUrl, lecturaRutas],
+  ].filter(([, r]) => r.estado === "error");
+  if (errores.length) {
+    const detalle = errores.map(([url, r]) => `${nombreArchivo(url)}: ${r.detalle}`).join("; ");
+    conError(`Terrain layer: could not be loaded (${detalle})`);
+    return controlador;
+  }
   if (!relieve || !rutasOk) {
     noCorrido("Terrain layer: not run");
     return controlador;
@@ -628,8 +681,7 @@ export async function agregarCapaRelieve(mapa, ctx = {}) {
   try {
     await conEstilo(mapa, () => agregarAlMapa(mapa, estado.rutas.piezas, colores, antesDe));
   } catch (err) {
-    console.warn("Raíz: terrain layer not added", err);
-    noCorrido("Terrain layer: needs the map, which is not available here.");
+    conError(`Terrain layer: could not be drawn (${err?.message ?? err})`, err);
     return controlador;
   }
 

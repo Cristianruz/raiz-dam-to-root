@@ -7,7 +7,9 @@
    la web, con fuente, script y la marca de datos simulados; también las cifras por zona
    (cubo.zonas.<id>, con el bbox de params.zona_piloto.zonas), las localidades del equipo
    (params.zona_piloto.localidades_equipo) y las de web/data/relieve.json (tormenta con su
-   fuente y periodo; umbral de las rutas con su etiqueta).
+   fuente y periodo; umbral de las rutas con su etiqueta); TODAS las hojas numéricas de
+   properties en parcelas.geojson (las de relieve con la fuente de relieve_parcelas.csv) y las
+   cifras de web/data/pruebas.json que muestra «About & Data».
 """
 import json
 import shutil
@@ -256,6 +258,67 @@ def test_manifest_cubre_relieve(man):
         if any(ch.isdigit() for ch in z.get("rotulo") or ""):
             e = entrada(man, "relieve.json", f"zonas.{zid}.rotulo")
             assert e and z["rotulo"] in e.get("textos", []), "rótulo de escala sin entrada en el manifest"
+
+
+def patrones_de_properties(geo):
+    """Patrones (features[*].properties.<ruta>) de todas las hojas numéricas de properties."""
+    salida = set()
+    for i, f in enumerate(geo.get("features") or []):
+        for r, _ in hojas(f.get("properties") or {}, ""):
+            salida.add(patron(f"features[{i}].properties.{r}"))
+    return salida
+
+
+def test_manifest_cubre_cada_cifra_de_parcelas(man):
+    # Regla 11: ninguna cifra de parcelas.geojson sin entrada (antes, una lista blanca las saltaba en silencio).
+    geo = leer("parcelas.geojson")
+    claves = {c["clave"] for c in man["cifras"].values() if c["archivo"] == "web/data/parcelas.geojson"}
+    faltan = sorted(patrones_de_properties(geo) - claves)
+    assert not faltan, f"cifras de parcelas.geojson sin entrada en el manifest: {faltan[:10]}"
+
+
+def test_manifest_relieve_de_parcela_con_la_fuente_de_su_entrega(man):
+    geo = leer("parcelas.geojson")
+    hay = {r for r in patrones_de_properties(geo) if ".properties.relieve." in r}
+    if not hay:
+        pytest.skip("parcelas.geojson sin properties.relieve (A9 no se ha ejecutado)")
+    entrega = manifest.entrega_de(man["fuentes_de_origen"], manifest.ENTREGA_RELIEVE_PARCELAS)
+    for r in ("relieve.pendiente_media_pct", "relieve.aportacion_externa_ha", "relieve.frac_depresion"):
+        e = man["cifras"].get(f"parcelas.geojson:features[*].properties.{r}")
+        assert e, f"properties.{r} sin entrada en el manifest"
+        if entrega and not e["mock"]:
+            assert contiene(e["fuente"], entrega["fuente"]), f"{r}: fuente {e['fuente']}"
+            assert contiene(e["fecha"], entrega.get("fecha_consulta") or entrega.get("fecha"))
+            assert entrega["script"] in str(e["script"])
+
+
+def test_manifest_avisa_cifra_de_parcela_sin_regla(tmp_path):
+    raiz, _, _ = raiz_con_dos_zonas(tmp_path)
+    ruta = raiz / "web/data/parcelas.geojson"
+    geo = json.loads(ruta.read_text(encoding="utf-8"))
+    props = geo["features"][0]["properties"]
+    props["cifra_nueva"] = props["area_ha"]  # una propiedad numérica que motor/manifest.py no conoce
+    ruta.write_text(json.dumps(geo, ensure_ascii=False), encoding="utf-8")
+    man2 = manifest.generar(raiz=raiz, escribir=False)
+    assert "parcelas.geojson:features[*].properties.cifra_nueva" in man2["cifras"], "no se registró"
+    assert any("properties.cifra_nueva: cifra sin regla propia" in a for a in man2["avisos"]), man2["avisos"]
+
+
+def test_manifest_cubre_pruebas_json(man):
+    ruta = RAIZ / "web/data/pruebas.json"
+    if not ruta.exists():
+        pytest.skip("sin web/data/pruebas.json (paso 5c de construir.py)")
+    pruebas = json.loads(ruta.read_text(encoding="utf-8"))
+    for i, p in enumerate(pruebas["pruebas"]):
+        for j, m in enumerate(p.get("metricas") or []):
+            for k in ("valor", "total", "fraccion"):
+                if isinstance(m.get(k), (int, float)):
+                    e = entrada(man, "pruebas.json", f"pruebas[{i}].metricas[{j}].{k}")
+                    assert e, f"pruebas.json: métrica {m['id']}.{k} sin entrada en el manifest"
+                    assert contiene(e["fuente"], m.get("fuente")), f"{m['id']}: fuente {e['fuente']}"
+        if any(ch.isdigit() for ch in p.get("criterio") or ""):
+            e = entrada(man, "pruebas.json", f"pruebas[{i}].criterio")
+            assert e and p["criterio"] in e.get("textos", []), f"criterio de {p['id']} sin entrada"
 
 
 # --- 3b) manifest con dos zonas (copia temporal de los datos reales) ------------------

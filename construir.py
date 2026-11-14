@@ -10,8 +10,11 @@
 
 Pasos (en este orden; si uno falla, se reporta y se sigue con los demás):
   (a) motor/ensamblar.py: valida las entregas del buzón (variable RAIZ_BUZON) y las
-      copia a data/processed. Si el archivo aún no existe, queda «pendiente».
-  (b) motor/b4_cubo.py con datos reales o motor/simulados.py mientras no los haya.
+      copia a data/processed. Si el archivo aún no existe, queda «pendiente». Sin RAIZ_BUZON
+      no se valida ninguna entrega: el paso queda OMITIDO (se usa la caché previa), no «OK».
+  (b) motor/b4_cubo.py con datos reales o motor/simulados.py mientras no los haya. Si faltan
+      entradas de B4 pero web/data ya tiene un cubo REAL (meta.mock = false), el paso FALLA y NO
+      reemplaza la web con simulados (un archivo renombrado o rechazado no debe pasar en silencio).
   (b2) motor/relieve_web.py: relieve.json y relieve_rutas.geojson para la web.
   (c) motor/manifest.py: genera web/data/manifest.json.
   (d) python validar_contrato.py: debe imprimir «CONTRATO OK».
@@ -21,6 +24,10 @@ Pasos (en este orden; si uno falla, se reporta y se sigue con los demás):
   (5c) docs/pruebas.md (la tabla de esta corrida) y, a partir de ella, motor/pruebas_web.py:
        web/data/pruebas.json, las cinco pruebas a la vista de «About & Data» (S9 §6; kit C5).
        Va después de las pruebas para que la «puerta automática» de la web sea esta corrida.
+       Con --rapido no se corre (pytest y node no corrieron): pruebas.json queda de la última corrida
+       completa y el reporte lo dice.
+  (c2) motor/manifest.py otra vez, después de 5c, para que manifest.json registre también las cifras
+       de pruebas.json de esta corrida (regla 11).
   (g) reporte. Sale con 0 solo si todo pasa; lo pendiente (piezas que aún no existen)
       no cuenta como falla.
 
@@ -176,7 +183,12 @@ def paso_ensamblar():
     faltan = [k for k in LLAVES_REPORTE if k not in reporte]
     if faltan:
         return Paso("ensamblar", FALLA, f"al reporte le faltan las llaves {faltan}"), reporte
-    return Paso("ensamblar", OK, "buzón validado"), reporte
+    if not buzon:
+        # Sin buzón no se validó ninguna entrega: decir «OK — buzón validado» sería falso.
+        return Paso("ensamblar", OMITIDO, "sin RAIZ_BUZON: no se validaron entregas en esta corrida "
+                                          "(se usa la caché previa de data/processed)"), reporte
+    return Paso("ensamblar", OK, f"buzón validado: entraron {contar(reporte.get('entraron'))}, "
+                                 f"rechazados {contar(reporte.get('rechazados'))}"), reporte
 
 
 def contar(x):
@@ -206,7 +218,16 @@ def paso_simulados(reporte):
         print(f"  DATOS REALES: {rep['parcelas']} parcelas ({rep['clasificadas']} clasificadas), {rep['opciones']} opciones")
         return Paso("simulados", OK, f"cubo REAL: {rep['parcelas']} parcelas, {rep['clasificadas']} clasificadas, "
                                      f"{rep['opciones']} opciones")
-    print(f"  Faltan entradas de B4 en data/processed ({', '.join(faltan)}): se usan los datos simulados.")
+    lista = ", ".join(faltan)
+    print(f"  Faltan entradas de B4 en data/processed ({lista}).")
+    # Si la web ya publica un cubo REAL, faltar una entrada es una regresión (archivo renombrado o
+    # rechazado por el ensamblador): no se reemplaza en silencio la web real con simulados.
+    if cubo_publicado_es_real():
+        print("  web/data/cubo.json es REAL (meta.mock = false): NO se reemplaza con datos simulados.")
+        return Paso("simulados", FALLA, f"faltan entradas de B4 ({lista}) y web/data tiene un cubo REAL: no se "
+                                        "reemplazó con simulados (restaure las entradas; para volver a los "
+                                        "simulados a propósito, borre web/data/cubo.json)")
+    print("  Se usan los datos SIMULADOS.")
     try:
         geo, cubo, expl = importar("motor.simulados").generar()
     except Exception as ex:  # noqa: BLE001
@@ -214,7 +235,19 @@ def paso_simulados(reporte):
         return Paso("simulados", FALLA, f"{type(ex).__name__}: {ex}")
     n_op = sum(len(p.get("opciones", [])) for p in cubo["parcelas"].values())
     print(f"  {len(geo['features'])} parcelas, {n_op} opciones, {len(expl['explicaciones'])} explicaciones")
-    return Paso("simulados", OK, f"regenerados: {len(geo['features'])} parcelas, {n_op} opciones")
+    return Paso("simulados", OK, f"SIMULADOS (faltan: {lista}): {len(geo['features'])} parcelas, {n_op} opciones")
+
+
+def cubo_publicado_es_real():
+    """True si web/data/cubo.json existe y dice meta.mock = false (un cubo real ya publicado)."""
+    ruta = RAIZ / "web/data/cubo.json"
+    if not ruta.exists():
+        return False
+    try:
+        meta = leer_json(ruta).get("meta") or {}
+    except Exception:  # noqa: BLE001 - un cubo ilegible no es un cubo real que proteger
+        return False
+    return meta.get("mock") is False
 
 
 # --- (b2) relieve para la web ------------------------------------------------
@@ -225,16 +258,24 @@ def paso_relieve():
     except Exception as ex:  # noqa: BLE001
         print(f"  relieve_web.construir() falló: {type(ex).__name__}: {ex}")
         return Paso("relieve", FALLA, f"{type(ex).__name__}: {ex}")
+    for a in rep.get("avisos") or []:
+        print(f"  aviso: {a}")
     if not rep.get("ejecutado"):
         print(f"  {rep.get('motivo')}: la web dirá «terrain layer: not run».")
         return Paso("relieve", OMITIDO, rep.get("motivo", ""))
-    print(f"  zonas con relieve: {', '.join(rep['zonas'])}; rutas {rep['rutas_bytes']} bytes")
-    return Paso("relieve", OK, f"zonas: {', '.join(rep['zonas'])}")
+    zonas = rep.get("zonas") or []
+    if not zonas:
+        # relieve.json sin zonas: la web dice «Terrain layer: not run»; no se reporta OK.
+        print("  relieve.json quedó sin zonas (ningún relieve_meta de una zona de params): la web dirá «not run».")
+        return Paso("relieve", PENDIENTE, "relieve.json sin zonas: ningún relieve_meta*.json de una zona de "
+                                          "params.zona_piloto.zonas; la web dice «Terrain layer: not run»")
+    print(f"  zonas con relieve: {', '.join(zonas)}; rutas {rep.get('rutas_bytes')} bytes")
+    return Paso("relieve", OK, f"zonas: {', '.join(zonas)}")
 
 
 # --- (c) manifest --------------------------------------------------------------
-def paso_manifest():
-    titulo("(c) Manifest (motor/manifest.py)")
+def paso_manifest(rotulo="(c) Manifest (motor/manifest.py)"):
+    titulo(rotulo)
     try:
         man = importar("motor.manifest").generar()
     except Exception as ex:  # noqa: BLE001
@@ -366,19 +407,22 @@ def paso_node():
 
 # --- (g) reporte -------------------------------------------------------------------------
 def estado_simulado(reporte):
-    """Qué sigue simulado: lo que no está en la caché validada (data/processed) según el ensamblador,
-    o, si no hay reporte, las marcas de cubo.meta."""
+    """Qué sigue simulado. Manda lo que dice el cubo publicado (cubo.meta.mock y mock_campos): es lo que
+    ve la web. Después, las entregas que el ensamblador aún da por simuladas y no están en la caché."""
+    try:
+        meta = leer_json(RAIZ / "web/data/cubo.json").get("meta", {})
+        if meta.get("mock"):
+            cubo = "cubo SIMULADO (cubo.meta.mock = true; campos: " + ", ".join(meta.get("mock_campos") or ["todos"]) + ")"
+        else:
+            cubo = "cubo real (cubo.meta.mock = false)"
+    except Exception as ex:  # noqa: BLE001
+        cubo = f"no se pudo leer cubo.json ({ex})"
     if reporte and reporte.get("sigue_simulado") is not None:
         cache = {f.name for f in (RAIZ / "data/processed").iterdir() if f.is_file()} if (RAIZ / "data/processed").exists() else set()
         s = [x for x in (reporte["sigue_simulado"] or []) if x not in cache]
-        return (", ".join(map(str, s)) or "nada") + f" (caché data/processed: {len(cache)} archivos)"
-    try:
-        meta = leer_json(RAIZ / "web/data/cubo.json").get("meta", {})
-    except Exception as ex:  # noqa: BLE001
-        return f"no se pudo leer cubo.json ({ex})"
-    if not meta.get("mock"):
-        return "nada (cubo.meta.mock = false)"
-    return "cubo.meta.mock = true; campos: " + ", ".join(meta.get("mock_campos") or ["todos"])
+        return f"{cubo}; entregas aún sin llegar: " + (", ".join(map(str, s)) or "ninguna") + \
+            f" (caché data/processed: {len(cache)} archivos)"
+    return cubo
 
 
 def main(argv=None):
@@ -407,10 +451,20 @@ def main(argv=None):
 
     pasos = (origen, ens, sim, rel, man, con, ver, py, js)
     # docs/pruebas.md con la tabla de esta corrida y, a partir de ella, web/data/pruebas.json (5c).
-    if not args.rapido:
+    # Con --rapido pytest y node no corrieron: no se reescribe ni la tabla ni pruebas.json (su «puerta»
+    # diría passed con la corrida anterior); el reporte lo dice.
+    if args.rapido:
+        titulo("(5c) Pruebas a la vista para la web (motor/pruebas_web.py)")
+        print("  --rapido: no se regenera web/data/pruebas.json; queda el de la última corrida completa.")
+        web = Paso("pruebas_web", OMITIDO, "--rapido: web/data/pruebas.json no se regeneró (puerta de la "
+                                           "última corrida completa, no de esta)")
+    else:
         escribir_pruebas_md(pasos, time.time() - inicio)
-    web = paso_pruebas_web()
-    todos = pasos + (web,)
+        web = paso_pruebas_web()
+        # (c2) El manifest otra vez, ahora con las cifras de pruebas.json de esta corrida (regla 11).
+        if web.estado == OK and man.estado == OK:
+            man = paso_manifest("(c2) Manifest con las cifras de pruebas.json (motor/manifest.py)")
+    todos = (origen, ens, sim, rel, man, con, ver, py, js, web)
     fallas = [p.nombre for p in todos if p.estado == FALLA]
     pendientes = [p.nombre for p in todos if p.estado == PENDIENTE]
     if reporte:

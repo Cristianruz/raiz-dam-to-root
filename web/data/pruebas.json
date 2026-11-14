@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-14T20:53:00+00:00",
+ "generado": "2026-11-14T20:58:16+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -175,9 +175,16 @@
    "partes": [
     {
      "id": "contraste_et",
-     "nombre": "Regional ET contrast (SSEBop VIIRS, WaPOR v3)",
+     "nombre": "Regional ET contrast (SSEBop VIIRS)",
      "estado": "run",
      "nota": "Regional comparison; not field-level validation. Satellite ET includes unclassified fields, roads and non-crop vegetation; modeled ET is potential crop ET.",
+     "fuente": "data/processed/et_contraste.csv"
+    },
+    {
+     "id": "contraste_wapor",
+     "nombre": "Regional ET contrast (WaPOR v3)",
+     "estado": "not run",
+     "nota": "WaPOR v3: not run (column et_wapor_mm is empty in the delivered file).",
      "fuente": "data/processed/et_contraste.csv"
     },
     {
@@ -203,14 +210,14 @@
     },
     {
      "id": "et_modelo_mm",
-     "etiqueta": "Modeled crop ET, pilot-area total",
+     "etiqueta": "Modeled crop ET, original pilot rectangle [-105.42, 28.08, -105.32, 28.16], Oct 2025–Sep 2026 total",
      "valor": 1139.3,
      "unidad": "mm",
      "fuente": "data/processed/et_contraste.csv"
     },
     {
      "id": "et_ssebop_mm",
-     "etiqueta": "SSEBop VIIRS ET, pilot-area total",
+     "etiqueta": "SSEBop VIIRS ET, original pilot rectangle [-105.42, 28.08, -105.32, 28.16], Oct 2025–Sep 2026 total",
      "valor": 746.3,
      "unidad": "mm",
      "fuente": "data/processed/et_contraste.csv"
@@ -226,7 +233,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-14T20:53:00+00:00",
+  "corrida": "2026-11-14T20:58:16+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -238,9 +245,9 @@
    {
     "id": "ensamblar",
     "nombre": "Team deliveries validated against the data contract",
-    "estado": "passed",
-    "estado_original": "OK",
-    "detalle": "buzón validado"
+    "estado": "skipped",
+    "estado_original": "OMITIDO",
+    "detalle": "sin RAIZ_BUZON: no se validaron entregas en esta corrida (se usa la caché previa de data/processed)"
    },
    {
     "id": "simulados",
@@ -282,14 +289,14 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "342 passed in 8.35s"
+    "detalle": "373 passed in 9.13s"
    },
    {
     "id": "node",
     "nombre": "JavaScript tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "23 pass, 0 fail, 0 skipped"
+    "detalle": "30 pass, 0 fail, 0 skipped"
    }
   ],
   "nota": "Last full run recorded by python construir.py. The browser smoke test (tests/e2e/web_smoke.mjs) runs separately, before each release."

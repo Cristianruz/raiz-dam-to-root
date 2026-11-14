@@ -312,8 +312,22 @@ def test_detector_lee_el_html_dentro_de_las_cadenas_js():
 
 # --- Pruebas sobre la web real -------------------------------------------------------------
 def archivos_js():
-    nombres = {p.name for p in WEB.glob("*.js")} | {"app.js"}
-    return sorted(nombres)
+    """Todos los módulos de la web: web/*.js y web/js/**/*.js (relieve, gota, mensaje, acerca…), como rutas
+    relativas a web/ («app.js», «js/relieve.js»). web/vendor/ no cuenta: son bibliotecas de terceros."""
+    rutas = {p.relative_to(WEB).as_posix() for p in WEB.rglob("*.js") if "vendor" not in p.relative_to(WEB).parts}
+    return sorted(rutas | {"app.js"})
+
+
+# CLAUDE.md regla 10: nunca «first» ni «only»; no prometer ahorros (se dice «reduces dam withdrawals»).
+PROHIBIDAS = re.compile(r"\b(first|only|sav(e|es|ed|ing|ings))\b", re.I)
+
+
+def test_archivos_js_incluye_los_modulos_de_web_js():
+    nombres = archivos_js()
+    assert "app.js" in nombres
+    for modulo in (WEB / "js").glob("*.js"):
+        assert f"js/{modulo.name}" in nombres, f"web/js/{modulo.name} no lo revisa ninguna prueba"
+    assert not [n for n in nombres if n.startswith("vendor/")]
 
 
 def test_index_html_sin_cifras():
@@ -331,3 +345,22 @@ def test_cadenas_js_sin_cifras(nombre):
         pytest.skip(f"pendiente: web/{nombre} aún no existe (lo escribe la pieza web)")
     malas = cifras_sin_fuente(fragmentos_js(ruta.read_text(encoding="utf-8")), nombre)
     assert not malas, mensaje(nombre, malas)
+
+
+@pytest.mark.parametrize("nombre", archivos_js())
+def test_cadenas_js_sin_palabras_prohibidas(nombre):
+    ruta = WEB / nombre
+    if not ruta.exists():
+        pytest.skip(f"pendiente: web/{nombre} aún no existe")
+    malas = [(n, t) for n, t in fragmentos_js(ruta.read_text(encoding="utf-8")) if PROHIBIDAS.search(t)]
+    assert not malas, (f"web/{nombre}: textos con «first», «only» o «save…» (CLAUDE.md regla 10):\n"
+                       + "\n".join(f"{nombre}:{n}: {t[:120]!r}" for n, t in malas[:20]))
+
+
+@pytest.mark.parametrize("nombre", archivos_js())
+def test_modulos_js_con_encabezado(nombre):
+    ruta = WEB / nombre
+    if not ruta.exists():
+        pytest.skip(f"pendiente: web/{nombre} aún no existe")
+    assert ruta.read_text(encoding="utf-8").startswith("// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"), \
+        f"web/{nombre} sin el encabezado de la regla 4"

@@ -433,30 +433,94 @@ def prueba_verificador(raiz, puerta):
 # ---------------------------------------------------------------------------
 # Prueba 5: contraste regional de ET y pruebas automáticas
 # ---------------------------------------------------------------------------
+# Productos del contraste regional (kit A8): (id de la parte, nombre en la web, columna de et_contraste.csv).
+# Cada uno es una parte: si su columna viene vacía, esa parte dice «not run» (kit Q1, punto 5).
+PRODUCTOS_ET = (
+    ("contraste_et", "Regional ET contrast (SSEBop VIIRS)", "et_ssebop_mm"),
+    ("contraste_wapor", "Regional ET contrast (WaPOR v3)", "et_wapor_mm"),
+)
+MESES_EN = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+
+def fuentes_registradas(raiz):
+    """{archivo: fuente} de data/processed/fuentes.json (lo escribe motor/ensamblar.py); {} si no existe."""
+    ruta = Path(raiz) / "data/processed/fuentes.json"
+    if not ruta.exists():
+        return {}
+    try:
+        crudo = leer_json(ruta)
+    except ValueError:
+        return {}
+    filas = crudo.get("fuentes", []) if isinstance(crudo, dict) else crudo
+    return {str(f.get("archivo")): str(f.get("fuente") or "") for f in filas or [] if isinstance(f, dict)}
+
+
+def ambito_et(fuente, zona):
+    """Área que cubre el contraste, tal como la dice la fuente registrada (no se supone):
+    «rectángulo original [o, s, e, n]» -> «original pilot rectangle [o, s, e, n]». Si la fuente no lo dice,
+    la zona del sufijo del archivo; si tampoco, «area of the delivered file»."""
+    m = re.search(r"rect[áa]ngulo original\s*(\[[^\]]+\])", fuente or "", re.I)
+    if m:
+        return f"original pilot rectangle {m.group(1)}"
+    if zona:
+        return f"pilot area {zona}"
+    return "area of the delivered file"
+
+
+def periodo_et(filas):
+    """«Oct 2025–Sep 2026» con el primer y el último mes de la columna mes (AAAA-MM); None si no se lee."""
+    meses = []
+    for f in filas:
+        m = re.fullmatch(r"\s*(\d{4})-(\d{1,2})(?:-\d{1,2})?\s*", str(f.get("mes") or ""))
+        if m and 1 <= int(m.group(2)) <= 12:
+            meses.append((int(m.group(1)), int(m.group(2))))
+    if not meses:
+        return None
+    (a0, m0), (a1, m1) = min(meses), max(meses)
+    ini, fin = f"{MESES_EN[m0 - 1]} {a0}", f"{MESES_EN[m1 - 1]} {a1}"
+    return ini if ini == fin else f"{ini}–{fin}"
+
+
 def prueba_et(raiz, puerta):
     partes, metricas, fuentes = [], [], []
     archivos = sorted((Path(raiz) / "data/processed").glob("et_contraste*.csv"))
     if not archivos:
-        partes.append(parte("contraste_et", "Regional ET contrast (SSEBop VIIRS, WaPOR v3)", NOT_RUN,
-                            "Regional ET contrast: not run (no et_contraste.csv in data/processed)."))
+        for id_, nombre, _ in PRODUCTOS_ET:
+            partes.append(parte(id_, nombre, NOT_RUN,
+                                "Regional ET contrast: not run (no et_contraste.csv in data/processed)."))
     else:
+        registradas = fuentes_registradas(raiz)
+        con_datos = {id_: [] for id_, _, _ in PRODUCTOS_ET}  # archivos donde cada producto trae valores
         for ruta in archivos:
             rel = relativa(ruta, raiz)
             fuentes.append(rel)
             zona = ruta.stem[len("et_contraste"):].lstrip("_") or None
             filas = filas_csv(ruta) or []
+            ambito = ambito_et(registradas.get(ruta.name), zona)
+            periodo = periodo_et(filas)
+            sufijo = f", {ambito}" + (f", {periodo}" if periodo else "") + " total"
             metricas.append(metrica("meses", "Months compared", len(filas), fuente=rel, zona=zona))
-            for col, etiqueta in (("et_modelo_mm", "Modeled crop ET, pilot-area total"),
-                                  ("et_ssebop_mm", "SSEBop VIIRS ET, pilot-area total"),
-                                  ("et_wapor_mm", "WaPOR v3 ET, pilot-area total")):
+            for col, etiqueta in (("et_modelo_mm", "Modeled crop ET"), ("et_ssebop_mm", "SSEBop VIIRS ET"),
+                                  ("et_wapor_mm", "WaPOR v3 ET")):
                 valores = [numero(f.get(col)) for f in filas]
                 valores = [v for v in valores if v is not None]
                 if valores:
-                    metricas.append(metrica(col, etiqueta, round(sum(valores), 1), unidad="mm", fuente=rel, zona=zona))
-        partes.append(parte("contraste_et", "Regional ET contrast (SSEBop VIIRS, WaPOR v3)", RUN,
-                            "Regional comparison; not field-level validation. Satellite ET includes unclassified "
-                            "fields, roads and non-crop vegetation; modeled ET is potential crop ET.",
-                            " · ".join(fuentes)))
+                    metricas.append(metrica(col, etiqueta + sufijo, round(sum(valores), 1), unidad="mm", fuente=rel,
+                                            zona=zona))
+                    for id_, _, columna in PRODUCTOS_ET:
+                        if columna == col:
+                            con_datos[id_].append(rel)
+        for id_, nombre, columna in PRODUCTOS_ET:
+            if con_datos[id_]:
+                partes.append(parte(id_, nombre, RUN,
+                                    "Regional comparison; not field-level validation. Satellite ET includes "
+                                    "unclassified fields, roads and non-crop vegetation; modeled ET is potential "
+                                    "crop ET.", " · ".join(con_datos[id_])))
+            else:
+                producto = re.search(r"\(([^)]+)\)", nombre).group(1)  # «WaPOR v3»
+                partes.append(parte(id_, nombre, NOT_RUN,
+                                    f"{producto}: not run (column {columna} is empty in the delivered file).",
+                                    " · ".join(fuentes)))
 
     # FAO-56 contra los ejemplos resueltos del manual: una prueba de pytest dedicada.
     pruebas_fao = sorted((Path(raiz) / "tests").glob("test_fao*56*.py"))
