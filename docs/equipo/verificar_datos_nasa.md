@@ -219,6 +219,8 @@ Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
 
 ## 4. GPM IMERG V07 (no se usó en lo entregado)
 
+> **Nota del 14-nov, 15:45:** esta sección describe el estado de la mañana. Después se entregó `imerg_diaria[_zona].csv` (GPM IMERG V07) y la tormenta de `relieve_meta*.json` ya sale de IMERG, con NASA POWER como contraste. El estado actual de cada fuente está en `README.md` → «NASA Data» y en `DATA_LICENSE.md`.
+
 La tormenta de referencia de `relieve_meta.json` salió de **NASA POWER** (`eto_diaria.csv`), que el kit A9, paso 4, permite. **GPM IMERG no está en ningún archivo entregado:** no se cita en la página, ni en «NASA Data», ni en el video. Si Cristian decide usarlo después, la extracción la hace la sesión de datos y esta sección se completa entonces con sus controles (banda, unidades y paso de tiempo leídos del catálogo, no de memoria).
 
 ---
