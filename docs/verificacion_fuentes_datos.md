@@ -10,4 +10,4 @@ Completa los «por verificar» de `docs/equipo/verificar_datos_nasa.md` con lo q
 | Confianza de FTW | `prue_v1_confidence_global.tif` (COG, compresión ZSTD) | Float32, 1/240° (~460 m), EPSG:4326, nodata −1. En la zona: 0.11–0.58. El llms.txt de FTW recomienda filtrar ≥ 0.4 (≥ 0.5 conservador); el contrato usa 0–100 y abstención < 50 |
 | Cita de FTW | llms.txt de source.coop/ftw/global-data | «Field boundaries: Fields of The World global predictions (CC-BY-4.0), source.coop/ftw/global-data» |
 | Celda de POWER | Cálculo de la malla MERRA-2 (0.5° × 0.625°) y CERES (1°) | El punto 28.19 N −105.45 O y las 4 esquinas y el centro del bbox caen en la misma celda |
-| SSEBop VIIRS v6 mensual (A8) | Catálogo de Earth Engine `projects/usgs-ssebop/viirs_et_v6_monthly` | Banda única `et`; 77 imágenes; la última es de 2026-09. Unidades y factor de escala: **por verificar** antes de usar la serie |
+| SSEBop VIIRS v6 mensual (A8) | Catálogo de Earth Engine `projects/usgs-ssebop/viirs_et_v6_monthly` | Banda única `et`; 77 imágenes; la última es de 2026-09. Unidades: **mm**, factor de escala **1.0**, malla 1 km (ficha de gee-community-catalog.org/projects/usgs_viirs, 14-nov) |

@@ -19,6 +19,9 @@ diferencia está de marzo a junio (ETc 76–197 mm/mes frente a 49–93 mm/mes),
 máximo; en invierno las dos series coinciden (21–37 mm/mes). Es coherente con riego deficitario o con superficie no
 regada dentro del rectángulo, pero este contraste no permite separar las dos causas.
 
-- Unidades de SSEBop: los valores son coherentes con mm por mes (máximo 119 mm en jul-2025); el factor de escala se
-  verificó solo por rango, **por confirmar en la ficha del catálogo** antes de citarlo.
+- Unidades de SSEBop, confirmadas en la ficha del catálogo comunitario de Earth Engine
+  (https://gee-community-catalog.org/projects/usgs_viirs/, consultada el 14-nov-2026): banda `et` = ETa en
+  milímetros, factor de escala 1.0, malla de 1 km (1/96°). Cita: Senay, G.B., Kagone S., Velpuri N.M., 2020,
+  Operational Global Actual Evapotranspiration using the SSEBop model. El catálogo comunitario lo mantiene la
+  comunidad, no USGS; la serie la publica USGS (`projects/usgs-ssebop`).
 - WaPOR v3: **not run** (sin acceso directo en Earth Engine sin una descarga pesada).
