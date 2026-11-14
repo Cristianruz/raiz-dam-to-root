@@ -24,6 +24,28 @@ dato en la ventana de verano en 2019–2026.
 - **Sesgo de supervivencia:** 21 parcelas con patrón de verano y sin cultivo de invierno en todos los años 2019–2024 no salen como nogal en 2026; su proporción en 2025 = 95.2%.
 - **2026:** las anuales bajan a 66.9 % (fuera del criterio; año con dotación parcial).
 
+## Análisis adicional en las zonas nuevas (post hoc; no sustituye al resultado registrado)
+
+**Desviación declarada:** el 14-nov a las 12:50 el equipo cambió la zona piloto a dos rectángulos, **después** de
+conocer el resultado de arriba. Según la política de desviaciones del preregistro, el análisis registrado (rectángulo
+original, 338 parcelas) queda como resultado principal y el de las zonas nuevas se reporta al lado, con el mismo
+criterio y los mismos umbrales. Script y criterio idénticos; cambian solo las parcelas.
+
+| Zona | Parcelas anuales | Mediana 2019–2024 | 2025 | (a) diferencia | Nogal (n) | (b) diferencia | H3 | Sensibilidad 0.35 / 0.45 (a) |
+|---|---|---|---|---|---|---|---|---|
+| Delicias–Saucillo ampliada | 581 | 79.5% | 63.3% | -16.2 pp | 79 | 0.0 pp | not supported | -12.7 / -21.0 pp |
+| Lázaro Cárdenas | 209 | 82.3% | 82.8% | 0.5 pp | 26 | 0.0 pp | not supported | 4.1 / -4.1 pp |
+
+Serie de las parcelas anuales (proporción con verano activo, umbral 0.40):
+
+| Zona | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|---|---|---|---|
+| Delicias–Saucillo ampliada | 82% | 83% | 77% | 91% | 77% | 76% | 63% | 59% |
+| Lázaro Cárdenas | 84% | 84% | 78% | 87% | 81% | 67% | 83% | 55% |
+
+Lectura: en la zona ampliada de Delicias–Saucillo sí hay una baja en 2025 (−16.2 puntos), pero no alcanza los 25
+puntos del criterio; en Lázaro Cárdenas no hay baja. En las tres áreas el nogal se mantuvo. H3 sigue «not supported».
+
 ## Lectura
 En la zona piloto, el año sin dotación de la presa no redujo la proporción de parcelas anuales con verdor de verano.
 Es coherente con lo que reportó la prensa —12,000 a 15,000 ha sembradas con pozos en 2025— y con una sustitución
