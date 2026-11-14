@@ -11,7 +11,9 @@ Entradas (en --dir):
 Salidas (columnas del kit 40, tabla 0.4-B, más la memoria):
     hls_mensual_parcelas.csv   id, mes, banda, mediana, p25, p75, n_validos
     suelo_desnudo.csv          id, dias_suelo_desnudo_feb_abr, dias_desnudo_viento_alto, ndvi_ultimo_mes, meses_validos
-    memoria_parcelas.csv       id, anio_agricola, estado, meses_verdes, max_verano, max_invierno, meses_validos
+    memoria_parcelas.csv       id, anio_agricola, estado, meses_verdes, max_verano, max_invierno,
+                               dias_suelo_desnudo_feb_abr, meses_validos
+    memoria_resumen.csv        id, dias_suelo_desnudo_mediana (mediana entre años con dato), anios_con_dato, estado_2025
     fuentes_A3.csv             archivo | fuente | fecha | script | sha256
 Índices guardados por Earth Engine × 10,000 en Int16; −32768 = sin dato.
 Reglas de la memoria (S9 §5 y revisión del 14-nov):
@@ -72,8 +74,8 @@ def interp_diaria(meses_valor, ini, fin):
     return {dt.date.fromordinal(d): float(v) for d, v in zip(dias, np.interp(dias, xs, ys))}
 
 
-def viento_alto_por_dia(ruta="eto_diaria.csv"):
-    """Días del 1-feb al 30-abr de 2026 con ws2m ≥ P75 de feb–abr 1981–2025 (assumption [S])."""
+def viento_alto_por_dia(pct, ruta="eto_diaria.csv"):
+    """Días del 1-feb al 30-abr de 2026 con ws2m ≥ percentil pct de feb–abr 1981–2025 (supuestos.json, [S])."""
     try:
         filas = list(csv.DictReader(open(ruta)))
     except FileNotFoundError:
@@ -81,7 +83,7 @@ def viento_alto_por_dia(ruta="eto_diaria.csv"):
     hist = [float(r["ws2m"]) for r in filas if r["fecha"][5:7] in ("02", "03", "04") and r["fecha"][:4] < "2026"]
     if not hist:
         return None
-    p75 = float(np.percentile(hist, 75))
+    p75 = float(np.percentile(hist, pct))
     return {dt.date.fromisoformat(r["fecha"]) for r in filas
             if r["fecha"][:4] == "2026" and r["fecha"][5:7] in ("02", "03", "04") and float(r["ws2m"]) >= p75}
 
@@ -113,7 +115,7 @@ def main():
 
     # --- A3: año agrícola 2026 ---
     filas_mes, filas_desnudo = [], []
-    viento = viento_alto_por_dia()
+    viento = viento_alto_por_dia(supuesto(s, "viento_alto"))
     with rasterio.open("hls_mensual_2025_10_a_2026_09.tif") as src:
         nombres = nombres_bandas(src)
         datos = src.read()
@@ -164,23 +166,41 @@ def main():
             for f in parcelas:
                 pid = f["properties"]["id"]
                 m = pixeles(src, f["geometry"])
-                ndvi_mes = {}
+                ndvi_mes, por_fecha = {}, {}
                 for b, nom in enumerate(nombres):
                     st = estadisticas(datos[b][m])
                     ndvi_mes[int(nom[5:7])] = None if st is None else st[0]
-                resumen[(pid, ag)] = resumen_anio(ndvi_mes, verde)
+                    por_fecha[(int(nom[:4]), int(nom[5:7]))] = None if st is None else st[0]
+                res = resumen_anio(ndvi_mes, verde)
+                # Días de suelo desnudo 1-feb a 30-abr del año agrícola (exige dato en feb, mar y abr)
+                if all(por_fecha.get((ag, mm)) is not None for mm in (2, 3, 4)):
+                    diario = interp_diaria(por_fecha, dt.date(ag, 2, 1), dt.date(ag, 4, 30))
+                    res["desnudo"] = sum(1 for v in diario.values() if v < desnudo)
+                else:
+                    res["desnudo"] = None
+                resumen[(pid, ag)] = res
     filas_mem = []
     for (pid, ag), res in sorted(resumen.items()):
         estado = clasificar(res, resumen.get((pid, ag - 1)), resumen.get((pid, ag + 1)), verde)
         filas_mem.append([pid, ag, estado, res["verdes"],
                           None if res["max_ver"] is None else round(res["max_ver"], 3),
-                          None if res["max_inv"] is None else round(res["max_inv"], 3), res["validos"]])
+                          None if res["max_inv"] is None else round(res["max_inv"], 3), res["desnudo"], res["validos"]])
     with open("memoria_parcelas.csv", "w", newline="") as fo:
         w = csv.writer(fo)
-        w.writerow(["id", "anio_agricola", "estado", "meses_verdes", "max_verano", "max_invierno", "meses_validos"])
+        w.writerow(["id", "anio_agricola", "estado", "meses_verdes", "max_verano", "max_invierno",
+                     "dias_suelo_desnudo_feb_abr", "meses_validos"])          # columnas de la tabla 0.4-B (A3-M)
         w.writerows(filas_mem)
+    # A3-M paso 8: mediana entre años con dato (null si no hay ningún año)
+    with open("memoria_resumen.csv", "w", newline="") as fo:
+        w = csv.writer(fo)
+        w.writerow(["id", "dias_suelo_desnudo_mediana", "anios_con_dato", "estado_2025"])
+        for f in parcelas:
+            pid = f["properties"]["id"]
+            vals = [r["desnudo"] for (q, a), r in resumen.items() if q == pid and r["desnudo"] is not None]
+            e25 = next((x[2] for x in filas_mem if x[0] == pid and x[1] == 2025), None)
+            w.writerow([pid, int(np.median(vals)) if vals else None, len(vals), e25])
 
-    registrar_fuentes("A3", ["hls_mensual_parcelas.csv", "suelo_desnudo.csv", "memoria_parcelas.csv"],
+    registrar_fuentes("A3", ["hls_mensual_parcelas.csv", "suelo_desnudo.csv", "memoria_parcelas.csv", "memoria_resumen.csv"],
                       "NASA HLS v2 (HLSL30/HLSS30 v002) vía Google Earth Engine, proyecto iondroplet",
                       "datos/colab/A3_parcelas_hls.py")
     con8 = sum(1 for r in filas_desnudo if r[4] >= 8)

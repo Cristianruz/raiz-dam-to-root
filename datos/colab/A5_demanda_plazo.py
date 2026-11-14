@@ -23,7 +23,8 @@ from collections import defaultdict
 from comun import carpeta, registrar_fuentes
 
 PARAMS = {"corridas": 2000, "periodo_clima": {"valor": [1991, 2025], "etiqueta": "assumption [S], propuesto en el preregistro"}}
-REQUERIDOS = ("ea_gravedad", "sesgo_eto", "presiembra_mm", "kc_nogal", "plazo_alfalfa_anios", "plazo_nogal_horizonte")
+REQUERIDOS = ("ea_gravedad", "sesgo_eto", "presiembra_mm", "presiembra_algodon_mm", "kc_nogal_tabla",
+              "cobertura_dosel_nogal", "altura_nogal_m", "corte_verano_moderado", "plazo_alfalfa_anios", "plazo_nogal_horizonte")
 
 
 def cargar_supuestos(ruta="supuestos.json"):
@@ -33,7 +34,18 @@ def cargar_supuestos(ruta="supuestos.json"):
     if faltan:
         raise SystemExit(f"Faltan en supuestos.json: {faltan}. No se usan valores de memoria.")
     PARAMS.update({k: s[k] for k in REQUERIDOS})
-    CULTIVOS["nogal"]["kc"] = tuple(s["kc_nogal"]["valor"])
+    # Nogal: Kc de la Tabla 12 (Walnut orchard) ajustado por cobertura del dosel, FAO-56 Ec. 98:
+    # Kd = min(1, ML·fc, fc^(1/(1+h))), ML = 1.5; Kc_mid = Kc_min + Kd·(Kc_mid_tabla − Kc_min), Kc_min = 0.15
+    ki, km, kf = s["kc_nogal_tabla"]["valor"]
+    fc, h = s["cobertura_dosel_nogal"]["valor"], s["altura_nogal_m"]["valor"]
+    kd = min(1.0, 1.5 * fc, fc ** (1 / (1 + h)))
+    CULTIVOS["nogal"]["kc"] = (ki, round(0.15 + kd * (km - 0.15), 3), kf)
+    CULTIVOS["algodon"]["presiembra_fija"] = s["presiembra_algodon_mm"]["valor"]
+    cv = s["corte_verano_moderado"]["valor"]
+    frac = sum(cv["riegos_omitidos"]) / 2 / cv["riegos_jul_sep"]
+    for r in ROTACIONES:
+        if r["id"] == "alfalfa_corte_verano":
+            r["reduccion_meses"] = {7: frac, 8: frac, 9: frac}
     PARAMS["plazo_anios"] = {"anual": 1, "alfalfa": s["plazo_alfalfa_anios"]["valor"],
                              "nogal": s["plazo_nogal_horizonte"]["valor"]}
 
@@ -44,8 +56,8 @@ CULTIVOS = {
     "alfalfa":         {"kc": (0.95, 0.95, 0.95), "perenne": True,
                         "nota": "Kc 0.95 todo el año (efecto promediado de cortes) [S]; contraste INIFAP 170–180 cm aplicados [V]"},
     "nogal":           {"kc": None, "siembra": (3, 15), "dias": (20, 10, 130, 30), "perenne": True,
-                        "nota": "Kc de supuestos.json (kc_nogal); inicio = brotación ≈15-mar (INIFAP) [S]"},
-    "algodon":         {"kc": (0.35, 1.175, 0.60), "siembra": (4, 25), "dias": (30, 50, 55, 45), "presiembra_fija": 200},
+                        "nota": "Kc de FAO-56 Tabla 12 (Walnut orchard) ajustado por cobertura del dosel (Ec. 98) con supuestos.json; inicio = brotación ≈15-mar (INIFAP) [S]"},
+    "algodon":         {"kc": (0.35, 1.175, 0.60), "siembra": (4, 25), "dias": (30, 50, 55, 45), "presiembra_fija": None},
     "chile":           {"kc": (0.60, 1.05, 0.90), "siembra": (3, 10), "dias": (28, 35, 40, 20),
                         "nota": "sustituto: pimiento FAO-56; siembra directa 20-feb a 31-mar (INIFAP) [V]"},
     "maiz_forrajero":  {"kc": (0.30, 1.20, 0.60), "siembra": (4, 15), "dias": (25, 35, 30, 15),
@@ -58,8 +70,8 @@ CULTIVOS = {
 ROTACIONES = [
     {"id": "alfalfa", "nombre": "Alfalfa (perenne)", "cultivos": ["alfalfa"], "plazo": "alfalfa"},
     {"id": "alfalfa_corte_verano", "nombre": "Alfalfa con corte de riego en verano", "cultivos": ["alfalfa"],
-     "plazo": "alfalfa", "sin_riego_meses": [8, 9],
-     "nota": "suspensión después del corte de inicios de agosto (Bali et al. 2024; pérdida de rendimiento 3–18 %) [V]"},
+     "plazo": "alfalfa",
+     "nota": "variante moderada del kit B3: se omiten 2–3 de ~6 riegos entre julio y septiembre [S]"},
     {"id": "nogal", "nombre": "Nogal (huerta)", "cultivos": ["nogal"], "plazo": "nogal"},
     {"id": "algodon", "nombre": "Algodón", "cultivos": ["algodon"], "plazo": "anual"},
     {"id": "chile", "nombre": "Chile", "cultivos": ["chile"], "plazo": "anual"},
@@ -137,16 +149,14 @@ def meses_anio(cultivos, anio_ag, clima, f_lluvia):
     return _CACHE[clave]
 
 
-def neta_anio(cultivos, anio_ag, clima, sesgo, f_lluvia, sin_riego_meses=()):
+def neta_anio(cultivos, anio_ag, clima, sesgo, f_lluvia, reduccion=None):
     """Lámina neta (mm) y ETc (mm) de una rotación en el año agrícola anio_ag (1-oct anterior a 30-sep)."""
     etc_mes, p_mes = meses_anio(cultivos, anio_ag, clima, f_lluvia)
     neta, etc = 0.0, 0.0
     for ym, e in etc_mes.items():
         e = e * (1 + sesgo)
         etc += e
-        if ym[1] in sin_riego_meses:
-            continue
-        neta += max(e - peff(p_mes[ym]), 0.0)
+        neta += max(e - peff(p_mes[ym]), 0.0) * (1 - (reduccion or {}).get(ym[1], 0.0))
     return neta, etc
 
 
@@ -165,11 +175,11 @@ def sortear(anios, rng):
             for _ in range(PARAMS["corridas"])]
 
 
-def simular(cultivos, clima, tuplas, f_lluvia, sin_riego=()):
+def simular(cultivos, clima, tuplas, f_lluvia, reduccion=None):
     anuales = [c for c in cultivos if not CULTIVOS[c].get("perenne")]
     brutas, netas, etcs = [], [], []
     for anio, sesgo, ea, pres in tuplas:
-        neta, etc = neta_anio(cultivos, anio, clima, sesgo, f_lluvia, sin_riego)
+        neta, etc = neta_anio(cultivos, anio, clima, sesgo, f_lluvia, reduccion)
         presiembra = sum(CULTIVOS[c].get("presiembra_fija", pres) for c in anuales)
         brutas.append((neta / ea + presiembra) / 100)        # mm → millares/ha
         netas.append(neta)
@@ -191,13 +201,13 @@ def main():
             (b10, b50, b90), n50, e50 = simular([c], clima, tuplas, f)
             filas.append([c, lp, round(e50), round(n50), round(b10, 2), round(b50, 2), round(b90, 2)])
     for r in ROTACIONES:
-        reg = {k: v for k, v in r.items() if k != "sin_riego_meses"}
+        reg = {k: v for k, v in r.items() if k != "reduccion_meses"}
         pz = PARAMS["plazo_anios"][r["plazo"]]
         reg["plazo_anios"] = pz if isinstance(pz, dict) else {"min": pz, "max": pz}   # contrato: siempre {min, max}
         reg["lamina_bruta_millares"] = {}
         for lp, f in ((0, 1.0), (-20, 0.8)):
             if r["cultivos"]:
-                (b10, b50, b90), n50, e50 = simular(r["cultivos"], clima, tuplas, f, r.get("sin_riego_meses", ()))
+                (b10, b50, b90), n50, e50 = simular(r["cultivos"], clima, tuplas, f, r.get("reduccion_meses"))
             else:
                 b10 = b50 = b90 = n50 = e50 = 0.0
             reg["lamina_bruta_millares"][str(lp)] = {"p10": round(b10, 2), "p50": round(b50, 2), "p90": round(b90, 2),

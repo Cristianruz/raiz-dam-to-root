@@ -6,7 +6,8 @@ Salida: cultivos_parcelas.csv  id, cultivo_actual, prob_max, acuerdo_metodos, ab
                                 edad_perenne_anios, estado_plazo
 Reglas [S] (umbrales a calibrar con las etiquetas a ciegas; S9 §5 y manual de etiquetado 39):
   - alfalfa: perenne 2025 y 2026 (≥ 8 meses verdes) y verde en invierno (NDVI dic–feb ≥ 0.35).
-  - nogal: verde de may a sep (≥ 4 meses ≥ 0.40) y bajo en invierno (dic–feb < 0.30) en 2026 y 2025;
+  - nogal: verde de may a sep (≥ 4 meses ≥ 0.40), ya verde en mayo y todavía en octubre (una anual de verano
+           no lo está), bajo en invierno (dic–feb < 0.30) y el patrón repetido en 2025 [S];
            su perennidad la da el patrón repetido, no los 8 meses verdes (pierde la hoja).
   - cereal_invierno: verde dic–mar y bajo jun–sep.
   - anual de verano (verde jun–sep y bajo dic–mar): chile, algodón, maíz o sorgo no se separan a 30 m
@@ -14,6 +15,7 @@ Reglas [S] (umbrales a calibrar con las etiquetas a ciegas; S9 §5 y manual de e
     con grupo_fenologico = anual_verano y estado_plazo = libre.
   - barbecho: sin verdor todo el año. Lo demás: sin_clasificar (abstención).
   - Abstención también si ftw_confianza < 50 (kit A4.2).
+Abstenidas: cultivo sin_clasificar, edad y estado_plazo en null.
 Plazo: anual → libre; alfalfa con edad ≥ 3 años → por_vencer; alfalfa más joven o nogal → comprometida.
 prob_max no aplica a reglas: se deja vacío; acuerdo_metodos = "1/1 (reglas)" hasta tener Random Forest.
 """
@@ -61,6 +63,7 @@ def main():
             if est(2026) == "perenne" and invierno and min(invierno) >= INV_ALF:
                 cultivo = "alfalfa"
             elif (sum(1 for v in prim_verano if v >= V) >= 4 and invierno and max(invierno) < INV_NOG
+                  and n.get(5, 0) >= V and n.get(10, 0) >= V                 # hoja en mayo y aún en octubre
                   and est(2025) in ("verano", "doble", "perenne")):
                 cultivo = "nogal"
             elif dic_mar and max(dic_mar) >= V and verano and max(verano) < V:
@@ -97,8 +100,8 @@ def main():
             cultivo = "sin_clasificar"           # no es clase del contrato
         c = conf.get(pid)
         abst = cultivo == "sin_clasificar" or c is None or c < FTW_MIN
-        if abst and cultivo != "sin_clasificar":
-            cultivo = "sin_clasificar"
+        if abst:
+            cultivo, edad, plazo = "sin_clasificar", None, None   # abstenida: sin plazo ni edad
         filas.append([pid, cultivo, "", "1/1 (reglas)", abst, edad, plazo, grupo])
 
     with open("cultivos_parcelas.csv", "w", newline="") as fo:
