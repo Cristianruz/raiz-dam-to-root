@@ -58,7 +58,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "c5e7ee211e82587173cff97c506ba5378801891090568d14f78931c90540b17c",
    "ruta_buzon": "contexto_regional.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "cultivos_parcelas.csv",
@@ -72,7 +72,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "6f6fee58eb78e95f085ee17d66e80709a4d2ba811596e47d557e4c70bc2293b6",
    "ruta_buzon": "cultivos_parcelas.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "demanda_cultivos.csv",
@@ -86,7 +86,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "83f3ce1353e5d6d0c9bcdba73992faa4a4540f11fe64d1fe33a0148dd19ef3e7",
    "ruta_buzon": "demanda_cultivos.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -101,7 +101,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "230be28e7df7b6d1101a639202f26734869a9fd435b548381bd8d2d19775fd53",
    "ruta_buzon": "demanda_cultivos_lazaro_cardenas.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -116,7 +116,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "4198a284dc8d350cf22e3eab4368cea7bfded7000f62d5923956f6d9eda7f032",
    "ruta_buzon": "et_contraste.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "eto_diaria.csv",
@@ -130,7 +130,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "89657914bad2e1be107ceb5a8d24833ccab0477cde570e160a683a5c56923046",
    "ruta_buzon": "eto_diaria.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -145,7 +145,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "16af45819b7f02190938043e4a2d67a878baae029fc4eebf1dbbf52a50d51563",
    "ruta_buzon": "eto_diaria_lazaro_cardenas.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -160,7 +160,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "5897ac4f2ddce87e36c5c0f89642f445da76c86a93385522a900c8455c2e11ba",
    "ruta_buzon": "gedi_parcelas.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "h3_series.csv",
@@ -174,7 +174,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "ef8579ef63bd2ca95735bbbb111dc6d0d7b42efda4ce424ff9e444d12537b303",
    "ruta_buzon": "h3_series.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "heladas.json",
@@ -188,7 +188,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "1a94266e2fe5d2a015660f42629d02cf1de04c2a52a64bd3fa2e29b2becc5c82",
    "ruta_buzon": "heladas.json",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "hls_mensual_parcelas.csv",
@@ -202,7 +202,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "fd97e0ade393c48a45f2b4c27acee672c592af4afbf56976f69cae36bf057fc9",
    "ruta_buzon": "hls_mensual_parcelas.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "imerg_diaria.csv",
@@ -216,7 +216,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "b308b68fa304cf8caa71a8dd6bcdb9a5904429d98851c6277fa426186420104e",
    "ruta_buzon": "imerg_diaria.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -231,7 +231,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "7005e73d8e22b0a897dbf5de4cf512f0b1f09d0f6c723899ca85cc18f6b37197",
    "ruta_buzon": "imerg_diaria_lazaro_cardenas.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -246,7 +246,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "132d19249f1b12e99fa3098794ee9980da7ac5b18d33118d158c80c6d46584f7",
    "ruta_buzon": "memoria_parcelas.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "memoria_resumen.csv",
@@ -260,7 +260,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "ce1cd1b8ed962589ac1d545c569029e3c17aaf4a3982e09c1949cc22ff67a8f3",
    "ruta_buzon": "memoria_resumen.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "nasadem_zona_piloto.tif",
@@ -274,7 +274,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "7ec898b86c90f6360876589af9ebdabdf3469c0c30691f88ecd572a788e8b31e",
    "ruta_buzon": "nasadem_zona_piloto.tif",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -289,7 +289,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "1e4566efddc29e94996abc3b6f3663c4f80da8b7e693403e0ad271b87736562b",
    "ruta_buzon": "nasadem_zona_piloto_lazaro_cardenas.tif",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -304,7 +304,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "60888e29f2e0bc5321a4dccec5ca2ef256c2f9b8ab03825d4c81b87e7899aa16",
    "ruta_buzon": "parcelas_base.geojson",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "relieve_meta.json",
@@ -318,7 +318,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "dc4e959ee72f347d43ea4f0941be299d6c703d830b51080741fe0d8cb5048c72",
    "ruta_buzon": "relieve_meta.json",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -333,7 +333,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "277657440c3a12f2352502b345ded3743932c1a5e77b9162ec01fd7a1db6191f",
    "ruta_buzon": "relieve_meta_lazaro_cardenas.json",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -348,7 +348,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "019ad831a6e2744a733bed8c51cb45b177e649a911a46096495e278be739dbb3",
    "ruta_buzon": "relieve_parcelas.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "relieve_rutas.geojson",
@@ -362,7 +362,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "74a53c57d083b901b03a13d973e5392d8065c67af3f0e0c4ed1fc89c51a25674",
    "ruta_buzon": "relieve_rutas.geojson",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "rotaciones.json",
@@ -376,7 +376,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "564232b8dcf2f57e4913f1c475adcc002831e086fa2340dab510c901c18caf7e",
    "ruta_buzon": "rotaciones.json",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -391,7 +391,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "c4d0b72c84e84d66eee2a168506f279f6d276335fd411a11e5ee55d2008c45a3",
    "ruta_buzon": "rotaciones_lazaro_cardenas.json",
-   "ingreso": "2026-11-14T21:43:41+00:00",
+   "ingreso": "2026-11-14T22:17:37+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -406,21 +406,21 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "64b9dff72e7e2f335adeb68bfa93ff6cad3d61f23eb35ada106ca5cc89c4346f",
    "ruta_buzon": "suelo_desnudo.csv",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   },
   {
    "archivo": "supuestos.json",
    "tipo": "entrega",
    "pieza": "B3",
    "rol": null,
-   "fuente": "Supuestos de la sesión de datos (datos/supuestos.json en la rama datos-satelite): cada uno con valor, etiqueta y fuente; los marcados assumption [S] no tienen fuente local y se declaran como supuesto",
+   "fuente": "Supuestos de la sesión de datos (datos/supuestos.json en la rama datos-satelite): cada uno con valor, etiqueta y fuente; los marcados assumption [S] no tienen fuente local. Incluye ea_goteo = 0.90 y ea_superficial_referencia = 0.60: valores indicativos de FAO, Irrigation Water Management Training Manual No. 4 (1989), Anexo I, Tabla 8, https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026 (no medidos en el DR-005); gedi_piso_instrumento_m y gedi_umbral_dosel_alto_m: análisis propio de A11 (datos/colab/A11_gedi_parcelas.py)",
    "fecha": "2026-11-14",
    "script": "datos/supuestos.json (lo leen A3, A4, A5 y A9)",
-   "url_o_api": "Supuestos de la sesión de datos (datos/supuestos.json en la rama datos-satelite): cada uno con valor, etiqueta y fuente; los marcados assumption [S] no tienen fuente local y se declaran como supuesto",
+   "url_o_api": "Supuestos de la sesión de datos (datos/supuestos.json en la rama datos-satelite): cada uno con valor, etiqueta y fuente; los marcados assumption [S] no tienen fuente local. Incluye ea_goteo = 0.90 y ea_superficial_referencia = 0.60: valores indicativos de FAO, Irrigation Water Management Training Manual No. 4 (1989), Anexo I, Tabla 8, https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026 (no medidos en el DR-005); gedi_piso_instrumento_m y gedi_umbral_dosel_alto_m: análisis propio de A11 (datos/colab/A11_gedi_parcelas.py)",
    "fecha_consulta": "2026-11-14",
-   "sha256": "686b53727cc3511ae599ecd159f857d7ff72dad2ca65f6991d1e07133d86f01c",
+   "sha256": "bb23b55a5eb3f1bdcd109f015c62b5e9378b53f016b0c6640309871190d8c9d7",
    "ruta_buzon": "supuestos.json",
-   "ingreso": "2026-11-14T21:43:41+00:00"
+   "ingreso": "2026-11-14T22:17:37+00:00"
   }
  ],
  "_nota_cifras": "Agrupadas por patrón de ruta: parcelas.<id> -> parcelas.*, zonas.<id> -> zonas.*, índices [n] -> [*]. Cada patrón lleva su fuente, fecha, script, etiqueta, número de valores y rango (los textos con cifras, en «textos»); así el manifiesto no crece con el número de parcelas ni de zonas.",
@@ -585,7 +585,7 @@
    "min": 24993.01,
    "max": 24993.01,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -597,7 +597,7 @@
    "min": 8441.47,
    "max": 8441.47,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -609,7 +609,7 @@
    "min": 16551.54,
    "max": 16551.54,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -621,7 +621,7 @@
    "min": 3954.44,
    "max": 3954.44,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -633,7 +633,7 @@
    "min": 76785.62,
    "max": 76785.62,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -645,7 +645,7 @@
    "min": 94573.15,
    "max": 94573.15,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -657,7 +657,7 @@
    "min": 117116.5,
    "max": 117116.5,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -669,7 +669,7 @@
    "min": 79496.69,
    "max": 79496.69,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -681,7 +681,7 @@
    "min": 96790.31,
    "max": 96790.31,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -693,7 +693,7 @@
    "min": 118991.59,
    "max": 118991.59,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -705,7 +705,7 @@
    "min": 1239,
    "max": 1239,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -717,7 +717,7 @@
    "min": 235,
    "max": 235,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -729,7 +729,7 @@
    "min": 74,
    "max": 74,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -741,7 +741,7 @@
    "min": 149,
    "max": 149,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -753,7 +753,7 @@
    "min": 781,
    "max": 781,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -765,7 +765,7 @@
    "min": 5847.82,
    "max": 19145.19,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -777,7 +777,7 @@
    "min": 1272.32,
    "max": 7169.15,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -789,7 +789,7 @@
    "min": 4575.5,
    "max": 11976.04,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -801,7 +801,7 @@
    "min": 507.02,
    "max": 3447.42,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -813,7 +813,7 @@
    "min": 8967.92,
    "max": 67817.7,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -825,7 +825,7 @@
    "min": 10971.78,
    "max": 83601.38,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -837,7 +837,7 @@
    "min": 13517.71,
    "max": 103598.78,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -849,7 +849,7 @@
    "min": 9285.43,
    "max": 70211.26,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -861,7 +861,7 @@
    "min": 11239.83,
    "max": 85550.48,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -873,7 +873,7 @@
    "min": 13784.19,
    "max": 105207.4,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -885,7 +885,7 @@
    "min": 299,
    "max": 940,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -897,7 +897,7 @@
    "min": 64,
    "max": 171,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -909,7 +909,7 @@
    "min": 8,
    "max": 66,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -921,7 +921,7 @@
    "min": 29,
    "max": 120,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -933,7 +933,7 @@
    "min": 198,
    "max": 583,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -981,7 +981,7 @@
    "min": 0.0,
    "max": 23.13,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -993,7 +993,7 @@
    "min": 0.0,
    "max": 28.4,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1005,7 +1005,7 @@
    "min": 0.0,
    "max": 35.16,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1017,7 +1017,7 @@
    "min": 0.0,
    "max": 23.86,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1029,7 +1029,7 @@
    "min": 0.0,
    "max": 29.01,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1041,7 +1041,7 @@
    "min": 0.0,
    "max": 35.64,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1053,7 +1053,7 @@
    "min": 1,
    "max": 10,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1065,7 +1065,7 @@
    "min": 1,
    "max": 10,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1077,7 +1077,7 @@
    "min": 0,
    "max": 10,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1089,7 +1089,7 @@
    "min": 0,
    "max": 10,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1101,7 +1101,7 @@
    "min": 0.0,
    "max": 191.0,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1113,7 +1113,7 @@
    "min": 0.0,
    "max": 191.0,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1125,7 +1125,7 @@
    "min": 0.0,
    "max": 196.1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1137,7 +1137,7 @@
    "min": 0.0,
    "max": 196.1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1149,7 +1149,7 @@
    "min": 0,
    "max": 89,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1161,7 +1161,7 @@
    "min": 0.0,
    "max": 5166309.3,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1173,7 +1173,7 @@
    "min": 0.0,
    "max": 2066523.7,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1185,7 +1185,7 @@
    "min": 0.0,
    "max": 3099785.6,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1197,7 +1197,7 @@
    "min": 0.0,
    "max": 1757446.4,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1209,7 +1209,7 @@
    "min": 0.0,
    "max": 1033261.9,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1221,7 +1221,7 @@
    "min": 0.0,
    "max": 2704017.9,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1233,7 +1233,7 @@
    "min": 1.01,
    "max": 828.27,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1245,7 +1245,7 @@
    "min": 13,
    "max": 58,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1257,7 +1257,7 @@
    "min": 0,
    "max": 89,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1269,7 +1269,7 @@
    "min": 0.0977,
    "max": 0.9127,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1281,7 +1281,7 @@
    "min": 2016,
    "max": 2026,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1293,7 +1293,7 @@
    "min": 0,
    "max": 89,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1341,7 +1341,7 @@
    "min": 1,
    "max": 11,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1353,7 +1353,7 @@
    "min": 28.4,
    "max": 28.4,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1365,7 +1365,7 @@
    "min": 3,
    "max": 3,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1377,7 +1377,7 @@
    "min": 4,
    "max": 4,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1389,7 +1389,7 @@
    "min": 23.13,
    "max": 23.13,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1401,7 +1401,7 @@
    "min": 35.16,
    "max": 35.16,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1413,7 +1413,7 @@
    "min": 25.49,
    "max": 25.49,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1425,7 +1425,7 @@
    "min": 3,
    "max": 3,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1437,7 +1437,7 @@
    "min": 4,
    "max": 4,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1449,7 +1449,7 @@
    "min": 20.96,
    "max": 20.96,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1461,7 +1461,7 @@
    "min": 31.59,
    "max": 31.59,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1473,7 +1473,7 @@
    "min": 14.66,
    "max": 14.66,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1485,7 +1485,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1497,7 +1497,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1509,7 +1509,7 @@
    "min": 11.57,
    "max": 11.57,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1521,7 +1521,7 @@
    "min": 18.29,
    "max": 18.29,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1533,7 +1533,7 @@
    "min": 17.44,
    "max": 17.44,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1545,7 +1545,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1557,7 +1557,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1569,7 +1569,7 @@
    "min": 14.81,
    "max": 14.81,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1581,7 +1581,7 @@
    "min": 20.69,
    "max": 20.69,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1593,7 +1593,7 @@
    "min": 6.28,
    "max": 6.28,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1605,7 +1605,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1617,7 +1617,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1629,7 +1629,7 @@
    "min": 5.07,
    "max": 5.07,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1641,7 +1641,7 @@
    "min": 7.54,
    "max": 7.54,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1653,7 +1653,7 @@
    "min": 0.0,
    "max": 0.0,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1665,7 +1665,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1677,7 +1677,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1689,7 +1689,7 @@
    "min": 0.0,
    "max": 0.0,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1701,7 +1701,7 @@
    "min": 0.0,
    "max": 0.0,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1713,7 +1713,7 @@
    "min": 11.14,
    "max": 11.14,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1725,7 +1725,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1737,7 +1737,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1749,7 +1749,7 @@
    "min": 9.31,
    "max": 9.31,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1761,7 +1761,7 @@
    "min": 13.49,
    "max": 13.49,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1773,7 +1773,7 @@
    "min": 19.1,
    "max": 19.1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1785,7 +1785,7 @@
    "min": 10,
    "max": 10,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1797,7 +1797,7 @@
    "min": 10,
    "max": 10,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1809,7 +1809,7 @@
    "min": 15.38,
    "max": 15.38,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1821,7 +1821,7 @@
    "min": 23.71,
    "max": 23.71,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1833,7 +1833,7 @@
    "min": 11.39,
    "max": 11.39,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1845,7 +1845,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1857,7 +1857,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1869,7 +1869,7 @@
    "min": 9.02,
    "max": 9.02,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1881,7 +1881,7 @@
    "min": 14.29,
    "max": 14.29,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1893,7 +1893,7 @@
    "min": 27.83,
    "max": 27.83,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1905,7 +1905,7 @@
    "min": 3,
    "max": 3,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1917,7 +1917,7 @@
    "min": 4,
    "max": 4,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1929,7 +1929,7 @@
    "min": 22.9,
    "max": 22.9,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1941,7 +1941,7 @@
    "min": 34.38,
    "max": 34.38,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1953,7 +1953,7 @@
    "min": 24.93,
    "max": 24.93,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1965,7 +1965,7 @@
    "min": 3,
    "max": 3,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1977,7 +1977,7 @@
    "min": 4,
    "max": 4,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1989,7 +1989,7 @@
    "min": 20.75,
    "max": 20.75,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2001,7 +2001,7 @@
    "min": 30.72,
    "max": 30.72,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2013,7 +2013,7 @@
    "min": 14.64,
    "max": 14.64,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2025,7 +2025,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2037,7 +2037,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2049,7 +2049,7 @@
    "min": 11.85,
    "max": 11.85,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2061,7 +2061,7 @@
    "min": 18.18,
    "max": 18.18,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2073,7 +2073,7 @@
    "min": 0.0,
    "max": 0.0,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2085,7 +2085,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2097,7 +2097,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2109,7 +2109,7 @@
    "min": 0.0,
    "max": 0.0,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2121,7 +2121,7 @@
    "min": 0.0,
    "max": 0.0,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2133,7 +2133,7 @@
    "min": 11.05,
    "max": 11.05,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2145,7 +2145,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2157,7 +2157,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2169,7 +2169,7 @@
    "min": 9.28,
    "max": 9.28,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2181,7 +2181,7 @@
    "min": 13.34,
    "max": 13.34,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2193,7 +2193,7 @@
    "min": 18.84,
    "max": 18.84,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2205,7 +2205,7 @@
    "min": 10,
    "max": 10,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2217,7 +2217,7 @@
    "min": 10,
    "max": 10,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2229,7 +2229,7 @@
    "min": 15.33,
    "max": 15.33,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2241,7 +2241,7 @@
    "min": 23.17,
    "max": 23.17,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2253,7 +2253,7 @@
    "min": 11.36,
    "max": 11.36,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2265,7 +2265,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2277,7 +2277,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2289,7 +2289,7 @@
    "min": 9.22,
    "max": 9.22,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2301,7 +2301,7 @@
    "min": 14.16,
    "max": 14.16,
    "fuente": "data/processed/contexto_regional.csv; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/demanda_cultivos_lazaro_cardenas.csv; data/processed/et_contraste.csv; data/processed/eto_diaria.csv; data/processed/eto_diaria_lazaro_cardenas.csv; data/processed/fuentes.json; data/processed/gedi_parcelas.csv; data/processed/h3_series.csv; data/processed/heladas.json; data/processed/hls_mensual_parcelas.csv; data/processed/imerg_diaria.csv; data/processed/imerg_diaria_lazaro_cardenas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/nasadem_zona_piloto_lazaro_cardenas.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_meta_lazaro_cardenas.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/rotaciones_lazaro_cardenas.json; data/processed/suelo_desnudo.csv; data/processed/supuestos.json; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T22:11:32+00:00",
+   "fecha": "2026-11-14T22:17:56+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2384,7 +2384,7 @@
    "min": 1,
    "max": 5,
    "fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "motor/pruebas_web.py",
    "etiqueta": "Criterio declarado antes del resultado (S9 §6)",
    "mock": false
@@ -2396,7 +2396,7 @@
    "min": null,
    "max": null,
    "fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "motor/pruebas_web.py",
    "etiqueta": "Criterio declarado antes del resultado (S9 §6)",
    "mock": false,
@@ -2419,7 +2419,7 @@
     "docs/figuras/llm_eval.csv",
     "data/processed/et_contraste.csv"
    ],
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "motor/pruebas_web.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2434,7 +2434,7 @@
     "web/data/parcelas.geojson",
     "docs/figuras/llm_eval.csv"
    ],
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "motor/pruebas_web.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2449,7 +2449,7 @@
     "web/data/parcelas.geojson",
     "docs/figuras/llm_eval.csv"
    ],
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "motor/pruebas_web.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -2461,7 +2461,7 @@
    "min": null,
    "max": null,
    "fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "motor/pruebas_web.py",
    "etiqueta": "Criterio declarado antes del resultado (S9 §6)",
    "mock": false,
@@ -2480,7 +2480,7 @@
     "docs/resultado_H1.md",
     "docs/resultado_H3.md"
    ],
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "motor/pruebas_web.py",
    "etiqueta": "Leído del documento de resultado citado",
    "mock": false,
@@ -2496,7 +2496,7 @@
    "min": null,
    "max": null,
    "fuente": "data/processed/et_contraste.csv",
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "motor/pruebas_web.py",
    "etiqueta": "Cálculo",
    "mock": false,
@@ -2512,7 +2512,7 @@
    "min": null,
    "max": null,
    "fuente": "data/processed/et_contraste.csv",
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "motor/pruebas_web.py",
    "etiqueta": "Leído del documento de resultado citado",
    "mock": false,
@@ -2527,12 +2527,12 @@
    "min": null,
    "max": null,
    "fuente": "docs/pruebas.md",
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "construir.py",
    "etiqueta": "Registro de la corrida de python construir.py",
    "mock": false,
    "textos": [
-    "2026-11-14T22:11:51+00:00"
+    "2026-11-14T22:18:13+00:00"
    ]
   },
   "pruebas.json:puerta.pasos[*].detalle": {
@@ -2542,14 +2542,14 @@
    "min": null,
    "max": null,
    "fuente": "docs/pruebas.md",
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "construir.py",
    "etiqueta": "Registro de la corrida de python construir.py",
    "mock": false,
    "textos": [
     "cubo REAL: 1239 parcelas, 458 clasificadas, 1492 opciones",
     "55189 cifras (0 simuladas), 26 fuentes de origen, 33 avisos",
-    "554 passed, 30 warnings in 16.80s",
+    "554 passed, 30 warnings in 15.62s",
     "63 pass, 0 fail, 0 skipped"
    ]
   },
@@ -2560,12 +2560,12 @@
    "min": null,
    "max": null,
    "fuente": "web/data/pruebas.json",
-   "fecha": "2026-11-14T22:11:51+00:00",
+   "fecha": "2026-11-14T22:18:13+00:00",
    "script": "motor/pruebas_web.py",
    "etiqueta": "Registro de la corrida de python construir.py",
    "mock": false,
    "textos": [
-    "2026-11-14T22:11:51+00:00"
+    "2026-11-14T22:18:13+00:00"
    ]
   }
  }
