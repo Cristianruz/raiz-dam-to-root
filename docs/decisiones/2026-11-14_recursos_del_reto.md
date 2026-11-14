@@ -1,5 +1,5 @@
 <!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
-# Decisión: el gemelo usa todas las bases de datos del reto que cubren la zona (14-nov-2026, 15:30)
+# Decisión: el gemelo usa todas las bases de datos del reto que cubren la zona (14-nov-2026, 14:55)
 
 **Quién decide:** Cristian (integrador): «utiliza todas las bases de datos que nos compartieron del Space Apps».
 
