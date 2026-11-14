@@ -44,7 +44,7 @@ comprometida) y P0118 (barbecho en 2026 tras años perenne, libre), elegidas por
 - `colab/unir_zonas.py --salida data/entrega_zonas` arma la entrega: un solo archivo con las dos zonas para parcelas, CSV por
   parcela y rutas; con sufijo `_lazaro_cardenas` para clima, demanda, relieve_meta y NASADEM; y el `LEEME.md`.
 - Corrida real: 940 + 299 parcelas. Protagonistas: P0757 (alfalfa de 3 años, por vencer, a 0.25 km de Km 92), P0632 (cereal de
-  fines de invierno, libre, a 3.2 km de Km 92; sustituye a P0244 desde el 14-nov a las 16:45, ver `docs/revision_protagonistas.md`)
+  fines de invierno, libre, a 3.2 km de Km 92; sustituye a P0244 desde el 14-nov a las 16:28, ver `docs/revision_protagonistas.md`)
   y L0175 (nogal, comprometida, a 2.6 km de Lázaro Cárdenas).
 - La entrega pasa `motor/ensamblar.py` de la rama del integrador: 22 archivos, 0 rechazados, 0 retenidos.
 - **Un comando la rehace desde los crudos** (unos 55 s): `python datos/colab/correr_zonas.py`. Comprobado el 14-nov-2026 en una

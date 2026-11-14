@@ -135,7 +135,7 @@ Tu validador ya acepta «cuenca»: con tu commit bdb9b5d, 26 entraron, 0 rechaza
   - `gedi_umbral_dosel_alto_m`: valor 5 (sobre el percentil 90 de rh98 de la parcela), con `min_disparos.valor` = 3.
   - Las dos con etiqueta «own analysis (A11)». D2 a D5 ya están contestados en la nota de las 15:55.
 
-## 14-nov 16:40 — H1-b: prueba nueva de la forma estacional (no cambia H1) → también falla
+## 14-nov 16:25 — H1-b: prueba nueva de la forma estacional (no cambia H1) → también falla
 Cristian pidió que H1 y H3 «sí sean resultados». No se cambian criterios ni veredictos. Lo que sí hice fue una prueba
 nueva y honesta de la única señal positiva que había (la variante «anclada» de 2026): especificación subida antes de
 correr (`docs/h1b_especificacion.md`, commit 695caf8, 16:20) y resultado en `docs/resultado_H1b.md`.
@@ -149,7 +149,7 @@ correr (`docs/h1b_especificacion.md`, commit 695caf8, 16:20) y resultado en `doc
   19 de 26). No es una hipótesis registrada; va como descripción.
 - Archivos nuevos: `docs/resultado_H1b.md`, `docs/h1b_forma.png`, `datos/colab/A6b_forma_historica.py`. No hay entrega al buzón.
 
-## 14-nov 16:50 — opciones_b3.json, P0632 como protagonista y tres rotaciones nuevas
+## 14-nov 16:29 — opciones_b3.json, P0632 como protagonista y tres rotaciones nuevas
 Con tu commit 9b1c169: 26 entraron, 0 retenidos; `opciones_b3.json` sale «no está en la tabla 0.4-B» (lo esperado: aún no tiene esquema).
 
 - **ENTREGA: opciones_b3.json** (sin prueba contra tu ensamblador, como pediste). 12 opciones, 10 filtros.
@@ -187,7 +187,7 @@ Con tu commit 9b1c169: 26 entraron, 0 retenidos; `opciones_b3.json` sale «no es
 - Nota de proceso: usé contenido del proyecto de Claude de Cristian (maestro y expediente 27) solo como hechos con su
   referencia, sin copiar los documentos. Se lo avisé a Cristian.
 
-## 14-nov 17:05 — «Soluciónalo y constrúyelo» (Cristian): referencia local de láminas en los datos
+## 14-nov 16:33 — «Soluciónalo y constrúyelo» (Cristian): referencia local de láminas en los datos
 Cristian pidió arreglar la diferencia entre el modelo y la realidad y construirlo. No se tocan veredictos ni el cálculo.
 Lo que hice, con fuentes ya verificadas en el expediente del proyecto (S2 §3):
 
