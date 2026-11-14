@@ -24,9 +24,9 @@
     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
    },
    "advertir_si_rojo": true,
-   "por_que_en": "TEST ONLY: placeholder reason for alfalfa.",
+   "por_que_en": "TEST DATA: placeholder reason for alfalfa.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   "alfalfa_corte_verano": {
    "letra_maestro": "B",
@@ -46,9 +46,9 @@
     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
    },
    "advertir_si_rojo": false,
-   "por_que_en": "TEST ONLY: placeholder reason for alfalfa with a summer irrigation cut.",
+   "por_que_en": "TEST DATA: placeholder reason for alfalfa with a summer irrigation cut.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   "nogal": {
    "letra_maestro": "nogal_no_rota",
@@ -68,9 +68,9 @@
     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
    },
    "advertir_si_rojo": false,
-   "por_que_en": "TEST ONLY: placeholder reason for pecan orchard.",
+   "por_que_en": "TEST DATA: placeholder reason for pecan orchard.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   "algodon": {
    "letra_maestro": "A",
@@ -93,9 +93,9 @@
     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
    },
    "advertir_si_rojo": false,
-   "por_que_en": "TEST ONLY: placeholder reason for cotton.",
+   "por_que_en": "TEST DATA: placeholder reason for cotton.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   "chile": {
    "letra_maestro": "C",
@@ -118,9 +118,9 @@
     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
    },
    "advertir_si_rojo": false,
-   "por_que_en": "TEST ONLY: placeholder reason for chile pepper.",
+   "por_que_en": "TEST DATA: placeholder reason for chile pepper.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   "maiz_forrajero": {
    "letra_maestro": "D",
@@ -143,9 +143,9 @@
     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
    },
    "advertir_si_rojo": false,
-   "por_que_en": "TEST ONLY: placeholder reason for forage maize.",
+   "por_que_en": "TEST DATA: placeholder reason for forage maize.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   "sorgo": {
    "letra_maestro": "E",
@@ -168,9 +168,9 @@
     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
    },
    "advertir_si_rojo": false,
-   "por_que_en": "TEST ONLY: placeholder reason for forage sorghum.",
+   "por_que_en": "TEST DATA: placeholder reason for forage sorghum.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   "avena_maiz": {
    "letra_maestro": "E",
@@ -202,9 +202,9 @@
     "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
    },
    "advertir_si_rojo": false,
-   "por_que_en": "TEST ONLY: placeholder reason for oats then forage maize.",
+   "por_que_en": "TEST DATA: placeholder reason for oats then forage maize.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   "descanso": {
    "letra_maestro": "no_sembrar",
@@ -217,9 +217,9 @@
     "fuente": null
    },
    "advertir_si_rojo": false,
-   "por_que_en": "TEST ONLY: placeholder reason for do not plant.",
+   "por_que_en": "TEST DATA: placeholder reason for do not plant.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   }
  },
  "por_cultivo_actual": {
@@ -257,9 +257,9 @@
    "necesita": [
     "heladas.json"
    ],
-   "texto_en": "TEST ONLY: frost after the first sowing date.",
+   "texto_en": "TEST DATA: frost after the earliest sowing date.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   {
    "id": "helada_sin_umbral",
@@ -271,9 +271,9 @@
    "necesita": [
     "heladas.json"
    ],
-   "texto_en": "TEST ONLY: frost after sowing, source sets no threshold.",
+   "texto_en": "TEST DATA: frost after sowing, source sets no threshold.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   {
    "id": "antecedente_local",
@@ -288,9 +288,9 @@
    "necesita": [
     "dato local que no tenemos"
    ],
-   "texto_en": "TEST ONLY: needs the field's disease history.",
+   "texto_en": "TEST DATA: needs the field's disease history.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   },
   {
    "id": "fecha_limite_prueba",
@@ -302,9 +302,9 @@
     "antes_de": "11-30"
    },
    "necesita": [],
-   "texto_en": "TEST ONLY: a deadline the engine cannot evaluate.",
+   "texto_en": "TEST DATA: a deadline the engine cannot evaluate.",
    "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
-   "etiqueta": "TEST ONLY"
+   "etiqueta": "TEST DATA"
   }
  ]
 }

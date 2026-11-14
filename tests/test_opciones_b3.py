@@ -18,6 +18,11 @@ carpetas temporales: data/processed y web/data no se tocan.
 (d) Sin el archivo, el cubo sale con el diseño provisional, como hasta ahora.
 (e) Contrato (validar_contrato.py) y manifest (motor/manifest.py): la forma de «filtros» pasa, un estado
     fuera de lista no, y prob_helada lleva la fuente de heladas.json.
+(f) Regla 10 de CLAUDE.md en los textos en inglés que la ficha muestra (nombre_en, por_que_en, texto_en y
+    etiqueta): el buzón rechaza «first», «only», promesas de ahorro y lo demás de la lista de
+    motor/verificador.py (la misma lista, importada), y las cifras, corchetes y llaves en nombre_en, que el
+    motor interpola en explicaciones.json. Los textos que la ficha muestra se recorren en el cubo armado con
+    la fixture y en el cubo real (web/data/cubo.json).
 """
 import json
 import re
@@ -33,7 +38,7 @@ for ruta in (str(RAIZ), str(RAIZ / "motor")):
         sys.path.insert(0, ruta)
 
 import validar_contrato  # noqa: E402
-from motor import b4_cubo, esquemas, manifest  # noqa: E402
+from motor import b4_cubo, esquemas, manifest, verificador  # noqa: E402
 from motor import ensamblar as ens  # noqa: E402
 
 FIX = RAIZ / "tests/fixtures/opciones_b3"
@@ -115,6 +120,9 @@ def _poner(valor, *ruta):
     return cambio
 
 
+# Inicio del motivo de rechazo por lenguaje (motor/ensamblar.py); sigue «: «palabra» (motivo) (opción o filtro)».
+LENGUAJE = "con lenguaje que la ficha no admite (CLAUDE.md, regla 10)"
+
 MALOS = {
     "letra fuera de lista": (_poner("Z", "opciones", "chile", "letra_maestro"), "letra_maestro fuera de la lista"),
     "ciclo fuera de lista": (_poner("verano", "opciones", "chile", "secuencia", 0, "ciclo"), "ciclo fuera de la lista"),
@@ -145,6 +153,32 @@ MALOS = {
     "sin fuente del archivo": (_quitar("fuente"), "falta fuente"),
     "sin por_cultivo_actual": (_quitar("por_cultivo_actual"), "falta por_cultivo_actual"),
     "sin filtros": (_quitar("filtros"), "falta filtros"),
+    # Regla 10 (CLAUDE.md) en los textos en inglés que la ficha muestra: campo, palabra y opción o filtro.
+    "texto_en con first, only y saves": (
+        _poner("Sow only after the first frost-free date; this saves water.", "filtros", 0, "texto_en"),
+        f"texto_en {LENGUAJE}: «first» (palabra prohibida), «only» (palabra prohibida), «saves» (promete ahorros) "
+        "(filtro helada_siembra)"),
+    "texto_en que pronostica la presa": (_poner("The dam will refill by spring.", "filtros", 2, "texto_en"),
+                                         f"texto_en {LENGUAJE}: «will refill» (pronostica la presa) (filtro antecedente_local)"),
+    "nombre_en con only": (_poner("Alfalfa only in winter", "opciones", "alfalfa", "nombre_en"),
+                           f"nombre_en {LENGUAJE}: «only» (palabra prohibida) (opción alfalfa)"),
+    "por_que_en que promete ahorros": (_poner("Its Savings are large.", "opciones", "sorgo", "por_que_en"),
+                                       f"por_que_en {LENGUAJE}: «savings» (promete ahorros) (opción sorgo)"),
+    "etiqueta de opción con only": (_poner("TEST ONLY", "opciones", "chile", "etiqueta"),
+                                    f"etiqueta {LENGUAJE}: «only» (palabra prohibida) (opción chile)"),
+    "etiqueta de filtro con first": (_poner("first draft [S]", "filtros", 3, "etiqueta"),
+                                     f"etiqueta {LENGUAJE}: «first» (palabra prohibida) (filtro fecha_limite_prueba)"),
+    # nombre_en se interpola en explicaciones.json (kit C3): ni cifras ni signos de cita o de marcador.
+    "nombre_en con cifras": (
+        _poner("Alfalfa, skipping 2-3 summer irrigations", "opciones", "alfalfa_corte_verano", "nombre_en"),
+        "nombre_en no admite cifras (se interpola en explicaciones.json, donde toda cifra va en un marcador; "
+        "escríbala con letra) (opción alfalfa_corte_verano: «2», «3»)"),
+    "nombre_en con corchetes": (_poner("Alfalfa [B]", "opciones", "alfalfa", "nombre_en"),
+                                "nombre_en no admite corchetes, llaves ni «Source:»"),
+    "nombre_en con llaves": (_poner("Alfalfa {{f1}}", "opciones", "alfalfa", "nombre_en"),
+                             "nombre_en no admite corchetes, llaves ni «Source:»"),
+    "nombre_en con Source:": (_poner("Alfalfa. Source: the master table", "opciones", "alfalfa", "nombre_en"),
+                              "nombre_en no admite corchetes, llaves ni «Source:»"),
     # El formato anterior al de la decisión (el de data/opciones_b4.json) ya no entra.
     "formato anterior (actual y alternativas)": (
         lambda o: (o.clear(), o.update(json.loads(json.dumps({k: v for k, v in CFG.items()})), filtros=[])),
@@ -593,3 +627,112 @@ def test_manifest_registra_filtros_y_catalogo_con_su_fuente(con_b3, tmp_path):
     regla = cifras[f"cubo.json:filtros_catalogo.helada_siembra.regla.{b4_cubo.UMBRAL_HELADA}"]
     assert regla["min"] == filtro["regla"][b4_cubo.UMBRAL_HELADA] and regla["fuente"] == filtro["fuente"]
     assert not [a for a in man["avisos"] if "filtros" in a or "catalogo" in a], man["avisos"]
+
+
+# ---------------------------------------------------------------------------------------
+# (f) Regla 10 en los textos en inglés que la ficha muestra
+# ---------------------------------------------------------------------------------------
+def palabras_prohibidas(texto):
+    """Palabras de la lista de motor/verificador.py (CLAUDE.md, regla 10) que aparecen en un texto."""
+    return [m.group(0) for patron, _ in verificador.PROHIBIDAS for m in patron.finditer(texto)]
+
+
+def textos_de_la_ficha(cubo, con_notas):
+    """[(ruta, texto)] de los textos en inglés del cubo que la ficha muestra: nombre de cada opción, motivo
+    y etiqueta de sus filtros, supuestos de La gota, base del tope de consumo y los catálogos de B3.
+    Las fuentes (citas) no se recorren. con_notas: además, cubo.meta.notas (lo que escribe el motor)."""
+    salida = []
+    for pid, pc in cubo["parcelas"].items():
+        for o in pc["opciones"]:
+            base = f"parcelas.{pid}.opciones.{o['id']}"
+            salida.append((f"{base}.nombre", o["nombre"]))
+            for f in o.get("filtros") or []:
+                salida += [(f"{base}.filtros.{f.get('id')}.{campo}", f.get(campo)) for campo in ("motivo", "etiqueta")]
+            for bloque in ("gota", "gota_goteo_con_tope", "gota_goteo_sin_tope"):
+                salida += [(f"{base}.{bloque}.supuestos", t) for t in (o.get(bloque) or {}).get("supuestos") or []]
+            salida.append((f"{base}.tope_consumo.base_historica", (o.get("tope_consumo") or {}).get("base_historica")))
+    for rid, d in (cubo.get("opciones_catalogo") or {}).items():
+        salida += [(f"opciones_catalogo.{rid}.{campo}", d.get(campo)) for campo in ("nombre_en", "por_que_en", "etiqueta")]
+    for fid, d in (cubo.get("filtros_catalogo") or {}).items():
+        salida += [(f"filtros_catalogo.{fid}.{campo}", d.get(campo)) for campo in ("texto_en", "etiqueta")]
+    if con_notas:
+        salida += [("meta.notas", n) for n in cubo["meta"].get("notas") or []]
+    return [(ruta, t) for ruta, t in salida if isinstance(t, str)]
+
+
+def fuera_de_regla(textos):
+    """{(ruta sin el id de parcela, palabra)} de los textos con lenguaje prohibido."""
+    return sorted({(re.sub(r"^parcelas\.[^.]+\.", "parcelas.*.", ruta), palabra)
+                   for ruta, t in textos for palabra in palabras_prohibidas(t)})
+
+
+def test_la_fixture_no_trae_lenguaje_prohibido_en_sus_textos():
+    """El rótulo de la fixture es «TEST DATA»: un rótulo con «only» o «first» no entraría por el buzón."""
+    for nombre in (ARCHIVO, "heladas.json", "supuestos.json"):
+        crudo = (FIX / nombre).read_text(encoding="utf-8")
+        assert palabras_prohibidas(crudo) == [], nombre
+
+
+def test_textos_de_la_ficha_en_el_cubo_de_prueba_sin_lenguaje_prohibido(con_b3):
+    _, _, cubo, _, web = con_b3
+    textos = textos_de_la_ficha(cubo, con_notas=True)
+    # El recorrido no está vacío: toca cada clase de texto que la ficha muestra.
+    clases = {re.sub(r"^parcelas\.[^.]+\.opciones\.[^.]+\.|^(opciones|filtros)_catalogo\.[^.]+\.", "", ruta).split(".")[-1]
+              for ruta, _ in textos}
+    assert {"nombre", "motivo", "etiqueta", "supuestos", "base_historica", "nombre_en", "por_que_en", "texto_en",
+            "notas"} <= clases, clases
+    assert any(t == B3["filtros"][0]["texto_en"] for _, t in textos)
+    assert fuera_de_regla(textos) == []
+    # Y las explicaciones, que llevan el nombre de B3, pasan el verificador completo (cifras, citas, lenguaje).
+    assert verificador.verificar_archivo(web / "explicaciones.json") == {}
+
+
+def test_textos_de_la_ficha_en_el_cubo_real_sin_lenguaje_prohibido():
+    """El cubo publicado (web/data/cubo.json), llegue por donde llegue cada texto: nombres provisionales o
+    de B3, filtros, supuestos de La gota. Sus notas (meta.notas) llevan fuentes citadas y no se recorren."""
+    if not (WEB / "cubo.json").exists():
+        pytest.skip("web/data/cubo.json aún no existe")
+    cubo = leer(WEB, "cubo.json")
+    assert fuera_de_regla(textos_de_la_ficha(cubo, con_notas=False)) == []
+    # Las notas que escribe el motor (en inglés) tampoco: «saving» no se usa ni para negar.
+    notas_del_motor = [("meta.notas", n) for n in cubo["meta"].get("notas") or [] if n.startswith("Drip scenario")]
+    assert fuera_de_regla(notas_del_motor) == []
+
+
+def test_muchos_textos_con_la_misma_palabra_se_cuentan(tmp_path):
+    """El rótulo anterior de la fixture («TEST ONLY» en cada por_que_en): un motivo con el número de casos."""
+    def cambio(o):
+        for d in o["opciones"].values():
+            d["por_que_en"] = "TEST ONLY: placeholder."
+    rep = ensamblar(tmp_path, alterado(cambio))
+    motivos = " | ".join(rep["rechazados"][0]["motivos"])
+    assert f"por_que_en {LENGUAJE}: «only» (palabra prohibida) ({len(B3['opciones'])} casos; ej.: opción " in motivos
+
+
+def test_la_lista_de_lenguaje_es_la_del_verificador(tmp_path, monkeypatch):
+    """Una sola lista (motor/verificador.py → PROHIBIDAS): el buzón la importa, no la duplica."""
+    assert ens.lenguaje_prohibido("Sow only here") == [("only", "palabra prohibida")]
+    assert ens.lenguaje_prohibido("A plain sentence about sowing dates.") == []
+    palabra = "zanahoria"
+    con_palabra = alterado(_poner(f"TEST DATA: {palabra}.", "filtros", 1, "texto_en"))
+    assert ensamblar(tmp_path / "antes", con_palabra)["rechazados"] == []
+    monkeypatch.setattr(verificador, "PROHIBIDAS", [(re.compile(rf"\b{palabra}\b", re.IGNORECASE), "palabra de prueba")])
+    rep = ensamblar(tmp_path / "despues", con_palabra)
+    assert f"texto_en {LENGUAJE}: «{palabra}» (palabra de prueba) (filtro helada_sin_umbral)" in " | ".join(
+        rep["rechazados"][0]["motivos"])
+
+
+@pytest.mark.parametrize("nombre", ["Alfalfa, skipping 2-3 summer irrigations", "Alfalfa only in winter",
+                                    "Alfalfa [B]", "Alfalfa {{zz}}", "Alfalfa {f", "Alfalfa. Source: the master table"])
+def test_nombre_que_el_buzon_rechaza_romperia_las_explicaciones(tmp_path, nombre):
+    """Por qué el buzón es estricto con nombre_en: puesto a mano en la caché, el motor lo interpola en
+    explicaciones.json y el comando único falla más adelante (contrato o verificador), lejos del archivo.
+    (Un marcador que sí existe, «{{f1}}», no falla aguas abajo: la explicación lo rellenaría con una cifra
+    y el nombre de la opción lo mostraría crudo; el buzón lo rechaza igual, ver MALOS.)"""
+    cambio = _poner(nombre, "opciones", "alfalfa", "nombre_en")
+    rep = ensamblar(tmp_path, alterado(cambio))
+    assert not rep["entraron"] and any("nombre_en" in m for m in rep["rechazados"][0]["motivos"])
+    _, _, _, _, web = correr(procesados(tmp_path, b3=alterado(cambio)), tmp_path)
+    tarde = validar_contrato.validar(web) + [e for errores in verificador.verificar_archivo(web / "explicaciones.json").values()
+                                             for e in errores]
+    assert tarde, "si esto dejara de fallar aguas abajo, la regla del buzón ya no haría falta"

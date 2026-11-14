@@ -26,6 +26,10 @@ Fuentes de lo que aquí se exige:
   opciones_b3.json (B3), un solo archivo para las dos zonas. Se valida su estructura (regla de JSON
   «opciones_b3»); que cada opción tenga lámina en rotaciones.json de cada zona lo comprueba el motor
   (motor/b4_cubo.py omite con aviso la que no la tenga).
+- la decisión de perfil de suelo y aptitud (docs/decisiones/2026-11-14_suelo_aptitud.md, FUENTE_SUELO):
+  suelo_parcelas.csv (A14) y suelo_requisitos.json (A15), cada uno UN archivo para las dos zonas (no
+  van en ARCHIVOS_POR_ZONA). No cambian el cálculo del agua: alimentan web/data/suelo.json
+  (motor/suelo_web.py).
 
 Vocabulario de un campo (columna de CSV, propiedad de GeoJSON o llave de un objeto JSON):
   tipo      texto | numero | entero | fecha (AAAA-MM-DD) | mes (AAAA-MM) |
@@ -59,10 +63,17 @@ rango_segun (cota de una columna según el valor de otra: el valor según su uni
 valores_segun (lista cerrada de una columna según el valor de otra: la zona según la fuente) y
 vacias_segun (columnas que van vacías cuando otra vale cierto valor y, con «llenas_si_no»,
 llenas en cualquier otro caso). ensamblar.py las aplica por nombre.
+Para el suelo (FUENTE_SUELO): suma_cercana (varias columnas suman un total ± una tolerancia: arena, limo
+y arcilla) y forma_texto (un texto con la forma de una expresión regular: la capa «a-b»).
 Reglas de JSON («regla»): heladas, dotaciones, supuestos, rotaciones y objeto (valida «campos»).
+Regla de JSON «suelo_requisitos» (FUENTE_SUELO): fuente del archivo; «cultivos» con llaves de su lista y,
+por cultivo, ph, textura y salinidad_umbral_ds_m (cada uno null o con su fuente) y nutrientes[]; rangos de
+pH dentro de la escala y el óptimo dentro del tolerado; texturas de la lista de clases y sin repetir.
 Regla de JSON «opciones_b3» (FUENTE_B3): opciones con letra_maestro, secuencia (ciclo y siembra MM-DD),
 indicadores booleanos o null y advertir_si_rojo; por_cultivo_actual que solo nombra opciones definidas;
 filtros con tipo de su lista, aplica_a, texto_en y fuente. Las listas cerradas viven en su esquema.
+Sus textos para la ficha (nombre_en, por_que_en, texto_en, etiqueta) se rechazan si traen el lenguaje de la
+regla 10 de CLAUDE.md (la lista de motor/verificador.py), y nombre_en, además, si trae cifras o corchetes.
 Llave de GeoJSON «por_zona» (parcelas_base): si una parcela trae «zona», su id empieza con el
 prefijo_id de esa zona y su centroide cae en el rectángulo (bbox) de esa zona.
 """
@@ -251,6 +262,43 @@ LIMITES_CONTEXTO = (
 # gaez_zona.csv: clases de cultivo del proyecto (contrato v4, kit §2.2) que SÍ son un cultivo:
 # «sin_clasificar» (abstención) y «barbecho» (sin cultivo) no tienen aptitud agroclimática.
 CULTIVOS_GAEZ = tuple(sorted(CULTIVOS - {"sin_clasificar", "barbecho"}))
+
+# Perfil de suelo y aptitud: suelo_parcelas.csv (A14) y suelo_requisitos.json (A15).
+FUENTE_SUELO = ("decisión de perfil de suelo y aptitud de cada cultivo "
+                "(docs/decisiones/2026-11-14_suelo_aptitud.md, «Entregas nuevas»)")
+# Las 12 clases de textura USDA de la decisión, tal cual y en su orden (una prueba las compara con el
+# documento). Lista cerrada de clase_textura y de textura.apta, textura.limitante y condicion.textura_en.
+CLASES_TEXTURA = ("sand", "loamy sand", "sandy loam", "loam", "silt loam", "silt", "sandy clay loam",
+                  "clay loam", "silty clay loam", "sandy clay", "silty clay", "clay")
+# «suman 100 ± 2» (FUENTE_SUELO): arena, limo y arcilla son porcentajes de la misma capa.
+SUMA_TEXTURA_PCT = 100
+TOLERANCIA_SUMA_TEXTURA_PCT = 2
+# Límites POR DEFINICIÓN (no son cotas de datos): un porcentaje está en [0, 100] y la escala de pH va
+# de 0 a 14.
+PORCENTAJE = {"tipo": "numero", "min": 0, "max": 100}
+PH_MIN, PH_MAX = 0, 14
+# profundidad_cm: la capa promediada como «a-b» en centímetros (FUENTE_SUELO: «p. ej. 0-30»): dos enteros
+# separados por un guion; una capa tiene espesor, así que a < b.
+FORMA_PROFUNDIDAD = r"^(\d+)-(\d+)$"
+# Cultivos que pueden llevar requisitos de suelo (llaves de «cultivos» en suelo_requisitos.json): las
+# clases del proyecto que SÍ son un cultivo (CULTIVOS_GAEZ) más los nombres con que las secuencias del cubo
+# nombren un cultivo sin ser clase del contrato (CULTIVOS_DE_SECUENCIAS). Revisado web/data/cubo.json
+# (opciones[].secuencia) el 14-nov-2026: alfalfa, algodon, cereal_invierno, maiz_forrajero, nogal y sorgo,
+# todas clases del contrato (la avena de la opción «avena_maiz» va como «cereal_invierno»), así que hoy
+# no hay ninguno que agregar. Una prueba (tests/test_esquemas_suelo.py) compara esta lista con el cubo.
+CULTIVOS_DE_SECUENCIAS = ()
+CULTIVOS_SUELO = tuple(sorted({*CULTIVOS_GAEZ, *CULTIVOS_DE_SECUENCIAS}))
+# Cómo nombra el cubo la opción que no siembra (motor/b4_cubo.py): no es un cultivo y no lleva requisitos.
+NO_SIEMBRA = "descanso"
+# Bloques de requisitos de un cultivo (cada uno null o con su fuente) y llaves de «condicion» de un aviso
+# de nutrientes (FUENTE_SUELO, «suelo_requisitos.json»). «textura_en» no está escrita en el ejemplo de la
+# decisión (que solo muestra ph_mayor_que): la pide la tarea del módulo junto con ph_menor_que.
+BLOQUES_REQUISITO = ("ph", "textura", "salinidad_umbral_ds_m")
+CONDICIONES_NUTRIENTE = ("ph_mayor_que", "ph_menor_que", "textura_en")
+# Llave OPCIONAL de suelo_requisitos.json con los cortes para decir si un pH es ácido, neutro o alcalino
+# ({acido_menor_que, alcalino_mayor_que, fuente}). No está en el contrato de la decisión: sin ella la
+# ficha escribe solo el número (ningún corte se escribe a mano en la web).
+ESCALA_PH = "escala_ph"
 
 ID = {"tipo": "texto", "id_parcela": True}
 INDICE = {"tipo": "numero", "min": -1, "max": 1}     # NDVI y demás diferencias normalizadas
@@ -780,6 +828,61 @@ ESQUEMAS = {
                           "del proyecto (contrato v4, kit §2.2; sin «sin_clasificar» ni «barbecho», que no "
                           "son cultivos); variable y unidad tal como las publica FAO (texto no vacío); "
                           "valor numérico; resolución > 0 por definición"),
+    },
+    # ---- A14 y A15 (perfil de suelo y aptitud; FUENTE_SUELO) ---------------------------
+    # Un solo archivo para las dos zonas (no van en ARCHIVOS_POR_ZONA). Sin «alimenta»: no hay versión
+    # simulada; si faltan, web/data/suelo.json lleva el bloque en null con su motivo (motor/suelo_web.py)
+    # y la página dice «not delivered yet».
+    "suelo_parcelas.csv": {
+        "pieza": "A14", "tipo": "csv",
+        "columnas": {
+            "id": _con(ID, unico=True),
+            "arena_pct": PORCENTAJE,
+            "limo_pct": PORCENTAJE,
+            "arcilla_pct": PORCENTAJE,
+            "clase_textura": {"tipo": "texto", "valores": CLASES_TEXTURA},
+            "ph": {"tipo": "numero", "min": PH_MIN, "max": PH_MAX},
+            "carbono_organico_g_kg": NO_NEGATIVO,
+            # «vacío si el producto no lo trae» (nitrógeno y CIC) o «si no hay producto con cobertura».
+            "nitrogeno_g_kg": _con(NO_NEGATIVO, nulo=True),
+            "cic_cmol_kg": _con(NO_NEGATIVO, nulo=True),
+            "salinidad_ce_ds_m": _con(NO_NEGATIVO, nulo=True),
+            "profundidad_cm": {"tipo": "texto"},
+            "n_celdas": {"tipo": "entero", "min": 1},
+        },
+        "reglas": [
+            {"regla": "suma_cercana", "columnas": ["arena_pct", "limo_pct", "arcilla_pct"],
+             "total": SUMA_TEXTURA_PCT, "tolerancia": TOLERANCIA_SUMA_TEXTURA_PCT},
+            {"regla": "forma_texto", "columna": "profundidad_cm", "patron": FORMA_PROFUNDIDAD,
+             "forma": "«a-b» en centímetros (por ejemplo 0-30)", "creciente": True},
+        ],
+        "fuente_reglas": (f"{FUENTE_SUELO}: una fila por parcela de parcelas_base.geojson (id único); arena, "
+                          "limo y arcilla en % que suman 100 ± 2; clase_textura de las 12 clases USDA de su "
+                          "tabla; nitrógeno, CIC y salinidad vacíos si el producto no los trae; "
+                          "profundidad_cm «a-b» (p. ej. 0-30) con a < b; al menos una celda del mapa. Límites "
+                          "por definición: porcentajes entre 0 y 100; pH entre 0 y 14 (la escala); carbono, "
+                          "nitrógeno, CIC y conductividad eléctrica ≥ 0"),
+    },
+    "suelo_requisitos.json": {
+        "pieza": "A15", "tipo": "json", "regla": "suelo_requisitos",
+        "cultivos": CULTIVOS_SUELO,
+        "bloques": BLOQUES_REQUISITO,
+        "clases_textura": CLASES_TEXTURA,
+        "ph_min": PH_MIN, "ph_max": PH_MAX,
+        "condiciones": CONDICIONES_NUTRIENTE,
+        "escala_ph": ESCALA_PH,
+        "fuente_reglas": (f"{FUENTE_SUELO}: fuente del archivo; «cultivos» con llaves de las clases de cultivo "
+                          "del proyecto (contrato v4, kit §2.2; sin «sin_clasificar» ni «barbecho», que no son "
+                          "cultivos), las mismas con que el cubo nombra los cultivos de cada secuencia; por "
+                          "cultivo, ph {optimo, tolerado}, textura {apta, limitante} y salinidad_umbral_ds_m "
+                          "{valor}: cada bloque es null («un bloque sin fuente va en null») o trae su fuente; "
+                          "optimo y tolerado son pares [min, max] con min ≤ max y el óptimo dentro del "
+                          "tolerado; apta y limitante solo con clases USDA de la tabla y sin repetir; "
+                          "nutrientes[] con elemento, texto_en y fuente, y condicion opcional (ph_mayor_que, "
+                          "ph_menor_que, textura_en); texto_en va tal cual a la ficha, así que se rechaza si trae "
+                          "el lenguaje de la regla 10 de CLAUDE.md. Límites por definición: pH entre 0 y 14 (la escala); "
+                          "conductividad eléctrica ≥ 0. Llave opcional escala_ph {acido_menor_que, "
+                          "alcalino_mayor_que, fuente}: si viene, dentro de la escala y en orden"),
     },
     # ---- Textos (P6) y resultados ----------------------------------------------------
     "resultado_H1.md": {"pieza": "A6", "tipo": "texto", "fuente_reglas": FUENTE_TABLA},

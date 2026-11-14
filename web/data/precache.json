@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
  "_nota": "Generado por motor/pwa.py recorriendo web/ (todo menos sw.js y lo oculto); nunca se edita a mano. «version» es la huella del contenido de esos archivos: web/sw.js guarda la copia sin conexión en la caché raiz-<version> y la renueva cuando cambia.",
- "version": "0dc5e463e6dc53e4",
+ "version": "ae9acebefbad01fa",
  "archivos": [
   "app.js",
   "css/acerca.css",
@@ -13,6 +13,7 @@
   "css/mensaje.css",
   "css/relieve.css",
   "css/resumen.css",
+  "css/suelo.css",
   "css/tiempo.css",
   "data/contexto.json",
   "data/cubo.json",
@@ -60,6 +61,7 @@
   "data/pruebas.json",
   "data/relieve.json",
   "data/relieve_rutas.geojson",
+  "data/suelo.json",
   "icons/raiz-192.png",
   "icons/raiz-512.png",
   "icons/raiz-maskable-512.png",
@@ -73,6 +75,7 @@
   "js/mensaje.js",
   "js/relieve.js",
   "js/resumen.js",
+  "js/suelo.js",
   "js/tiempo.js",
   "manifest.webmanifest",
   "reglas.js",

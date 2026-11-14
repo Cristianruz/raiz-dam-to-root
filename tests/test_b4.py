@@ -424,7 +424,9 @@ def test_goteo_lleva_la_fuente_y_la_etiqueta_de_supuestos(con_goteo):
     assert not any(n.startswith(NOTA_SIN_GOTEO) for n in notas)
     nota = [n for n in notas if "indicative values" in n and "not measured in this district" in n]
     assert nota and etiqueta in nota[0] and sup["ea_goteo"]["fuente"] in nota[0]
-    assert any("X3.1" in n and "smaller saving" in n for n in notas), "falta declarar la lectura de X3.1"
+    # La lectura de X3.1 se declara sin «saving» (CLAUDE.md, regla 10: ni para negar; tests/test_opciones_b3.py).
+    assert any("X3.1" in n and "the larger of" in n and "more conservative reading" in n for n in notas), \
+        "falta declarar la lectura de X3.1"
 
 
 def test_goteo_la_entrega_nunca_baja_de_et_entre_ea_goteo():

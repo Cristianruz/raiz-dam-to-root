@@ -1,0 +1,170 @@
+/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* web/css/suelo.css — perfil de suelo de la parcela y aptitud de cada opción (web/js/suelo.js;
+   docs/decisiones/2026-11-14_suelo_aptitud.md).
+   Colores de la identidad como variables; toma --tinta, --borde, --brote… de style.css. El valor tras la
+   coma es el respaldo si style.css no está cargado (mismos códigos de la identidad, kit C1 §10).
+   Nada depende solo del color: cada tramo de la barra de textura lleva su trama (puntos, rayas, liso) y
+   su porcentaje en texto; cada estado de aptitud, su símbolo y su texto. Texto oscuro sobre fondos
+   claros (AA). Los números de este archivo son medidas de diseño, no datos. */
+
+:root {
+  --suelo-tinta: var(--tinta, #1D2329);
+  --suelo-tinta-suave: var(--tinta-suave, #4A525A);
+  --suelo-fondo: var(--blanco, #FFFFFF);
+  --suelo-borde: var(--borde, #D8CFC2);
+  --suelo-papel: var(--arena, #F5EFE6);
+  --suelo-foco: var(--agua, #1F6FB2);
+  --suelo-enlace: var(--agua-osc, #174F80);
+
+  /* Fracciones de la textura: de clara a oscura (arena, limo, arcilla), cada una con su trama */
+  --suelo-arena: #F3DFB3;
+  --suelo-limo: #CFA274;
+  --suelo-arcilla: var(--tierra, #8A5A3B);
+  --suelo-trama: #5B3A22;
+
+  /* Estados de aptitud: borde y fondo de la insignia (el texto siempre es oscuro) */
+  --suelo-fits: var(--brote, #4C9A2A);
+  --suelo-fits-claro: var(--brote-claro, #E3F0DC);
+  --suelo-tolerated: var(--ambar, #D98E04);
+  --suelo-tolerated-claro: var(--ambar-claro, #FBEFD5);
+  --suelo-outside: var(--rojo, #B3261E);
+  --suelo-outside-claro: var(--rojo-claro, #F6DEDC);
+  --suelo-sin-rango: var(--tinta-suave, #4A525A);
+  --suelo-sin-rango-claro: var(--arena-osc, #E9DFD0);
+}
+
+/* ---------- Base ---------- */
+.suelo-perfil, .suelo-aptitud {
+  color: var(--suelo-tinta);
+  font-size: 0.9rem; line-height: 1.4;
+  min-width: 0; max-width: 100%;
+  overflow-wrap: break-word;
+}
+.suelo-perfil *, .suelo-aptitud * { box-sizing: border-box; min-width: 0; }
+.suelo-perfil p, .suelo-aptitud p { margin: 0; }
+.suelo-titulo { font-weight: 700; }
+.suelo-icono { font-weight: 700; }
+
+.suelo-solo-lector {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Lo pedido y aún no entregado, o sin dato para la parcela, con su símbolo. El perfil (una vez por ficha)
+   va en una caja de borde punteado; la aptitud (una vez por tarjeta de opción) va en una línea sin caja,
+   para no repetir la misma caja en cada tarjeta. */
+p.suelo-perfil.suelo-pendiente {
+  padding: 6px 10px; border-radius: 6px;
+  border: 1px dashed var(--suelo-sin-rango);
+  background: var(--suelo-sin-rango-claro);
+}
+p.suelo-aptitud.suelo-pendiente { font-size: 0.85rem; color: var(--suelo-tinta-suave); }
+.suelo-pendiente-que { font-weight: 700; }
+
+/* ---------- Perfil de suelo ---------- */
+div.suelo-perfil {
+  display: grid; gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--suelo-borde); border-radius: 8px;
+  background: var(--suelo-fondo);
+}
+.suelo-capa { color: var(--suelo-tinta-suave); }
+
+/* Barra apilada: el ancho de cada tramo lo pone el dato (flex-grow en el HTML). */
+.suelo-barra {
+  display: flex; gap: 2px;
+  height: 18px; padding: 1px;
+  border: 1px solid var(--suelo-tinta-suave); border-radius: 5px;
+  background: var(--suelo-fondo);
+  overflow: hidden;
+}
+.suelo-tramo { flex: 0 1 0%; min-width: 3px; height: 100%; border-radius: 2px; }
+.suelo-tramo, .suelo-clave { forced-color-adjust: none; }
+.suelo-tramo--arena {
+  background-color: var(--suelo-arena);
+  background-image: radial-gradient(var(--suelo-trama) 1.1px, transparent 1.6px);
+  background-size: 6px 6px;
+}
+.suelo-tramo--limo {
+  background-color: var(--suelo-limo);
+  background-image: repeating-linear-gradient(135deg, transparent 0 4px, var(--suelo-trama) 4px 5.5px);
+}
+.suelo-tramo--arcilla { background-color: var(--suelo-arcilla); }
+
+.suelo-leyenda {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 4px 14px;
+  font-size: 0.85rem;
+}
+.suelo-leyenda li { display: inline-flex; align-items: center; gap: 6px; }
+.suelo-clave {
+  flex: none; width: 14px; height: 14px;
+  border: 1px solid var(--suelo-tinta-suave); border-radius: 3px;
+}
+
+.suelo-datos {
+  margin: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 2px 16px;
+}
+.suelo-datos > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; }
+.suelo-datos dt { color: var(--suelo-tinta-suave); }
+.suelo-datos dt::after { content: ":"; }
+.suelo-datos dd { margin: 0; }
+.suelo-ph-clase {
+  display: inline-block; margin-left: 2px; padding: 0 6px;
+  border: 1px solid var(--suelo-tinta-suave); border-radius: 4px;
+  font-size: 0.8rem; font-weight: 700; color: var(--suelo-tinta-suave);
+}
+
+/* Lo que ningún mapa abierto da por parcela: se dice a la vista, no en letra chica. */
+.suelo-no-mapeado {
+  padding: 6px 10px;
+  border-left: 4px solid var(--suelo-tinta-suave); border-radius: 0 6px 6px 0;
+  background: var(--suelo-papel);
+}
+.suelo-escala, .suelo-fuente, .suelo-evidencia { font-size: 0.8rem; color: var(--suelo-tinta-suave); }
+.suelo-escala { font-weight: 700; }
+.suelo-fuente { overflow-wrap: anywhere; }
+
+/* ---------- Aptitud de una opción ---------- */
+div.suelo-aptitud { display: grid; gap: 2px; }
+.suelo-aptitud-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.suelo-insignia {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  padding: 1px 9px; border-radius: 999px;
+  border: 2px solid var(--suelo-sin-rango);
+  background: var(--suelo-fondo);
+  font-size: 0.85rem; font-weight: 700; color: var(--suelo-tinta);
+}
+.suelo-insignia--fits { border-color: var(--suelo-fits); background: var(--suelo-fits-claro); }
+.suelo-insignia--tolerated { border-color: var(--suelo-tolerated); background: var(--suelo-tolerated-claro); }
+.suelo-insignia--outside_range { border-color: var(--suelo-outside); background: var(--suelo-outside-claro); }
+.suelo-insignia--no_published_range { border-style: dashed; background: var(--suelo-sin-rango-claro); }
+.suelo-marca-aviso { font-size: 0.8rem; color: var(--suelo-tinta-suave); }
+
+.suelo-porque > summary {
+  width: fit-content; max-width: 100%;
+  padding: 4px 6px; margin-left: -6px;
+  border-radius: 4px;
+  cursor: pointer; font-weight: 700; color: var(--suelo-enlace);
+}
+.suelo-porque > summary:hover { text-decoration: underline; }
+.suelo-porque > summary:focus-visible { outline: 3px solid var(--suelo-foco); outline-offset: 2px; }
+.suelo-motivos, .suelo-avisos {
+  list-style: none; margin: 4px 0 0; padding: 0;
+  display: grid; gap: 6px;
+}
+.suelo-motivos li, .suelo-avisos li { padding-left: 10px; border-left: 3px solid var(--suelo-borde); }
+.suelo-motivos li[data-estado="fits"] { border-left-color: var(--suelo-fits); }
+.suelo-motivos li[data-estado="tolerated"] { border-left-color: var(--suelo-tolerated); }
+.suelo-motivos li[data-estado="outside_range"] { border-left-color: var(--suelo-outside); }
+.suelo-motivos .suelo-fuente, .suelo-avisos .suelo-fuente { display: block; }
+.suelo-avisos-titulo { margin-top: 8px !important; font-weight: 700; }
+.suelo-evidencia { margin-top: 8px !important; }
+
+@media print {
+  .suelo-porque > summary { color: var(--suelo-tinta); }
+}

@@ -25,9 +25,9 @@
   "04-12": 0.0
  },
  "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
- "nota": "TEST ONLY",
+ "nota": "TEST DATA",
  "definicion": {
-  "prob_helada_despues_de": "TEST ONLY: share of years with frost from that date on"
+  "prob_helada_despues_de": "TEST DATA: share of years with frost from that date on"
  },
  "zonas": {
   "lazaro_cardenas": {

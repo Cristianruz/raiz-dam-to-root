@@ -857,7 +857,7 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
             f"not measured in this district ({goteo[EA_GOTEO]['etiqueta']}). Source: {goteo[EA_GOTEO]['fuente']}",
             "Drip scenario, how kit X3.1 was read (it does not say how to go from the gravity water depth to drip): "
             f"field delivery with drip is the larger of crop ET ÷ {EA_GOTEO} and current delivery × {EA_SUPERFICIAL} ÷ "
-            f"{EA_GOTEO} (the smaller saving). With the consumption cap, ET and area stay the same. Without it, dam "
+            f"{EA_GOTEO} (the more conservative reading). With the consumption cap, ET and area stay the same. Without it, dam "
             "water stays the same, the freed water irrigates more area of the same crop and ET rises in that "
             "proportion; the aquifer return keeps the same coefficient as an upper bound. Options that take no "
             "water have no drip scenario.",

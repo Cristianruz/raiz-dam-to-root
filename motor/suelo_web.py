@@ -1,0 +1,582 @@
+#!/usr/bin/env python3
+# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+"""Perfil de suelo por parcela y aptitud de cada opción para la web: escribe web/data/suelo.json.
+
+Decisión: docs/decisiones/2026-11-14_suelo_aptitud.md (qué se agrega, qué no es y el contrato de las
+dos entregas: suelo_parcelas.csv, pieza A14, y suelo_requisitos.json, pieza A15). Nada de esto cambia
+el cálculo del agua de la parcela (cubo, kit §2): la aptitud es una evidencia más junto al agua y al
+plazo. No es un análisis de suelo (es un mapa regional modelado) y no decide por el agricultor.
+
+API (el integrador la conecta a construir.py DESPUÉS de motor/b4_cubo.py, porque lee el cubo; este
+módulo no depende de ningún otro motor):
+    construir(processed=data/processed, web=web/data, cubo_ruta=None, generado=None) -> dict
+        Lee las entregas YA validadas de `processed` (motor/ensamblar.py) y las opciones del cubo
+        (`cubo_ruta`; por omisión <web>/cubo.json) y escribe <web>/suelo.json. Devuelve
+        {"ejecutado": True, "salida": ruta, "bloques": {"perfil": bool, "requisitos": bool,
+        "aptitud": bool}, "parcelas_con_perfil": n, "opciones_evaluadas": n, "estados": {estado: n},
+        "avisos": [...]}. No modifica nada más. `generado` fija la marca de tiempo (solo para la fixture).
+    armar(processed, cubo, generado=None) -> (suelo, avisos)
+        Lo mismo sin escribir (para las pruebas). `cubo` es el contenido de cubo.json o None.
+    aptitud_de_opcion(secuencia, perfil, requisitos) -> dict   y   aptitud_de_cultivo(cultivo, perfil,
+        requisitos) -> dict: las reglas de abajo para UNA opción o UN cultivo (`requisitos` ya pasado
+        por normalizar_requisitos).
+CLI:
+    python motor/suelo_web.py [--processed DIR] [--web DIR] [--cubo RUTA]
+
+Contenido de suelo.json (lo lee web/js/suelo.js; toda cifra de la página sale de aquí):
+  _encabezado, _nota, generado (fecha y hora UTC), decision
+  rotulo           texto fijo de escala, en inglés: «Regional soil map; not a soil test». La resolución
+                   del mapa NO va aquí ni se escribe a mano: está en perfil.fuente, que es la línea de
+                   data/processed/fuentes.json del archivo (LEEME.md del buzón: producto, versión, capa).
+  motivo_pedido    el texto común de lo pedido y aún no entregado
+  idioma_fuentes   idioma de los textos de «fuente» de las entregas (líneas de LEEME.md), para que la
+                   página los marque con su atributo «lang»
+  perfil           null + perfil_motivo, o {archivo, fuente, fecha, profundidad_cm, parcelas: {id:
+                   {arena_pct, limo_pct, arcilla_pct, clase_textura, ph, carbono_organico_g_kg,
+                   nitrogeno_g_kg, cic_cmol_kg, salinidad_ce_ds_m, n_celdas}}, resumen_zona: {zona: {n,
+                   clases: {clase: n}, ph: {min, mediana, max}}} | null}. Un valor que la entrega trae
+                   vacío va en null, nunca en cero. profundidad_cm es la capa del archivo («0-30»); si
+                   las filas no traen todas la misma, va en null y cada parcela lleva la suya.
+  requisitos       null + requisitos_motivo, o el contenido de suelo_requisitos.json tal cual (fuente,
+                   cultivos y, si viene, escala_ph) más «entrega» {archivo, fuente, fecha}
+  aptitud          null + aptitud_motivo (+ aptitud_falta: qué archivos faltan) si falta cualquiera de los
+                   dos o el cubo; si están: {id_parcela: {id_opcion: {estado, nota, por_cultivo: [{cultivo,
+                   estado, nota, motivos: [{criterio: "ph" | "textura" | "salinidad", estado, valor_parcela,
+                   rango_o_lista, fuente}], sin_dato_de_parcela: [criterio]}], avisos_nutrientes:
+                   [{elemento, texto_en, fuente, cultivo}]}}}. Solo entran las parcelas con perfil y
+                   con opciones en el cubo. rango_o_lista: {optimo: [min, max], tolerado: [min, max]}
+                   (ph), {apta: [...], limitante: [...]} (textura) o {umbral_ds_m: valor} (salinidad).
+  avisos           lo que el motor no pudo leer o encontró inconsistente (lista de textos)
+
+REGLAS DE APTITUD (cuatro estados: fits, tolerated, outside_range y no_published_range):
+- Por criterio:
+  · pH: dentro del rango óptimo (extremos incluidos) → fits; fuera del óptimo y dentro del tolerado →
+    tolerated; fuera del tolerado → outside_range;
+  · textura: la clase de la parcela está en «apta» → fits; en «limitante» → outside_range; en ninguna de
+    las dos → tolerated;
+  · salinidad: solo se evalúa si la parcela trae salinidad_ce_ds_m Y el cultivo trae umbral: menor o
+    igual al umbral → fits; mayor → outside_range.
+  Un criterio sin dato de la parcela o sin rango publicado NO cuenta (no se supone nada).
+- El estado de un cultivo es el PEOR de sus criterios evaluados (outside_range > tolerated > fits). Sin
+  ningún criterio evaluable → no_published_range, con su nota.
+- El estado de la opción es el PEOR de sus cultivos con rango; si ninguno tiene rango →
+  no_published_range.
+- «descanso» (no sembrar; esquemas.NO_SIEMBRA) o una secuencia vacía no se evalúan: no_published_range
+  con la nota «nothing is planted».
+- Avisos de nutrientes: se agrega el de cada cultivo de la opción cuando su condición se cumple con el
+  perfil de la parcela (ph_mayor_que y ph_menor_que: desigualdad estricta; textura_en: la clase de la
+  parcela está en la lista; varias llaves: todas). Sin condición → siempre.
+- Nada se interpola ni se redondea más allá de lo que trae la entrega. Los únicos valores calculados son
+  los del resumen por zona (conteos, mínimo, máximo y mediana del pH; la mediana lleva a lo más un
+  decimal más que la entrega). Este archivo no trae ningún rango, umbral ni corte: todos se LEEN de
+  suelo_requisitos.json.
+"""
+import argparse
+import csv
+import datetime
+import json
+import math
+import statistics
+import sys
+from collections import Counter
+from pathlib import Path
+
+RAIZ = Path(__file__).resolve().parent.parent
+if str(RAIZ) not in sys.path:
+    sys.path.insert(0, str(RAIZ))
+
+from motor import esquemas as E  # noqa: E402
+
+ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+NOMBRE_SALIDA = "suelo.json"
+NOMBRE_FUENTES = "fuentes.json"
+NOMBRE_CUBO = "cubo.json"
+DECISION = "docs/decisiones/2026-11-14_suelo_aptitud.md"
+
+# Entregas (docs/decisiones/2026-11-14_suelo_aptitud.md): un archivo para las dos zonas.
+ARCHIVO_PERFIL = "suelo_parcelas.csv"
+ARCHIVO_REQUISITOS = "suelo_requisitos.json"
+
+# Textos fijos en inglés (la página los muestra tal cual; sin cifras).
+ROTULO = "Regional soil map; not a soil test"
+MOTIVO_PEDIDO = "Requested from the data team — not delivered yet"
+MOTIVO_ILEGIBLE = "The delivered file could not be read; see the build log"
+MOTIVO_SIN_CUBO = "The options of each field are not built yet"
+NOTA_NO_SIEMBRA = "nothing is planted"
+NOTA_SIN_RANGO = "no published range for this crop"
+NOTA_SIN_VALOR = "no soil value of this field to compare with the published range"
+# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) van en español.
+IDIOMA_FUENTES = "es"
+
+# Estados de aptitud, de mejor a peor (el peor manda), y el que no entra en esa escala.
+FITS, TOLERATED, OUTSIDE = "fits", "tolerated", "outside_range"
+SEVERIDAD = (FITS, TOLERATED, OUTSIDE)
+SIN_RANGO = "no_published_range"
+ESTADOS = (*SEVERIDAD, SIN_RANGO)
+CRITERIO_PH, CRITERIO_TEXTURA, CRITERIO_SALINIDAD = "ph", "textura", "salinidad"
+# Bloque de suelo_requisitos.json de cada criterio (esquemas.BLOQUES_REQUISITO).
+BLOQUE_DE = {CRITERIO_PH: "ph", CRITERIO_TEXTURA: "textura", CRITERIO_SALINIDAD: "salinidad_umbral_ds_m"}
+
+# Columnas numéricas del perfil (las demás: clase_textura, profundidad_cm y n_celdas).
+COLUMNAS_NUMERICAS = ("arena_pct", "limo_pct", "arcilla_pct", "ph", "carbono_organico_g_kg",
+                      "nitrogeno_g_kg", "cic_cmol_kg", "salinidad_ce_ds_m")
+VACIOS = {"", "nan", "na", "n/a", "null", "none"}   # igual que motor/ensamblar.py
+
+
+# ---------------------------------------------------------------------------------------
+# Lectura
+# ---------------------------------------------------------------------------------------
+def leer_json(ruta):
+    return json.loads(Path(ruta).read_text(encoding="utf-8-sig"))
+
+
+def leer_csv(ruta):
+    with open(ruta, newline="", encoding="utf-8-sig") as f:
+        return [fila for fila in csv.DictReader(f) if any((v or "").strip() for v in fila.values())]
+
+
+def numero(texto):
+    """Celda de CSV como número finito, tal como llega (un entero se queda entero); None si está vacía
+    o no es un número."""
+    t = (texto or "").strip()
+    if t.lower() in VACIOS:
+        return None
+    try:
+        v = float(t)
+    except ValueError:
+        return None
+    if not math.isfinite(v):
+        return None
+    return int(v) if v.is_integer() else v
+
+
+def decimales_de(texto):
+    """Decimales con que la entrega escribió un número («7.85» → 2; «8» → 0)."""
+    t = (texto or "").strip()
+    return len(t.split(".", 1)[1]) if "." in t else 0
+
+
+def finito(v):
+    """El número si es finito (los booleanos no cuentan); None en otro caso."""
+    return v if isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) else None
+
+
+def texto_lleno(v):
+    return v.strip() if isinstance(v, str) and v.strip() else None
+
+
+def fuentes_registradas(processed):
+    """{archivo: {"fuente", "fecha"}} de las entregas de processed/fuentes.json (LEEME.md del buzón)."""
+    ruta = Path(processed) / NOMBRE_FUENTES
+    if not ruta.is_file():
+        return {}
+    registro = {}
+    for f in leer_json(ruta).get("fuentes", []):
+        if f.get("tipo", "entrega") == "entrega" and f.get("archivo"):
+            registro[f["archivo"]] = {"fuente": f.get("fuente"), "fecha": f.get("fecha")}
+    return registro
+
+
+def procedencia(nombre, registradas):
+    """De qué entrega sale un bloque: {"archivo", "fuente", "fecha"} (lo que falte va en None)."""
+    r = registradas.get(nombre) or {}
+    return {"archivo": nombre, "fuente": r.get("fuente"), "fecha": r.get("fecha")}
+
+
+def zonas_de_parcelas(processed, avisos):
+    """{id: zona} de parcelas_base.geojson (sin «zona» = la zona por omisión); None si no se puede leer."""
+    ruta = Path(processed) / E.ARCHIVO_PARCELAS
+    if not ruta.is_file():
+        avisos.append(f"{E.ARCHIVO_PARCELAS} no está en las entregas validadas: el resumen de suelo por zona va en null")
+        return None
+    try:
+        parcelas = leer_json(ruta).get("features") or []
+    except (json.JSONDecodeError, UnicodeDecodeError, AttributeError) as ex:
+        avisos.append(f"{E.ARCHIVO_PARCELAS}: no se pudo leer ({type(ex).__name__}: {ex}); el resumen por zona va en null")
+        return None
+    zonas = {}
+    for p in parcelas:
+        props = (p or {}).get("properties") or {}
+        if texto_lleno(props.get("id")):
+            zonas[props["id"].strip()] = texto_lleno(props.get("zona")) or E.ZONA_POR_OMISION
+    return zonas
+
+
+# ---------------------------------------------------------------------------------------
+# Perfil de suelo (suelo_parcelas.csv)
+# ---------------------------------------------------------------------------------------
+def resumen_por_zona(parcelas, decimales_ph, zona_de):
+    """{zona: {n, clases: {clase: n}, ph: {min, mediana, max}}} con las parcelas del archivo. La mediana
+    del pH lleva a lo más un decimal más que la entrega (el punto medio de dos valores)."""
+    por_zona = {}
+    for pid, perfil in parcelas.items():
+        zona = zona_de.get(pid)
+        if zona is not None:
+            por_zona.setdefault(zona, []).append(perfil)
+    resumen = {}
+    for zona in sorted(por_zona):
+        perfiles = por_zona[zona]
+        cuenta = Counter(p["clase_textura"] for p in perfiles if p["clase_textura"])
+        # En el orden de la lista de clases (la del contrato); una clase ajena iría al final.
+        orden = [c for c in E.CLASES_TEXTURA if c in cuenta] + sorted(c for c in cuenta if c not in E.CLASES_TEXTURA)
+        phs = sorted(p["ph"] for p in perfiles if p["ph"] is not None)
+        if phs:
+            mediana = round(statistics.median(phs), decimales_ph + 1)
+            mediana = int(mediana) if float(mediana).is_integer() else mediana
+        resumen[zona] = {
+            "n": len(perfiles),
+            "clases": {c: cuenta[c] for c in orden},
+            "ph": {"min": phs[0], "mediana": mediana, "max": phs[-1]} if phs else None,
+        }
+    return resumen
+
+
+def bloque_perfil(ruta, registro, zona_de, avisos):
+    """El bloque «perfil»: una entrada por fila de suelo_parcelas.csv, con sus valores tal como llegan."""
+    filas = leer_csv(ruta)
+    parcelas, capas, decimales_ph = {}, {}, 0
+    for fila in filas:
+        pid = fila["id"].strip()
+        perfil = {c: numero(fila[c]) for c in COLUMNAS_NUMERICAS[:3]}
+        perfil["clase_textura"] = texto_lleno(fila["clase_textura"])
+        perfil.update({c: numero(fila[c]) for c in COLUMNAS_NUMERICAS[3:]})
+        celdas = numero(fila["n_celdas"])
+        perfil["n_celdas"] = celdas if isinstance(celdas, int) else None
+        parcelas[pid] = perfil
+        capas[pid] = texto_lleno(fila["profundidad_cm"])
+        decimales_ph = max(decimales_ph, decimales_de(fila["ph"]))
+    distintas = {c for c in capas.values() if c}
+    profundidad = distintas.pop() if len(distintas) == 1 and all(capas.values()) else None
+    if profundidad is None and parcelas:
+        avisos.append(f"{ARCHIVO_PERFIL}: las filas no traen todas la misma profundidad_cm; va en null y cada "
+                      "parcela lleva la suya")
+        for pid, perfil in parcelas.items():
+            perfil["profundidad_cm"] = capas[pid]
+    resumen = None
+    if zona_de is not None:
+        ajenas = sorted(pid for pid in parcelas if pid not in zona_de)
+        if ajenas:
+            avisos.append(f"{ARCHIVO_PERFIL}: parcelas que no están en {E.ARCHIVO_PARCELAS} y no entran al resumen "
+                          f"por zona: {len(ajenas)} (p. ej. {', '.join(ajenas[:3])})")
+        resumen = resumen_por_zona(parcelas, decimales_ph, zona_de)
+    return {**registro, "profundidad_cm": profundidad, "parcelas": parcelas, "resumen_zona": resumen}
+
+
+# ---------------------------------------------------------------------------------------
+# Requisitos de cada cultivo (suelo_requisitos.json)
+# ---------------------------------------------------------------------------------------
+def bloque_requisitos(ruta, registro):
+    """El contenido de suelo_requisitos.json tal cual, más de dónde llegó."""
+    contenido = leer_json(ruta)
+    if not isinstance(contenido, dict) or not isinstance(contenido.get("cultivos"), dict):
+        raise ValueError(f"{ARCHIVO_REQUISITOS} no trae el objeto «cultivos»")
+    return {**contenido, "entrega": registro}
+
+
+def _par(v):
+    """(min, max) de un par [min, max] con min ≤ max; None si no lo es."""
+    if isinstance(v, list) and len(v) == 2 and finito(v[0]) is not None and finito(v[1]) is not None and v[0] <= v[1]:
+        return v[0], v[1]
+    return None
+
+
+def _clases(v):
+    """La lista si es una lista de textos; None si no."""
+    return v if isinstance(v, list) and all(isinstance(c, str) for c in v) else None
+
+
+def normalizar_requisitos(cultivos, avisos):
+    """{cultivo: {"ph", "textura", "salinidad_umbral_ds_m", "nutrientes"}} listo para comparar. El archivo
+    ya pasó el validador del buzón (motor/ensamblar.py, regla suelo_requisitos); aquí solo se protege al
+    motor: un bloque que no tenga la forma del contrato se deja en None (no cuenta) y se avisa. Ningún
+    valor se cambia ni se completa."""
+    listos = {}
+    for cultivo, req in cultivos.items():
+        if not isinstance(req, dict):
+            avisos.append(f"{ARCHIVO_REQUISITOS}: los requisitos de «{cultivo}» no son un objeto; no se usan")
+            continue
+        ph = req.get("ph")
+        if isinstance(ph, dict):
+            optimo, tolerado = _par(ph.get("optimo")), _par(ph.get("tolerado"))
+            ph = {"optimo": optimo, "tolerado": tolerado, "fuente": texto_lleno(ph.get("fuente"))} \
+                if optimo and tolerado and tolerado[0] <= optimo[0] and optimo[1] <= tolerado[1] else False
+        textura = req.get("textura")
+        if isinstance(textura, dict):
+            apta, limitante = _clases(textura.get("apta")), _clases(textura.get("limitante"))
+            textura = {"apta": apta, "limitante": limitante, "fuente": texto_lleno(textura.get("fuente"))} \
+                if apta is not None and limitante is not None and not set(apta) & set(limitante) else False
+        salinidad = req.get("salinidad_umbral_ds_m")
+        if isinstance(salinidad, dict):
+            valor = finito(salinidad.get("valor"))
+            salinidad = {"valor": valor, "fuente": texto_lleno(salinidad.get("fuente"))} if valor is not None else False
+        bloques = {"ph": ph, "textura": textura, "salinidad_umbral_ds_m": salinidad}
+        for nombre, bloque in bloques.items():
+            if bloque is False or (bloque is not None and not isinstance(bloque, dict)):
+                avisos.append(f"{ARCHIVO_REQUISITOS}: «{cultivo}».{nombre} no tiene la forma del contrato; no cuenta")
+                bloques[nombre] = None
+        nutrientes = []
+        for nut in req.get("nutrientes") or []:
+            cond = nut.get("condicion") if isinstance(nut, dict) else None
+            if not isinstance(nut, dict) or (cond is not None and not isinstance(cond, dict)) \
+                    or any(k not in E.CONDICIONES_NUTRIENTE for k in (cond or {})):
+                avisos.append(f"{ARCHIVO_REQUISITOS}: un aviso de nutrientes de «{cultivo}» no tiene la forma del "
+                              "contrato; no se usa")
+                continue
+            nutrientes.append(nut)
+        listos[cultivo] = {**bloques, "nutrientes": nutrientes}
+    return listos
+
+
+# ---------------------------------------------------------------------------------------
+# Aptitud (las reglas del encabezado)
+# ---------------------------------------------------------------------------------------
+def peor(estados):
+    """El peor de varios estados de aptitud; no_published_range si no hay ninguno en la escala."""
+    en_escala = [e for e in estados if e in SEVERIDAD]
+    return max(en_escala, key=SEVERIDAD.index) if en_escala else SIN_RANGO
+
+
+def criterio_ph(perfil, bloque):
+    """Motivo del pH, o None si no cuenta (sin pH de la parcela o sin rango publicado)."""
+    ph = finito(perfil.get("ph"))
+    if ph is None or not bloque:
+        return None
+    optimo, tolerado = bloque["optimo"], bloque["tolerado"]
+    if optimo[0] <= ph <= optimo[1]:
+        estado = FITS
+    elif tolerado[0] <= ph <= tolerado[1]:
+        estado = TOLERATED
+    else:
+        estado = OUTSIDE
+    return {"criterio": CRITERIO_PH, "estado": estado, "valor_parcela": ph,
+            "rango_o_lista": {"optimo": list(optimo), "tolerado": list(tolerado)}, "fuente": bloque["fuente"]}
+
+
+def criterio_textura(perfil, bloque):
+    """Motivo de la textura, o None si no cuenta (sin clase de la parcela o sin listas publicadas)."""
+    clase = texto_lleno(perfil.get("clase_textura"))
+    if clase is None or not bloque:
+        return None
+    if clase in bloque["apta"]:
+        estado = FITS
+    elif clase in bloque["limitante"]:
+        estado = OUTSIDE
+    else:
+        estado = TOLERATED
+    return {"criterio": CRITERIO_TEXTURA, "estado": estado, "valor_parcela": clase,
+            "rango_o_lista": {"apta": list(bloque["apta"]), "limitante": list(bloque["limitante"])},
+            "fuente": bloque["fuente"]}
+
+
+def criterio_salinidad(perfil, bloque):
+    """Motivo de la salinidad, o None si no cuenta: solo se evalúa si la parcela trae conductividad
+    eléctrica y el cultivo trae umbral."""
+    ce = finito(perfil.get("salinidad_ce_ds_m"))
+    if ce is None or not bloque:
+        return None
+    return {"criterio": CRITERIO_SALINIDAD, "estado": FITS if ce <= bloque["valor"] else OUTSIDE, "valor_parcela": ce,
+            "rango_o_lista": {"umbral_ds_m": bloque["valor"]}, "fuente": bloque["fuente"]}
+
+
+CRITERIOS = ((CRITERIO_PH, criterio_ph), (CRITERIO_TEXTURA, criterio_textura), (CRITERIO_SALINIDAD, criterio_salinidad))
+
+
+def aptitud_de_cultivo(cultivo, perfil, requisitos):
+    """{cultivo, estado, nota, motivos, sin_dato_de_parcela} de UN cultivo en el suelo de UNA parcela.
+    `requisitos` es la salida de normalizar_requisitos."""
+    if cultivo == E.NO_SIEMBRA:
+        return {"cultivo": cultivo, "estado": SIN_RANGO, "nota": NOTA_NO_SIEMBRA, "motivos": [], "sin_dato_de_parcela": []}
+    req = requisitos.get(cultivo)
+    if req is None:
+        return {"cultivo": cultivo, "estado": SIN_RANGO, "nota": NOTA_SIN_RANGO, "motivos": [], "sin_dato_de_parcela": []}
+    motivos, sin_dato = [], []
+    for criterio, comparar in CRITERIOS:
+        bloque = req[BLOQUE_DE[criterio]]
+        motivo = comparar(perfil, bloque)
+        if motivo is not None:
+            motivos.append(motivo)
+        elif bloque:
+            sin_dato.append(criterio)   # hay rango publicado, pero la parcela no trae ese valor
+    nota = None if motivos else (NOTA_SIN_VALOR if sin_dato else NOTA_SIN_RANGO)
+    return {"cultivo": cultivo, "estado": peor(m["estado"] for m in motivos), "nota": nota, "motivos": motivos,
+            "sin_dato_de_parcela": sin_dato}
+
+
+def condicion_cumplida(condicion, perfil):
+    """True si el perfil de la parcela cumple la condición de un aviso de nutrientes (sin condición →
+    siempre). Si la condición pide un valor que la parcela no trae, no se cumple: no se supone nada."""
+    if not condicion:
+        return True
+    ph = finito(perfil.get("ph"))
+    if "ph_mayor_que" in condicion and not (ph is not None and ph > condicion["ph_mayor_que"]):
+        return False
+    if "ph_menor_que" in condicion and not (ph is not None and ph < condicion["ph_menor_que"]):
+        return False
+    if "textura_en" in condicion and perfil.get("clase_textura") not in condicion["textura_en"]:
+        return False
+    return True
+
+
+def aptitud_de_opcion(secuencia, perfil, requisitos):
+    """{estado, nota, por_cultivo, avisos_nutrientes} de UNA opción (su secuencia de cultivos) en el
+    suelo de UNA parcela."""
+    cultivos = list(dict.fromkeys(c.strip() for c in secuencia or [] if isinstance(c, str) and c.strip()))
+    por_cultivo = [aptitud_de_cultivo(c, perfil, requisitos) for c in cultivos]
+    sembrados = [c for c in cultivos if c != E.NO_SIEMBRA]
+    avisos = []
+    for cultivo in sembrados:
+        for nut in (requisitos.get(cultivo) or {}).get("nutrientes", []):
+            if condicion_cumplida(nut.get("condicion"), perfil):
+                avisos.append({"elemento": nut.get("elemento"), "texto_en": nut.get("texto_en"),
+                               "fuente": nut.get("fuente"), "cultivo": cultivo})
+    return {
+        "estado": peor(c["estado"] for c in por_cultivo),
+        "nota": None if sembrados else NOTA_NO_SIEMBRA,
+        "por_cultivo": por_cultivo,
+        "avisos_nutrientes": avisos,
+    }
+
+
+def bloque_aptitud(perfil, requisitos, cubo, avisos):
+    """{id_parcela: {id_opcion: aptitud}} de las parcelas con perfil y con opciones en el cubo."""
+    listos = normalizar_requisitos(requisitos["cultivos"], avisos)
+    aptitud, sin_perfil, en_secuencias = {}, 0, set()
+    for pid, parcela in ((cubo or {}).get("parcelas") or {}).items():
+        opciones = [o for o in (parcela or {}).get("opciones") or [] if isinstance(o, dict) and texto_lleno(o.get("id"))]
+        if not opciones:
+            continue
+        for o in opciones:
+            en_secuencias.update(c for c in o.get("secuencia") or [] if isinstance(c, str) and c != E.NO_SIEMBRA)
+        suelo = perfil["parcelas"].get(pid)
+        if suelo is None:
+            sin_perfil += 1
+            continue
+        aptitud[pid] = {o["id"]: aptitud_de_opcion(o.get("secuencia"), suelo, listos) for o in opciones}
+    if sin_perfil:
+        avisos.append(f"parcelas con opciones en el cubo y sin fila en {ARCHIVO_PERFIL} (van sin aptitud): {sin_perfil}")
+    sin_requisitos = sorted(en_secuencias - set(listos))
+    if sin_requisitos:
+        avisos.append(f"{ARCHIVO_REQUISITOS} no trae requisitos de: {', '.join(sin_requisitos)}; su aptitud queda en "
+                      f"«{SIN_RANGO}»")
+    sin_uso = sorted(set(listos) - en_secuencias)
+    if sin_uso:
+        avisos.append(f"{ARCHIVO_REQUISITOS} trae requisitos de cultivos que ninguna opción del cubo siembra: "
+                      f"{', '.join(sin_uso)}")
+    fuera_de_lista = sorted(en_secuencias - set(E.CULTIVOS_SUELO))
+    if fuera_de_lista:
+        avisos.append(f"las secuencias del cubo nombran cultivos que el validador aún no admite en {ARCHIVO_REQUISITOS}: "
+                      f"{', '.join(fuera_de_lista)} (agréguelos a esquemas.CULTIVOS_DE_SECUENCIAS)")
+    return aptitud
+
+
+# ---------------------------------------------------------------------------------------
+# Armado
+# ---------------------------------------------------------------------------------------
+ERRORES_DE_LECTURA = (KeyError, ValueError, TypeError, AttributeError, csv.Error, json.JSONDecodeError, UnicodeDecodeError)
+
+
+def armar(processed, cubo, generado=None):
+    """(suelo, avisos) con lo que hay en `processed` y las opciones de `cubo` (contenido de cubo.json o
+    None). No escribe nada."""
+    processed = Path(processed)
+    avisos = []
+    registradas = fuentes_registradas(processed)
+    suelo = {
+        "_encabezado": ENCABEZADO,
+        "_nota": ("Lo escribe motor/suelo_web.py con las entregas validadas de data/processed y las opciones de "
+                  "cubo.json; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo»."),
+        "generado": generado or datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        "decision": DECISION,
+        "rotulo": ROTULO,
+        "motivo_pedido": MOTIVO_PEDIDO,
+        "idioma_fuentes": IDIOMA_FUENTES,
+    }
+    faltan = []
+
+    def bloque_opcional(nombre, archivo, leer):
+        """Bloque de una entrega: null + motivo si no llegó o no se pudo leer; nunca se rellena."""
+        ruta = processed / archivo
+        if not ruta.is_file():
+            suelo[nombre], suelo[f"{nombre}_motivo"] = None, MOTIVO_PEDIDO
+            faltan.append(archivo)
+            return None
+        try:
+            valor = leer(ruta, procedencia(archivo, registradas))
+        except ERRORES_DE_LECTURA as ex:
+            avisos.append(f"{archivo}: no se pudo leer ({type(ex).__name__}: {ex}); el bloque «{nombre}» va en null")
+            suelo[nombre], suelo[f"{nombre}_motivo"] = None, MOTIVO_ILEGIBLE
+            return None
+        suelo[nombre], suelo[f"{nombre}_motivo"] = valor, None
+        return valor
+
+    perfil = bloque_opcional("perfil", ARCHIVO_PERFIL, lambda ruta, registro: bloque_perfil(
+        ruta, registro, zonas_de_parcelas(processed, avisos), avisos))
+    requisitos = bloque_opcional("requisitos", ARCHIVO_REQUISITOS, bloque_requisitos)
+
+    suelo["aptitud"], suelo["aptitud_falta"] = None, faltan
+    if perfil is None or requisitos is None:
+        # Falta una entrega (se pidió y no ha llegado) o llegó y no se pudo leer.
+        suelo["aptitud_motivo"] = MOTIVO_PEDIDO if faltan else MOTIVO_ILEGIBLE
+    elif not isinstance(cubo, dict) or not isinstance(cubo.get("parcelas"), dict):
+        suelo["aptitud_motivo"] = MOTIVO_SIN_CUBO
+        avisos.append(f"{NOMBRE_CUBO} no está o no trae «parcelas»: la aptitud va en null (corra antes motor/b4_cubo.py)")
+    else:
+        try:
+            suelo["aptitud"], suelo["aptitud_motivo"] = bloque_aptitud(perfil, requisitos, cubo, avisos), None
+        except ERRORES_DE_LECTURA as ex:
+            avisos.append(f"aptitud: no se pudo calcular ({type(ex).__name__}: {ex}); va en null")
+            suelo["aptitud"], suelo["aptitud_motivo"] = None, MOTIVO_ILEGIBLE
+    suelo["avisos"] = avisos
+    return suelo, avisos
+
+
+def volcar(suelo):
+    """JSON con una llave de primer nivel por renglón y cada bloque compacto (la aptitud repite las
+    fuentes en cada motivo: así pesa menos). allow_nan=False: un NaN o un infinito falla aquí y no
+    llega a la página."""
+    renglones = [f" {json.dumps(k, ensure_ascii=False)}: "
+                 f"{json.dumps(v, ensure_ascii=False, separators=(',', ':'), allow_nan=False)}"
+                 for k, v in suelo.items()]
+    return "{\n" + ",\n".join(renglones) + "\n}\n"
+
+
+def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", cubo_ruta=None, generado=None):
+    """Escribe <web>/suelo.json con lo que hay en `processed` y las opciones del cubo. Devuelve un resumen."""
+    processed, web = Path(processed), Path(web)
+    cubo_ruta = Path(cubo_ruta) if cubo_ruta else web / NOMBRE_CUBO
+    cubo, avisos_cubo = None, []
+    if cubo_ruta.is_file():
+        try:
+            cubo = leer_json(cubo_ruta)
+        except (json.JSONDecodeError, UnicodeDecodeError) as ex:
+            avisos_cubo.append(f"{cubo_ruta.name}: no se pudo leer ({type(ex).__name__}: {ex})")
+    suelo, avisos = armar(processed, cubo, generado=generado)
+    avisos[:0] = avisos_cubo
+    web.mkdir(parents=True, exist_ok=True)
+    salida = web / NOMBRE_SALIDA
+    salida.write_text(volcar(suelo), encoding="utf-8")
+    opciones = [o for parcela in (suelo["aptitud"] or {}).values() for o in parcela.values()]
+    return {
+        "ejecutado": True,
+        "salida": str(salida),
+        "bloques": {b: suelo[b] is not None for b in ("perfil", "requisitos", "aptitud")},
+        "parcelas_con_perfil": len(suelo["perfil"]["parcelas"]) if suelo["perfil"] else 0,
+        "opciones_evaluadas": len(opciones),
+        "estados": {e: n for e, n in ((e, sum(1 for o in opciones if o["estado"] == e)) for e in ESTADOS) if n},
+        "avisos": avisos,
+    }
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Escribe web/data/suelo.json (perfil de suelo y aptitud de cada opción).")
+    ap.add_argument("--processed", default=str(RAIZ / "data/processed"), help="entregas validadas")
+    ap.add_argument("--web", default=str(RAIZ / "web/data"), help="carpeta de salida")
+    ap.add_argument("--cubo", default=None, help="cubo.json con las opciones (por omisión, <web>/cubo.json)")
+    args = ap.parse_args(argv)
+    resumen = construir(processed=args.processed, web=args.web, cubo_ruta=args.cubo)
+    print(json.dumps(resumen, ensure_ascii=False, indent=1))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
