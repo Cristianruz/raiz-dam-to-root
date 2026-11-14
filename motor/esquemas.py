@@ -214,8 +214,9 @@ FUENTE_RECURSOS = ("decisión de usar las bases de datos del reto "
 FUENTE_B3 = ("decisión de opciones y filtros oficiales "
              "(docs/decisiones/2026-11-14_opciones_b3.md, «Contrato de opciones_b3.json»)")
 LETRAS_MAESTRO = ("ACTUAL", "A", "B", "C", "D", "E", "nogal_no_rota", "no_sembrar")
-CICLOS_SIEMBRA = ("OI", "PV")
-TIPOS_FILTRO = ("helada", "sucesion", "fecha_limite", "residuo_herbicida", "salinidad", "intervalo")
+CICLOS_SIEMBRA = ("OI", "PV", "perenne")  # «perenne»: cultivo que no se siembra por ciclo (nogal)
+TIPOS_FILTRO = ("helada", "sucesion", "fecha_limite", "residuo_herbicida", "salinidad", "intervalo",
+                "dotacion_minima")  # la página lo evalúa en vivo contra la dotación del deslizador
 INDICADORES_OPCION = ("leguminosa", "ruptura_plagas", "raiz_profunda")
 # Llave de «regla» con el umbral del filtro de helada (la misma que lee motor/b4_cubo.py: una prueba
 # compara ambas). Es opcional: la decisión pide NO inventar umbral; sin ella la ficha no decide.

@@ -256,6 +256,14 @@ test("textoDeMotivo, salinidad: en el umbral o por debajo, o por encima", () => 
   assert.equal(textoDeMotivo(alto), `Salinity ${alto.valor_parcela} dS/m is above the threshold (${alto.rango_o_lista.umbral_ds_m} dS/m)`);
 });
 
+test("textoDeMotivo: con un estado desconocido no afirma «dentro» ni «fuera»", () => {
+  for (const [idParcela, idOpcion, criterio] of [["P0001", "ACTUAL", "ph"], ["P0001", "ACTUAL", "textura"], ["P0001", "ACTUAL", "salinidad"]]) {
+    const texto = textoDeMotivo({ ...motivoDe(idParcela, idOpcion, criterio), estado: "estado_nuevo" });
+    assert.ok(texto.includes("compared with") && !/\b(within|outside|above|below|suitable list|limiting list|neither)\b/.test(texto), texto);
+    assert.ok(!SIN_BASURA.test(texto));
+  }
+});
+
 test("textoDeMotivo: ningún motivo de la fixture deja basura ni queda vacío", () => {
   let n = 0;
   for (const { idParcela, idOpcion } of TODAS) {

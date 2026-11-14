@@ -241,6 +241,7 @@ export function peorEstado(estados) {
 /**
  * Texto legible de UN motivo de suelo.json ({criterio, estado, valor_parcela, rango_o_lista}): dice el
  * valor de la parcela y el rango o la lista con que se comparó. La fuente va aparte (motivo.fuente).
+ * Con un estado que este módulo no conoce no afirma nada: escribe solo el valor y con qué se comparó.
  */
 export function textoDeMotivo(motivo) {
   const m = motivo ?? {};
@@ -252,18 +253,22 @@ export function textoDeMotivo(motivo) {
     const tolerado = formatoRango(r.tolerado);
     if (m.estado === "fits") return `${valor} is within the optimal range (${optimo})`;
     if (m.estado === "tolerated") return `${valor} is outside the optimal range (${optimo}) and within the tolerated range (${tolerado})`;
-    return `${valor} is outside the tolerated range (${tolerado})`;
+    if (m.estado === "outside_range") return `${valor} is outside the tolerated range (${tolerado})`;
+    return `${valor}, compared with the optimal range (${optimo}) and the tolerated range (${tolerado})`;
   }
   if (m.criterio === "textura") {
     const clase = `${nombreDeClase(m.valor_parcela) ?? "This"} texture`;
     if (m.estado === "fits") return `${clase} is on the suitable list (${lista(r.apta)})`;
     if (m.estado === "outside_range") return `${clase} is on the limiting list (${lista(r.limitante)})`;
-    return `${clase} is on neither list (suitable: ${lista(r.apta)}; limiting: ${lista(r.limitante)})`;
+    if (m.estado === "tolerated") return `${clase} is on neither list (suitable: ${lista(r.apta)}; limiting: ${lista(r.limitante)})`;
+    return `${clase}, compared with the lists (suitable: ${lista(r.apta)}; limiting: ${lista(r.limitante)})`;
   }
   if (m.criterio === "salinidad") {
     const valor = `Salinity ${formatoQueDistingue(m.valor_parcela, [r.umbral_ds_m])} dS/m`;
     const umbral = `${formatoNumero(r.umbral_ds_m)} dS/m`;
-    return m.estado === "fits" ? `${valor} is at or below the threshold (${umbral})` : `${valor} is above the threshold (${umbral})`;
+    if (m.estado === "fits") return `${valor} is at or below the threshold (${umbral})`;
+    if (m.estado === "outside_range") return `${valor} is above the threshold (${umbral})`;
+    return `${valor}, compared with the threshold (${umbral})`;
   }
   return `${m.criterio ?? "criterion"}: ${ESTADOS_APTITUD[m.estado]?.etiqueta ?? "no data"}`;
 }
