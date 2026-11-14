@@ -31,3 +31,7 @@ Notas para el integrador (B4):
   se anota a mano porque lo escribe Earth Engine. Orden: primero `parcelas_base.geojson`.
 - Punto de NASA POWER (28.19 N, −105.45 O): fuera del bbox por ~3 km, pero en la misma celda MERRA-2
   (0.5° × 0.625°, centro 28.0 N, −105.625 O) y CERES (1°) que las cuatro esquinas y el centro del bbox.
+
+Corrida real (14-nov-2026): 338 parcelas; protagonistas P0097 (alfalfa, 3 años, por vencer), P0110 (nogal,
+comprometida) y P0118 (barbecho en 2026 tras años perenne, libre), elegidas por confianza FTW ≥ 55, 6–40 ha y
+12 meses válidos; revisarlas a ojo en el mapa. Las 14 entregas pasan `motor/ensamblar.py` de la otra rama sin rechazos.

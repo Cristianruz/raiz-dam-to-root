@@ -22,7 +22,8 @@ from collections import defaultdict
 
 from comun import carpeta, registrar_fuentes
 
-PARAMS = {"corridas": 2000, "periodo_clima": {"valor": [1991, 2025], "etiqueta": "assumption [S], propuesto en el preregistro"}}
+PARAMS = {"corridas": {"valor": 2000, "etiqueta": "[S] número de corridas Monte Carlo"}, "periodo_clima": {"valor": [1991, 2025], "etiqueta": "assumption [S], propuesto en el preregistro"}}
+PLAZOS = {}                  # años por tipo de plazo, desde supuestos.json (van en cada rotación como {min, max})
 REQUERIDOS = ("ea_gravedad", "sesgo_eto", "presiembra_mm", "presiembra_algodon_mm", "kc_nogal_tabla",
               "cobertura_dosel_nogal", "altura_nogal_m", "corte_verano_moderado", "plazo_alfalfa_anios", "plazo_nogal_horizonte")
 
@@ -46,8 +47,8 @@ def cargar_supuestos(ruta="supuestos.json"):
     for r in ROTACIONES:
         if r["id"] == "alfalfa_corte_verano":
             r["reduccion_meses"] = {7: frac, 8: frac, 9: frac}
-    PARAMS["plazo_anios"] = {"anual": 1, "alfalfa": s["plazo_alfalfa_anios"]["valor"],
-                             "nogal": s["plazo_nogal_horizonte"]["valor"]}
+    PLAZOS.update({"anual": 1, "alfalfa": s["plazo_alfalfa_anios"]["valor"],
+                   "nogal": s["plazo_nogal_horizonte"]["valor"]})
 
 
 # Kc FAO-56 Tabla 12 [V] y etapas Tabla 11 [V] (ajustes de duración marcados [S]).
@@ -172,7 +173,7 @@ def sortear(anios, rng):
     s0, s1 = PARAMS["sesgo_eto"]["valor"]
     p0, p1 = PARAMS["presiembra_mm"]["valor"]
     return [(rng.choice(anios), rng.uniform(s0, s1), rng.uniform(ea0, ea1), rng.uniform(p0, p1))
-            for _ in range(PARAMS["corridas"])]
+            for _ in range(PARAMS["corridas"]["valor"])]
 
 
 def simular(cultivos, clima, tuplas, f_lluvia, reduccion=None):
@@ -202,7 +203,7 @@ def main():
             filas.append([c, lp, round(e50), round(n50), round(b10, 2), round(b50, 2), round(b90, 2)])
     for r in ROTACIONES:
         reg = {k: v for k, v in r.items() if k != "reduccion_meses"}
-        pz = PARAMS["plazo_anios"][r["plazo"]]
+        pz = PLAZOS[r["plazo"]]
         reg["plazo_anios"] = pz if isinstance(pz, dict) else {"min": pz, "max": pz}   # contrato: siempre {min, max}
         reg["lamina_bruta_millares"] = {}
         for lp, f in ((0, 1.0), (-20, 0.8)):

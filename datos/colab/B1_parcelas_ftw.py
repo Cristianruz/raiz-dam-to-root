@@ -54,16 +54,23 @@ def confianza(geom, raster):
             if geom.contains(c) and v[i * w + j] != r["nodata"]:
                 vals.append(v[i * w + j])
     if not vals:
+        # Celda del centroide; si es nodata, la celda válida más cercana a 1 o 2 celdas (≤ ~1 km)
         c = geom.centroid
         i, j = int((y0 - c.y) / res), int((c.x - x0) / res)
-        if 0 <= i < h and 0 <= j < w and v[i * w + j] != r["nodata"]:
-            vals = [v[i * w + j]]
+        for radio in (0, 1, 2):
+            cerca = [v[a * w + b] for a in range(i - radio, i + radio + 1) for b in range(j - radio, j + radio + 1)
+                     if 0 <= a < h and 0 <= b < w and v[a * w + b] != r["nodata"]]
+            if cerca:
+                vals = [sum(cerca) / len(cerca)]
+                break
     return None if not vals else round(100 * sum(vals) / len(vals))
 
 
 def main():
     a = carpeta("B1: parcelas de Fields of The World",
-                lambda ap: ap.add_argument("--crudo", required=True, help="ftw_zona_piloto_crudo.geojson"))
+                lambda ap: (ap.add_argument("--crudo", required=True, help="ftw_zona_piloto_crudo.geojson"),
+                            ap.add_argument("--protagonistas", default="",
+                                            help="ids de las 3 protagonistas, separados por coma (revisadas a mano)")))
     from shapely.geometry import box, mapping, shape
     crudo = json.load(open(a.crudo))
     raster = crudo.get("confianza_raster")
@@ -113,6 +120,14 @@ def main():
         feats.append({"type": "Feature", "geometry": json.loads(json.dumps(gj)), "properties": {
             "id": f"P{k:04d}", "area_ha": round(ha, 2), "modulo": None,
             "ftw_confianza": confianza(g, raster), "protagonista": False, "ftw_id": fid}})
+    prot = [x for x in a.protagonistas.split(",") if x]
+    for x in feats:
+        x["properties"]["protagonista"] = x["properties"]["id"] in prot
+    if prot and sum(x["properties"]["protagonista"] for x in feats) != len(prot):
+        raise SystemExit(f"Alguna protagonista no existe: {prot}")
+    sin_conf = [x["properties"]["id"] for x in feats if x["properties"]["ftw_confianza"] is None]
+    if sin_conf:
+        raise SystemExit(f"Parcelas sin confianza de FTW ni a 2 celdas: {sin_conf}")
     with open("parcelas_base.geojson", "w") as fo:
         json.dump({"type": "FeatureCollection", "features": feats}, fo)
     registrar_fuentes("B1", ["parcelas_base.geojson"],
