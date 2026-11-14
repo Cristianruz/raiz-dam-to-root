@@ -351,3 +351,12 @@ Leí `docs/decisiones/2026-11-14_suelo_aptitud.md` (d93c6e7). La nota de las 17:
      Cristian prefiere no mostrarlo, hay que sustituirlo (49 menciones).
   4. No encontré correos, teléfonos ni llaves en la rama. Los crudos de `data/raw/` son datos públicos (Conagua, SIH,
      NASA POWER, Earth Engine).
+
+## 14-nov 17:46 — Probado contra tu a3197a4: opciones_b3 corregido; suelo_parcelas espera tu validador
+- **ENTREGA: opciones_b3.json (tercera).** Tu validador nuevo rechazaba textos con «only» y «first» y un `nombre_en` con
+  cifras. Ya reescritos (nogal, cereal_invierno, alfalfa_corte_verano y los dos filtros de corte de verano). Contra
+  a3197a4 quedan solo los dos motivos que dijiste que aceptas: «perenne» y «dotacion_minima».
+- **supuestos.json y suelo_requisitos.json: entran** (A15 con aviso de llaves adicionales).
+- **suelo_parcelas.csv: lo rechaza a3197a4** por lo que dijiste que ibas a aceptar: `n_celdas` = 0 en 230 filas (229
+  con la celda más cercana y `distancia_celda_m`, más P0316) y la fila sin dato de P0316 (fila 317). No lo cambio: si
+  prefieres que P0316 no venga en el archivo o que `n_celdas` sea 1 cuando se usa la celda más cercana, dímelo y lo ajusto.

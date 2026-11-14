@@ -48,7 +48,7 @@
     "fuente": "Sin dato en el maestro"
    },
    "advertir_si_rojo": false,
-   "por_que_en": "An orchard does not rotate. Only minimum-irrigation scenarios apply, and kernel filling (August–September) should not be put at risk.",
+   "por_que_en": "An orchard does not rotate. Minimum-irrigation scenarios are the ones that apply, and kernel filling (August–September) should not be put at risk.",
    "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), «Nogal»: no rota; lámina de ~1.5–1.82 m; no afectar el llenado de almendra (ago–sep)",
    "etiqueta": "[V]"
   },
@@ -173,7 +173,7 @@
     "fuente": "Sin dato en el maestro"
    },
    "advertir_si_rojo": false,
-   "por_que_en": "Current rotation. Irrigated winter oats or triticale are not verified for Delicias; the only depth found (about 54 cm) comes from La Laguna.",
+   "por_que_en": "Current rotation. Irrigated winter oats or triticale are not verified for Delicias; the single depth found (about 54 cm) comes from La Laguna.",
    "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: ~54 cm (Ochoa-Espinoza 2022, La Laguna, no Delicias)",
    "etiqueta": "assumption [S]"
   },
@@ -222,7 +222,7 @@
   },
   "alfalfa_corte_verano": {
    "letra_maestro": "B",
-   "nombre_en": "Keep the alfalfa and skip 2–3 summer irrigations",
+   "nombre_en": "Keep the alfalfa and skip two to three summer irrigations",
    "secuencia": [
     {
      "ciclo": "OI",
@@ -561,7 +561,7 @@
    "necesita": [
     "memoria"
    ],
-   "texto_en": "Only for an established stand, never in its first year.",
+   "texto_en": "For an established stand; never in its year of establishment.",
    "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción B («solo se ofrece si la alfalfa está establecida, no en su primer año»)",
    "etiqueta": "[V]"
   },
@@ -580,7 +580,7 @@
    "necesita": [
     "dato local que no tenemos"
    ],
-   "texto_en": "Skipping summer irrigations is only reasonable on deep, non-sandy soil without high salinity; risk is high on heavy clay under extreme heat. Soil texture and salinity are not measured for this field: needs a local check.",
+   "texto_en": "Skipping summer irrigations is reasonable on deep, non-sandy soil without high salinity, and not elsewhere; risk is high on heavy clay under extreme heat. Soil texture and salinity are not measured for this field: needs a local check.",
    "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción B y su actualización del 29-oct (Bali et al. 2024; UC ANR 8522)",
    "etiqueta": "[V] ensayos de otras regiones"
   }

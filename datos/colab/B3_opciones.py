@@ -48,7 +48,7 @@ OPCIONES = {
         "secuencia": [sec("perenne", "nogal", None, None, "No aplica: huerta establecida")],
         "indicadores": ind(False, None, None, "Sin dato en el maestro"),
         "advertir_si_rojo": False,
-        "por_que_en": "An orchard does not rotate. Only minimum-irrigation scenarios apply, and kernel filling (August–September) should not be put at risk.",
+        "por_que_en": "An orchard does not rotate. Minimum-irrigation scenarios are the ones that apply, and kernel filling (August–September) should not be put at risk.",
         "fuente": f"{MAESTRO}, «Nogal»: no rota; lámina de ~1.5–1.82 m; no afectar el llenado de almendra (ago–sep)", "etiqueta": "[V]"},
     "chile": {
         "letra_maestro": "ACTUAL", "nombre_en": "Chile pepper",
@@ -84,7 +84,7 @@ OPCIONES = {
         "secuencia": [sec("OI", "cereal_invierno", *S_CEREAL)],
         "indicadores": ind(False, None, None, "Sin dato en el maestro"),
         "advertir_si_rojo": False,
-        "por_que_en": "Current rotation. Irrigated winter oats or triticale are not verified for Delicias; the only depth found (about 54 cm) comes from La Laguna.",
+        "por_que_en": "Current rotation. Irrigated winter oats or triticale are not verified for Delicias; the single depth found (about 54 cm) comes from La Laguna.",
         "fuente": f"{MAESTRO}, opción A: ~54 cm (Ochoa-Espinoza 2022, La Laguna, no Delicias)", "etiqueta": "assumption [S]"},
     # --- Alternativas del maestro ---
     "avena_maiz": {
@@ -97,7 +97,7 @@ OPCIONES = {
         "fuente": f"{MAESTRO}, opción A; maíz forrajero: INIFAP, Folleto Técnico 53 (2014); cereal de invierno ~54 cm: Ochoa-Espinoza 2022 (La Laguna, no Delicias)",
         "etiqueta": "[V] maíz forrajero y alfalfa; assumption [S] cereal de invierno con riego en Delicias"},
     "alfalfa_corte_verano": {
-        "letra_maestro": "B", "nombre_en": "Keep the alfalfa and skip 2–3 summer irrigations",
+        "letra_maestro": "B", "nombre_en": "Keep the alfalfa and skip two to three summer irrigations",
         "secuencia": [sec("OI", "alfalfa", None, None, "No se siembra: se mantiene la alfalfa establecida")],
         "indicadores": ind(True, None, None, "Leguminosa: clasificación botánica de la alfalfa (no viene del maestro)"),
         "advertir_si_rojo": True,
@@ -194,13 +194,13 @@ FILTROS = [
     {"id": "corte_verano_alfalfa_establecida", "tipo": "sucesion", "aplica_a": ["alfalfa_corte_verano"],
      "regla": {"no_en_primer_anio": True, "edad_min_anios": 2},
      "necesita": ["memoria"],
-     "texto_en": "Only for an established stand, never in its first year.",
+     "texto_en": "For an established stand; never in its year of establishment.",
      "fuente": f"{MAESTRO}, opción B («solo se ofrece si la alfalfa está establecida, no en su primer año»)", "etiqueta": "[V]"},
     {"id": "corte_verano_suelo", "tipo": "salinidad", "aplica_a": ["alfalfa_corte_verano"],
      "regla": {"suelo": "profundo y no arenoso", "salinidad_alta": "no se ofrece", "salinidad_media": "se descuenta un lavado de 0–25 %",
                "riesgo_alto": "arcillas pesadas con calor extremo"},
      "necesita": [SIN_DATO],
-     "texto_en": "Skipping summer irrigations is only reasonable on deep, non-sandy soil without high salinity; risk is high on heavy clay under extreme heat. Soil texture and salinity are not measured for this field: needs a local check.",
+     "texto_en": "Skipping summer irrigations is reasonable on deep, non-sandy soil without high salinity, and not elsewhere; risk is high on heavy clay under extreme heat. Soil texture and salinity are not measured for this field: needs a local check.",
      "fuente": f"{MAESTRO}, opción B y su actualización del 29-oct (Bali et al. 2024; UC ANR 8522)", "etiqueta": "[V] ensayos de otras regiones"},
 ]
 
