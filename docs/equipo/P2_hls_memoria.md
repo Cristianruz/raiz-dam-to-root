@@ -1,57 +1,57 @@
 <!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
-# P2 · HLS de 2026 y memoria de la parcela
+# P2 · Mapa de cultivos con Random Forest y las 3 protagonistas
 
-**Qué le toca** (S9 §10; kit §3): las series de HLS de 2026 y la memoria 2016–2026; la revisión de las 3 parcelas protagonistas (B1); el mapa de cultivos con P3 (A4.2); y las figuras del mapa y de la memoria.
+**Qué le toca ahora** (S9 §10; kit §3; decisiones del integrador del 14-nov a las 10:30):
+1. **B1, paso 4:** proponer las 3 parcelas protagonistas, revisarlas en color verdadero y mandar sus `id` a Cristian.
+2. **A4.2:** entrenar el Random Forest, compararlo con las reglas y entregar `cultivos_parcelas.csv` con dos métodos (`acuerdo_metodos` «2/2» o «1/2» y `prob_max`), con validación cruzada espacial por bloques de 5 km y la regla de abstención.
+3. **Figuras** del mapa y de la memoria, el domingo.
 
-**Lo que cambió hoy y manda sobre el kit** (detalle en [README §6](README.md#6-cambios-respecto-al-kit-mandan-sobre-el-kit)):
-- **Usted no usa Earth Engine.** Las exportaciones de A3, A3-M y NASADEM las corre otra sesión de Claude en el Chrome de Cristian, con el proyecto `iondroplet`. **Su trabajo empieza con los CSV o GeoTIFF que esa sesión deja en Drive.** No se autentique en Earth Engine. El kit (§0.3 y G0, regla 6) le asignaba Earth Engine: eso ya no aplica.
-- **B1 también lo hace la sesión de Chrome**, porque necesita red. Le toca la revisión manual de las protagonistas y la prueba de B1.
-- **Entrega:** en `Raiz/entregas/`, carpeta plana sin `P2/`, con una línea por archivo en `Raiz/entregas/LEEME.md`.
-- **Acuerdo de formatos del 14-nov (cambio e; manda sobre la tabla 0.4-B).** El validador ya lo aplica: con la fila vieja del kit, sus dos archivos se rechazan.
-  - `memoria_resumen.csv` lleva `id, dias_suelo_desnudo_mediana, anios_con_dato, estado_2025`. **Ya no lleva `edad_perenne_anios`.**
-  - `cultivos_parcelas.csv` lleva `id, cultivo_actual, prob_max, acuerdo_metodos, abstencion, edad_perenne_anios, estado_plazo, grupo_fenologico`. Las tres últimas pueden ir vacías.
-  - **La edad de la perenne va en `cultivos_parcelas.csv`.** La calcula quien entrega ese archivo, con la regla de A3-M, paso 9, sobre `memoria_parcelas.csv`: usted, en A4.2; o la sesión de datos, en su versión de solo reglas.
+**Ya está hecho y no se rehace** (lo entregó la sesión de datos; detalle en [README, «Estado a las 10:30»](README.md#estado-a-las-1030-sábado-14-nov)). Usted lo **lee directo de `Raiz_entregas`** desde Colab, sin copiarlo ni modificarlo:
 
-| Orden | Pieza | Archivos que entrega (tabla 0.4-B) | Hora límite |
+| Archivo en `Raiz_entregas` | Qué trae | Para qué le sirve |
+|---|---|---|
+| `parcelas_base.geojson` | 338 campos de Fields of The World, 5,794 ha, `id` de `P0001` en adelante, de norte a sur. Propiedades `id`, `area_ha`, `modulo`, `ftw_confianza`, `protagonista` | Geometrías, `ftw_confianza` (abstención) y los `id` de todo |
+| `hls_reflect_2025_10_a_2026_09.tif` | Reflectancia mediana mensual, oct-2025 a sep-2026, bandas `AAAA_MM_azul`, `_verde`, `_rojo`, `_nir`, `_swir1` y `_swir2`. Int16 multiplicado por 10,000; −32768 = sin dato | Variables del Random Forest y el color verdadero de las protagonistas |
+| `hls_mensual_parcelas.csv` | `id, mes, banda, mediana, p25, p75, n_validos`; bandas `ndvi`, `lswi` y `bsi`, ya en su escala (entre −1 y 1) | Variables del Random Forest y la curva de NDVI de las protagonistas |
+| `cultivos_parcelas.csv` (versión de **solo reglas**) | `acuerdo_metodos` «1/1 (reglas)», `prob_max` vacío, `edad_perenne_anios`, `estado_plazo`, `grupo_fenologico` | El método A (reglas) que se compara con el Random Forest; candidatas a protagonista |
+| `memoria_parcelas.csv` | Estado de cada parcela por año agrícola, 2016–2026 | La edad de la alfalfa y del nogal |
+| `suelo_desnudo.csv` | Días de suelo desnudo del 1-feb al 30-abr de 2026 | Elegir la protagonista anual |
+
+**Por qué importa el Random Forest:** con solo reglas, **218 de los 338 campos quedan abstenidos**. De ellos, **132 son anuales de verano** (chile, algodón, maíz o sorgo) que las reglas no separan (cifras del integrador, 14-nov 10:30). Sin un segundo método, el mapa no dice qué se siembra en la mayor parte de la zona.
+
+| Orden | Pieza | Archivos que entrega | Hora límite |
 |---|---|---|---|
-| 1 | [B1 · revisión de parcelas y protagonistas](#b1--revisión-de-parcelas-y-de-las-3-protagonistas) | Revisa `parcelas_base.geojson` y `parcelas_muestra.geojson` (los entrega la sesión de Chrome); entrega `B1_mapa_confianza.png` | sáb 12:00 |
-| 2 | [A3 · HLS 2026 por parcela](#a3--hls-del-año-agrícola-2026-por-parcela) | `hls_mensual_parcelas.csv`, `suelo_desnudo.csv`, `fuentes_A3.csv` | sáb 14:30 |
-| 3 | [A3-M · memoria 2016–2026](#a3-m--memoria-de-la-parcela-20162026) | `memoria_mensual.csv`, `memoria_parcelas.csv`, `memoria_resumen.csv`, `memoria_validacion.csv`, `fuentes_A3M.csv` | Un año en cuanto llegue; ninguno a las 20:30 → plan B; años restantes, dom 8:00 |
-| 4 | [A4.2 · mapa de cultivos (con P3)](#a42--mapa-de-cultivos-de-2026-con-p3) | `cultivos_parcelas.csv`, `tabla_metodos.csv`, figura PNG, `fuentes_A42.csv` | Entrega entre sáb 18:00 y 20:30 |
-| 5 | [Figuras](#figuras-del-mapa-y-de-la-memoria) | PNG | dom 8:00 (mapa y memoria); dom 11:00 (página) |
+| 1 | [B1, paso 4 · las 3 protagonistas](#b1-paso-4--las-3-protagonistas) | `B1_protagonistas.png`, `fuentes_protagonistas.csv`; los 3 `id` por mensaje a Cristian | Sáb 12:00 (kit §3, bloque de B1). El hito de las 20:30 necesita una parcela real |
+| 2 | [A4.2 · Random Forest y comparación con las reglas](#a42--random-forest-y-comparación-con-las-reglas) | `cultivos_parcelas.csv` (sustituye a la versión de reglas), `tabla_metodos.csv`, `A42_cobertura_exactitud.png`, `fuentes_A42.csv` | Sáb 15:00–20:30; entrega entre 18:00 y 20:30 (kit §3). Necesita `etiquetas_unidas.csv` de P3. Antes de las 15:00 puede preparar la tabla de variables |
+| 3 | [Figuras](#figuras-del-mapa-y-de-la-memoria) | `fig_*.png` | Dom 8:00 (mapa y memoria); dom 11:00 (página) |
 
 **Cómo se usa cada bloque** (flujo completo en [README §4](README.md#4-flujo-de-trabajo-de-una-pieza)):
 1. Abra un cuaderno nuevo en Colab con el nombre indicado y monte Drive.
 2. Si el bloque dice `[PEGA AQUÍ …]`, sustitúyalo por el texto indicado.
 3. Pegue el bloque completo en el panel de Gemini. Pida **una celda por paso** y ejecútela antes de pedir la siguiente.
-4. Al final:
-   - corra la prueba;
-   - verifique los datos con [verificar_datos_nasa.md](verificar_datos_nasa.md);
-   - pida la revisión con contexto nuevo de `docs/prompts/para_gemini.md`.
-5. Entregue:
-   - guarde los archivos en `Raiz/entregas/` y su línea en `LEEME.md`;
-   - guarde el cuaderno en `Raiz/cuadernos/`;
-   - avise en el grupo: `ENTREGA: <archivo> — prueba OK`.
-
-**Antes de cada pieza, revise `Raiz/entregas/LEEME.md`.** Si el archivo ya tiene su línea (por ejemplo, porque la sesión de Chrome lo entregó), no lo rehaga: verifíquelo con la guía de verificación y avise a Cristian.
+4. Al final: corra la prueba, verifique los datos con [verificar_datos_nasa.md](verificar_datos_nasa.md) y pida la revisión con contexto nuevo de `docs/prompts/para_gemini.md`.
+5. Entregue: archivos en `Raiz_entregas`, su línea al final de `Raiz_entregas/LEEME.md`, el cuaderno en `Raiz/cuadernos/` y el aviso `ENTREGA: <archivo> — prueba OK`.
 
 ---
 
-## B1 · Revisión de parcelas y de las 3 protagonistas
+## B1, paso 4 · Las 3 protagonistas
 
 | | |
 |---|---|
-| **Lo hace la sesión de Chrome** | Pasos 1, 2, 3 y 5 del prompt: recorte de Fields of The World 2025, `area_ha`, `ftw_confianza` y entrega de `parcelas_base.geojson` y `parcelas_muestra.geojson` con sus líneas de `LEEME.md` |
-| **Le toca a usted** | Paso 4: elegir y revisar a mano las 3 protagonistas. Y la PRUEBA: esquema, mapa PNG por confianza y % de parcelas con confianza < 50 |
-| **Entradas** | `parcelas_base.geojson` y `parcelas_muestra.geojson` de `Raiz/entregas/`; una imagen en color verdadero (HLS o Sentinel-2; por ejemplo, en Copernicus Browser); como apoyo visual, la exportación de A3 cuando llegue |
-| **Cuaderno** | `B1_revision.ipynb` en `Raiz/cuadernos/` |
-| **Hora límite** | Sáb 12:00 (kit §3, primer bloque). Si A3 aún no llega, la elección de protagonistas se pospone y se avisa (kit B1, paso 4) |
-| **Verificación de datos** | [verificar_datos_nasa.md → Fields of The World](verificar_datos_nasa.md#7-fields-of-the-world-2025-b1) |
+| **Qué ya hizo la sesión de datos** | Pasos 1, 2, 3 y 5 de B1: recorte de Fields of The World, `area_ha`, `ftw_confianza` y `parcelas_base.geojson`. Las protagonistas **aún no están marcadas** |
+| **Le toca a usted** | Paso 4: elegir las 3 protagonistas y revisarlas a mano contra una imagen en color verdadero |
+| **Qué se busca** (decisión del integrador, 14-nov; kit B1, paso 4; kit §10, punto 9) | Una por estado del plazo: **una alfalfa «por vencer»**, **una anual «libre»** y **un nogal «comprometida»**, ninguna abstenida |
+| **Entradas** | `parcelas_base.geojson`, `cultivos_parcelas.csv` (reglas), `suelo_desnudo.csv`, `hls_mensual_parcelas.csv` y `hls_reflect_2025_10_a_2026_09.tif`, todos de `Raiz_entregas`. Opcional: Copernicus Browser (Sentinel-2 en color verdadero) en el navegador |
+| **Cuaderno** | `B1_protagonistas.ipynb` en `Raiz/cuadernos/` |
+| **Hora límite** | Sáb 12:00 (kit §3) |
+| **Verificación de datos** | [verificar_datos_nasa.md → Fields of The World](verificar_datos_nasa.md#7-fields-of-the-world-2025-b1) y [→ HLS](verificar_datos_nasa.md#2-hls-l30-y-s30-v002-a3-a3-m-y-a4) |
 
-**Si un contorno no coincide:**
-- No reescriba `parcelas_base.geojson`: es de la sesión de Chrome.
-- Mande a Cristian un GeoJSON con el `id` y el polígono corregido. Escriba la corrección en `Raiz/cuadernos/B1_revision_protagonistas.md`.
-- Los 3 `id` elegidos también se los pasa a Cristian, para que `protagonista = true` quede en el archivo.
+**Si un contorno no coincide con la parcela:**
+- No reescriba `parcelas_base.geojson`: es de la sesión de datos.
+- Guarde el polígono corregido en `Raiz/cuadernos/B1_protagonistas_correccion.geojson`, con su `id`, y escriba qué cambió en `Raiz/cuadernos/B1_revision_protagonistas.md`. Cristian lo pasa a `docs/`.
+- **Mande a Cristian los 3 `id`** por mensaje: él (o la sesión de datos) marca `protagonista = true`.
+
+**Si el Random Forest cambia después la clase de una protagonista** (A4.2), vuelva a revisarla y avise.
 
 **Bloque para pegar en Gemini** (G0 completo + tarea):
 ```text
@@ -59,402 +59,107 @@ CONTEXTO
 Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria.
 
 ENTORNO
-Google Colab (Python 3). Google Drive montado; carpeta /content/drive/MyDrive/Raiz/:
-- entradas/ = datos de solo lectura;
-- entregas/ = donde guardo resultados. Es UNA carpeta plana (sin subcarpetas por rol) y cada archivo lleva una línea en entregas/LEEME.md; ahí también están las entregas de los demás, que solo leo;
-- cuadernos/ = cuadernos.
-Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chrome de Cristian, proyecto iondroplet), que deja sus exportaciones en Drive. Yo trabajo sobre esos archivos.
+Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
+- /content/drive/MyDrive/Raiz_entregas/ = el buzón: UNA carpeta plana (sin subcarpetas) con LEEME.md, una línea por archivo. Ahí están los archivos que ya entregó la sesión de datos; los leo directo de ahí y NO los modifico. Ahí guardo mis entregas.
+- /content/drive/MyDrive/Raiz/entradas/ = datos de solo lectura;
+- /content/drive/MyDrive/Raiz/cuadernos/ = cuadernos y archivos de trabajo.
+Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome de Cristian) y sus exportaciones ya están en Raiz_entregas/.
 
 REGLAS OBLIGATORIAS
-1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
+1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en Raiz_entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en Raiz/cuadernos/. No sobrescribas archivos de otras personas ni de la sesión de datos, salvo que la TAREA lo diga. Los id de parcela son los de Raiz_entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
 5. Si un paso falla dos veces con el mismo error, detente y explícame el problema en 5 líneas antes de seguir.
-6. Earth Engine: no aplica. No uses ee.Authenticate ni ee.Initialize. Si un paso de la tarea pide Earth Engine, dime qué archivo de la sesión de Chrome necesito y detente. Los cálculos de series, en pandas.
-7. Usa bibliotecas comunes (pandas, numpy, requests, geopandas, scikit-learn). Si necesitas instalar algo, dime el comando y por qué.
+6. Earth Engine: no aplica. No uses ee.Authenticate ni ee.Initialize. Si un paso pide Earth Engine, dime qué archivo necesito y detente. Los cálculos de series, en pandas.
+7. Usa bibliotecas comunes (pandas, numpy, geopandas, rasterio, matplotlib, scikit-learn). Si necesitas instalar algo, dime el comando y por qué.
 8. Al terminar, explica en español claro:
    - los 3 pasos clave;
    - los supuestos;
    - de dónde sale cada número;
    - qué podría estar mal.
-9. Guarda también fuentes_B1.csv en entregas/ con: archivo, url_o_api, fecha_consulta y sha256 de cada dato de origen utilizado.
+9. Guarda también fuentes_protagonistas.csv en Raiz_entregas/ con: archivo, url_o_api, fecha_consulta (AAAA-MM-DD) y sha256 de cada dato de origen utilizado. Ninguna celda vacía. Para un archivo de Raiz_entregas/, url_o_api = "Raiz_entregas/<archivo>".
 10. La herramienta no reparte, vende ni intercambia agua, no pronostica la presa y no promete ahorros. No escribas textos que digan lo contrario.
-11. Al final escribe, para CADA archivo que guardes en entregas/ (también fuentes_B1.csv y las figuras), su línea para entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; script = colab/<nombre del cuaderno>.ipynb). Sin esa línea el archivo no entra.
+11. Al final escribe, para CADA archivo que guardes en Raiz_entregas/ (también fuentes_protagonistas.csv y las figuras), su línea para Raiz_entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; script = colab/<nombre del cuaderno>.ipynb; sin el carácter "|" dentro de un campo). Dame una celda que la AGREGUE al final de LEEME.md con open(ruta, "a"), nunca con "w". Sin esa línea el archivo no entra.
 
 ESQUEMA DE SALIDA DE ESTA TAREA
-Fila de la tabla 0.4-B del kit (copiada tal cual). ESTOS ARCHIVOS NO LOS ESCRIBO: los entregó la sesión de Chrome y aquí solo los verifico.
-| B1 (P2) | `parcelas_base.geojson` (zona piloto) y `parcelas_muestra.geojson` (polígonos de los puntos etiquetados) | `id`, `area_ha`, `modulo`, `ftw_confianza`, `protagonista`; en la muestra, además `punto_id` y `bloque` |
-Archivos que SÍ escribo:
-- en entregas/: B1_mapa_confianza.png (la figura PNG que pide la PRUEBA de B1) y fuentes_B1.csv;
-- en cuadernos/: B1_revision_protagonistas.md, con la revisión de las protagonistas.
+No escribo parcelas_base.geojson (es de la sesión de datos). Escribo:
+- en Raiz_entregas/: B1_protagonistas.png (una figura con las 3 protagonistas en color verdadero, con su contorno) y fuentes_protagonistas.csv;
+- en Raiz/cuadernos/: B1_revision_protagonistas.md (la revisión) y, solo si un contorno no coincide, B1_protagonistas_correccion.geojson (id y polígono corregido).
 
 DOCUMENTOS DE REFERENCIA (pegados)
 Advertencia del kit v4, sección A4 (copiada tal cual):
 > **Advertencia sobre Fields of The World:** su benchmark no incluye México y el riego árido de Norteamérica no está en su entrenamiento. Se usan sus predicciones globales de 2025 (CC-BY-4.0), con filtro de confianza por polígono y revisión manual de las 3 protagonistas (B1). En la página se declara: *"Field boundaries are NN predictions outside the model's training domain; filtered by confidence and manually reviewed for the showcased fields."*
-[PEGA AQUÍ el valor de zona_piloto.bbox de data/params.json (GitHub del proyecto). No lo escribas de memoria.]
+S9 §5, viñeta "Estado" (copiada tal cual):
+- **Estado:** libre (anual o descanso); por vencer (alfalfa con 3 años o más [S]); comprometida (alfalfa joven o nogal).
+Formato de los archivos (dato de la sesión de datos):
+- hls_reflect_2025_10_a_2026_09.tif: bandas con nombre AAAA_MM_azul, AAAA_MM_verde, AAAA_MM_rojo, AAAA_MM_nir, AAAA_MM_swir1, AAAA_MM_swir2 (los nombres están en las descripciones de banda del TIF); valores Int16 multiplicados por 10,000; -32768 = sin dato.
+- hls_mensual_parcelas.csv: id, mes (AAAA-MM), banda (ndvi, lswi, bsi), mediana, p25, p75, n_validos; ya en su escala.
+- cultivos_parcelas.csv (versión de reglas): id, cultivo_actual, prob_max (vacío), acuerdo_metodos ("1/1 (reglas)"), abstencion, edad_perenne_anios, estado_plazo, grupo_fenologico.
 
 TAREA
-NOTA DEL EQUIPO: los pasos 1, 2, 3 y 5 los hizo la sesión de Chrome. Yo hago el paso 4 (elegir las 3 protagonistas y revisarlas a mano contra una imagen en color verdadero) y la PRUEBA. No reescribo parcelas_base.geojson: los id de las protagonistas y cualquier polígono corregido se los paso a Cristian. Primero imprime: número de parcelas, CRS, columnas, cuántas tienen protagonista = true y si alguna parcela cae fuera del rectángulo de la zona piloto.
-Tarea B1. En motor/B1_parcelas.ipynb (lo corre la sesión de Chrome; su revisión, en B1_revision.ipynb de Raiz/cuadernos/):
-1) Zona piloto: rectángulo definido por coordenadas (zona_piloto.bbox de data/params.json; lo propone usted con el visor y lo confirma Cristian antes de ejecutar). El límite de los módulos de riego no es público: en todos los textos se dice "zona piloto", nunca "módulo". Para el polígono del DR-005, utilice el que exista en data/raw/ o la capa REST de distritos de riego de Conagua SIGAGIS, y documente la fuente.
-2) Descargue ÚNICAMENTE el recorte de las predicciones globales de Fields of The World 2025 (Source Cooperative, source.coop/ftw/global-data, CC-BY-4.0; GeoParquet/PMTiles) que corresponde al rectángulo. NO descargue el producto global. Si es GeoParquet, filtre por bounding box.
-   ADVERTENCIA: el benchmark de FTW no incluye México, y el riego árido y Norteamérica no están en su entrenamiento. Las predicciones sobre Delicias están fuera del dominio de entrenamiento: aplique el filtro de confianza y revise a mano los polígonos de las protagonistas (paso 4).
-3) Recorte, calcule area_ha y filtre los campos < 1 ha. Copie la confianza por polígono (escala 0–100) a ftw_confianza; documente también la capa de confianza de 500 m (umbral ≥ 0.4 según FTW).
+NOTA DEL EQUIPO: los pasos 1, 2, 3 y 5 de B1 los hizo la sesión de datos. Yo hago el paso 4. Primero imprime: número de parcelas de parcelas_base.geojson, CRS, cuántas tienen protagonista = true y el % con ftw_confianza < 50.
+1) CANDIDATAS, con cultivos_parcelas.csv unido por id a parcelas_base.geojson y suelo_desnudo.csv. Solo parcelas con abstencion = false. Imprime una tabla por grupo (id, area_ha, ftw_confianza, cultivo_actual, edad_perenne_anios, estado_plazo, dias_suelo_desnudo_feb_abr), ordenada por ftw_confianza de mayor a menor:
+   - alfalfa con estado_plazo = por_vencer;
+   - nogal con estado_plazo = comprometida;
+   - anual con estado_plazo = libre. Además, aparte, las parcelas con grupo_fenologico = anual_verano (hoy abstenidas porque las reglas no separan el chile), con sus días de suelo desnudo: si el Random Forest confirma una como chile, puede servir como la protagonista anual que pide el kit; dímelo en una línea.
+2) Propón 3 (una de cada grupo) y explica en una línea por qué cada una.
+3) REVISIÓN VISUAL (kit B1, paso 4): para cada propuesta, imagen en color verdadero con hls_reflect_2025_10_a_2026_09.tif (bandas rojo, verde y azul del mes con menos píxeles sin dato dentro de la parcela; dime qué mes usaste), recortada a la parcela más un margen, con el contorno de parcelas_base.geojson encima. Convierte -32768 a NaN y divide entre 10,000 antes de graficar; usa un estiramiento por percentiles y dilo. Junta las 3 en B1_protagonistas.png, con el id, el cultivo y la nota "Source: NASA HLS L30/S30 v002; field boundaries: Fields of The World (CC-BY-4.0)".
+4) Curva de NDVI mensual de las 3 (de hls_mensual_parcelas.csv, banda ndvi, mediana).
+5) Escribe en Raiz/cuadernos/B1_revision_protagonistas.md, para cada una: id, cultivo, estado del plazo, mes de la imagen, si el contorno coincide con la parcela (sí / no y qué no coincide) y qué se vio en Copernicus Browser si te lo cuento. Si no coincide, guarda en Raiz/cuadernos/B1_protagonistas_correccion.geojson el id y el polígono que te indique, sin tocar parcelas_base.geojson.
+6) Al final, escribe el mensaje para Cristian: "Protagonistas propuestas: <id alfalfa por vencer>, <id anual libre>, <id nogal comprometida>; contornos revisados: …".
+
+Texto del kit B1, paso 4 (copiado tal cual):
 4) Para la demostración: 30–60 parcelas de un solo sector (la zona piloto) y 3 protagonistas (protagonista=true). Si el peso del archivo y la cuota de Earth Engine lo permiten tras el piloto de consumo, conserve todas las parcelas del rectángulo con confianza suficiente: el indicador de zona y H3 son más sólidos con más parcelas. Protagonistas, de preferencia, una por cada estado del plazo:
    - una alfalfa vieja (por vencer);
    - una de chile con suelo desnudo en invierno (libre);
    - una huerta de nogal (comprometida), en lugar de la parcela de forraje o maíz del kit 23.
    Se eligen con el apoyo visual de A3; si aún no está disponible, posponga la selección y notifíquelo.
    REVISIÓN MANUAL OBLIGATORIA de las 3 protagonistas: compare cada polígono con una imagen en color verdadero (HLS o Sentinel-2) y corrija el contorno si no coincide con la parcela; registre la corrección en Raiz/cuadernos/B1_revision_protagonistas.md (Cristian la pasa a docs/).
-5) Entregue en Raiz/entregas/ parcelas_base.geojson y parcelas_muestra.geojson (polígonos FTW que contienen los puntos etiquetados, con punto_id y bloque) conforme al contrato (sección 2.2); los campos que no le corresponden se dejan en null.
-
-PRUEBA:
-- verificación de esquema;
-- un mapa estático (PNG) con las parcelas coloreadas por confianza FTW;
-- % de parcelas con confianza < 50. Si es > 40%, notifíquelo: será necesario editar manualmente los polígonos de las protagonistas.
-```
-
-**Ajustes de ruta hechos al texto del kit en este bloque:**
-- «En motor/B1_parcelas.ipynb:» → «En motor/B1_parcelas.ipynb (lo corre la sesión de Chrome; su revisión, en B1_revision.ipynb de Raiz/cuadernos/):»
-- «registre la corrección en docs/.» → «registre la corrección en Raiz/cuadernos/B1_revision_protagonistas.md (Cristian la pasa a docs/).»
-- «5) Entregue parcelas_base.geojson y parcelas_muestra.geojson (» → «5) Entregue en Raiz/entregas/ parcelas_base.geojson y parcelas_muestra.geojson (»
-- «- verificación de esquema (o validar_contrato.py → "CONTRATO OK");» → «- verificación de esquema;»
-
-**Prueba de aceptación** (kit B1):
-```text
-PRUEBA:
-- verificación de esquema;
-- un mapa estático (PNG) con las parcelas coloreadas por confianza FTW;
-- % de parcelas con confianza < 50. Si es > 40%, notifíquelo: será necesario editar manualmente los polígonos de las protagonistas.
-```
-
-**Plan B:** el kit no trae uno para B1. Si la sesión de Chrome no logra entregar `parcelas_base.geojson`, se aplica R3 (kit §8): el núcleo se queda con las 3 protagonistas.
-
-**Línea de LEEME.md** (una por archivo; ajuste la fecha y el cuaderno):
-```text
-B1_mapa_confianza.png | Fields of The World 2025 (Source Cooperative, source.coop/ftw/global-data, CC-BY-4.0), confianza por polígono; parcelas_base.geojson | 2026-11-14 | colab/B1_revision.ipynb
-fuentes_B1.csv | Fuentes de B1: parcelas_base.geojson y parcelas_muestra.geojson de Raiz/entregas/ (sha256) | 2026-11-14 | colab/B1_revision.ipynb
-```
-Aviso en el grupo: `ENTREGA: B1_mapa_confianza.png — prueba OK`. Mande además, por mensaje a Cristian, los 3 `id` de las protagonistas.
-
----
-
-## A3 · HLS del año agrícola 2026 por parcela
-
-| | |
-|---|---|
-| **Lo hace la sesión de Chrome** | Pasos 1 a 4 del prompt, en Earth Engine: colecciones HLS L30/S30 v002, renombrado del NIR, Fmask, escala y corrida piloto de EECU. Exporta a Drive los compuestos mensuales de oct-2025 a sep-2026 de la zona piloto |
-| **Le toca a usted** | Pasos 5 a 7: estadística mensual por parcela, días de suelo desnudo y NDVI del último mes. Y la PRUEBA |
-| **Entradas** | Las exportaciones de la sesión de Chrome (CSV por parcela o GeoTIFF mensuales; los nombres los anuncia esa sesión en el grupo o en `LEEME.md`) y `parcelas_base.geojson` |
-| **Cuaderno** | `A3_hls_gee.ipynb` en `Raiz/cuadernos/` (nombre del kit) |
-| **Hora límite** | Sáb 14:30 (kit A3) |
-| **Verificación de datos** | [verificar_datos_nasa.md → HLS](verificar_datos_nasa.md#2-hls-l30-y-s30-v002-a3-a3-m-y-a42) |
-
-**Antes de calcular, pregunte a la sesión de Chrome (o lea su línea de `LEEME.md`):**
-- qué factor de escala trae la exportación;
-- qué valor marca «sin dato»;
-- qué bandas trae.
-
-No aplique la escala dos veces. Vea la guía de verificación, §2.
-
-**Dos huecos del kit que debe avisar, no rellenar:**
-1. **Columna `dias_desnudo_viento_alto`.** La pide la tabla 0.4-B, pero el prompt A3 no define «viento alto».
-   - No invente el umbral: P5 lo declara en `supuestos.json`, con fuente o como «assumption».
-   - Si no está declarado, avise a Cristian antes de entregar: el validador no acepta esa columna vacía.
-2. **Paso 6 (suelo desnudo).** Pide observaciones individuales.
-   - Si la exportación solo trae compuestos mensuales, dígalo.
-   - Use la interpolación mensual de A3-M (paso 8) y rotúlela «aproximación mensual». Cristian decide si vale para 2026.
-
-**Bloque para pegar en Gemini:**
-```text
-CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria.
-
-ENTORNO
-Google Colab (Python 3). Google Drive montado; carpeta /content/drive/MyDrive/Raiz/:
-- entradas/ = datos de solo lectura;
-- entregas/ = donde guardo resultados. Es UNA carpeta plana (sin subcarpetas por rol) y cada archivo lleva una línea en entregas/LEEME.md; ahí también están las entregas de los demás, que solo leo;
-- cuadernos/ = cuadernos.
-Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chrome de Cristian, proyecto iondroplet), que deja sus exportaciones en Drive. Yo trabajo sobre esos archivos.
-
-REGLAS OBLIGATORIAS
-1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
-2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
-4. Al final imprime:
-   (a) la PRUEBA DE ACEPTACIÓN de la tarea;
-   (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
-5. Si un paso falla dos veces con el mismo error, detente y explícame el problema en 5 líneas antes de seguir.
-6. Earth Engine: no aplica. No uses ee.Authenticate ni ee.Initialize. Si un paso de la tarea pide Earth Engine, dime qué archivo de la sesión de Chrome necesito y detente. Los cálculos de series, en pandas.
-7. Usa bibliotecas comunes (pandas, numpy, requests, geopandas, scikit-learn). Si necesitas instalar algo, dime el comando y por qué.
-8. Al terminar, explica en español claro:
-   - los 3 pasos clave;
-   - los supuestos;
-   - de dónde sale cada número;
-   - qué podría estar mal.
-9. Guarda también fuentes_A3.csv en entregas/ con: archivo, url_o_api, fecha_consulta y sha256 de cada dato de origen utilizado.
-10. La herramienta no reparte, vende ni intercambia agua, no pronostica la presa y no promete ahorros. No escribas textos que digan lo contrario.
-11. Al final escribe, para CADA archivo que guardes en entregas/ (también fuentes_A3.csv y las figuras), su línea para entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; script = colab/<nombre del cuaderno>.ipynb). Sin esa línea el archivo no entra.
-
-ESQUEMA DE SALIDA DE ESTA TAREA
-Fila de la tabla 0.4-B del kit (copiada tal cual):
-| A3 (P2) | `hls_mensual_parcelas.csv` y `suelo_desnudo.csv` | (id, mes, banda, mediana, p25, p75, n_validos); (id, dias_suelo_desnudo_feb_abr, dias_desnudo_viento_alto, ndvi_ultimo_mes, meses_validos) |
-Además: fuentes_A3.csv (archivo, url_o_api, fecha_consulta, sha256). Formato de mes: AAAA-MM.
-
-DOCUMENTOS DE REFERENCIA (pegados)
-S9 §5 "Cálculo: lo que cambia" (copiado tal cual):
-- **Unidad:** millares por hectárea. 1 millar/ha = 1,000 m³/ha = 10 cm de lámina.
-- **Lámina bruta en parcela** L = (ETc − lluvia efectiva) ÷ eficiencia parcelaria, con P10, P50 y P90 (S3; sin cambio).
-- **Dotación** D: valor del deslizador. Supuesto [S]: el millar se mide en la toma de la parcela.
-- **Cobertura** = mín(1, D ÷ L P50). **Hectáreas que alcanzan** = superficie × cobertura. Se muestran siempre, con su rango.
-- **Semáforo** (S8, sin cambio): verde si D cubre P90; ámbar si cubre P50; rojo si no cubre P50; gris si hay abstención.
-- **Plazo:** anual 1 año; alfalfa 3–4 años [P]; nogal, horizonte de cálculo de 10 años [S] (la vida de la huerta se cita con fuente INIFAP antes de publicarla).
-- **Compromiso** = L P50 × años de plazo restantes. En alfalfa, plazo restante = plazo − edad observada, con mínimo cero. En nogal no se descuenta la edad: el compromiso se calcula siempre a 10 años.
-- **Estado:** libre (anual o descanso); por vencer (alfalfa con 3 años o más [S]); comprometida (alfalfa joven o nogal).
-- **Agua ya comprometida** de la zona piloto = suma de superficie × L P50 de las parcelas perennes ÷ (D × superficie total). Si pasa de 100 %, la diferencia sale de pozos o queda sin cubrir; la ficha lo dice y enlaza con La gota.
-- **Memoria:** con el NDVI mensual de HLS por parcela, cada año agrícola se clasifica con reglas: cultivo de verano (máximo de jun–sep ≥ 0.40), de invierno (máximo de dic–mar ≥ 0.40), doble o descanso. La alfalfa se reconoce como perenne cuando la parcela está verde (NDVI ≥ 0.40) 8 meses o más dos años seguidos. El nogal pierde la hoja en invierno y no cumple esa regla: su condición de huerta la da el mapa de cultivos de 2026 y la memoria solo calcula desde cuándo muestra ese patrón. Umbrales [S] con sensibilidad 0.35–0.45; se validan con las etiquetas a ciegas de 2026.
-- **Suelo desnudo:** días con NDVI < 0.2 del 1-feb al 30-abr, ahora medidos cada año; la ficha muestra la mediana.
-- **Ejemplo de escala** (láminas del INIFAP [V]; la herramienta usa su propio cálculo): 10 ha con 3.5 millares/ha reciben 35 millares, que alcanzan para 2.0 ha de alfalfa (17.5), 5.1 ha de algodón (6.8) o 6.4 ha de maíz forrajero (5.5).
-[PEGA AQUÍ lo que diga la sesión de Chrome sobre su exportación: nombres de archivo, bandas, factor de escala y valor de "sin dato".]
-[PEGA AQUÍ, si P5 ya lo declaró, el umbral de "viento alto" de supuestos.json con su fuente.]
-
-TAREA
-NOTA DEL EQUIPO: los pasos 1 a 4 (Earth Engine) ya los hizo la sesión de Chrome; yo empiezo en el paso 5 con sus archivos de Drive. Si la exportación es GeoTIFF, calcula por parcela (polígonos de parcelas_base.geojson) la mediana, p25, p75 y n_validos de cada banda e índice por mes. Si alguna banda o mes no viene en la exportación, dímelo; no lo inventes. Si hls_mensual_parcelas.csv ya está en entregas/LEEME.md, no lo rehagas: solo verifícalo.
-Tarea A3. Se trabajará en Google Earth Engine (Python `ee` desde Colab, cuaderno A3_hls_gee.ipynb en Raiz/cuadernos/).
-1) Cargue como FeatureCollection las parcelas de parcelas_base.geojson (zona piloto) y de parcelas_muestra.geojson (polígonos de los puntos etiquetados), que genera B1. Si aún no existen, utilice el rectángulo de la zona piloto de data/params.json y avise.
-2) Utilice NASA/HLS/HLSL30/v002 y NASA/HLS/HLSS30/v002 entre 2025-10-01 y 2026-09-30 (año agrícola 2026).
-   - Antes de calcular, verifique en el catálogo de Earth Engine los nombres de las bandas de cada colección (difieren entre L30 y S30), la banda Fmask y que existan escenas de 2026 sobre el área. Si falta una de las dos colecciones, use la disponible y márquelo.
-   - Armonice las bandas: azul, verde, rojo, NIR, SWIR1 y SWIR2.
-   - NOTA DE RENOMBRADO: el NIR es B5 en L30 y B8A (NIR angosto) en S30. Renombre ambas colecciones a nombres comunes ANTES de fusionarlas:
-     L30: B2 azul, B3 verde, B4 rojo, B5 NIR, B6 SWIR1, B7 SWIR2.
-     S30: B2 azul, B3 verde, B4 rojo, B8A NIR, B11 SWIR1, B12 SWIR2 (confirme B11–B12 en la guía de LP DAAC).
-     No utilice B8 de S30 como NIR ni B5 de S30 (es borde rojo).
-3) Enmascare nubes, nube adyacente, sombras y nieve con Fmask (bit 1 nube, 2 adyacente, 3 sombra, 4 nieve). NO enmascare el bit de agua (bit 5): el riego por inundación puede marcarse como agua. Aplique la escala 0.0001 y descarte el relleno −9999. Considere que el Fmask de L30 presenta omisiones antes de abr-2022. Calcule NDVI y LSWI.
-4) CORRIDA PILOTO antes de exportar: las 3 protagonistas y 1 mes. Lea el consumo de EECU de la tarea y anótelo en docs/ee_uso.md.
-5) Genere compuestos MENSUALES (mediana) y, por parcela, obtenga la mediana, p25 y p75 de cada banda e índice por mes. Exporte a CSV: hls_mensual_parcelas.csv en Raiz/entregas/ (id, mes, banda, mediana, p25, p75, n_validos).
-6) Calcule por parcela los días aproximados de suelo desnudo entre el 1-feb y el 30-abr de 2026: días con NDVI < 0.2 a partir de las observaciones válidas, interpolando entre fechas. Documente el método. Guarde suelo_desnudo.csv en Raiz/entregas/.
-7) Por parcela, guarde la mediana del NDVI del último compuesto mensual válido (ndvi_ultimo_mes), sin modificar otros campos.
 
 PRUEBA DE ACEPTACIÓN:
-- % de parcelas con ≥ 8 meses válidos (reportarlo; meta ≥ 80%).
-- Gráfica de NDVI mensual de las 3 parcelas protagonistas.
-  - Una alfalfa debe mostrarse verde casi todo el año, con caídas por corte.
-  - Un chile, verde en verano y bajo en invierno.
-  - Un nogal, verde en verano y sin hojas en invierno.
-- Si no se observa este comportamiento, notifíquelo.
-Explique qué es el NDVI con un ejemplo de estas parcelas.
+- tabla de las 3 propuestas con id, cultivo, estado del plazo, ftw_confianza y abstencion = false;
+- B1_protagonistas.png abre y muestra las 3 parcelas con su contorno;
+- curva de NDVI de las 3: la alfalfa, verde casi todo el año, con caídas por corte; el nogal, verde en verano y sin hojas en invierno; la anual, verde en su temporada y baja fuera de ella (kit A3, prueba). Si no se ve así, dilo;
+- para cada una, "contorno coincide" o "contorno no coincide: corrección en Raiz/cuadernos/".
 ```
 
-**Ajustes de ruta hechos al texto del kit en este bloque:**
-- «cuaderno datos/A3_hls_gee.ipynb» → «cuaderno A3_hls_gee.ipynb en Raiz/cuadernos/»
-- «Exporte a CSV: data/processed/hls_mensual_parcelas.csv (» → «Exporte a CSV: hls_mensual_parcelas.csv en Raiz/entregas/ (»
-- «Guarde data/processed/suelo_desnudo.csv.» → «Guarde suelo_desnudo.csv en Raiz/entregas/.»
+**Ajustes al texto del kit en este bloque:** la única ruta cambiada es «registre la corrección en docs/.» → «registre la corrección en Raiz/cuadernos/B1_revision_protagonistas.md (Cristian la pasa a docs/).». Los criterios de la «anual libre» siguen la decisión del integrador del 14-nov: el kit pedía chile, y las reglas todavía no lo separan.
 
-**Prueba de aceptación** (kit A3):
-```text
-PRUEBA DE ACEPTACIÓN:
-- % de parcelas con ≥ 8 meses válidos (reportarlo; meta ≥ 80%).
-- Gráfica de NDVI mensual de las 3 parcelas protagonistas.
-  - Una alfalfa debe mostrarse verde casi todo el año, con caídas por corte.
-  - Un chile, verde en verano y bajo en invierno.
-  - Un nogal, verde en verano y sin hojas en invierno.
-- Si no se observa este comportamiento, notifíquelo.
-Explique qué es el NDVI con un ejemplo de estas parcelas.
-```
+**Prueba de aceptación:** la del bloque. Además, el ensamblador avisa si `parcelas_base.geojson` no trae exactamente 3 protagonistas (kit B1, paso 4): ese aviso desaparece cuando Cristian las marque.
 
-**Plan B** (kit A3). La que lo ejecutaría es la sesión de Chrome: usted no descarga HLS.
-**Plan B:** si Earth Engine falla o no otorga permiso, utilizar `earthaccess` con HLS de LP DAAC, recortando únicamente el área. Es más lento: limitarse a las protagonistas y a una muestra.
+**Plan B:** el kit no trae uno para B1. Si a las 12:00 no hay una candidata clara en algún grupo, mande las dos que sí tiene y diga cuál falta. Por R3 (kit §8), el núcleo puede quedarse con las 3 protagonistas.
 
 **Líneas de LEEME.md:**
 ```text
-hls_mensual_parcelas.csv | HLS L30/S30 v002 (NASA LP DAAC; Earth Engine NASA/HLS/HLSL30/v002 y NASA/HLS/HLSS30/v002), exportación de la sesión de Chrome, oct-2025 a sep-2026, zona piloto | 2026-11-14 | colab/A3_hls_gee.ipynb
-suelo_desnudo.csv | Derivado de hls_mensual_parcelas.csv (NDVI < 0.2, 1-feb a 30-abr de 2026; S9 §5); viento de eto_diaria.csv (NASA POWER) | 2026-11-14 | colab/A3_hls_gee.ipynb
-fuentes_A3.csv | Fuentes de A3: exportaciones de la sesión de Chrome y parcelas_base.geojson (sha256) | 2026-11-14 | colab/A3_hls_gee.ipynb
+B1_protagonistas.png | HLS L30/S30 v002 (hls_reflect_2025_10_a_2026_09.tif, color verdadero) y contornos de parcelas_base.geojson (Fields of The World, CC-BY-4.0); revisión manual de las 3 protagonistas (kit B1, paso 4) | 2026-11-14 | colab/B1_protagonistas.ipynb
+fuentes_protagonistas.csv | Fuentes de la revisión de protagonistas: parcelas_base.geojson, cultivos_parcelas.csv, suelo_desnudo.csv, hls_mensual_parcelas.csv y hls_reflect_2025_10_a_2026_09.tif de Raiz_entregas (sha256) | 2026-11-14 | colab/B1_protagonistas.ipynb
 ```
-Aviso: `ENTREGA: hls_mensual_parcelas.csv — prueba OK` y `ENTREGA: suelo_desnudo.csv — prueba OK`.
+Aviso en el grupo: `ENTREGA: B1_protagonistas.png — prueba OK`. Y por mensaje a Cristian, los 3 `id`.
 
 ---
 
-## A3-M · Memoria de la parcela, 2016–2026
-
-Es segunda línea (S9 §8): no se pone por delante de A3 ni de A4.2.
+## A4.2 · Random Forest y comparación con las reglas
 
 | | |
 |---|---|
-| **Lo hace la sesión de Chrome** | La parte A (pasos 1 a 5): extracción en Earth Engine, piloto de consumo y una exportación por año agrícola, de 2025 hacia atrás. El consumo de EECU lo anota esa sesión en `docs/ee_uso.md` |
-| **Le toca a usted** | Las partes B (reglas, pasos 6 a 9) y C (validación y sensibilidad, pasos 10 y 11), en pandas, con cada año que llega |
-| **Entradas** | Las exportaciones anuales de NDVI mensual de la sesión de Chrome; `hls_mensual_parcelas.csv` y `suelo_desnudo.csv` (A3, para 2026); `cultivos_parcelas.csv` (A4.2, para comparar en el paso 10); `etiquetas_unidas.csv` (P3) y `parcelas_muestra.geojson` (B1), para el paso 10 |
-| **Cuaderno** | `A3M_memoria.ipynb` en `Raiz/cuadernos/` |
-| **Paso 10: etiquetas y parcelas tienen `id` distintos** | El `id` de `etiquetas_unidas.csv` es el del polígono de `parcelas_muestra.geojson`; el de la memoria, el de `parcelas_base.geojson`. El bloque pide una unión espacial (punto representativo del polígono de la muestra dentro de una parcela de `parcelas_base`) e imprimir cuántas etiquetas coinciden. Si son pocas o ninguna, avise a Cristian |
-| **Hora límite** | Cada año se entrega en cuanto llega. **Si a las 20:30 del sábado no hay ningún año exportado, se aplica el plan B general.** Años restantes: sáb 20:30 a 1:00. Funciones congeladas: dom 8:00 |
-| **Verificación de datos** | [verificar_datos_nasa.md → HLS](verificar_datos_nasa.md#2-hls-l30-y-s30-v002-a3-a3-m-y-a42) (fecha de inicio de cada colección) |
-
-**Cada vez que entregue años nuevos:** reescriba los 4 archivos completos, cambie la fecha de su línea en `LEEME.md` (no agregue otra) y avise.
-
-**`memoria_resumen.csv` cambió (cambio e):**
-- columnas exactas: `id, dias_suelo_desnudo_mediana, anios_con_dato, estado_2025`;
-- **sin `edad_perenne_anios`**: la edad se calcula con la regla del paso 9 y se entrega en `cultivos_parcelas.csv` (A4.2). Cada vez que entregue años nuevos, avise también a quien entrega `cultivos_parcelas.csv`, para que recalcule la edad;
-- `anios_con_dato`: el kit no lo define. Esta guía lo toma como los años agrícolas de la parcela con estado distinto de `sin_dato` (entero, nunca vacío). Si Cristian lo define de otro modo, manda él;
-- `dias_suelo_desnudo_mediana` es entero o vacío (kit §2.2). Con un número par de años, la mediana puede salir con «.5»: redondéela y diga cómo.
-
-**Bloque para pegar en Gemini:**
-```text
-CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria.
-
-ENTORNO
-Google Colab (Python 3). Google Drive montado; carpeta /content/drive/MyDrive/Raiz/:
-- entradas/ = datos de solo lectura;
-- entregas/ = donde guardo resultados. Es UNA carpeta plana (sin subcarpetas por rol) y cada archivo lleva una línea en entregas/LEEME.md; ahí también están las entregas de los demás, que solo leo;
-- cuadernos/ = cuadernos.
-Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chrome de Cristian, proyecto iondroplet), que deja sus exportaciones en Drive. Yo trabajo sobre esos archivos.
-
-REGLAS OBLIGATORIAS
-1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
-2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
-4. Al final imprime:
-   (a) la PRUEBA DE ACEPTACIÓN de la tarea;
-   (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
-5. Si un paso falla dos veces con el mismo error, detente y explícame el problema en 5 líneas antes de seguir.
-6. Earth Engine: no aplica. No uses ee.Authenticate ni ee.Initialize. Si un paso de la tarea pide Earth Engine, dime qué archivo de la sesión de Chrome necesito y detente. Los cálculos de series, en pandas.
-7. Usa bibliotecas comunes (pandas, numpy, requests, geopandas, scikit-learn). Si necesitas instalar algo, dime el comando y por qué.
-8. Al terminar, explica en español claro:
-   - los 3 pasos clave;
-   - los supuestos;
-   - de dónde sale cada número;
-   - qué podría estar mal.
-9. Guarda también fuentes_A3M.csv en entregas/ con: archivo, url_o_api, fecha_consulta y sha256 de cada dato de origen utilizado.
-10. La herramienta no reparte, vende ni intercambia agua, no pronostica la presa y no promete ahorros. No escribas textos que digan lo contrario.
-11. Al final escribe, para CADA archivo que guardes en entregas/ (también fuentes_A3M.csv y las figuras), su línea para entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; script = colab/<nombre del cuaderno>.ipynb). Sin esa línea el archivo no entra.
-
-ESQUEMA DE SALIDA DE ESTA TAREA
-Fila de la tabla 0.4-B del kit (copiada tal cual):
-| A3-M (P2) | `memoria_mensual.csv`, `memoria_parcelas.csv`, `memoria_resumen.csv` y `memoria_validacion.csv` | (id, anio_agricola, mes, ndvi_mediana, n_validos); (id, anio_agricola, estado, meses_verdes, max_verano, max_invierno, dias_suelo_desnudo_feb_abr, meses_validos); (id, edad_perenne_anios, dias_suelo_desnudo_mediana, estado_2025); tabla de acuerdo con las etiquetas de 2026 |
-CAMBIO ACORDADO EL 14-NOV (manda sobre la fila de arriba; el validador ya lo aplica): memoria_resumen.csv lleva EXACTAMENTE id, dias_suelo_desnudo_mediana, anios_con_dato, estado_2025. NO lleva edad_perenne_anios: la edad va en cultivos_parcelas.csv (A4.2). anios_con_dato = número de años agrícolas de la parcela con estado distinto de sin_dato (entero ≥ 0, nunca vacío). dias_suelo_desnudo_mediana es entero o vacío (kit §2.2): si la mediana sale con .5, redondéala y dime cómo.
-Además: fuentes_A3M.csv (archivo, url_o_api, fecha_consulta, sha256). Estados permitidos en memoria_parcelas.csv y estado_2025: perenne, verano, invierno, doble, descanso, sin_dato (kit §2.2).
-
-DOCUMENTOS DE REFERENCIA (pegados)
-S9 §5 "Cálculo: lo que cambia" (copiado tal cual; de aquí salen los umbrales):
-- **Unidad:** millares por hectárea. 1 millar/ha = 1,000 m³/ha = 10 cm de lámina.
-- **Lámina bruta en parcela** L = (ETc − lluvia efectiva) ÷ eficiencia parcelaria, con P10, P50 y P90 (S3; sin cambio).
-- **Dotación** D: valor del deslizador. Supuesto [S]: el millar se mide en la toma de la parcela.
-- **Cobertura** = mín(1, D ÷ L P50). **Hectáreas que alcanzan** = superficie × cobertura. Se muestran siempre, con su rango.
-- **Semáforo** (S8, sin cambio): verde si D cubre P90; ámbar si cubre P50; rojo si no cubre P50; gris si hay abstención.
-- **Plazo:** anual 1 año; alfalfa 3–4 años [P]; nogal, horizonte de cálculo de 10 años [S] (la vida de la huerta se cita con fuente INIFAP antes de publicarla).
-- **Compromiso** = L P50 × años de plazo restantes. En alfalfa, plazo restante = plazo − edad observada, con mínimo cero. En nogal no se descuenta la edad: el compromiso se calcula siempre a 10 años.
-- **Estado:** libre (anual o descanso); por vencer (alfalfa con 3 años o más [S]); comprometida (alfalfa joven o nogal).
-- **Agua ya comprometida** de la zona piloto = suma de superficie × L P50 de las parcelas perennes ÷ (D × superficie total). Si pasa de 100 %, la diferencia sale de pozos o queda sin cubrir; la ficha lo dice y enlaza con La gota.
-- **Memoria:** con el NDVI mensual de HLS por parcela, cada año agrícola se clasifica con reglas: cultivo de verano (máximo de jun–sep ≥ 0.40), de invierno (máximo de dic–mar ≥ 0.40), doble o descanso. La alfalfa se reconoce como perenne cuando la parcela está verde (NDVI ≥ 0.40) 8 meses o más dos años seguidos. El nogal pierde la hoja en invierno y no cumple esa regla: su condición de huerta la da el mapa de cultivos de 2026 y la memoria solo calcula desde cuándo muestra ese patrón. Umbrales [S] con sensibilidad 0.35–0.45; se validan con las etiquetas a ciegas de 2026.
-- **Suelo desnudo:** días con NDVI < 0.2 del 1-feb al 30-abr, ahora medidos cada año; la ficha muestra la mediana.
-- **Ejemplo de escala** (láminas del INIFAP [V]; la herramienta usa su propio cálculo): 10 ha con 3.5 millares/ha reciben 35 millares, que alcanzan para 2.0 ha de alfalfa (17.5), 5.1 ha de algodón (6.8) o 6.4 ha de maíz forrajero (5.5).
-
-TAREA
-NOTA DEL EQUIPO: la parte A (pasos 1 a 5, Earth Engine) la hace la sesión de Chrome. Yo hago las partes B y C en pandas con los años exportados que haya en Drive. Primero imprime qué años agrícolas hay, cuántas parcelas trae cada uno y si algún año usa una sola colección (L30 o S30). La edad (edad_perenne_anios) NO se escribe en este cuaderno: va en cultivos_parcelas.csv (A4.2). Si falta etiquetas_unidas.csv (o parcelas_muestra.geojson), no hagas el paso 10 y avísame. En la prueba, el consumo de EECU lo reporta la sesión de Chrome (docs/ee_uso.md).
-NOTA DEL EQUIPO (paso 10): UNIÓN ETIQUETA → PARCELA: etiquetas_unidas.csv trae en id el polígono de parcelas_muestra.geojson (la muestra del distrito), no el de parcelas_base.geojson. Para cada etiqueta: (1) únela por punto_id con entregas/parcelas_muestra.geojson para obtener su polígono; (2) toma su punto representativo (geometry.representative_point(), que siempre cae dentro del polígono); (3) haz geopandas.sjoin con entregas/parcelas_base.geojson (predicate="within"; si el CRS difiere, reproyecta antes) y llama id_base al id que resulte; (4) imprime: etiquetas totales, etiquetas con id_base (zona piloto), etiquetas sin id_base (fuera de la zona piloto) e id_base con más de una etiqueta. No cambies la columna id de etiquetas_unidas.csv: id_base vive solo en el cuaderno. En el paso 10, "solo las de la zona piloto" son las etiquetas con id_base; el estado de 2026 y cultivo_actual se leen por id_base. Si ninguna etiqueta tiene id_base, no armes la tabla de acuerdo: escribe que no hay etiquetas en la zona piloto y avísame.
-Tarea A3-M. En A3M_memoria.ipynb, en Raiz/cuadernos/ (Earth Engine con Python `ee` desde Colab; después, pandas).
-
-A) EXTRACCIÓN (Earth Engine)
-1) Parcelas: solo parcelas_base.geojson (zona piloto). No use la muestra del distrito.
-2) Colecciones y máscara: las mismas de A3 (HLSL30 y HLSS30 v002, renombrado del NIR, Fmask sin enmascarar el agua, escala 0.0001, relleno −9999). Aquí solo se calcula NDVI. Verifique en el catálogo la fecha de inicio de cada colección; si para algún año falta una de las dos, use la disponible y márquelo.
-3) Año agrícola Y = del 1 de octubre de Y−1 al 30 de septiembre de Y. Compuesto mensual = mediana del NDVI de las observaciones válidas del mes. Por parcela: mediana del compuesto y número de observaciones válidas (n_validos).
-4) PILOTO DE CONSUMO, obligatorio antes de exportar: las 3 protagonistas y el año agrícola 2025 completo. Lea el consumo de EECU de la tarea, estime el consumo de todas las parcelas por 10 años y anótelo en docs/ee_uso.md junto con lo ya gastado en A3. Compare con la cuota de 150 EECU-h al mes y con el margen de reserva que fije Cristian. Si la estimación no cabe, aplique el PLAN B.
-5) Exporte POR AÑOS, un Export.table.toDrive por año agrícola, empezando por el más reciente: 2025, 2024, 2023, 2022, 2021, 2020, 2019 y después 2018, 2017 y 2016. Sin getInfo() en ciclos. Cada año que llega se entrega: no espere a tenerlos todos.
-   PLAN B: solo 2019–2026. La franja de la ficha empieza entonces en 2019 y así se declara.
-   SOLO SI SOBRA TIEMPO (S9 §8): años 2013 a 2015.
-
-B) REGLAS (pandas; umbrales leídos de la sección 5 de S9, que le pego; ninguno de memoria)
-6) Un "mes verde" es un mes con NDVI ≥ 0.40. Para cada parcela y año agrícola calcule: meses_verdes, max_verano (máximo de jun–sep), max_invierno (máximo de dic–mar) y meses_validos.
-7) Estado del año, en este orden:
-   - sin_dato: menos de 8 meses válidos, o ningún mes válido en la ventana de verano o en la de invierno;
-   - perenne: 8 meses verdes o más en ese año y también en el año anterior o en el siguiente (dos años seguidos);
-   - doble: max_verano ≥ 0.40 y max_invierno ≥ 0.40, sin ser perenne;
-   - verano: solo max_verano ≥ 0.40;
-   - invierno: solo max_invierno ≥ 0.40;
-   - descanso: ninguno de los dos.
-8) Suelo desnudo de cada año: días con NDVI < 0.2 entre el 1-feb y el 30-abr, por interpolación lineal entre los valores mensuales de enero a mayo (cada valor asignado al día 15). Declárelo como aproximación mensual. Para 2026, compare con el valor de A3 (observaciones individuales) y reporte la diferencia.
-9) Resumen por parcela:
-   - dias_suelo_desnudo_mediana: mediana de los años con dato;
-   - estado_2025;
-   - anios_con_dato: años agrícolas con estado distinto de sin_dato (cambio acordado el 14-nov);
-   - edad_perenne_anios, con cultivo_actual de A4.2 (NO va en memoria_resumen.csv: se calcula con esta regla y se guarda en cultivos_parcelas.csv, A4.2; cambio acordado el 14-nov):
-     · alfalfa: años agrícolas consecutivos en estado perenne contados hacia atrás desde 2026; mínimo 1 si el mapa de 2026 dice alfalfa;
-     · nogal: años consecutivos con señal de verano (estado verano, doble o perenne) contados hacia atrás desde 2026. El nogal pierde la hoja en invierno y puede no cumplir la regla de 8 meses: su condición de perenne la da el mapa de cultivos, y la memoria solo le calcula la antigüedad;
-     · los demás cultivos y las parcelas abstenidas: null.
-   Si A4.2 aún no está entregada, la edad se calcula cuando se entregue cultivos_parcelas.csv.
-
-C) VALIDACIÓN Y SENSIBILIDAD
-10) Compare el estado de 2026 con las etiquetas a ciegas de 2026 (etiquetas_unidas.csv, solo las de la zona piloto) y con cultivo_actual: alfalfa ↔ perenne; maíz, sorgo, algodón y chile ↔ verano (o doble); cereal de invierno ↔ invierno (o doble); barbecho ↔ descanso; nogal ↔ verano o perenne (reporte cuántos caen en cada uno). Entregue la tabla de acuerdo.
-11) Repita los estados con los umbrales 0.35 y 0.45 y reporte qué proporción de parcelas-año cambia de estado.
-
-SALIDAS (en Raiz/entregas/): memoria_mensual.csv, memoria_parcelas.csv, memoria_resumen.csv y memoria_validacion.csv, con las columnas del ESQUEMA DE SALIDA.
-
-PRUEBA DE ACEPTACIÓN (imprímala):
-- % de parcelas-año con estado distinto de sin_dato;
-- tabla de acuerdo de 2026 y proporción de acuerdo;
-- franja de memoria de las 3 protagonistas, año por año;
-- tabla de sensibilidad 0.35 / 0.40 / 0.45;
-- consumo de EECU real frente al estimado.
-Explique en 5 líneas qué mide la memoria y qué no (es una regla sobre el verdor, no un padrón de cultivos).
-```
-
-**Ajustes de ruta hechos al texto del kit en este bloque:**
-- «En datos/A3M_memoria.ipynb (» → «En A3M_memoria.ipynb, en Raiz/cuadernos/ (»
-- «SALIDAS: memoria_mensual.csv,» → «SALIDAS (en Raiz/entregas/): memoria_mensual.csv,»
-
-**Ajustes por el acuerdo de formatos (cambio e), en el paso 9:**
-- se agregó «- anios_con_dato: años agrícolas con estado distinto de sin_dato (cambio acordado el 14-nov);»;
-- «- edad_perenne_anios, con cultivo_actual de A4.2:» → «- edad_perenne_anios, con cultivo_actual de A4.2 (NO va en memoria_resumen.csv: se calcula con esta regla y se guarda en cultivos_parcelas.csv, A4.2; cambio acordado el 14-nov):»;
-- «Si A4.2 aún no está entregada, deje edad_perenne_anios en null y vuelva a calcularla después.» → «Si A4.2 aún no está entregada, la edad se calcula cuando se entregue cultivos_parcelas.csv.»
-
-**Prueba de aceptación** (kit A3-M):
-```text
-PRUEBA DE ACEPTACIÓN (imprímala):
-- % de parcelas-año con estado distinto de sin_dato;
-- tabla de acuerdo de 2026 y proporción de acuerdo;
-- franja de memoria de las 3 protagonistas, año por año;
-- tabla de sensibilidad 0.35 / 0.40 / 0.45;
-- consumo de EECU real frente al estimado.
-Explique en 5 líneas qué mide la memoria y qué no (es una regla sobre el verdor, no un padrón de cultivos).
-```
-
-**Plan B:**
-- Del prompt: solo 2019–2026. La franja empieza en 2019 y así se declara.
-- Del kit:
-
-**Plan B general:** si a las 20:30 del sábado no hay ningún año exportado, la memoria sale de la demostración; `memoria`, `edad_perenne_anios` y `dias_suelo_desnudo_mediana` quedan en null y la página dice «field memory: not run».
-
-**Líneas de LEEME.md** (una por archivo; actualice la fecha en cada entrega):
-```text
-memoria_mensual.csv | HLS L30/S30 v002 (NASA LP DAAC), NDVI mensual por año agrícola, exportaciones de la sesión de Chrome, años <lista de años> | 2026-11-14 | colab/A3M_memoria.ipynb
-memoria_parcelas.csv | Reglas de S9 §5 sobre memoria_mensual.csv (umbral 0.40; kit A3-M, pasos 6–8) | 2026-11-14 | colab/A3M_memoria.ipynb
-memoria_resumen.csv | Resumen por parcela de memoria_parcelas.csv (kit A3-M, paso 9; acuerdo de formatos del 14-nov: anios_con_dato, sin edad) | 2026-11-14 | colab/A3M_memoria.ipynb
-memoria_validacion.csv | Estado 2026 frente a etiquetas_unidas.csv (zona piloto) y cultivo_actual (kit A3-M, paso 10) | 2026-11-14 | colab/A3M_memoria.ipynb
-fuentes_A3M.csv | Fuentes de A3-M: exportaciones anuales de la sesión de Chrome (sha256) | 2026-11-14 | colab/A3M_memoria.ipynb
-```
-Aviso: `ENTREGA: memoria_parcelas.csv — prueba OK (años …)`.
-
----
-
-## A4.2 · Mapa de cultivos de 2026 (con P3)
-
-| | |
-|---|---|
-| **Quién** | P2, con P3 (kit A4.2). P3 trae las etiquetas (`etiquetas_unidas.csv`) |
-| **Entradas** | `hls_mensual_parcelas.csv` (A3); `etiquetas_unidas.csv` (A4.1); `parcelas_base.geojson` y `parcelas_muestra.geojson` (B1); `memoria_parcelas.csv` (A3-M, para la edad de la perenne; cambio e) |
+| **Quién** | P2, con P3 (kit A4.2). P3 entrega `etiquetas_unidas.csv` y revisa la validación |
+| **Enfoque A (reglas)** | **Ya hecho** por la sesión de datos: es el `cultivos_parcelas.csv` de solo reglas. Usted no lo reprograma: lo documenta en una tabla y lo evalúa con las etiquetas |
+| **Enfoque B (Random Forest)** | Lo hace usted |
+| **Entradas** (todas de `Raiz_entregas`, abiertas directo desde Drive) | `hls_reflect_2025_10_a_2026_09.tif`, `hls_mensual_parcelas.csv`, `parcelas_base.geojson`, `cultivos_parcelas.csv` de reglas (vía su respaldo, vea abajo), `memoria_parcelas.csv` y `etiquetas_unidas.csv` (P3) |
 | **Cuaderno** | `A4_mapa_cultivos.ipynb` en `Raiz/cuadernos/` |
-| **Hora límite** | Sáb 15:00–20:30; entrega entre 18:00 y 20:30 (kit §3) |
-| **Verificación de datos** | [verificar_datos_nasa.md → HLS](verificar_datos_nasa.md#2-hls-l30-y-s30-v002-a3-a3-m-y-a42) y [Fields of The World](verificar_datos_nasa.md#7-fields-of-the-world-2025-b1) |
+| **Hora límite** | Sáb 15:00–20:30; entrega entre 18:00 y 20:30 (kit §3). Antes de las 15:00 puede hacer los pasos de variables (1 y 2) |
+| **Verificación de datos** | [verificar_datos_nasa.md → HLS](verificar_datos_nasa.md#2-hls-l30-y-s30-v002-a3-a3-m-y-a4) |
 
-**Avise a Cristian antes de empezar si falta algo de esto:**
-- **Versión de solo reglas.** El validador (`motor/esquemas.py`) acepta hoy un `cultivos_parcelas.csv` de A4 hecho solo con reglas: `acuerdo_metodos` = «1/1 (reglas)» y `prob_max` vacío. Lo entrega la sesión de datos. Si ya tiene su línea en `LEEME.md`, **no lo sobrescriba**: Cristian decide si su versión con Random Forest lo sustituye.
-- **HLS de la muestra.** Para entrenar hace falta el HLS de los polígonos de `parcelas_muestra.geojson` (los puntos etiquetados). Si la sesión de Chrome solo exportó la zona piloto, no hay con qué entrenar.
-- **Referencia de Conagua.** La comparación usa la Estadística Agrícola 2016-2017, Cuadro 3.5 (archivo 29). No está en el repo: pídala.
-- **Presto.** El enfoque C («solo si sobra tiempo») no se inicia antes del hito de las 20:30 (kit §3).
-- **Predicciones sobre la muestra de validación.** A4.3 (P3) necesita la clase que el mapa asigna a cada polígono de validación de `parcelas_muestra.geojson`. Esas predicciones **no caben en `cultivos_parcelas.csv`**: su `id` debe existir en `parcelas_base.geojson` y el validador rechaza el archivo si no. Tampoco tienen fila en la tabla 0.4-B. Pregunte a Cristian dónde guardarlas.
+**Antes de empezar, cuatro cosas:**
+1. **Respaldo de las reglas.** Su archivo **sustituye** al `cultivos_parcelas.csv` de reglas (mismo nombre, carpeta plana). Antes de escribirlo, copie el de reglas a `Raiz/cuadernos/cultivos_parcelas_reglas_respaldo.csv` y trabaje con esa copia. Pida a Cristian que avise a la sesión de datos que **no vuelva a correr A4** sobre ese nombre.
+2. **Regla de acuerdo entre métodos.** Las reglas solo dicen «anual de verano» donde el Random Forest puede decir «chile» o «algodón». El bloque trae una regla de acuerdo **propuesta [S]**: confírmela con Cristian antes de entregar.
+3. **Etiquetas.** `etiquetas_unidas.csv` (P3) trae en `id` el campo de `parcelas_base.geojson` que contiene cada punto ([README §6, decisión e](README.md#6-decisiones-del-14-nov-mandan-sobre-el-kit)). Se entrena solo con `uso = entrenamiento`. Las de `uso = validacion` son de P3 para Olofsson (A4.3): **no se usan para entrenar ni para elegir parámetros**.
+4. **Referencia de Conagua.** La comparación de áreas usa la Estadística Agrícola 2016-2017, Cuadro 3.5 (archivo 29). No está en el repo: pídala. Si no llega, la prueba dice «no realizada: falta la referencia».
+
+**Presto** (enfoque C, «solo si sobra tiempo») no se inicia antes del hito de las 20:30 (kit §3).
 
 **Bloque para pegar en Gemini:**
 ```text
@@ -462,57 +167,81 @@ CONTEXTO
 Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria (con P3).
 
 ENTORNO
-Google Colab (Python 3). Google Drive montado; carpeta /content/drive/MyDrive/Raiz/:
-- entradas/ = datos de solo lectura;
-- entregas/ = donde guardo resultados. Es UNA carpeta plana (sin subcarpetas por rol) y cada archivo lleva una línea en entregas/LEEME.md; ahí también están las entregas de los demás, que solo leo;
-- cuadernos/ = cuadernos.
-Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chrome de Cristian, proyecto iondroplet), que deja sus exportaciones en Drive. Yo trabajo sobre esos archivos.
+Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
+- /content/drive/MyDrive/Raiz_entregas/ = el buzón: UNA carpeta plana (sin subcarpetas) con LEEME.md, una línea por archivo. Ahí están los archivos que ya entregó la sesión de datos; los leo directo de ahí y NO los modifico. Ahí guardo mis entregas.
+- /content/drive/MyDrive/Raiz/entradas/ = datos de solo lectura;
+- /content/drive/MyDrive/Raiz/cuadernos/ = cuadernos y archivos de trabajo.
+Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome de Cristian) y sus exportaciones ya están en Raiz_entregas/.
 
 REGLAS OBLIGATORIAS
-1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
+1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en Raiz_entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en Raiz/cuadernos/. No sobrescribas archivos de otras personas ni de la sesión de datos, salvo que la TAREA lo diga. Los id de parcela son los de Raiz_entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
    (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
 5. Si un paso falla dos veces con el mismo error, detente y explícame el problema en 5 líneas antes de seguir.
-6. Earth Engine: no aplica. No uses ee.Authenticate ni ee.Initialize. Si un paso de la tarea pide Earth Engine, dime qué archivo de la sesión de Chrome necesito y detente. Los cálculos de series, en pandas.
-7. Usa bibliotecas comunes (pandas, numpy, requests, geopandas, scikit-learn). Si necesitas instalar algo, dime el comando y por qué.
+6. Earth Engine: no aplica. No uses ee.Authenticate ni ee.Initialize. Si un paso pide Earth Engine, dime qué archivo necesito y detente. Los cálculos de series, en pandas.
+7. Usa bibliotecas comunes (pandas, numpy, geopandas, rasterio, matplotlib, scikit-learn). Si necesitas instalar algo, dime el comando y por qué.
 8. Al terminar, explica en español claro:
    - los 3 pasos clave;
    - los supuestos;
    - de dónde sale cada número;
    - qué podría estar mal.
-9. Guarda también fuentes_A42.csv en entregas/ con: archivo, url_o_api, fecha_consulta y sha256 de cada dato de origen utilizado.
+9. Guarda también fuentes_A42.csv en Raiz_entregas/ con: archivo, url_o_api, fecha_consulta (AAAA-MM-DD) y sha256 de cada dato de origen utilizado. Ninguna celda vacía. Para un archivo de Raiz_entregas/, url_o_api = "Raiz_entregas/<archivo>"; para las reglas, el sha256 es el del respaldo en Raiz/cuadernos/.
 10. La herramienta no reparte, vende ni intercambia agua, no pronostica la presa y no promete ahorros. No escribas textos que digan lo contrario.
-11. Al final escribe, para CADA archivo que guardes en entregas/ (también fuentes_A42.csv y las figuras), su línea para entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; script = colab/<nombre del cuaderno>.ipynb). Sin esa línea el archivo no entra.
+11. Al final escribe, para CADA archivo que guardes en Raiz_entregas/ (también fuentes_A42.csv y las figuras), su línea para Raiz_entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; script = colab/<nombre del cuaderno>.ipynb; sin el carácter "|" dentro de un campo). Dame una celda que la AGREGUE al final de LEEME.md con open(ruta, "a"), nunca con "w". Sin esa línea el archivo no entra.
 
 ESQUEMA DE SALIDA DE ESTA TAREA
 Fila de la tabla 0.4-B del kit (copiada tal cual):
 | A4.2 (P2) | `cultivos_parcelas.csv` y `tabla_metodos.csv` | (id, cultivo_actual, prob_max, acuerdo_metodos, abstencion); (enfoque, f1_macro, f1_por_clase, tiempo) |
-Además: una figura PNG (curva cobertura–exactitud) y fuentes_A42.csv (archivo, url_o_api, fecha_consulta, sha256).
-CAMBIO ACORDADO EL 14-NOV (manda sobre la fila de arriba; el validador ya lo aplica): cultivos_parcelas.csv lleva EXACTAMENTE id, cultivo_actual, prob_max, acuerdo_metodos, abstencion, edad_perenne_anios, estado_plazo, grupo_fenologico. Las tres últimas pueden ir vacías:
-- edad_perenne_anios: entero ≥ 0 o vacío. Solo en alfalfa y nogal, con la regla de A3-M paso 9 (pegada abajo) sobre memoria_parcelas.csv; vacía en los demás cultivos, en las abstenidas y si no hay memoria;
-- estado_plazo: déjalo vacío; el estado del plazo lo calcula el motor B4 con data/params.json (kit B4, paso 6). Si se llena: solo libre, por_vencer o comprometida, y vacío en las abstenidas;
-- grupo_fenologico: texto o vacío. Si las reglas fenológicas (enfoque A) asignan un grupo a la parcela, va aquí; si no, vacío.
-Valores permitidos de cultivo_actual (kit §2.2): "alfalfa", "nogal", "chile", "maiz_forrajero", "sorgo", "algodon", "cereal_invierno", "barbecho", "sin_clasificar"; "forraje_verano" solo si las etiquetas agrupan maíz y sorgo. acuerdo_metodos: "2/2" o "1/2" (kit §2.2); además "1/1" = solo reglas, mientras el Random Forest no esté, y solo entonces prob_max puede ir vacío (extensión del contrato en validar_contrato.py).
+LO QUE ACEPTA EL VALIDADOR (motor/esquemas.py; manda sobre la fila de arriba):
+cultivos_parcelas.csv lleva EXACTAMENTE estas 8 columnas, en este orden, y UNA fila por cada id de parcelas_base.geojson (todas, sin repetir):
+- id: texto; existe en parcelas_base.geojson.
+- cultivo_actual: alfalfa, nogal, chile, maiz_forrajero, sorgo, algodon, cereal_invierno, barbecho o sin_clasificar; forraje_verano solo si las etiquetas agrupan maíz y sorgo.
+- prob_max: número entre 0 y 1 = la probabilidad máxima del Random Forest para esa parcela. NUNCA vacío cuando acuerdo_metodos es "2/2" o "1/2" (el validador rechaza el archivo).
+- acuerdo_metodos: "2/2" o "1/2", según la REGLA DE ACUERDO de la TAREA. Solo si el Random Forest no pudo dar clase a una parcela (sin variables): "1/1" con prob_max vacío y el resto de la fila igual que en las reglas; dime cuántas y cuáles.
+- abstencion: true o false.
+- edad_perenne_anios: entero ≥ 0 solo en alfalfa y nogal no abstenidas; vacío en los demás.
+- estado_plazo: libre, por_vencer o comprometida, con la viñeta "Estado" de S9 §5 pegada abajo; vacío en las abstenidas.
+- grupo_fenologico: copia el de las reglas (columna grupo_fenologico del respaldo).
+Coherencia que revisa el validador: abstencion = true si prob_max < 0.6, si acuerdo_metodos = "1/2" o si ftw_confianza < 50 (data/params.json: mapa.umbral_abstencion y mapa.ftw_confianza_min). abstencion = true ⇔ cultivo_actual = sin_clasificar. Abstenida ⇒ edad_perenne_anios y estado_plazo vacíos.
+tabla_metodos.csv: enfoque (único por fila, por ejemplo "A_reglas" y "B_random_forest"), f1_macro (entre 0 y 1), f1_por_clase (texto, por ejemplo "alfalfa: …; nogal: …"), tiempo (texto).
+Además: A42_cobertura_exactitud.png y fuentes_A42.csv (archivo, url_o_api, fecha_consulta, sha256).
+Escribe los CSV con pandas (index=False). No los abras ni los guardes con Excel o Sheets: convierten "2/2" en fecha.
 
 DOCUMENTOS DE REFERENCIA (pegados)
 S9 §6, prueba 1 (copiada tal cual):
 | 1 | Mapa de cultivos | F1 macro con bloques espaciales de 5 km; áreas con Olofsson; abstención si p < 0.6 |
-Advertencia del kit v4, sección A4 (copiada tal cual):
-> **Advertencia sobre Fields of The World:** su benchmark no incluye México y el riego árido de Norteamérica no está en su entrenamiento. Se usan sus predicciones globales de 2025 (CC-BY-4.0), con filtro de confianza por polígono y revisión manual de las 3 protagonistas (B1). En la página se declara: *"Field boundaries are NN predictions outside the model's training domain; filtered by confidence and manually reviewed for the showcased fields."*
-[PEGA AQUÍ, si Cristian te la pasó, la tabla de la Estadística Agrícola 2016-2017 de Conagua, Cuadro 3.5 (archivo 29). Si no está, la comparación se reporta como "no realizada: falta la referencia".]
+S9 §5, viñeta "Estado" (copiada tal cual):
+- **Estado:** libre (anual o descanso); por vencer (alfalfa con 3 años o más [S]); comprometida (alfalfa joven o nogal).
 Regla de la edad, kit A3-M paso 9 (copiada tal cual):
    - edad_perenne_anios, con cultivo_actual de A4.2:
      · alfalfa: años agrícolas consecutivos en estado perenne contados hacia atrás desde 2026; mínimo 1 si el mapa de 2026 dice alfalfa;
      · nogal: años consecutivos con señal de verano (estado verano, doble o perenne) contados hacia atrás desde 2026. El nogal pierde la hoja en invierno y puede no cumplir la regla de 8 meses: su condición de perenne la da el mapa de cultivos, y la memoria solo le calcula la antigüedad;
      · los demás cultivos y las parcelas abstenidas: null.
+Advertencia del kit v4, sección A4 (copiada tal cual):
+> **Advertencia sobre Fields of The World:** su benchmark no incluye México y el riego árido de Norteamérica no está en su entrenamiento. Se usan sus predicciones globales de 2025 (CC-BY-4.0), con filtro de confianza por polígono y revisión manual de las 3 protagonistas (B1). En la página se declara: *"Field boundaries are NN predictions outside the model's training domain; filtered by confidence and manually reviewed for the showcased fields."*
+Formato de los archivos (dato de la sesión de datos):
+- hls_reflect_2025_10_a_2026_09.tif: bandas con nombre AAAA_MM_azul, AAAA_MM_verde, AAAA_MM_rojo, AAAA_MM_nir, AAAA_MM_swir1, AAAA_MM_swir2 (en las descripciones de banda del TIF); Int16 multiplicado por 10,000; -32768 = sin dato.
+- hls_mensual_parcelas.csv: id, mes (AAAA-MM), banda (ndvi, lswi, bsi), mediana, p25, p75, n_validos; ya en su escala.
+- etiquetas_unidas.csv (P3): id (campo de parcelas_base.geojson que contiene el punto), punto_id, bloque (cuadrícula de 5 km), uso (entrenamiento o validacion), clase_P2, clase_P3, clase_desempate, clase_final, acuerdo.
+[PEGA AQUÍ el docstring de datos/colab/A4_cultivos_reglas.py (rama datos-satelite; pídelo a Cristian): son las reglas fenológicas del enfoque A, con sus umbrales y su fuente.]
+[PEGA AQUÍ, si Cristian te la pasó, la tabla de la Estadística Agrícola 2016-2017 de Conagua, Cuadro 3.5 (archivo 29). Si no está, la comparación se reporta como "no realizada: falta la referencia".]
 
 TAREA
-NOTA DEL EQUIPO: trabajo con las tablas de entregas/; no uso Earth Engine. Si no hay HLS para los polígonos de la muestra etiquetada, detente y avísame. El id de etiquetas_unidas.csv es el del polígono de parcelas_muestra.geojson, no el de parcelas_base.geojson. En cultivos_parcelas.csv van SOLO id de parcelas_base.geojson: no metas ahí predicciones de polígonos de la muestra (el validador rechaza el archivo). Las predicciones sobre los polígonos de validación de la muestra las necesita A4.3: guárdalas solo donde Cristian indique; si no lo ha dicho, avísame.
-NOTA DEL EQUIPO (edad, cambio acordado el 14-nov): edad_perenne_anios se calcula aquí con la regla pegada y entregas/memoria_parcelas.csv (estado por parcela y año agrícola). Si memoria_parcelas.csv no está, deja la edad vacía y avísame; cuando llegue, se recalcula y se vuelve a entregar cultivos_parcelas.csv.
-Tarea A4.2. En A4_mapa_cultivos.ipynb (Raiz/cuadernos/), con hls_mensual_parcelas.csv de Raiz/entregas/ y las etiquetas acordadas (etiquetas_unidas.csv de Raiz/entregas/). Los enfoques A y B son OBLIGATORIOS; el C, SOLO SI SOBRA TIEMPO.
+NOTA DEL EQUIPO (entradas): todo se lee de Raiz_entregas/. Antes de escribir nada, copia Raiz_entregas/cultivos_parcelas.csv (versión de reglas) a Raiz/cuadernos/cultivos_parcelas_reglas_respaldo.csv y usa esa copia como enfoque A. Mi salida cultivos_parcelas.csv SUSTITUYE a la de reglas en Raiz_entregas/ (es la única excepción a la regla 3).
+NOTA DEL EQUIPO (enfoque A): las reglas ya están calculadas (respaldo). No las reprogrames: documenta cada regla en una tabla a partir del docstring pegado. Para evaluarlas, su clase es grupo_fenologico; donde grupo_fenologico es anual_verano o sin_clasificar, las reglas no dan cultivo y eso cuenta como error en su F1 (dilo en la tabla).
+NOTA DEL EQUIPO (variables, pasos que puedo hacer antes de tener las etiquetas): (1) por parcela y por mes de 2025-10 a 2026-09, con rasterio y el polígono de parcelas_base.geojson (píxeles cuyo centro cae dentro; si ninguno, all_touched=True), la mediana, p25 y p75 de azul, verde, rojo, nir, swir1 y swir2 de hls_reflect_2025_10_a_2026_09.tif, después de convertir -32768 a NaN y dividir entre 10,000; (2) únelas con mediana, p25 y p75 de ndvi, lswi y bsi de hls_mensual_parcelas.csv. Imprime cuántas parcelas y meses quedan sin dato. No rellenes huecos en silencio: dime cuántos hay y propón cómo tratarlos (por ejemplo, una versión de scikit-learn que acepte NaN); espera mi OK. Guarda la tabla de variables en Raiz/cuadernos/A42_variables.csv.
+NOTA DEL EQUIPO (etiquetas): entreno SOLO con etiquetas_unidas.csv de uso = entrenamiento y clase_final distinta de no_se, unidas por id a la tabla de variables. Las de uso = validacion no se usan aquí (son de P3 para Olofsson). Si un id tiene etiquetas con clases distintas, sácalo del entrenamiento y lístalo. Imprime cuántas etiquetas quedan por clase y por bloque; si alguna clase tiene muy pocas o hay menos de dos bloques, detente y avísame.
+NOTA DEL EQUIPO (REGLA DE ACUERDO ENTRE MÉTODOS, propuesta [S]; Cristian la confirma antes de entregar):
+- clase de las reglas = grupo_fenologico del respaldo (la clase que dieron las reglas antes de la abstención);
+- grupo_fenologico igual a la clase del Random Forest → "2/2";
+- grupo_fenologico = anual_verano y el Random Forest da chile, algodon, maiz_forrajero, sorgo o forraje_verano → "2/2" (las reglas solo dicen "anual de verano"; el Random Forest dice cuál);
+- cualquier otro caso, incluido grupo_fenologico = sin_clasificar → "1/2".
+Con "2/2", cultivo_actual = la clase del Random Forest (si no hay abstención).
+NOTA DEL EQUIPO (salida): una fila por cada una de las parcelas de parcelas_base.geojson. prob_max y la clase del Random Forest salen del modelo entrenado con TODAS las etiquetas de entrenamiento, aplicado a todas las parcelas. edad_perenne_anios: con la regla pegada sobre memoria_parcelas.csv; imprime las diferencias con la edad del respaldo en las parcelas donde los dos métodos dicen alfalfa o nogal. estado_plazo: con la viñeta "Estado" de S9 §5 y data/params.json (plazo.alfalfa_por_vencer). Imprime cuántas de las parcelas con grupo_fenologico = anual_verano quedan clasificadas (no abstenidas).
+Tarea A4.2. En A4_mapa_cultivos.ipynb (Raiz/cuadernos/), con hls_mensual_parcelas.csv y hls_reflect_2025_10_a_2026_09.tif de Raiz_entregas/ y las etiquetas acordadas (etiquetas_unidas.csv de Raiz_entregas/). Los enfoques A y B son OBLIGATORIOS; el C, SOLO SI SOBRA TIEMPO.
 A) REGLAS FENOLÓGICAS (interpretables):
 - reglas simples con pico de NDVI, meses verdes y meses de suelo desnudo para cada clase;
 - documente cada regla en una tabla.
@@ -526,7 +255,7 @@ C) RED NEURONAL PREENTRENADA (Presto, NASA Harvest) — SOLO SI SOBRA TIEMPO (S9
 - si en 1.5 horas no se ejecuta, se abandona y se reporta "attempted, not completed".
 
 VALIDACIÓN:
-- validación cruzada ESPACIAL por bloques (cuadrícula de 5 km), NUNCA K-fold aleatorio;
+- validación cruzada ESPACIAL por bloques (cuadrícula de 5 km), NUNCA K-fold aleatorio (usa la columna bloque de etiquetas_unidas.csv como grupo, por ejemplo con GroupKFold);
 - reporte F1 macro, F1 por clase y la matriz de confusión de cada enfoque en una tabla comparativa (enfoque | F1 macro | F1 por clase | tiempo de cómputo);
 - la MÉTRICA PRINCIPAL es el F1 macro (declarada antes de ver resultados).
 
@@ -534,105 +263,103 @@ ABSTENCIÓN: cultivo_actual = "sin_clasificar" y abstencion = true si:
 - prob_max < 0.6;
 - los enfoques no coinciden (acuerdo 1/2);
 - ftw_confianza < 50.
-CURVA COBERTURA–EXACTITUD (diagnóstico; no cambia la regla): con las probabilidades fuera de pliegue de Random Forest, SOLO en la muestra de entrenamiento (nunca en la de validación Olofsson), reporte el % de parcelas retenidas y el F1 macro de las retenidas para umbrales de 0.4 a 0.8. El umbral de 0.6 queda fijo. Guarde una figura PNG en Raiz/entregas/.
+CURVA COBERTURA–EXACTITUD (diagnóstico; no cambia la regla): con las probabilidades fuera de pliegue de Random Forest, SOLO en la muestra de entrenamiento (nunca en la de validación Olofsson), reporte el % de parcelas retenidas y el F1 macro de las retenidas para umbrales de 0.4 a 0.8. El umbral de 0.6 queda fijo. Guarde la figura como A42_cobertura_exactitud.png en Raiz_entregas/.
 
 Si los cereales de invierno no se separan, agrúpelos en "cereal_invierno". Si las etiquetas traen "forraje_verano", úsela como una sola clase y regístrelo en la tabla de métodos.
 
 SALIDA:
-- cultivo_actual, prob_max, acuerdo_metodos y abstencion por parcela (sin modificar otros campos), en Raiz/entregas/cultivos_parcelas.csv, más edad_perenne_anios, estado_plazo y grupo_fenologico (cambio acordado el 14-nov; pueden ir vacías);
-- la tabla comparativa en Raiz/entregas/tabla_metodos.csv.
+- cultivo_actual, prob_max, acuerdo_metodos y abstencion por parcela (sin modificar otros campos), en Raiz_entregas/cultivos_parcelas.csv, con las 8 columnas del ESQUEMA DE SALIDA;
+- la tabla comparativa en Raiz_entregas/tabla_metodos.csv.
 
 PRUEBA:
-- verificación de esquema;
-- % de parcelas abstenidas (reportarlo; si es > 50%, notifíquelo);
-- el área por cultivo del mapa frente a la estadística agrícola más reciente de Conagua para el DR-005 (de Raiz/entradas/; si no está, pídala a Cristian; referencia verificada: Estadística Agrícola 2016-2017, Cuadro 3.5, archivo 29): tabla de diferencias en %, indicando el año de la referencia y que la zona piloto no es el distrito.
+- verificación de esquema contra el ESQUEMA DE SALIDA (8 columnas en orden; una fila por parcela; prob_max sin vacíos salvo en filas "1/1"; coherencia de la abstención);
+- % de parcelas abstenidas (reportarlo; si es > 50%, notifíquelo), comparado con las de solo reglas;
+- el área por cultivo del mapa frente a la estadística agrícola más reciente de Conagua para el DR-005 (pegada arriba si Cristian la pasó; referencia verificada: Estadística Agrícola 2016-2017, Cuadro 3.5, archivo 29): tabla de diferencias en %, indicando el año de la referencia y que la zona piloto no es el distrito.
 Explique en 6 líneas qué enfoque obtuvo el mejor desempeño y por qué.
 ```
 
-**Ajustes de ruta hechos al texto del kit en este bloque:**
-- «En datos/A4_mapa_cultivos.ipynb, con data/processed/hls_mensual_parcelas.csv y las etiquetas acordadas.» → «En A4_mapa_cultivos.ipynb (Raiz/cuadernos/), con hls_mensual_parcelas.csv de Raiz/entregas/ y las etiquetas acordadas (etiquetas_unidas.csv de Raiz/entregas/).»
-- «Guarde una figura en docs/figuras/.» → «Guarde una figura PNG en Raiz/entregas/.»
-- «- cultivo_actual, prob_max, acuerdo_metodos y abstencion por parcela (sin modificar otros campos);» → «- cultivo_actual, prob_max, acuerdo_metodos y abstencion por parcela (sin modificar otros campos), en Raiz/entregas/cultivos_parcelas.csv, más edad_perenne_anios, estado_plazo y grupo_fenologico (cambio acordado el 14-nov; pueden ir vacías);» (rutas y cambio e)
-- «- la tabla comparativa en docs/figuras/tabla_metodos.csv.» → «- la tabla comparativa en Raiz/entregas/tabla_metodos.csv.»
-- «- verificación de esquema (o validar_contrato.py → "CONTRATO OK");» → «- verificación de esquema;»
-- «(de data/raw/conagua;» → «(de Raiz/entradas/; si no está, pídala a Cristian;»
+**Ajustes al texto del kit en este bloque:**
+- «En datos/A4_mapa_cultivos.ipynb, con data/processed/hls_mensual_parcelas.csv y las etiquetas acordadas.» → «En A4_mapa_cultivos.ipynb (Raiz/cuadernos/), con hls_mensual_parcelas.csv y hls_reflect_2025_10_a_2026_09.tif de Raiz_entregas/ y las etiquetas acordadas (etiquetas_unidas.csv de Raiz_entregas/).»
+- «NUNCA K-fold aleatorio;» → se agregó «(usa la columna bloque de etiquetas_unidas.csv como grupo, por ejemplo con GroupKFold)».
+- «Guarde una figura en docs/figuras/.» → «Guarde la figura como A42_cobertura_exactitud.png en Raiz_entregas/.»
+- «(sin modificar otros campos);» → «(sin modificar otros campos), en Raiz_entregas/cultivos_parcelas.csv, con las 8 columnas del ESQUEMA DE SALIDA;»
+- «la tabla comparativa en docs/figuras/tabla_metodos.csv.» → «en Raiz_entregas/tabla_metodos.csv.»
+- «verificación de esquema (o validar_contrato.py → "CONTRATO OK");» → «verificación de esquema contra el ESQUEMA DE SALIDA (…);»
+- «(reportarlo; si es > 50%, notifíquelo);» → se agregó «comparado con las de solo reglas».
+- «(de data/raw/conagua;» → «(pegada arriba si Cristian la pasó;».
 
-**Prueba de aceptación** (kit A4.2):
+**Prueba de aceptación** (kit A4.2, con los ajustes):
 ```text
 PRUEBA:
-- verificación de esquema;
-- % de parcelas abstenidas (reportarlo; si es > 50%, notifíquelo);
-- el área por cultivo del mapa frente a la estadística agrícola más reciente de Conagua para el DR-005 (de Raiz/entradas/; si no está, pídala a Cristian; referencia verificada: Estadística Agrícola 2016-2017, Cuadro 3.5, archivo 29): tabla de diferencias en %, indicando el año de la referencia y que la zona piloto no es el distrito.
+- verificación de esquema contra el ESQUEMA DE SALIDA (8 columnas en orden; una fila por parcela; prob_max sin vacíos salvo en filas "1/1"; coherencia de la abstención);
+- % de parcelas abstenidas (reportarlo; si es > 50%, notifíquelo), comparado con las de solo reglas;
+- el área por cultivo del mapa frente a la estadística agrícola más reciente de Conagua para el DR-005 (referencia verificada: Estadística Agrícola 2016-2017, Cuadro 3.5, archivo 29): tabla de diferencias en %, indicando el año de la referencia y que la zona piloto no es el distrito.
 Explique en 6 líneas qué enfoque obtuvo el mejor desempeño y por qué.
 ```
 
-**Plan B:** el kit no trae uno para A4.2, y los enfoques A y B son obligatorios. Si el Random Forest no corre, use R1 y avise a Cristian. Él decide con R3: «parcelas y cultivo de 2026» es núcleo, y dentro del núcleo solo se simplifica, no se elimina.
+**Plan B:** el kit no trae uno para A4.2, y los enfoques A y B son obligatorios. Si el Random Forest no corre, use R1 y avise a Cristian: mientras tanto se queda la versión de solo reglas que ya está en el buzón (por eso se respalda y no se borra). «Parcelas y cultivo de 2026» es núcleo: dentro del núcleo solo se simplifica (kit R3).
 
 **Líneas de LEEME.md:**
 ```text
-cultivos_parcelas.csv | Reglas fenológicas + Random Forest sobre hls_mensual_parcelas.csv (HLS L30/S30 v002) y etiquetas_unidas.csv; abstención según kit A4.2; edad de la perenne con la regla de A3-M paso 9 sobre memoria_parcelas.csv (acuerdo de formatos del 14-nov) | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
-tabla_metodos.csv | Validación cruzada espacial por bloques de 5 km (kit A4.2) | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
+cultivos_parcelas.csv | Reglas fenológicas (sesión de datos, A4) y Random Forest sobre hls_reflect_2025_10_a_2026_09.tif y hls_mensual_parcelas.csv (HLS L30/S30 v002) con etiquetas_unidas.csv; validación espacial por bloques de 5 km; abstención según kit A4.2; edad con kit A3-M paso 9 sobre memoria_parcelas.csv | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
+tabla_metodos.csv | F1 macro y por clase de reglas y Random Forest; validación cruzada espacial por bloques de 5 km (kit A4.2) | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
 A42_cobertura_exactitud.png | Probabilidades fuera de pliegue del Random Forest, muestra de entrenamiento (kit A4.2) | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
-fuentes_A42.csv | Fuentes de A4.2: hls_mensual_parcelas.csv, etiquetas_unidas.csv y la referencia de Conagua (sha256) | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
+fuentes_A42.csv | Fuentes de A4.2: hls_reflect_2025_10_a_2026_09.tif, hls_mensual_parcelas.csv, parcelas_base.geojson, respaldo de cultivos_parcelas.csv de reglas, memoria_parcelas.csv y etiquetas_unidas.csv (sha256) | 2026-11-14 | colab/A4_mapa_cultivos.ipynb
 ```
-Aviso: `ENTREGA: cultivos_parcelas.csv — prueba OK`.
+Aviso: `ENTREGA: cultivos_parcelas.csv — prueba OK (reglas + Random Forest)`.
 
 ---
 
 ## Figuras del mapa y de la memoria
 
-Son tareas de apoyo para la página y la exposición. No tienen fila en la tabla 0.4-B, que solo pide «figura PNG».
+Son tareas de apoyo para la página y la exposición. La tabla 0.4-B solo pide «figura PNG».
 - **Cuándo:** dom hasta 8:00, figuras del mapa y de la memoria; dom 8:00–11:00, figuras para la página (kit §3).
-- **Reglas:**
-  - cada figura lee sus números de las entregas;
-  - el título dice la fuente: «NASA HLS L30/S30 v002», sin logotipos de NASA;
-  - en la memoria va la nota: «Rule-based reading of monthly greenness; not a crop census.» (kit C2).
-- **Nombres:** `fig_mapa_cultivos.png`, `fig_memoria_protagonistas.png`, … (nombre libre, terminado en `.png`). Cada una lleva su línea en `LEEME.md`.
+- **Reglas:** cada figura lee sus números de las entregas; el título dice la fuente («NASA HLS L30/S30 v002»), sin logotipos de NASA; en la memoria va la nota «Rule-based reading of monthly greenness; not a crop census.» (kit C2).
+- **Nombres:** `fig_mapa_cultivos.png`, `fig_memoria_protagonistas.png`, … (empiezan con `fig_` y terminan en `.png`). Cada una lleva su línea en `LEEME.md`.
 
+**Bloque para pegar en Gemini:**
 ```text
 CONTEXTO
 Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria.
 
 ENTORNO
-Google Colab (Python 3). Google Drive montado; carpeta /content/drive/MyDrive/Raiz/:
-- entradas/ = datos de solo lectura;
-- entregas/ = donde guardo resultados. Es UNA carpeta plana (sin subcarpetas por rol) y cada archivo lleva una línea en entregas/LEEME.md; ahí también están las entregas de los demás, que solo leo;
-- cuadernos/ = cuadernos.
-Earth Engine NO se usa en este cuaderno: lo corre otra sesión (Claude en el Chrome de Cristian, proyecto iondroplet), que deja sus exportaciones en Drive. Yo trabajo sobre esos archivos.
+Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
+- /content/drive/MyDrive/Raiz_entregas/ = el buzón: UNA carpeta plana (sin subcarpetas) con LEEME.md, una línea por archivo. Ahí están los archivos que ya entregó la sesión de datos; los leo directo de ahí y NO los modifico. Ahí guardo mis entregas.
+- /content/drive/MyDrive/Raiz/entradas/ = datos de solo lectura;
+- /content/drive/MyDrive/Raiz/cuadernos/ = cuadernos y archivos de trabajo.
+Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome de Cristian) y sus exportaciones ya están en Raiz_entregas/.
 
 REGLAS OBLIGATORIAS
-1. No inventes cifras. Todo número sale de un archivo de entradas/ o de entregas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
+1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
 2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
-3. Escribe ÚNICAMENTE en entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en cuadernos/ (por ejemplo, un JSON crudo o una nota de revisión). No escribas otros archivos, no cambies nombres de columnas y no sobrescribas archivos de otras personas. Los id de parcela son los de entregas/parcelas_base.geojson.
+3. Escribe ÚNICAMENTE en Raiz_entregas/ y ÚNICAMENTE los archivos del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No sobrescribas archivos de otras personas ni de la sesión de datos. Los id de parcela son los de Raiz_entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
-   (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
+   (b) la lista de figuras guardadas, con su tamaño en píxeles.
 5. Si un paso falla dos veces con el mismo error, detente y explícame el problema en 5 líneas antes de seguir.
-6. Earth Engine: no aplica. No uses ee.Authenticate ni ee.Initialize. Si un paso de la tarea pide Earth Engine, dime qué archivo de la sesión de Chrome necesito y detente. Los cálculos de series, en pandas.
-7. Usa bibliotecas comunes (pandas, numpy, requests, geopandas, scikit-learn). Si necesitas instalar algo, dime el comando y por qué.
-8. Al terminar, explica en español claro:
-   - los 3 pasos clave;
-   - los supuestos;
-   - de dónde sale cada número;
-   - qué podría estar mal.
-9. Guarda también fuentes_FIG.csv en entregas/ con: archivo, url_o_api, fecha_consulta y sha256 de cada dato de origen utilizado.
+6. Earth Engine: no aplica. No uses ee.Authenticate ni ee.Initialize.
+7. Usa bibliotecas comunes (pandas, numpy, geopandas, rasterio, matplotlib). Si necesitas instalar algo, dime el comando y por qué.
+8. Al terminar, explica en español claro de qué archivo sale cada número de cada figura.
+9. Guarda también fuentes_FIG.csv en Raiz_entregas/ con: archivo, url_o_api, fecha_consulta (AAAA-MM-DD) y sha256 de cada tabla usada. Ninguna celda vacía.
 10. La herramienta no reparte, vende ni intercambia agua, no pronostica la presa y no promete ahorros. No escribas textos que digan lo contrario.
-11. Al final escribe, para CADA archivo que guardes en entregas/ (también fuentes_FIG.csv y las figuras), su línea para entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; script = colab/<nombre del cuaderno>.ipynb). Sin esa línea el archivo no entra.
+11. Al final escribe, para CADA archivo que guardes en Raiz_entregas/ (también fuentes_FIG.csv), su línea para Raiz_entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; script = colab/<nombre del cuaderno>.ipynb). Dame una celda que la AGREGUE al final de LEEME.md con open(ruta, "a"), nunca con "w". Sin esa línea el archivo no entra.
 
 ESQUEMA DE SALIDA DE ESTA TAREA
-Solo figuras PNG en entregas/ (la tabla 0.4-B pide "figura PNG"), con nombre que empiece con fig_ y su línea en LEEME.md.
+Solo figuras PNG en Raiz_entregas/ (la tabla 0.4-B pide "figura PNG"), con nombre que empiece con fig_, y fuentes_FIG.csv.
 
 DOCUMENTOS DE REFERENCIA (pegados)
 [PEGA AQUÍ la lista de figuras que pide Cristian para la página.]
 
 TAREA
-Con cultivos_parcelas.csv, memoria_parcelas.csv, parcelas_base.geojson y hls_mensual_parcelas.csv de entregas/, genera las figuras que te pido, una celda por figura. En el título o pie de cada figura va la fuente: "Source: NASA HLS L30/S30 v002; Raíz analysis". En la franja de memoria va la nota fija "Rule-based reading of monthly greenness; not a crop census." Sin logotipos. Las parcelas abstenidas van en gris con la leyenda "Not classified". No escribas en la figura ningún número que no venga de las tablas.
+Con cultivos_parcelas.csv, memoria_parcelas.csv, parcelas_base.geojson y hls_mensual_parcelas.csv de Raiz_entregas/, genera las figuras que te pido, una celda por figura. En el título o pie de cada figura va la fuente: "Source: NASA HLS L30/S30 v002; Raíz analysis". En la franja de memoria va la nota fija "Rule-based reading of monthly greenness; not a crop census." Sin logotipos. Las parcelas abstenidas van en gris con la leyenda "Not classified". No escribas en la figura ningún número que no venga de las tablas.
+PRUEBA: cada figura abre, se lee en un teléfono y cada número que muestra está en una entrega con su línea en LEEME.md.
 ```
 - **Hora límite:** dom 8:00 (figuras del mapa y de la memoria) y dom 11:00 (figuras para la página; código congelado).
-- **Prueba de aceptación:** cada figura abre, se lee en un teléfono y cada número que muestra está en una entrega con su línea de `LEEME.md`.
-- **Plan B:** si no hay tiempo, se usan capturas de pantalla de la web real (S10 §8: el relieve animado pasa a imagen fija).
+- **Prueba de aceptación:** la del bloque.
+- **Plan B:** si no hay tiempo, se usan capturas de pantalla de la web real (S10 §8).
 
-**Línea de LEEME.md** (una por figura):
+**Línea de LEEME.md** (una por figura, más la de `fuentes_FIG.csv`):
 ```text
-fig_<nombre>.png | <tablas de origen en entregas/> | 2026-11-15 | colab/figuras_P2.ipynb
+fig_<nombre>.png | <tablas de origen en Raiz_entregas> | 2026-11-15 | colab/figuras_P2.ipynb
+fuentes_FIG.csv | Fuentes de las figuras de P2: tablas de Raiz_entregas (sha256) | 2026-11-15 | colab/figuras_P2.ipynb
 ```

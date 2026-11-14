@@ -3,7 +3,38 @@
 
 **Para quién:** P2 a P6. Se trabaja con Gemini en Colab o con Claude en el navegador; no hace falta Claude Code.
 
-**Qué manda:** si esta guía y el kit dicen cosas distintas, mandan los cambios del 14-nov (§6). Después, en orden: S9, el kit v4 y S8.
+**Qué manda:** si esta guía y el kit dicen cosas distintas, mandan las decisiones del 14-nov (§6) y el validador del repo (`motor/esquemas.py` y `motor/ensamblar.py`). Después, en orden: S9, el kit v4 y S8.
+
+## Estado a las 10:30 (sábado 14-nov)
+
+**Lo que ya está hecho.** Lo hizo la «sesión de datos» (otra sesión de Claude en el Chrome de Cristian, rama `datos-satelite`, scripts `datos/colab/*.py`) y el integrador lo validó. **No se rehace: se usa.** Los archivos están en la carpeta de Drive `Raiz_entregas`.
+
+| Pieza | Archivos en `Raiz_entregas` | Qué traen |
+|---|---|---|
+| B1 · parcelas | `parcelas_base.geojson` | 338 campos de Fields of The World, 5,794 ha, `id` de `P0001` en adelante, de norte a sur. Las 3 protagonistas aún no están marcadas: las propone P2 |
+| A1 · clima | `eto_diaria.csv` | NASA POWER y ETo FAO-56, del 1984-01-01 al 2026-11-09 |
+| A3 y A3-M · satélite | `hls_mensual_parcelas.csv` (bandas `ndvi`, `lswi` y `bsi`), `suelo_desnudo.csv`, `memoria_parcelas.csv`, `memoria_resumen.csv` | Año agrícola 2026 y memoria 2016–2026 por parcela |
+| A4 · cultivos, solo reglas | `cultivos_parcelas.csv` | Reglas fenológicas: `acuerdo_metodos` = «1/1 (reglas)» y `prob_max` vacío; además `edad_perenne_anios`, `estado_plazo` y `grupo_fenologico`. Deja **218 de 338 campos abstenidos**: 132 son anuales de verano que las reglas no separan |
+| A5 · demanda | `rotaciones.json`, `demanda_cultivos.csv` | Lámina por rotación y por cultivo (FAO-56 + POWER, Monte Carlo) |
+| A9 · relieve | `relieve_parcelas.csv`, `relieve_rutas.geojson`, `relieve_meta.json`, `nasadem_zona_piloto.tif` | Pendiente, rutas de escurrimiento y tormenta de referencia |
+| Rásteres de Earth Engine | `hls_mensual_2025_10_a_2026_09.tif`, `hls_reflect_2025_10_a_2026_09.tif` y los `hls_ndvi_memoria_<año>.tif` (12 rásteres en total) | Insumos para quien los necesite (P2 en el Random Forest). Earth Engine lo corre **solo** la sesión de datos |
+
+**La web** ya muestra en local los 338 campos reales. Se publica cuando estén los arreglos que faltan.
+
+**Lo que falta, por rol:**
+
+| Rol | Pendiente | Su guía |
+|---|---|---|
+| P2 | A4.2: Random Forest y comparación con las reglas → `cultivos_parcelas.csv` con `acuerdo_metodos` «2/2» o «1/2» y `prob_max`. Proponer las 3 protagonistas, revisadas en color verdadero | [P2](P2_hls_memoria.md) |
+| P3 | A4.1: `etiquetas_unidas.csv` (**urgente**: P2 la necesita para entrenar). A4.3: Olofsson. A7: H3 | [P3](P3_etiquetas_h3.md) |
+| P4 | A2: `heladas.json`. A6: back-test H1. A8: queda «not run» por ahora. Llevar a las mentorías la pregunta de la lámina frente a INIFAP | [P4](P4_clima_demanda.md) |
+| P5 | B2: `dotaciones.json`. B3: `opciones_b3.json`. `propuesta_supuestos.md`. `cifras.csv` | [P5](P5_dotaciones_rotaciones.md) |
+| P6 | Textos (`textos_ui.md`, `plantillas_explicaciones.md`, `whatsapp_plantilla.md`), mentorías, página C6, video, People's Choice y #MejorMeme | [P6](P6_textos_pagina.md) |
+
+**Próximos hitos** (kit §0.1, regla 10; S10 §7):
+- **14:30:** las 3 pantallas navegables.
+- **16:00 y 17:00:** mentorías obligatorias. Faltar descalifica.
+- **20:30:** una parcela real completa, publicada.
 
 ## 1. Qué es Raíz (S9 §1)
 
@@ -12,18 +43,14 @@
 - Zona piloto del Distrito de Riego 005 Delicias, Chihuahua. El usuario elige la dotación de la presa con un deslizador, en millares por hectárea, y la web calcula para cuántas hectáreas alcanza cada cultivo.
 - En la página en inglés: *"Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover."*
 
-## 2. Hitos del día (hora de Chihuahua)
+## 2. Hitos del fin de semana (hora de Chihuahua)
 
 **Sábado 14** (kit §0.1, regla 10; kit §3; S10 §7):
 
 | Hora | Qué pasa | Quién |
 |---|---|---|
-| 8:00 | Registro con documentos | Todos |
-| 9:00 | Bienvenida y plática de seguridad | Todos |
-| 9:45 | Cristian lanza las exportaciones de Earth Engine (el «sapo» del día). El equipo arranca en Colab: parcelas y protagonistas, POWER y ETo, dotaciones con fuente | Todos |
-| 10:00–14:00 | Sesiones de la sede (las de las 10:00 y las 12:00) | P6 y otro integrante |
-| **14:30** | **HITO: las 3 pantallas navegables con datos simulados** | Cristian |
-| **16:00 y 17:00** | **Mentorías obligatorias.** Faltar descalifica. Pregunta clave: dónde se mide el millar | Cristian y uno más; P6 hace la prueba de pasillo |
+| **14:30** | **HITO: las 3 pantallas navegables** | Cristian |
+| **16:00 y 17:00** | **Mentorías obligatorias.** Faltar descalifica. Preguntas clave: dónde se mide el millar y qué eficiencia parcelaria es realista (vea [P4](P4_clima_demanda.md#pregunta-para-las-mentorías-de-las-1600-y-las-1700)) | Cristian y uno más; P6 hace la prueba de pasillo |
 | 18:00 | Prueba de usabilidad | P6 |
 | **20:30** | **HITO: una parcela completa con datos reales, publicada.** Si no se logra, se aplica R3 (orden de corte) | Todos |
 | 21:00 | Cierre de puertas. Quien hace el turno de noche se queda dentro desde antes de las 21:00; los demás vuelven a las 7:00 | — |
@@ -46,70 +73,78 @@
 
 **Después del evento:** People's Choice, del 17 al 20 de noviembre (P6). Sin bots: descalifican.
 
-## 3. Quién hace qué (S9 §10; kit §3)
+## 3. Quién hace qué (S9 §10; kit §3; decisiones del 14-nov)
 
-| Persona | Responsable de (S9 §10) | Piezas de este fin de semana | Su guía |
+| Persona | Responsable de (S9 §10) | Piezas que le quedan | Su guía |
 |---|---|---|---|
-| Cristian | Repositorio, motor, web, pruebas automáticas y envío | Integra las entregas (K-ENS), web (C1–C5, X3.2), motor (B4, X3.1), explicaciones (C3) y pruebas (K-TEST). Es el único que hace commits | — |
-| Sesión de Chrome, también llamada «sesión de datos» (Claude en el Chrome de Cristian, proyecto `iondroplet`) | Earth Engine y lo que necesita red | B1 (parcelas). Exportaciones de A3 y A3-M (HLS), A9 (NASADEM y GPM IMERG) y A8 (SSEBop y WaPOR). Por el acuerdo de formatos (§6, cambio e), entrega también A5 (`rotaciones.json` y `demanda_cultivos.csv`) y una versión de `cultivos_parcelas.csv` de solo reglas | — |
-| P2 | Series de HLS de 2026 y memoria | B1 (revisión de protagonistas), A3, A3-M, A4.2 (con P3), figuras | [P2_hls_memoria.md](P2_hls_memoria.md) |
-| P3 | Etiquetas, exactitud del mapa y H3 | A4.1, A4.2 (con P2), validación de la memoria de 2026, A7 (H3), A4.3 (Olofsson) | [P3_etiquetas_h3.md](P3_etiquetas_h3.md) |
-| P4 | Clima, demanda y back-test H1 | A1, A2, A5, A9 (relieve), A6 (H1), A8 (contraste de ET) | [P4_clima_demanda.md](P4_clima_demanda.md) |
-| P5 | Dotaciones, plazos, rotaciones y tabla única de cifras | B2, B3 (con `supuestos.json`), `cifras.csv`, B2-cal (solo si el preregistro la declara); revisión de las cifras del motor | [P5_dotaciones_rotaciones.md](P5_dotaciones_rotaciones.md) |
-| P6 | Entrevistas, textos, página, video, People's Choice y meme | `textos_ui.md`, `plantillas_explicaciones.md`, `whatsapp_plantilla.md`, C6, C7 y C8, People's Choice y #MejorMeme; sesiones de la sede, mentorías y prueba de usabilidad | [P6_textos_pagina.md](P6_textos_pagina.md) |
+| Cristian | Repositorio, motor, web, pruebas automáticas y envío | Integra las entregas (K-ENS), motor (B4, X3.1), web, explicaciones (C3) y pruebas (K-TEST). Es el único que hace commits | — |
+| Sesión de datos (Claude en el Chrome de Cristian, rama `datos-satelite`) | Earth Engine y todo lo que necesita red | Ya entregó B1, A1, A3, A3-M, A4 (reglas), A5 y A9. Es la **única dueña** de `rotaciones.json` y de `supuestos.json`. Si hace falta algo de Earth Engine, se le pide a Cristian | — |
+| P2 | Series de HLS de 2026 y memoria | A4.2 (Random Forest, con P3) y las 3 protagonistas | [P2_hls_memoria.md](P2_hls_memoria.md) |
+| P3 | Etiquetas, exactitud del mapa y H3 | A4.1, A4.3 (Olofsson) y A7 (H3) | [P3_etiquetas_h3.md](P3_etiquetas_h3.md) |
+| P4 | Clima, demanda y back-test H1 | A2, A6 (H1) y A8 (por ahora «not run»); pregunta para las mentorías | [P4_clima_demanda.md](P4_clima_demanda.md) |
+| P5 | Dotaciones, plazos, rotaciones y tabla única de cifras | B2, B3 (`opciones_b3.json`), `propuesta_supuestos.md` y `cifras.csv` | [P5_dotaciones_rotaciones.md](P5_dotaciones_rotaciones.md) |
+| P6 | Entrevistas, textos, página, video, People's Choice y meme | Textos, C6, C7 y C8, People's Choice y #MejorMeme; mentorías y prueba de usabilidad | [P6_textos_pagina.md](P6_textos_pagina.md) |
 
 **El cuello de botella es Cristian** (S10 §6). Nadie lo interrumpe salvo por un bloqueo. Las dudas se juntan y se resuelven en la revisión de cada hora.
 
 ## 4. Flujo de trabajo de una pieza
 
+**Carpetas de Drive:**
+- `Raiz_entregas` (el **buzón**): carpeta **plana**, sin subcarpetas, porque las exportaciones de Drive no pueden crearlas. Ahí están los archivos de la sesión de datos y ahí se entregan los suyos. En Colab se ve en `/content/drive/MyDrive/Raiz_entregas/` si la carpeta está en su unidad o si le agregó un acceso directo en «Mi unidad» (en Drive: clic derecho en la carpeta → Organizar → Agregar acceso directo). Si no aparece, pregunte a Cristian.
+- `Raiz/entradas/`: datos de solo lectura (hojas de etiquetas, documentos, series del SIH).
+- `Raiz/cuadernos/`: cuadernos y archivos de trabajo.
+
 ```
 1. Abra su guía de rol → busque la pieza → copie el «Bloque para pegar» (G0 ya completado + prompt del kit)
 2. Colab: cuaderno nuevo con el nombre indicado → monte Drive → pegue el bloque en Gemini
-3. Pida UNA celda por paso; ejecútela y diga "listo" antes de pedir la siguiente
-4. Al final, Gemini imprime la PRUEBA DE ACEPTACIÓN y la verificación de esquema
-5. Autoverificación:
+3. Lea los archivos de la sesión de datos DIRECTO de Raiz_entregas (no los copie ni los modifique)
+4. Pida UNA celda por paso; ejecútela y diga "listo" antes de pedir la siguiente
+5. Al final, Gemini imprime la PRUEBA DE ACEPTACIÓN y la verificación de esquema
+6. Autoverificación:
    - datos: verificar_datos_nasa.md;
    - cuaderno y tabla: docs/prompts/para_gemini.md, en un chat NUEVO de Gemini
-6. Guarde en Drive:
-   - tabla(s) + fuentes_<pieza>.csv + figuras → Raiz/entregas/ (carpeta plana);
-   - UNA línea por archivo → Raiz/entregas/LEEME.md;
+7. Guarde en Drive:
+   - tabla(s) + fuentes_<pieza>.csv + figuras → Raiz_entregas;
+   - UNA línea por archivo → al final de Raiz_entregas/LEEME.md;
    - el cuaderno → Raiz/cuadernos/
-7. Avise en el grupo:  ENTREGA: <archivo> — prueba OK
-8. Cristian corre el ensamblador (motor/ensamblar.py). Cada archivo:
+8. Avise en el grupo:  ENTREGA: <archivo> — prueba OK
+9. Cristian corre el ensamblador (motor/ensamblar.py). Cada archivo:
    - entra;
    - se rechaza, y el reporte dice el motivo;
    - o queda retenido, esperando parcelas_base.geojson
-9. Pegue R2 (§9) en su chat de Gemini y quédese con la explicación: es lo que defiende ante el jurado
+10. Pegue R2 (§9) en su chat de Gemini y quédese con la explicación: es lo que defiende ante el jurado
 ```
 
-**Antes de empezar una pieza, mire `Raiz/entregas/LEEME.md`.** Si el archivo ya tiene su línea (por ejemplo, porque lo entregó la sesión de Chrome), no lo rehaga. Verifíquelo y avise a Cristian. Dos archivos con el mismo nombre se pisan.
+**No rehaga lo que ya está en `LEEME.md`.** Si un archivo ya tiene su línea, úselo. Dos archivos con el mismo nombre se pisan: antes de guardar, revise que el nombre no sea de otra persona ni de la sesión de datos. La única excepción acordada es `cultivos_parcelas.csv`: la versión de P2 (reglas + Random Forest) sustituye a la de solo reglas ([P2](P2_hls_memoria.md)).
 
-**Qué revisa el ensamblador** (`motor/ensamblar.py` y `motor/esquemas.py`, ya en el repo). Rechaza, con el motivo, todo archivo que:
+**Qué revisa el ensamblador** (`motor/ensamblar.py` con `motor/esquemas.py`). Rechaza, con el motivo, todo archivo que:
 - no tenga su línea en `LEEME.md`;
-- no se llame como en la tabla 0.4-B o en el acuerdo de formatos (§6, cambio e): un nombre que no conoce «no se sabe cómo validarlo». Se aceptan además `fuentes_<pieza>.csv` y las figuras `.png`;
-- no traiga las columnas obligatorias. Ojo: en `memoria_resumen.csv`, `cultivos_parcelas.csv`, `rotaciones.json` y `relieve_meta.json` mandan las del acuerdo de formatos, no la fila del kit (§6, cambio e);
+- no se llame como una llave de `ESQUEMAS` en `motor/esquemas.py`: un nombre que no conoce «no está en la tabla 0.4-B: no se sabe cómo validarlo». Se aceptan además `fuentes_<pieza>.csv` y las figuras `.png`;
+- no traiga las columnas obligatorias. Columnas de más solo dan un aviso;
 - no cumpla los rangos: P10 ≤ P50 ≤ P90; NDVI entre −1 y 1; `prob_max` entre 0 y 1; estados dentro de su lista; dotaciones dentro del deslizador;
-- traiga `id` que no existen en `parcelas_base.geojson` (salvo `etiquetas_unidas.csv`, cuyo `id` es el de `parcelas_muestra.geojson`; cambio c);
-- deje vacía una celda que el esquema exige, por ejemplo `id` o el `sha256` de `fuentes_<pieza>.csv`. Si falta el dato, la fila no se entrega: se avisa a Cristian. Si un dato de origen fue un texto pegado, se guarda en `Raiz/cuadernos/` como `.txt` y se registra su `sha256`;
+- traiga `id` que no existen en `parcelas_base.geojson`;
+- deje vacía una celda que el esquema exige: por ejemplo `id`, `prob_max` cuando `acuerdo_metodos` es «2/2» o «1/2», o el `sha256` de `fuentes_<pieza>.csv`. Si falta el dato, la fila no se entrega: se avisa a Cristian;
 - en `plantillas_explicaciones.md`, traiga un dígito fuera de los marcadores `{{…}}`.
 
 Además:
 - el código (`.py`, `.ipynb`) no entra por el buzón: Cristian lo revisa y lo copia a mano;
-- las exportaciones crudas de Earth Engine (`hls_mensual_*.tif`, `hls_reflect_*.tif`, `hls_ndvi_memoria_*.tif`, `piloto_consumo.tif`) tampoco son entregas: se listan aparte, sin validarlas y sin pedirles línea;
+- los rásteres crudos de Earth Engine (`hls_mensual_*.tif`, `hls_reflect_*.tif`, `hls_ndvi_memoria_*.tif`) no son entregas: se listan aparte, sin validarlos y sin pedirles línea;
+- dos notas de P5 (`opciones_b3.json` y `propuesta_supuestos.md`) **no tienen esquema**: el reporte las lista como «no está en la tabla 0.4-B». Es lo esperado: Cristian las lee y las copia a mano;
 - **nunca corrige en silencio**: si algo no cumple, se rechaza y se dice por qué.
 
 ## 5. La línea de LEEME.md y el aviso
 
-`Raiz/entregas/LEEME.md` es una tabla. Si aún no existe, créela con este encabezado exacto (el ensamblador lo busca):
+`Raiz_entregas/LEEME.md` ya existe: lo creó la sesión de datos. Es una tabla con este encabezado (el ensamblador lo busca):
 ```text
 | archivo | fuente | fecha | script |
 |---|---|---|---|
 ```
-Debajo va **una línea por archivo**. Ejemplo acordado:
+Debajo va **una línea por archivo**. Ejemplo:
 ```text
-eto_diaria.csv | NASA POWER Daily API (community=AG), 28.19 N −105.45 O, 1981–2026 | 2026-11-14 | colab/A1_power_eto.ipynb
+heladas.json | Derivado de eto_diaria.csv (NASA POWER Daily, community=AG); helada = Tmin ≤ 0 °C; percentiles 10, 50 y 90 | 2026-11-14 | colab/A2_heladas.ipynb
 ```
-- **archivo:** el nombre exacto, igual al de la tabla 0.4-B. También llevan línea `fuentes_<pieza>.csv` y cada figura `.png`. En `<pieza>` va el código de la pieza sin puntos ni guiones: `fuentes_A1.csv`, `fuentes_A3M.csv`, `fuentes_A41.csv`, `fuentes_B2.csv`…
+- **Cómo agregarla:** al final del archivo. Desde Colab, ábralo en modo «añadir» (`open(ruta, "a")`), **nunca** en modo «escribir» (`"w"`), que borra las líneas de los demás. No edite ni borre líneas ajenas.
+- **archivo:** el nombre exacto, igual a la llave de `ESQUEMAS` en `motor/esquemas.py`. También llevan línea `fuentes_<pieza>.csv` y cada figura `.png`. En `<pieza>` va el código sin puntos ni guiones (`fuentes_A2.csv`, `fuentes_A42.csv`…). **No use un nombre que ya usa la sesión de datos** (`fuentes_A1.csv`, `fuentes_A3.csv`, `fuentes_A4.csv`, `fuentes_A5.csv`, `fuentes_A9.csv`, `fuentes_B1.csv`).
 - **fuente:**
   - de dónde salen los datos: API, colección o documento, con su periodo y lugar;
   - para una tabla derivada, de qué entregas sale;
@@ -117,32 +152,33 @@ eto_diaria.csv | NASA POWER Daily API (community=AG), 28.19 N −105.45 O, 1981�
 - **fecha:** `AAAA-MM-DD`, el día de la entrega.
 - **script:**
   - en un cuaderno, `colab/<nombre del cuaderno>.ipynb`; el cuaderno se guarda en `Raiz/cuadernos/` y Cristian lo pasa al repo;
-  - en un texto de P6, el bloque de esta guía que usó.
-- **Si vuelve a entregar el mismo archivo,** cambie la fecha de su línea. Si queda repetida, cuenta la última.
+  - en un texto de P6, el bloque de su guía que usó.
+- **Si vuelve a entregar el mismo archivo,** agregue una línea nueva con la fecha nueva: cuenta la última.
 - **Sin línea, el archivo no entra.**
 
 **Aviso al grupo** (kit §0.4-B, paso 5): `ENTREGA: <archivo> — prueba OK`.
 
-## 6. Cambios respecto al kit (mandan sobre el kit)
+## 6. Decisiones del 14-nov (mandan sobre el kit)
 
-| # | Cambio del 14-nov | Qué pasaje del kit sustituye |
+| # | Decisión | Qué pasaje del kit sustituye |
 |---|---|---|
-| (a) | **Earth Engine lo corre otra sesión de Claude, en el Chrome de Cristian, con el proyecto `iondroplet`:** exportaciones de A3, A3-M, A8 y A9, y NASADEM. P2 a P5 **no se autentican en Earth Engine** y trabajan sobre los CSV y TIF que esa sesión deja en Drive | Tabla del kit §0.3 (P2 con Earth Engine en A3 y A3-M; P4 en A8), G0 «ENTORNO» y regla 6, y los pasos de Earth Engine de A1 (elevación), A3, A3-M, A8 y A9. Ya coincidía con el kit §0.3, punto 1: «Solo Cristian ejecuta Earth Engine» |
-| (a′) | **B1 (`parcelas_base.geojson` y `parcelas_muestra.geojson`) lo hace la sesión de Chrome**, porque necesita red. P2 revisa a mano las protagonistas | Tabla del kit §0.3: B1 con geopandas en Colab, a cargo de P2 |
-| (b) | **Entregas en `Raiz/entregas/`, carpeta plana**, con **una línea por archivo** en `Raiz/entregas/LEEME.md` (`archivo \| fuente \| fecha \| script`). Sin esa línea el archivo no entra | Kit §0.1, regla 2, y §0.4-B, pasos 1 y 5 (`entregas/<rol>/`). `docs/prompts/para_gemini.md` todavía dice `entregas/<rol>/`: manda la carpeta plana |
-| (c) | **Nombres de archivo y columnas exactos de la tabla 0.4-B.** Se acordaron además, para A9: `nasadem_zona_piloto.tif` (30 m, EPSG:4326, zona piloto + 2 km), `relieve_parcelas.csv` (`id, pendiente_media_pct, aportacion_externa_ha, frac_depresion`) y `relieve_rutas.geojson`. Los `id` de los CSV son los de `parcelas_base.geojson`, **con una excepción: `etiquetas_unidas.csv` (A4.1) usa el `id` del polígono de `parcelas_muestra.geojson`** que contiene cada punto etiquetado (la muestra del distrito; así lo valida `motor/esquemas.py`). Para cruzar etiquetas con parcelas de la zona piloto (A3-M, paso 10, y A4.3), los bloques piden una unión espacial e imprimir cuántas coinciden. **Donde el acuerdo de formatos (fila e) cambia una fila de la tabla 0.4-B, manda el acuerdo** | Los prompts dicen `data/processed/…`, `docs/figuras/…`, `docs/resultado_…md` o `data/raw/…`. Cada bloque de esta guía cambia solo esas rutas y las lista bajo «Ajustes de ruta» |
-| (e) | **Acuerdo de formatos del 14-nov** entre la sesión de datos y Cristian. Ya lo aplica el validador (`motor/esquemas.py`, commit `29614a2`); si su archivo sigue la fila vieja del kit, se rechaza:<br>• `memoria_resumen.csv` (A3-M): `id, dias_suelo_desnudo_mediana, anios_con_dato, estado_2025`. **Ya no lleva `edad_perenne_anios`.**<br>• `cultivos_parcelas.csv` (A4): `id, cultivo_actual, prob_max, acuerdo_metodos, abstencion, edad_perenne_anios, estado_plazo, grupo_fenologico`. Las tres últimas pueden ir vacías y van vacías si la parcela está abstenida. **La edad de la perenne va aquí.** La calcula quien entrega este archivo, con la regla de A3-M, paso 9, sobre `memoria_parcelas.csv`. `acuerdo_metodos` admite además `1/1` (solo reglas; solo entonces `prob_max` puede ir vacío)<br>• `rotaciones.json` y `demanda_cultivos.csv` son **salidas de A5** y hoy las entrega la sesión de datos. Las lee el motor del cubo (`motor/b4_cubo.py`). `rotaciones.json` lleva las llaves `params`, `cultivos`, `rotaciones` y `anios_clima` y **sustituye a la lista de opciones del kit B3: P5 no escribe un archivo con ese nombre**<br>• `relieve_meta.json` (A9): `rotulo`, `umbral_ruta_ha`, `umbral_ruta_etiqueta`, `celda_ha` y `tormenta` (`mm`, `definicion`, `fuente`, `periodo`). **La tormenta P95 va aquí** (antes se pasaba a mano a P5 para `cifras.csv`; si aparece en la página, P5 la copia de este archivo)<br>• Las exportaciones crudas de Earth Engine (`hls_mensual_*.tif`, `hls_reflect_*.tif`, `hls_ndvi_memoria_*.tif`, `piloto_consumo.tif`) no son entregas: el ensamblador las lista aparte y no les pide línea | Filas A3-M, A4.2 y B3 de la tabla 0.4-B; kit A3-M, paso 9 (edad en el resumen); B3 (P5 crea `rotaciones.json`); A5 (lee `rotaciones.json` de B3); A9, paso 4 (tormenta sin archivo) |
-| (d) | **El validador del repo (`motor/ensamblar.py`) rechaza con motivo** lo que no cumpla. Nunca corrige en silencio | Kit K-ENS, paso 2 (ya lo decía) |
-| — | P6 trabaja con la app de Gemini **o con Claude en el navegador** | Tabla del kit §0.3: «Claude (chat del Project)» |
-| — | **G0 ya completado en cada bloque.** Se ajustaron sus reglas a los cambios (a) y (b): reglas 1, 3, 6, 7 y 9 (`entregas/` plana; sin Earth Engine; archivos de trabajo en `cuadernos/` solo si la tarea lo pide). Se agregó la regla 11: escribir la línea de `LEEME.md` | Kit §4, G0 |
+| (a) | **Earth Engine lo corre solo la sesión de datos.** P2 a P6 no se autentican en Earth Engine: trabajan con los archivos que esa sesión dejó en `Raiz_entregas` | Kit §0.3 (P2 con Earth Engine en A3 y A3-M; P4 en A8), G0 «ENTORNO» y regla 6, y los pasos de Earth Engine de A1, A3, A3-M, A8 y A9. Ya coincidía con el kit §0.3, punto 1: «Solo Cristian ejecuta Earth Engine» |
+| (b) | **Buzón: carpeta plana `Raiz_entregas`**, con una línea por archivo en `Raiz_entregas/LEEME.md` (`archivo \| fuente \| fecha \| script`, fecha `AAAA-MM-DD`). Sin esa línea el archivo no entra | Kit §0.1, regla 2, y §0.4-B, pasos 1 y 5 (`entregas/<rol>/`). `docs/prompts/para_gemini.md` todavía nombra la carpeta vieja por rol: manda `Raiz_entregas` |
+| (c) | **Ya hecho por la sesión de datos:** B1, A1, A3, A3-M, A4 (solo reglas), A5 y A9, más los rásteres de Earth Engine (tabla de arriba). Nadie los rehace | Las filas B1, A1, A3, A3-M, A5 y A9 de las guías de las 9:00 |
+| (d) | **Formatos: manda el validador** (`motor/esquemas.py`). Donde difiere de la tabla 0.4-B del kit:<br>• `memoria_resumen.csv`: `id, dias_suelo_desnudo_mediana, anios_con_dato, estado_2025`. `anios_con_dato` = años agrícolas en que se pudieron calcular los días de suelo desnudo (hubo NDVI válido en febrero, marzo y abril); son los años que entran en la mediana (script A3 de la sesión de datos)<br>• `cultivos_parcelas.csv`: `id, cultivo_actual, prob_max, acuerdo_metodos, abstencion, edad_perenne_anios, estado_plazo, grupo_fenologico`. La edad de la perenne va aquí, no en la memoria<br>• `rotaciones.json` y `demanda_cultivos.csv` son salidas de A5 (las lee `motor/b4_cubo.py`)<br>• `relieve_meta.json` trae la tormenta de referencia (`tormenta.mm`, con definición, fuente y periodo) | Filas A3-M, A4.2, A5, B3 y A9 de la tabla 0.4-B |
+| (e) | **Etiquetas:** `etiquetas_unidas.csv` lleva `punto_id` (el punto etiquetado) y en `id` el `id` del campo de Fields of The World (`parcelas_base.geojson`) que contiene el punto. No hay `parcelas_muestra.geojson`: los rásteres de HLS cubren solo la zona piloto, así que un punto fuera de los 338 campos no tiene datos y no entra al archivo | Kit A4.1 y B1, paso 5 (muestra del distrito) |
+| (f) | **Un solo dueño para `rotaciones.json` y `supuestos.json`: la sesión de datos.** P5 no entrega otro `supuestos.json`: propone valores con fuente en `propuesta_supuestos.md` (nota que lee Cristian). B3 de P5 pasa a `opciones_b3.json` (opciones por cultivo y filtros duros), que sustituirá al diseño provisional `data/opciones_b4.json` | Kit B3 (P5 creaba `rotaciones.json` y `supuestos.json`) y la fila «Supuestos» de la tabla 0.4-B |
+| (g) | **El validador rechaza con motivo** lo que no cumpla. Nunca corrige en silencio | Kit K-ENS, paso 2 (ya lo decía) |
+| — | P6 trabaja con la app de Gemini **o con Claude en el navegador** | Kit §0.3: «Claude (chat del Project)» |
+| — | **G0 ya completado en cada bloque**, con las reglas ajustadas a (a) y (b) y una regla 11: escribir la línea de `LEEME.md` | Kit §4, G0 |
 
-**Documentos que el kit cita y no están en el repo:** 33 (especificación técnica), 27 y 29 (cifras verificadas), 30 (preregistro H1), maestro §5.2 (rotaciones) y el PDF de FAO-56, según la lista de `CLAUDE.md`. Faltan también el borrador de la página (archivo 31, kit C6), el manual de etiquetado (39) y el protocolo Olofsson (22), que cita el kit A4.1. Si su pieza los necesita, **pídalos a Cristian**. No los reconstruya de memoria ni deje que Gemini los «recuerde».
+**Documentos que el kit cita y no están en el repo:** 33 (especificación técnica), 27 y 29 (cifras verificadas), 30 (preregistro H1), maestro §5.2 (rotaciones) y el PDF de FAO-56, según la lista de `CLAUDE.md`. Faltan también el borrador de la página (archivo 31, kit C6), el manual de etiquetado (39) y el protocolo Olofsson (22). Si su pieza los necesita, **pídalos a Cristian**. No los reconstruya de memoria ni deje que Gemini los «recuerde».
 
 ## 7. Las 10 reglas del kit (§0.1), en corto
 
 1. **Un repo, un integrador.** Solo Cristian hace commits.
-2. **Cada quien entrega en el buzón.** Ahora es `Raiz/entregas/`, plano y con su línea en `LEEME.md` (cambio b). El cuaderno va a `Raiz/cuadernos/` y Cristian lo copia al repo.
-3. **Primero, el contrato de datos** (kit §2). Mismos nombres de archivos y campos: la web arranca con datos simulados mientras llegan los reales.
+2. **Cada quien entrega en el buzón.** Ahora es `Raiz_entregas`, plano y con su línea en `LEEME.md` (decisión b). El cuaderno va a `Raiz/cuadernos/` y Cristian lo copia al repo.
+3. **Primero, el contrato de datos** (kit §2). Mismos nombres de archivos y campos.
 4. **Un prompt = una pieza pequeña**, con entrada, salida y prueba. Nunca «genere toda la aplicación».
 5. **No se avanza sin aprobar la prueba.** Si falla 2 veces, R1 (§9). Si falla 3 veces, el plan B de la pieza.
 6. **La IA no inventa cifras.** Todo número sale de un archivo, de `data/params.json` o de S9 y S8, con su fuente y etiqueta. Un número «típico» se rechaza.
@@ -157,31 +193,29 @@ eto_diaria.csv | NASA POWER Daily API (community=AG), 28.19 N −105.45 O, 1981�
 - **Celulares en silencio durante los bloques.**
 - **Si algo falla dos veces, R1**, en lugar de insistir.
 
-## 8. Índice de archivos de salida (tabla 0.4-B y acuerdo de formatos)
+## 8. Índice de archivos (verificado contra `ESQUEMAS` de `motor/esquemas.py`)
 
-| Archivo | Pieza | Quién lo entrega | Guía |
-|---|---|---|---|
-| `parcelas_base.geojson`, `parcelas_muestra.geojson` | B1 | Sesión de Chrome (P2 revisa) | [P2](P2_hls_memoria.md#b1--revisión-de-parcelas-y-de-las-3-protagonistas) |
-| `hls_mensual_parcelas.csv`, `suelo_desnudo.csv` | A3 | P2 | [P2](P2_hls_memoria.md#a3--hls-del-año-agrícola-2026-por-parcela) |
-| `memoria_mensual.csv`, `memoria_parcelas.csv`, `memoria_resumen.csv` (sin edad; cambio e), `memoria_validacion.csv` | A3-M | P2 | [P2](P2_hls_memoria.md#a3-m--memoria-de-la-parcela-20162026) |
-| `etiquetas_unidas.csv` | A4.1 | P3 | [P3](P3_etiquetas_h3.md#a41--unión-de-etiquetas) |
-| `cultivos_parcelas.csv` (con edad, `estado_plazo` y `grupo_fenologico`; cambio e), `tabla_metodos.csv` | A4.2 | P2 (con P3). La sesión de datos entrega hoy una versión de solo reglas: no la sobrescriba sin hablar con Cristian | [P2](P2_hls_memoria.md#a42--mapa-de-cultivos-de-2026-con-p3) |
-| `olofsson.csv` + figura PNG | A4.3 | P3 | [P3](P3_etiquetas_h3.md#a43--exactitud-olofsson) |
-| `resultado_H3.md`, `h3_series.csv` + figura PNG | A7 | P3 | [P3](P3_etiquetas_h3.md#a7--experimento-natural-de-2025-h3) |
-| `eto_diaria.csv`, `heladas.json` | A1 y A2 | P4 | [P4](P4_clima_demanda.md#a1--clima-nasa-power-y-eto-fao-56) |
-| `rotaciones.json`, `demanda_cultivos.csv` (los lee el cubo) | A5 (acuerdo de formatos, cambio e) | Sesión de datos; P4 los verifica | [P4](P4_clima_demanda.md#a5--demanda-de-agua-por-opción-con-banda) |
-| `demanda_parcelas.csv`, `etc_mensual.csv` + figura del tornado | A5 (tabla 0.4-B; el cubo ya no los lee) | P4, solo si Cristian se los pide | [P4](P4_clima_demanda.md#a5--demanda-de-agua-por-opción-con-banda) |
-| `resultado_H1.md` + figura PNG | A6 | P4 | [P4](P4_clima_demanda.md#a6--back-test-h1) |
-| `et_contraste.csv` + figura PNG | A8 | P4 | [P4](P4_clima_demanda.md#a8--contraste-regional-de-et) |
-| `nasadem_zona_piloto.tif` | A9, paso 1 (acordado) | Sesión de Chrome | [P4](P4_clima_demanda.md#a9--relieve-y-simulación-de-tormenta) |
-| `relieve_rutas.geojson`, `relieve_parcelas.csv`, `relieve_meta.json` (rótulo, umbral de ruta y tormenta P95; cambio e) | A9 (acordado) | P4 (si ya tienen línea en `LEEME.md`, los verifica) | [P4](P4_clima_demanda.md#a9--relieve-y-simulación-de-tormenta) |
-| `dotaciones.json`; `historial_superficie.csv` solo si sobra tiempo | B2 | P5 | [P5](P5_dotaciones_rotaciones.md#b2--dotaciones-en-millares-por-hectárea) |
-| `calibracion.csv` | B2-cal | P5 (solo si el preregistro la declara) | [P5](P5_dotaciones_rotaciones.md#b2-cal--calibración-solo-si-el-preregistro-la-declara) |
-| `filtros.py` (código: Cristian lo copia a mano). Las opciones de B3, donde indique Cristian; **nunca con el nombre `rotaciones.json`** (cambio e) | B3 | P5 | [P5](P5_dotaciones_rotaciones.md#b3--rotaciones-filtros-duros-plazos-y-supuestosjson) |
-| `supuestos.json` | Supuestos | P5 | [P5](P5_dotaciones_rotaciones.md#b3--rotaciones-filtros-duros-plazos-y-supuestosjson) |
-| `cifras.csv` | Tabla única de cifras | P5 | [P5](P5_dotaciones_rotaciones.md#tabla-única-de-cifras-cifrascsv) |
-| `textos_ui.md`, `plantillas_explicaciones.md`, `whatsapp_plantilla.md` | Textos | P6 | [P6](P6_textos_pagina.md) |
-| `fuentes_<pieza>.csv` | Todas las piezas con datos de origen | Cada quien | En cada bloque (G0, regla 9) |
+**Ya entregados por la sesión de datos** (no se rehacen): `parcelas_base.geojson`, `eto_diaria.csv`, `hls_mensual_parcelas.csv`, `suelo_desnudo.csv`, `memoria_parcelas.csv`, `memoria_resumen.csv`, `cultivos_parcelas.csv` (versión de reglas), `rotaciones.json`, `demanda_cultivos.csv`, `relieve_parcelas.csv`, `relieve_rutas.geojson`, `relieve_meta.json` y `nasadem_zona_piloto.tif`.
+
+**Pendientes del equipo:**
+
+| Archivo | Pieza | Quién | ¿Lo valida el ensamblador? | Guía |
+|---|---|---|---|---|
+| `cultivos_parcelas.csv` (sustituye al de reglas), `tabla_metodos.csv`, figura PNG | A4.2 | P2 | Sí | [P2](P2_hls_memoria.md#a42--random-forest-y-comparación-con-las-reglas) |
+| `B1_protagonistas.png` + los 3 `id` por mensaje a Cristian | B1, paso 4 | P2 | La figura, sí (`.png`) | [P2](P2_hls_memoria.md#b1-paso-4--las-3-protagonistas) |
+| `etiquetas_unidas.csv` | A4.1 | P3 | Sí | [P3](P3_etiquetas_h3.md#a41--unión-de-etiquetas) |
+| `olofsson.csv` + figura PNG | A4.3 | P3 | Sí (columnas libres) | [P3](P3_etiquetas_h3.md#a43--exactitud-olofsson) |
+| `h3_series.csv`, `resultado_H3.md` + figura PNG | A7 | P3 | Sí | [P3](P3_etiquetas_h3.md#a7--experimento-natural-de-2025-h3) |
+| `heladas.json` | A2 | P4 | Sí | [P4](P4_clima_demanda.md#a2--heladas-por-fecha) |
+| `resultado_H1.md` + figura PNG | A6 | P4 | Sí | [P4](P4_clima_demanda.md#a6--back-test-h1) |
+| `et_contraste.csv` + figura PNG | A8 (por ahora «not run») | P4 | Sí | [P4](P4_clima_demanda.md#a8--contraste-regional-de-et-por-ahora-not-run) |
+| `dotaciones.json`; `historial_superficie.csv` solo si sobra tiempo | B2 | P5 | Sí | [P5](P5_dotaciones_rotaciones.md#b2--dotaciones-en-millares-por-hectárea) |
+| `opciones_b3.json` | B3 | P5 | **No: nota no validada** (Cristian la copia a mano) | [P5](P5_dotaciones_rotaciones.md#b3--opciones-por-cultivo-y-filtros-duros-opciones_b3json) |
+| `propuesta_supuestos.md` | Supuestos | P5 | **No: nota no validada** (la lee Cristian) | [P5](P5_dotaciones_rotaciones.md#propuesta-de-supuestos-propuesta_supuestosmd) |
+| `cifras.csv` | Tabla única de cifras | P5 | Sí | [P5](P5_dotaciones_rotaciones.md#tabla-única-de-cifras-cifrascsv) |
+| `calibracion.csv` | B2-cal (solo si el preregistro la declara) | P5 | Sí (columnas libres) | [P5](P5_dotaciones_rotaciones.md#b2-cal--calibración-solo-si-el-preregistro-la-declara) |
+| `textos_ui.md`, `plantillas_explicaciones.md`, `whatsapp_plantilla.md` | Textos | P6 | Sí | [P6](P6_textos_pagina.md) |
+| `fuentes_<pieza>.csv` (`archivo, url_o_api, fecha_consulta, sha256`) | Toda pieza con datos de origen | Cada quien | Sí (patrón `fuentes_*.csv`) | En cada bloque (G0, regla 9) |
 
 ## 9. Si algo falla: R1. Después de cada pieza: R2
 
@@ -205,14 +239,15 @@ Explique lo que acaba de realizar como si el lector no tuviera conocimientos de 
 ## 10. Enlaces
 
 - **Guías por rol:**
-  - [P2 · HLS y memoria](P2_hls_memoria.md)
+  - [P2 · Random Forest y protagonistas](P2_hls_memoria.md)
   - [P3 · Etiquetas, exactitud y H3](P3_etiquetas_h3.md)
-  - [P4 · Clima, demanda y back-test](P4_clima_demanda.md)
-  - [P5 · Dotaciones, plazos y rotaciones](P5_dotaciones_rotaciones.md)
+  - [P4 · Heladas, back-test y contraste de ET](P4_clima_demanda.md)
+  - [P5 · Dotaciones, opciones y cifras](P5_dotaciones_rotaciones.md)
   - [P6 · Textos, página y jurado](P6_textos_pagina.md)
 - **Antes de usar o entregar un dato:** [verificar_datos_nasa.md](verificar_datos_nasa.md).
 - **Qué herramienta usar:** [herramientas.md](herramientas.md).
 - **Revisión con contexto nuevo para Gemini:** [docs/prompts/para_gemini.md](../prompts/para_gemini.md).
+- **Formatos exactos:** [motor/esquemas.py](../../motor/esquemas.py) (columnas y rangos) y [motor/ensamblar.py](../../motor/ensamblar.py) (cómo se valida).
 - **Fuentes:**
   - el kit: [docs/kit/40_kit_v4_proyecto_definitivo.md](../kit/40_kit_v4_proyecto_definitivo.md);
   - el alcance: [docs/sintesis/S9_proyecto_definitivo.md](../sintesis/S9_proyecto_definitivo.md);
