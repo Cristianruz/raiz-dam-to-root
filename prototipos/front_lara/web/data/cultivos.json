@@ -1,0 +1,63 @@
+{
+  "_responsables": "Integrante 4 (demanda_neta_mm con FAO-56 + NASA POWER) e Integrante 5 (rendimiento, precio, costo, suelo)",
+  "_instrucciones": "demanda_neta_mm = requerimiento neto de riego del ciclo (ETc - precipitación efectiva). eficiencia = eficiencia de aplicación en parcela (0-1). Precios y costos en MXN. Reemplazar valores de ejemplo y poner validado=true en cada cultivo.",
+  "cultivos": [
+    {
+      "id": "alfalfa", "nombre": "Alfalfa", "ciclo": "Perenne (anual de corte)",
+      "demanda_neta_mm": 1450, "eficiencia": 0.65,
+      "rendimiento_t_ha": 18, "precio_mxn_t": 4000, "costo_mxn_ha": 45000,
+      "suelo_efecto": "mejora", "suelo_nota": "Leguminosa: fija nitrógeno y mejora la estructura del suelo.",
+      "fuente": "EJEMPLO — reemplazar", "validado": false
+    },
+    {
+      "id": "nogal", "nombre": "Nogal pecanero", "ciclo": "Perenne (árbol)",
+      "demanda_neta_mm": 1150, "eficiencia": 0.70,
+      "rendimiento_t_ha": 1.8, "precio_mxn_t": 80000, "costo_mxn_ha": 70000,
+      "suelo_efecto": "neutral", "suelo_nota": "Huerta establecida; no se puede dejar sin riego sin perder árboles.",
+      "perenne_estricto": true,
+      "fuente": "EJEMPLO — reemplazar", "validado": false
+    },
+    {
+      "id": "algodon", "nombre": "Algodón", "ciclo": "Primavera-verano",
+      "demanda_neta_mm": 750, "eficiencia": 0.65,
+      "rendimiento_t_ha": 5, "precio_mxn_t": 15000, "costo_mxn_ha": 50000,
+      "suelo_efecto": "desgaste", "suelo_nota": "Cultivo extractivo; conviene rotarlo con leguminosa o cereal.",
+      "fuente": "EJEMPLO — reemplazar", "validado": false
+    },
+    {
+      "id": "chile", "nombre": "Chile jalapeño (goteo)", "ciclo": "Primavera-verano",
+      "demanda_neta_mm": 700, "eficiencia": 0.85,
+      "rendimiento_t_ha": 35, "precio_mxn_t": 6000, "costo_mxn_ha": 140000,
+      "suelo_efecto": "neutral", "suelo_nota": "Requiere sistema de goteo; inversión alta y precio volátil.",
+      "fuente": "EJEMPLO — reemplazar", "validado": false
+    },
+    {
+      "id": "sorgo", "nombre": "Sorgo grano", "ciclo": "Verano",
+      "demanda_neta_mm": 480, "eficiencia": 0.65,
+      "rendimiento_t_ha": 7, "precio_mxn_t": 4500, "costo_mxn_ha": 22000,
+      "suelo_efecto": "neutral", "suelo_nota": "Tolera sequía y algo de salinidad; deja rastrojo como cobertura.",
+      "fuente": "EJEMPLO — reemplazar", "validado": false
+    },
+    {
+      "id": "trigo", "nombre": "Trigo", "ciclo": "Otoño-invierno",
+      "demanda_neta_mm": 450, "eficiencia": 0.65,
+      "rendimiento_t_ha": 6, "precio_mxn_t": 6000, "costo_mxn_ha": 25000,
+      "suelo_efecto": "mejora", "suelo_nota": "Cobertura invernal; reduce erosión eólica.",
+      "fuente": "EJEMPLO — reemplazar", "validado": false
+    },
+    {
+      "id": "avena", "nombre": "Avena forrajera", "ciclo": "Otoño-invierno",
+      "demanda_neta_mm": 350, "eficiencia": 0.65,
+      "rendimiento_t_ha": 10, "precio_mxn_t": 3500, "costo_mxn_ha": 20000,
+      "suelo_efecto": "mejora", "suelo_nota": "Cobertura invernal; aporta materia orgánica.",
+      "fuente": "EJEMPLO — reemplazar", "validado": false
+    },
+    {
+      "id": "cacahuate", "nombre": "Cacahuate", "ciclo": "Primavera-verano",
+      "demanda_neta_mm": 550, "eficiencia": 0.65,
+      "rendimiento_t_ha": 3, "precio_mxn_t": 18000, "costo_mxn_ha": 30000,
+      "suelo_efecto": "mejora", "suelo_nota": "Leguminosa: aporta nitrógeno; prefiere suelos ligeros.",
+      "fuente": "EJEMPLO — reemplazar", "validado": false
+    }
+  ]
+}

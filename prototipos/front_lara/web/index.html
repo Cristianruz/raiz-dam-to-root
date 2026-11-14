@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Raíz — de la presa a la parcela</title>
+  <link rel="stylesheet" href="vendor/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="barra">
+    <div class="marca">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="28" height="28"><path d="M16 3v12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M16 15c-2 4-6 6-9 7M16 15c2 4 6 6 9 7M16 15v13M16 21c-2 2-4 3-6 3M16 21c2 2 4 3 6 3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="16" cy="4" r="2.6" fill="var(--agua)"/></svg>
+      </span>
+      <div>
+        <h1>Raíz</h1>
+        <p class="sub">De la presa a la parcela · <span id="distrito">DR-005 Delicias</span></p>
+      </div>
+    </div>
+
+    <section class="selector" aria-label="Dotación de agua">
+      <div class="selector-titulo">
+        <span>Dotación que llega a la parcela</span>
+        <strong id="laminaValor">— cm</strong>
+      </div>
+      <div class="escenarios" id="escenarios" role="radiogroup"></div>
+      <input type="range" id="laminaSlider" min="0" max="100" step="1" aria-label="Dotación personalizada en centímetros">
+    </section>
+  </header>
+
+  <div id="avisoDatos" class="aviso" hidden></div>
+
+  <main class="contenido">
+    <section class="mapa-caja" aria-label="Mapa de parcelas">
+      <div id="mapa"></div>
+      <div class="leyenda" aria-label="Leyenda">
+        <div class="leyenda-titulo">Cultivo actual: ¿alcanza el agua?</div>
+        <div><i class="pt verde"></i> 90% o más de la parcela</div>
+        <div><i class="pt ambar"></i> 50–90%</div>
+        <div><i class="pt rojo"></i> menos de 50%</div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <nav class="lista-parcelas" id="listaParcelas" aria-label="Parcelas piloto"></nav>
+      <div class="ficha" id="ficha" aria-live="polite">
+        <p class="vacio">Selecciona una parcela en el mapa.</p>
+      </div>
+    </aside>
+  </main>
+
+  <script src="vendor/leaflet.js"></script>
+  <script src="calculos.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
