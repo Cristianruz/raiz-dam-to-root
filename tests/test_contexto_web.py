@@ -2,8 +2,8 @@
 """Pruebas de motor/contexto_web.py (bases de datos del reto → web/data/contexto.json).
 
 Decisión: docs/decisiones/2026-11-14_recursos_del_reto.md.
-(a) Con data/processed REAL (hoy sin las entregas nuevas): el clima del año existe para las dos
-    zonas y sus sumas coinciden con un cálculo independiente hecho aquí; los días con helada
+(a) Con data/processed REAL (con las entregas que hayan llegado): el clima del año existe para las
+    dos zonas y sus sumas coinciden con un cálculo independiente hecho aquí; los días con helada
     coinciden con contar Tmin ≤ 0 °C; los bloques de entregas ausentes van en null con su motivo;
     el estado de cada recurso es coherente con los archivos presentes.
 (b) Con un processed DE PRUEBA (tests/fixtures/contexto_reto/generar.py, escrito en tmp_path) que
@@ -11,6 +11,8 @@ Decisión: docs/decisiones/2026-11-14_recursos_del_reto.md.
     esos mismos archivos pasan el validador del buzón (motor/ensamblar.py).
 (c) El JSON nunca trae NaN ni Infinity; un año con faltantes por encima del umbral va en null con
     sus «dias_con_dato» reales; la fixture contexto_lleno.json está al día.
+(d) et_contraste lleva la zona piloto a la que pertenece (archivo sin sufijo = zona por omisión) y
+    el motivo fijo para las demás zonas; cada bloque dice de qué archivo salió.
 Todo se escribe en tmp_path: nunca en data/processed ni en web/data. Los valores de (b) y (c) son
 DE PRUEBA; los umbrales se leen de motor/esquemas.py y de data/params.json, no se escriben aquí.
 """
@@ -195,7 +197,10 @@ def test_real_et_contraste_tal_cual(real):
     for columna, valores in bloque["columnas"].items():
         assert len(valores) == len(filas)
         assert valores == [float(f[columna]) if f[columna].strip() else None for f in filas]
-    assert bloque["fuente"] and bloque["fecha"]
+    assert bloque["fuente"] and bloque["fecha"] and bloque["archivo"] == "et_contraste.csv"
+    # El contraste es de UNA zona (archivo sin sufijo): la página no lo cruza con las series de otra.
+    assert bloque["zona"] == esquemas.ZONA_POR_OMISION and bloque["zona"] in contexto["zonas"]
+    assert bloque["motivo_otras_zonas"] == cw.MOTIVO_CONTRASTE_OTRA_ZONA
 
 
 def test_real_estado_de_cada_recurso_coherente_con_los_archivos(real):
@@ -379,6 +384,58 @@ def test_lleno_gaez_y_heladas(lleno):
     original = json.loads((lleno["processed"] / "heladas.json").read_text(encoding="utf-8"))
     assert {k: v for k, v in heladas.items() if k != "entrega"} == original, "el contenido de heladas.json, tal cual"
     assert heladas["entrega"]["fuente"] and heladas["entrega"]["fecha"] == GEN.FECHA_PRUEBA
+
+
+def test_et_contraste_lleva_la_zona_del_archivo_sin_sufijo(lleno):
+    """et_contraste.csv no lleva sufijo de zona: es de la zona por omisión (decisión de dos zonas)."""
+    contexto = lleno["contexto"]
+    bloque = contexto["et_contraste"]
+    # Supuesto del motor: un solo et_contraste.csv. Si un día va uno por zona (ARCHIVOS_POR_ZONA),
+    # esta prueba falla para que se revise bloque_et_contraste.
+    assert "et_contraste.csv" not in esquemas.ARCHIVOS_POR_ZONA
+    assert bloque["zona"] == esquemas.ZONA_POR_OMISION
+    assert bloque["zona"] in ZONAS and len(ZONAS) > 1, "hay otra zona piloto donde el contraste no se corrió"
+    assert bloque["zona"] != esquemas.ZONA_CUENCA
+    motivo = bloque["motivo_otras_zonas"]
+    assert motivo == cw.MOTIVO_CONTRASTE_OTRA_ZONA and motivo.strip()
+    assert not any(ch.isdigit() for ch in motivo), "texto fijo, sin cifras"
+    # Las series regionales de la otra zona existen: por eso hace falta decir de qué zona es el contraste.
+    otra = next(z for z in ZONAS if z != bloque["zona"])
+    assert {"modis.et", "gldas.et"} <= set(contexto["contexto_regional"][otra])
+    # La decisión de dos zonas que lo sustenta sigue diciendo lo mismo.
+    decision = (RAIZ / "docs/decisiones/2026-11-14_dos_zonas.md").read_text(encoding="utf-8")
+    assert f"Los archivos sin sufijo son de {esquemas.ZONA_POR_OMISION}" in decision
+
+
+def test_lleno_cada_bloque_dice_su_archivo(lleno):
+    """«archivo», «fuente» y «fecha» de cada bloque: la página escribe el texto de la fuente una sola vez."""
+    contexto = lleno["contexto"]
+    for bloque in ("gedi", "ecostress", "gaez"):
+        assert contexto[bloque]["archivo"] == ARCHIVO_DE[bloque], bloque
+        assert contexto[bloque]["fuente"] and contexto[bloque]["fecha"] == GEN.FECHA_PRUEBA
+    assert contexto["et_contraste"]["archivo"] == "et_contraste.csv"
+    assert contexto["heladas"]["entrega"]["archivo"] == ARCHIVO_DE["heladas"]
+    series = [s for por_zona in contexto["contexto_regional"].values() for s in por_zona.values()]
+    assert {s["archivo"] for s in series} == {ARCHIVO_DE["contexto_regional"]}
+    # Todas las series de un archivo comparten su línea de fuentes.json; la de prueba es larga a
+    # propósito (enumera las seis fuentes), como la real: es el caso que la página no debe repetir.
+    fuentes = {s["fuente"] for s in series}
+    assert len(fuentes) == 1 and len(series) > len(esquemas.FUENTES_CONTEXTO)
+    fuente = fuentes.pop()
+    assert all(f in fuente for f in esquemas.FUENTES_CONTEXTO)
+    assert len(fuente) > len(contexto["et_contraste"]["fuente"])
+
+
+def test_bloque_sin_registro_en_fuentes_json(lleno, tmp_path):
+    """Una entrega presente pero sin línea en fuentes.json: el bloque dice su archivo; fuente y fecha, null."""
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    (processed / "fuentes.json").unlink()
+    _, contexto, _ = construir_en(tmp_path, processed)
+    for bloque, archivo in (("gedi", ARCHIVO_DE["gedi"]), ("et_contraste", "et_contraste.csv")):
+        assert contexto[bloque]["archivo"] == archivo
+        assert contexto[bloque]["fuente"] is None and contexto[bloque]["fecha"] is None
+    assert contexto["et_contraste"]["zona"] == esquemas.ZONA_POR_OMISION
 
 
 def test_lleno_recursos_pasan_a_en_uso(lleno):

@@ -8,10 +8,9 @@
 
 :root {
   --gemelo-agua: var(--agua, #1F6FB2);             /* columna: lo que cubre la dotación elegida (Agua) */
-  --gemelo-agua-apuntada: var(--agua-osc, #174F80); /* la misma parte, en la columna apuntada */
+  --gemelo-agua-apuntada: var(--agua-osc, #174F80); /* la misma parte, en la columna bajo el puntero o la mira */
   --gemelo-falta: var(--rojo, #B3261E);            /* columna: lo que la dotación no cubre */
   --gemelo-falta-trama: #7E1A15;                   /* rayas de esa parte (para no depender solo del color) */
-  --gemelo-falta-apuntada: #7E1A15;                /* la misma parte, en la columna apuntada */
   --gemelo-plana: #C4C8CC;                         /* parcela sin clasificar: plana y gris… */
   --gemelo-plana-trama: #9299A0;                   /* …con rayas… */
   --gemelo-plana-borde: var(--tinta-suave, #4A525A); /* …y borde punteado */

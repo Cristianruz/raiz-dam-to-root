@@ -16,10 +16,15 @@
 //       (2) una tarjeta por grupo de series de contexto_regional (contexto.tarjetas): gráfica, valor
 //           del año elegido, unidad, resolución y fuente. Si el bloque es null o la serie no llegó, la
 //           tarjeta existe y dice el motivo del JSON («Requested from the data team — not delivered
-//           yet»), sin gráfica vacía ni ceros. La tarjeta de evapotranspiración dibuja además
-//           et_contraste. GRACE llega como una sola serie de cuenca: se muestra igual en todas las
-//           zonas y se rotula «Basin scale». Otra tarjeta lista la aptitud de GAEZ por cultivo;
-//       (3) la nota fija de límites (NOTA_REGIONAL).
+//           yet»), sin gráfica vacía ni ceros. GRACE llega como una sola serie de cuenca: se muestra
+//           igual en todas las zonas y se rotula «Basin scale». Otra tarjeta lista la aptitud de GAEZ
+//           por cultivo. La tarjeta de evapotranspiración dibuja además et_contraste junto a MODIS y
+//           GLDAS, pero SOLO en la zona del contraste (et_contraste.zona): en las demás zonas dice
+//           que no se corrió ahí (et_contraste.motivo_otras_zonas) y no cruza series de dos áreas;
+//       (3) las fuentes: en cada tarjeta, a la vista, el nombre del recurso y la fecha del archivo; el
+//           texto completo de cada fuente (la línea de LEEME, que puede ser larga) va UNA sola vez,
+//           plegado, en «Sources and product versions» al final de la sección;
+//       (4) la nota fija de límites (NOTA_REGIONAL).
 //         contexto        contenido de contexto.json (null: la sección lo dice)
 //         zonaId          id de la zona piloto (contexto.zonas); otra cosa: «choose a pilot area»
 //         anio            año agrícola elegido en la línea de tiempo (por omisión, el último con dato)
@@ -30,9 +35,10 @@
 //       Tabla «Challenge data sources» (Resource · Agency · Role in Raíz · Status · Files), con el
 //       estado en símbolo y texto, ordenada (en uso, pedidas, no aplica) y un resumen cuyos conteos
 //       se calculan de contexto.recursos.
-//   evidenciaDeParcela({ contexto, id }) -> [{ etiqueta, texto, fuente }]
+//   evidenciaDeParcela({ contexto, id }) -> [{ etiqueta, texto, fuente, archivo, fecha }]
 //       Renglones para la ficha: altura del dosel de GEDI y ET de ECOSTRESS del último mes con dato.
-//       [] si los dos bloques son null.
+//       [] si los dos bloques son null. «fuente» es el texto completo de la entrega (puede ser
+//       largo); «archivo» y «fecha» sirven para citarla en corto.
 //   riesgoDeHelada({ contexto, fechaSiembra, zonaId }) -> { prob, fuente, fecha } | null
 //       Probabilidad de helada después de la fecha de siembra, de heladas.prob_helada_despues_de
 //       (la fecha «MM-DD» más cercana anterior o igual). fechaSiembra: «MM-DD», «AAAA-MM-DD», Date,
@@ -40,8 +46,9 @@
 //       si no, la de la zona base. null si no hay bloque o la fecha cae fuera de la ventana calculada.
 //   Funciones puras (las mismas que usa la página; se prueban en tests/contexto.test.js):
 //       num, climaDelAnio, diferenciaLluvia, anioPorOmision, graficasDeClima, seriesDeZona,
-//       puntosAnuales, valorAnual, modeloTarjetas, modeloContraste, escalaY, formatoResolucion,
-//       formatoNumero, etiquetaMes, ordenarRecursos, contarEstados, ultimoMesConDato, mesDia.
+//       puntosAnuales, valorAnual, modeloTarjetas, modeloContraste, citasDeTarjeta, fuentesDeSeccion,
+//       escalaY, formatoResolucion, formatoNumero, etiquetaMes, ordenarRecursos, contarEstados,
+//       ultimoMesConDato, mesDia.
 //   Las funciones «montar…» insertan css/contexto.css en la página si aún no está enlazada.
 //
 // Reglas de este archivo:
@@ -74,6 +81,9 @@ const TEXTO_SIN_DATO = "no data";
 const ROTULO_ANIO = "Agricultural year";
 const ROTULO_MES = "Month";
 const ROTULO_TABLA = "Data table";
+const ROTULO_FUENTES = "Sources and product versions";
+// Respaldo de et_contraste.motivo_otras_zonas (lo escribe motor/contexto_web.py).
+const TEXTO_CONTRASTE_OTRA_ZONA = "Not run for this pilot area";
 const AYUDA_MESES = "Point at a month to read its values, or open the data table.";
 
 // Estado de un recurso (contexto.recursos[].estado). El símbolo acompaña al texto y al color.
@@ -337,6 +347,7 @@ function motivoDeMeses(punto) {
 }
 
 function recursoDeFuente(contexto, fuenteId) {
+  if (fuenteId == null) return null;
   return ((contexto && contexto.recursos) || []).find((r) => r.fuente_contexto === fuenteId || r.id === fuenteId) || null;
 }
 
@@ -418,7 +429,7 @@ export function modeloTarjetas(contexto, zonaId) {
       };
     });
     const contraste = tarjeta.contraste ? modeloContraste(contexto, zonaId, tarjeta) : null;
-    const disponible = paneles.some((p) => p.disponible) || Boolean(contraste);
+    const disponible = paneles.some((p) => p.disponible) || Boolean(contraste && contraste.disponible);
     const sinDato = paneles.find((p) => !p.disponible);
     return {
       id: tarjeta.id,
@@ -432,23 +443,47 @@ export function modeloTarjetas(contexto, zonaId) {
   });
 }
 
+function nombreDeZona(contexto, zonaId) {
+  const zona = contexto && contexto.zonas && contexto.zonas[zonaId];
+  return (zona && zona.nombre) || (zonaId == null ? null : String(zonaId));
+}
+
 /**
- * Gráfica mensual de et_contraste (A8) junto a las series regionales de ET de la zona en esos mismos
- * meses. null si no hay bloque et_contraste. Las columnas sin ningún valor no se dibujan: se listan
- * en `sinDato` para decirlo.
+ * Gráfica mensual de et_contraste (A8). El contraste es de UNA zona piloto (et_contraste.zona):
+ * - en esa zona: { disponible: true, … } con sus columnas y, junto a ellas, las series regionales de
+ *   ET de la misma zona en esos meses. Las columnas sin ningún valor no se dibujan: van en `sinDato`;
+ * - en otra zona: { disponible: false, zona, zonaNombre, motivo } y ninguna serie. No se dibuja, para
+ *   no poner en los mismos ejes el contraste de un área y las series regionales de otra;
+ * - si el JSON no dice de qué zona es el contraste: sus columnas solas, sin series regionales.
+ * null si no hay bloque et_contraste, si la tarjeta no lo define o si no hay nada que dibujar.
  */
 export function modeloContraste(contexto, zonaId, tarjeta) {
   const bloque = contexto && contexto.et_contraste;
   const definicion = tarjeta && tarjeta.contraste;
   if (!bloque || !definicion || !(bloque.meses || []).length) return null;
+  const base = {
+    id: `${tarjeta.id}-contraste`,
+    titulo: definicion.titulo,
+    nombre: `${tarjeta.titulo}: ${definicion.titulo}`,
+    zona: bloque.zona ?? null,
+  };
+  if (base.zona != null && base.zona !== zonaId) {
+    return {
+      ...base,
+      disponible: false,
+      zonaNombre: nombreDeZona(contexto, base.zona),
+      motivo: bloque.motivo_otras_zonas || TEXTO_CONTRASTE_OTRA_ZONA,
+    };
+  }
   const meses = bloque.meses.map(String);
-  const seriesZona = seriesDeZona(contexto, zonaId);
   const candidatas = [];
   Object.entries(definicion.columnas || {}).forEach(([columna, nombre]) => {
     const valores = (bloque.columnas && bloque.columnas[columna]) || [];
     candidatas.push({ nombre, valores: meses.map((_, i) => num(valores[i])) });
   });
-  (definicion.series_regionales || []).forEach((s) => {
+  // Las series regionales entran solo cuando el JSON dice que el contraste es de esta misma zona.
+  const seriesZona = base.zona != null ? seriesDeZona(contexto, zonaId) : {};
+  (base.zona != null ? definicion.series_regionales || [] : []).forEach((s) => {
     const serie = seriesZona[s.clave];
     const porMes = new Map(serie ? serie.meses.map((m, i) => [m, num(serie.valores[i])]) : []);
     candidatas.push({ nombre: s.etiqueta, valores: meses.map((m) => porMes.get(m) ?? null) });
@@ -459,9 +494,8 @@ export function modeloContraste(contexto, zonaId, tarjeta) {
     .map((c) => ({ nombre: c.nombre, ranura: c.ranura, valores: c.valores, detalles: c.valores.map((v) => (v == null ? TEXTO_SIN_DATO : null)) }));
   if (!series.length) return null;
   return {
-    id: `${tarjeta.id}-contraste`,
-    titulo: definicion.titulo,
-    nombre: `${tarjeta.titulo}: ${definicion.titulo}`,
+    ...base,
+    disponible: true,
     unidad: definicion.unidad_en || "",
     subtitulo: definicion.unidad_en || "",
     x: meses.map((m) => ({ clave: m, etiqueta: etiquetaMes(m) })),
@@ -471,9 +505,75 @@ export function modeloContraste(contexto, zonaId, tarjeta) {
     porAnio: false,
     columnaX: ROTULO_MES,
     nota: definicion.nota || null,
+    recurso: definicion.recurso || null,
+    archivo: bloque.archivo || null,
     fuente: bloque.fuente || null,
     fecha: bloque.fecha || null,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Fuentes de lo que se dibuja: funciones puras
+// ---------------------------------------------------------------------------
+function cita(contexto, recursoId, origen) {
+  const recurso = recursoDeFuente(contexto, recursoId);
+  return {
+    recurso: (recurso && recurso.nombre) || (recursoId == null ? null : String(recursoId)),
+    archivo: (origen && origen.archivo) || null,
+    fuente: (origen && origen.fuente) || null,
+    fecha: (origen && origen.fecha) || null,
+  };
+}
+
+function sinRepetir(citas) {
+  const vistas = new Set();
+  return citas.filter((x) => {
+    const llave = JSON.stringify([x.recurso, x.archivo, x.fuente, x.fecha]);
+    if (vistas.has(llave)) return false;
+    vistas.add(llave);
+    return true;
+  });
+}
+
+/**
+ * De dónde sale lo que dibuja una tarjeta (un elemento de modeloTarjetas): [{ recurso, archivo,
+ * fuente, fecha }], sin repetir. `recurso` es el nombre del recurso del reto (contexto.recursos).
+ * Cuenta las series presentes y el contraste solo si se dibuja en esta zona.
+ */
+export function citasDeTarjeta(contexto, tarjeta) {
+  const citas = [];
+  ((tarjeta && tarjeta.paneles) || []).forEach((p) =>
+    (p.series || []).forEach((s) => {
+      if (s.serie) citas.push(cita(contexto, s.serie.fuente_id ?? String(s.clave).split(".")[0], s.serie));
+    }),
+  );
+  const k = tarjeta && tarjeta.contraste;
+  if (k && k.disponible) citas.push(cita(contexto, k.recurso, k));
+  return sinRepetir(citas);
+}
+
+function citasDeGaez(contexto, zonaId) {
+  const gaez = contexto && contexto.gaez;
+  const filas = gaez ? (gaez.zonas || {})[zonaId] || [] : [];
+  return filas.length ? [cita(contexto, "gaez", gaez)] : [];
+}
+
+/**
+ * Fuentes completas de lo que la sección muestra en una zona, cada texto UNA sola vez:
+ * [{ archivo, fuente, fecha, recursos: [nombres] }]. Varias series comparten archivo y, con él, la
+ * misma línea de fuente (que puede ser larga): aquí se juntan en una entrada.
+ */
+export function fuentesDeSeccion(contexto, zonaId, tarjetas = modeloTarjetas(contexto, zonaId)) {
+  const entradas = new Map();
+  const citas = [...(tarjetas || []).flatMap((t) => citasDeTarjeta(contexto, t)), ...citasDeGaez(contexto, zonaId)];
+  citas.forEach((x) => {
+    if (!x.fuente) return;
+    const llave = JSON.stringify([x.archivo, x.fuente, x.fecha]);
+    if (!entradas.has(llave)) entradas.set(llave, { archivo: x.archivo, fuente: x.fuente, fecha: x.fecha, recursos: [] });
+    const entrada = entradas.get(llave);
+    if (x.recurso && !entrada.recursos.includes(x.recurso)) entrada.recursos.push(x.recurso);
+  });
+  return [...entradas.values()];
 }
 
 // ---------------------------------------------------------------------------
@@ -528,7 +628,7 @@ export function evidenciaDeParcela({ contexto, id } = {}) {
         `median ${formatoNumero(mediana)} m from ${formatoNumero(disparos)} ${plural(disparos, "shot", "shots")}` +
         (alta != null ? `; top decile above ${formatoNumero(alta)} m` : "");
     }
-    lista.push({ etiqueta: "Canopy height (GEDI)", texto, fuente: gedi.fuente || null });
+    lista.push({ etiqueta: "Canopy height (GEDI)", texto, fuente: gedi.fuente || null, archivo: gedi.archivo || null, fecha: gedi.fecha || null });
   }
   const eco = contexto && contexto.ecostress;
   if (eco) {
@@ -539,6 +639,8 @@ export function evidenciaDeParcela({ contexto, id } = {}) {
         ? `${formatoNumero(ultimo.valor)} mm/day, median of the clear scenes of ${etiquetaMes(ultimo.mes)}`
         : "ECOSTRESS: no clear scene over this field",
       fuente: eco.fuente || null,
+      archivo: eco.archivo || null,
+      fecha: eco.fecha || null,
     });
   }
   return lista;
@@ -827,13 +929,22 @@ function htmlCifras(contexto, zonaId, anio) {
     </div>`;
 }
 
+/**
+ * Texto de una fuente tal como llegó (la línea de LEEME del buzón). Si el JSON dice en qué idioma
+ * están esas líneas (contexto.idioma_fuentes), se marca para los lectores de pantalla.
+ */
+function htmlTextoFuente(contexto, texto) {
+  const idioma = contexto && typeof contexto.idioma_fuentes === "string" ? contexto.idioma_fuentes : null;
+  return `<span class="contexto-fuente-texto"${idioma ? ` lang="${esc(idioma)}"` : ""}>${esc(texto)}</span>`;
+}
+
 function htmlFuentesClima(contexto, zonaId) {
   const bloque = bloqueClima(contexto, zonaId);
   if (!bloque) return "";
   const fuentes = ["power", "imerg"]
     .map((k) => bloque.fuentes && bloque.fuentes[k])
     .filter(Boolean)
-    .map((f) => `<li><code>${esc(f.archivo)}</code>: ${esc(f.fuente || TEXTO_NO_DISPONIBLE)}${f.fecha ? ` (${esc(f.fecha)})` : ""}</li>`)
+    .map((f) => `<li><code>${esc(f.archivo)}</code>: ${f.fuente ? htmlTextoFuente(contexto, f.fuente) : esc(TEXTO_NO_DISPONIBLE)}${f.fecha ? ` (${esc(f.fecha)})` : ""}</li>`)
     .join("");
   const umbral = num(bloque.umbral_faltantes);
   const faltantes = umbral != null ? `<li>A year missing ${esc(formateador({ style: "percent", maximumFractionDigits: 1 }).format(umbral))} of its days or more is not totaled; nothing is filled in.</li>` : "";
@@ -869,21 +980,45 @@ function htmlMetaPanel(panel) {
   return partes.length ? `<p class="contexto-meta">${partes.map((p) => `<span>${esc(p)}</span>`).join("")}</p>` : "";
 }
 
-/** Fuentes de una tarjeta, sin repetir: las de sus series presentes y la de et_contraste. */
-function htmlFuentesTarjeta(t) {
-  const vistas = new Map();
-  t.paneles.forEach((p) => p.series.forEach((s) => s.serie && s.serie.fuente && vistas.set(s.serie.fuente, s.serie.fecha || null)));
-  if (t.contraste && t.contraste.fuente) vistas.set(t.contraste.fuente, t.contraste.fecha || null);
-  return [...vistas]
-    .map(([fuente, fecha]) => `<p class="contexto-meta"><span class="contexto-fuente">Source: ${esc(fuente)}${fecha ? ` (${esc(fecha)})` : ""}</span></p>`)
+/**
+ * Fuente de una tarjeta, en corto: nombres de los recursos y fecha de sus archivos. El texto completo
+ * de cada fuente va una sola vez, en la lista del final de la sección (htmlFuentesSeccion).
+ */
+function htmlFuenteCorta(citas) {
+  const nombres = [...new Set(citas.map((x) => x.recurso).filter(Boolean))];
+  if (!nombres.length) return "";
+  const fechas = [...new Set(citas.map((x) => x.fecha).filter(Boolean))];
+  const fecha = fechas.length ? ` · ${plural(fechas.length, "file date", "file dates")} ${fechas.join(", ")}` : "";
+  return `<p class="contexto-meta"><span class="contexto-fuente">Source: ${esc(nombres.join(", "))}${esc(fecha)}</span></p>`;
+}
+
+/** Lista plegada con el texto completo de cada fuente de la sección, una sola vez cada uno. */
+function htmlFuentesSeccion(contexto, fuentes) {
+  if (!fuentes.length) return "";
+  const filas = fuentes
+    .map((f) => {
+      const de = [f.archivo ? `<code>${esc(f.archivo)}</code>` : "", f.fecha ? `file date ${esc(f.fecha)}` : ""].filter(Boolean);
+      const cabeza = [f.recursos.length ? `<b>${esc(f.recursos.join(", "))}</b>` : "", ...de].filter(Boolean).join(" · ");
+      return `<li>${cabeza}: ${htmlTextoFuente(contexto, f.fuente)}</li>`;
+    })
     .join("");
+  return `<details class="contexto-datos contexto-definiciones contexto-fuentes">
+      <summary>${esc(ROTULO_FUENTES)}</summary>
+      <ul>${filas}</ul>
+    </details>`;
 }
 
 function htmlPendiente(motivo, que) {
   return `<p class="contexto-pendiente"><span class="contexto-pendiente-simbolo" aria-hidden="true">${ESTADOS_RECURSO.requested.simbolo}</span> ${que ? `<span class="contexto-pendiente-que">${esc(que)}:</span> ` : ""}${esc(motivo || TEXTO_NO_DISPONIBLE)}</p>`;
 }
 
-function htmlTarjeta(t, nivel) {
+/** El contraste es de otra zona piloto: se dice con el motivo del JSON; no se dibuja nada. */
+function htmlContrasteDeOtraZona(k) {
+  const donde = k.zonaNombre ? ` It was run for ${k.zonaNombre}. Series of two different areas are not drawn on the same chart.` : "";
+  return `<p class="contexto-pendiente contexto-pendiente--otra-zona"><span class="contexto-pendiente-simbolo" aria-hidden="true">${ESTADOS_RECURSO.not_applicable.simbolo}</span> <span class="contexto-pendiente-que">${esc(k.titulo)}:</span> ${esc(k.motivo)}.${esc(donde)}</p>`;
+}
+
+function htmlTarjeta(t, nivel, contexto) {
   const cuerpo = t.paneles
     .map((p) => {
       if (!p.disponible) return htmlPendiente(p.motivo, p.titulo);
@@ -892,7 +1027,9 @@ function htmlTarjeta(t, nivel) {
     })
     .join("");
   let contraste = "";
-  if (t.contraste) {
+  if (t.contraste && !t.contraste.disponible) {
+    contraste = htmlContrasteDeOtraZona(t.contraste);
+  } else if (t.contraste) {
     const k = t.contraste;
     const sinDato = k.sinDato.length ? `<p class="contexto-meta"><span>Not drawn, no data: ${esc(k.sinDato.join(", "))}</span></p>` : "";
     const nota = k.nota ? `<p class="contexto-meta"><span>${esc(k.nota)}</span></p>` : "";
@@ -902,7 +1039,7 @@ function htmlTarjeta(t, nivel) {
   return `<article class="${clase}" data-tarjeta="${esc(t.id)}">
       <h${nivel} class="contexto-tarjeta-titulo">${esc(t.titulo)}</h${nivel}>
       ${cuerpo}${contraste}
-      ${htmlFuentesTarjeta(t)}
+      ${htmlFuenteCorta(citasDeTarjeta(contexto, t))}
       ${t.nota ? `<p class="contexto-tarjeta-nota">${esc(t.nota)}</p>` : ""}
     </article>`;
 }
@@ -932,7 +1069,7 @@ function htmlTarjetaGaez(contexto, zonaId, nivel, nombres) {
     })
     .join("");
   const escalaComun = unaEscala ? `<p class="contexto-meta"><span>Regional, ${esc(resoluciones[0])} grid</span></p>` : "";
-  const fuente = gaez.fuente ? `<p class="contexto-meta"><span class="contexto-fuente">Source: ${esc(gaez.fuente)}${gaez.fecha ? ` (${esc(gaez.fecha)})` : ""}</span></p>` : "";
+  const fuente = htmlFuenteCorta(citasDeGaez(contexto, zonaId));
   return `<article class="contexto-tarjeta" data-tarjeta="gaez">${cabeza}
       <table class="contexto-tabla contexto-tabla--gaez">
         <caption class="solo-lector">${titulo}</caption>
@@ -1086,7 +1223,7 @@ export function montarContextoRegional(contenedor, opciones = {}) {
     clima.forEach((m) => graficas.set(m.id, m));
     tarjetas.forEach((t) => {
       t.paneles.forEach((p) => p.grafica && graficas.set(p.grafica.id, p.grafica));
-      if (t.contraste) graficas.set(t.contraste.id, t.contraste);
+      if (t.contraste && t.contraste.disponible) graficas.set(t.contraste.id, t.contraste);
     });
     const bloqueDeClima = clima.length
       ? `<div class="contexto-clima-cifras"></div>
@@ -1100,9 +1237,10 @@ export function montarContextoRegional(contenedor, opciones = {}) {
         ${bloqueDeClima}
       </section>
       <div class="contexto-tarjetas">
-        ${tarjetas.map((t) => htmlTarjeta(t, sub)).join("")}
+        ${tarjetas.map((t) => htmlTarjeta(t, sub, estado.contexto)).join("")}
         ${htmlTarjetaGaez(estado.contexto, estado.zonaId, sub, opciones.nombresCultivo)}
       </div>
+      ${htmlFuentesSeccion(estado.contexto, fuentesDeSeccion(estado.contexto, estado.zonaId, tarjetas))}
       <p class="contexto-nota">${esc(NOTA_REGIONAL)}</p>`;
     pintarAnio();
     if (observador) raiz.querySelectorAll(".contexto-lienzo").forEach((l) => observador.observe(l));

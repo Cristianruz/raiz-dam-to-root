@@ -14,6 +14,9 @@ Qué escribe:
   · meses sin fila (GRACE) y un valor vacío (SMAP) en contexto_regional.csv; GRACE va como una
     sola serie con zona «cuenca» (nota de GRACE del contrato);
   · parcelas sin disparos de GEDI y meses sin escena de ECOSTRESS.
+  La «fuente» de contexto_regional.csv en fuentes.json es LARGA a propósito (como la línea real de
+  LEEME, que enumera sus seis productos): sirve para probar que la página no la repite por tarjeta.
+  et_contraste.csv va sin sufijo de zona: el motor lo asigna a la zona por omisión.
 - main(): regenera tests/fixtures/contexto_reto/contexto_lleno.json con motor/contexto_web.py
   sobre ese processed (en una carpeta temporal) y con «generado» fijo (GENERADO_PRUEBA).
 
@@ -224,6 +227,21 @@ def et_contraste():
     return lineas
 
 
+def fuente_de_prueba(nombre):
+    """Texto de «fuente» DE PRUEBA de una entrega (el de fuentes.json). El de contexto_regional.csv
+    es largo a propósito: un producto de prueba por cada fuente del contrato, con sus variables."""
+    base = f"{nombre}: {ROTULO}"
+    if nombre != "contexto_regional.csv":
+        return base
+    productos = "; ".join(
+        f"{fuente} = PRODUCTO/DE/PRUEBA/{fuente.upper()} "
+        f"(variables de prueba: {', '.join(v for f, v, _ in esquemas.COMBINACIONES_CONTEXTO if f == fuente)}; "
+        f"celda de prueba de {RESOLUCIONES_PRUEBA[fuente]} m)"
+        for fuente in esquemas.FUENTES_CONTEXTO)
+    return (f"{base}. Texto largo a propósito, como una línea de LEEME que enumera sus productos: {productos}. "
+            "Periodo de prueba: el del archivo")
+
+
 def escribir_processed(destino):
     """Escribe en `destino` el data/processed DE PRUEBA y devuelve la lista de archivos."""
     destino = Path(destino)
@@ -242,7 +260,7 @@ def escribir_processed(destino):
     (destino / "heladas.json").write_text(json.dumps(heladas(), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     nombres = sorted([*archivos, "heladas.json"])
     fuentes = {"_encabezado": ENCABEZADO, "_nota": ROTULO, "generado": GENERADO_PRUEBA,
-               "fuentes": [{"archivo": n, "tipo": "entrega", "fuente": f"{n}: {ROTULO}", "fecha": FECHA_PRUEBA,
+               "fuentes": [{"archivo": n, "tipo": "entrega", "fuente": fuente_de_prueba(n), "fecha": FECHA_PRUEBA,
                             "script": "tests/fixtures/contexto_reto/generar.py"} for n in nombres]}
     (destino / "fuentes.json").write_text(json.dumps(fuentes, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return nombres

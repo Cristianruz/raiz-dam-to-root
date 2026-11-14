@@ -64,6 +64,11 @@
 }
 .contexto-pendiente-simbolo { font-weight: 700; }
 .contexto-pendiente-que { font-weight: 700; }
+/* El contraste es de otra zona piloto: aviso neutro, de borde continuo (no es una entrega pendiente). */
+.contexto-pendiente--otra-zona {
+  border-style: solid; border-color: var(--contexto-borde);
+  background: var(--contexto-arena);
+}
 
 .contexto-nota {
   padding: 10px 12px;
@@ -182,6 +187,10 @@
   outline: 3px solid var(--contexto-agua); outline-offset: 2px;
 }
 .contexto-definiciones ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: 0.85rem; overflow-wrap: anywhere; }
+/* Fuentes completas de la sección: UNA lista plegada al final (cada texto puede ser largo y lo
+   comparten varias tarjetas). En cada tarjeta queda a la vista solo el recurso y la fecha del archivo. */
+.contexto-fuentes ul { gap: 8px; }
+.contexto-fuentes li b { font-weight: 700; }
 .contexto-tabla-caja { overflow-x: auto; }
 .contexto-datos .contexto-tabla-caja { max-height: 17rem; overflow-y: auto; margin-top: 4px; border: 1px solid var(--contexto-borde); border-radius: 8px; }
 .contexto-tabla { width: 100%; border-collapse: collapse; font-size: 0.85rem; }

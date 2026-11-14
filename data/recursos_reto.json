@@ -1,6 +1,6 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
- "_nota": "Bases de datos del reto y su papel en Raíz. Fuente: docs/decisiones/2026-11-14_recursos_del_reto.md (tabla «Papel de cada recurso», un renglón por entrada) y docs/referencias/recursos_reto.md (lista oficial). Lo lee motor/contexto_web.py para escribir web/data/contexto.json: el ESTADO de cada recurso (in_use, requested, not_applicable) no se escribe aquí, se calcula con lo que de verdad hay en data/processed. Textos en inglés porque son los que muestra la página; sin cifras de datos (los dígitos que hay son parte del nombre de un producto). «entregas»: nombres base de los archivos de data/processed que sustentan el recurso (los de un archivo por zona llevan además el sufijo «_<zona>», que el motor agrega). «fuente_contexto»: valor de la columna «fuente» de contexto_regional.csv que corresponde al recurso (el recurso cuenta como entregado solo si el archivo trae filas suyas con valor). «tarjetas»: cómo agrupa la página las series de contexto_regional.csv (clave «fuente.variable» del contrato). «unidades»: cómo se muestra en inglés cada unidad del contrato.",
+ "_nota": "Bases de datos del reto y su papel en Raíz. Fuente: docs/decisiones/2026-11-14_recursos_del_reto.md (tabla «Papel de cada recurso», un renglón por entrada) y docs/referencias/recursos_reto.md (lista oficial). Lo lee motor/contexto_web.py para escribir web/data/contexto.json: el ESTADO de cada recurso (in_use, requested, not_applicable) no se escribe aquí, se calcula con lo que de verdad hay en data/processed. Textos en inglés porque son los que muestra la página; sin cifras de datos (los dígitos que hay son parte del nombre de un producto). «entregas»: nombres base de los archivos de data/processed que sustentan el recurso (los de un archivo por zona llevan además el sufijo «_<zona>», que el motor agrega). «fuente_contexto»: valor de la columna «fuente» de contexto_regional.csv que corresponde al recurso (el recurso cuenta como entregado solo si el archivo trae filas suyas con valor). «tarjetas»: cómo agrupa la página las series de contexto_regional.csv (clave «fuente.variable» del contrato). «contraste» (tarjeta de evapotranspiración): columnas de et_contraste.csv, series regionales que se dibujan junto a ellas en la zona del contraste, y «recurso», el id del recurso de esta lista que lo sustenta. «unidades»: cómo se muestra en inglés cada unidad del contrato.",
  "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
  "recursos": [
   {
@@ -213,7 +213,7 @@
    "id": "evapotranspiracion",
    "titulo": "Evapotranspiration",
    "recursos": ["modis", "gldas", "viirs_ssebop"],
-   "nota": "Independent estimates next to the modeled crop demand. A regional comparison, not a field-level validation.",
+   "nota": "Independent estimates of evapotranspiration at regional scale: a regional comparison, not a field-level validation.",
    "paneles": [
     {
      "titulo": "MODIS and GLDAS",
@@ -225,7 +225,8 @@
    ],
    "contraste": {
     "titulo": "Monthly contrast with the modeled demand",
-    "nota": "This contrast covers the area named in its source, which can differ from the pilot area selected.",
+    "nota": "Modeled crop demand and SSEBop cover the rectangle named in their source. MODIS and GLDAS are means over the whole pilot area. The two areas can differ.",
+    "recurso": "viirs_ssebop",
     "unidad_en": "mm/month",
     "columnas": {
      "et_modelo_mm": "Modeled crop demand (FAO method with NASA POWER)",

@@ -1,0 +1,293 @@
+/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* web/css/resumen.css — Estado del gemelo, frase resumen y NDVI mensual de la ficha
+   (docs/decisiones/2026-11-14_gemelo_digital.md, puntos 3 y 5):
+     · .estado-gemelo…   tarjeta «Twin status» (web/js/estado_gemelo.js)
+     · .resumen-frase    frase resumen arriba de la ficha (texto de fraseResumen(), web/js/resumen.js)
+     · .resumen-ndvi…    gráfica del NDVI mensual de la parcela (dibujarNDVI(), web/js/resumen.js)
+     · .resumen-voz      texto y tablas que solo oyen los lectores de pantalla
+   Colores como variables: toma --agua, --brote, --tierra, --ambar, --arena… de style.css; el valor tras la
+   coma es el respaldo si style.css no está cargado (mismos códigos de la identidad, kit C1 §10). No hay
+   colores en el JS.
+   Nada depende solo del color: cada grupo de la tarjeta lleva símbolo y título; en la gráfica, la serie
+   lleva puntos, los umbrales comparten tinta y se distinguen por su trazo y su rótulo, y los meses sin
+   dato llevan trama y texto. Las únicas dos tintas de dato son el verde de la serie y la tinta neutra.
+   El diseño responde al ANCHO DEL CONTENEDOR (rejillas auto-fit), no al de la ventana: sirve igual en el
+   panel angosto, en la ficha y en el teléfono. No hay animaciones ni transiciones (nada que apagar con
+   prefers-reduced-motion).
+   Los números de este archivo son medidas de diseño, no datos. */
+
+.estado-gemelo,
+.resumen-frase,
+.resumen-ndvi {
+  --resumen-agua: var(--agua, #1F6FB2);
+  --resumen-agua-osc: var(--agua-osc, #174F80);
+  --resumen-agua-clara: var(--agua-clara, #DCEAF6);
+  --resumen-brote: var(--brote, #4C9A2A);
+  --resumen-brote-claro: var(--brote-claro, #E3F0DC);
+  --resumen-tierra: var(--tierra, #8A5A3B);
+  --resumen-ambar: var(--ambar, #D98E04);
+  --resumen-ambar-claro: var(--ambar-claro, #FBEFD5);
+  --resumen-arena: var(--arena, #F5EFE6);
+  --resumen-arena-osc: var(--arena-osc, #E9DFD0);
+  --resumen-gris: var(--gris, #8E9399);
+  --resumen-tinta: var(--tinta, #1D2329);
+  --resumen-tinta-suave: var(--tinta-suave, #4A525A);
+  --resumen-borde: var(--borde, #D8CFC2);
+  --resumen-papel: var(--blanco, #FFFFFF);
+  --resumen-radio: var(--radio, 10px);
+  --resumen-sombra: var(--sombra, 0 2px 10px rgba(29, 35, 41, 0.12));
+
+  min-width: 0;
+  color: var(--resumen-tinta);
+  line-height: 1.4;
+  text-align: left;
+}
+.estado-gemelo *, .estado-gemelo *::before, .estado-gemelo *::after,
+.resumen-ndvi *, .resumen-ndvi *::before, .resumen-ndvi *::after { box-sizing: border-box; }
+.estado-gemelo p, .resumen-ndvi p { margin: 0; }
+.estado-gemelo [hidden], .resumen-ndvi [hidden] { display: none !important; }
+
+/* Texto solo para lectores de pantalla (la tabla con los valores de la gráfica). */
+.resumen-voz {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Tarjeta «Twin status»
+   --------------------------------------------------------------------------- */
+.estado-gemelo {
+  display: grid; gap: 12px;
+  background: var(--resumen-papel);
+  border-radius: var(--resumen-radio);
+  box-shadow: var(--resumen-sombra);
+  padding: 14px 16px 16px;
+  font-size: 1rem;
+  overflow-wrap: anywhere; /* las fuentes registradas son largas: se parten, no desbordan */
+}
+/* Dentro de un bloque del panel (que ya es una caja), la tarjeta no repite la caja. */
+.bloque .estado-gemelo { background: none; border-radius: 0; box-shadow: none; padding: 0; }
+
+.estado-gemelo-cabeza {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px;
+}
+.estado-gemelo-titulo { margin: 0; font-size: 1.15rem; line-height: 1.2; }
+.estado-gemelo-reconstruido { font-size: 0.9rem; color: var(--resumen-tinta-suave); }
+.estado-gemelo-reconstruido time { color: var(--resumen-tinta); font-weight: 700; font-variant-numeric: tabular-nums; }
+.estado-gemelo-falta { color: var(--resumen-tinta-suave); font-style: italic; }
+
+.estado-gemelo-simulado {
+  background: var(--resumen-ambar-claro);
+  border: 2px solid var(--resumen-tinta);
+  border-radius: 6px; padding: 6px 10px;
+  font-weight: 700; font-size: 0.9rem;
+}
+
+.estado-gemelo-subtitulo,
+.estado-gemelo-grupo-titulo { margin: 0; font-size: 1rem; line-height: 1.25; }
+
+/* «Fields mirrored»: una fila por zona */
+.estado-gemelo-espejo { display: grid; gap: 6px; }
+.estado-gemelo-zonas {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 232px), 1fr)); gap: 8px;
+}
+.estado-gemelo-zona {
+  display: grid; gap: 2px; align-content: start;
+  border: 1px solid var(--resumen-borde); border-radius: 8px;
+  padding: 8px 10px; min-width: 0;
+}
+.estado-gemelo-zona[aria-current="true"] { border: 2px solid var(--resumen-agua); padding: 7px 9px; }
+.estado-gemelo-zona--total { background: var(--resumen-arena); }
+.estado-gemelo-zona-nombre { font-weight: 700; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.estado-gemelo-en-vista {
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--resumen-papel); background: var(--resumen-agua-osc);
+  border-radius: 4px; padding: 1px 6px;
+}
+.estado-gemelo-conteo { font-size: 0.95rem; color: var(--resumen-tinta-suave); font-variant-numeric: tabular-nums; }
+.estado-gemelo-conteo strong { color: var(--resumen-tinta); }
+.estado-gemelo-barra {
+  display: block; height: 6px; margin-top: 4px;
+  background: var(--resumen-arena-osc); border-radius: 3px; overflow: hidden;
+}
+.estado-gemelo-barra > span { display: block; height: 100%; background: var(--resumen-agua); border-radius: 3px 0 0 3px; }
+
+/* Los tres grupos: Observed · Modeled · Your scenario */
+.estado-gemelo-grupos {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 232px), 1fr)); gap: 10px;
+  align-items: start;
+}
+.estado-gemelo-grupo {
+  --estado-gemelo-acento: var(--resumen-gris);
+  display: grid; gap: 4px; min-width: 0;
+  background: var(--resumen-arena);
+  border-top: 4px solid var(--estado-gemelo-acento);
+  border-radius: 4px 4px 8px 8px;
+  padding: 10px 12px 6px;
+}
+.estado-gemelo-grupo--observado { --estado-gemelo-acento: var(--resumen-brote); }
+.estado-gemelo-grupo--modelado { --estado-gemelo-acento: var(--resumen-agua); }
+.estado-gemelo-grupo--escenario { --estado-gemelo-acento: var(--resumen-ambar); }
+.estado-gemelo-grupo-titulo { display: flex; align-items: center; gap: 8px; }
+.estado-gemelo-simbolo {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--resumen-papel); border: 2px solid var(--resumen-tinta);
+  font-size: 0.9rem; font-weight: 700; line-height: 1;
+}
+.estado-gemelo-grupo-nota { font-size: 0.85rem; color: var(--resumen-tinta-suave); }
+.estado-gemelo-sin-fuentes {
+  background: var(--resumen-papel); border: 1px dashed var(--resumen-tinta-suave); border-radius: 6px;
+  padding: 6px 8px; font-size: 0.85rem; margin-top: 4px !important;
+}
+.estado-gemelo-sin-fuentes strong { display: block; }
+
+.estado-gemelo-filas { list-style: none; margin: 4px 0 0; padding: 0; }
+.estado-gemelo-fila {
+  display: grid; gap: 1px; min-width: 0;
+  padding: 7px 0;
+  border-top: 1px solid var(--resumen-borde);
+  font-size: 0.9rem;
+}
+.estado-gemelo-fila-cabeza {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 10px;
+}
+.estado-gemelo-etiqueta { font-weight: 700; font-size: 0.95rem; }
+.estado-gemelo-fuente { color: var(--resumen-tinta); }
+.estado-gemelo-detalle { color: var(--resumen-tinta-suave); }
+.estado-gemelo-fecha { color: var(--resumen-tinta-suave); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+.estado-gemelo-fecha time { color: var(--resumen-tinta); font-weight: 700; }
+.estado-gemelo-fecha--falta { font-style: italic; }
+.estado-gemelo-valor { color: var(--resumen-tinta-suave); }
+.estado-gemelo-valor strong { color: var(--resumen-tinta); }
+
+.estado-gemelo-archivos { margin-top: 2px; }
+.estado-gemelo-archivos summary {
+  cursor: pointer; width: fit-content; max-width: 100%;
+  color: var(--resumen-agua-osc); font-weight: 700; font-size: 0.85rem;
+  min-height: 24px; padding: 2px 0;
+}
+.estado-gemelo-archivos summary:focus-visible,
+.resumen-ndvi-lienzo:focus-visible {
+  outline: 3px solid var(--resumen-agua);
+  outline-offset: 2px;
+}
+.estado-gemelo-archivos ul { list-style: none; margin: 4px 0 2px; padding: 0; display: grid; gap: 6px; }
+.estado-gemelo-archivos li {
+  background: var(--resumen-papel); border-radius: 6px; padding: 6px 8px;
+  font-size: 0.82rem; color: var(--resumen-tinta-suave);
+}
+.estado-gemelo-archivo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem; color: var(--resumen-tinta); font-weight: 700;
+}
+.estado-gemelo-registrada { display: block; margin-top: 2px; }
+
+.estado-gemelo-nota {
+  border-left: 4px solid var(--resumen-tierra);
+  background: var(--resumen-arena);
+  border-radius: 4px; padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Frase resumen de la ficha (la app pone el texto con textContent; data-caso es opcional)
+   --------------------------------------------------------------------------- */
+.resumen-frase {
+  margin: 0;
+  background: var(--resumen-agua-clara);
+  border-left: 4px solid var(--resumen-agua);
+  border-radius: 4px; padding: 10px 12px;
+  font-size: 1.08rem; line-height: 1.45; font-weight: 400;
+  overflow-wrap: anywhere;
+}
+.resumen-frase[data-caso="sin_riego"] { background: var(--resumen-brote-claro); border-left-color: var(--resumen-brote); }
+.resumen-frase[data-caso="abstenida"],
+.resumen-frase[data-caso="sin_calculo"] {
+  background: var(--resumen-arena); border-left-color: var(--resumen-gris);
+}
+
+/* ---------------------------------------------------------------------------
+   NDVI mensual de la parcela
+   --------------------------------------------------------------------------- */
+.resumen-ndvi { display: grid; gap: 6px; font-size: 1rem; }
+.resumen-ndvi-titulo { margin: 0; font-size: 1.1rem; line-height: 1.2; }
+.resumen-ndvi-aviso { color: var(--resumen-tinta-suave); font-style: italic; }
+
+.resumen-ndvi-lienzo {
+  min-width: 0; max-width: 760px; overflow: hidden;
+  background: var(--resumen-papel);
+  border: 1px solid var(--resumen-borde); border-radius: 8px;
+  padding: 4px 2px 0;
+  cursor: crosshair;
+  touch-action: pan-y; /* el dedo elige un mes sin impedir el desplazamiento vertical de la ficha */
+}
+/* El ancho lo fija el contenedor (el viewBox se dibuja a ese ancho: el texto no se encoge ni se estira). */
+.resumen-ndvi-svg { display: block; width: 100%; height: auto; }
+
+.resumen-ndvi-rejilla { stroke: var(--resumen-arena-osc); stroke-width: 1; }
+.resumen-ndvi-base { stroke: var(--resumen-tinta-suave); stroke-width: 1; }
+.resumen-ndvi-corte { stroke: var(--resumen-borde); stroke-width: 1; }
+.resumen-ndvi-eje, .resumen-ndvi-anio {
+  fill: var(--resumen-tinta-suave); font-size: 11px; font-variant-numeric: tabular-nums;
+}
+.resumen-ndvi-mes { fill: var(--resumen-tinta); font-size: 12px; font-weight: 700; }
+.resumen-ndvi-mes--sin { fill: var(--resumen-tinta-suave); font-weight: 400; }
+.resumen-ndvi-rotulo { fill: var(--resumen-tinta-suave); font-size: 12px; }
+
+/* Serie: la única tinta de color de la gráfica. El punto lleva un aro del color del papel. */
+.resumen-ndvi-linea {
+  fill: none; stroke: var(--resumen-brote); stroke-width: 2;
+  stroke-linejoin: round; stroke-linecap: round;
+}
+.resumen-ndvi-punto { fill: var(--resumen-brote); stroke: var(--resumen-papel); stroke-width: 2; }
+
+/* Umbrales: misma tinta neutra; los separa el trazo (rayas / puntos) y el rótulo, no el color. */
+.resumen-ndvi-umbral { fill: none; stroke: var(--resumen-tinta-suave); stroke-width: 1.5; }
+.resumen-ndvi-umbral--verde { stroke-dasharray: 7 4; }
+.resumen-ndvi-umbral--desnudo { stroke-dasharray: 1.5 4; stroke-linecap: round; }
+
+/* Mes sin dato: banda con trama (y el texto «no data» en la lectura y en la tabla). */
+.resumen-ndvi-trama { stroke: var(--resumen-gris); stroke-width: 1; }
+.resumen-ndvi-hueco { stroke: none; }
+
+/* Mes elegido (puntero, dedo o flechas) */
+.resumen-ndvi-cursor line { stroke: var(--resumen-tinta); stroke-width: 1; }
+.resumen-ndvi-cursor circle { fill: none; stroke: var(--resumen-tinta); stroke-width: 2; }
+
+.resumen-ndvi-lectura { font-size: 1rem; font-variant-numeric: tabular-nums; }
+.resumen-ndvi-lectura-nota { display: block; font-size: 0.8rem; color: var(--resumen-tinta-suave); }
+.resumen-ndvi-claves {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 4px 16px;
+  font-size: 0.85rem; color: var(--resumen-tinta-suave);
+}
+.resumen-ndvi-claves li { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.resumen-ndvi-clave { flex: none; display: block; }
+.resumen-ndvi-ayuda, .resumen-ndvi-fuente { font-size: 0.8rem; color: var(--resumen-tinta-suave); overflow-wrap: anywhere; }
+
+/* Contraste forzado del sistema: las tintas siguen al texto del sistema. */
+@media (forced-colors: active) {
+  .resumen-ndvi-svg { forced-color-adjust: none; }
+  .resumen-ndvi-lienzo { background: Canvas; border-color: CanvasText; }
+  .resumen-ndvi-linea, .resumen-ndvi-umbral, .resumen-ndvi-base, .resumen-ndvi-trama,
+  .resumen-ndvi-cursor line, .resumen-ndvi-cursor circle { stroke: CanvasText; }
+  .resumen-ndvi-rejilla, .resumen-ndvi-corte { stroke: GrayText; }
+  .resumen-ndvi-punto { fill: CanvasText; stroke: Canvas; }
+  .resumen-ndvi-eje, .resumen-ndvi-anio, .resumen-ndvi-mes, .resumen-ndvi-rotulo { fill: CanvasText; }
+  .estado-gemelo-barra { border: 1px solid CanvasText; }
+  .estado-gemelo-barra > span { background: Highlight; }
+  .estado-gemelo-en-vista { border: 1px solid CanvasText; }
+}
+
+/* Papel: la gráfica se imprime tal cual; sobran la ayuda de uso y el mes elegido. */
+@media print {
+  .resumen-ndvi-ayuda, .resumen-ndvi-cursor { display: none !important; }
+  .resumen-ndvi-lienzo { border-color: #000; }
+  .estado-gemelo { box-shadow: none; border: 1px solid #000; }
+  .estado-gemelo-grupo, .resumen-ndvi, .resumen-frase { break-inside: avoid; }
+}

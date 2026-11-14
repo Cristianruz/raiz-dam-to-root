@@ -2,7 +2,9 @@
 // Funciones puras de web/js/contexto.js (bases de datos del reto;
 // docs/decisiones/2026-11-14_recursos_del_reto.md): las MISMAS que usa la página.
 // - clima del año: valores del año elegido, diferencia IMERG − POWER, año por omisión y modelos de las gráficas;
-// - series regionales: resumen anual (suma o media), años parciales, tarjetas con y sin entrega, et_contraste;
+// - series regionales: resumen anual (suma o media), años parciales, tarjetas con y sin entrega;
+// - et_contraste: se dibuja solo en su zona piloto; en otra zona se dice y no se cruzan dos áreas;
+// - fuentes: cada tarjeta cita en corto y el texto completo de cada fuente va una sola vez por sección;
 // - formato: resolución (m → km), números, meses; eje vertical;
 // - recursos del reto: orden y conteos por estado;
 // - evidencia por parcela (GEDI y ECOSTRESS) con y sin dato, y riesgo de helada por fecha de siembra.
@@ -15,6 +17,7 @@ import {
   NOTA_REGIONAL,
   anioPorOmision,
   cargarContexto,
+  citasDeTarjeta,
   climaDelAnio,
   contarEstados,
   diferenciaLluvia,
@@ -23,6 +26,7 @@ import {
   evidenciaDeParcela,
   formatoNumero,
   formatoResolucion,
+  fuentesDeSeccion,
   graficasDeClima,
   mesDia,
   modeloContraste,
@@ -269,6 +273,134 @@ test("modeloContraste: et_contraste junto a MODIS y GLDAS; lo que no trae datos 
   assert.equal(hoy.fuente, LLENO.et_contraste.fuente);
   assert.equal(modeloContraste({ ...LLENO, et_contraste: null }, ZONA_A, tarjeta), null);
   assert.equal(modeloContraste(LLENO, ZONA_A, { id: "x" }), null);
+  // En su zona: se dibuja, y dice de qué zona, recurso y archivo es.
+  assert.equal(LLENO.et_contraste.zona, ZONA_A, "la fixture trae el contraste de la zona por omisión");
+  assert.equal(lleno.disponible, true);
+  assert.equal(lleno.zona, ZONA_A);
+  assert.equal(lleno.recurso, tarjeta.contraste.recurso);
+  assert.equal(lleno.archivo, LLENO.et_contraste.archivo);
+});
+
+test("modeloContraste: en otra zona piloto no se dibuja ni se cruza con sus series regionales", () => {
+  const tarjeta = LLENO.tarjetas.find((t) => t.contraste);
+  // La otra zona SÍ tiene MODIS y GLDAS: antes se dibujaban sobre el contraste de un área distinta.
+  const deB = seriesDeZona(LLENO, ZONA_B);
+  assert.ok(deB["modis.et"] && deB["gldas.et"]);
+  const otra = modeloContraste(LLENO, ZONA_B, tarjeta);
+  assert.equal(otra.disponible, false);
+  assert.equal(otra.zona, ZONA_A);
+  assert.equal(otra.zonaNombre, LLENO.zonas[ZONA_A].nombre);
+  assert.equal(otra.motivo, LLENO.et_contraste.motivo_otras_zonas);
+  assert.equal(otra.titulo, tarjeta.contraste.titulo);
+  for (const llave of ["series", "x", "sinDato", "fuente", "nota"]) assert.equal(llave in otra, false, `sin «${llave}»: no hay nada que dibujar`);
+  // Una zona que el JSON no conoce tampoco recibe el contraste de otra.
+  assert.equal(modeloContraste(LLENO, "zona_inventada", tarjeta).disponible, false);
+  assert.equal(modeloContraste(LLENO, null, tarjeta).disponible, false);
+  // Sin el motivo en el JSON, el texto fijo de respaldo (no vacío, sin cifras).
+  const sinMotivo = modeloContraste({ ...LLENO, et_contraste: { ...LLENO.et_contraste, motivo_otras_zonas: null } }, ZONA_B, tarjeta);
+  assert.ok(sinMotivo.motivo && !/\d/.test(sinMotivo.motivo));
+  // Si el contraste fuera de la otra zona, se dibuja allá con SUS series regionales y aquí no.
+  const mudado = { ...LLENO, et_contraste: { ...LLENO.et_contraste, zona: ZONA_B } };
+  const enB = modeloContraste(mudado, ZONA_B, tarjeta);
+  const porMes = new Map(deB["modis.et"].meses.map((m, i) => [m, deB["modis.et"].valores[i]]));
+  assert.deepEqual(enB.series.find((s) => s.nombre === "MODIS").valores, LLENO.et_contraste.meses.map((m) => porMes.get(m) ?? null));
+  assert.equal(modeloContraste(mudado, ZONA_A, tarjeta).disponible, false);
+});
+
+test("modeloContraste: si el JSON no dice de qué zona es, van sus columnas solas (sin series regionales)", () => {
+  const tarjeta = LLENO.tarjetas.find((t) => t.contraste);
+  const { zona: _zona, ...sinZona } = LLENO.et_contraste;
+  for (const zona of [ZONA_A, ZONA_B]) {
+    const m = modeloContraste({ ...LLENO, et_contraste: sinZona }, zona, tarjeta);
+    assert.equal(m.disponible, true);
+    assert.equal(m.zona, null);
+    assert.deepEqual(m.series.map((s) => s.nombre), [tarjeta.contraste.columnas.et_modelo_mm, tarjeta.contraste.columnas.et_ssebop_mm]);
+    assert.deepEqual(m.sinDato, ["WaPOR"], "las series regionales ni se dibujan ni se anuncian como faltantes");
+  }
+});
+
+test("modeloTarjetas: la tarjeta de evapotranspiración en la zona sin contraste conserva su panel anual", () => {
+  const et = (contexto, zona) => modeloTarjetas(contexto, zona).find((t) => t.id === "evapotranspiracion");
+  const enA = et(LLENO, ZONA_A);
+  const enB = et(LLENO, ZONA_B);
+  assert.equal(enA.contraste.disponible, true);
+  assert.equal(enB.contraste.disponible, false);
+  assert.equal(enB.disponible, true, "MODIS y GLDAS anuales de la propia zona sí se dibujan");
+  assert.equal(enB.paneles[0].disponible, true);
+  // Sin series regionales y sin contraste para esta zona, la tarjeta queda pendiente (no «disponible»).
+  const pendiente = et(SIN_ENTREGAS, ZONA_B);
+  assert.equal(pendiente.disponible, false);
+  assert.equal(pendiente.contraste.disponible, false);
+  assert.equal(et(SIN_ENTREGAS, ZONA_A).disponible, true, "en su zona, el contraste entregado sí se dibuja");
+  // Las fuentes de la tarjeta: el recurso del contraste se cita solo donde el contraste se dibuja.
+  const ssebop = LLENO.recursos.find((r) => r.id === LLENO.tarjetas.find((t) => t.contraste).contraste.recurso).nombre;
+  assert.ok(citasDeTarjeta(LLENO, enA).some((x) => x.recurso === ssebop && x.archivo === LLENO.et_contraste.archivo));
+  assert.ok(!citasDeTarjeta(LLENO, enB).some((x) => x.recurso === ssebop));
+  assert.ok(!fuentesDeSeccion(LLENO, ZONA_B).some((f) => f.archivo === LLENO.et_contraste.archivo));
+});
+
+test("contraste de hoy (web/data/contexto.json): se dibuja solo en su zona", { skip: !(REAL && REAL.et_contraste) && "sin et_contraste en web/data/contexto.json" }, () => {
+  const tarjeta = REAL.tarjetas.find((t) => t.contraste);
+  assert.ok(REAL.et_contraste.zona in REAL.zonas, "el motor dice de qué zona piloto es el contraste");
+  for (const zona of Object.keys(REAL.zonas)) {
+    const m = modeloContraste(REAL, zona, tarjeta);
+    assert.equal(m.disponible, zona === REAL.et_contraste.zona, zona);
+    if (!m.disponible) assert.ok(m.motivo && m.zonaNombre === REAL.zonas[REAL.et_contraste.zona].nombre);
+  }
+});
+
+test("citasDeTarjeta y fuentesDeSeccion: cita corta por tarjeta y cada texto de fuente una sola vez", () => {
+  const tarjetas = modeloTarjetas(LLENO, ZONA_A);
+  const nombreDe = (id) => LLENO.recursos.find((r) => r.id === id).nombre;
+  // Cita corta: el nombre del recurso (no el texto largo de la entrega) y la fecha del archivo.
+  const suelo = citasDeTarjeta(LLENO, tarjetas.find((t) => t.id === "humedad_suelo"));
+  assert.deepEqual(suelo.map((x) => x.recurso), [nombreDe("smap"), nombreDe("gldas")], "una cita por recurso, sin repetir");
+  for (const x of suelo) {
+    assert.equal(x.archivo, "contexto_regional.csv");
+    assert.equal(x.fecha, LLENO.contexto_regional[ZONA_A]["smap.humedad_raiz"].fecha);
+  }
+  // La fuente de contexto_regional.csv es una sola línea larga compartida por todas sus series.
+  const larga = LLENO.contexto_regional[ZONA_A]["smap.humedad_raiz"].fuente;
+  const todas = tarjetas.flatMap((t) => citasDeTarjeta(LLENO, t));
+  assert.ok(todas.filter((x) => x.fuente === larga).length > LLENO.tarjetas.length, "muchas citas comparten el mismo texto");
+  assert.ok(larga.length > LLENO.et_contraste.fuente.length);
+  // En la sección, cada texto aparece una sola vez, con los recursos que lo comparten.
+  const fuentes = fuentesDeSeccion(LLENO, ZONA_A);
+  assert.equal(new Set(fuentes.map((f) => f.fuente)).size, fuentes.length, "sin textos repetidos");
+  assert.deepEqual(fuentes.map((f) => f.archivo).sort(), ["contexto_regional.csv", LLENO.et_contraste.archivo, LLENO.gaez.archivo].sort());
+  const regional = fuentes.find((f) => f.fuente === larga);
+  assert.deepEqual([...regional.recursos].sort(), LLENO.recursos.filter((r) => r.fuente_contexto).map((r) => r.nombre).sort());
+  assert.equal(regional.fecha, LLENO.contexto_regional[ZONA_A]["smap.humedad_raiz"].fecha);
+  assert.deepEqual(fuentes.find((f) => f.archivo === LLENO.gaez.archivo).recursos, [nombreDe("gaez")]);
+  // Por omisión calcula las tarjetas de la zona; da lo mismo que pasárselas.
+  assert.deepEqual(fuentesDeSeccion(LLENO, ZONA_A, tarjetas), fuentes);
+  // Sin entregas regionales: queda la del contraste (en su zona) y nada más; sin contexto, nada.
+  assert.deepEqual(fuentesDeSeccion(SIN_ENTREGAS, ZONA_A).map((f) => f.archivo), [LLENO.et_contraste.archivo]);
+  assert.deepEqual(fuentesDeSeccion(SIN_ENTREGAS, ZONA_B), []);
+  assert.deepEqual(fuentesDeSeccion(null, ZONA_A), []);
+  assert.deepEqual(citasDeTarjeta(LLENO, null), []);
+  // Una entrega sin línea en fuentes.json: la tarjeta la cita por su recurso; no hay texto que listar.
+  const sinRegistro = structuredClone(LLENO);
+  for (const serie of Object.values(sinRegistro.contexto_regional[ZONA_A])) Object.assign(serie, { fuente: null, fecha: null });
+  const verdor = modeloTarjetas(sinRegistro, ZONA_A).find((t) => t.id === "verdor");
+  assert.deepEqual(citasDeTarjeta(sinRegistro, verdor), [{ recurso: nombreDe("modis"), archivo: "contexto_regional.csv", fuente: null, fecha: null }]);
+  assert.ok(fuentesDeSeccion(sinRegistro, ZONA_A).every((f) => f.fuente));
+  // Un contraste cuyo recurso no está en el catálogo: se lista su fuente, sin atribuirla a otro recurso.
+  const sinRecurso = structuredClone(LLENO);
+  delete sinRecurso.tarjetas.find((t) => t.contraste).contraste.recurso;
+  for (const r of sinRecurso.recursos) if (r.fuente_contexto === null) delete r.fuente_contexto;
+  const et = modeloTarjetas(sinRecurso, ZONA_A).find((t) => t.id === "evapotranspiracion");
+  assert.equal(citasDeTarjeta(sinRecurso, et).find((x) => x.archivo === LLENO.et_contraste.archivo).recurso, null);
+  assert.deepEqual(fuentesDeSeccion(sinRecurso, ZONA_A).find((f) => f.archivo === LLENO.et_contraste.archivo).recursos, []);
+});
+
+test("fuentes de hoy (web/data/contexto.json): ningún texto de fuente repetido en la sección", { skip: !(REAL && REAL.contexto_regional) && "sin contexto_regional en web/data/contexto.json" }, () => {
+  for (const zona of Object.keys(REAL.zonas)) {
+    const fuentes = fuentesDeSeccion(REAL, zona);
+    assert.ok(fuentes.length > 0, zona);
+    assert.equal(new Set(fuentes.map((f) => f.fuente)).size, fuentes.length, zona);
+    for (const f of fuentes) assert.ok(f.archivo && f.recursos.length > 0, `${zona}: ${f.archivo}`);
+  }
 });
 
 test("escalaY: marcas redondas, cero incluido si se pide y null sin valores", () => {
@@ -365,6 +497,9 @@ test("evidenciaDeParcela: altura del dosel de GEDI y ET de ECOSTRESS del último
   assert.deepEqual(filas.map((f) => f.etiqueta), ["Canopy height (GEDI)", "Evapotranspiration (ECOSTRESS)"]);
   assert.equal(filas[0].texto, `median ${p.altura_mediana_m} m from ${p.n_disparos} shots; top decile above ${p.altura_p90_m} m`);
   assert.equal(filas[0].fuente, LLENO.gedi.fuente);
+  assert.deepEqual([filas[0].archivo, filas[0].fecha], [LLENO.gedi.archivo, LLENO.gedi.fecha]);
+  assert.deepEqual([filas[1].archivo, filas[1].fecha], [LLENO.ecostress.archivo, LLENO.ecostress.fecha]);
+  assert.deepEqual(Object.keys(filas[0]), ["etiqueta", "texto", "fuente", "archivo", "fecha"]);
   const ultimo = ultimoMesConDato(LLENO.ecostress.meses, LLENO.ecostress.parcelas[id]);
   assert.equal(filas[1].texto, `${formatoNumero(ultimo.valor)} mm/day, median of the clear scenes of ${etiquetaMes(ultimo.mes)}`);
   assert.equal(filas[1].fuente, LLENO.ecostress.fuente);

@@ -21,6 +21,8 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
   _encabezado, generado (fecha y hora UTC), decision
   zonas            {id: {"nombre"}} de data/params.json → zona_piloto.zonas
   motivo_pedido    el texto común de lo pedido y aún no entregado
+  idioma_fuentes   idioma de los textos de «fuente» (las líneas de LEEME.md del buzón), para que la
+                   página los marque con su atributo «lang»
   recursos         uno por renglón de data/recursos_reto.json: id, nombre, organismo, papel, aplica,
                    estado («in_use» si AL MENOS UNA de sus entregas está en processed; «requested» si
                    aplica y no hay ninguna; «not_applicable»), entregas_presentes, entregas_faltantes,
@@ -32,17 +34,26 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                    calculado de eto_diaria[_zona].csv (NASA POWER) e imerg_diaria[_zona].csv.
   contexto_regional  null + contexto_regional_motivo, o {zona: {"fuente.variable": {fuente_id,
                    variable, ambito, unidad, unidad_en, estadistica, unidad_anual_en, resolucion_m,
-                   n_celdas, fuente, fecha, meses, valores, anual: [{anio, media, n_meses, suma,
-                   completo}]}}}. GRACE llega como UNA serie de cuenca (nota de GRACE de la decisión):
-                   va bajo la llave «cuenca» (esquemas.ZONA_CUENCA) con ambito «cuenca», y la página
-                   la muestra igual en las dos zonas; las demás series llevan ambito «zona».
-  gedi             null + gedi_motivo, o {fuente, fecha, parcelas: {id: {n_disparos, altura_mediana_m,
-                   altura_p90_m}} (solo n_disparos > 0), n_con_dato, n_total}
-  ecostress        null + ecostress_motivo, o {fuente, fecha, meses, parcelas: {id: [valores por mes]}}
-  gaez             null + gaez_motivo, o {fuente, fecha, zonas: {zona: [{cultivo, variable, valor,
-                   unidad, resolucion_m}]}}
-  heladas          null + heladas_motivo, o el contenido de heladas.json más «entrega» {fuente, fecha}
-  et_contraste     null + et_contraste_motivo, o {fuente, fecha, meses, columnas: {columna: [valores]}}
+                   n_celdas, archivo, fuente, fecha, meses, valores, anual: [{anio, media, n_meses,
+                   suma, completo}]}}}. GRACE llega como UNA serie de cuenca (nota de GRACE de la
+                   decisión): va bajo la llave «cuenca» (esquemas.ZONA_CUENCA) con ambito «cuenca», y
+                   la página la muestra igual en las dos zonas; las demás series llevan ambito «zona».
+  gedi             null + gedi_motivo, o {archivo, fuente, fecha, parcelas: {id: {n_disparos,
+                   altura_mediana_m, altura_p90_m}} (solo n_disparos > 0), n_con_dato, n_total}
+  ecostress        null + ecostress_motivo, o {archivo, fuente, fecha, meses, parcelas: {id: [valores
+                   por mes]}}
+  gaez             null + gaez_motivo, o {archivo, fuente, fecha, zonas: {zona: [{cultivo, variable,
+                   valor, unidad, resolucion_m}]}}
+  heladas          null + heladas_motivo, o el contenido de heladas.json más «entrega» {archivo,
+                   fuente, fecha}
+  et_contraste     null + et_contraste_motivo, o {zona, motivo_otras_zonas, archivo, fuente, fecha,
+                   meses, columnas: {columna: [valores]}}. «zona» es la zona piloto del contraste:
+                   et_contraste.csv no lleva sufijo de zona, así que es de la zona por omisión
+                   (esquemas.ZONA_POR_OMISION; docs/decisiones/2026-11-14_dos_zonas.md). La página lo
+                   dibuja solo en esa zona; en las demás dice «motivo_otras_zonas» y no cruza sus
+                   series regionales con las de otra área.
+  En cada bloque, «archivo», «fuente» y «fecha» son la entrega de data/processed y su línea de
+  fuentes.json (LEEME.md del buzón). La página escribe el texto de «fuente» una sola vez por sección.
   tarjetas, unidades  cómo agrupa y rotula la página las series (de data/recursos_reto.json)
   avisos           lo que el motor no pudo leer o encontró inconsistente (lista de textos)
 
@@ -96,6 +107,11 @@ DEFINICION_HELADA = (f"Frost day: daily minimum temperature at or below {UMBRAL_
 # Texto de data/params.json (memoria.anio_actual.unidad) que confirma la definición del año.
 MARCAS_PARAMS_ANIO = ("1-oct", "30-sep")
 
+# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) se escriben en español,
+# como el resto de la operación del equipo (CLAUDE.md, OPERACIÓN). La interfaz va en inglés: la
+# página marca esos textos con este idioma para los lectores de pantalla.
+IDIOMA_FUENTES = "es"
+
 # Redondeos de presentación (no cambian el dato de origen).
 DECIMALES_MM = 1
 DECIMALES_MEDIA = 4
@@ -107,6 +123,8 @@ MOTIVO_PEDIDO = "Requested from the data team — not delivered yet"
 MOTIVO_SIN_FILAS = "The delivered file has no rows for this source yet"
 MOTIVO_ILEGIBLE = "The delivered file could not be read; see the build log"
 MOTIVO_SIN_CLIMA = "No daily weather file in the validated deliveries"
+# et_contraste.csv es de una sola zona (ver bloque_et_contraste): lo que dice la página en las demás.
+MOTIVO_CONTRASTE_OTRA_ZONA = "Not run for this pilot area"
 
 # Entregas nuevas (docs/decisiones/2026-11-14_recursos_del_reto.md): un archivo para las dos zonas.
 ARCHIVO_CONTEXTO = "contexto_regional.csv"
@@ -199,6 +217,12 @@ def entrega(nombre, registradas):
     """{"archivo", "fuente", "fecha"} de una entrega presente (fuente y fecha en None si no está registrada)."""
     r = registradas.get(nombre) or {}
     return {"archivo": nombre, "fuente": r.get("fuente"), "fecha": r.get("fecha")}
+
+
+def procedencia(registro):
+    """De qué entrega sale un bloque: {"archivo", "fuente", "fecha"}. `registro` es lo que armar() le
+    pasa al lector del bloque (entrega(nombre, registradas)); lo que falte va en None."""
+    return {"archivo": registro.get("archivo"), "fuente": registro.get("fuente"), "fecha": registro.get("fecha")}
 
 
 # ---------------------------------------------------------------------------------------
@@ -402,8 +426,7 @@ def bloque_contexto(ruta, zonas, unidades, registro, avisos):
             "unidad_anual_en": rotulo.get("anual_en", rotulo.get("en", unidad)) if aditiva else rotulo.get("en", unidad),
             "resolucion_m": resolucion,
             "n_celdas": _unico(celdas),
-            "fuente": registro.get("fuente"),
-            "fecha": registro.get("fecha"),
+            **procedencia(registro),
             "meses": [_texto_mes(*m) for m in meses],
             "valores": valores,
             "anual": resumen_anual(meses, valores, aditiva),
@@ -429,8 +452,7 @@ def bloque_gedi(ruta, registro):
                 "altura_mediana_m": numero(fila["altura_mediana_m"]),
                 "altura_p90_m": numero(fila["altura_p90_m"]),
             }
-    return {"fuente": registro.get("fuente"), "fecha": registro.get("fecha"),
-            "parcelas": parcelas, "n_con_dato": len(parcelas), "n_total": len(filas)}
+    return {**procedencia(registro), "parcelas": parcelas, "n_con_dato": len(parcelas), "n_total": len(filas)}
 
 
 def bloque_ecostress(ruta, registro):
@@ -442,7 +464,7 @@ def bloque_ecostress(ruta, registro):
         mes = fila["mes"].strip()
         if mes in indice:
             parcelas.setdefault(fila["id"].strip(), [None] * len(meses))[indice[mes]] = numero(fila["et_mm_dia"])
-    return {"fuente": registro.get("fuente"), "fecha": registro.get("fecha"), "meses": meses, "parcelas": parcelas}
+    return {**procedencia(registro), "meses": meses, "parcelas": parcelas}
 
 
 def bloque_gaez(ruta, zonas, registro, avisos):
@@ -461,7 +483,7 @@ def bloque_gaez(ruta, zonas, registro, avisos):
             "unidad": fila["unidad"].strip(),
             "resolucion_m": numero_limpio(fila["resolucion_m"]),
         })
-    return {"fuente": registro.get("fuente"), "fecha": registro.get("fecha"), "zonas": por_zona}
+    return {**procedencia(registro), "zonas": por_zona}
 
 
 def bloque_heladas(ruta, registro):
@@ -469,15 +491,24 @@ def bloque_heladas(ruta, registro):
     contenido = leer_json(ruta)
     if not isinstance(contenido, dict):
         raise ValueError("heladas.json no es un objeto")
-    return {**contenido, "entrega": {"fuente": registro.get("fuente"), "fecha": registro.get("fecha")}}
+    return {**contenido, "entrega": procedencia(registro)}
 
 
 def bloque_et_contraste(ruta, registro):
-    """Meses y columnas de et_contraste.csv tal cual (A8), para dibujarlas junto a MODIS y GLDAS."""
+    """Meses y columnas de et_contraste.csv tal cual (A8), y la zona piloto a la que pertenecen.
+
+    et_contraste.csv es un archivo SIN sufijo de zona y no va en esquemas.ARCHIVOS_POR_ZONA: es de la
+    zona por omisión (docs/decisiones/2026-11-14_dos_zonas.md: «Los archivos sin sufijo son de
+    delicias_saucillo»). La página lo dibuja junto a MODIS y GLDAS solo en esa zona; en las demás
+    dice «motivo_otras_zonas», porque cruzar las series regionales de una zona con el contraste de
+    otra compararía dos áreas distintas en los mismos ejes.
+    """
     filas = leer_csv(ruta)
     columnas = [c for c in (filas[0].keys() if filas else []) if c and c != "mes"]
     return {
-        "fuente": registro.get("fuente"), "fecha": registro.get("fecha"),
+        "zona": E.ZONA_POR_OMISION,
+        "motivo_otras_zonas": MOTIVO_CONTRASTE_OTRA_ZONA,
+        **procedencia(registro),
         "meses": [fila["mes"].strip() for fila in filas],
         "columnas": {c: [numero(fila.get(c)) for fila in filas] for c in columnas},
     }
@@ -553,6 +584,7 @@ def armar(processed, params, catalogo):
         "zonas": zonas,
         # Motivo común de lo pedido y no entregado (el de cada bloque y cada recurso sin entrega).
         "motivo_pedido": MOTIVO_PEDIDO,
+        "idioma_fuentes": IDIOMA_FUENTES,
     }
 
     def bloque_opcional(nombre, archivo, leer):
@@ -562,7 +594,7 @@ def armar(processed, params, catalogo):
             contexto[nombre], contexto[f"{nombre}_motivo"] = None, MOTIVO_PEDIDO
             return None
         try:
-            valor = leer(ruta, registradas.get(archivo) or {})
+            valor = leer(ruta, entrega(archivo, registradas))
         except (KeyError, ValueError, AttributeError, csv.Error, json.JSONDecodeError, UnicodeDecodeError) as ex:
             avisos.append(f"{archivo}: no se pudo leer ({type(ex).__name__}: {ex}); el bloque «{nombre}» va en null")
             contexto[nombre], contexto[f"{nombre}_motivo"] = None, MOTIVO_ILEGIBLE

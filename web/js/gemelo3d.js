@@ -38,11 +38,13 @@
 //     columnaEn(punto) -> id | null   columna bajo un punto de la pantalla ({x, y} o [x, y] del mapa). Sirve para que
 //                                     el clic de la aplicación sobre sus propias capas ceda ante una columna.
 //     depuracion                      (solo lectura, para pruebas) último cálculo: { version, montado, zonaId, D, r,
-//                                     metrosPorMillar, columnas, planas, cuenta, fuenteRelieve, teselasFallidas };
-//                                     columnas y planas son los FeatureCollection enviados con setData.
+//                                     metrosPorMillar, columnas, planas, cuenta, fuenteRelieve, urlTeselas,
+//                                     teselasFallidas }; columnas y planas son los FeatureCollection de setData;
+//                                     urlTeselas es document.baseURI + la plantilla del JSON.
+//     destruir()                      desactiva sin animación y suelta todo; el controlador queda inerte.
+//
 //   calcularColumnas({ features, cubo, D, r, zonaId, metrosPorMillar, reglas }) -> { columnas, planas, cuenta… }
 //     el cálculo puro (sin mapa), para probarlo con Node.
-//     destruir()                      desactiva sin animación y suelta todo; el controlador queda inerte.
 //
 // QUÉ DIBUJA (todo con el prefijo «gemelo-»):
 //   · Parcela clasificada cuya opción ACTUAL pide agua (L50 > 0, lámina bruta P50 para la lluvia r): una columna.
@@ -99,7 +101,6 @@ const CAPA_PLANA = "gemelo-plana";
 const CAPA_PLANA_BORDE = "gemelo-plana-borde";
 const CAPA_SIN_RIEGO = "gemelo-sin-riego";
 const CAPA_SIN_RIEGO_BORDE = "gemelo-sin-riego-borde";
-const CAPA_APUNTADA = "gemelo-columna-apuntada";
 const CAPA_AGUA = "gemelo-columna-agua";
 const CAPA_FALTA = "gemelo-columna-falta";
 const CAPA_CAMARA = "gemelo-camara"; // capa «custom» sin dibujo: recibe la matriz de proyección de cada cuadro
@@ -111,7 +112,6 @@ const CAPAS = [
   CAPA_PLANA_BORDE,
   CAPA_SIN_RIEGO,
   CAPA_SIN_RIEGO_BORDE,
-  CAPA_APUNTADA,
   CAPA_AGUA,
   CAPA_FALTA,
   CAPA_CAMARA,
@@ -212,7 +212,6 @@ function coloresGemelo() {
     sinRiego: colorCSS("gemelo-sin-riego", "brote"),
     sombra: colorCSS("gemelo-sombra", "tierra"),
     luz: colorCSS("gemelo-luz", "blanco"),
-    tinta: colorCSS("gemelo-tinta", "tinta"),
   };
 }
 
@@ -482,13 +481,20 @@ function htmlLeyenda(gemelo) {
   const columnas = gemelo?.columnas ?? {};
   const exageracion = num(terreno.exageracion);
   const metros = num(columnas.metros_por_millar);
+  // Renglones de escala: el rótulo del relieve con su exageración, y la escala de las columnas con su nota.
   const escala = [];
-  if (terreno.rotulo) escala.push(`Terrain: ${esc(terreno.rotulo)}`);
-  if (exageracion != null) escala.push(`Vertical exaggeration of the terrain: ×${esc(fmt(exageracion))}`);
+  const veces = exageracion != null ? `×${esc(fmt(exageracion))}` : "";
+  if (terreno.rotulo) escala.push(`Terrain: ${esc(terreno.rotulo)}` + (veces ? ` (${veces})` : ""));
+  else if (veces) escala.push(`Vertical exaggeration of the terrain: ${veces}`);
   if (metros != null) {
-    const notas = [columnas.etiqueta ? `Label: ${esc(columnas.etiqueta)}` : "", esc(columnas.nota ?? "")].filter(Boolean);
     escala.push(
-      `Column scale: ${esc(fmt(metros))} m of height for each thousand m³/ha` + (notas.length ? ` (${notas.join("; ")})` : ""),
+      [
+        `Column scale: ${esc(fmt(metros))} m of height for each thousand m³/ha`,
+        esc(columnas.nota ?? ""),
+        columnas.etiqueta ? `Label: ${esc(columnas.etiqueta)}` : "",
+      ]
+        .filter(Boolean)
+        .join(" · "),
     );
   }
   const muestra = (clase) => `<span class="gemelo-muestra gemelo-muestra-${clase}" aria-hidden="true"></span>`;
@@ -623,7 +629,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     if (pitch != null) {
       // Si el mapa limita la inclinación por debajo de la del gemelo, se amplía mientras la vista esté activa.
       if (pitch > mapa.getMaxPitch()) {
-        est.maxPitchPrevio = mapa.getMaxPitch();
+        est.maxPitchPrevio ??= mapa.getMaxPitch();
         mapa.setMaxPitch(pitch);
       }
       destino.pitch = pitch;
@@ -633,14 +639,15 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
   }
 
   function aplanarCamara(animar) {
-    const previo = est.maxPitchPrevio;
-    est.maxPitchPrevio = null;
+    // El tope de inclinación que se amplió al activar vuelve a su valor cuando la cámara ya está plana
+    // (si la vista se reactiva antes, se deja como está).
     const restaurar = () => {
-      if (previo == null || est.activo || mapa.getPitch() > previo) return;
-      mapa.setMaxPitch(previo);
+      if (est.maxPitchPrevio == null || est.activo) return;
+      mapa.setMaxPitch(est.maxPitchPrevio);
+      est.maxPitchPrevio = null;
     };
     const animado = animar && !sinMovimiento();
-    if (animado && previo != null) mapa.once("moveend", restaurar);
+    if (animado && est.maxPitchPrevio != null) mapa.once("moveend", restaurar);
     moverCamara({ pitch: 0, bearing: 0 }, animar);
     if (!animado) restaurar();
   }
@@ -725,14 +732,9 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
       filter: deClase(SIN_RIEGO),
       paint: { "line-color": c.sinRiego, "line-width": 2.5 },
     });
-    // Contorno al pie de la columna apuntada (puntero o mira del teclado).
-    mapa.addLayer({
-      id: CAPA_APUNTADA,
-      type: "line",
-      source: FUENTE_COLUMNAS,
-      paint: { "line-color": c.tinta, "line-width": 4, "line-opacity": ["case", apuntada, 1, 0] },
-    });
     // Columna: abajo, lo que cubre la dotación (azul liso); arriba, lo que falta (rojo con rayas).
+    // La columna apuntada (puntero o mira) oscurece su parte azul con feature-state: la fuente de las columnas
+    // no tiene capas tendidas sobre el terreno, así que apuntar no obliga a MapLibre a redibujar el relieve.
     mapa.addLayer({
       id: CAPA_AGUA,
       type: "fill-extrusion",
@@ -1216,6 +1218,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
         planas: est.ultimo?.planas ?? null,
         cuenta: est.ultimo ? { ...est.ultimo.cuenta } : null,
         fuenteRelieve: est.fuenteRelieve ? { ...est.fuenteRelieve } : null,
+        urlTeselas: zonaDe(est.zonaId) ? urlAbsoluta(zonaDe(est.zonaId).teselas) : null,
         teselasFallidas: [...est.teselasFallidas],
       };
     },
