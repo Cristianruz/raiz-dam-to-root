@@ -4,12 +4,22 @@
 Uso:  python validar_contrato.py [carpeta]      (por omisión web/data)
 Imprime "CONTRATO OK" o la lista de errores y termina con código 1.
 Solo usa la biblioteca estándar.
+
+Dos zonas (decisión docs/decisiones/2026-11-14_dos_zonas.md), todo opcional para que los datos
+de una sola zona y los simulados sigan pasando:
+- parcelas.geojson: properties.zona, si viene, es una zona de data/params.json (zona_piloto.zonas)
+  y el id lleva el prefijo de esa zona. Parcela sin «zona» = delicias_saucillo.
+- cubo.json «zonas»: {id: bloque con las mismas reglas que «zona» + bbox [o, s, e, n] + nombre_mostrar};
+  sus superficies, demandas y conteos suman los de «zona» (tolerancia de redondeo).
+- cubo.json «localidades»: [{nombre, municipio, lat, lon, fuente}].
+- cubo.json parcelas.<id>.sin_opciones: motivo (código) de una parcela clasificada sin opciones.
 """
 import json
 import re
 import sys
 from pathlib import Path
 
+RAIZ = Path(__file__).resolve().parent
 CULTIVOS = {"alfalfa", "nogal", "chile", "maiz_forrajero", "sorgo", "algodon",
             "cereal_invierno", "barbecho", "sin_clasificar", "forraje_verano"}
 ESTADOS_MEMORIA = {"perenne", "verano", "invierno", "doble", "descanso", "sin_dato"}
@@ -20,11 +30,37 @@ MARCAS = {"como_2025", "como_2026", "anio_normal"}
 PREGUNTAS = ("por_que", "evidencia", "beneficios", "que_no_sabemos", "riesgos")
 CAMPOS_GOTA = ("m3_salen_presa", "m3_perdidas_canal", "m3_llegan_parcela",
                "m3_consume_cultivo_et", "m3_regresan_acuifero", "m3_otras_perdidas")
+SUPERFICIES = ("superficie_total_ha", "superficie_clasificada_ha", "superficie_abstenida_ha", "superficie_perenne_ha")
+CONTEOS = ("total", "libre", "por_vencer", "comprometida", "abstenida")
+# Parcela sin propiedad «zona» = zona sin sufijo (decisión 2026-11-14; igual que motor/b4_cubo.py).
+ZONA_SIN_SUFIJO = "delicias_saucillo"
+# Motivos (códigos) por los que una parcela clasificada puede quedar sin opciones (motor/b4_cubo.py).
+MOTIVOS_SIN_OPCIONES = {"sin_clima_zona"}
+
+
+def zonas_de_params(ruta):
+    """{id: zona} de params.zona_piloto.zonas, o None si params.json no existe o no las define
+    (entonces no se revisa contra params)."""
+    try:
+        params = json.loads(Path(ruta).read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
+    lista = ((params.get("zona_piloto") or {}).get("zonas") or {}).get("valor")
+    if not isinstance(lista, list):
+        return None
+    return {z.get("id"): z for z in lista if isinstance(z, dict)}
+
+
+def es_num(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
 
 
 class Validador:
-    def __init__(self):
+    def __init__(self, zonas_params=None):
         self.errores = []
+        self.zonas_params = zonas_params  # {id: zona} de params.json o None
+        self.zonas_geo = set()  # zonas de las parcelas (sin propiedad = ZONA_SIN_SUFIJO)
+        self.con_zona = False   # alguna parcela trae la propiedad «zona»
 
     def error(self, donde, msg):
         self.errores.append(f"{donde}: {msg}")
@@ -83,6 +119,7 @@ class Validador:
             elif pid in ids:
                 self.error(w, "id repetido")
             ids.add(pid)
+            self.zona_parcela(p, pid, w)
             self.num(p.get("area_ha"), f"{w}.area_ha", minimo=0)
             if p.get("modulo") is not None and not isinstance(p.get("modulo"), str):
                 self.error(w, "modulo debe ser texto o null")
@@ -122,6 +159,122 @@ class Validador:
             if p.get("estado_plazo") not in ESTADOS_PLAZO:
                 self.error(w, f"estado_plazo fuera de lista: {p.get('estado_plazo')}")
         return ids
+
+    def zona_parcela(self, p, pid, w):
+        """properties.zona (opcional): texto, zona de params y prefijo del id de esa zona."""
+        if "zona" not in p:
+            self.zonas_geo.add(ZONA_SIN_SUFIJO)
+            return
+        self.con_zona = True
+        zona = p["zona"]
+        if not isinstance(zona, str) or not zona:
+            self.error(w, f"zona debe ser texto no vacío: {zona!r}")
+            return
+        self.zonas_geo.add(zona)
+        if self.zonas_params is None:
+            return
+        if zona not in self.zonas_params:
+            self.error(w, f"zona fuera de params.zona_piloto.zonas: {zona}")
+            return
+        prefijo = self.zonas_params[zona].get("prefijo_id")
+        if prefijo and isinstance(pid, str) and not pid.startswith(prefijo):
+            self.error(w, f"el id debe llevar el prefijo de su zona {zona} ({prefijo})")
+
+    # --- bloques de zona del cubo («zona», «zonas.<id>») ----------------------
+    def bloque_zona(self, z, donde):
+        """Superficies ≥ 0, demanda perenne P10 ≤ P50 ≤ P90 por lluvia y conteos enteros ≥ 0."""
+        if not isinstance(z, dict):
+            self.error(donde, "debe ser objeto")
+            return
+        for k in SUPERFICIES:
+            self.num(z.get(k), f"{donde}.{k}", minimo=0)
+        for r in LLUVIAS:
+            self.banda((z.get("demanda_perenne_millares") or {}).get(r), f"{donde}.demanda_perenne_millares.{r}")
+        conteos = z.get("conteos")
+        if not isinstance(conteos, dict):
+            self.error(donde, "conteos debe ser objeto")
+            return
+        for k in CONTEOS:
+            self.num(conteos.get(k), f"{donde}.conteos.{k}", minimo=0, entero=True)
+
+    def bbox(self, b, donde):
+        """[oeste, sur, este, norte] en grados, con oeste < este y sur < norte."""
+        if not (isinstance(b, list) and len(b) == 4 and all(es_num(x) for x in b)):
+            self.error(donde, f"bbox debe ser [oeste, sur, este, norte] con 4 números: {b}")
+            return
+        o, s, e, n = b
+        if not (-180 <= o < e <= 180):
+            self.error(donde, f"bbox: oeste debe ser < este (en −180..180): {b}")
+        if not (-90 <= s < n <= 90):
+            self.error(donde, f"bbox: sur debe ser < norte (en −90..90): {b}")
+
+    def zonas(self, c):
+        """Bloque «zonas» (opcional): uno por zona, y su suma igual al bloque «zona»."""
+        d = "cubo.json"
+        zs = c.get("zonas")
+        if zs is None:
+            if self.con_zona:
+                self.error(d, "las parcelas traen «zona» pero el cubo no trae el bloque «zonas»")
+            return
+        if not isinstance(zs, dict) or not zs:
+            self.error(d, "zonas debe ser objeto no vacío {id: bloque}")
+            return
+        for zid, z in zs.items():
+            w = f"{d}.zonas.{zid}"
+            if self.zonas_params is not None and zid not in self.zonas_params:
+                self.error(w, "zona fuera de params.zona_piloto.zonas")
+            self.bloque_zona(z, w)
+            if not isinstance(z, dict):
+                continue
+            if not isinstance(z.get("nombre_mostrar"), str) or not z["nombre_mostrar"].strip():
+                self.error(w, "nombre_mostrar debe ser texto no vacío")
+            self.bbox(z.get("bbox"), f"{w}.bbox")
+            if "clima_disponible" in z and not isinstance(z["clima_disponible"], bool):
+                self.error(w, "clima_disponible debe ser bool")
+        for zid in sorted(self.zonas_geo - set(zs)):
+            self.error(d, f"la zona {zid} tiene parcelas pero no tiene bloque en «zonas»")
+        # Suma de las zonas = total. Cada bloque se redondea a 2 decimales: tolerancia por bloque.
+        total = c.get("zona") or {}
+        bloques = [z for z in zs.values() if isinstance(z, dict)]
+        tol = 0.01 * len(bloques) + 1e-6
+
+        def comparar(nombre, valores, esperado, tolerancia):
+            if es_num(esperado) and all(es_num(v) for v in valores) and abs(sum(valores) - esperado) > tolerancia:
+                self.error(d, f"la suma de zonas.*.{nombre} ({round(sum(valores), 2)}) no coincide con zona.{nombre} ({esperado})")
+
+        for k in SUPERFICIES:
+            comparar(k, [z.get(k) for z in bloques], total.get(k), tol)
+        for r in LLUVIAS:
+            for q in ("p10", "p50", "p90"):
+                vals = [((z.get("demanda_perenne_millares") or {}).get(r) or {}).get(q) for z in bloques]
+                esperado = ((total.get("demanda_perenne_millares") or {}).get(r) or {}).get(q)
+                comparar(f"demanda_perenne_millares.{r}.{q}", vals, esperado, tol)
+        for k in CONTEOS:
+            comparar(f"conteos.{k}", [(z.get("conteos") or {}).get(k) for z in bloques],
+                     (total.get("conteos") or {}).get(k), 0)
+
+    def localidades(self, c):
+        """Bloque «localidades» (opcional): puntos de referencia del mapa con su fuente."""
+        d = "cubo.json.localidades"
+        locs = c.get("localidades")
+        if locs is None:
+            return
+        if not isinstance(locs, list):
+            self.error(d, "debe ser lista")
+            return
+        for i, x in enumerate(locs):
+            w = f"{d}[{i}]"
+            if not isinstance(x, dict):
+                self.error(w, "debe ser objeto {nombre, municipio, lat, lon, fuente}")
+                continue
+            if not isinstance(x.get("nombre"), str) or not x["nombre"].strip():
+                self.error(w, "nombre debe ser texto no vacío")
+            if x.get("municipio") is not None and not isinstance(x.get("municipio"), str):
+                self.error(w, "municipio debe ser texto o null")
+            self.num(x.get("lat"), f"{w}.lat", -90, 90)
+            self.num(x.get("lon"), f"{w}.lon", -180, 180)
+            if not isinstance(x.get("fuente"), str) or not x["fuente"].strip():
+                self.error(w, "falta la fuente")
 
     # --- §2.3 cubo.json -----------------------------------------------------
     def cubo(self, c, ids):
@@ -173,13 +326,9 @@ class Validador:
         if [str(x) for x in (c.get("lluvia_pct") or [])] != list(LLUVIAS):
             self.error(d, f"lluvia_pct debe ser [0, -20]: {c.get('lluvia_pct')}")
 
-        z = c.get("zona") or {}
-        for k in ("superficie_total_ha", "superficie_clasificada_ha", "superficie_abstenida_ha", "superficie_perenne_ha"):
-            self.num(z.get(k), f"{d}.zona.{k}", minimo=0)
-        for r in LLUVIAS:
-            self.banda((z.get("demanda_perenne_millares") or {}).get(r), f"{d}.zona.demanda_perenne_millares.{r}")
-        if not isinstance(z.get("conteos"), dict):
-            self.error(d, "zona.conteos debe ser objeto")
+        self.bloque_zona(c.get("zona") or {}, f"{d}.zona")
+        self.zonas(c)
+        self.localidades(c)
 
         parcelas = c.get("parcelas") or {}
         faltan = ids - set(parcelas)
@@ -192,8 +341,13 @@ class Validador:
         for pid, pc in parcelas.items():
             ops = pc.get("opciones") or []
             w0 = f"{d}.parcelas.{pid}"
+            motivo = pc.get("sin_opciones")
+            if motivo is not None and (motivo not in MOTIVOS_SIN_OPCIONES or ops):
+                self.error(w0, f"sin_opciones debe ser uno de {sorted(MOTIVOS_SIN_OPCIONES)} y solo con opciones vacías: {motivo!r}")
             if not ops and pid in getattr(self, "abstenidas", set()):
                 continue  # parcela abstenida: sin opciones (kit B4, paso 1: solo parcelas NO abstenidas)
+            if not ops and motivo in MOTIVOS_SIN_OPCIONES:
+                continue  # parcela clasificada sin opciones por un motivo declarado (p. ej. zona sin clima)
             if not any(o.get("id") == "ACTUAL" for o in ops):
                 self.error(w0, "falta la opción ACTUAL")
             if len(ops) < 3:
@@ -279,9 +433,9 @@ class Validador:
                 self.num(mv, f"{d}.{k}.valores.{mk}")
 
 
-def validar(carpeta="web/data"):
+def validar(carpeta="web/data", params_ruta=RAIZ / "data/params.json"):
     carpeta = Path(carpeta)
-    v = Validador()
+    v = Validador(zonas_de_params(params_ruta))
     datos = {}
     for nombre in ("parcelas.geojson", "cubo.json", "explicaciones.json"):
         ruta = carpeta / nombre

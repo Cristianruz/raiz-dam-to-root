@@ -175,12 +175,15 @@ FUENTE_KENS = "kit v4, K-ENS paso 2"
 FUENTE_ACUERDO = "acuerdo con la sesión de Earth Engine y Colab (14-nov-2026)"
 FUENTE_FORMATOS = ("acuerdo de formatos entre la sesión de datos y el integrador (14-nov-2026; "
                    "reemplaza o amplía la fila de la tabla 0.4-B)")
+FUENTE_DOS_ZONAS = "decisión de dos zonas piloto (docs/decisiones/2026-11-14_dos_zonas.md)"
 
 ID = {"tipo": "texto", "id_parcela": True}
 INDICE = {"tipo": "numero", "min": -1, "max": 1}     # NDVI y demás diferencias normalizadas
 FRACCION = {"tipo": "numero", "min": 0, "max": 1}
 MESES_ANIO = {"tipo": "entero", "min": 0, "max": 12}
 NO_NEGATIVO = {"tipo": "numero", "min": 0}
+# Propiedad «zona» (FUENTE_DOS_ZONAS): opcional; si viene, un id de zona_piloto.zonas.
+ZONA = {"tipo": "texto", "opcional": True, "valores": "@zonas_ids"}
 
 
 def _con(base, **cambios):
@@ -202,12 +205,18 @@ ESQUEMAS = {
             "modulo": {"tipo": "texto", "nulo": True},
             "ftw_confianza": {"tipo": "numero", "min": 0, "max": 100},
             "protagonista": {"tipo": "bool"},
+            "zona": ZONA,
         },
         "es_referencia_ids": True,
         "protagonistas_esperadas": PROTAGONISTAS_ESPERADAS,
         "avisar_fuera_de_bbox": True,
-        "alimenta": "parcelas.geojson: geometría, id, area_ha, modulo, ftw_confianza, protagonista",
-        "fuente_reglas": f"{FUENTE_TABLA}; kit §2.2; {FUENTE_ACUERDO}",
+        # Con «zona»: id con el prefijo de la zona y centroide dentro de su rectángulo.
+        "por_zona": True,
+        "alimenta": "parcelas.geojson: geometría, id, area_ha, modulo, ftw_confianza, protagonista, zona",
+        "fuente_reglas": (f"{FUENTE_TABLA}; kit §2.2; {FUENTE_ACUERDO}; {FUENTE_DOS_ZONAS}: un solo "
+                          "archivo con las dos zonas, «zona» opcional (sin ella = zona por omisión), "
+                          "ids únicos entre zonas y, con «zona», con el prefijo de la zona y el "
+                          "centroide en su rectángulo"),
     },
     "parcelas_muestra.geojson": {
         "pieza": "B1", "tipo": "geojson",
@@ -484,7 +493,9 @@ ESQUEMAS = {
     "nasadem_zona_piloto.tif": {
         "pieza": "A9", "tipo": "geotiff",
         "fuente_reglas": (f"{FUENTE_ACUERDO}: TIFF con GeoKeyDirectoryTag, EPSG:4326, escala y punto "
-                          "de amarre de ~30 m (≈ 1″) y extensión que cubre zona_piloto.bbox; kit A9 paso 1"),
+                          "de amarre de ~30 m (≈ 1″) y extensión que cubre la zona; kit A9 paso 1; "
+                          f"{FUENTE_DOS_ZONAS}: un archivo por zona (sin sufijo = zona por omisión) "
+                          "que cubre el rectángulo de SU zona en zona_piloto.zonas"),
     },
     "relieve_parcelas.csv": {
         "pieza": "A9", "tipo": "csv",
@@ -500,10 +511,11 @@ ESQUEMAS = {
     "relieve_rutas.geojson": {
         "pieza": "A9", "tipo": "geojson",
         "geometrias": ("LineString", "MultiLineString"),
-        "propiedades": {},
+        "propiedades": {"zona": ZONA},
         "tamano_max_bytes": TAMANO_MAX_RUTAS_BYTES,
         "alimenta": "capa «Terrain & runoff» y botón «Simulate a storm»",
-        "fuente_reglas": f"{FUENTE_ACUERDO}; kit A9 paso 3 (< 1 MB)",
+        "fuente_reglas": (f"{FUENTE_ACUERDO}; kit A9 paso 3 (< 1 MB); {FUENTE_DOS_ZONAS}: un solo "
+                          "archivo, «zona» opcional en cada línea (sin ella = zona por omisión)"),
     },
     "relieve_meta.json": {
         "pieza": "A9", "tipo": "json", "regla": "objeto",

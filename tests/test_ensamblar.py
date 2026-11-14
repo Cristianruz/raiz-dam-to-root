@@ -12,7 +12,10 @@ Cubre:
 - los formatos del acuerdo con la sesión de datos (14-nov-2026): rotaciones.json y
   demanda_cultivos.csv (A5), memoria_parcelas.csv y memoria_resumen.csv (A3-M),
   cultivos_parcelas.csv con «1/1 (reglas)» (A4) y relieve_meta.json (A9), y los crudos de
-  Earth Engine (hls_*.tif, piloto_consumo.tif), que se listan aparte y no se rechazan.
+  Earth Engine (hls_*.tif, piloto_consumo.tif), que se listan aparte y no se rechazan;
+- las dos zonas piloto (docs/decisiones/2026-11-14_dos_zonas.md) con tests/fixtures/buzon_dos_zonas:
+  propiedad «zona», prefijo del id y centroide en el rectángulo de su zona, archivos con sufijo
+  «_<zona>», NASADEM por zona y la entrega real de una zona (data/processed) que sigue validando.
 Todas escriben en tmp_path: nunca en data/processed ni en docs/entregas_log.md.
 
 Los valores de las pruebas son DE PRUEBA (no son datos). Los límites que dependen de
@@ -42,8 +45,12 @@ from motor import esquemas  # noqa: E402
 FIXTURES = RAIZ / "tests/fixtures"
 BUZON_OK = FIXTURES / "buzon_ok"
 BUZON_MALO = FIXTURES / "buzon_malo"
+BUZON_DOS_ZONAS = FIXTURES / "buzon_dos_zonas"
+PROCESADOS = RAIZ / "data/processed"
 PARAMS = json.loads((RAIZ / "data/params.json").read_text(encoding="utf-8"))
 LIMITES = ens.limites_derivados(PARAMS)
+OMISION = esquemas.ZONA_POR_OMISION     # sin «zona» o sin sufijo
+OTRA = "lazaro_cardenas"                # la zona con sufijo de la fixture buzon_dos_zonas
 ARCOSEG = 1 / 3600          # 1 arcosegundo en grados (definición)
 MARGEN_FIXTURE = 0.02       # margen de prueba alrededor de zona_piloto.bbox (≈ 2 km de A9)
 ENCABEZADO_TIF = "AI-assisted (Claude Code) - Raiz, NASA Space Apps 2026 - fixture: valores de prueba"
@@ -201,6 +208,13 @@ def test_buzon_ok_todo_entra_y_se_copia_con_sha256(tmp_path):
     # Bitácora: encabezado y una línea por corrida.
     log = (tmp_path / "log.md").read_text(encoding="utf-8")
     assert log.startswith("<!-- AI-assisted") and "| 13: " in log
+    # Una sola zona (sin «zona» ni sufijos): todo es de la zona por omisión.
+    por_nombre = {x["archivo"]: x for x in rep["entraron"]}
+    for n, x in por_nombre.items():
+        assert x["zona"] == (OMISION if n in esquemas.ARCHIVOS_POR_ZONA else None), n
+    assert por_nombre["parcelas_base.geojson"]["zonas"] == {OMISION: 3}
+    assert por_nombre["relieve_parcelas.csv"]["zonas"] == {OMISION: 3}
+    assert not por_nombre["nasadem_zona_piloto.tif"]["avisos"]   # cubre el rectángulo de su zona
 
 
 def test_buzon_ok_avisa_faltante_power_menor_al_5pct(tmp_path):
@@ -768,7 +782,8 @@ def test_parcelas_avisos_bbox_y_protagonistas(tmp_path):
     b = buzon_con(tmp_path, {"parcelas_base.geojson": json.dumps(geo)}, copiar=())
     rep = correr(b, tmp_path)
     avisos = " ".join(rep["entraron"][0]["avisos"])
-    assert "fuera de zona_piloto.bbox" in avisos and "protagonistas" in avisos
+    # Sin «zona», la parcela es de la zona por omisión: solo se avisa (no se exige el rectángulo).
+    assert "fuera del rectángulo de su zona" in avisos and "protagonistas" in avisos
 
 
 @pytest.mark.parametrize("cambio, clave", [
@@ -981,16 +996,33 @@ def test_geotiff_que_no_cubre_la_zona(tmp_path):
     escribir_geotiff(b / "nasadem_zona_piloto.tif", oeste=bbox[0], norte=bbox[3], ancho=10, alto=10)
     (b / "LEEME.md").write_text("| archivo | fuente | fecha | script |\n"
                                 + LINEA_LEEME.format(archivo="nasadem_zona_piloto.tif") + "\n", encoding="utf-8")
-    assert "no cubre zona_piloto.bbox" in motivos_de(correr(b, tmp_path), "nasadem_zona_piloto.tif")
+    m = motivos_de(correr(b, tmp_path), "nasadem_zona_piloto.tif")
+    assert f"no cubre el rectángulo de la zona {OMISION}" in m and "ni las parcelas" not in m
 
 
-def test_geotiff_bbox_null_solo_avisa(tmp_path):
+def params_sin_zonas():
+    """data/params.json sin zona_piloto.zonas (como antes de la decisión de dos zonas)."""
     params = json.loads(json.dumps(PARAMS))
-    params["zona_piloto"]["bbox"]["valor"] = None
+    del params["zona_piloto"]["zonas"]
+    return params
+
+
+@pytest.mark.parametrize("sin_zonas, clave", [
+    (True, "zona_piloto.bbox de data/params.json es null"),
+    (False, f"el rectángulo de la zona {OMISION} (zona_piloto.zonas) de data/params.json es null"),
+])
+def test_geotiff_bbox_null_solo_avisa(tmp_path, sin_zonas, clave):
+    """Sin rectángulo en params no se comprueba la cobertura: se avisa (nunca se inventa)."""
+    if sin_zonas:
+        params = params_sin_zonas()
+        params["zona_piloto"]["bbox"]["valor"] = None
+    else:
+        params = json.loads(json.dumps(PARAMS))
+        next(z for z in params["zona_piloto"]["zonas"]["valor"] if z["id"] == OMISION)["bbox"] = None
     b = buzon_con(tmp_path, {}, copiar=("nasadem_zona_piloto.tif",))
     rep = correr(b, tmp_path, params=params)
     assert nombres(rep["entraron"]) == ["nasadem_zona_piloto.tif"]
-    assert any("bbox" in a and "null" in a for a in rep["entraron"][0]["avisos"])
+    assert any(clave in a for a in rep["entraron"][0]["avisos"]), rep["entraron"][0]["avisos"]
 
 
 def test_no_es_tiff(tmp_path):
@@ -1006,6 +1038,14 @@ def test_limites_salen_de_params():
     assert LIMITES["bbox"] == PARAMS["zona_piloto"]["bbox"]["valor"]
     assert LIMITES["lluvia_pct"] == PARAMS["lluvia_pct"]["valor"]
     assert LIMITES["umbrales_ndvi"][0] == _umbral_ndvi()
+    zonas = PARAMS["zona_piloto"]["zonas"]["valor"]
+    assert LIMITES["zonas_ids"] == sorted(z["id"] for z in zonas)
+    for z in zonas:
+        assert LIMITES["zonas"][z["id"]]["bbox"] == z["bbox"]
+        assert LIMITES["zonas"][z["id"]]["prefijo_id"] == z["prefijo_id"]
+    # La zona por omisión y la de la fixture con sufijo existen en params.
+    assert {OMISION, OTRA} <= set(LIMITES["zonas_ids"])
+    assert ens.limites_derivados(params_sin_zonas())["zonas"] is None
 
 
 def test_params_sin_clave_avisa_y_no_inventa(tmp_path):
@@ -1097,10 +1137,12 @@ def test_cli_buzon_inexistente_sale_con_2(tmp_path):
 # Regenerar los GeoTIFF de las fixtures (python tests/test_ensamblar.py --regenerar-tif)
 # ---------------------------------------------------------------------------------------
 def regenerar_tif():
-    geotiff_que_cubre(BUZON_OK / "nasadem_zona_piloto.tif", LIMITES["bbox"])
+    # Sin sufijo = la zona por omisión: cubre su rectángulo (no la envolvente zona_piloto.bbox).
+    geotiff_que_cubre(BUZON_OK / "nasadem_zona_piloto.tif", LIMITES["zonas"][OMISION]["bbox"])
     escribir_geotiff(BUZON_MALO / "nasadem_zona_piloto.tif", oeste=0, norte=0, ancho=8, alto=8, georef=False)
-    for d in (BUZON_OK, BUZON_MALO):
-        t = d / "nasadem_zona_piloto.tif"
+    tif_otra = BUZON_DOS_ZONAS / f"nasadem_zona_piloto_{OTRA}.tif"
+    geotiff_que_cubre(tif_otra, LIMITES["zonas"][OTRA]["bbox"])
+    for t in (BUZON_OK / "nasadem_zona_piloto.tif", BUZON_MALO / "nasadem_zona_piloto.tif", tif_otra):
         print(f"{t.relative_to(RAIZ)}: {t.stat().st_size} bytes, sha256 {sha(t)[:12]}…")
 
 

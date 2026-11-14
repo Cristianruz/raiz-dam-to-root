@@ -19,6 +19,22 @@ Qué hace:
 4) Agrega una línea por corrida a docs/entregas_log.md (hora, qué entró, qué se rechazó).
 Todavía NO toca web/data/: la integración con el contrato llega con el motor B4.
 
+Dos zonas piloto (docs/decisiones/2026-11-14_dos_zonas.md; zonas en data/params.json →
+zona_piloto.zonas):
+- parcelas_base.geojson trae las dos zonas; cada parcela puede traer «zona». Con «zona», el id
+  lleva el prefijo de la zona y el centroide (promedio de los vértices del anillo exterior) cae
+  en el rectángulo de la zona. Sin «zona» = esquemas.ZONA_POR_OMISION, sin exigir prefijo.
+- Los archivos de esquemas.ARCHIVOS_POR_ZONA llegan uno por zona: «<base>_<zona>.<ext>» se valida
+  con el esquema de su base; el sufijo debe ser una zona conocida (y no la zona por omisión, que
+  va sin sufijo). Se copian con su nombre tal cual.
+- nasadem_zona_piloto[_<zona>].tif debe cubrir el rectángulo de SU zona. Si no lo cubre pero sí
+  cubre todas las parcelas de esa zona en el parcelas_base.geojson de la misma corrida, entra con
+  un aviso para re-exportar (compatibilidad: la entrega de una zona se exportó antes de ampliar
+  el rectángulo).
+- El reporte dice la zona de cada archivo («zona») y, en los archivos con las dos zonas
+  (parcelas_base, relieve_rutas y los CSV por parcela), cuántos elementos trae de cada una («zonas»).
+Si params no trae zona_piloto.zonas, todo funciona como con una zona (zona_piloto.bbox) y se avisa.
+
 Uso:
   python motor/ensamblar.py --buzon RUTA [--salida CARPETA] [--log ARCHIVO] [--json]
   RAIZ_BUZON=RUTA python motor/ensamblar.py
@@ -157,6 +173,31 @@ def dias_ventana(anio, ventana):
     return (datetime.date(anio, mf, df) - datetime.date(anio, mi, di)).days + 1
 
 
+def es_bbox(v):
+    """True si v es [oeste, sur, este, norte] con cuatro números."""
+    return isinstance(v, list) and len(v) == 4 and all(map(es_numero, v))
+
+
+def zonas_de_params(params):
+    """({id: {"nombre", "prefijo_id", "bbox"}}, [ids]) de zona_piloto.zonas.valor (decisión de
+    dos zonas); (None, None) si params no las trae. Un prefijo o un bbox ausente o mal escrito
+    queda en None: la comprobación se omite y se avisa (nunca se inventa)."""
+    crudo = valor_en_params(params, "zona_piloto.zonas.valor")
+    if not isinstance(crudo, list):
+        return None, None
+    zonas = {}
+    for z in crudo:
+        if not isinstance(z, dict) or not isinstance(z.get("id"), str) or not z["id"].strip():
+            continue
+        prefijo = z.get("prefijo_id")
+        zonas[z["id"].strip()] = {
+            "nombre": z.get("nombre"),
+            "prefijo_id": prefijo.strip() if isinstance(prefijo, str) and prefijo.strip() else None,
+            "bbox": list(z["bbox"]) if es_bbox(z.get("bbox")) else None,
+        }
+    return (zonas, sorted(zonas)) if zonas else (None, None)
+
+
 def limites_derivados(params):
     """Límites que los esquemas piden como «@nombre», calculados de data/params.json.
     Lo que params no trae queda en None (la comprobación se omite y se avisa)."""
@@ -169,7 +210,8 @@ def limites_derivados(params):
         "ftw_confianza_min": valor_en_params(params, "mapa.ftw_confianza_min.valor"),
     }
     bbox = valor_en_params(params, "zona_piloto.bbox.valor")
-    lim["bbox"] = list(bbox) if isinstance(bbox, list) and len(bbox) == 4 and all(map(es_numero, bbox)) else None
+    lim["bbox"] = list(bbox) if es_bbox(bbox) else None
+    lim["zonas"], lim["zonas_ids"] = zonas_de_params(params)
     deslizador = valor_en_params(params, "dotaciones.deslizador.valor") or {}
     lim["deslizador_min"] = deslizador.get("min") if isinstance(deslizador, dict) else None
     lim["deslizador_max"] = deslizador.get("max") if isinstance(deslizador, dict) else None
@@ -206,6 +248,45 @@ def esquema_de(nombre):
         if fnmatch.fnmatchcase(nombre.lower(), patron):
             return esq
     return None
+
+
+def separar_sufijo_zona(nombre):
+    """(base, sufijo) si el nombre es «<base sin extensión>_<sufijo>.<ext>» de una base de
+    E.ARCHIVOS_POR_ZONA (p. ej., rotaciones_lazaro_cardenas.json → rotaciones.json,
+    lazaro_cardenas); (None, None) si no. No dice si el sufijo es una zona conocida."""
+    if nombre in E.ESQUEMAS:
+        return None, None
+    for base in E.ARCHIVOS_POR_ZONA:
+        raiz, ext = base.rsplit(".", 1)
+        if nombre.startswith(raiz + "_") and nombre.endswith("." + ext):
+            sufijo = nombre[len(raiz) + 1:-(len(ext) + 1)]
+            if sufijo:
+                return base, sufijo
+    return None, None
+
+
+def identificar(nombre, limites):
+    """(esquema, zona, motivos) de un archivo del buzón (decisión de dos zonas).
+    - Nombre exacto de la tabla: su esquema; si es de E.ARCHIVOS_POR_ZONA, la zona por omisión.
+    - «<base>_<zona>.<ext>»: el esquema de la base y la zona del sufijo, que debe ser un id de
+      zona_piloto.zonas distinto de la zona por omisión (esa va sin sufijo); si no, un motivo.
+    - Si no, el esquema por patrón (sin zona)."""
+    base, sufijo = separar_sufijo_zona(nombre)
+    if base is None:
+        return esquema_de(nombre), (E.ZONA_POR_OMISION if nombre in E.ARCHIVOS_POR_ZONA else None), []
+    zonas = limites.get("zonas")
+    if zonas is None:
+        motivo = (f"sufijo de zona «{sufijo}»: data/params.json no trae zona_piloto.zonas, no se sabe "
+                  "de qué zona es")
+    elif sufijo == E.ZONA_POR_OMISION:
+        motivo = (f"sufijo «_{sufijo}»: los archivos de la zona {sufijo} van sin sufijo ({base}; "
+                  f"{E.FUENTE_DOS_ZONAS})")
+    elif sufijo not in zonas:
+        motivo = (f"sufijo de zona «{sufijo}» desconocido: las zonas de data/params.json "
+                  f"(zona_piloto.zonas) son {', '.join(limites['zonas_ids'])}")
+    else:
+        motivo = None
+    return E.ESQUEMAS[base], sufijo, [motivo] if motivo else []
 
 
 # =========================================================================================
@@ -252,6 +333,19 @@ class Contexto:
         self.ids = None          # set de ids de parcelas_base.geojson cuando entra
         self.props = {}          # propiedades de cada parcela (para la regla de abstención)
         self.estado_parcelas = "no_llego"   # no_llego | rechazado | ok
+        self.zona_de_id = {}     # id de parcela → zona (sin «zona» = la zona por omisión)
+        self.cajas_zona = {}     # zona → [oeste, sur, este, norte] de los vértices de sus parcelas
+        self.n_parcelas_zona = {}  # zona → número de parcelas
+        self.zona_archivo = None   # zona del archivo que se valida (por sufijo o por omisión)
+
+    def rectangulo(self, zona):
+        """(bbox, rótulo) contra el que se compara un archivo o una parcela de esa zona: el
+        rectángulo de la zona en zona_piloto.zonas; si params no trae zonas, la envolvente
+        zona_piloto.bbox (como con una sola zona). bbox es None si params no lo trae."""
+        zonas = self.limites.get("zonas")
+        if zonas is None:
+            return self.limites.get("bbox"), "zona_piloto.bbox"
+        return (zonas.get(zona) or {}).get("bbox"), f"el rectángulo de la zona {zona} (zona_piloto.zonas)"
 
     def razon_sin_ids(self):
         if self.estado_parcelas == "rechazado":
@@ -503,6 +597,8 @@ def validar_csv(ruta, esq, ctx):
         sin_fila = ctx.ids - ids_vistos
         if sin_fila:
             res.aviso(f"{len(sin_fila)} de {len(ctx.ids)} parcelas de {E.ARCHIVO_PARCELAS} sin filas en este archivo")
+        # Un solo CSV con las dos zonas (las filas se distinguen por el id): parcelas por zona.
+        res.info["zonas"] = dict(sorted(Counter(ctx.zona_de_id[i] for i in ids_vistos if i in ctx.zona_de_id).items()))
     return res
 
 
@@ -721,16 +817,22 @@ def validar_geojson(ruta, esq, ctx):
 
     geometrias = esq["geometrias"]
     propiedades = esq.get("propiedades", {})
-    bbox = ctx.limites.get("bbox") if esq.get("avisar_fuera_de_bbox") else None
+    zonas = ctx.limites.get("zonas")
+    con_zona = "zona" in propiedades          # la propiedad «zona» está en el esquema
     vistos = {p: {} for p, campo in propiedades.items() if campo.get("unico")}
     props_por_id, fuera_bbox, protagonistas = {}, 0, 0
+    zona_de_id, cajas_zona, cuenta_zonas = {}, {}, Counter()
     for i, f in enumerate(features):
         if not isinstance(f, dict) or f.get("type") != "Feature":
             res.motivo("elemento de features que no es un Feature", f"feature {i}")
             continue
         p = f.get("properties") if isinstance(f.get("properties"), dict) else None
         donde = f"feature {i}" + (f" (id {p.get('id')})" if p and p.get("id") is not None else "")
-        g = f.get("geometry")
+        # Zona del feature: la propiedad «zona» si viene; si no, la zona por omisión.
+        zona = (p.get("zona").strip() if isinstance(p.get("zona"), str) else p.get("zona")) \
+            if p and "zona" in p else E.ZONA_POR_OMISION
+        zona_conocida = isinstance(zona, str) and bool(zona) and (zonas is None or zona in zonas)
+        g, caja = f.get("geometry"), None
         if not isinstance(g, dict):
             res.motivo("geometría nula o ausente", donde)
         elif g.get("type") not in geometrias:
@@ -739,16 +841,23 @@ def validar_geojson(ruta, esq, ctx):
             error, caja = revisar_coordenadas(g["type"], g.get("coordinates"))
             if error:
                 res.motivo(f"coordenadas inválidas: {error}", donde)
-            elif bbox and not (caja[0] >= bbox[0] and caja[1] >= bbox[1] and caja[2] <= bbox[2] and caja[3] <= bbox[3]):
-                fuera_bbox += 1
+                caja = None
+            elif esq.get("avisar_fuera_de_bbox") and zona_conocida:
+                bbox = ctx.rectangulo(zona)[0]
+                if bbox and not caja_dentro(caja, bbox):
+                    fuera_bbox += 1
         if not propiedades:
             continue
         if p is None:
-            res.motivo("feature sin properties", donde)
+            if any(not campo.get("opcional") for campo in propiedades.values()):
+                res.motivo("feature sin properties", donde)
+            elif con_zona:
+                cuenta_zonas[zona] += 1      # sin properties = sin «zona»: la zona por omisión
             continue
         for nombre, campo in propiedades.items():
             if nombre not in p:
-                res.motivo(f"falta la propiedad {nombre}", donde)
+                if not campo.get("opcional"):
+                    res.motivo(f"falta la propiedad {nombre}", donde)
                 continue
             estado, valor, error = leer_valor_json(p[nombre], campo)
             if estado == ERROR:
@@ -763,21 +872,85 @@ def validar_geojson(ruta, esq, ctx):
                         res.motivo(f"{nombre} repetido", f"{donde} (ya en feature {vistos[nombre][valor]})")
                     else:
                         vistos[nombre][valor] = i
+        if esq.get("por_zona") and "zona" in p and zona_conocida:
+            revisar_parcela_en_zona(p, g if caja else None, zona, ctx, res, donde)
+        if con_zona and zona_conocida:
+            cuenta_zonas[zona] += 1
+            if caja:
+                previa = cajas_zona.get(zona)
+                cajas_zona[zona] = caja if previa is None else [min(previa[0], caja[0]), min(previa[1], caja[1]),
+                                                                max(previa[2], caja[2]), max(previa[3], caja[3])]
         if p.get("protagonista") is True:
             protagonistas += 1
         if isinstance(p.get("id"), str):
             props_por_id[p["id"].strip()] = p
+            if zona_conocida:
+                zona_de_id[p["id"].strip()] = zona
 
     if fuera_bbox:
-        res.aviso(f"{fuera_bbox} features con vértices fuera de zona_piloto.bbox de data/params.json "
-                  "(B1 recorta al rectángulo; revisar)")
+        if zonas is None:
+            res.aviso(f"{fuera_bbox} features con vértices fuera de zona_piloto.bbox de data/params.json "
+                      "(B1 recorta al rectángulo; revisar)")
+        else:
+            res.aviso(f"{fuera_bbox} features con vértices fuera del rectángulo de su zona (zona_piloto.zonas "
+                      f"de data/params.json; sin «zona» = {E.ZONA_POR_OMISION}; B1 recorta al rectángulo; revisar)")
+    if con_zona and zonas is None and any("zona" in (f.get("properties") or {}) for f in features if isinstance(f, dict)):
+        res.aviso("data/params.json no trae zona_piloto.zonas: no se comprobaron el prefijo del id ni el "
+                  "rectángulo de cada zona")
     esperadas = esq.get("protagonistas_esperadas")
     if esperadas is not None and protagonistas != esperadas:
         res.aviso(f"trae {protagonistas} protagonistas; el kit (B1) pide {esperadas}")
+    if con_zona:
+        res.info["zonas"] = dict(sorted(cuenta_zonas.items()))
     if esq.get("es_referencia_ids"):
         res.info["ids"] = set(props_por_id)
         res.info["props"] = props_por_id
+        res.info["zona_de_id"] = zona_de_id
+        res.info["cajas_zona"] = cajas_zona
     return res
+
+
+def caja_dentro(caja, bbox):
+    """True si la caja [oeste, sur, este, norte] cae completa dentro de bbox."""
+    return caja[0] >= bbox[0] and caja[1] >= bbox[1] and caja[2] <= bbox[2] and caja[3] <= bbox[3]
+
+
+def centroide_vertices(geometria):
+    """Promedio simple de los vértices del anillo exterior (sin repetir el de cierre); en un
+    MultiPolygon, de los anillos exteriores de todos sus polígonos. Basta para saber en qué
+    rectángulo cae la parcela (decisión de dos zonas). None si no es un polígono."""
+    tipo, coords = geometria.get("type"), geometria.get("coordinates")
+    if tipo not in ("Polygon", "MultiPolygon"):
+        return None
+    puntos = []
+    for poligono in ([coords] if tipo == "Polygon" else coords):
+        anillo = poligono[0]
+        puntos.extend(anillo[:-1] if list(anillo[0][:2]) == list(anillo[-1][:2]) else anillo)
+    return [sum(p[0] for p in puntos) / len(puntos), sum(p[1] for p in puntos) / len(puntos)]
+
+
+def revisar_parcela_en_zona(p, geometria, zona, ctx, res, donde):
+    """Parcela con «zona» (decisión de dos zonas): el id empieza con el prefijo_id de la zona y
+    el centroide cae en su rectángulo. Si params no trae zonas, no se comprueba (se avisa una vez
+    al final de validar_geojson)."""
+    datos = (ctx.limites.get("zonas") or {}).get(zona)
+    if datos is None:
+        return
+    prefijo, pid = datos["prefijo_id"], p.get("id")
+    if prefijo is None:
+        res.aviso(f"zona_piloto.zonas no trae el prefijo_id de la zona {zona}: no se comprobó el prefijo de sus id")
+    elif isinstance(pid, str) and not pid.strip().startswith(prefijo):
+        res.motivo(f"id sin el prefijo «{prefijo}» de su zona {zona}", donde)
+    if geometria is None:
+        return
+    bbox, rotulo = ctx.rectangulo(zona)
+    if bbox is None:
+        res.aviso(f"{rotulo} de data/params.json es null o no está: no se comprobó que sus parcelas caigan dentro")
+        return
+    c = centroide_vertices(geometria)
+    if c and not (bbox[0] <= c[0] <= bbox[2] and bbox[1] <= c[1] <= bbox[3]):
+        res.motivo(f"centroide fuera del rectángulo de su zona {zona} {bbox} (zona_piloto.zonas)",
+                   f"{donde}: centroide [{c[0]:.5f}, {c[1]:.5f}]")
 
 
 # =========================================================================================
@@ -947,15 +1120,34 @@ def validar_geotiff(ruta, esq, ctx):
     if raster == G["raster_punto"]:      # PixelIsPoint: el amarre es el centro del píxel
         oeste, norte = oeste - sx / 2, norte + sy / 2
     este, sur = oeste + tif["ancho"] * sx, norte - tif["alto"] * sy
-    res.info["extension"] = [oeste, sur, este, norte]
-    bbox = ctx.limites.get("bbox")
+    extension = [oeste, sur, este, norte]
+    res.info["extension"] = extension
+    # Cada NASADEM cubre el rectángulo de SU zona (sufijo; sin sufijo = la zona por omisión).
+    zona = ctx.zona_archivo or E.ZONA_POR_OMISION
+    bbox, rotulo = ctx.rectangulo(zona)
     if bbox is None:
-        res.aviso("zona_piloto.bbox de data/params.json es null: no se comprobó que la extensión cubra la zona")
+        res.aviso(f"{rotulo} de data/params.json es null o no está: no se comprobó que la extensión cubra la zona")
     elif escala_ok:
         tol = sx / 2   # medio píxel de holgura en los bordes
-        if not (oeste <= bbox[0] + tol and sur <= bbox[1] + tol and este >= bbox[2] - tol and norte >= bbox[3] - tol):
-            res.motivo(f"la extensión [{oeste:.5f}, {sur:.5f}, {este:.5f}, {norte:.5f}] no cubre "
-                       f"zona_piloto.bbox {bbox}")
+
+        def cubre(caja):
+            return (oeste <= caja[0] + tol and sur <= caja[1] + tol and este >= caja[2] - tol
+                    and norte >= caja[3] - tol)
+
+        if not cubre(bbox):
+            texto = f"la extensión [{oeste:.5f}, {sur:.5f}, {este:.5f}, {norte:.5f}] no cubre {rotulo} {bbox}"
+            # Compatibilidad: si cubre todas las parcelas de su zona en el parcelas_base.geojson de
+            # esta corrida, entra con un aviso (se exportó antes de ampliar el rectángulo).
+            caja = ctx.cajas_zona.get(zona)
+            if caja and cubre(caja):
+                res.aviso(f"{texto}; sí cubre las {ctx.n_parcelas_zona.get(zona, 0)} parcelas de la zona {zona} "
+                          f"en {E.ARCHIVO_PARCELAS} (vértices en [{caja[0]:.5f}, {caja[1]:.5f}, {caja[2]:.5f}, "
+                          f"{caja[3]:.5f}]): entra; re-exportar NASADEM con el rectángulo de la zona")
+            elif caja:
+                res.motivo(f"{texto} ni las parcelas de la zona {zona} en {E.ARCHIVO_PARCELAS} "
+                           f"(vértices en [{caja[0]:.5f}, {caja[1]:.5f}, {caja[2]:.5f}, {caja[3]:.5f}])")
+            else:
+                res.motivo(texto)
     return res
 
 
@@ -1468,7 +1660,8 @@ ENCABEZADO_LOG = f"""<!-- {ENCABEZADO} -->
 
 Una línea por corrida de `motor/ensamblar.py` con buzón (kit v4, K-ENS paso 1). La escribe el
 ensamblador: no se edita a mano. Columnas: hora local con zona horaria; buzón; carpeta de salida;
-archivos que entraron con su rol (subcarpeta `entregas/<rol>/`; «—» si llegaron sueltos);
+archivos que entraron con su rol (subcarpeta `entregas/<rol>/`; «—» si llegaron sueltos) y su
+zona cuando aplica (decisión de dos zonas);
 rechazados con su primer motivo; retenidos (esperan a `parcelas_base.geojson`).
 Las corridas de prueba con `--salida` escriben su bitácora en esa carpeta, no aquí.
 
@@ -1494,6 +1687,10 @@ def escribir_log(log, rep):
         partes = []
         for x in items:
             texto = f"{x['archivo']} [{x.get('rol') or '—'}]"
+            if x.get("zona"):
+                texto += f" (zona {x['zona']})"
+            elif x.get("zonas"):
+                texto += f" (zonas {', '.join(x['zonas'])})"
             if con_motivo:
                 motivo = x.get(con_motivo)
                 motivo = motivo[0] if isinstance(motivo, list) and motivo else motivo
@@ -1563,7 +1760,9 @@ def ensamblar(buzon=None, salida=None, log=None, params=None):
     ctx = Contexto(limites)
     nuevas_fuentes, nombres_entraron = [], set()
     for a in archivos:
-        nombre, esq = a["nombre"], esquema_de(a["nombre"])
+        nombre = a["nombre"]
+        # Esquema y zona (por sufijo «_<zona>» o la zona por omisión); un sufijo desconocido es motivo.
+        esq, zona, motivos_zona = identificar(nombre, limites)
         motivos, res = [], None
         linea = leeme.get(nombre)
         if error_leeme:
@@ -1574,17 +1773,25 @@ def ensamblar(buzon=None, salida=None, log=None, params=None):
             motivos.extend(linea["errores"])
         if repetidos[nombre] > 1:
             motivos.append(f"el nombre se repite en el buzón ({repetidos[nombre]} veces): no se sabe cuál es la entrega")
+        motivos.extend(motivos_zona)
         if esq is None:
             motivos.append("no está en la tabla 0.4-B del kit (motor/esquemas.py): no se sabe cómo validarlo")
         else:
+            ctx.zona_archivo = zona
             try:
                 res = validador_de(esq)(a["ruta"], esq, ctx)
                 motivos.extend(res.motivos())
             except Exception as ex:  # noqa: BLE001 - un archivo roto se reporta, no detiene el ensamblado
                 motivos.append(f"error al validar: {type(ex).__name__}: {ex}")
+            finally:
+                ctx.zona_archivo = None
         avisos_archivo = res.avisos if res else []
+        # «zona»: la del archivo (sufijo o por omisión) o None si no aplica; «zonas»: elementos
+        # por zona en los archivos que traen las dos (parcelas, rutas y CSV por parcela).
         base = {"archivo": nombre, "rol": a["rol"], "pieza": esq.get("pieza") if esq else None,
-                "ruta_buzon": a["rel"]}
+                "ruta_buzon": a["rel"], "zona": zona}
+        if res and res.info.get("zonas"):
+            base["zonas"] = res.info["zonas"]
         necesita_ids = bool(res and res.info.get("necesita_ids") and ctx.ids is None)
 
         if necesita_ids and not motivos:
@@ -1609,6 +1816,7 @@ def ensamblar(buzon=None, salida=None, log=None, params=None):
                     "fuente": linea["fuente"], "fecha": linea["fecha"], "script": linea["script"],
                     "url_o_api": linea["fuente"], "fecha_consulta": linea["fecha"],
                     "sha256": sha, "ruta_buzon": a["rel"], "ingreso": hora,
+                    **({"zona": zona} if zona else {}),
                 })
                 for fila in (res.info.get("origen") or []):
                     nuevas_fuentes.append({"tipo": "origen", "de": nombre, "pieza": base["pieza"],
@@ -1617,6 +1825,8 @@ def ensamblar(buzon=None, salida=None, log=None, params=None):
         if nombre == E.ARCHIVO_PARCELAS and ctx.estado_parcelas == "no_llego":
             if nombre in nombres_entraron:
                 ctx.ids, ctx.props, ctx.estado_parcelas = res.info["ids"], res.info["props"], "ok"
+                ctx.zona_de_id, ctx.cajas_zona = res.info["zona_de_id"], res.info["cajas_zona"]
+                ctx.n_parcelas_zona = res.info.get("zonas") or {}
             else:
                 ctx.estado_parcelas = "rechazado"
 
@@ -1643,7 +1853,12 @@ def texto_reporte(rep):
                f"Bitácora ...: {rep['log']}", ""]
 
     def etiqueta(x):
-        return f"[{x.get('pieza') or '?'} · rol {x.get('rol') or '—'}]"
+        partes = [x.get("pieza") or "?", f"rol {x.get('rol') or '—'}"]
+        if x.get("zona"):
+            partes.append(f"zona {x['zona']}")
+        if x.get("zonas"):
+            partes.append("zonas " + ", ".join(f"{z} ({n})" for z, n in x["zonas"].items()))
+        return f"[{' · '.join(partes)}]"
 
     lineas.append(f"ENTRARON ({len(rep['entraron'])})")
     for x in rep["entraron"]:

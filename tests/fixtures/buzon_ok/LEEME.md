@@ -16,7 +16,7 @@ no se valida ni se copia; el ensamblador lo lista aparte como «crudo».
 | suelo_desnudo.csv | Valores de prueba (fixture) | 2026-11-14 | tests/fixtures (a mano) |
 | relieve_parcelas.csv | Valores de prueba (fixture) | 2026-11-14 | tests/fixtures (a mano) |
 | relieve_rutas.geojson | Valores de prueba (fixture): 2 rutas | 2026-11-14 | tests/fixtures (a mano) |
-| nasadem_zona_piloto.tif | Valores de prueba (fixture): malla de 1 arcosegundo en EPSG:4326 que cubre zona_piloto.bbox | 2026-11-14 | tests/test_ensamblar.py --regenerar-tif |
+| nasadem_zona_piloto.tif | Valores de prueba (fixture): malla de 1 arcosegundo en EPSG:4326 que cubre el rectángulo de delicias_saucillo (zona_piloto.zonas; sin sufijo = esa zona) | 2026-11-14 | tests/test_ensamblar.py --regenerar-tif |
 | rotaciones.json | Valores de prueba (fixture): 3 rotaciones (perenne, anual y descanso sin cultivos) | 2026-11-14 | tests/fixtures (a mano) |
 | demanda_cultivos.csv | Valores de prueba (fixture): 2 cultivos con lluvia 0 y -20 | 2026-11-14 | tests/fixtures (a mano) |
 | memoria_parcelas.csv | Valores de prueba (fixture): incluye 90 días en 2024 (bisiesto) y celdas vacías | 2026-11-14 | tests/fixtures (a mano) |
