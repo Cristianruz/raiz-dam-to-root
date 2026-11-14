@@ -46,4 +46,10 @@ comprometida) y P0118 (barbecho en 2026 tras años perenne, libre), elegidas por
 - Corrida real: 940 + 299 parcelas. Protagonistas: P0757 (alfalfa de 3 años, por vencer, a 0.25 km de Km 92), P0244 (descanso en
   2026 tras años con cultivo, libre, a 0.7 km de El Molino) y L0175 (nogal, comprometida, a 2.6 km de Lázaro Cárdenas).
   No hay «anual libre» con nombre de cultivo: las anuales de verano se abstienen; la protagonista libre es una parcela en descanso.
-- La entrega pasa `motor/ensamblar.py` de la rama del integrador: 18 archivos, 0 rechazados, 0 retenidos.
+- La entrega pasa `motor/ensamblar.py` de la rama del integrador: 22 archivos, 0 rechazados, 0 retenidos.
+- **Un comando la rehace desde los crudos** (unos 55 s): `python datos/colab/correr_zonas.py`. Comprobado el 14-nov-2026 en una
+  carpeta vacía: los 20 archivos de datos salen idénticos, byte por byte, a los entregados en `Raiz_entregas`. El `LEEME.md`
+  de la entrega lleva además detalle escrito a mano en la columna de fuente (punto de NASA POWER, rectángulo de IMERG) y dos
+  archivos del rectángulo original (`et_contraste.csv`, `h3_series.csv`, de `data/processed/`).
+- Rutas de escurrimiento (A9): no se dibujan dentro de depresiones cerradas del DEM de 3 m o más (`prof_depresion_ruta_m` [S] en
+  `supuestos.json`); ahí la dirección de flujo sale del relleno y no del terreno. `relieve_parcelas.csv` no depende de esto.
