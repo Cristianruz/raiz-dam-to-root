@@ -1,0 +1,173 @@
+{
+ "meta": {
+  "mock": true,
+  "dinamicos": [
+   "d",
+   "ha",
+   "cobertura"
+  ],
+  "nota": "SIMULATED template texts; C3 replaces them"
+ },
+ "explicaciones": {
+  "EXP_P0001_ACTUAL": {
+   "textos": {
+    "por_que": "This option asks for {{f1}} thousand m³ per hectare per year and commits water for {{f2}} to {{f3}} years. With your allocation of {{d}} thousand m³/ha it covers {{cobertura}} of the need: enough for {{ha}} hectares.",
+    "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER climate (range {{f4}} to {{f5}} thousand m³/ha). Field history from NASA HLS greenness. SIMULATED text until the explanation step runs.",
+    "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation.",
+    "que_no_sabemos": "Field efficiency in this district has not been measured; the band shows that uncertainty. Field boundaries are estimated.",
+    "riesgos": "Check with your module technician: allocation, measuring point and local soil conditions can change the answer."
+   },
+   "valores": {
+    "f1": 17.5,
+    "f2": 3,
+    "f3": 4,
+    "f4": 16.5,
+    "f5": 18.5
+   }
+  },
+  "EXP_P0001_B": {
+   "textos": {
+    "por_que": "This option asks for {{f1}} thousand m³ per hectare per year and commits water for {{f2}} to {{f3}} years. With your allocation of {{d}} thousand m³/ha it covers {{cobertura}} of the need: enough for {{ha}} hectares.",
+    "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER climate (range {{f4}} to {{f5}} thousand m³/ha). Field history from NASA HLS greenness. SIMULATED text until the explanation step runs.",
+    "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation.",
+    "que_no_sabemos": "Field efficiency in this district has not been measured; the band shows that uncertainty. Field boundaries are estimated.",
+    "riesgos": "Check with your module technician: allocation, measuring point and local soil conditions can change the answer."
+   },
+   "valores": {
+    "f1": 14.0,
+    "f2": 3,
+    "f3": 4,
+    "f4": 13.0,
+    "f5": 15.0
+   }
+  },
+  "EXP_P0001_ALT_ALGODON": {
+   "textos": {
+    "por_que": "This option asks for {{f1}} thousand m³ per hectare per year and commits water for {{f2}} to {{f3}} years. With your allocation of {{d}} thousand m³/ha it covers {{cobertura}} of the need: enough for {{ha}} hectares.",
+    "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER climate (range {{f4}} to {{f5}} thousand m³/ha). Field history from NASA HLS greenness. SIMULATED text until the explanation step runs.",
+    "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation.",
+    "que_no_sabemos": "Field efficiency in this district has not been measured; the band shows that uncertainty. Field boundaries are estimated.",
+    "riesgos": "Check with your module technician: allocation, measuring point and local soil conditions can change the answer."
+   },
+   "valores": {
+    "f1": 6.8,
+    "f2": 1,
+    "f3": 1,
+    "f4": 6.3,
+    "f5": 7.4
+   }
+  },
+  "EXP_P0001_ALT_MAIZ": {
+   "textos": {
+    "por_que": "This option asks for {{f1}} thousand m³ per hectare per year and commits water for {{f2}} to {{f3}} years. With your allocation of {{d}} thousand m³/ha it covers {{cobertura}} of the need: enough for {{ha}} hectares.",
+    "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER climate (range {{f4}} to {{f5}} thousand m³/ha). Field history from NASA HLS greenness. SIMULATED text until the explanation step runs.",
+    "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation.",
+    "que_no_sabemos": "Field efficiency in this district has not been measured; the band shows that uncertainty. Field boundaries are estimated.",
+    "riesgos": "Check with your module technician: allocation, measuring point and local soil conditions can change the answer."
+   },
+   "valores": {
+    "f1": 5.5,
+    "f2": 1,
+    "f3": 1,
+    "f4": 5.0,
+    "f5": 6.0
+   }
+  },
+  "EXP_P0002_ACTUAL": {
+   "textos": {
+    "por_que": "This option asks for {{f1}} thousand m³ per hectare per year and commits water for {{f2}} to {{f3}} years. With your allocation of {{d}} thousand m³/ha it covers {{cobertura}} of the need: enough for {{ha}} hectares.",
+    "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER climate (range {{f4}} to {{f5}} thousand m³/ha). Field history from NASA HLS greenness. SIMULATED text until the explanation step runs.",
+    "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation.",
+    "que_no_sabemos": "Field efficiency in this district has not been measured; the band shows that uncertainty. Field boundaries are estimated.",
+    "riesgos": "Check with your module technician: allocation, measuring point and local soil conditions can change the answer."
+   },
+   "valores": {
+    "f1": 9.2,
+    "f2": 1,
+    "f3": 1,
+    "f4": 8.6,
+    "f5": 9.9
+   }
+  },
+  "EXP_P0002_ALT_ALGODON": {
+   "textos": {
+    "por_que": "This option asks for {{f1}} thousand m³ per hectare per year and commits water for {{f2}} to {{f3}} years. With your allocation of {{d}} thousand m³/ha it covers {{cobertura}} of the need: enough for {{ha}} hectares.",
+    "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER climate (range {{f4}} to {{f5}} thousand m³/ha). Field history from NASA HLS greenness. SIMULATED text until the explanation step runs.",
+    "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation.",
+    "que_no_sabemos": "Field efficiency in this district has not been measured; the band shows that uncertainty. Field boundaries are estimated.",
+    "riesgos": "Check with your module technician: allocation, measuring point and local soil conditions can change the answer."
+   },
+   "valores": {
+    "f1": 6.8,
+    "f2": 1,
+    "f3": 1,
+    "f4": 6.3,
+    "f5": 7.4
+   }
+  },
+  "EXP_P0002_ALT_ALFALFA_NUEVA": {
+   "textos": {
+    "por_que": "This option asks for {{f1}} thousand m³ per hectare per year and commits water for {{f2}} to {{f3}} years. With your allocation of {{d}} thousand m³/ha it covers {{cobertura}} of the need: enough for {{ha}} hectares.",
+    "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER climate (range {{f4}} to {{f5}} thousand m³/ha). Field history from NASA HLS greenness. SIMULATED text until the explanation step runs.",
+    "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation.",
+    "que_no_sabemos": "Field efficiency in this district has not been measured; the band shows that uncertainty. Field boundaries are estimated.",
+    "riesgos": "Check with your module technician: allocation, measuring point and local soil conditions can change the answer."
+   },
+   "valores": {
+    "f1": 17.5,
+    "f2": 3,
+    "f3": 4,
+    "f4": 16.5,
+    "f5": 18.5
+   }
+  },
+  "EXP_P0003_ACTUAL": {
+   "textos": {
+    "por_que": "This option asks for {{f1}} thousand m³ per hectare per year and commits water for {{f2}} to {{f3}} years. With your allocation of {{d}} thousand m³/ha it covers {{cobertura}} of the need: enough for {{ha}} hectares.",
+    "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER climate (range {{f4}} to {{f5}} thousand m³/ha). Field history from NASA HLS greenness. SIMULATED text until the explanation step runs.",
+    "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation.",
+    "que_no_sabemos": "Field efficiency in this district has not been measured; the band shows that uncertainty. Field boundaries are estimated.",
+    "riesgos": "Check with your module technician: allocation, measuring point and local soil conditions can change the answer."
+   },
+   "valores": {
+    "f1": 12.5,
+    "f2": 10,
+    "f3": 10,
+    "f4": 11.0,
+    "f5": 14.0
+   }
+  },
+  "EXP_P0003_ALT_ALGODON": {
+   "textos": {
+    "por_que": "This option asks for {{f1}} thousand m³ per hectare per year and commits water for {{f2}} to {{f3}} years. With your allocation of {{d}} thousand m³/ha it covers {{cobertura}} of the need: enough for {{ha}} hectares.",
+    "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER climate (range {{f4}} to {{f5}} thousand m³/ha). Field history from NASA HLS greenness. SIMULATED text until the explanation step runs.",
+    "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation.",
+    "que_no_sabemos": "Field efficiency in this district has not been measured; the band shows that uncertainty. Field boundaries are estimated.",
+    "riesgos": "Check with your module technician: allocation, measuring point and local soil conditions can change the answer."
+   },
+   "valores": {
+    "f1": 6.8,
+    "f2": 1,
+    "f3": 1,
+    "f4": 6.3,
+    "f5": 7.4
+   }
+  },
+  "EXP_P0003_NO_SEMBRAR": {
+   "textos": {
+    "por_que": "This option asks for {{f1}} thousand m³ per hectare per year and commits water for {{f2}} to {{f3}} years. With your allocation of {{d}} thousand m³/ha it covers {{cobertura}} of the need: enough for {{ha}} hectares.",
+    "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER climate (range {{f4}} to {{f5}} thousand m³/ha). Field history from NASA HLS greenness. SIMULATED text until the explanation step runs.",
+    "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation.",
+    "que_no_sabemos": "Field efficiency in this district has not been measured; the band shows that uncertainty. Field boundaries are estimated.",
+    "riesgos": "Check with your module technician: allocation, measuring point and local soil conditions can change the answer."
+   },
+   "valores": {
+    "f1": 0,
+    "f2": 1,
+    "f3": 1,
+    "f4": 0,
+    "f5": 0
+   }
+  }
+ }
+}

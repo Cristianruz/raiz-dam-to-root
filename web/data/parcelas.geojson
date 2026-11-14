@@ -1,0 +1,285 @@
+{
+ "type": "FeatureCollection",
+ "meta": {
+  "mock": true,
+  "anio_actual": 2026
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "P0001",
+    "area_ha": 8.4,
+    "modulo": null,
+    "ftw_confianza": 72,
+    "protagonista": true,
+    "cultivo_actual": "alfalfa",
+    "prob_max": 0.81,
+    "acuerdo_metodos": "2/2",
+    "abstencion": false,
+    "dias_suelo_desnudo_feb_abr": 6,
+    "ndvi_ultimo_mes": 0.62,
+    "dias_suelo_desnudo_mediana": 8,
+    "edad_perenne_anios": 6,
+    "memoria": [
+     {
+      "anio": 2016,
+      "estado": "verano"
+     },
+     {
+      "anio": 2017,
+      "estado": "doble"
+     },
+     {
+      "anio": 2018,
+      "estado": "invierno"
+     },
+     {
+      "anio": 2019,
+      "estado": "descanso"
+     },
+     {
+      "anio": 2020,
+      "estado": "sin_dato"
+     },
+     {
+      "anio": 2021,
+      "estado": "perenne"
+     },
+     {
+      "anio": 2022,
+      "estado": "perenne"
+     },
+     {
+      "anio": 2023,
+      "estado": "perenne"
+     },
+     {
+      "anio": 2024,
+      "estado": "perenne"
+     },
+     {
+      "anio": 2025,
+      "estado": "perenne"
+     },
+     {
+      "anio": 2026,
+      "estado": "perenne"
+     }
+    ],
+    "estado_plazo": "por_vencer"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.46065,
+       28.192291
+      ],
+      [
+       -105.457696,
+       28.192291
+      ],
+      [
+       -105.457696,
+       28.194895
+      ],
+      [
+       -105.46065,
+       28.194895
+      ],
+      [
+       -105.46065,
+       28.192291
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "P0002",
+    "area_ha": 6.1,
+    "modulo": null,
+    "ftw_confianza": 64,
+    "protagonista": true,
+    "cultivo_actual": "chile",
+    "prob_max": 0.74,
+    "acuerdo_metodos": "2/2",
+    "abstencion": false,
+    "dias_suelo_desnudo_feb_abr": 61,
+    "ndvi_ultimo_mes": 0.18,
+    "dias_suelo_desnudo_mediana": 55,
+    "edad_perenne_anios": null,
+    "memoria": [
+     {
+      "anio": 2016,
+      "estado": "verano"
+     },
+     {
+      "anio": 2017,
+      "estado": "verano"
+     },
+     {
+      "anio": 2018,
+      "estado": "doble"
+     },
+     {
+      "anio": 2019,
+      "estado": "verano"
+     },
+     {
+      "anio": 2020,
+      "estado": "descanso"
+     },
+     {
+      "anio": 2021,
+      "estado": "verano"
+     },
+     {
+      "anio": 2022,
+      "estado": "invierno"
+     },
+     {
+      "anio": 2023,
+      "estado": "verano"
+     },
+     {
+      "anio": 2024,
+      "estado": "verano"
+     },
+     {
+      "anio": 2025,
+      "estado": "descanso"
+     },
+     {
+      "anio": 2026,
+      "estado": "verano"
+     }
+    ],
+    "estado_plazo": "libre"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.448201,
+       28.185747
+      ],
+      [
+       -105.445684,
+       28.185747
+      ],
+      [
+       -105.445684,
+       28.187965
+      ],
+      [
+       -105.448201,
+       28.187965
+      ],
+      [
+       -105.448201,
+       28.185747
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "P0003",
+    "area_ha": 12.0,
+    "modulo": null,
+    "ftw_confianza": 88,
+    "protagonista": true,
+    "cultivo_actual": "nogal",
+    "prob_max": 0.92,
+    "acuerdo_metodos": "2/2",
+    "abstencion": false,
+    "dias_suelo_desnudo_feb_abr": 0,
+    "ndvi_ultimo_mes": 0.55,
+    "dias_suelo_desnudo_mediana": 0,
+    "edad_perenne_anios": 11,
+    "memoria": [
+     {
+      "anio": 2016,
+      "estado": "verano"
+     },
+     {
+      "anio": 2017,
+      "estado": "verano"
+     },
+     {
+      "anio": 2018,
+      "estado": "verano"
+     },
+     {
+      "anio": 2019,
+      "estado": "verano"
+     },
+     {
+      "anio": 2020,
+      "estado": "verano"
+     },
+     {
+      "anio": 2021,
+      "estado": "verano"
+     },
+     {
+      "anio": 2022,
+      "estado": "verano"
+     },
+     {
+      "anio": 2023,
+      "estado": "verano"
+     },
+     {
+      "anio": 2024,
+      "estado": "verano"
+     },
+     {
+      "anio": 2025,
+      "estado": "verano"
+     },
+     {
+      "anio": 2026,
+      "estado": "verano"
+     }
+    ],
+    "estado_plazo": "comprometida"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.440554,
+       28.193834
+      ],
+      [
+       -105.437023,
+       28.193834
+      ],
+      [
+       -105.437023,
+       28.196946
+      ],
+      [
+       -105.440554,
+       28.196946
+      ],
+      [
+       -105.440554,
+       28.193834
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

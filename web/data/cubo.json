@@ -1,0 +1,1228 @@
+{
+ "meta": {
+  "version": "4.0",
+  "generado": null,
+  "mock": true,
+  "mock_campos": [
+   "parcelas",
+   "zona",
+   "explicaciones",
+   "geometria"
+  ],
+  "fuentes": [
+   "data/params.json",
+   "data/simulados.json"
+  ],
+  "notas": [
+   "DATOS SIMULADOS para que la web arranque antes de que lleguen las entregas reales (kit v4, K-INT). NO son datos. Las láminas de alfalfa (17.5), algodón (6.8) y maíz forrajero (5.5) imitan el orden de magnitud de INIFAP citado en S9 §5, y la de chile (9.2) el de kit A5 (~92 cm); la del nogal es un marcador sin fuente. Geometrías: cuadrados alrededor del punto de clima del kit, no parcelas reales. motor/ensamblar.py sustituye cada campo cuando llega su entrega válida."
+  ]
+ },
+ "distrito": {
+  "boquilla": {
+   "namo_hm3": 2846.78,
+   "fuente_namo": "Tabla de Conagua reproducida en prensa",
+   "almacenamiento_hm3": 825.577,
+   "fecha_almacenamiento": "2026-11-09",
+   "fuente_almacenamiento": "Impacto Noticias, 9-nov-2026, con el reporte diario de Conagua (S8 §2)"
+  },
+  "acuifero_0831": {
+   "disponibilidad_hm3_anio": -167.12,
+   "fuente": "Conagua 2024, documento técnico DR_0831"
+  },
+  "capas_disponibles": [
+   "cultivos",
+   "suelo_desnudo",
+   "memoria_2025"
+  ]
+ },
+ "dotaciones": {
+  "unidad": "millares_por_ha",
+  "equivalencia": "1 millar/ha = 1,000 m³/ha = 10 cm de lámina; 100 mm = 1 millar/ha (kit B4)",
+  "deslizador": {
+   "min": 0,
+   "max": 12,
+   "paso": 0.5
+  },
+  "marcas": [
+   {
+    "id": "como_2025",
+    "nombre": "Like 2025",
+    "min": 1,
+    "max": 1,
+    "valor": 1,
+    "nota": "≈1 millar/ha, de pozos; sin agua de las presas",
+    "fuente": "El Diario de Chihuahua, 28-oct-2024, según la investigación (S8 §2). Referencia: Módulo 4, 1 millar/ha a 4,976 ha desde 11 pozos",
+    "fecha_consulta": null,
+    "etiqueta": "[P]"
+   },
+   {
+    "id": "como_2026",
+    "nombre": "Like 2026",
+    "min": 3,
+    "max": 4,
+    "valor": 3.5,
+    "nota": "valor = punto medio del rango",
+    "fuente": "El Diario de Chihuahua, 27-jul-2026; nota no leída directamente (S8 §2)",
+    "fecha_consulta": null,
+    "etiqueta": "[P], por confirmar"
+   },
+   {
+    "id": "anio_normal",
+    "nombre": "Normal year",
+    "min": 9,
+    "max": 10,
+    "valor": 9.5,
+    "nota": "valor = punto medio del rango",
+    "fuente": "El Diario de Chihuahua, 27-jul-2026; nota no leída directamente (S8 §2)",
+    "fecha_consulta": null,
+    "etiqueta": "[P], por confirmar"
+   }
+  ],
+  "punto_medicion": "Toma de la parcela [S]; Por confirmar con un técnico de módulo en la mentoría"
+ },
+ "lluvia_pct": [
+  0,
+  -20
+ ],
+ "zona": {
+  "nombre": "zona piloto",
+  "superficie_total_ha": 26.5,
+  "superficie_clasificada_ha": 26.5,
+  "superficie_abstenida_ha": 0,
+  "superficie_perenne_ha": 20.4,
+  "demanda_perenne_millares": {
+   "0": {
+    "p10": 270.6,
+    "p50": 297.0,
+    "p90": 323.4
+   },
+   "-20": {
+    "p10": 280.8,
+    "p50": 307.2,
+    "p90": 333.6
+   }
+  },
+  "conteos": {
+   "total": 3,
+   "libre": 1,
+   "por_vencer": 1,
+   "comprometida": 1,
+   "abstenida": 0
+  }
+ },
+ "parcelas": {
+  "P0001": {
+   "opciones": [
+    {
+     "id": "ACTUAL",
+     "nombre": "Current rotation: established alfalfa",
+     "secuencia": [
+      "alfalfa"
+     ],
+     "agua": {
+      "lamina_bruta": {
+       "0": {
+        "p10": 16.5,
+        "p50": 17.5,
+        "p90": 18.5
+       },
+       "-20": {
+        "p10": 17.0,
+        "p50": 18.0,
+        "p90": 19.0
+       }
+      },
+      "plazo_anios": {
+       "min": 3,
+       "max": 4
+      },
+      "plazo_restante": {
+       "min": 0,
+       "max": 0
+      },
+      "compromiso_millares_ha": {
+       "0": {
+        "min": 0.0,
+        "max": 0.0
+       },
+       "-20": {
+        "min": 0.0,
+        "max": 0.0
+       }
+      },
+      "nota_plazo": null
+     },
+     "suelo": {
+      "dias_desnudo": 8,
+      "dias_desnudo_origen": "medido",
+      "leguminosa": true,
+      "ruptura_plagas": false,
+      "riesgo_salinidad": null
+     },
+     "dinero": null,
+     "semaforo": {
+      "suelo": "verde",
+      "dinero": "gris"
+     },
+     "meses_cultivo": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "filtros": [],
+     "advertir_si_rojo": false,
+     "preguntas_ref": "EXP_P0001_ACTUAL",
+     "gota": {
+      "m3_salen_presa": 245000.0,
+      "m3_perdidas_canal": 98000.0,
+      "m3_llegan_parcela": 147000.0,
+      "m3_consume_cultivo_et": 103320.0,
+      "m3_regresan_acuifero": 49000.0,
+      "m3_otras_perdidas": 92680.0,
+      "supuestos": [
+       "SIMULATED: conduction efficiency = params mean; return coefficient applied to dam outflow"
+      ]
+     },
+     "gota_goteo_con_tope": {
+      "m3_salen_presa": 191333.3,
+      "m3_perdidas_canal": 76533.3,
+      "m3_llegan_parcela": 114800.0,
+      "m3_consume_cultivo_et": 103320.0,
+      "m3_regresan_acuifero": 38266.7,
+      "m3_otras_perdidas": 49746.7,
+      "supuestos": [
+       "SIMULATED: drip efficiency is a mock value until P5 delivers supuestos.json"
+      ]
+     },
+     "gota_goteo_sin_tope": {
+      "m3_salen_presa": 245000.0,
+      "m3_perdidas_canal": 98000.0,
+      "m3_llegan_parcela": 147000.0,
+      "m3_consume_cultivo_et": 132300.0,
+      "m3_regresan_acuifero": 49000.0,
+      "m3_otras_perdidas": 63700.0,
+      "supuestos": [
+       "SIMULATED: water no longer released is reassigned to extra drip area with the same crop"
+      ]
+     },
+     "tope_consumo": {
+      "et_historica_m3": 103320.0,
+      "et_goteo_sin_tope_m3": 132300.0,
+      "cumple_sin_tope": false,
+      "base_historica": "SIMULATED: ET of the current irrigation method (gota.m3_consume_cultivo_et)"
+     }
+    },
+    {
+     "id": "B",
+     "nombre": "Established alfalfa with a summer irrigation cut",
+     "secuencia": [
+      "alfalfa"
+     ],
+     "agua": {
+      "lamina_bruta": {
+       "0": {
+        "p10": 13.0,
+        "p50": 14.0,
+        "p90": 15.0
+       },
+       "-20": {
+        "p10": 13.5,
+        "p50": 14.5,
+        "p90": 15.5
+       }
+      },
+      "plazo_anios": {
+       "min": 3,
+       "max": 4
+      },
+      "plazo_restante": {
+       "min": 3,
+       "max": 4
+      },
+      "compromiso_millares_ha": {
+       "0": {
+        "min": 42.0,
+        "max": 56.0
+       },
+       "-20": {
+        "min": 43.5,
+        "max": 58.0
+       }
+      },
+      "nota_plazo": null
+     },
+     "suelo": {
+      "dias_desnudo": 8,
+      "dias_desnudo_origen": "estimado",
+      "leguminosa": true,
+      "ruptura_plagas": false,
+      "riesgo_salinidad": null
+     },
+     "dinero": null,
+     "semaforo": {
+      "suelo": "verde",
+      "dinero": "gris"
+     },
+     "meses_cultivo": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1
+     ],
+     "filtros": [
+      {
+       "filtro": "corte_verano_variante_moderada",
+       "pasa": true,
+       "motivo": "Moderate variant by default (skip 2–3 irrigations Jul–Sep)",
+       "fuente": "Kit v4, B3 (maestro §5.2) — SIMULATED"
+      }
+     ],
+     "advertir_si_rojo": false,
+     "preguntas_ref": "EXP_P0001_B",
+     "gota": {
+      "m3_salen_presa": 196000.0,
+      "m3_perdidas_canal": 78400.0,
+      "m3_llegan_parcela": 117600.0,
+      "m3_consume_cultivo_et": 82320.0,
+      "m3_regresan_acuifero": 39200.0,
+      "m3_otras_perdidas": 74480.0,
+      "supuestos": [
+       "SIMULATED: conduction efficiency = params mean; return coefficient applied to dam outflow"
+      ]
+     },
+     "gota_goteo_con_tope": {
+      "m3_salen_presa": 152444.4,
+      "m3_perdidas_canal": 60977.8,
+      "m3_llegan_parcela": 91466.7,
+      "m3_consume_cultivo_et": 82320.0,
+      "m3_regresan_acuifero": 30488.9,
+      "m3_otras_perdidas": 39635.6,
+      "supuestos": [
+       "SIMULATED: drip efficiency is a mock value until P5 delivers supuestos.json"
+      ]
+     },
+     "gota_goteo_sin_tope": {
+      "m3_salen_presa": 196000.0,
+      "m3_perdidas_canal": 78400.0,
+      "m3_llegan_parcela": 117600.0,
+      "m3_consume_cultivo_et": 105840.0,
+      "m3_regresan_acuifero": 39200.0,
+      "m3_otras_perdidas": 50960.0,
+      "supuestos": [
+       "SIMULATED: water no longer released is reassigned to extra drip area with the same crop"
+      ]
+     },
+     "tope_consumo": {
+      "et_historica_m3": 82320.0,
+      "et_goteo_sin_tope_m3": 105840.0,
+      "cumple_sin_tope": false,
+      "base_historica": "SIMULATED: ET of the current irrigation method (gota.m3_consume_cultivo_et)"
+     }
+    },
+    {
+     "id": "ALT_ALGODON",
+     "nombre": "Switch to cotton",
+     "secuencia": [
+      "algodon"
+     ],
+     "agua": {
+      "lamina_bruta": {
+       "0": {
+        "p10": 6.3,
+        "p50": 6.8,
+        "p90": 7.4
+       },
+       "-20": {
+        "p10": 6.6,
+        "p50": 7.1,
+        "p90": 7.7
+       }
+      },
+      "plazo_anios": {
+       "min": 1,
+       "max": 1
+      },
+      "plazo_restante": {
+       "min": 1,
+       "max": 1
+      },
+      "compromiso_millares_ha": {
+       "0": {
+        "min": 6.8,
+        "max": 6.8
+       },
+       "-20": {
+        "min": 7.1,
+        "max": 7.1
+       }
+      },
+      "nota_plazo": null
+     },
+     "suelo": {
+      "dias_desnudo": 70,
+      "dias_desnudo_origen": "estimado",
+      "leguminosa": false,
+      "ruptura_plagas": true,
+      "riesgo_salinidad": null
+     },
+     "dinero": null,
+     "semaforo": {
+      "suelo": "ambar",
+      "dinero": "gris"
+     },
+     "meses_cultivo": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0
+     ],
+     "filtros": [
+      {
+       "filtro": "soca_algodon",
+       "pasa": true,
+       "motivo": "Stalk destruction before Nov 30 required",
+       "fuente": "NOM-026; INIFAP 2017 — SIMULATED"
+      }
+     ],
+     "advertir_si_rojo": false,
+     "preguntas_ref": "EXP_P0001_ALT_ALGODON",
+     "gota": {
+      "m3_salen_presa": 95200.0,
+      "m3_perdidas_canal": 38080.0,
+      "m3_llegan_parcela": 57120.0,
+      "m3_consume_cultivo_et": 40320.0,
+      "m3_regresan_acuifero": 19040.0,
+      "m3_otras_perdidas": 35840.0,
+      "supuestos": [
+       "SIMULATED: conduction efficiency = params mean; return coefficient applied to dam outflow"
+      ]
+     },
+     "gota_goteo_con_tope": {
+      "m3_salen_presa": 74666.7,
+      "m3_perdidas_canal": 29866.7,
+      "m3_llegan_parcela": 44800.0,
+      "m3_consume_cultivo_et": 40320.0,
+      "m3_regresan_acuifero": 14933.3,
+      "m3_otras_perdidas": 19413.3,
+      "supuestos": [
+       "SIMULATED: drip efficiency is a mock value until P5 delivers supuestos.json"
+      ]
+     },
+     "gota_goteo_sin_tope": {
+      "m3_salen_presa": 95200.0,
+      "m3_perdidas_canal": 38080.0,
+      "m3_llegan_parcela": 57120.0,
+      "m3_consume_cultivo_et": 51408.0,
+      "m3_regresan_acuifero": 19040.0,
+      "m3_otras_perdidas": 24752.0,
+      "supuestos": [
+       "SIMULATED: water no longer released is reassigned to extra drip area with the same crop"
+      ]
+     },
+     "tope_consumo": {
+      "et_historica_m3": 40320.0,
+      "et_goteo_sin_tope_m3": 51408.0,
+      "cumple_sin_tope": false,
+      "base_historica": "SIMULATED: ET of the current irrigation method (gota.m3_consume_cultivo_et)"
+     }
+    },
+    {
+     "id": "ALT_MAIZ",
+     "nombre": "Switch to forage maize",
+     "secuencia": [
+      "maiz_forrajero"
+     ],
+     "agua": {
+      "lamina_bruta": {
+       "0": {
+        "p10": 5.0,
+        "p50": 5.5,
+        "p90": 6.0
+       },
+       "-20": {
+        "p10": 5.3,
+        "p50": 5.8,
+        "p90": 6.3
+       }
+      },
+      "plazo_anios": {
+       "min": 1,
+       "max": 1
+      },
+      "plazo_restante": {
+       "min": 1,
+       "max": 1
+      },
+      "compromiso_millares_ha": {
+       "0": {
+        "min": 5.5,
+        "max": 5.5
+       },
+       "-20": {
+        "min": 5.8,
+        "max": 5.8
+       }
+      },
+      "nota_plazo": null
+     },
+     "suelo": {
+      "dias_desnudo": 75,
+      "dias_desnudo_origen": "estimado",
+      "leguminosa": false,
+      "ruptura_plagas": true,
+      "riesgo_salinidad": null
+     },
+     "dinero": null,
+     "semaforo": {
+      "suelo": "ambar",
+      "dinero": "gris"
+     },
+     "meses_cultivo": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0
+     ],
+     "filtros": [],
+     "advertir_si_rojo": false,
+     "preguntas_ref": "EXP_P0001_ALT_MAIZ",
+     "gota": {
+      "m3_salen_presa": 77000.0,
+      "m3_perdidas_canal": 30800.0,
+      "m3_llegan_parcela": 46200.0,
+      "m3_consume_cultivo_et": 32760.0,
+      "m3_regresan_acuifero": 15400.0,
+      "m3_otras_perdidas": 28840.0,
+      "supuestos": [
+       "SIMULATED: conduction efficiency = params mean; return coefficient applied to dam outflow"
+      ]
+     },
+     "gota_goteo_con_tope": {
+      "m3_salen_presa": 60666.7,
+      "m3_perdidas_canal": 24266.7,
+      "m3_llegan_parcela": 36400.0,
+      "m3_consume_cultivo_et": 32760.0,
+      "m3_regresan_acuifero": 12133.3,
+      "m3_otras_perdidas": 15773.3,
+      "supuestos": [
+       "SIMULATED: drip efficiency is a mock value until P5 delivers supuestos.json"
+      ]
+     },
+     "gota_goteo_sin_tope": {
+      "m3_salen_presa": 77000.0,
+      "m3_perdidas_canal": 30800.0,
+      "m3_llegan_parcela": 46200.0,
+      "m3_consume_cultivo_et": 41580.0,
+      "m3_regresan_acuifero": 15400.0,
+      "m3_otras_perdidas": 20020.0,
+      "supuestos": [
+       "SIMULATED: water no longer released is reassigned to extra drip area with the same crop"
+      ]
+     },
+     "tope_consumo": {
+      "et_historica_m3": 32760.0,
+      "et_goteo_sin_tope_m3": 41580.0,
+      "cumple_sin_tope": false,
+      "base_historica": "SIMULATED: ET of the current irrigation method (gota.m3_consume_cultivo_et)"
+     }
+    }
+   ]
+  },
+  "P0002": {
+   "opciones": [
+    {
+     "id": "ACTUAL",
+     "nombre": "Current rotation: chile pepper",
+     "secuencia": [
+      "chile"
+     ],
+     "agua": {
+      "lamina_bruta": {
+       "0": {
+        "p10": 8.6,
+        "p50": 9.2,
+        "p90": 9.9
+       },
+       "-20": {
+        "p10": 9.0,
+        "p50": 9.6,
+        "p90": 10.3
+       }
+      },
+      "plazo_anios": {
+       "min": 1,
+       "max": 1
+      },
+      "plazo_restante": {
+       "min": 1,
+       "max": 1
+      },
+      "compromiso_millares_ha": {
+       "0": {
+        "min": 9.2,
+        "max": 9.2
+       },
+       "-20": {
+        "min": 9.6,
+        "max": 9.6
+       }
+      },
+      "nota_plazo": null
+     },
+     "suelo": {
+      "dias_desnudo": 55,
+      "dias_desnudo_origen": "medido",
+      "leguminosa": false,
+      "ruptura_plagas": false,
+      "riesgo_salinidad": null
+     },
+     "dinero": null,
+     "semaforo": {
+      "suelo": "rojo",
+      "dinero": "gris"
+     },
+     "meses_cultivo": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0
+     ],
+     "filtros": [
+      {
+       "filtro": "chile_tras_chile",
+       "pasa": false,
+       "motivo": "Do not plant chile after chile",
+       "fuente": "INIFAP 2017 — SIMULATED"
+      }
+     ],
+     "advertir_si_rojo": false,
+     "preguntas_ref": "EXP_P0002_ACTUAL",
+     "gota": {
+      "m3_salen_presa": 93533.3,
+      "m3_perdidas_canal": 37413.3,
+      "m3_llegan_parcela": 56120.0,
+      "m3_consume_cultivo_et": 39040.0,
+      "m3_regresan_acuifero": 18706.7,
+      "m3_otras_perdidas": 35786.7,
+      "supuestos": [
+       "SIMULATED: conduction efficiency = params mean; return coefficient applied to dam outflow"
+      ]
+     },
+     "gota_goteo_con_tope": {
+      "m3_salen_presa": 72296.3,
+      "m3_perdidas_canal": 28918.5,
+      "m3_llegan_parcela": 43377.8,
+      "m3_consume_cultivo_et": 39040.0,
+      "m3_regresan_acuifero": 14459.3,
+      "m3_otras_perdidas": 18797.0,
+      "supuestos": [
+       "SIMULATED: drip efficiency is a mock value until P5 delivers supuestos.json"
+      ]
+     },
+     "gota_goteo_sin_tope": {
+      "m3_salen_presa": 93533.3,
+      "m3_perdidas_canal": 37413.3,
+      "m3_llegan_parcela": 56120.0,
+      "m3_consume_cultivo_et": 50508.0,
+      "m3_regresan_acuifero": 18706.7,
+      "m3_otras_perdidas": 24318.7,
+      "supuestos": [
+       "SIMULATED: water no longer released is reassigned to extra drip area with the same crop"
+      ]
+     },
+     "tope_consumo": {
+      "et_historica_m3": 39040.0,
+      "et_goteo_sin_tope_m3": 50508.0,
+      "cumple_sin_tope": false,
+      "base_historica": "SIMULATED: ET of the current irrigation method (gota.m3_consume_cultivo_et)"
+     }
+    },
+    {
+     "id": "ALT_ALGODON",
+     "nombre": "Switch to cotton",
+     "secuencia": [
+      "algodon"
+     ],
+     "agua": {
+      "lamina_bruta": {
+       "0": {
+        "p10": 6.3,
+        "p50": 6.8,
+        "p90": 7.4
+       },
+       "-20": {
+        "p10": 6.6,
+        "p50": 7.1,
+        "p90": 7.7
+       }
+      },
+      "plazo_anios": {
+       "min": 1,
+       "max": 1
+      },
+      "plazo_restante": {
+       "min": 1,
+       "max": 1
+      },
+      "compromiso_millares_ha": {
+       "0": {
+        "min": 6.8,
+        "max": 6.8
+       },
+       "-20": {
+        "min": 7.1,
+        "max": 7.1
+       }
+      },
+      "nota_plazo": null
+     },
+     "suelo": {
+      "dias_desnudo": 70,
+      "dias_desnudo_origen": "estimado",
+      "leguminosa": false,
+      "ruptura_plagas": true,
+      "riesgo_salinidad": null
+     },
+     "dinero": null,
+     "semaforo": {
+      "suelo": "ambar",
+      "dinero": "gris"
+     },
+     "meses_cultivo": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0
+     ],
+     "filtros": [],
+     "advertir_si_rojo": false,
+     "preguntas_ref": "EXP_P0002_ALT_ALGODON",
+     "gota": {
+      "m3_salen_presa": 69133.3,
+      "m3_perdidas_canal": 27653.3,
+      "m3_llegan_parcela": 41480.0,
+      "m3_consume_cultivo_et": 29280.0,
+      "m3_regresan_acuifero": 13826.7,
+      "m3_otras_perdidas": 26026.7,
+      "supuestos": [
+       "SIMULATED: conduction efficiency = params mean; return coefficient applied to dam outflow"
+      ]
+     },
+     "gota_goteo_con_tope": {
+      "m3_salen_presa": 54222.2,
+      "m3_perdidas_canal": 21688.9,
+      "m3_llegan_parcela": 32533.3,
+      "m3_consume_cultivo_et": 29280.0,
+      "m3_regresan_acuifero": 10844.4,
+      "m3_otras_perdidas": 14097.8,
+      "supuestos": [
+       "SIMULATED: drip efficiency is a mock value until P5 delivers supuestos.json"
+      ]
+     },
+     "gota_goteo_sin_tope": {
+      "m3_salen_presa": 69133.3,
+      "m3_perdidas_canal": 27653.3,
+      "m3_llegan_parcela": 41480.0,
+      "m3_consume_cultivo_et": 37332.0,
+      "m3_regresan_acuifero": 13826.7,
+      "m3_otras_perdidas": 17974.7,
+      "supuestos": [
+       "SIMULATED: water no longer released is reassigned to extra drip area with the same crop"
+      ]
+     },
+     "tope_consumo": {
+      "et_historica_m3": 29280.0,
+      "et_goteo_sin_tope_m3": 37332.0,
+      "cumple_sin_tope": false,
+      "base_historica": "SIMULATED: ET of the current irrigation method (gota.m3_consume_cultivo_et)"
+     }
+    },
+    {
+     "id": "ALT_ALFALFA_NUEVA",
+     "nombre": "Establish new alfalfa",
+     "secuencia": [
+      "alfalfa"
+     ],
+     "agua": {
+      "lamina_bruta": {
+       "0": {
+        "p10": 16.5,
+        "p50": 17.5,
+        "p90": 18.5
+       },
+       "-20": {
+        "p10": 17.0,
+        "p50": 18.0,
+        "p90": 19.0
+       }
+      },
+      "plazo_anios": {
+       "min": 3,
+       "max": 4
+      },
+      "plazo_restante": {
+       "min": 3,
+       "max": 4
+      },
+      "compromiso_millares_ha": {
+       "0": {
+        "min": 52.5,
+        "max": 70.0
+       },
+       "-20": {
+        "min": 54.0,
+        "max": 72.0
+       }
+      },
+      "nota_plazo": null
+     },
+     "suelo": {
+      "dias_desnudo": 20,
+      "dias_desnudo_origen": "estimado",
+      "leguminosa": true,
+      "ruptura_plagas": true,
+      "riesgo_salinidad": null
+     },
+     "dinero": null,
+     "semaforo": {
+      "suelo": "verde",
+      "dinero": "gris"
+     },
+     "meses_cultivo": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "filtros": [],
+     "advertir_si_rojo": true,
+     "preguntas_ref": "EXP_P0002_ALT_ALFALFA_NUEVA",
+     "gota": {
+      "m3_salen_presa": 177916.7,
+      "m3_perdidas_canal": 71166.7,
+      "m3_llegan_parcela": 106750.0,
+      "m3_consume_cultivo_et": 75030.0,
+      "m3_regresan_acuifero": 35583.3,
+      "m3_otras_perdidas": 67303.3,
+      "supuestos": [
+       "SIMULATED: conduction efficiency = params mean; return coefficient applied to dam outflow"
+      ]
+     },
+     "gota_goteo_con_tope": {
+      "m3_salen_presa": 138944.4,
+      "m3_perdidas_canal": 55577.8,
+      "m3_llegan_parcela": 83366.7,
+      "m3_consume_cultivo_et": 75030.0,
+      "m3_regresan_acuifero": 27788.9,
+      "m3_otras_perdidas": 36125.6,
+      "supuestos": [
+       "SIMULATED: drip efficiency is a mock value until P5 delivers supuestos.json"
+      ]
+     },
+     "gota_goteo_sin_tope": {
+      "m3_salen_presa": 177916.7,
+      "m3_perdidas_canal": 71166.7,
+      "m3_llegan_parcela": 106750.0,
+      "m3_consume_cultivo_et": 96075.0,
+      "m3_regresan_acuifero": 35583.3,
+      "m3_otras_perdidas": 46258.3,
+      "supuestos": [
+       "SIMULATED: water no longer released is reassigned to extra drip area with the same crop"
+      ]
+     },
+     "tope_consumo": {
+      "et_historica_m3": 75030.0,
+      "et_goteo_sin_tope_m3": 96075.0,
+      "cumple_sin_tope": false,
+      "base_historica": "SIMULATED: ET of the current irrigation method (gota.m3_consume_cultivo_et)"
+     }
+    }
+   ]
+  },
+  "P0003": {
+   "opciones": [
+    {
+     "id": "ACTUAL",
+     "nombre": "Current: pecan orchard",
+     "secuencia": [
+      "nogal"
+     ],
+     "agua": {
+      "lamina_bruta": {
+       "0": {
+        "p10": 11.0,
+        "p50": 12.5,
+        "p90": 14.0
+       },
+       "-20": {
+        "p10": 11.5,
+        "p50": 13.0,
+        "p90": 14.5
+       }
+      },
+      "plazo_anios": {
+       "min": 10,
+       "max": 10
+      },
+      "plazo_restante": {
+       "min": 10,
+       "max": 10
+      },
+      "compromiso_millares_ha": {
+       "0": {
+        "min": 125.0,
+        "max": 125.0
+       },
+       "-20": {
+        "min": 130.0,
+        "max": 130.0
+       }
+      },
+      "nota_plazo": "calculation horizon; orchards live longer"
+     },
+     "suelo": {
+      "dias_desnudo": 0,
+      "dias_desnudo_origen": "medido",
+      "leguminosa": false,
+      "ruptura_plagas": false,
+      "riesgo_salinidad": null
+     },
+     "dinero": null,
+     "semaforo": {
+      "suelo": "verde",
+      "dinero": "gris"
+     },
+     "meses_cultivo": [
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0
+     ],
+     "filtros": [],
+     "advertir_si_rojo": false,
+     "preguntas_ref": "EXP_P0003_ACTUAL",
+     "gota": {
+      "m3_salen_presa": 250000.0,
+      "m3_perdidas_canal": 100000.0,
+      "m3_llegan_parcela": 150000.0,
+      "m3_consume_cultivo_et": 105600.0,
+      "m3_regresan_acuifero": 50000.0,
+      "m3_otras_perdidas": 94400.0,
+      "supuestos": [
+       "SIMULATED: conduction efficiency = params mean; return coefficient applied to dam outflow"
+      ]
+     },
+     "gota_goteo_con_tope": {
+      "m3_salen_presa": 195555.6,
+      "m3_perdidas_canal": 78222.2,
+      "m3_llegan_parcela": 117333.3,
+      "m3_consume_cultivo_et": 105600.0,
+      "m3_regresan_acuifero": 39111.1,
+      "m3_otras_perdidas": 50844.4,
+      "supuestos": [
+       "SIMULATED: drip efficiency is a mock value until P5 delivers supuestos.json"
+      ]
+     },
+     "gota_goteo_sin_tope": {
+      "m3_salen_presa": 250000.0,
+      "m3_perdidas_canal": 100000.0,
+      "m3_llegan_parcela": 150000.0,
+      "m3_consume_cultivo_et": 135000.0,
+      "m3_regresan_acuifero": 50000.0,
+      "m3_otras_perdidas": 65000.0,
+      "supuestos": [
+       "SIMULATED: water no longer released is reassigned to extra drip area with the same crop"
+      ]
+     },
+     "tope_consumo": {
+      "et_historica_m3": 105600.0,
+      "et_goteo_sin_tope_m3": 135000.0,
+      "cumple_sin_tope": false,
+      "base_historica": "SIMULATED: ET of the current irrigation method (gota.m3_consume_cultivo_et)"
+     }
+    },
+    {
+     "id": "ALT_ALGODON",
+     "nombre": "Replace orchard with cotton",
+     "secuencia": [
+      "algodon"
+     ],
+     "agua": {
+      "lamina_bruta": {
+       "0": {
+        "p10": 6.3,
+        "p50": 6.8,
+        "p90": 7.4
+       },
+       "-20": {
+        "p10": 6.6,
+        "p50": 7.1,
+        "p90": 7.7
+       }
+      },
+      "plazo_anios": {
+       "min": 1,
+       "max": 1
+      },
+      "plazo_restante": {
+       "min": 1,
+       "max": 1
+      },
+      "compromiso_millares_ha": {
+       "0": {
+        "min": 6.8,
+        "max": 6.8
+       },
+       "-20": {
+        "min": 7.1,
+        "max": 7.1
+       }
+      },
+      "nota_plazo": null
+     },
+     "suelo": {
+      "dias_desnudo": 70,
+      "dias_desnudo_origen": "estimado",
+      "leguminosa": false,
+      "ruptura_plagas": true,
+      "riesgo_salinidad": null
+     },
+     "dinero": null,
+     "semaforo": {
+      "suelo": "ambar",
+      "dinero": "gris"
+     },
+     "meses_cultivo": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0
+     ],
+     "filtros": [],
+     "advertir_si_rojo": false,
+     "preguntas_ref": "EXP_P0003_ALT_ALGODON",
+     "gota": {
+      "m3_salen_presa": 136000.0,
+      "m3_perdidas_canal": 54400.0,
+      "m3_llegan_parcela": 81600.0,
+      "m3_consume_cultivo_et": 57600.0,
+      "m3_regresan_acuifero": 27200.0,
+      "m3_otras_perdidas": 51200.0,
+      "supuestos": [
+       "SIMULATED: conduction efficiency = params mean; return coefficient applied to dam outflow"
+      ]
+     },
+     "gota_goteo_con_tope": {
+      "m3_salen_presa": 106666.7,
+      "m3_perdidas_canal": 42666.7,
+      "m3_llegan_parcela": 64000.0,
+      "m3_consume_cultivo_et": 57600.0,
+      "m3_regresan_acuifero": 21333.3,
+      "m3_otras_perdidas": 27733.3,
+      "supuestos": [
+       "SIMULATED: drip efficiency is a mock value until P5 delivers supuestos.json"
+      ]
+     },
+     "gota_goteo_sin_tope": {
+      "m3_salen_presa": 136000.0,
+      "m3_perdidas_canal": 54400.0,
+      "m3_llegan_parcela": 81600.0,
+      "m3_consume_cultivo_et": 73440.0,
+      "m3_regresan_acuifero": 27200.0,
+      "m3_otras_perdidas": 35360.0,
+      "supuestos": [
+       "SIMULATED: water no longer released is reassigned to extra drip area with the same crop"
+      ]
+     },
+     "tope_consumo": {
+      "et_historica_m3": 57600.0,
+      "et_goteo_sin_tope_m3": 73440.0,
+      "cumple_sin_tope": false,
+      "base_historica": "SIMULATED: ET of the current irrigation method (gota.m3_consume_cultivo_et)"
+     }
+    },
+    {
+     "id": "NO_SEMBRAR",
+     "nombre": "Do not plant / standing stubble",
+     "secuencia": [
+      "descanso"
+     ],
+     "agua": {
+      "lamina_bruta": {
+       "0": {
+        "p10": 0,
+        "p50": 0,
+        "p90": 0
+       },
+       "-20": {
+        "p10": 0,
+        "p50": 0,
+        "p90": 0
+       }
+      },
+      "plazo_anios": {
+       "min": 1,
+       "max": 1
+      },
+      "plazo_restante": {
+       "min": 1,
+       "max": 1
+      },
+      "compromiso_millares_ha": {
+       "0": {
+        "min": 0,
+        "max": 0
+       },
+       "-20": {
+        "min": 0,
+        "max": 0
+       }
+      },
+      "nota_plazo": null
+     },
+     "suelo": {
+      "dias_desnudo": 0,
+      "dias_desnudo_origen": "estimado",
+      "leguminosa": false,
+      "ruptura_plagas": true,
+      "riesgo_salinidad": null
+     },
+     "dinero": null,
+     "semaforo": {
+      "suelo": "verde",
+      "dinero": "gris"
+     },
+     "meses_cultivo": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "filtros": [],
+     "advertir_si_rojo": false,
+     "preguntas_ref": "EXP_P0003_NO_SEMBRAR",
+     "gota": {
+      "m3_salen_presa": 0.0,
+      "m3_perdidas_canal": 0.0,
+      "m3_llegan_parcela": 0.0,
+      "m3_consume_cultivo_et": 0.0,
+      "m3_regresan_acuifero": 0.0,
+      "m3_otras_perdidas": 0.0,
+      "supuestos": [
+       "SIMULATED: conduction efficiency = params mean; return coefficient applied to dam outflow"
+      ]
+     },
+     "gota_goteo_con_tope": {
+      "m3_salen_presa": 0.0,
+      "m3_perdidas_canal": 0.0,
+      "m3_llegan_parcela": 0.0,
+      "m3_consume_cultivo_et": 0.0,
+      "m3_regresan_acuifero": 0.0,
+      "m3_otras_perdidas": 0.0,
+      "supuestos": [
+       "SIMULATED: drip efficiency is a mock value until P5 delivers supuestos.json"
+      ]
+     },
+     "gota_goteo_sin_tope": {
+      "m3_salen_presa": 0.0,
+      "m3_perdidas_canal": 0.0,
+      "m3_llegan_parcela": 0.0,
+      "m3_consume_cultivo_et": 0.0,
+      "m3_regresan_acuifero": 0.0,
+      "m3_otras_perdidas": 0.0,
+      "supuestos": [
+       "SIMULATED: water no longer released is reassigned to extra drip area with the same crop"
+      ]
+     },
+     "tope_consumo": {
+      "et_historica_m3": 0.0,
+      "et_goteo_sin_tope_m3": 0.0,
+      "cumple_sin_tope": true,
+      "base_historica": "SIMULATED: ET of the current irrigation method (gota.m3_consume_cultivo_et)"
+     }
+    }
+   ]
+  }
+ }
+}
