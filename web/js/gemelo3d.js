@@ -37,8 +37,11 @@
 //     leyendaHTML() -> string         leyenda en inglés; la exageración y los metros por millar salen de gemelo.json.
 //     columnaEn(punto) -> id | null   columna bajo un punto de la pantalla ({x, y} o [x, y] del mapa). Sirve para que
 //                                     el clic de la aplicación sobre sus propias capas ceda ante una columna.
-//     depuracion                      (solo lectura, para pruebas) último cálculo: { version, zonaId, D, r,
-//                                     metrosPorMillar, columnas, planas, cuenta, fuenteRelieve, teselasFallidas }.
+//     depuracion                      (solo lectura, para pruebas) último cálculo: { version, montado, zonaId, D, r,
+//                                     metrosPorMillar, columnas, planas, cuenta, fuenteRelieve, teselasFallidas };
+//                                     columnas y planas son los FeatureCollection enviados con setData.
+//   calcularColumnas({ features, cubo, D, r, zonaId, metrosPorMillar, reglas }) -> { columnas, planas, cuenta… }
+//     el cálculo puro (sin mapa), para probarlo con Node.
 //     destruir()                      desactiva sin animación y suelta todo; el controlador queda inerte.
 //
 // QUÉ DIBUJA (todo con el prefijo «gemelo-»):
@@ -49,6 +52,16 @@
 //   · Parcela sin clasificar (abstención, o sin opción ACTUAL): plana, gris, con rayas y borde punteado.
 //   Nada depende solo del color: lo que falta va arriba y rayado; lo no clasificado, plano, rayado y punteado.
 //
+// CÓMO SE CONECTA (lo hace el integrador en app.js e index.html; aquí no se toca ninguno de los dos):
+//   <link rel="stylesheet" href="css/gemelo.css">
+//   import { crearGemelo3D } from "./js/gemelo3d.js";
+//   const vista = crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela: abrirFicha, alAvisar: (a) => aviso(a.mensaje) });
+//   botón «3D view»:  vista.activo() ? vista.desactivar() : vista.activar(zona);   leyenda: vista.leyendaHTML()
+//   en cada cambio de deslizador, lluvia o zona:  vista.actualizar({ features, cubo, D, r, zonaId: zona });
+//   · El clic de la aplicación sobre sus parcelas debe ceder ante una columna (en 3D, la columna tapa a la parcela
+//     de atrás):  if (vista.activo() && vista.columnaEn(e.point)) return;
+//   · Un fitBounds de la aplicación con la vista activa debe conservar el rumbo (bearing: mapa.getBearing()).
+//
 // DECISIONES DE ESTE ARCHIVO (para quien lo integre o lo revise):
 //   1. Las teselas se piden con un protocolo propio de MapLibre («gemelo-dem://» + la URL absoluta, que se arma con
 //      document.baseURI + terreno.zonas[zona].teselas). Así el módulo se entera de una tesela que falta (MapLibre
@@ -57,11 +70,18 @@
 //   2. La codificación es la de terreno.encoding. Se le pasa a MapLibre con sus factores equivalentes
 //      (encoding «custom») para restarle elev_min_m de la zona: el relieve se dibuja respecto al punto más bajo de
 //      la zona y no como una meseta de más de un kilómetro sobre el plano sin datos (sin acantilados en el borde
-//      del relieve ni donde falte una tesela). La forma del relieve y el sombreado no cambian.
-//   3. Ninguna cifra escrita a mano: exageración, metros por millar, cámara, zooms y límites salen de gemelo.json;
-//      las láminas, de cubo.json por reglas.js. Los números del código son medidas de diseño (anchos, duración).
-//   4. Colores leídos de variables CSS (css/gemelo.css, que toma --agua, --rojo, --brote… de style.css).
-//   5. La vista no reparte agua, no pronostica y no recomienda: dibuja lo que la rotación actual pide y lo que
+//      del relieve ni donde falte una tesela). La forma del relieve y el sombreado no cambian. Sin elev_min_m, o
+//      con otra codificación, la fuente usa terreno.encoding tal cual.
+//   3. La columna bajo el puntero se calcula aquí (columnaEn): la consulta de MapLibre no suma la altura del
+//      terreno a las extrusiones y fallaría en la tapa de las columnas. Una capa «custom» sin dibujo recibe la
+//      matriz de proyección de cada cuadro (API pública de MapLibre) y con ella se proyecta cada columna.
+//   4. Las alturas se recalculan con setData sobre una fuente que solo trae las columnas; las parcelas planas van
+//      en otra fuente que no se reenvía al mover el deslizador.
+//   5. Ninguna cifra escrita a mano: exageración, metros por millar, cámara, zooms y límites salen de gemelo.json;
+//      las láminas, de cubo.json por reglas.js. Los números del código son medidas de diseño (anchos, duración)
+//      o constantes del formato de las teselas.
+//   6. Colores leídos de variables CSS (css/gemelo.css, que toma --agua, --rojo, --brote… de style.css).
+//   7. La vista no reparte agua, no pronostica y no recomienda: dibuja lo que la rotación actual pide y lo que
 //      la dotación elegida cubre.
 
 const LOCALE = "en-US";
@@ -288,16 +308,14 @@ function anilloEnPantalla(m, xy, z, ancho, alto) {
   return salida;
 }
 
-/** ¿El punto (px, py) cae dentro del polígono? `v` es [x, y, x, y…]; `indices` elige los vértices (o todos). */
-function puntoDentro(px, py, v, indices) {
-  const n = indices ? indices.length : v.length / 2;
+/** ¿El punto (px, py) cae dentro del polígono? `v` trae sus vértices en pantalla: [x, y, x, y…]. */
+function puntoDentro(px, py, v) {
+  const n = v.length / 2;
   let dentro = false;
   for (let i = 0, j = n - 1; i < n; j = i, i += 1) {
-    const a = (indices ? indices[i] : i) * 2;
-    const b = (indices ? indices[j] : j) * 2;
-    const ya = v[a + 1];
-    const yb = v[b + 1];
-    if (ya > py !== yb > py && px < ((v[b] - v[a]) * (py - ya)) / (yb - ya) + v[a]) dentro = !dentro;
+    const ya = v[i * 2 + 1];
+    const yb = v[j * 2 + 1];
+    if (ya > py !== yb > py && px < ((v[j * 2] - v[i * 2]) * (py - ya)) / (yb - ya) + v[i * 2]) dentro = !dentro;
   }
   return dentro;
 }
@@ -387,8 +405,7 @@ function fuenteRelieve(terreno, zona, conProtocolo) {
   if (Array.isArray(limites) && limites.length === 4 && limites.every((v) => num(v) != null)) {
     fuente.bounds = limites.map(Number);
   }
-  if (terreno.fuente) fuente.attribution = esc(terreno.fuente);
-  return fuente;
+  return fuente; // la fuente de los datos (terreno.fuente) va en la leyenda, no en la atribución del mapa
 }
 
 // ---------------------------------------------------------------------------
@@ -396,14 +413,16 @@ function fuenteRelieve(terreno, zona, conProtocolo) {
 // ---------------------------------------------------------------------------
 /**
  * Clasifica las parcelas de la zona y calcula la altura de sus columnas.
- * Devuelve { columnas, planas, firmaPlanas, porId, cuenta }: dos FeatureCollection (las columnas cambian con D;
- * las planas, no), el detalle por parcela y los conteos.
+ * Devuelve { columnas, planas, firmaColumnas, firmaPlanas, porId, cuenta }: dos FeatureCollection (las columnas
+ * cambian con D; las planas, no), una firma de cada una (para no reenviar al mapa lo que no cambió), el detalle
+ * por parcela y los conteos.
  *   cubre_m = min(D, L50) × metrosPorMillar     pide_m = L50 × metrosPorMillar     falta_m = pide_m − cubre_m
  */
 export function calcularColumnas({ features, cubo, D, r, zonaId, metrosPorMillar, reglas }) {
   const columnas = [];
   const planas = [];
-  const firma = [];
+  const firmaColumnas = [];
+  const firmaPlanas = [];
   const porId = new Map();
   const cuenta = { [COLUMNA]: 0, [SIN_RIEGO]: 0, [SIN_CLASIFICAR]: 0 };
   const k = num(metrosPorMillar);
@@ -432,7 +451,7 @@ export function calcularColumnas({ features, cubo, D, r, zonaId, metrosPorMillar
     porId.set(p.id, { clase, l50, cobertura });
     if (clase !== COLUMNA) {
       planas.push({ type: "Feature", geometry: f.geometry, properties: { id: p.id, clase } });
-      firma.push(`${p.id}:${clase}`);
+      firmaPlanas.push(`${p.id}:${clase}`);
       continue;
     }
     if (k == null) continue; // sin escala no hay altura que dibujar (se avisa aparte)
@@ -443,11 +462,13 @@ export function calcularColumnas({ features, cubo, D, r, zonaId, metrosPorMillar
       geometry: f.geometry,
       properties: { id: p.id, clase, l50, cobertura, cubre_m: cubre, pide_m: pide, falta_m: pide - cubre },
     });
+    firmaColumnas.push(`${p.id}:${cubre}:${pide}`);
   }
   return {
     columnas: { type: "FeatureCollection", features: columnas },
     planas: { type: "FeatureCollection", features: planas },
-    firmaPlanas: firma.join("|"),
+    firmaColumnas: firmaColumnas.join("|"),
+    firmaPlanas: firmaPlanas.join("|"),
     porId,
     cuenta,
   };
@@ -504,6 +525,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     cuadroPuntero: 0,
     version: 0,
     ultimo: null, // último resultado de calcularColumnas
+    firmaColumnas: null, // lo último enviado con setData a cada fuente
     firmaPlanas: null,
     fuenteRelieve: null,
     conProtocolo: false,
@@ -770,9 +792,13 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     const metros = num(gemelo?.columnas?.metros_por_millar);
     if (metros == null) avisar("sin_escala", TEXTOS.sinEscala);
     const resultado = calcularColumnas({ ...est.datos, zonaId: est.zonaId, metrosPorMillar: metros, reglas });
-    mapa.getSource(FUENTE_COLUMNAS)?.setData(resultado.columnas);
+    // Solo se envía al mapa lo que cambió: cada setData hace que MapLibre vuelva a dibujar el relieve.
+    // Las parcelas planas no dependen de la dotación; las columnas, sí.
+    if (resultado.firmaColumnas !== est.firmaColumnas) {
+      mapa.getSource(FUENTE_COLUMNAS)?.setData(resultado.columnas);
+      est.firmaColumnas = resultado.firmaColumnas;
+    }
     if (resultado.firmaPlanas !== est.firmaPlanas) {
-      // Las parcelas planas no dependen de la dotación: solo se reenvían si cambió su lista.
       mapa.getSource(FUENTE_PLANAS)?.setData(resultado.planas);
       est.firmaPlanas = resultado.firmaPlanas;
     }
@@ -1109,6 +1135,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
       mapa.off("error", alErrorDelMapa);
     }
     est.montado = false;
+    est.firmaColumnas = null;
     est.firmaPlanas = null;
     est.fuenteRelieve = null;
     est.matriz = null;

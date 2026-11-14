@@ -1,7 +1,7 @@
 <!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
 # Resultado de las pruebas (generado por `python construir.py`; no se edita a mano)
 
-Corrida: 2026-11-14T21:37:45+00:00 · duración 18.5 s
+Corrida: 2026-11-14T21:41:59+00:00 · duración 16.9 s
 
 | Paso | Estado | Detalle |
 |---|---|---|
@@ -12,7 +12,7 @@ Corrida: 2026-11-14T21:37:45+00:00 · duración 18.5 s
 | manifest | OK | 55189 cifras (0 simuladas), 23 fuentes de origen, 33 avisos |
 | contrato | OK | CONTRATO OK |
 | verificador | OK | VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv |
-| pytest | OK | 542 passed, 30 warnings in 16.89s |
+| pytest | OK | 542 passed, 30 warnings in 15.38s |
 | node | OK | 57 pass, 0 fail, 0 skipped |
 
 La prueba con navegador (`node tests/e2e/web_smoke.mjs`) se corre aparte y antes de cada publicación.
