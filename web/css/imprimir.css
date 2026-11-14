@@ -69,7 +69,7 @@
     border: none !important;
   }
   #ficha .ficha-cabeza h2 { font-size: 12pt; }
-  #ficha .ficha-cuerpo { padding: 0 !important; gap: 1.8mm !important; }
+  #ficha .ficha-cuerpo { padding: 0 !important; gap: 1.2mm !important; }
   #ficha .ficha-cuerpo h3 { font-size: 9pt; margin-bottom: 1mm; }
   #ficha p { margin: 0; }
 
@@ -179,7 +179,7 @@
   #ficha .gota-fila .rotulo { font-size: 7pt; }
   #ficha .gota-pista { height: 3mm; }
   /* Si La gota llega como Sankey en SVG: que no pase de una franja (escala con su viewBox). */
-  #ficha .gota svg { max-width: 100%; max-height: 42mm; height: auto; }
+  #ficha .gota svg { max-width: 100%; max-height: 36mm; height: auto; }
   #ficha .gota-leyenda {
     margin-top: 1mm;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -196,8 +196,8 @@
   #ficha .impresion-fuentes-lista {
     margin: 0;
     padding-left: 3.5mm;
-    columns: 3;
-    column-gap: 5mm;
+    columns: 4;
+    column-gap: 4mm;
     font-size: 6pt;
     line-height: 1.15;
   }

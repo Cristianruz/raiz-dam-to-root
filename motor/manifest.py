@@ -25,6 +25,15 @@ De dónde sale cada campo:
   etiqueta; los textos con cifras (rótulo de escala, periodo, definición) con la
   fuente del archivo. La fecha y el script de origen salen de la entrega
   relieve_meta[_<zona>].json en data/processed/fuentes.json.
+- parcelas.geojson: cada hoja numérica de properties. Las de PROPIEDADES_PARCELA y memoria[*].anio
+  son cálculo del motor (B1, A3, A3-M, A4.2); las de properties.relieve (pendiente media, área que
+  escurre hacia la parcela y fracción en depresión, A9) llevan la fuente, la fecha y el script de la
+  entrega relieve_parcelas.csv en data/processed/fuentes.json. Una hoja numérica sin regla propia se
+  registra igual (con la fuente del archivo) y se avisa en «avisos»: nunca se salta en silencio.
+- web/data/pruebas.json (motor/pruebas_web.py, paso 5c de construir.py): las cifras de «About & Data»
+  (métricas de cada prueba, número de la prueba, criterios y textos con cifras), con la fuente citada en
+  cada una. construir.py vuelve a generar el manifest después del paso 5c para que entren las de la
+  corrida actual.
 - mock: se decide por bloque con las marcas del propio archivo
   (cubo.meta.mock y cubo.meta.mock_campos; meta.mock de parcelas.geojson y de
   explicaciones.json). Si el cubo no trae la lista por campo, manda
@@ -54,18 +63,30 @@ ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
 SCRIPT_SIMULADOS = "motor/simulados.py"
 SCRIPT_ENSAMBLADO = "motor/ensamblar.py"
 SCRIPT_RELIEVE = "motor/relieve_web.py"
+SCRIPT_PRUEBAS = "motor/pruebas_web.py"
 ARCHIVO_RELIEVE = "web/data/relieve.json"
+ARCHIVO_PARCELAS = "web/data/parcelas.geojson"
+ARCHIVO_PRUEBAS = "web/data/pruebas.json"
+ENTREGA_RELIEVE_PARCELAS = "relieve_parcelas.csv"  # A9: indicadores de relieve por parcela
 FUENTE_SIMULADA = "Datos simulados (data/simulados.json y data/params.json); no son datos reales"
 ETIQUETA_SIMULADA = "SIMULADO"
 ETIQUETA_CALCULO = "Cálculo"
+ETIQUETA_CRITERIO = "Criterio declarado antes del resultado (S9 §6)"
+ETIQUETA_DOCUMENTO = "Leído del documento de resultado citado"
+ETIQUETA_CORRIDA = "Registro de la corrida de python construir.py"
+# Rótulo de escala del relieve sin etiqueta propia en relieve.json: resolución nominal del producto.
+ETIQUETA_ROTULO_RELIEVE = "Resolución nominal de NASADEM (NASA, 30 m; S9 §4 bis)"
 
 # Bloques numéricos de cada opción que la ficha muestra (kit C2 y X3.2).
 BLOQUES_OPCION = ("agua.lamina_bruta", "agua.plazo_anios", "agua.plazo_restante",
                   "agua.compromiso_millares_ha", "suelo.dias_desnudo", "gota",
                   "gota_goteo_con_tope", "gota_goteo_sin_tope", "tope_consumo")
-# Propiedades numéricas de cada parcela que muestran el mapa y la ficha (kit C1 y C2).
+# Propiedades numéricas de cada parcela que muestran el mapa y la ficha (kit C1 y C2): cálculo del motor.
 PROPIEDADES_PARCELA = ("area_ha", "ftw_confianza", "prob_max", "dias_suelo_desnudo_feb_abr",
-                       "ndvi_ultimo_mes", "dias_suelo_desnudo_mediana", "edad_perenne_anios")
+                       "ndvi_ultimo_mes", "dias_suelo_desnudo_mediana", "edad_perenne_anios",
+                       "memoria[*].anio")
+# properties.relieve (A9; la ficha las muestra en el renglón Soil): fuente de la entrega relieve_parcelas.csv.
+PROPIEDADES_RELIEVE = ("relieve.pendiente_media_pct", "relieve.aportacion_externa_ha", "relieve.frac_depresion")
 
 
 def leer_json(ruta):
@@ -141,7 +162,8 @@ def origen_calculo(meta, bloque, mock, hoy):
     fecha = meta.get("generado") or hoy
     if mock:
         return FUENTE_SIMULADA, fecha, SCRIPT_SIMULADOS, ETIQUETA_SIMULADA
-    fuentes = meta.get("fuentes") or []
+    # Los archivos ocultos de la caché (p. ej. data/processed/.gitkeep) no son fuentes de datos.
+    fuentes = [f for f in (meta.get("fuentes") or []) if not Path(str(f)).name.startswith(".")]
     scripts = meta.get("scripts") or {}
     script = scripts.get(bloque) or meta.get("script") or SCRIPT_ENSAMBLADO
     return ("; ".join(map(str, fuentes)) or None), fecha, script, ETIQUETA_CALCULO
@@ -272,6 +294,19 @@ def entrega_de_relieve(fuentes_origen, zona):
     return encontrada
 
 
+def entrega_de(fuentes_origen, archivo):
+    """Fila de data/processed/fuentes.json de la entrega «archivo» (la última registrada); None si no está."""
+    encontrada = None
+    for fo in fuentes_origen or []:
+        if isinstance(fo, dict) and fo.get("tipo", "entrega") == "entrega" and str(fo.get("archivo") or "") == archivo:
+            encontrada = fo
+    return encontrada
+
+
+def tiene_digito(v):
+    return isinstance(v, str) and bool(re.search(r"\d", v))
+
+
 def textos_con_digitos(obj, ruta):
     """[(ruta, texto)] de los textos que llevan algún dígito, sin contar fuentes ni etiquetas."""
     salida = []
@@ -315,8 +350,98 @@ def cifras_de_relieve(m, relieve, fuentes_origen):
                 m.agregar(ARCHIVO_RELIEVE, ruta, valor, fuente_zona, fecha, script, None, mock)
         for ruta, texto in textos_con_digitos(z, base):
             en_tormenta = ruta.startswith(f"{base}.tormenta.")
+            etiqueta_texto = etiqueta_tormenta if en_tormenta else (z.get("rotulo_etiqueta") or ETIQUETA_ROTULO_RELIEVE)
             m.agregar(ARCHIVO_RELIEVE, ruta, texto, t.get("fuente") if en_tormenta else fuente_zona, fecha,
-                      script, etiqueta_tormenta if en_tormenta else z.get("rotulo_etiqueta"), mock)
+                      script, etiqueta_texto, mock)
+
+
+def cifras_de_parcelas(m, geo, fuentes_origen, origen_geo, mock, script_cubo):
+    """parcelas.geojson: TODAS las hojas numéricas de properties, cada una con su regla.
+    - PROPIEDADES_PARCELA (y memoria[*].anio): cálculo del motor (origen_geo);
+    - properties.relieve.*: entrega relieve_parcelas.csv (A9) de fuentes.json, copiada por B4;
+    - cualquier otra: se registra con la fuente del archivo y se avisa una vez por patrón (no se salta)."""
+    fuente, fecha, script, etiqueta = origen_geo
+    entrega = entrega_de(fuentes_origen, ENTREGA_RELIEVE_PARCELAS) or {}
+    if mock:
+        relieve_origen = origen_geo
+    else:
+        scripts = "; ".join(x for x in (entrega.get("script"), script_cubo) if x) or None
+        relieve_origen = (entrega.get("fuente"), entrega.get("fecha_consulta") or entrega.get("fecha"),
+                          scripts, ETIQUETA_CALCULO)
+    sin_regla = set()
+    for i, f in enumerate(geo.get("features") or []):
+        for ruta, valor in hojas_numericas(f.get("properties") or {}, ""):
+            patron = re.sub(r"\[\d+\]", "[*]", ruta)
+            clave = f"features[{i}].properties.{ruta}"
+            if patron in PROPIEDADES_PARCELA:
+                m.agregar(ARCHIVO_PARCELAS, clave, valor, fuente, fecha, script, etiqueta, mock)
+            elif patron in PROPIEDADES_RELIEVE or patron.startswith("relieve."):
+                if patron not in PROPIEDADES_RELIEVE and patron not in sin_regla:
+                    sin_regla.add(patron)
+                    m.avisos.append(f"parcelas.geojson:properties.{patron}: cifra de relieve sin regla propia en "
+                                    "motor/manifest.py (se registra con la fuente de relieve_parcelas.csv)")
+                if not mock and not entrega and "relieve_entrega" not in sin_regla:
+                    sin_regla.add("relieve_entrega")
+                    m.avisos.append("parcelas.geojson:properties.relieve.*: la entrega relieve_parcelas.csv no está "
+                                    "en data/processed/fuentes.json")
+                m.agregar(ARCHIVO_PARCELAS, clave, valor, *relieve_origen, mock)
+            else:
+                if patron not in sin_regla:
+                    sin_regla.add(patron)
+                    m.avisos.append(f"parcelas.geojson:properties.{patron}: cifra sin regla propia en "
+                                    "motor/manifest.py (se registra con la fuente del archivo)")
+                m.agregar(ARCHIVO_PARCELAS, clave, valor, fuente, fecha, script, None, mock)
+
+
+def cifras_de_pruebas(m, pruebas):
+    """web/data/pruebas.json (motor/pruebas_web.py): cifras y textos con cifras de «About & Data».
+    - métricas (valor, total, fracción y su rótulo si lleva cifras): la fuente citada en la métrica;
+    - número, título y criterio de cada prueba: S9 §6 (criterio declarado antes del resultado);
+    - resumen y notas con cifras: el documento o el archivo citado en la prueba o en la parte;
+    - puerta automática (corrida y detalle de cada paso): docs/pruebas.md, escrito por construir.py."""
+    fecha = pruebas.get("generado")
+    script = pruebas.get("script") or SCRIPT_PRUEBAS
+    fuente_criterios = pruebas.get("fuente_criterios")
+    for i, p in enumerate(pruebas.get("pruebas") or []):
+        if not isinstance(p, dict):
+            continue
+        base = f"pruebas[{i}]"
+        f_crit = p.get("criterio_fuente") or fuente_criterios
+        f_prueba = "; ".join(map(str, p.get("fuentes") or [])) or None
+        if es_numero(p.get("numero")):
+            m.agregar(ARCHIVO_PRUEBAS, f"{base}.numero", p["numero"], f_crit, fecha, script, ETIQUETA_CRITERIO, False)
+        for campo in ("titulo", "criterio"):
+            if tiene_digito(p.get(campo)):
+                m.agregar(ARCHIVO_PRUEBAS, f"{base}.{campo}", p[campo], f_crit, fecha, script, ETIQUETA_CRITERIO, False)
+        if tiene_digito(p.get("resumen")):
+            m.agregar(ARCHIVO_PRUEBAS, f"{base}.resumen", p["resumen"], f_prueba, fecha, script,
+                      ETIQUETA_DOCUMENTO, False)
+        for j, met in enumerate(p.get("metricas") or []):
+            if not isinstance(met, dict):
+                continue
+            f_met = met.get("fuente") or f_prueba
+            for k in ("valor", "total", "fraccion"):
+                if es_numero(met.get(k)):
+                    m.agregar(ARCHIVO_PRUEBAS, f"{base}.metricas[{j}].{k}", met[k], f_met, fecha, script,
+                              ETIQUETA_CALCULO, False)
+            if tiene_digito(met.get("etiqueta")):
+                m.agregar(ARCHIVO_PRUEBAS, f"{base}.metricas[{j}].etiqueta", met["etiqueta"], f_met, fecha, script,
+                          ETIQUETA_CALCULO, False)
+        for j, parte in enumerate(p.get("partes") or []):
+            if isinstance(parte, dict) and tiene_digito(parte.get("nota")):
+                m.agregar(ARCHIVO_PRUEBAS, f"{base}.partes[{j}].nota", parte["nota"], parte.get("fuente") or f_prueba,
+                          fecha, script, ETIQUETA_DOCUMENTO, False)
+    puerta = pruebas.get("puerta") or {}
+    f_puerta = puerta.get("fuente") or "docs/pruebas.md"
+    if tiene_digito(puerta.get("corrida")):
+        m.agregar(ARCHIVO_PRUEBAS, "puerta.corrida", puerta["corrida"], f_puerta, puerta["corrida"], "construir.py",
+                  ETIQUETA_CORRIDA, False)
+    for j, paso in enumerate(puerta.get("pasos") or []):
+        if isinstance(paso, dict) and tiene_digito(paso.get("detalle")):
+            m.agregar(ARCHIVO_PRUEBAS, f"puerta.pasos[{j}].detalle", paso["detalle"], f_puerta,
+                      puerta.get("corrida") or fecha, "construir.py", ETIQUETA_CORRIDA, False)
+    if tiene_digito(fecha):
+        m.agregar(ARCHIVO_PRUEBAS, "generado", fecha, ARCHIVO_PRUEBAS, fecha, script, ETIQUETA_CORRIDA, False)
 
 
 def generar(raiz=RAIZ, escribir=True, hoy=None):
@@ -386,17 +511,8 @@ def generar(raiz=RAIZ, escribir=True, hoy=None):
     # 4) parcelas.geojson (B1, A3, A3-M y A4.2)
     meta_geo = geo.get("meta") or {}
     mock_geo = bool(meta_geo.get("mock", meta.get("mock")))
-    fuente, fecha, script, etiqueta = origen_calculo({**meta, **meta_geo}, "parcelas_geojson", mock_geo, hoy)
-    for i, f in enumerate(geo.get("features") or []):
-        props = f.get("properties") or {}
-        for k in PROPIEDADES_PARCELA:
-            if es_numero(props.get(k)):
-                m.agregar("web/data/parcelas.geojson", f"features[{i}].properties.{k}", props[k],
-                          fuente, fecha, script, etiqueta, mock_geo)
-        for j, anio in enumerate(props.get("memoria") or []):
-            if es_numero((anio or {}).get("anio")):
-                m.agregar("web/data/parcelas.geojson", f"features[{i}].properties.memoria[{j}].anio",
-                          anio["anio"], fuente, fecha, script, etiqueta, mock_geo)
+    origen_geo = origen_calculo({**meta, **meta_geo}, "parcelas_geojson", mock_geo, hoy)
+    cifras_de_parcelas(m, geo, fuentes_origen, origen_geo, mock_geo, script_cubo)
 
     # 5) valores de los marcadores de explicaciones.json (C3)
     if expl is not None:
@@ -414,6 +530,11 @@ def generar(raiz=RAIZ, escribir=True, hoy=None):
     ruta_relieve = raiz / ARCHIVO_RELIEVE
     if ruta_relieve.exists():
         cifras_de_relieve(m, leer_json(ruta_relieve), fuentes_origen)
+
+    # 7) pruebas.json (paso 5c): las cifras de «About & Data». Si aún no existe, no hay nada que rastrear.
+    ruta_pruebas = raiz / ARCHIVO_PRUEBAS
+    if ruta_pruebas.exists():
+        cifras_de_pruebas(m, leer_json(ruta_pruebas))
 
     simuladas = sum(1 for c in m.cifras.values() if c["mock"])
     cifras = agrupar_cifras(m.cifras)

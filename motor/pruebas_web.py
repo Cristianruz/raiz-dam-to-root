@@ -8,10 +8,14 @@ y su ESTADO REAL, leído del repo en el momento de construir:
      (docs/figuras/tabla_metodos.csv y olofsson.csv). La fracción de parcelas abstenidas se cuenta
      en web/data/parcelas.geojson, en total y por zona.
   2. Back-test H1: «not run» si no existe docs/resultado_H1.md; si existe, su veredicto
-     («meets / does not meet the preregistered criterion», kit A6).
+     («meets / does not meet the preregistered criterion», kit A6). El resumen que muestra la página es la
+     línea «Rótulo para la página: "…"» del documento (en inglés); si no la trae, solo la frase en negrita
+     del veredicto (o la primera oración que lo dice), nunca el párrafo en español que sigue.
   3. Experimento natural H3: igual, con docs/resultado_H3.md («H3 supported / not supported», kit A7).
   4. Verificador de cifras: resumen de docs/figuras/llm_eval.csv (motor/verificador.py).
-  5. Contraste regional de ET («not run» si no hay data/processed/et_contraste*.csv, kit A8) y
+  5. Contraste regional de ET («not run» si no hay data/processed/et_contraste*.csv, kit A8), con SSEBop VIIRS
+     y WaPOR v3 como partes separadas (una columna vacía = «not run», kit Q1 punto 5); los totales se rotulan
+     con el área que dice la fuente registrada (p. ej. el rectángulo original) y el periodo de la columna mes; y
      pruebas automáticas: FAO-56 contra los ejemplos del manual (tests/test_fao*56*.py) y cierre
      del balance de La gota (validar_contrato.py, renglón «contrato» de la puerta).
 Además, la PUERTA AUTOMÁTICA: la tabla de docs/pruebas.md, que escribe `python construir.py`
@@ -309,18 +313,54 @@ def veredicto(texto, pares):
 
     Primero se buscan las líneas que se anuncian como resultado («Result», «Verdict», «Resultado»…),
     para no confundir con el veredicto una línea que solo describe el criterio; después, todas."""
+    estado, linea = veredicto_crudo(texto, pares)
+    return estado, (limpiar_md(linea) if linea is not None else None)
+
+
+# «Rótulo para la página: "…"»: la frase en inglés que el propio documento de resultado propone para la web.
+ROTULO_PAGINA = re.compile(r"R[óo]tulo para la p[áa]gina:\s*[\"“«]([^\"”»\n]+)[\"”»]", re.I)
+
+
+def rotulo_pagina(texto):
+    """Texto del «Rótulo para la página» del documento, o None si no lo trae."""
+    m = ROTULO_PAGINA.search(texto or "")
+    return m.group(1).strip() if m else None
+
+
+def dice_veredicto(texto, pares):
+    baja = texto.lower()
+    return any(neg in baja or pos in baja for neg, pos in pares)
+
+
+def frase_del_veredicto(linea, pares):
+    """De la línea del veredicto, solo la parte que lo dice: la frase en negrita que lo contiene o, si no hay,
+    la primera oración que lo contiene. Así no se arrastra el párrafo (en español) que sigue en el documento."""
+    for seg in re.findall(r"\*\*(.+?)\*\*", linea):
+        if dice_veredicto(seg, pares):
+            return limpiar_md(seg)
+    limpia = limpiar_md(linea)
+    for oracion in re.split(r"(?<=[.!?])\s+", limpia):
+        if dice_veredicto(oracion, pares):
+            return oracion.strip()
+    return limpia
+
+
+def veredicto_crudo(texto, pares):
+    """(estado, línea sin limpiar) del veredicto; ver veredicto()."""
     lineas = texto.splitlines()
     anunciadas = [l for l in lineas if any(p in l.lower() for p in PALABRAS_VEREDICTO)]
     for grupo in (anunciadas, lineas):
         for linea in grupo:
+            if ROTULO_PAGINA.search(linea):
+                continue  # el rótulo se lee aparte; no es la línea del veredicto
             baja = linea.lower()
             for negativa, positiva in pares:
                 neg = baja.count(negativa)
                 pos = baja.count(positiva) - (neg if positiva in negativa else 0)
                 if neg and not pos:
-                    return FAILED, limpiar_md(linea)
+                    return FAILED, linea
                 if pos and not neg:
-                    return PASSED, limpiar_md(linea)
+                    return PASSED, linea
     return None, None
 
 
@@ -330,12 +370,18 @@ def prueba_hipotesis(raiz, hipotesis):
     if texto is None:
         return {"estado": NOT_RUN, "resumen": f"Not run: {rel} is not in the repo yet.", "fuentes": [],
                 "partes": [], "metricas": []}
-    estado, linea = veredicto(texto, VEREDICTOS[hipotesis])
-    if estado is None:  # el documento existe pero no dice el veredicto con las frases del kit
-        primera = next((limpiar_md(l) for l in texto.splitlines() if limpiar_md(l) and not l.lstrip().startswith("#")),
-                       "")
-        estado, linea = RUN, primera
-    return {"estado": estado, "resumen": linea or None, "fuentes": [rel], "partes": [], "metricas": []}
+    pares = VEREDICTOS[hipotesis]
+    estado, linea = veredicto_crudo(texto, pares)
+    rotulo = rotulo_pagina(texto)
+    if estado is None:
+        # El documento existe pero no dice el veredicto con las frases del kit. El rótulo, si lo trae, puede
+        # decirlo; si no, se publica «run» con una nota en inglés (no el texto del documento, en español).
+        estado, _ = veredicto_crudo(rotulo, pares) if rotulo else (None, None)
+        if estado is None:
+            return {"estado": RUN, "resumen": rotulo or f"Run: {rel} does not state a verdict yet.",
+                    "fuentes": [rel], "partes": [], "metricas": []}
+    resumen = rotulo or frase_del_veredicto(linea, pares)
+    return {"estado": estado, "resumen": resumen or None, "fuentes": [rel], "partes": [], "metricas": []}
 
 
 # ---------------------------------------------------------------------------

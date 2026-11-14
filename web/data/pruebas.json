@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-14T20:40:22+00:00",
+ "generado": "2026-11-14T20:53:00+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -75,7 +75,7 @@
    "criterio": "With data up to March 14, the error at July 14 must be lower than that of baselines L1 and L1-s. Truth: outflow through the intake works of La Boquilla (SIH)",
    "criterio_fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
    "estado": "failed",
-   "resumen": "H1: does not meet the preregistered criterion. En el punto principal (14-jul-2026) el error del modelo es mayor",
+   "resumen": "H1 does not meet the preregistered criterion (partial back-test; press-reported truth)",
    "partes": [],
    "metricas": [],
    "fuentes": [
@@ -89,7 +89,7 @@
    "criterio": "In the year without dam water, the share of annual-crop fields with a summer crop falls 25 points or more below its 2019–2024 median, and the share of pecan orchards stays within 10 points of its median. The number of fields in each group is published",
    "criterio_fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
    "estado": "failed",
-   "resumen": "H3 not supported. El criterio (a) no se cumple; el (b) sí. Resultado tal como se obtuvo, con el criterio",
+   "resumen": "H3 not supported (2025 natural experiment; pilot area, HLS v2)",
    "partes": [],
    "metricas": [],
    "fuentes": [
@@ -226,7 +226,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-14T20:40:22+00:00",
+  "corrida": "2026-11-14T20:53:00+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -261,7 +261,7 @@
     "nombre": "Manifest of every figure",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "51427 cifras (0 simuladas), 22 fuentes de origen, 33 avisos"
+    "detalle": "55186 cifras (0 simuladas), 22 fuentes de origen, 33 avisos"
    },
    {
     "id": "contrato",
@@ -282,7 +282,7 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "342 passed in 8.60s"
+    "detalle": "342 passed in 8.35s"
    },
    {
     "id": "node",
