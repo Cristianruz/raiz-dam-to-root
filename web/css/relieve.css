@@ -1,0 +1,108 @@
+/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* web/css/relieve.css — Capa «Terrain & runoff» y botón «Simulate a storm» (web/js/relieve.js).
+   Colores de la identidad como variables; relieve.js los lee de aquí (no hay colores en el JS).
+   Toma --agua, --agua-osc, --blanco… de style.css; el valor tras la coma es el respaldo si
+   style.css no está cargado (mismos códigos de la identidad, kit C1 §10).
+   Los números de este archivo son medidas de diseño, no datos. */
+
+:root {
+  --relieve-ruta: var(--agua, #1F6FB2);          /* rutas de escurrimiento (Agua) */
+  --relieve-ruta-fuerte: var(--agua-osc, #174F80); /* rutas resaltadas durante la tormenta */
+  --relieve-borde: var(--blanco, #FFFFFF);       /* contorno claro bajo las rutas (contraste sobre las parcelas) */
+  --relieve-gota: var(--agua, #1F6FB2);          /* gotas de la tormenta */
+  --relieve-gota-borde: var(--blanco, #FFFFFF);
+  --relieve-fondo-tormenta: var(--agua-clara, #DCEAF6);
+}
+
+/* Bloque de controles (dentro del contenedor que elige app.js) */
+.relieve { display: grid; gap: 8px; font-size: 0.9rem; }
+
+.relieve-controles {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+}
+
+/* El interruptor reutiliza .interruptor de style.css; aquí solo se ajusta el texto. */
+.relieve-interruptor span { font-weight: 700; }
+
+.relieve-boton-tormenta {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 2px solid var(--relieve-ruta); background: var(--blanco, #FFFFFF);
+  color: var(--relieve-ruta-fuerte); border-radius: 999px;
+  padding: 4px 14px; min-height: 40px; cursor: pointer; font-weight: 700;
+}
+.relieve-boton-tormenta:hover { background: var(--relieve-fondo-tormenta); }
+.relieve-boton-tormenta:focus-visible { outline: 3px solid var(--relieve-ruta); outline-offset: 2px; }
+.relieve-boton-tormenta:disabled { opacity: 0.45; cursor: not-allowed; }
+.relieve[data-animando="true"] .relieve-boton-tormenta { background: var(--relieve-ruta); color: var(--blanco, #FFFFFF); }
+
+/* Ícono de lluvia dibujado con CSS (tres gotas): acompaña al texto, no lo sustituye. */
+.relieve-icono-lluvia {
+  width: 14px; height: 14px; flex: none;
+  background:
+    radial-gradient(circle at 20% 30%, currentColor 0 2px, transparent 2.5px),
+    radial-gradient(circle at 60% 20%, currentColor 0 2px, transparent 2.5px),
+    radial-gradient(circle at 45% 75%, currentColor 0 2px, transparent 2.5px);
+}
+
+.relieve-ayuda { font-size: 0.85rem; color: var(--tinta-suave, #4A525A); }
+
+/* Leyenda */
+.relieve-leyenda ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.relieve-leyenda li { display: flex; align-items: center; gap: 8px; }
+.relieve-leyenda .fuente { margin-top: 4px; }
+.relieve-muestra-ruta {
+  width: 24px; height: 5px; flex: none; border-radius: 3px;
+  background: var(--relieve-ruta); box-shadow: 0 0 0 1px var(--relieve-borde), 0 0 0 2px rgba(0, 0, 0, 0.2);
+}
+.relieve-muestra-gota {
+  width: 9px; height: 9px; flex: none; margin: 0 7px; border-radius: 50%;
+  background: var(--relieve-gota); box-shadow: 0 0 0 1px var(--relieve-gota-borde), 0 0 0 2px rgba(0, 0, 0, 0.2);
+}
+.relieve-etiqueta {
+  display: inline-block; font-size: 0.75rem; font-weight: 700; color: var(--tinta-suave, #4A525A);
+  border: 1px solid var(--borde, #D8CFC2); border-radius: 999px; padding: 0 6px; white-space: nowrap;
+}
+.relieve-escala { font-size: 0.85rem; font-style: italic; color: var(--tinta-suave, #4A525A); }
+
+/* Tarjeta de la tormenta */
+.relieve-tormenta {
+  background: var(--relieve-fondo-tormenta); border-left: 4px solid var(--relieve-ruta);
+  border-radius: 4px; padding: 8px 10px; display: grid; gap: 6px;
+}
+.relieve-tormenta-zona { display: grid; gap: 2px; }
+.relieve-tormenta-titulo { font-weight: 700; }
+.relieve-tormenta-cifra strong { font-size: 1.3rem; color: var(--relieve-ruta-fuerte); }
+.relieve-tormenta-def, .relieve-tormenta-periodo { color: var(--tinta-suave, #4A525A); }
+.relieve-nota { font-size: 0.85rem; }
+
+.relieve-aviso, .relieve-no-corrido {
+  font-size: 0.9rem; color: var(--tinta-suave, #4A525A);
+  background: var(--arena, #F5EFE6); border: 1px dashed var(--borde, #D8CFC2);
+  border-radius: 6px; padding: 6px 10px;
+}
+
+/* Texto solo para lectores de pantalla (anuncios de la tormenta) */
+.relieve-solo-lector {
+  position: absolute !important; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0;
+}
+
+/* Lienzo de las gotas: encima del mapa, sin capturar clics ni arrastres. */
+.relieve-lienzo-tormenta { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+/* Bloque flotante (solo si app.js no da contenedor) */
+.relieve-flotante {
+  position: absolute; left: 10px; bottom: 28px; z-index: 2; max-width: min(340px, calc(100% - 20px));
+  max-height: calc(100% - 40px); overflow-y: auto; /* en teléfono no tapa ni corta: se desplaza dentro */
+  background: var(--blanco, #FFFFFF); border-radius: 10px; padding: 10px 12px;
+  box-shadow: 0 2px 10px rgba(29, 35, 41, 0.18);
+}
+
+/* Línea de la ficha (renglón Soil) */
+.relieve-parcela { font-size: 0.9rem; margin-top: 4px; }
+.relieve-parcela-titulo { font-weight: 700; }
+.relieve-parcela .relieve-escala { white-space: normal; }
+
+@media (prefers-reduced-motion: reduce) {
+  .relieve-boton-tormenta { transition: none; }
+}
