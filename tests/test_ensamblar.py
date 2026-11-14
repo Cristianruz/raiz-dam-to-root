@@ -81,6 +81,16 @@ def archivos_de(buzon):
     return sorted(p.name for p in buzon.iterdir() if p.is_file() and p.name != "LEEME.md")
 
 
+AVISO_SIN_PILLOW = "Pillow no está instalado"
+
+
+def avisos_sin_pillow(entrada):
+    """Los avisos de un archivo menos el de «Pillow no está instalado…»: sin Pillow (GitHub
+    Actions instala solo requirements.txt) el lector de la biblioteca estándar siempre lo agrega
+    y no dice nada de la cobertura. Cualquier otro aviso (p. ej., «no cubre …») sí cuenta."""
+    return [a for a in entrada["avisos"] if AVISO_SIN_PILLOW not in a]
+
+
 def buzon_con(tmp_path, archivos, base=BUZON_OK, copiar=("parcelas_base.geojson",), lineas_extra=None):
     """Arma un buzón en tmp_path/buzon: copia `copiar` de `base`, escribe `archivos`
     ({nombre: texto o bytes}) y un LEEME.md con una línea por archivo."""
@@ -214,7 +224,7 @@ def test_buzon_ok_todo_entra_y_se_copia_con_sha256(tmp_path):
         assert x["zona"] == (OMISION if n in esquemas.ARCHIVOS_POR_ZONA else None), n
     assert por_nombre["parcelas_base.geojson"]["zonas"] == {OMISION: 3}
     assert por_nombre["relieve_parcelas.csv"]["zonas"] == {OMISION: 3}
-    assert not por_nombre["nasadem_zona_piloto.tif"]["avisos"]   # cubre el rectángulo de su zona
+    assert not avisos_sin_pillow(por_nombre["nasadem_zona_piloto.tif"])   # cubre el rectángulo de su zona
 
 
 def test_buzon_ok_avisa_faltante_power_menor_al_5pct(tmp_path):
@@ -1071,7 +1081,7 @@ def test_dos_zonas_todo_entra_con_su_zona(tmp_path):
     assert por_nombre["parcelas_base.geojson"]["zonas"] == {OMISION: 2, OTRA: 2}
     assert por_nombre["relieve_parcelas.csv"]["zonas"] == {OMISION: 2, OTRA: 2}
     assert por_nombre["relieve_rutas.geojson"]["zonas"] == {OMISION: 1, OTRA: 1}
-    assert not por_nombre[f"nasadem_zona_piloto_{OTRA}.tif"]["avisos"]
+    assert not avisos_sin_pillow(por_nombre[f"nasadem_zona_piloto_{OTRA}.tif"])
     # fuentes.json lleva la zona de los archivos por zona; el reporte y la bitácora también.
     fuentes = {f["archivo"]: f for f in rep["fuentes"]}
     assert fuentes[f"eto_diaria_{OTRA}.csv"]["zona"] == OTRA and "zona" not in fuentes["relieve_parcelas.csv"]
@@ -1244,8 +1254,11 @@ def test_nasadem_que_cubre_las_parcelas_pero_no_el_rectangulo(tmp_path):
 
 
 def test_entrega_real_de_una_zona_sigue_validando(tmp_path):
-    """La entrega real actual (data/processed: parcelas sin «zona», archivos sin sufijo) entra
-    completa como un buzón, con LEEME.md generado aquí (fuente «prueba»)."""
+    """La entrega real actual (data/processed) entra completa como un buzón, con LEEME.md generado
+    aquí (fuente «prueba»). Hoy es de una zona (parcelas sin «zona», archivos sin sufijo), pero la
+    prueba no lo exige: cuando llegue la entrega de dos zonas (parcelas L…, archivos
+    «_lazaro_cardenas») debe seguir en verde si todo es válido. La zona de cada archivo es la de
+    su sufijo; sin sufijo, la zona por omisión si es un archivo por zona y None si no."""
     entregas = sorted(p.name for p in PROCESADOS.iterdir()
                       if p.is_file() and not p.name.startswith(".") and p.name != ens.NOMBRE_FUENTES)
     if ens.E.ARCHIVO_PARCELAS not in entregas:
@@ -1261,8 +1274,11 @@ def test_entrega_real_de_una_zona_sigue_validando(tmp_path):
     assert rep["rechazados"] == [] and rep["retenidos"] == [], [(x["archivo"], x["motivos"]) for x in rep["rechazados"]]
     assert nombres(rep["entraron"]) == entregas
     for x in rep["entraron"]:
-        assert x["zona"] == (OMISION if x["archivo"] in esquemas.ARCHIVOS_POR_ZONA else None), x["archivo"]
-        assert set(x.get("zonas") or {OMISION: 0}) == {OMISION}, x["archivo"]
+        _, sufijo = ens.separar_sufijo_zona(x["archivo"])
+        esperada = sufijo or (OMISION if x["archivo"] in esquemas.ARCHIVOS_POR_ZONA else None)
+        assert x["zona"] == esperada, x["archivo"]
+        # Los archivos con elementos de varias zonas (parcelas, relieve) solo traen zonas conocidas.
+        assert set(x.get("zonas") or {}) <= set(LIMITES["zonas_ids"]), (x["archivo"], x.get("zonas"))
 
 
 # ---------------------------------------------------------------------------------------

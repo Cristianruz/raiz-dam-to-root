@@ -63,6 +63,9 @@
   --suelo-bajo: #F1E6D2;
   --suelo-alto: var(--tierra);
 
+  /* Localidades del equipo (puntos de referencia, no parcelas) */
+  --localidad: var(--tinta);
+
   /* La gota */
   --gota-agua: var(--agua);
   --gota-canal: var(--ambar);
@@ -226,6 +229,18 @@ button, input, select { font: inherit; color: inherit; }
   border-top: 6px solid var(--agua);
 }
 .indicador-titulo { font-size: 0.95rem; color: var(--tinta-suave); }
+
+/* Selector de zona piloto (solo con más de una zona) */
+.selector-zona {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px;
+  margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--borde);
+}
+.selector-zona label { font-weight: 700; font-size: 0.9rem; }
+.selector-zona select {
+  flex: 1 1 12em; min-width: 0; min-height: 38px; padding: 4px 8px;
+  border: 2px solid var(--agua); border-radius: 8px;
+  background: var(--blanco); color: var(--agua-osc); font-weight: 700; cursor: pointer;
+}
 .indicador-cifra { font-size: 2rem; font-weight: 700; color: var(--agua-osc); margin-top: 2px; }
 .indicador-cifra .al-menos { font-size: 1.1rem; font-weight: 700; color: var(--tinta); }
 .indicador-cifra .de-dotacion { font-size: 1rem; font-weight: 400; color: var(--tinta-suave); }
@@ -259,6 +274,20 @@ button, input, select { font: inherit; color: inherit; }
   border: 3px solid var(--gris); border-radius: 999px;
   padding: 2px 8px; font-weight: 700; font-size: 0.85rem;
   box-shadow: var(--sombra); cursor: pointer; white-space: nowrap;
+}
+
+/* Localidades del equipo: punto oscuro con borde blanco y su nombre (no se pueden pulsar en el mapa) */
+.etiqueta-localidad {
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.92); color: var(--localidad);
+  border: 1px solid var(--localidad); border-radius: 4px;
+  padding: 1px 6px; font-size: 0.8rem; font-weight: 700; font-style: italic;
+  white-space: nowrap; box-shadow: var(--sombra);
+}
+.etiqueta-localidad.activa { background: var(--localidad); color: var(--blanco); }
+.punto-localidad {
+  width: 14px; height: 14px; border-radius: 50%; flex: none;
+  background: var(--localidad); border: 2px solid var(--blanco); box-shadow: 0 0 0 1px var(--localidad);
 }
 
 /* ---------- Panel lateral ---------- */
@@ -330,6 +359,18 @@ button, input, select { font: inherit; color: inherit; }
   font-size: 0.75rem; font-weight: 700; color: var(--agua-osc);
   border: 1px solid var(--agua); border-radius: 999px; padding: 0 6px; margin-left: 4px;
 }
+
+.lista-localidades { list-style: none; margin: 0 0 6px; padding: 0; display: grid; gap: 6px; }
+.boton-localidad, .lista-localidades .localidad {
+  width: 100%; display: flex; align-items: center; gap: 8px; text-align: left;
+  background: var(--arena); border: 1px solid var(--borde); border-radius: 8px;
+  padding: 6px 10px; min-height: 40px;
+}
+.boton-localidad { cursor: pointer; }
+.boton-localidad:hover { background: var(--arena-osc); }
+.localidad-texto { min-width: 0; }
+.localidad-detalle { display: block; font-size: 0.85rem; color: var(--tinta-suave); }
+.boton-localidad .ver { margin-left: auto; font-size: 0.85rem; color: var(--agua-osc); text-decoration: underline; white-space: nowrap; }
 
 .conteos { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .conteos li { display: flex; align-items: center; gap: 8px; }

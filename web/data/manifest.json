@@ -372,7 +372,7 @@
    "min": 5794.33,
    "max": 5794.33,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -384,7 +384,7 @@
    "min": 2005.25,
    "max": 2005.25,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -396,7 +396,7 @@
    "min": 3789.08,
    "max": 3789.08,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -408,7 +408,7 @@
    "min": 1455.06,
    "max": 1455.06,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -420,7 +420,7 @@
    "min": 26907.77,
    "max": 26907.77,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -432,7 +432,7 @@
    "min": 33226.38,
    "max": 33226.38,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -444,7 +444,7 @@
    "min": 41190.62,
    "max": 41190.62,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -456,7 +456,7 @@
    "min": 27900.31,
    "max": 27900.31,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -468,7 +468,7 @@
    "min": 34026.9,
    "max": 34026.9,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -480,7 +480,7 @@
    "min": 41862.93,
    "max": 41862.93,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -492,7 +492,7 @@
    "min": 338,
    "max": 338,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -504,7 +504,7 @@
    "min": 37,
    "max": 37,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -516,7 +516,7 @@
    "min": 28,
    "max": 28,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -528,7 +528,7 @@
    "min": 55,
    "max": 55,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -540,7 +540,7 @@
    "min": 218,
    "max": 218,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -552,7 +552,7 @@
    "min": 0.0,
    "max": 23.13,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -564,7 +564,7 @@
    "min": 0.0,
    "max": 28.4,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -576,7 +576,7 @@
    "min": 0.0,
    "max": 35.16,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -588,7 +588,7 @@
    "min": 0.0,
    "max": 23.86,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -600,7 +600,7 @@
    "min": 0.0,
    "max": 29.01,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -612,7 +612,7 @@
    "min": 0.0,
    "max": 35.64,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -624,7 +624,7 @@
    "min": 1,
    "max": 10,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -636,7 +636,7 @@
    "min": 1,
    "max": 10,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -648,7 +648,7 @@
    "min": 0,
    "max": 10,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -660,7 +660,7 @@
    "min": 0,
    "max": 10,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -672,7 +672,7 @@
    "min": 0.0,
    "max": 191.0,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -684,7 +684,7 @@
    "min": 0.0,
    "max": 191.0,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -696,7 +696,7 @@
    "min": 0.0,
    "max": 196.1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -708,7 +708,7 @@
    "min": 0.0,
    "max": 196.1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -720,7 +720,7 @@
    "min": 0,
    "max": 89,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -732,7 +732,7 @@
    "min": 0.0,
    "max": 4701146.7,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -744,7 +744,7 @@
    "min": 0.0,
    "max": 1880458.7,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -756,7 +756,7 @@
    "min": 0.0,
    "max": 2820688.0,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -768,7 +768,7 @@
    "min": 0.0,
    "max": 1606758.4,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -780,7 +780,7 @@
    "min": 0.0,
    "max": 940229.3,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -792,7 +792,7 @@
    "min": 0.0,
    "max": 2154158.9,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -804,7 +804,7 @@
    "min": 1.02,
    "max": 336.4,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -816,7 +816,7 @@
    "min": 17,
    "max": 57,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -828,7 +828,7 @@
    "min": 0,
    "max": 89,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -840,7 +840,7 @@
    "min": 0.1194,
    "max": 0.835,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -852,7 +852,7 @@
    "min": 0,
    "max": 89,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -864,7 +864,7 @@
    "min": 2016,
    "max": 2026,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -876,7 +876,7 @@
    "min": 2,
    "max": 11,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -888,7 +888,7 @@
    "min": 28.4,
    "max": 28.4,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -900,7 +900,7 @@
    "min": 3,
    "max": 3,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -912,7 +912,7 @@
    "min": 4,
    "max": 4,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -924,7 +924,7 @@
    "min": 23.13,
    "max": 23.13,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -936,7 +936,7 @@
    "min": 35.16,
    "max": 35.16,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -948,7 +948,7 @@
    "min": 25.49,
    "max": 25.49,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -960,7 +960,7 @@
    "min": 3,
    "max": 3,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -972,7 +972,7 @@
    "min": 4,
    "max": 4,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -984,7 +984,7 @@
    "min": 20.96,
    "max": 20.96,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -996,7 +996,7 @@
    "min": 31.59,
    "max": 31.59,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1008,7 +1008,7 @@
    "min": 14.66,
    "max": 14.66,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1020,7 +1020,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1032,7 +1032,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1044,7 +1044,7 @@
    "min": 11.57,
    "max": 11.57,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1056,7 +1056,7 @@
    "min": 18.29,
    "max": 18.29,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1068,7 +1068,7 @@
    "min": 17.44,
    "max": 17.44,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1080,7 +1080,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1092,7 +1092,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1104,7 +1104,7 @@
    "min": 14.81,
    "max": 14.81,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1116,7 +1116,7 @@
    "min": 20.69,
    "max": 20.69,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1128,7 +1128,7 @@
    "min": 6.28,
    "max": 6.28,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1140,7 +1140,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1152,7 +1152,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1164,7 +1164,7 @@
    "min": 5.07,
    "max": 5.07,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1176,7 +1176,7 @@
    "min": 7.54,
    "max": 7.54,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1188,7 +1188,7 @@
    "min": 0.0,
    "max": 0.0,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1200,7 +1200,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1212,7 +1212,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1224,7 +1224,7 @@
    "min": 0.0,
    "max": 0.0,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1236,7 +1236,7 @@
    "min": 0.0,
    "max": 0.0,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1248,7 +1248,7 @@
    "min": 11.14,
    "max": 11.14,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1260,7 +1260,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1272,7 +1272,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1284,7 +1284,7 @@
    "min": 9.31,
    "max": 9.31,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1296,7 +1296,7 @@
    "min": 13.49,
    "max": 13.49,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1308,7 +1308,7 @@
    "min": 19.1,
    "max": 19.1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1320,7 +1320,7 @@
    "min": 10,
    "max": 10,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1332,7 +1332,7 @@
    "min": 10,
    "max": 10,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1344,7 +1344,7 @@
    "min": 15.38,
    "max": 15.38,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1356,7 +1356,7 @@
    "min": 23.71,
    "max": 23.71,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1368,7 +1368,7 @@
    "min": 11.39,
    "max": 11.39,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1380,7 +1380,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1392,7 +1392,7 @@
    "min": 1,
    "max": 1,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1404,7 +1404,7 @@
    "min": 9.02,
    "max": 9.02,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false
@@ -1416,7 +1416,7 @@
    "min": 14.29,
    "max": 14.29,
    "fuente": "data/processed/.gitkeep; data/processed/cultivos_parcelas.csv; data/processed/demanda_cultivos.csv; data/processed/eto_diaria.csv; data/processed/fuentes.json; data/processed/hls_mensual_parcelas.csv; data/processed/memoria_parcelas.csv; data/processed/memoria_resumen.csv; data/processed/nasadem_zona_piloto.tif; data/processed/parcelas_base.geojson; data/processed/relieve_meta.json; data/processed/relieve_parcelas.csv; data/processed/relieve_rutas.geojson; data/processed/rotaciones.json; data/processed/suelo_desnudo.csv; data/params.json; data/opciones_b4.json",
-   "fecha": "2026-11-14T19:02:37+00:00",
+   "fecha": "2026-11-14T19:12:07+00:00",
    "script": "motor/b4_cubo.py",
    "etiqueta": "Cálculo",
    "mock": false

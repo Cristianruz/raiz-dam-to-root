@@ -63,6 +63,11 @@
   <main id="principal" class="principal">
     <section class="zona-mapa" aria-label="Pilot area map">
       <div class="indicador" id="indicador">
+        <!-- Selector de zona piloto: app.js lo llena con cubo.zonas y lo muestra solo si hay más de una. -->
+        <div class="selector-zona" id="selector-zona" hidden>
+          <label for="zona-sel">Pilot area</label>
+          <select id="zona-sel"></select>
+        </div>
         <h1 class="indicador-titulo">Water already committed by perennial crops</h1>
         <div aria-live="polite" aria-atomic="true">
           <p class="indicador-cifra" id="indicador-cifra"></p>
@@ -103,6 +108,14 @@
         <ul class="conteos" id="conteos-semaforo"></ul>
         <h3>Water term</h3>
         <ul class="conteos" id="conteos-plazo"></ul>
+      </section>
+
+      <!-- Localidades del equipo (cubo.localidades): puntos de referencia del mapa, no parcelas. -->
+      <section class="bloque" id="bloque-localidades" aria-labelledby="t-localidades" hidden>
+        <h2 id="t-localidades">Team reference localities (not fields)</h2>
+        <p class="ayuda">Places to find your way on the map. They are not fields and carry no water data.</p>
+        <ul class="lista-localidades" id="lista-localidades"></ul>
+        <p class="fuente" id="localidades-fuente"></p>
       </section>
 
       <section class="bloque" aria-labelledby="t-boquilla">

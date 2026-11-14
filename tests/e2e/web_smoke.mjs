@@ -15,6 +15,9 @@
 //   la lista de parcelas es completa, se desplaza y se filtra, la ficha abre en las parcelas protagonistas con
 //   una tarjeta por opción, «enough for» cambia con el deslizador, «no irrigation needed» con necesidad cero,
 //   la ficha de una parcela abstenida, el clic en el mapa, y La gota con y sin escenario de goteo;
+// - dos zonas piloto (docs/decisiones/2026-11-14_dos_zonas.md): con una sola zona el selector «Pilot area» NO
+//   aparece; con un cubo y un geojson de DOS zonas derivados en memoria (page.route) aparece, y cambiar de zona
+//   cambia el indicador, los conteos, la lista y el mapa; las localidades del equipo se listan y se dibujan;
 // - guarda capturas en tests/e2e/capturas/ (o en RAIZ_CAPTURAS).
 // No supone un juego de datos: los valores esperados y las parcelas de cada prueba se leen de los datos.
 // Los casos que los datos no traen (superficie abstenida, capa ausente, una parcela abstenida, el goteo)
@@ -25,6 +28,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { aguaComprometida, conteosZona } from "../../web/reglas.js";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -55,6 +59,8 @@ const leerJSON = (nombre) => JSON.parse(fs.readFileSync(path.join(DATOS, nombre)
 const cubo = leerJSON("cubo.json");
 const parcelas = leerJSON("parcelas.geojson");
 const explicaciones = leerJSON("explicaciones.json");
+// Parámetros de las zonas y de las localidades del equipo (para la variante de dos zonas).
+const params = JSON.parse(fs.readFileSync(path.join(RAIZ, "data", "params.json"), "utf-8"));
 
 // ---------------------------------------------------------------- lectura de los datos (nada escrito a mano)
 const props = parcelas.features.map((f) => f.properties);
@@ -310,6 +316,34 @@ async function pruebasEscritorio(page) {
     await page.locator("#ficha-cerrar").click();
   } else {
     omitir("indicador > 100 %", "ninguna marca lo produce con estos datos");
+  }
+
+  // Una sola zona (o sin cubo.zonas): el selector «Pilot area» no aparece
+  const nZonas = Object.keys(cubo.zonas ?? {}).length;
+  if (nZonas < 2) check(`con ${nZonas || "ninguna"} zona en cubo.zonas el selector «Pilot area» no aparece`, await page.locator("#selector-zona").isHidden());
+  else check("con varias zonas en cubo.zonas el selector «Pilot area» aparece", await page.locator("#selector-zona").isVisible());
+
+  // Localidades del equipo: listadas en texto (con su fuente) si el cubo las trae
+  const locs = Array.isArray(cubo.localidades) ? cubo.localidades : [];
+  if (locs.length) {
+    const textoLoc = await texto(page, "#bloque-localidades");
+    check(
+      "localidades del equipo listadas en texto con su fuente",
+      (await page.locator("#lista-localidades li").count()) === locs.length && locs.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(locs[0].fuente),
+      `${locs.length} localidades`,
+    );
+    check("la leyenda dice «Team reference localities (not fields)»", textoLoc.includes("Team reference localities (not fields)"));
+    // Las etiquetas de localidades fuera de la vista se ocultan: ninguna visible asoma cortada por el borde del mapa.
+    const cortadas = await page.evaluate(() => {
+      const caja = document.querySelector("#mapa").getBoundingClientRect();
+      return [...document.querySelectorAll(".etiqueta-localidad")]
+        .filter((el) => el.getClientRects().length)
+        .filter((el) => el.getBoundingClientRect().left < caja.left)
+        .map((el) => el.textContent);
+    });
+    check("ninguna etiqueta de localidad visible queda cortada por el borde izquierdo del mapa", cortadas.length === 0, cortadas.join(", "));
+  } else {
+    check("sin cubo.localidades no aparece el bloque de localidades", await page.locator("#bloque-localidades").isHidden());
   }
 
   // Segunda cifra: X de Y parcelas
@@ -623,6 +657,200 @@ function variante() {
   return { c, g, primera, quitada, idAbst, pAbst, idGoteo };
 }
 
+// ---------------------------------------------------------------- variante de dos zonas (en memoria)
+/** Extensión {o, s, e, n} de un conjunto de features. */
+function extensionDe(features) {
+  const ext = { o: Infinity, s: Infinity, e: -Infinity, n: -Infinity };
+  const recorrer = (c) => {
+    if (typeof c[0] === "number") {
+      ext.o = Math.min(ext.o, c[0]); ext.e = Math.max(ext.e, c[0]);
+      ext.s = Math.min(ext.s, c[1]); ext.n = Math.max(ext.n, c[1]);
+    } else c.forEach(recorrer);
+  };
+  for (const f of features) recorrer(f.geometry.coordinates);
+  return ext;
+}
+function trasladar(geom, dx, dy) {
+  const mover = (c) => (typeof c[0] === "number" ? [c[0] + dx, c[1] + dy, ...c.slice(2)] : c.map(mover));
+  return { ...geom, coordinates: mover(geom.coordinates) };
+}
+
+/** Bloque de zona como lo arma motor/b4_cubo.py (bloque_zona): mismo cálculo, sobre las parcelas de la zona. */
+function bloqueZona(nombre, props, c) {
+  const red = (v) => Math.round(v * 100) / 100;
+  const noAbst = props.filter((p) => !p.abstencion);
+  const perennes = noAbst.filter((p) => ["alfalfa", "nogal"].includes(p.cultivo_actual) && (c.parcelas[p.id]?.opciones ?? []).length);
+  const llaves = c.lluvia_pct.map(String);
+  const demanda = Object.fromEntries(
+    llaves.map((r) => [
+      r,
+      Object.fromEntries(["p10", "p50", "p90"].map((q) => [q, red(perennes.reduce((s, p) => s + p.area_ha * c.parcelas[p.id].opciones[0].agua.lamina_bruta[r][q], 0))])),
+    ]),
+  );
+  const estados = props.map((p) => p.estado_plazo ?? null);
+  const cuenta = (e) => estados.filter((x) => x === e).length;
+  return {
+    nombre,
+    superficie_total_ha: red(props.reduce((s, p) => s + p.area_ha, 0)),
+    superficie_clasificada_ha: red(noAbst.reduce((s, p) => s + p.area_ha, 0)),
+    superficie_abstenida_ha: red(props.filter((p) => p.abstencion).reduce((s, p) => s + p.area_ha, 0)),
+    superficie_perenne_ha: red(perennes.reduce((s, p) => s + p.area_ha, 0)),
+    demanda_perenne_millares: demanda,
+    conteos: { total: props.length, libre: cuenta("libre"), por_vencer: cuenta("por_vencer"), comprometida: cuenta("comprometida"), abstenida: cuenta(null) },
+  };
+}
+
+/**
+ * Cubo y geojson de DOS zonas derivados de los datos actuales (solo en la memoria de la prueba; NO son datos):
+ * - las parcelas del sur (el último ~40 % en el orden de los ids, salvo las protagonistas) pasan a la segunda zona de
+ *   params.zona_piloto.zonas, con ids «<prefijo><n>» y sus geometrías trasladadas al centro del bbox de esa zona;
+ * - las de la primera zona pierden la propiedad «zona» (compatibilidad: sin propiedad = la primera zona);
+ * - cubo.zonas con los dos bloques recalculados aquí y cubo.localidades de params.zona_piloto.localidades_equipo.
+ */
+function varianteDosZonas() {
+  const zp = params.zona_piloto ?? {};
+  const zonas = zp.zonas?.valor ?? [];
+  if (zonas.length < 2) return null;
+  const [za, zb] = zonas;
+  const c = structuredClone(cubo);
+  const g = structuredClone(parcelas);
+  const corte = Math.floor(g.features.length * 0.6);
+  const mudar = g.features.filter((f, i) => i >= corte && !f.properties.protagonista);
+  const quedan = g.features.filter((f) => !mudar.includes(f));
+  const ext = extensionDe(mudar);
+  const dx = (zb.bbox[0] + zb.bbox[2]) / 2 - (ext.o + ext.e) / 2;
+  const dy = (zb.bbox[1] + zb.bbox[3]) / 2 - (ext.s + ext.n) / 2;
+  mudar.forEach((f, k) => {
+    const viejo = f.properties.id;
+    const nuevo = `${zb.prefijo_id}${String(k + 1).padStart(viejo.length - 1, "0")}`;
+    f.properties.id = nuevo;
+    f.properties.zona = zb.id;
+    f.geometry = trasladar(f.geometry, dx, dy);
+    c.parcelas[nuevo] = c.parcelas[viejo];
+    delete c.parcelas[viejo];
+  });
+  for (const f of quedan) delete f.properties.zona;
+  const bloque = (z, fs) => ({ ...bloqueZona(z.id, fs.map((f) => f.properties), c), nombre_mostrar: z.nombre, bbox: z.bbox, clima_disponible: true });
+  c.zonas = { [za.id]: bloque(za, quedan), [zb.id]: bloque(zb, mudar) };
+  const loc = zp.localidades_equipo ?? {};
+  c.localidades = (loc.valor ?? []).map((l) => ({ ...l, fuente: loc.fuente }));
+  return { c, g, za, zb, porZona: { [za.id]: quedan, [zb.id]: mudar } };
+}
+
+/** Pruebas de la variante de dos zonas (escritorio). */
+async function pruebasDosZonas(page, v) {
+  const { c, g, za, zb, porZona } = v;
+  const D = D2;
+  await fijarDeslizador(page, D);
+  const pct = (x) => new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 0 }).format(x).replace("-", "−");
+  const n0 = (x) => new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(x);
+  const sel = page.locator("#zona-sel");
+
+  check("dos zonas: el selector «Pilot area» aparece", await page.locator("#selector-zona").isVisible());
+  const opciones = await sel.locator("option").allInnerTexts();
+  const esperadas = ["All areas", ...Object.values(c.zonas).map((z) => z.nombre_mostrar)];
+  check("dos zonas: opciones = «All areas» + nombre_mostrar de cada zona", JSON.stringify(opciones) === JSON.stringify(esperadas), opciones.join(" | "));
+
+  /** Lo que la página debe mostrar para un conjunto de parcelas y su bloque de zona. */
+  async function revisar(etiqueta, bloque, features, prefijo) {
+    const ac = aguaComprometida(bloque, D, 0);
+    const cnt = conteosZona(features, c, D, 0);
+    const ind = await indicador(page);
+    check(
+      `dos zonas (${etiqueta}): el indicador usa su bloque de zona (${pct(ac.p50)}, rango ${pct(ac.p10)}–${pct(ac.p90)})`,
+      ind.includes(pct(ac.p50)) && ind.includes(`Likely range: ${pct(ac.p10)} to ${pct(ac.p90)}`) && ind.includes("at least") === ac.alMenos,
+      `${await texto(page, "#indicador-cifra")} · ${await texto(page, "#indicador-rango")}`,
+    );
+    const segunda = await texto(page, "#indicador-segunda");
+    check(`dos zonas (${etiqueta}): segunda cifra con las parcelas de la zona (${cnt.rojo} of ${cnt.clasificadas})`, segunda.includes(`${n0(cnt.rojo)} of ${n0(cnt.clasificadas)}`), segunda);
+    const sem = await page.locator("#conteos-semaforo .n").allInnerTexts();
+    const plazo = await page.locator("#conteos-plazo .n").allInnerTexts();
+    const esperadoSem = ["verde", "ambar", "rojo", "gris"].map((k) => n0(cnt[k]));
+    const esperadoPlazo = ["libre", "por_vencer", "comprometida", "sin_dato"].map((k) => n0(cnt[k]));
+    check(
+      `dos zonas (${etiqueta}): conteos del panel solo con sus parcelas`,
+      JSON.stringify(sem) === JSON.stringify(esperadoSem) && JSON.stringify(plazo) === JSON.stringify(esperadoPlazo),
+      `${sem.join("/")} · ${plazo.join("/")}`,
+    );
+    const ids = await page.locator(".boton-parcela:visible").evaluateAll((bs) => bs.map((b) => b.dataset.id));
+    check(
+      `dos zonas (${etiqueta}): la lista muestra solo sus ${features.length} parcelas${prefijo ? ` (ids «${prefijo}…»)` : ""}`,
+      ids.length === features.length && (!prefijo || ids.every((id) => id.startsWith(prefijo))),
+      `${ids.length} en la lista`,
+    );
+    const dibujadas = await page.evaluate(() => window.raizDepuracion.parcelasDibujadas());
+    check(`dos zonas (${etiqueta}): el mapa encuadra y dibuja sus ${features.length} parcelas`, dibujadas === features.length, `${dibujadas} dibujadas`);
+    return ind;
+  }
+
+  const indTodas = await revisar("All areas", c.zona, g.features, null);
+  await page.screenshot({ path: path.join(CAPTURAS, "escritorio_dos_zonas_todas.png") });
+
+  await sel.selectOption(zb.id);
+  const indB = await revisar(zb.nombre, c.zonas[zb.id], porZona[zb.id], zb.prefijo_id);
+  check(`dos zonas: cambiar a ${zb.nombre} cambia el indicador`, indB !== indTodas);
+  check("dos zonas: el resumen de la lista nombra la zona", (await texto(page, "#lista-resumen")).includes(zb.nombre));
+  // La localidad de la segunda zona cae en su encuadre: su punto y su etiqueta se ven.
+  const locB = c.localidades.find((l) => l.lon >= zb.bbox[0] && l.lon <= zb.bbox[2] && l.lat >= zb.bbox[1] && l.lat <= zb.bbox[3]);
+  if (locB) {
+    const dibujadas = await page.evaluate(() => window.raizDepuracion.localidadesDibujadas());
+    const etiqueta = page.locator(".etiqueta-localidad", { hasText: locB.nombre });
+    check(`dos zonas: la localidad ${locB.nombre} se dibuja en el mapa de ${zb.nombre}`, dibujadas.includes(locB.nombre) && (await etiqueta.isVisible()), dibujadas.join(", "));
+  } else {
+    omitir("dos zonas: localidad dentro de la segunda zona", "ninguna localidad de params cae en su bbox");
+  }
+  await page.evaluate(() => window.raizDepuracion.esperarMapa());
+  await page.screenshot({ path: path.join(CAPTURAS, `escritorio_dos_zonas_${zb.id}.png`) });
+
+  // Ficha abierta de una parcela de la segunda zona: se cierra al cambiar a la primera.
+  const idB = porZona[zb.id][0].properties.id;
+  await abrirDesdeLista(page, idB);
+  await sel.selectOption(za.id);
+  check(`dos zonas: la ficha de ${idB} se cierra al cambiar a ${za.nombre}`, await page.locator("#ficha").isHidden());
+  const indA = await revisar(za.nombre, c.zonas[za.id], porZona[za.id], za.prefijo_id);
+  check(`dos zonas: cambiar a ${za.nombre} cambia el indicador`, indA !== indB && indA !== indTodas);
+
+  // Localidades: listadas en texto con su fuente; «Show on map» las lleva al mapa.
+  const textoLoc = await texto(page, "#bloque-localidades");
+  check(
+    "dos zonas: localidades listadas en texto con la leyenda y su fuente",
+    textoLoc.includes("Team reference localities (not fields)") && c.localidades.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(c.localidades[0].fuente),
+  );
+  check("dos zonas: una etiqueta en el mapa por localidad", (await page.locator(".etiqueta-localidad").count()) === c.localidades.length);
+  const locA = c.localidades.find((l) => l !== locB);
+  if (locA) {
+    await page.locator(".boton-localidad", { hasText: locA.nombre }).click();
+    const dibujadas = await page.evaluate(() => window.raizDepuracion.localidadesDibujadas());
+    const etiqueta = page.locator(".etiqueta-localidad", { hasText: locA.nombre });
+    check(
+      `dos zonas: «Show on map» de ${locA.nombre} la dibuja y resalta su etiqueta`,
+      dibujadas.includes(locA.nombre) && (await etiqueta.isVisible()) && (await etiqueta.getAttribute("class")).includes("activa"),
+      dibujadas.join(", "),
+    );
+    await page.screenshot({ path: path.join(CAPTURAS, "escritorio_dos_zonas_localidad.png") });
+  }
+
+  // De vuelta a todas las zonas: indicador del bloque total y lista completa.
+  await sel.selectOption("");
+  check("dos zonas: «All areas» vuelve al indicador total", (await indicador(page)) === indTodas);
+  check("dos zonas: «All areas» vuelve a la lista completa", (await page.locator(".boton-parcela:visible").count()) === g.features.length);
+}
+
+/** Variante de dos zonas en el teléfono: el selector cabe y cambia la zona. */
+async function pruebasDosZonasTelefono(page, v) {
+  check("teléfono, dos zonas: el selector «Pilot area» aparece", await page.locator("#selector-zona").isVisible());
+  await page.locator("#zona-sel").selectOption(v.zb.id);
+  const n = await page.locator(".boton-parcela:visible").count();
+  check(`teléfono, dos zonas: la lista muestra las ${v.porZona[v.zb.id].length} parcelas de ${v.zb.nombre}`, n === v.porZona[v.zb.id].length, `${n}`);
+  check("teléfono, dos zonas: sin desplazamiento horizontal", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  const alto = await page.evaluate(() => document.querySelector("#controles").offsetHeight / window.innerHeight);
+  check("teléfono, dos zonas: los controles fijos ocupan menos del 40 % de la pantalla", alto < 0.4, `${Math.round(alto * 100)} %`);
+  await page.evaluate(() => window.raizDepuracion.esperarMapa());
+  await page.screenshot({ path: path.join(CAPTURAS, "telefono_dos_zonas.png") });
+  await page.locator("#t-localidades").evaluate((el) => el.scrollIntoView({ block: "start" }));
+  await page.screenshot({ path: path.join(CAPTURAS, "telefono_dos_zonas_localidades.png") });
+}
+
 // ---------------------------------------------------------------- principal
 async function main() {
   fs.mkdirSync(CAPTURAS, { recursive: true });
@@ -672,6 +900,29 @@ async function main() {
     }
     check("variante en memoria: sin errores de consola", alt.errores.length === 0, alt.errores.join(" | "));
     await alt.ctx.close();
+
+    // Variante de dos zonas en memoria: selector, indicador, conteos, lista, mapa y localidades por zona.
+    const dz = varianteDosZonas();
+    if (dz) {
+      console.log(`\nDos zonas (en memoria): ${dz.za.id} = ${dz.porZona[dz.za.id].length} parcelas · ${dz.zb.id} = ${dz.porZona[dz.zb.id].length} parcelas`);
+      const datosDZ = { "cubo.json": dz.c, "parcelas.geojson": dz.g };
+      const dos = await abrir(navegador, base, { viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" }, "dos zonas en memoria", datosDZ);
+      await pruebasDosZonas(dos.page, dz);
+      check("dos zonas: sin errores de consola", dos.errores.length === 0, dos.errores.join(" | "));
+      await dos.ctx.close();
+      const dosTel = await abrir(
+        navegador,
+        base,
+        { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: "reduce" },
+        "dos zonas en memoria, teléfono",
+        datosDZ,
+      );
+      await pruebasDosZonasTelefono(dosTel.page, dz);
+      check("teléfono, dos zonas: sin errores de consola", dosTel.errores.length === 0, dosTel.errores.join(" | "));
+      await dosTel.ctx.close();
+    } else {
+      omitir("variante de dos zonas", "params.zona_piloto.zonas trae menos de dos zonas");
+    }
   } catch (err) {
     check("la prueba de humo terminó sin excepciones", false, err.stack ?? String(err));
   } finally {

@@ -8,6 +8,9 @@
 // - Las reglas del deslizador viven SOLO en reglas.js; aquí únicamente se llaman.
 // - Los colores se leen de las variables CSS de style.css (no hay colores en el JS).
 // - Comentarios en español; la interfaz, en inglés.
+// - Dos zonas piloto (docs/decisiones/2026-11-14_dos_zonas.md): el selector «Pilot area» sale de
+//   cubo.zonas y solo aparece con más de una zona. Parcela sin propiedad «zona» = la primera zona del
+//   cubo; sin cubo.zonas todo funciona como con una sola zona (bloque cubo.zona).
 
 import {
   llaveLluvia,
@@ -112,6 +115,14 @@ const estado = {
   marcadores: new Map(),
   pintadoPendiente: false,
   avisoTeselas: false,
+  // Zonas piloto
+  zonasIds: [], // ids de cubo.zonas, en el orden del cubo
+  zonaSel: null, // id de la zona elegida; null = todas («All areas»)
+  visibles: [], // parcelas de la zona elegida (todas si zonaSel es null)
+  idsVisibles: new Set(),
+  encuadre: null, // extensión que encuadra el mapa para la zona elegida
+  movidoPorUsuario: false, // el usuario movió el mapa: no se vuelve a encuadrar al cambiar de tamaño
+  etiquetasLocalidad: [], // [{el, lngLat}]: etiquetas (DOM) de las localidades del equipo en el mapa
 };
 
 // ---------------------------------------------------------------------------
@@ -243,6 +254,7 @@ async function iniciar() {
 
   for (const f of estado.parcelas.features) estado.porId.set(f.properties.id, f);
 
+  iniciarZonas();
   mostrarAvisoSimulado();
   iniciarControles();
   iniciarColoreado();
@@ -252,6 +264,7 @@ async function iniciar() {
   actualizarTodo();
   fijarMedidas(); // la cabecera ya tiene su alto final: el mapa se encuadra con él
   crearMapa();
+  pintarLocalidades(); // después del mapa: sin mapa, la lista queda solo en texto
   document.body.dataset.listo = "si";
 }
 
@@ -282,6 +295,79 @@ function mostrarAvisoSimulado() {
   const mock = Boolean(estado.cubo.meta?.mock || estado.parcelas.meta?.mock || estado.explicaciones.meta?.mock);
   $("#aviso-simulado").hidden = !mock;
   $("#aviso-simulado-detalle").hidden = !mock;
+}
+
+// ---------------------------------------------------------------------------
+// Zonas piloto: selector «Pilot area» (decisión del 14-nov-2026, dos zonas)
+// ---------------------------------------------------------------------------
+/** Ids de cubo.zonas en el orden del cubo (el de params). Vacío si el cubo no trae el bloque. */
+function idsZonas() {
+  const z = estado.cubo.zonas;
+  return z && typeof z === "object" && !Array.isArray(z) ? Object.keys(z) : [];
+}
+
+/** Zona de una parcela: su propiedad «zona»; sin ella, la primera zona del cubo (compatibilidad). */
+function zonaDe(p) {
+  return p.zona ?? estado.zonasIds[0] ?? null;
+}
+
+function nombreZona(id) {
+  const z = estado.cubo.zonas?.[id];
+  return z?.nombre_mostrar ?? z?.nombre ?? String(id ?? "").replace(/_/g, " ");
+}
+
+/** Bloque del indicador: el de la zona elegida o, con «All areas», el total (cubo.zona). */
+function bloqueZonaElegida() {
+  return (estado.zonaSel && estado.cubo.zonas?.[estado.zonaSel]) || estado.cubo.zona;
+}
+
+/** bbox [oeste, sur, este, norte] de una zona como extensión [[o, s], [e, n]]; null si no hay. */
+function extensionBbox(b) {
+  return Array.isArray(b) && b.length === 4 && b.every((v) => Number.isFinite(Number(v)))
+    ? [[Number(b[0]), Number(b[1])], [Number(b[2]), Number(b[3])]]
+    : null;
+}
+
+/** Encuadre de la zona elegida: la extensión de sus parcelas; si no tiene, su bbox. */
+function extensionZona() {
+  return extension({ features: estado.visibles }) ?? (estado.zonaSel ? extensionBbox(estado.cubo.zonas?.[estado.zonaSel]?.bbox) : null);
+}
+
+/** Parcelas de la zona elegida, sus ids y el encuadre del mapa. */
+function fijarVisibles() {
+  const sel = estado.zonaSel;
+  estado.visibles = sel == null ? estado.parcelas.features : estado.parcelas.features.filter((f) => zonaDe(f.properties) === sel);
+  estado.idsVisibles = new Set(estado.visibles.map((f) => f.properties.id));
+  estado.encuadre = extensionZona();
+}
+
+/** El selector aparece solo con más de una zona; con una (o sin cubo.zonas) la página queda como antes. */
+function iniciarZonas() {
+  estado.zonasIds = idsZonas();
+  const varias = estado.zonasIds.length > 1;
+  $("#selector-zona").hidden = !varias;
+  if (varias) {
+    const sel = $("#zona-sel");
+    sel.innerHTML =
+      '<option value="">All areas</option>' +
+      estado.zonasIds.map((id) => `<option value="${esc(id)}">${esc(nombreZona(id))}</option>`).join("");
+    sel.value = "";
+  }
+  estado.zonaSel = null;
+  fijarVisibles();
+}
+
+/** Cambio de zona: indicador, conteos, lista y mapa pasan a las parcelas de esa zona. */
+function cambiarZona(valor) {
+  const id = valor && estado.cubo.zonas?.[valor] ? valor : null;
+  if (id === estado.zonaSel) return;
+  estado.zonaSel = id;
+  fijarVisibles();
+  // La ficha abierta de una parcela de otra zona se cierra (sin mover el foco del selector).
+  if (estado.fichaId && !estado.idsVisibles.has(estado.fichaId)) cerrarFicha({ devolverFoco: false });
+  filtrarLista();
+  actualizarTodo();
+  encuadrar();
 }
 
 // ---------------------------------------------------------------------------
@@ -386,7 +472,7 @@ function actualizarValorDeslizador() {
 function actualizarTodo() {
   leerControles();
   actualizarValorDeslizador();
-  const conteos = conteosZona(estado.parcelas.features, estado.cubo, estado.D, estado.r);
+  const conteos = conteosZona(estado.visibles, estado.cubo, estado.D, estado.r);
   actualizarIndicador(conteos);
   actualizarConteos(conteos);
   pintarColoreado();
@@ -395,12 +481,25 @@ function actualizarTodo() {
 
 function actualizarIndicador(conteos) {
   const { D, r } = estado;
-  const ac = aguaComprometida(estado.cubo.zona, D, r);
   const cifra = $("#indicador-cifra");
   const rango = $("#indicador-rango");
   const mensaje = $("#indicador-mensaje");
   const partes = [];
 
+  // Zonas sin clima (cubo.zonas.<id>.clima_disponible = false): sus perennes no tienen lámina.
+  const ids = estado.zonaSel ? [estado.zonaSel] : estado.zonasIds;
+  const sinClima = ids.filter((id) => estado.cubo.zonas?.[id]?.clima_disponible === false);
+  if (ids.length && sinClima.length === ids.length) {
+    cifra.hidden = true;
+    rango.hidden = true;
+    mensaje.innerHTML = "<p>No climate data for this area yet, so the water need of its crops is not computed.</p>";
+    mensaje.hidden = false;
+    mensaje.classList.add("alerta");
+    $("#indicador-segunda").textContent = "Field water checks will appear when the climate data of this area arrive.";
+    return;
+  }
+
+  const ac = aguaComprometida(bloqueZonaElegida(), D, r);
   if (ac.sinDotacion) {
     cifra.hidden = true;
     rango.hidden = true;
@@ -421,6 +520,9 @@ function actualizarIndicador(conteos) {
   }
   if (ac.alMenos) {
     partes.push(`<p>${esc(fmtPct(ac.fraccionSinClasificar))} of the area is not classified, so this is a minimum.</p>`);
+  }
+  if (sinClima.length) {
+    partes.push(`<p>No climate data yet for ${esc(sinClima.map(nombreZona).join(", "))}: its perennial crops are not counted.</p>`);
   }
   mensaje.innerHTML = partes.join("");
   mensaje.hidden = partes.length === 0;
@@ -544,7 +646,8 @@ function clasificarParcelas() {
   const esq = clasificador();
   const salida = new Map();
   if (esq.continua) {
-    const valores = estado.parcelas.features.map((f) => esq.valor(f.properties)).filter((v) => v != null);
+    // Rango de la rampa: solo las parcelas de la zona elegida (la salida sí cubre todas: la lista las conserva).
+    const valores = estado.visibles.map((f) => esq.valor(f.properties)).filter((v) => v != null);
     const min = valores.length ? Math.min(...valores) : null;
     const max = valores.length ? Math.max(...valores) : null;
     const interp = window.d3?.interpolateRgb?.(colorCSS("suelo-bajo"), colorCSS("suelo-alto"));
@@ -599,7 +702,7 @@ function pintarLeyenda({ esq, salida, min, max }) {
         : "<p>No values available.</p>") +
       `<ul><li>${muestra("gris", "puntos")} No data</li></ul>`;
   } else {
-    const presentes = new Set(Array.from(salida.values()).map((v) => v.clave));
+    const presentes = new Set(estado.visibles.map((f) => salida.get(f.properties.id)?.clave));
     const clases = esq.soloPresentes ? esq.clases.filter((c) => presentes.has(c.clave) || c.clave === "sin_clasificar") : esq.clases;
     cuerpo =
       `<p><strong>${esc(esq.titulo)}</strong></p><ul>` +
@@ -677,18 +780,21 @@ function pintarLista({ salida }) {
   }
 }
 
-/** Filtro de la lista por id o cultivo; el resumen dice cuántas parcelas se ven. */
+/** Filtro de la lista por zona y por id o cultivo; el resumen dice cuántas parcelas se ven. */
 function filtrarLista() {
   const q = lista.filtro.trim().toLowerCase();
   let visibles = 0;
-  for (const n of lista.nodos.values()) {
-    const ver = !q || n.busqueda.includes(q);
+  let total = 0;
+  for (const [id, n] of lista.nodos) {
+    const enZona = estado.idsVisibles.has(id);
+    if (enZona) total += 1;
+    const ver = enZona && (!q || n.busqueda.includes(q));
     n.li.hidden = !ver;
     if (ver) visibles += 1;
   }
-  const total = lista.nodos.size;
+  const donde = estado.zonaSel ? ` in ${nombreZona(estado.zonaSel)}` : "";
   $("#lista-resumen").textContent =
-    visibles === total ? `${fmt(total, 0)} fields` : `Showing ${fmt(visibles, 0)} of ${fmt(total, 0)} fields`;
+    visibles === total ? `${fmt(total, 0)} fields${donde}` : `Showing ${fmt(visibles, 0)} of ${fmt(total, 0)} fields${donde}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -721,7 +827,7 @@ function rellenoMapa() {
   const { salida } = estado.clasificacion ?? clasificarParcelas();
   return {
     type: "FeatureCollection",
-    features: estado.parcelas.features.map((f) => {
+    features: estado.visibles.map((f) => {
       const c = salida.get(f.properties.id);
       return {
         type: "Feature",
@@ -773,7 +879,7 @@ function mercatorY(lat) {
  * se deja libre su espacio por arriba o por la izquierda, lo que deje las parcelas más grandes.
  * (Dejarlo siempre por arriba encogía la zona piloto a una franja y las parcelas a unos pocos píxeles.)
  */
-function margenMapa(ext = extension(estado.parcelas)) {
+function margenMapa(ext = estado.encuadre) {
   const m = 32;
   if (!esAncho() || !ext) return m;
   const ind = $("#indicador");
@@ -796,7 +902,7 @@ function margenMapa(ext = extension(estado.parcelas)) {
 
 function crearMapa() {
   const ml = window.maplibregl;
-  const ext = extension(estado.parcelas);
+  const ext = estado.encuadre;
   if (!ml || !ext) {
     avisoMapa("The map could not be drawn here; use the field list to open each field.");
     document.body.dataset.mapa = "sin-mapa";
@@ -838,14 +944,13 @@ function crearMapa() {
   mapa.addControl(new ml.NavigationControl({ showCompass: false }), "top-right");
 
   // Si el contenedor cambia de tamaño (la cabecera crece, se gira el teléfono) y el usuario aún no
-  // ha movido el mapa, se vuelve a encuadrar la extensión de las parcelas.
-  let movidoPorUsuario = false;
-  const marcarMovido = (e) => { if (e.originalEvent) movidoPorUsuario = true; };
+  // ha movido el mapa, se vuelve a encuadrar la zona elegida (la extensión de sus parcelas).
+  const marcarMovido = (e) => { if (e.originalEvent) estado.movidoPorUsuario = true; };
   mapa.on("dragstart", marcarMovido);
   mapa.on("zoomstart", marcarMovido);
   mapa.on("resize", () => {
-    if (movidoPorUsuario) return;
-    mapa.fitBounds(ext, { padding: margenMapa(ext), maxZoom: 17, duration: 0 });
+    if (estado.movidoPorUsuario || !estado.encuadre) return;
+    mapa.fitBounds(estado.encuadre, { padding: margenMapa(estado.encuadre), maxZoom: 17, duration: 0 });
   });
 
   // Teselas del mapa base que no cargan: aviso discreto, las parcelas siguen sobre fondo sólido.
@@ -881,6 +986,7 @@ function crearMapa() {
     mapa.on("mouseenter", "parcelas-relleno", () => { mapa.getCanvas().style.cursor = "pointer"; });
     mapa.on("mouseleave", "parcelas-relleno", () => { mapa.getCanvas().style.cursor = ""; });
     crearMarcadores();
+    agregarLocalidades(mapa);
     estado.mapaListo = true;
     pintarMapa();
     // «listo» cuando la fuente de las parcelas ya está procesada (el GeoJSON se tesela aparte, después de «load»).
@@ -904,6 +1010,14 @@ function crearMarcadores() {
   }
 }
 
+/** Encuadra la zona elegida (al cambiar de zona). */
+function encuadrar() {
+  const ext = estado.encuadre;
+  if (!estado.mapa || !ext) return;
+  estado.movidoPorUsuario = false;
+  estado.mapa.fitBounds(ext, { padding: margenMapa(ext), maxZoom: 17, duration: reduceMovimiento() ? 0 : 600 });
+}
+
 function programarPintadoMapa() {
   if (!estado.mapaListo || estado.pintadoPendiente) return;
   estado.pintadoPendiente = true;
@@ -918,10 +1032,108 @@ function pintarMapa() {
   estado.mapa.getSource("parcelas")?.setData(rellenoMapa());
   const { salida } = estado.clasificacion;
   for (const [id, { el }] of estado.marcadores) {
+    el.hidden = !estado.idsVisibles.has(id); // protagonista de otra zona: sin etiqueta
     const c = salida.get(id);
     el.textContent = c.simbolo ? `${id} ${c.simbolo}` : `${id} · ${c.texto}`;
     el.style.borderColor = c.color;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Localidades del equipo (cubo.localidades, copiadas de params.zona_piloto.localidades_equipo).
+// Son puntos de referencia, no parcelas: sin datos de agua. En el mapa, un punto (capa de círculos)
+// y su nombre (etiqueta HTML: el estilo no carga tipografías de la red); en el panel, la lista en texto.
+// ---------------------------------------------------------------------------
+function listaLocalidades() {
+  const l = estado.cubo.localidades;
+  if (!Array.isArray(l)) return [];
+  return l.filter((x) => x && Number.isFinite(Number(x.lat)) && Number.isFinite(Number(x.lon)));
+}
+
+/** Zona cuyo bbox contiene la localidad (solo informativo en la lista). */
+function zonaDeLocalidad(l) {
+  return estado.zonasIds.find((id) => {
+    const ext = extensionBbox(estado.cubo.zonas?.[id]?.bbox);
+    return ext && l.lon >= ext[0][0] && l.lon <= ext[1][0] && l.lat >= ext[0][1] && l.lat <= ext[1][1];
+  });
+}
+
+function pintarLocalidades() {
+  const locs = listaLocalidades();
+  $("#bloque-localidades").hidden = locs.length === 0;
+  if (!locs.length) return;
+  const conMapa = Boolean(estado.mapa);
+  const varias = estado.zonasIds.length > 1;
+  $("#lista-localidades").innerHTML = locs
+    .map((l, i) => {
+      const zona = varias ? zonaDeLocalidad(l) : null;
+      const detalle = [l.municipio ? `${l.municipio} municipality` : "", zona ? `${nombreZona(zona)} area` : ""].filter(Boolean).join(" · ");
+      const texto =
+        '<span class="punto-localidad" aria-hidden="true"></span><span class="localidad-texto">' +
+        `<strong>${esc(l.nombre)}</strong>` +
+        (detalle ? `<span class="localidad-detalle">${esc(detalle)}</span>` : "") +
+        "</span>";
+      return conMapa
+        ? `<li><button type="button" class="boton-localidad" data-localidad="${i}">${texto}<span class="ver">Show on map</span></button></li>`
+        : `<li class="localidad">${texto}</li>`;
+    })
+    .join("");
+  const fuentes = [...new Set(locs.map((l) => l.fuente).filter(Boolean))];
+  $("#localidades-fuente").textContent = `Source: ${fuentes.length ? fuentes.join("; ") : "not available"}`;
+}
+
+function agregarLocalidades(mapa) {
+  const locs = listaLocalidades();
+  if (!locs.length) return;
+  const punto = (l) => [Number(l.lon), Number(l.lat)];
+  mapa.addSource("localidades", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: locs.map((l) => ({ type: "Feature", geometry: { type: "Point", coordinates: punto(l) }, properties: { nombre: l.nombre } })),
+    },
+  });
+  mapa.addLayer({
+    id: "localidades-punto",
+    type: "circle",
+    source: "localidades",
+    paint: { "circle-radius": 6, "circle-color": colorCSS("localidad"), "circle-stroke-color": colorCSS("blanco"), "circle-stroke-width": 2 },
+  });
+  const ml = window.maplibregl;
+  estado.etiquetasLocalidad = locs.map((l) => {
+    const el = document.createElement("div");
+    el.className = "etiqueta-localidad";
+    el.textContent = l.nombre;
+    el.setAttribute("aria-hidden", "true"); // la lista del panel es la vía accesible
+    new ml.Marker({ element: el, anchor: "left", offset: [10, 0] }).setLngLat(punto(l)).addTo(mapa);
+    return { el, lngLat: punto(l) };
+  });
+  // Una etiqueta cuyo punto queda fuera de la vista se oculta (si no, asoma cortada por el borde).
+  mapa.on("move", ocultarEtiquetasFuera);
+  ocultarEtiquetasFuera();
+}
+
+function ocultarEtiquetasFuera() {
+  if (!estado.mapa || !estado.etiquetasLocalidad.length) return;
+  const vista = estado.mapa.getBounds();
+  for (const { el, lngLat } of estado.etiquetasLocalidad) el.hidden = !vista.contains(lngLat);
+}
+
+/** «Show on map»: encuadra la zona elegida junto con la localidad y resalta su etiqueta. */
+function mostrarLocalidad(i) {
+  const l = listaLocalidades()[i];
+  if (!l || !estado.mapa) return;
+  const lon = Number(l.lon);
+  const lat = Number(l.lat);
+  const base = estado.encuadre ?? [[lon, lat], [lon, lat]];
+  const ext = [
+    [Math.min(base[0][0], lon), Math.min(base[0][1], lat)],
+    [Math.max(base[1][0], lon), Math.max(base[1][1], lat)],
+  ];
+  estado.mapa.fitBounds(ext, { padding: margenMapa(ext), maxZoom: 15, duration: reduceMovimiento() ? 0 : 600 });
+  estado.movidoPorUsuario = true; // que un cambio de tamaño no lo devuelva al encuadre de la zona
+  estado.etiquetasLocalidad.forEach(({ el }, j) => el.classList.toggle("activa", j === i));
+  if (!esAncho()) $("#mapa").scrollIntoView({ block: "center", behavior: reduceMovimiento() ? "auto" : "smooth" });
 }
 
 // ---------------------------------------------------------------------------
@@ -1000,13 +1212,14 @@ function abrirFicha(id, opciones = {}) {
   }
 }
 
-function cerrarFicha() {
+function cerrarFicha({ devolverFoco = true } = {}) {
   if (!estado.fichaId) return;
   const id = estado.fichaId;
   estado.fichaId = null;
   $("#ficha").hidden = true;
   $("#ficha-cuerpo").innerHTML = "";
   pintarColoreado();
+  if (!devolverFoco) return;
   const volver = estado.disparador && document.contains(estado.disparador) ? estado.disparador : $(`.boton-parcela[data-id="${CSS.escape(id)}"]`);
   volver?.focus?.();
 }
@@ -1478,7 +1691,7 @@ function pintarCoberturaGota() {
 // Eventos
 // ---------------------------------------------------------------------------
 function parcelaParaGota() {
-  const fs = estado.parcelas.features;
+  const fs = estado.visibles;
   const perenne = (p) => p.estado_plazo === "comprometida" || p.estado_plazo === "por_vencer";
   const f = fs.find((x) => x.properties.protagonista && perenne(x.properties)) ?? fs.find((x) => perenne(x.properties)) ?? fs[0];
   return f?.properties.id;
@@ -1511,7 +1724,13 @@ function conectarEventos() {
     if (id) abrirFicha(id, { seccion: "gota" });
   });
 
-  $("#ficha-cerrar").addEventListener("click", cerrarFicha);
+  $("#zona-sel").addEventListener("change", (e) => cambiarZona(e.target.value));
+  $("#lista-localidades").addEventListener("click", (e) => {
+    const b = e.target.closest(".boton-localidad");
+    if (b) mostrarLocalidad(Number(b.dataset.localidad));
+  });
+
+  $("#ficha-cerrar").addEventListener("click", () => cerrarFicha());
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && estado.fichaId) cerrarFicha();
   });
@@ -1532,7 +1751,10 @@ function esperarMapa() {
     const revisar = () => {
       cuadros += 1;
       // Dos cuadros como mínimo: el repintado programado con requestAnimationFrame ya llamó a setData.
-      if (cuadros > 2 && !estado.pintadoPendiente && estado.mapa.isSourceLoaded("parcelas")) ok(true);
+      // También: la cámara quieta (encuadre de una zona) y la fuente de las localidades, si existe.
+      const mapa = estado.mapa;
+      const fuentes = mapa.isSourceLoaded("parcelas") && (!mapa.getSource("localidades") || mapa.isSourceLoaded("localidades"));
+      if (cuadros > 2 && !estado.pintadoPendiente && !mapa.isMoving() && fuentes) ok(true);
       else if (cuadros > 600) ok(false);
       else requestAnimationFrame(revisar);
     };
@@ -1543,6 +1765,11 @@ function esperarMapa() {
 // Ganchos mínimos para la prueba de humo (tests/e2e/web_smoke.mjs): solo leen; no cambian el comportamiento.
 window.raizDepuracion = {
   esperarMapa,
+  /** Nombres de las localidades del equipo dibujadas en la vista actual del mapa. */
+  async localidadesDibujadas() {
+    if (!(await esperarMapa()) || !estado.mapa.getLayer("localidades-punto")) return [];
+    return [...new Set(estado.mapa.queryRenderedFeatures({ layers: ["localidades-punto"] }).map((f) => f.properties.nombre))];
+  },
   /** Número de parcelas distintas dibujadas en la vista actual del mapa. */
   async parcelasDibujadas() {
     if (!(await esperarMapa())) return 0;
