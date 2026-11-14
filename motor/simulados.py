@@ -108,7 +108,13 @@ def gota(area, l50, neta, conduccion, c_ret, ef_goteo):
 def generar():
     params = leer_json(RAIZ / "data/params.json")
     sim = leer_json(RAIZ / "data/simulados.json")
-    centro = params["zona_piloto"]["punto_clima"]["valor"]
+    # Centro de las geometrías simuladas: centro del rectángulo de la zona piloto si ya está
+    # definido; si no, el punto de clima del kit.
+    bbox = params["zona_piloto"]["bbox"]["valor"]
+    if bbox:
+        centro = {"lon": (bbox[0] + bbox[2]) / 2, "lat": (bbox[1] + bbox[3]) / 2}
+    else:
+        centro = params["zona_piloto"]["punto_clima"]["valor"]
     conduccion = params["eficiencia"]["conduccion"]["valor"]["media"]
     c_ret = params["gota"]["c_retorno_superficial"]["valor"]
     ef_goteo = sim["eficiencia_goteo_mock"]

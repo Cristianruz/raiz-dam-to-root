@@ -3,11 +3,11 @@
   "_nota": "Todas las constantes del proyecto (kit v4 §2.5). Cada clave: valor, unidad, fuente, etiqueta y nota. Etiquetas: [V] verificado en fuente primaria; [P] prensa o fuente secundaria; [S] supuesto declarado; [NE] no encontrado; Diseño = valor de interfaz, no dato. Lo pendiente queda en null.",
   "zona_piloto": {
     "bbox": {
-      "valor": null,
+      "valor": [-105.42, 28.08, -105.32, 28.16],
       "unidad": "grados [oeste, sur, este, norte], EPSG:4326",
-      "fuente": "Visor web; lo propone P2 y lo confirma Cristian el sábado. El límite del módulo no es público",
+      "fuente": "Sesión de datos (rama datos-satelite), 14-nov-2026: mismo rectángulo de los scripts de Earth Engine y de parcelas. El límite del módulo no es público",
       "etiqueta": "[S]",
-      "nota": "pendiente"
+      "nota": "Rectángulo agrícola entre Delicias y Saucillo; verificar en el mapa de Earth Engine"
     },
     "punto_clima": {
       "valor": {"lat": 28.19, "lon": -105.45},
