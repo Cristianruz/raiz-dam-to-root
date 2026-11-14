@@ -268,5 +268,15 @@
    "etiqueta": "sin fuente",
    "fuente": "No se encontró una publicación del INIFAP que dé la vida de la huerta en años (búsqueda del 14-nov-2026). No se publica una cifra; lo que sí tiene fuente es la edad de huertas en producción (ver las dos entradas anteriores)"
   }
+ },
+ "suelo_margen_ph": {
+  "valor": 0.5,
+  "etiqueta": "assumption [S]",
+  "fuente": "Criterio propio (14-nov-2026): una diferencia de pH menor que este margen entre el mapa y el límite publicado de un cultivo no se rotula «outside range» sino «near the published limit». No sale de una cifra de incertidumbre del pH: la Tabla 4 de Poggio et al. 2021 (DOI 10.5194/soil-7-217-2021) está como imagen y no se pudo leer; el texto del artículo da eficiencias del modelo (MEC) de 0.31 a 0.74 según la propiedad, e ISRIC declara que sus modelos explican entre 30 % y 70 % de la variación"
+ },
+ "suelo_coincidencia_textura": {
+  "valor": 0.47,
+  "etiqueta": "own analysis (A13), estimate",
+  "fuente": "Fracción de parcelas en que la clase de textura USDA calculada con SoilGrids 2.0 (0–30 cm) es igual a la de OpenLandMap (0 cm): 584 de 1,238 parcelas con dato en las dos zonas; en las demás difieren a una clase vecina"
  }
 }

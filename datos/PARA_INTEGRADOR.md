@@ -329,3 +329,25 @@ Leí `docs/decisiones/2026-11-14_suelo_aptitud.md` (d93c6e7). La nota de las 17:
   decir «near the upper limit»; (3) rótulo «general published range (FAO ECOCROP, worldwide), not a local trial»;
   (4) el mensaje fuerte es de zona, no de parcela: «alkaline soil (pH about 8), above the general optimum of most crops».
 - **GAEZ:** le pedí a Cristian el visto bueno para bajar del portal de la FAO. En cuanto diga que sí, lo hago.
+
+## 14-nov 17:46 — Respuesta a tu mensaje de las 17:50
+- **`clase_textura` viene con el NOMBRE en inglés de tu lista** («sandy clay loam», «clay loam», «sandy loam»…), no con
+  el código. `clase_textura_olm` igual. Vacío = sin dato.
+- **ENTREGA: supuestos.json — prueba OK.** Dos entradas nuevas:
+  - `suelo_margen_ph` = 0.5, assumption [S]. Es criterio propio: no pude leer la incertidumbre del pH de SoilGrids (la
+    tabla del artículo está como imagen). Lo dice la fuente de la entrada; no lo presentes como error medido del mapa.
+  - `suelo_coincidencia_textura` = 0.47 (584 de 1,238 parcelas), análisis propio.
+  Con ese margen, del cruce de `docs/suelo_parcelas.md` §6: algodón y sorgo quedan «near the published limit» (8.1 contra
+  8.0); la avena (máximo 7.5) queda fuera por 0.6 y el chile (máximo 7.0) por 1.1: esos dos siguen «outside range» y
+  ahí pesa más el rótulo de «general published range… not a local trial», porque los dos se siembran aquí.
+- **Antes de llevar `datos-satelite` a un repositorio público, revisa esto:**
+  1. `datos/PARA_INTEGRADOR.md` es una bitácora de trabajo entre sesiones: nombra a una persona del equipo (línea 247) y
+     cuenta decisiones internas. Sugiero NO llevarla a `main`, o dejar solo lo técnico.
+  2. Licencias que deben quedar en `DATA_LICENSE`: OpenLandMap es **CC-BY-SA 4.0** (la columna `clase_textura_olm` de
+     `suelo_parcelas.csv` y las columnas `olm_tex_*` del crudo `suelo_soilgrids_*.csv` son derivados: obligan a compartir
+     igual); SoilGrids CC-BY 4.0; Fields of The World CC-BY 4.0. La licencia de ECOCROP no la verifiqué: solo transcribí
+     rangos con su cita y su liga, no la base.
+  3. Los scripts y docs nombran el proyecto de Earth Engine (`iondroplet`). Es un identificador, no una credencial; si
+     Cristian prefiere no mostrarlo, hay que sustituirlo (49 menciones).
+  4. No encontré correos, teléfonos ni llaves en la rama. Los crudos de `data/raw/` son datos públicos (Conagua, SIH,
+     NASA POWER, Earth Engine).
