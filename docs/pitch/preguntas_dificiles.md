@@ -58,10 +58,10 @@
 - **Pendiente.** «Una persona del equipo todavía no revisa a ojo, en color verdadero, las tres parcelas que mostramos.» Son P0757, P0632 y L0175 (`docs/decisiones/2026-11-14_opciones_b3.md` §2; `docs/reparto_faltantes.md`, D3). Una sesión de IA sí las comparó con imágenes de Sentinel-2 (rama `datos-satelite`, `docs/revision_protagonistas.md`). De ahí salió el cambio de P0244 por P0632, y también una advertencia: el contorno de L0175 incluye un lote sin cultivo, así que su nogal ocupa menos que el polígono.
 
 ### 8. Su alfalfa pide mucha más agua que la del INIFAP. ¿Por qué?
-- **Respuesta.** Es cierto y lo publicamos. Antes de dividir entre la eficiencia de riego en la parcela, nuestra lámina queda cerca de la del INIFAP; casi toda la diferencia aparece en esa división. Esa eficiencia la supusimos, porque no hay un valor medido para el distrito. Si la supusimos baja, las hectáreas que «alcanzan» son más de las que marca la página.
-- **Cifra.** Lámina bruta del modelo: 28.4 millares/ha (rango de 23.13 a 35.16). INIFAP: 17.5 millares/ha [V]. Lámina neta del modelo: 1,626 mm, que son 16.26 millares/ha. Eficiencia parcelaria supuesta: de 0.45 a 0.70 [S].
-- **Archivo.** `README.md`, «Open question: model against INIFAP depth»; `LIMITATIONS.md`, «Water demand»; `data/processed/rotaciones.json`; S9 §5.
-- **Pendiente.** «Necesitamos que un técnico del distrito nos diga qué eficiencia es realista en riego por gravedad y en qué condiciones valen las láminas del INIFAP.»
+- **Respuesta.** Es cierto y lo publicamos. El modelo calcula toda el agua que pediría una alfalfa bien regada; eso queda por encima de lo que recomienda el INIFAP y de lo que aquí se aplica. Una parte viene de la eficiencia de riego que supusimos, pero no toda: la planta, según el modelo, también consume más de lo estimado para el distrito. Por eso la página puede marcar menos hectáreas de las que alcanzan con el riego acostumbrado.
+- **Cifra.** Lámina bruta del modelo: 28.4 millares/ha (rango de 23.13 a 35.16). Recomendada por el INIFAP: de 17.0 a 18.0 millares/ha [V] (17.5 en S9). Aplicada en el distrito, media de 2009 a 2016: 17.4 millares/ha [V]; modelo ÷ aplicada = 1.63. Agua que consume la planta (ETc): 1,748 mm en el modelo frente a 1,139 mm estimados en el DR-005 (Villalobos-Cano et al. 2024, medias de 2009 a 2016, calculadas con Hargreaves y no con Penman-Monteith). Eficiencia parcelaria supuesta: de 0.45 a 0.70 [S]; con 0.60 a 0.70 la lámina bajaría de 28.4 a 25.1 millares/ha, y eso no cierra la diferencia con 17.4. Ejemplo: con 3.5 millares/ha, 10 ha de alfalfa alcanzan para 1.2 ha con la lámina del modelo y para 2.0 ha con la aplicada. Cuidado: estos 1,139 mm no son los 1,139.3 mm de la pregunta 17; son dos cifras distintas que coinciden.
+- **Archivo.** `docs/modelo_vs_practica.md` (§1 a §4); `data/processed/rotaciones.json` → rotación `alfalfa`, `lamina_bruta_millares` (`p50` y `etc_mm_p50`); `README.md`, «Open question: model against INIFAP depth»; `LIMITATIONS.md`, «Water demand»; S9 §5.
+- **Pendiente.** «Necesitamos que un técnico del distrito nos diga cuánta agua se aplica de verdad a la alfalfa, qué eficiencia es realista en riego por gravedad y en qué condiciones valen las láminas del INIFAP.» Dos cuidados al decirlo: el estudio local no dice en qué punto se midió el agua aplicada, y sus cifras son promedios del distrito, no de cada parcela. La ficha todavía no muestra, junto a la necesidad del modelo, lo que aquí se suele aplicar: la sesión de datos preparó esa referencia (`lamina_local_cm`) y aún no está en `data/processed/supuestos.json`. Si alguien lee en `README.md` o en `LIMITATIONS.md` que casi toda la diferencia sale de dividir la lámina neta (1,626 mm) entre la eficiencia: «Esa frase quedó atrasada; la comparación completa, cultivo por cultivo, está en `docs/modelo_vs_practica.md`.»
 
 ### 9. ¿Por qué no hay dinero en la ficha? ¿Y el goteo?
 - **Respuesta.** Dinero: no tenemos datos verificados, y un número sin fuente no entra; el renglón «Money» dice «no data». **[SI EL GOTEO ESTÁ CONECTADO]** El goteo sí se muestra en «Follow the drop», con una eficiencia indicativa de la FAO que no se midió en el distrito, y así va rotulado. **[SI EL GOTEO NO ESTÁ]** El goteo aún no está en la página: tenemos una eficiencia indicativa de la FAO, no medida en el distrito, y falta conectarla. En los dos casos, con goteo hay que contar las dos cosas: sale menos agua de la presa, pero también regresa menos al acuífero.
@@ -91,9 +91,9 @@
 - **Pendiente.** Si la prueba o la mentoría ya se hicieron, cambie esta respuesta por lo que se anotó, con el cargo de la persona y la hora, sin nombre.
 
 ### 14. ¿Qué sigue después del hackatón?
-- **Respuesta.** Tres cosas, en este orden. Medir con un técnico la eficiencia de riego y el punto donde se mide el millar. Clasificar las parcelas grises con las etiquetas del equipo y medir la exactitud del mapa. Y sentarnos con agricultores de las dos zonas a corregir parcelas y opciones.
-- **Cifra.** 781 parcelas por clasificar; eficiencia supuesta de 0.45 a 0.70 [S].
-- **Archivo.** `docs/reparto_faltantes.md`; `LIMITATIONS.md`; `README.md`, «In progress».
+- **Respuesta.** Tres cosas, en este orden. Revisar con un técnico cuánta agua se aplica de verdad a cada cultivo, qué eficiencia de riego es realista y dónde se mide el millar. Clasificar las parcelas grises con las etiquetas del equipo y medir la exactitud del mapa. Y sentarnos con agricultores de las dos zonas a corregir parcelas y opciones.
+- **Cifra.** 781 parcelas por clasificar; eficiencia supuesta de 0.45 a 0.70 [S]; la lámina de alfalfa del modelo es 1.63 veces la aplicada en el distrito.
+- **Archivo.** `docs/reparto_faltantes.md`; `LIMITATIONS.md`; `README.md`, «In progress»; `docs/modelo_vs_practica.md`.
 - **Pendiente.** Lo que no se construyó se rotula «Next phase / vision»: agente conversacional, sensores y optimizador están fuera del alcance (S9 §8).
 
 ---
@@ -101,10 +101,10 @@
 ## B. Jurado técnico
 
 ### 15. ¿Por qué H1 no cumplió, y por qué lo muestran?
-- **Respuesta.** El criterio se escribió antes de correr: el error del modelo al 14 de julio debía ser menor que el de dos cuentas sencillas, y fue mayor. El modelo calcula la demanda completa del cultivo y el distrito opera con mucha menos agua. Lo mostramos porque esa era la regla, publicar salga como salga, y porque nos dice hacia dónde se equivoca el modelo: en el nivel, no en la forma del ciclo.
-- **Cifra.** Modelo P50: 904.6 hm³ (P10–P90 de 727.2 a 1,131.4). Referencia de prensa: 447.65 hm³. Líneas base: L1-s 404.5 y L1 367.2. Demanda del ciclo según el modelo: 1,185.7 hm³ frente a 600 hm³ autorizados. Variante anclada, que es una sensibilidad y no decide: 457.7 hm³, a 10.1 de la referencia.
-- **Archivo.** `docs/resultado_H1.md`; `docs/h1_especificacion_operativa.md`; `docs/h1_verdad_sih.md`.
-- **Pendiente.** «Es un back-test parcial: el cierre oficial del ciclo 2026 no está publicado, la referencia es de prensa y equivale a la caída de almacenamiento. Con un ciclo no hablamos de exactitud.»
+- **Respuesta.** El criterio se escribió antes de correr: al 14 de julio el modelo debía errar menos que dos cuentas sencillas, y erró más. El modelo calcula toda el agua que pediría el cultivo; el distrito usa mucha menos. Después probamos, también con la regla escrita antes, si acertaba en cómo se reparte el agua dentro del ciclo en años anteriores; tampoco se sostiene. Lo mostramos porque la regla era publicar salga como salga, y así se sabe cuánto creerle.
+- **Cifra.** H1, al 14-jul-2026. Modelo P50: 904.6 hm³ (P10–P90 de 727.2 a 1,131.4). Referencia de prensa: 447.65 hm³. Líneas base: L1-s 404.5 y L1 367.2. Demanda del ciclo según el modelo: 1,185.7 hm³ frente a 600 hm³ autorizados. Variante anclada, que es una sensibilidad y no decide: 457.7 hm³, a 10.1 de la referencia; fue un año, no una regla, y no se presenta como punto a favor. H1-b, ciclos de 1999 a 2024: does not hold. El modelo gana a las dos formas simples en 6 de 26 años. Mediana del error: 8.66 puntos porcentuales, frente a 3.34 de la curva de ETo de NASA POWER y 7.9 de la lineal. Al 14 de julio el modelo da 76.2 % del agua del ciclo; lo observado es 68.0 %.
+- **Archivo.** `docs/resultado_H1.md`; `docs/resultado_H1b.md`; `docs/h1b_especificacion.md`; `docs/h1_especificacion_operativa.md`; `docs/h1_verdad_sih.md`.
+- **Pendiente.** «Es un back-test parcial: el cierre oficial del ciclo 2026 no está publicado, la referencia es de prensa y equivale a la caída de almacenamiento. Con un ciclo no hablamos de exactitud.» Sobre H1-b: «Es una prueba posterior, nacida del resultado de 2026; no es una de las cinco registradas y no cambia H1. Su regla se subió al repositorio antes de calcular.» Si preguntan qué forma sí sigue a la presa: la más sencilla, la curva de ETo de NASA POWER; es una descripción de los datos, no una hipótesis registrada. La sección «Tests in sight» de la página todavía no menciona H1-b: está en el `README.md` y en `docs/resultado_H1b.md`.
 
 ### 16. ¿Por qué H3 no se sostiene?
 - **Respuesta.** Esperábamos que en 2025, sin agua de las presas, cayera mucho la siembra de verano en las parcelas anuales. Casi no cayó; el nogal sí se mantuvo, como esperábamos. Es coherente con lo que reportó la prensa, siembra con pozos, pero el satélite ve el verdor y no de dónde vino el agua; la maleza o la lluvia de monzón también pueden dar ese verdor.
@@ -113,9 +113,9 @@
 - **Pendiente.** «El análisis registrado es el del rectángulo original, de 338 parcelas. Las dos zonas nuevas se reportan aparte porque las cambiamos después de conocer ese resultado.»
 
 ### 17. ¿Por qué el contraste de evapotranspiración difiere 53 %?
-- **Respuesta.** Porque no miden lo mismo. Nuestro número es la demanda potencial de los cultivos clasificados, como si estuvieran bien regados; el de SSEBop es la evapotranspiración real promediada sobre todo el rectángulo, con parcelas sin clasificar, caminos y poblados. La diferencia se concentra de marzo a junio, cuando nogal y alfalfa piden más. Es una comparación regional, no una validación por parcela.
-- **Cifra.** Modelo: 1,139.3 mm. SSEBop VIIRS v6: 746.3 mm. Diferencia: +393 mm, +53 %, de octubre de 2025 a septiembre de 2026, en el rectángulo original. En las zonas nuevas: +27 % y +3 %; ahí el barbecho pesa 42 % y 60 % de la superficie clasificada, así que la cercanía no prueba que el modelo acierte más.
-- **Archivo.** `docs/resultado_A8.md`; `README.md`, «Validation», prueba 5.
+- **Respuesta.** En parte, porque no miden lo mismo. Nuestro número es lo que pedirían los cultivos clasificados si estuvieran bien regados; el de SSEBop es la evapotranspiración real de todo el rectángulo, con caminos, poblados y parcelas sin clasificar. Pero no todo se explica así: la prueba contra la presa y la lámina de alfalfa también dicen que el modelo calcula de más, y no podemos afirmar que acierte en el nivel. Es una comparación regional, no por parcela.
+- **Cifra.** Modelo: 1,139.3 mm. SSEBop VIIRS v6: 746.3 mm. Diferencia: +393 mm, +53 %, de octubre de 2025 a septiembre de 2026, en el rectángulo original; se concentra de marzo a junio, cuando nogal y alfalfa piden más. En las zonas nuevas: +27 % y +3 %; ahí el barbecho pesa 42 % y 60 % de la superficie clasificada, así que la cercanía no prueba que el modelo acierte más. Tres contrastes apuntan al mismo lado: prueba contra la presa, modelo ÷ observado = 2.0; lámina de alfalfa, modelo ÷ aplicada = 1.63; ET de satélite, modelo ÷ SSEBop = 1.53 en el rectángulo original.
+- **Archivo.** `docs/resultado_A8.md`; `README.md`, «Validation», prueba 5; `docs/modelo_vs_practica.md` §2 (punto 4) y §4.
 - **Pendiente.** «El segundo contraste, con WaPOR, no se corrió. Tampoco tenemos un contraste a escala de parcela: ECOSTRESS está pedido y no entregado.»
 
 ### 18. ¿Qué tiene de «gemelo digital» si no hay sensores?
@@ -168,14 +168,14 @@ Los límites de parcela son de Fields of The World, un dato de terceros que no e
 
 ### 23. ¿Dónde está el preregistro?
 - **Respuesta.** Los criterios de las cinco pruebas están escritos en el documento del proyecto, con fecha anterior al evento. Los puntos que H1 dejaba abiertos se fijaron y se subieron al repositorio antes de correr el modelo; el orden se puede comprobar en el historial.
-- **Cifra.** La especificación de H1 se subió el 14 de noviembre a las 14:11, antes del script del análisis.
-- **Archivo.** S9 §6 y Anexo B; `docs/h1_especificacion_operativa.md`.
+- **Cifra.** La especificación de H1 se subió el 14 de noviembre a las 14:11, antes del script del análisis. La de H1-b, la prueba posterior, se subió el mismo día a las 16:20 (commit `695caf8`), antes de calcular.
+- **Archivo.** S9 §6 y Anexo B; `docs/h1_especificacion_operativa.md`; `docs/h1b_especificacion.md`; `docs/resultado_H1b.md`.
 - **Pendiente.** «La liga pública del preregistro en OSF todavía no está en el repositorio. Si la versión publicada fija algo distinto, prevalece la publicada y el análisis se repite.» (`docs/reparto_faltantes.md`, H3). Liga: [LINK: pendiente — integrador].
 
 ### 24. ¿Qué significa «at least 108 %» de agua ya comprometida?
-- **Respuesta.** Con una dotación como la de 2026, lo que piden los cultivos perennes de las dos zonas ya rebasa esa dotación repartida en toda la superficie; lo que falta sale de pozos o queda sin cubrir. Dice «at least» porque las parcelas sin clasificar no suman. La cifra tiene dos incertidumbres que empujan en sentidos contrarios: faltan perennes por contar, y nuestra lámina puede estar alta.
-- **Cifra.** 108 % (rango de 88 % a 134 %) en «All areas» con 3.5 millares/ha; 40 % (de 32 % a 49 %) con 9.5. En «Delicias – Saucillo», 125 % con 3.5. Sin clasificar: 66.2 % de la superficie.
-- **Archivo.** Lo calcula `web/reglas.js` (`aguaComprometida`) con `web/data/cubo.json` → `zona` y `zonas`; fórmula en S9 §5.
+- **Respuesta.** Con una dotación como la de 2026, lo que piden los cultivos perennes de las dos zonas ya rebasa esa dotación repartida en toda la superficie; lo que falta sale de pozos o queda sin cubrir. Dice «at least» porque las parcelas sin clasificar no suman. La cifra tiene dos incertidumbres que empujan en sentidos contrarios: faltan perennes por contar, y nuestra lámina de alfalfa y de nogal queda por encima de la que se aplica en el distrito.
+- **Cifra.** 108 % (rango de 88 % a 134 %) en «All areas» con 3.5 millares/ha; 40 % (de 32 % a 49 %) con 9.5. En «Delicias – Saucillo», 125 % con 3.5. Sin clasificar: 66.2 % de la superficie. Modelo ÷ lámina aplicada en el distrito: 1.63 en alfalfa y 1.39 en nogal.
+- **Archivo.** Lo calcula `web/reglas.js` (`aguaComprometida`) con `web/data/cubo.json` → `zona` y `zonas`; fórmula en S9 §5; `docs/modelo_vs_practica.md` §1.
 
 ### 25. ¿La tormenta es un pronóstico de inundación?
 - **Respuesta.** No. Es una lluvia fuerte tomada del propio registro de la zona, para ver por dónde escurre el agua y dónde se junta. No da profundidades ni sirve para diseñar drenes. El relieve es de 30 metros y se usa a escala de zona, no dentro de la parcela.
@@ -204,7 +204,7 @@ Los límites de parcela son de Fields of The World, un dato de terceros que no e
 
 | Si preguntan… | Diga… |
 |---|---|
-| Si la herramienta acierta | «En la prueba contra la presa, no cumplió. Sabemos hacia dónde falla y lo publicamos.» |
+| Si la herramienta acierta | «En la prueba contra la presa, no cumplió: calcula más agua de la que el distrito usa. Lo publicamos tal como salió.» |
 | Por un dato que no tenemos | «Ese dato no lo tenemos con fuente, y por eso la página dice "no data".» |
 | Si está terminado | «Lo que no se corrió aparece como "not run". No lo escondemos.» |
 | Por la liga pública | «Se activa cuando el repositorio quede público.» [LINK: pendiente — integrador] |
@@ -217,3 +217,5 @@ Los límites de parcela son de Fields of The World, un dato de terceros que no e
 - Respuesta 9: escoja la variante según si el goteo quedó conectado. Desde las 22:46 del 14-nov, `web/data/cubo.json` ya trae el escenario, con el motor en revisión; vuelva a leer los porcentajes de L0175 en la página final. `README.md` y `LIMITATIONS.md` todavía dicen que no hay escenario ni eficiencia con fuente, y los corrige el integrador.
 - Respuesta 7: diga «54 o 55» cuando la página marque a P0632; hoy `web/data/parcelas.geojson` marca a P0244.
 - Si esta noche entra la tabla oficial de rotaciones (`opciones_b3.json`, pieza B3), cambie la respuesta 3 y vuelva a contar las opciones y los filtros.
+- Respuestas 8, 15 y 17: se reescribieron con `docs/resultado_H1b.md` y `docs/modelo_vs_practica.md` (commit `b73e8b3`, de las 22:53 del 14-nov). `README.md` («So most of the gap comes from dividing by the field (on-farm) efficiency») y `LIMITATIONS.md` («Water demand») todavía dicen lo contrario de `docs/modelo_vs_practica.md` §2, punto 3. Los corrige el integrador, porque están fuera de `docs/pitch/`; antes de la exposición, compruebe que digan lo mismo que estas respuestas.
+- La página todavía no muestra H1-b ni la lámina que se aplica en el distrito. Si entran a «Tests in sight» o a la ficha, vuelva a leer las respuestas 8 y 15 contra la página.

@@ -11,51 +11,79 @@
 //                  ancho disponible (sus piezas bajan de renglón): sirve en la barra de la marca, en el panel
 //                  o en el teléfono.
 //     alCambiar    opcional: función(estado) que se llama cada vez que cambia algo de estado() (p. ej. para
-//                  repetirlo en la tarjeta «Estado del gemelo»).
+//                  repetirlo en la tarjeta «Estado del gemelo»). La primera llamada llega DESPUÉS de que
+//                  montarInstalacion devolvió (nunca dentro) y con lo guardado ya leído, así que la función
+//                  puede usar el controlador. Si la función lanza, su error se reporta aparte (como error no
+//                  atrapado) y el indicador sigue funcionando.
 //     rutaWorker   opcional: ruta del service worker, relativa a la página (por omisión «./sw.js»).
 //
 //     Qué dibuja:
-//       · «Online» u «Offline — showing the last synced copy» (eventos online/offline del navegador; además,
-//         si el service worker avisa que no alcanzó al servidor, también cuenta como sin conexión);
-//       · «Preparing the offline copy…» mientras el service worker guarda los archivos, «Ready to work offline»
-//         cuando terminó (mensaje del worker) y «Offline copy not complete yet» si faltó alguno;
+//       · con conexión: «Online» y, al lado, «Preparing the offline copy…» mientras el service worker guarda
+//         los archivos, «Ready to work offline» cuando terminó (mensaje del worker) u «Offline copy not
+//         complete yet» si faltó alguno;
+//       · sin conexión (eventos online/offline del navegador; además, si el service worker avisa que no
+//         alcanzó al servidor, también cuenta como sin conexión), UN solo rótulo, según lo que haya guardado:
+//           «Offline — showing the last synced copy»   SOLO si hay una copia COMPLETA guardada;
+//           «Offline — no complete offline copy yet; reconnect before reloading»
+//                                                      si no hay copia, se estaba guardando o quedó a medias
+//                                                      (la red se cortó antes de terminar): recargar puede
+//                                                      dejar la página en blanco, y el rótulo lo advierte;
+//           «Offline»                                  solo si todavía no se sabe qué hay guardado;
 //       · el botón «Install app», solo cuando el navegador avisa que la aplicación se puede instalar
 //         (evento beforeinstallprompt); al pulsarlo abre el diálogo del navegador.
-//     Todo va en una región role="status" (los cambios se anuncian) y cada estado lleva texto y una figura
-//     distinta: nada depende solo del color.
+//     Todo va en una región role="status" (los cambios se anuncian; si nada cambió no se toca, para que el
+//     lector de pantalla no lo repita) y cada estado lleva texto y una figura distinta: nada depende solo del
+//     color.
 //
 //     El worker se registra cuando la página terminó de cargar (evento load), para que la descarga de la copia
 //     no compita con el arranque; hasta entonces el nodo está oculto.
 //     Si el navegador no tiene service workers, o la página no viene de https ni de localhost (p. ej. la copia
 //     de un solo archivo abierta con file://), NO dibuja nada y no falla: devuelve un controlador con
 //     soportado === false. Si el registro del worker falla, retira lo dibujado.
+//     Qué hay guardado se lee al montar, directo del almacén de cachés del navegador (no depende de que el
+//     worker conteste: puede seguir instalándose), y después lo va diciendo el worker con sus avisos.
 //     La copia se vuelve a comparar con el servidor al montar, al recuperar la conexión, al volver a la pestaña
-//     y, mientras el servidor no conteste, cada medio minuto.
+//     y, mientras el servidor no conteste (también si dejó de contestar a media copia), cada medio minuto.
+//     Una copia a medias continúa donde quedó: no vuelve a bajar lo que ya está guardado.
 //
 //   controlador:
 //     soportado            booleano: hay service workers y contexto seguro (se sabe al montar).
 //     listo                Promise<boolean>: true cuando el worker quedó registrado; false si no se pudo.
 //     estado() -> { red, copia, version, instalable }
 //                            red         "online" | "offline"
-//                            copia       "ninguna" | "guardando" | "lista" | "incompleta"
-//                            version     versión de la copia guardada (web/data/precache.json), o null
+//                            copia       "desconocida"  aún no se sabe qué hay guardado (solo antes del primer
+//                                                       aviso a alCambiar, o si el almacén no se puede leer)
+//                                        "ninguna"      no hay nada guardado
+//                                        "guardando"    se está guardando la copia
+//                                        "lista"        copia COMPLETA: es el único estado con respaldo sin red
+//                                        "incompleta"   copia a medias (faltó algún archivo o se cortó la red)
+//                            version     versión de la copia de la que se habla (web/data/precache.json), o null
 //                            instalable  true si el botón «Install app» está a la vista
 //     sincronizar()        pide al worker que compare su copia con el servidor y la renueve si cambió.
 //     destruir()           suelta los oyentes y retira su nodo; queda inerte.
 //
+//   textosDe({ red, copia }) -> { red, copia }
+//                        los rótulos que corresponden a un estado() (copia: null si no hay segunda pastilla).
+//                        Función pura: úsela para repetir el estado en otra parte de la página (p. ej. la tarjeta
+//                        «Estado del gemelo») con las MISMAS palabras, en vez de armar otro texto.
 //   TEXTOS               los textos de la interfaz (en inglés), para las pruebas.
 //   PEDIR_SINCRONIZAR, AVISO_COPIA
 //                        tipos de los mensajes con web/sw.js (allá están con el mismo valor).
 //
 // Para conectar la aplicación (index.html): <link rel="manifest" href="manifest.webmanifest">,
 // <link rel="stylesheet" href="css/instalar.css"> y, desde app.js, montarInstalacion(<un contenedor>).
-// Este módulo no escribe cifras: la versión y los conteos llegan del worker, que los lee de precache.json.
+// Monte el módulo ANTES de cargar los datos (o aparte de esa carga): si la página abre desde una copia a
+// medias y los datos no llegan, el rótulo debe estar ahí para decirlo.
+// Este módulo no escribe cifras: la versión llega del worker o del almacén de cachés (los dos la toman de
+// data/precache.json).
 
 export const TEXTOS = Object.freeze({
   grupo: "App and connection",
   instalar: "Install app",
   enLinea: "Online",
   sinConexion: "Offline — showing the last synced copy",
+  sinConexionSinCopia: "Offline — no complete offline copy yet; reconnect before reloading",
+  sinConexionSinSaber: "Offline",
   copiaLista: "Ready to work offline",
   copiaGuardando: "Preparing the offline copy…",
   copiaIncompleta: "Offline copy not complete yet",
@@ -64,9 +92,24 @@ export const PEDIR_SINCRONIZAR = "raiz-sincronizar";
 export const AVISO_COPIA = "raiz-copia";
 
 const RUTA_WORKER = "./sw.js";
+const PREFIJO = "raiz-";              // nombre de las cachés de la copia (el mismo de web/sw.js)
+const LISTADO = "data/precache.json"; // guardado dentro de su caché = copia completa (el mismo de web/sw.js)
 const REINTENTO_MS = 30000; // si el worker no alcanzó al servidor, cada cuánto se le pide que lo intente otra vez
-const COPIAS = ["ninguna", "guardando", "lista", "incompleta"];
+const COPIAS = ["ninguna", "guardando", "lista", "incompleta"]; // los estados que informa web/sw.js
+const SIN_SABER = "desconocida"; // antes de leer el almacén de cachés y del primer aviso del worker
 const TEXTO_DE_COPIA = { guardando: TEXTOS.copiaGuardando, lista: TEXTOS.copiaLista, incompleta: TEXTOS.copiaIncompleta };
+
+/**
+ * Rótulos de un estado: { red, copia } (copia null = sin segunda pastilla).
+ * Sin conexión solo se dice «showing the last synced copy» si hay una copia COMPLETA; con cualquier otro
+ * estado conocido se advierte que no hay respaldo, y mientras no se sabe se dice solo «Offline».
+ */
+export function textosDe({ red, copia } = {}) {
+  if (red !== "offline") return { red: TEXTOS.enLinea, copia: TEXTO_DE_COPIA[copia] ?? null };
+  if (copia === "lista") return { red: TEXTOS.sinConexion, copia: null };
+  if (COPIAS.includes(copia)) return { red: TEXTOS.sinConexionSinCopia, copia: null };
+  return { red: TEXTOS.sinConexionSinSaber, copia: null };
+}
 
 // ---------------------------------------------------------------- aviso de instalación (uno por página)
 // El navegador puede avisar antes de que la aplicación monte este módulo: el aviso se guarda desde que el
@@ -112,6 +155,18 @@ function crear(etiqueta, clase, texto) {
   return nodo;
 }
 
+/** Escribe el texto de un nodo solo si cambió: una región role="status" que no se toca no se vuelve a anunciar. */
+function escribir(nodo, texto) {
+  if (nodo.textContent !== texto) nodo.textContent = texto;
+}
+
+/** Reporta un error ajeno (la función de quien montó) como error no atrapado, sin interrumpir este módulo. */
+function reportarAparte(error) {
+  setTimeout(() => {
+    throw error;
+  });
+}
+
 /** Una pastilla del estado: figura (decorativa) + texto. */
 function pastilla(clase) {
   const caja = crear("span", `instalar-pastilla ${clase}`);
@@ -120,6 +175,28 @@ function pastilla(clase) {
   const texto = crear("span", "instalar-texto");
   caja.append(figura, texto);
   return { caja, texto };
+}
+
+/**
+ * Qué hay guardado, leído directo del almacén de cachés (sin esperar al worker): { copia, version }, o null si
+ * el almacén no se puede leer. La regla es la de web/sw.js: una caché «raiz-<version>» es una copia completa
+ * solo si guarda el listado de esa versión (el worker lo escribe al final). Nunca lanza.
+ */
+async function leerAlmacen(carpeta) {
+  try {
+    const nombres = (await window.caches.keys()).filter((nombre) => nombre.startsWith(PREFIJO)).reverse();
+    let aMedias = null; // la caché más nueva que tiene algo pero no su listado
+    for (const nombre of nombres) {
+      const cache = await window.caches.open(nombre);
+      const marca = await cache.match(new URL(LISTADO, carpeta).href);
+      const listado = marca ? await marca.json().catch(() => null) : null;
+      if (listado && PREFIJO + listado.version === nombre) return { copia: "lista", version: listado.version };
+      if (!aMedias && (await cache.keys()).length) aMedias = nombre;
+    }
+    return aMedias ? { copia: "incompleta", version: aMedias.slice(PREFIJO.length) } : { copia: "ninguna", version: null };
+  } catch {
+    return null;
+  }
 }
 
 const INERTE = Object.freeze({
@@ -141,9 +218,10 @@ export function montarInstalacion(contenedor, { alCambiar, rutaWorker = RUTA_WOR
   let vivo = true;
   let enLinea = navigator.onLine !== false; // lo que dice el navegador
   let conRed = null; // lo que dice el worker: true/false según alcanzó o no al servidor; null si no se sabe
-  let copia = "ninguna";
+  let copia = SIN_SABER; // hasta saberlo no se afirma ni se niega que haya respaldo
   let version = null;
   let ultimo = "";
+  let anunciando = false; // alCambiar no se llama dentro de montarInstalacion (quien monta aún no tiene el controlador)
   let reintento = 0; // temporizador del próximo intento de sincronizar (solo mientras el servidor no contesta)
 
   // --- nodos
@@ -176,17 +254,21 @@ export function montarInstalacion(contenedor, { alCambiar, rutaWorker = RUTA_WOR
     const e = estado();
     raiz.dataset.red = e.red;
     raiz.dataset.copia = e.copia;
-    red.texto.textContent = e.red === "online" ? TEXTOS.enLinea : TEXTOS.sinConexion;
-    // Sin conexión, el texto de arriba ya dice que se ve la copia: la segunda pastilla sobra.
-    const textoCopia = e.red === "online" ? TEXTO_DE_COPIA[e.copia] : undefined;
-    guardada.texto.textContent = textoCopia ?? "";
-    guardada.caja.hidden = !textoCopia;
+    // Sin conexión, el primer rótulo ya dice si hay copia o no (textosDe): la segunda pastilla sobra.
+    const rotulos = textosDe(e);
+    escribir(red.texto, rotulos.red);
+    escribir(guardada.texto, rotulos.copia ?? "");
+    guardada.caja.hidden = !rotulos.copia;
     if (!avisoInstalacion && !boton.hidden && document.activeElement === boton) estadoNodo.focus();
     boton.hidden = !avisoInstalacion;
     const firma = JSON.stringify(e);
-    if (firma !== ultimo) {
-      ultimo = firma;
-      if (typeof alCambiar === "function") alCambiar(e);
+    if (!anunciando || firma === ultimo) return;
+    ultimo = firma;
+    if (typeof alCambiar !== "function") return;
+    try {
+      alCambiar(e);
+    } catch (error) {
+      reportarAparte(error); // el indicador sigue funcionando aunque falle quien lo escucha
     }
   }
 
@@ -205,7 +287,8 @@ export function montarInstalacion(contenedor, { alCambiar, rutaWorker = RUTA_WOR
       copia = m.estado;
       version = m.version ?? null;
     }
-    // El navegador dice que hay conexión pero el servidor no contestó: se vuelve a intentar más tarde.
+    // El navegador dice que hay conexión pero el servidor no contestó (también si dejó de contestar a media
+    // copia): se vuelve a intentar más tarde; la copia continúa donde quedó.
     clearTimeout(reintento);
     if (conRed === false && enLinea) reintento = setTimeout(sincronizar, REINTENTO_MS);
     repintar();
@@ -266,8 +349,20 @@ export function montarInstalacion(contenedor, { alCambiar, rutaWorker = RUTA_WOR
     if (document.readyState === "complete") resolver();
     else window.addEventListener("load", resolver, { once: true });
   });
+  // Mientras tanto se lee qué hay guardado: el rótulo aparece ya sabiendo si hay respaldo, conteste o no el worker.
+  const carpeta = new URL("./", new URL(rutaWorker, window.location.href)); // la carpeta de la aplicación
+  const leido = leerAlmacen(carpeta).then((guardado) => {
+    if (guardado && copia === SIN_SABER) { // si el worker ya avisó, manda su aviso
+      copia = guardado.copia;
+      version = guardado.version;
+    }
+    // El primer aviso a alCambiar sale aquí: quien montó ya recibió el controlador y ya se leyó qué hay guardado.
+    anunciando = true;
+    repintar();
+  });
   const listo = cargada
     .then(() => (vivo ? sw.register(rutaWorker, { updateViaCache: "none" }) : Promise.reject(new Error("destruido"))))
+    .then(() => leido)
     .then(
       () => {
         if (!vivo) return false;

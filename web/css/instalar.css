@@ -1,9 +1,11 @@
 /* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
 /* web/css/instalar.css — Aplicación instalable y sin conexión (web/js/instalar.js): pastillas «Online» /
-   «Offline — showing the last synced copy» y «Ready to work offline», y el botón «Install app».
+   «Offline — showing the last synced copy» (o, si no hay copia completa, «Offline — no complete offline copy
+   yet; reconnect before reloading») y «Ready to work offline», y el botón «Install app».
    Colores como variables: toma --agua, --brote, --ambar… de style.css; el valor tras la coma es el respaldo
    si style.css no está cargado (mismos códigos de la identidad, kit C1 §10).
-   Cada estado lleva texto y una figura distinta (disco, aro tachado, palomita, aro que gira, admiración):
+   Cada estado lleva texto y una figura distinta (disco, aro tachado, palomita, aro que gira, admiración;
+   sin conexión, aro tachado si hay copia completa y admiración si no la hay):
    nada depende solo del color. Las figuras se dibujan con bordes, que se conservan en modo de alto contraste.
    El bloque se acomoda al ancho que le den (sus piezas bajan de renglón): barra de la marca, panel o teléfono.
    Los números de este archivo son medidas de diseño, no datos. */
@@ -89,6 +91,27 @@
   left: -4px; right: -4px; top: calc(50% - 1px);
   border-top: 2px solid currentColor;
   transform: rotate(-45deg);
+}
+
+/* Sin conexión y SIN copia completa (no hay nada guardado, se estaba guardando o quedó a medias): no hay
+   respaldo. El mismo aviso ámbar con borde más grueso y una admiración en vez del aro tachado. */
+.instalar[data-red="offline"]:is([data-copia="ninguna"], [data-copia="guardando"], [data-copia="incompleta"]) .instalar-red {
+  border-width: 2px;
+}
+.instalar[data-red="offline"]:is([data-copia="ninguna"], [data-copia="guardando"], [data-copia="incompleta"]) .instalar-red .instalar-figura {
+  width: 16px;
+  height: 16px;
+}
+.instalar[data-red="offline"]:is([data-copia="ninguna"], [data-copia="guardando"], [data-copia="incompleta"]) .instalar-red .instalar-figura::after {
+  content: "!";
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-top: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: none;
 }
 
 /* Copia lista: palomita (dos bordes de un rectángulo girado). */

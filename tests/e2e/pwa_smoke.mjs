@@ -24,6 +24,19 @@
 //   (incluidas las teselas de relieve y el archivo renovado con red primero), una petición a otro origen
 //   falla sin romper nada y no hay errores de página; lo mismo en un teléfono de 390 × 844 sin
 //   desplazamiento horizontal;
+// - LA RED SE CORTA A MEDIA COPIA (otra visita, con otro servidor que deja sin contestar las descargas de datos
+//   del service worker): lo que la página necesita para abrir se guarda antes que los datos; si se recarga con
+//   el worker aún instalándose, la página lee ella misma el almacén y dice «Offline copy not complete yet»; el
+//   servidor deja de contestar (el navegador no se entera) y luego se corta la red: el indicador NO dice
+//   «showing the last synced copy» sino «Offline — no complete offline copy yet; reconnect before reloading»,
+//   el worker informa «incompleta» (no «ninguna») también cuando se le vuelve a preguntar sin red, la recarga
+//   sin red abre el index.html guardado (no la página de error del navegador) y el aviso cabe en el teléfono;
+//   al volver la red la copia continúa donde quedó, termina («Ready to work offline») y entonces sí, sin red,
+//   el indicador dice «showing the last synced copy»;
+// - antes de abrir el navegador, la regla de los rótulos (textosDe): ese texto solo sale con una copia completa;
+// - quien escucha (alCambiar): recibe su primer aviso después de montar y con lo guardado ya leído, puede usar
+//   el controlador, y si su función lanza el indicador sigue en pie; sincronizar sin cambios no toca la región
+//   de estado (el lector de pantalla no la repite);
 // - guarda capturas en RAIZ_CAPTURAS (por omisión, una carpeta temporal que se anuncia al final).
 // No supone un juego de datos: las dotaciones de referencia y los archivos se leen de la propia copia.
 
@@ -34,7 +47,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
-import { TEXTOS } from "../../web/js/instalar.js";
+import { AVISO_COPIA, PEDIR_SINCRONIZAR, TEXTOS, textosDe } from "../../web/js/instalar.js";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -50,7 +63,7 @@ const LISTADO = "data/precache.json";
 const MARCA = "<!-- pwa_smoke: este texto llegó por la red después de guardarse la copia -->";
 const SONDA = "data/archivo_que_no_existe.json"; // la prueba lo pide sin red a propósito: su falla es la esperada
 const ESPERA_COPIA_MS = 90000; // tope de la prueba para que el service worker guarde todos los archivos
-const ESPERA_ARRANQUE_MS = 30000;
+const ESPERA_ARRANQUE_MS = 60000; // holgado: la máquina puede estar corriendo otras pruebas con navegador a la vez
 
 const TIPOS = {
   ".html": "text/html; charset=utf-8",
@@ -127,11 +140,22 @@ function conectarEnLaCopia() {
 }
 
 // ---------------------------------------------------------------- servidor estático (se puede apagar de golpe)
-function servidor() {
+/**
+ * `retener(ruta, req)`: si devuelve true, esa petición se queda SIN respuesta (hasta caer() o apagar()).
+ * caer(): el servidor deja de contestar sin cerrarse (corta cada conexión que llega y las abiertas), como un wifi
+ * que sigue conectado pero ya no tiene salida; levantar() lo deshace.
+ */
+function servidor(retener = () => false) {
   const atendidas = [];
+  let caido = false;
   const srv = http.createServer((req, res) => {
     const ruta = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
-    atendidas.push(ruta);
+    if (caido) {
+      req.socket.destroy();
+      return;
+    }
+    atendidas.push({ ruta, delWorker: (req.headers.referer ?? "").endsWith("/sw.js") });
+    if (retener(ruta, req)) return;
     let archivo = path.normalize(path.join(COPIA, ruta));
     if (!archivo.startsWith(COPIA)) {
       res.writeHead(403).end();
@@ -151,7 +175,15 @@ function servidor() {
     srv.listen(0, "127.0.0.1", () =>
       ok({
         puerto: srv.address().port,
+        /** Peticiones atendidas: { ruta, delWorker } (las del service worker llevan Referer …/sw.js). */
         atendidas,
+        caer: () => {
+          caido = true;
+          srv.closeAllConnections();
+        },
+        levantar: () => {
+          caido = false;
+        },
         /** Apaga el servidor y tira las conexiones abiertas: desde aquí nada contesta. */
         apagar: () =>
           new Promise((listo) => {
@@ -192,7 +224,282 @@ function vigilar(page, base, errores) {
   });
 }
 
+/** Contexto de navegador nuevo (su propio almacenamiento: sin service worker ni cachés de otra visita). */
+async function nuevoContexto(navegador, base) {
+  const ctx = await navegador.newContext({ viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" });
+  // La pantalla de inicio se da por cerrada (como en web_smoke.mjs): su diálogo modal taparía los controles.
+  await ctx.addInitScript((llave) => {
+    try {
+      window.sessionStorage.setItem(llave, "cerrado");
+    } catch {
+      // sin almacenamiento: la pantalla aparecería (no pasa en Chromium)
+    }
+  }, LLAVE_INICIO);
+  // Otros orígenes (teselas del mapa base) se cortan de inmediato, como en una máquina sin salida a internet.
+  await ctx.route((url) => !url.href.startsWith(base), (route) => route.abort());
+  return ctx;
+}
+
+/**
+ * Espera a que todas las rutas estén guardadas en alguna caché de la página; false si se acaba el tiempo.
+ * (Se pregunta varias veces desde aquí: page.waitForFunction no espera a un predicado asíncrono.)
+ */
+async function esperarEnCache(page, rutas, limiteMs) {
+  const fin = Date.now() + limiteMs;
+  for (;;) {
+    const estan = await page.evaluate(async (lista) => {
+      for (const ruta of lista) if (!(await caches.match(new URL(ruta, location.href).href))) return false;
+      return true;
+    }, rutas);
+    if (estan) return true;
+    if (Date.now() > fin) return false;
+    await new Promise((seguir) => setTimeout(seguir, 200));
+  }
+}
+
+/** Lo que dice y marca el indicador (.instalar), o null si no está en la página. */
+const leerCaja = (page) =>
+  page.evaluate(() => {
+    const caja = document.querySelector(".instalar");
+    if (!caja) return null;
+    return { texto: caja.innerText.replace(/\s+/g, " ").trim(), red: caja.dataset.red, copia: caja.dataset.copia, visible: !caja.hidden };
+  });
+
+// ---------------------------------------------------------------- la regla de los rótulos (sin navegador)
+function reglaDeLosRotulos() {
+  const copias = ["desconocida", "ninguna", "guardando", "lista", "incompleta"];
+  const fallas = [];
+  for (const red of ["online", "offline"]) {
+    for (const copia of copias) {
+      const rotulos = textosDe({ red, copia });
+      const dicho = `${rotulos.red} ${rotulos.copia ?? ""}`;
+      const afirmaCopia = dicho.includes(TEXTOS.sinConexion) || dicho.includes(TEXTOS.copiaLista);
+      if (afirmaCopia !== (copia === "lista")) fallas.push(`${red}/${copia}: «${dicho.trim()}»`);
+      if (red === "offline" && ["ninguna", "guardando", "incompleta"].includes(copia) && rotulos.red !== TEXTOS.sinConexionSinCopia) {
+        fallas.push(`${red}/${copia} no advierte: «${dicho.trim()}»`);
+      }
+    }
+  }
+  check(
+    `regla de los rótulos: «${TEXTOS.sinConexion}» y «${TEXTOS.copiaLista}» solo con una copia completa; sin ella y sin red, «${TEXTOS.sinConexionSinCopia}»`,
+    fallas.length === 0,
+    fallas.join(" · "),
+  );
+}
+
+// ---------------------------------------------------------------- la red se corta a media copia
+/**
+ * Otra visita (contexto y servidor nuevos): el servidor deja sin contestar las descargas de DATOS que hace el
+ * service worker, así que la copia se queda a medias; luego el servidor deja de contestar y se corta la red.
+ * Es la primera visita en la mesa del Open House con el wifi que se cae mientras se guarda la copia.
+ * Al final la red vuelve: la copia continúa donde quedó y solo entonces el indicador puede decir que hay copia.
+ */
+async function corteAMediaCopia(navegador, precache) {
+  let reteniendo = true;
+  const retenidas = new Set();
+  const srv = await servidor((ruta, req) => {
+    const delWorker = (req.headers.referer ?? "").endsWith("/sw.js");
+    if (!reteniendo || !delWorker || !ruta.startsWith("/data/") || ruta === `/${LISTADO}`) return false;
+    retenidas.add(ruta);
+    return true;
+  });
+  const base = `http://localhost:${srv.puerto}/`;
+  const ctx = await nuevoContexto(navegador, base);
+  const dice = (caja, texto) => Boolean(caja) && caja.texto.includes(texto);
+  const advierte = (caja) => dice(caja, TEXTOS.sinConexionSinCopia) && !dice(caja, TEXTOS.sinConexion) && !dice(caja, TEXTOS.copiaLista);
+  const descrita = (caja) => (caja ? `${caja.texto} · copia: ${caja.copia}` : "(sin .instalar)");
+  try {
+    const page = await ctx.newPage();
+    const erroresDePagina = [];
+    page.on("pageerror", (e) => erroresDePagina.push(e.message));
+    await page.goto(base, { waitUntil: "load" });
+    await esperarArranque(page);
+
+    // Lo que la página necesita para abrir (todo lo que no es dato) debe quedar guardado aunque los datos no lleguen.
+    const paraAbrir = precache.archivos.filter((r) => !r.startsWith("data/"));
+    let guardadoParaAbrir = false;
+    try {
+      await page.waitForSelector(".instalar[data-copia='guardando']", { timeout: ESPERA_ARRANQUE_MS });
+      guardadoParaAbrir = await esperarEnCache(page, paraAbrir, ESPERA_ARRANQUE_MS);
+    } catch {
+      guardadoParaAbrir = false;
+    }
+    // Con eso guardado, al worker solo le quedan datos por pedir: se espera a que el servidor retenga alguno.
+    for (let i = 0; i < 50 && retenidas.size === 0; i += 1) await new Promise((seguir) => setTimeout(seguir, 100));
+    const aMedias = await leerCaja(page);
+    const almacen = await page.evaluate(async (listado) => {
+      const salida = [];
+      for (const nombre of (await caches.keys()).filter((n) => n.startsWith("raiz-"))) {
+        const c = await caches.open(nombre);
+        salida.push({ nombre, entradas: (await c.keys()).length, conListado: Boolean(await c.match(new URL(listado, location.href).href)) });
+      }
+      return salida;
+    }, LISTADO);
+    check(
+      "a media copia: lo que la página necesita para abrir se guarda antes que los datos, y ninguna caché tiene aún el listado (no hay copia completa)",
+      guardadoParaAbrir && retenidas.size > 0 && almacen.length === 1 && !almacen[0].conListado && almacen[0].entradas < precache.archivos.length,
+      `${paraAbrir.length} archivos para abrir · ${almacen.map((c) => `${c.nombre}: ${c.entradas} de ${precache.archivos.length}`).join(", ")} · ${retenidas.size} descarga(s) de datos sin respuesta`,
+    );
+    check(
+      `a media copia, con red: «${TEXTOS.enLinea}» y «${TEXTOS.copiaGuardando}», sin «${TEXTOS.copiaLista}»`,
+      aMedias?.red === "online" && aMedias.copia === "guardando" && dice(aMedias, TEXTOS.enLinea) && dice(aMedias, TEXTOS.copiaGuardando) &&
+        !dice(aMedias, TEXTOS.copiaLista),
+      descrita(aMedias),
+    );
+
+    // Se recarga con red y el worker sigue instalándose (detenido en sus descargas: no avisa nada). La página
+    // lee ella misma el almacén de cachés y dice lo que hay: una copia a medias.
+    await page.reload({ waitUntil: "load" });
+    await esperarArranque(page);
+    await page.waitForSelector(".instalar[data-copia]:not([hidden])", { timeout: ESPERA_ARRANQUE_MS }).catch(() => {});
+    const sinWorker = await leerCaja(page);
+    const registro = await page.evaluate(async () => {
+      const r = await navigator.serviceWorker.getRegistration();
+      return { instalando: Boolean(r?.installing), activo: Boolean(r?.active), alMando: Boolean(navigator.serviceWorker.controller) };
+    });
+    check(
+      `recargada con el worker aún instalándose: la página lee el almacén y dice «${TEXTOS.enLinea}» y «${TEXTOS.copiaIncompleta}»`,
+      registro.instalando && !registro.activo && !registro.alMando && sinWorker?.visible && sinWorker.red === "online" &&
+        sinWorker.copia === "incompleta" && dice(sinWorker, TEXTOS.copiaIncompleta) && !dice(sinWorker, TEXTOS.copiaLista),
+      `${descrita(sinWorker)} · worker instalando: ${registro.instalando}, activo: ${registro.activo}`,
+    );
+
+    // ---------------------------------------------------------- el servidor deja de contestar (wifi sin salida)
+    // El navegador sigue creyendo que hay conexión: es el worker quien avisa que ya no alcanzó al servidor.
+    srv.caer();
+    let termino = true;
+    try {
+      await page.waitForSelector(".instalar[data-red='offline'][data-copia='incompleta']", { timeout: ESPERA_ARRANQUE_MS });
+      await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller), null, { timeout: ESPERA_ARRANQUE_MS });
+    } catch {
+      termino = false;
+    }
+    const sinServidor = await leerCaja(page);
+    const navegadorEnLinea = await page.evaluate(() => navigator.onLine);
+    check(
+      `el servidor deja de contestar a media copia: el indicador dice «${TEXTOS.sinConexionSinCopia}» y NO «${TEXTOS.sinConexion}»`,
+      termino && navegadorEnLinea && sinServidor?.red === "offline" && sinServidor.copia === "incompleta" && advierte(sinServidor),
+      `${descrita(sinServidor)} · navigator.onLine: ${navegadorEnLinea}`,
+    );
+
+    // ---------------------------------------------------------- se corta la red
+    await ctx.setOffline(true);
+    await page.waitForFunction(() => navigator.onLine === false, null, { timeout: 5000 }).catch(() => {});
+    const alCortar = await leerCaja(page);
+    check(
+      "se corta la red con la copia a medias: el indicador sigue advirtiendo que no hay copia completa",
+      alCortar?.red === "offline" && alCortar.copia !== "lista" && advierte(alCortar),
+      descrita(alCortar),
+    );
+
+    // Al worker se le vuelve a preguntar SIN red: hay una caché a medias, así que contesta «incompleta» (no «ninguna»).
+    const aviso = await page.evaluate(
+      ({ pedir, tipoAviso }) =>
+        new Promise((resolver) => {
+          const reloj = setTimeout(() => resolver(null), 10000);
+          navigator.serviceWorker.addEventListener("message", (evento) => {
+            if (evento.data?.tipo !== tipoAviso) return;
+            clearTimeout(reloj);
+            resolver(evento.data);
+          });
+          navigator.serviceWorker.ready.then((r) => r.active.postMessage({ tipo: pedir }));
+        }),
+      { pedir: PEDIR_SINCRONIZAR, tipoAviso: AVISO_COPIA },
+    );
+    check(
+      "sin red y con una caché a medias, el worker contesta «incompleta» (no «ninguna») y que no alcanzó al servidor",
+      aviso?.estado === "incompleta" && aviso.conRed === false && aviso.guardados > 0 && aviso.version === precache.version,
+      aviso ? `estado: ${aviso.estado} · conRed: ${aviso.conRed} · guardados: ${aviso.guardados} · versión ${aviso.version}` : "el worker no contestó",
+    );
+    check("a media copia y al cortar la red no hay errores de página", erroresDePagina.length === 0, erroresDePagina.slice(0, 4).join(" | "));
+    await page.screenshot({ path: path.join(CAPTURAS, "pwa_corte.png") });
+
+    // El aviso largo cabe en el teléfono.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const t = await page.evaluate(() => {
+      const r = document.querySelector(".instalar").getBoundingClientRect();
+      return { ancho: document.documentElement.scrollWidth, ventana: window.innerWidth, dentro: r.width > 0 && r.left >= 0 && r.right <= window.innerWidth + 0.5 };
+    });
+    check(
+      "teléfono (390 × 844): el aviso de que no hay copia completa cabe y no hay desplazamiento horizontal",
+      t.ancho <= t.ventana && t.dentro,
+      `ancho del documento ${t.ancho} de ${t.ventana} px`,
+    );
+    await page.screenshot({ path: path.join(CAPTURAS, "pwa_corte_telefono.png") });
+    await page.setViewportSize({ width: 1366, height: 860 });
+
+    // ---------------------------------------------------------- recarga sin red con la copia a medias
+    const titulo = (fs.readFileSync(path.join(COPIA, "index.html"), "utf-8").match(/<title>([^<]*)<\/title>/i) ?? [])[1] ?? "";
+    let abrio = "";
+    try {
+      await page.reload({ waitUntil: "domcontentloaded" });
+      abrio = await page.title();
+    } catch (err) {
+      abrio = `no abrió: ${String(err.message).split("\n")[0]}`;
+    }
+    check(
+      "recarga sin red con la copia a medias: abre el index.html guardado, no la página de error del navegador",
+      titulo !== "" && abrio === titulo && page.url() === base,
+      abrio,
+    );
+    // Si la página monta el indicador aunque no lleguen los datos, debe seguir advirtiendo.
+    await page.waitForSelector(".instalar[data-red='offline']:not([hidden])", { timeout: 10000 }).catch(() => {});
+    const recargada = await leerCaja(page).catch(() => null);
+    if (recargada?.visible) {
+      check("recargada sin red con la copia a medias: el indicador advierte que no hay copia completa", advierte(recargada), descrita(recargada));
+    } else {
+      omitir("indicador tras recargar con la copia a medias", "la página no lo monta cuando no llegan los datos");
+    }
+    await page.screenshot({ path: path.join(CAPTURAS, "pwa_corte_recarga.png") }).catch(() => {});
+
+    // ---------------------------------------------------------- vuelve la red: la copia continúa donde quedó
+    reteniendo = false;
+    srv.levantar();
+    const alVolver = srv.atendidas.length;
+    await ctx.setOffline(false);
+    let completa = true;
+    try {
+      await page.reload({ waitUntil: "load" });
+      await esperarArranque(page);
+      await page.waitForSelector(".instalar[data-red='online'][data-copia='lista']", { timeout: ESPERA_COPIA_MS });
+    } catch {
+      completa = false;
+    }
+    const conCopia = await leerCaja(page);
+    const delWorker = srv.atendidas.slice(alVolver).filter((a) => a.delWorker).map((a) => a.ruta.slice(1));
+    const repetidas = delWorker.filter((ruta) => paraAbrir.includes(ruta));
+    check(
+      `vuelve la red: la copia continúa donde quedó (no vuelve a bajar lo ya guardado) y el indicador dice «${TEXTOS.enLinea}» y «${TEXTOS.copiaLista}»`,
+      completa && dice(conCopia, TEXTOS.enLinea) && dice(conCopia, TEXTOS.copiaLista) && delWorker.length > 0 && repetidas.length === 0,
+      `${descrita(conCopia)} · el worker pidió ${delWorker.length} archivo(s), ${repetidas.length} de los que ya tenía`,
+    );
+
+    // Ahora sí hay copia completa: sin red, la página arranca y el indicador lo puede decir.
+    await ctx.setOffline(true);
+    srv.caer();
+    let mapa = "";
+    try {
+      await page.reload({ waitUntil: "load" });
+      mapa = await esperarArranque(page);
+      await page.waitForSelector(".instalar[data-red='offline'][data-copia='lista']", { timeout: ESPERA_ARRANQUE_MS });
+    } catch (err) {
+      mapa = `no arrancó: ${String(err.message).split("\n")[0]}`;
+    }
+    const alFinal = await leerCaja(page).catch(() => null);
+    check(
+      `con la copia ya completa, sin red: la página arranca y el indicador dice «${TEXTOS.sinConexion}»`,
+      alFinal?.red === "offline" && alFinal.copia === "lista" && dice(alFinal, TEXTOS.sinConexion) && !dice(alFinal, TEXTOS.sinConexionSinCopia),
+      `${descrita(alFinal)} · mapa: ${mapa}`,
+    );
+  } finally {
+    await ctx.close().catch(() => {});
+    await srv.apagar();
+  }
+}
+
 async function main() {
+  reglaDeLosRotulos();
+
   // ------------------------------------------------------------ la copia y su listado
   fs.cpSync(WEB, COPIA, { recursive: true });
   fs.mkdirSync(CAPTURAS, { recursive: true });
@@ -220,18 +527,7 @@ async function main() {
   const base = `http://localhost:${srv.puerto}/`;
   const navegador = await chromium.launch();
   try {
-    const ctx = await navegador.newContext({ viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" });
-    // La pantalla de inicio se da por cerrada (como en web_smoke.mjs): su diálogo modal taparía los controles.
-    await ctx.addInitScript((llave) => {
-      try {
-        window.sessionStorage.setItem(llave, "cerrado");
-      } catch {
-        // sin almacenamiento: la pantalla aparecería (no pasa en Chromium)
-      }
-    }, LLAVE_INICIO);
-    // Otros orígenes (teselas del mapa base) se cortan de inmediato, como en una máquina sin salida a internet.
-    await ctx.route((url) => !url.href.startsWith(base), (route) => route.abort());
-
+    const ctx = await nuevoContexto(navegador, base);
     const page = await ctx.newPage();
     const errores = [];
     vigilar(page, base, errores);
@@ -328,13 +624,70 @@ async function main() {
     );
     await page.screenshot({ path: path.join(CAPTURAS, "pwa_online.png") });
 
+    // Quien escucha (alCambiar), en otra pestaña: su función usa el controlador y además lanza.
+    const aparte = await ctx.newPage();
+    const erroresAparte = [];
+    aparte.on("pageerror", (e) => erroresAparte.push(e.message));
+    await aparte.goto(base, { waitUntil: "load" });
+    const escucha = await aparte.evaluate(async () => {
+      const { montarInstalacion } = await import("./js/instalar.js");
+      const pausa = (ms) => new Promise((seguir) => setTimeout(seguir, ms));
+      const caja = document.createElement("div");
+      document.body.append(caja);
+      const salida = { lanzo: "", dentro: false, avisos: [] };
+      let devuelto = false;
+      try {
+        const ctl = montarInstalacion(caja, {
+          alCambiar: (e) => {
+            if (!devuelto) salida.dentro = true;
+            salida.avisos.push(`${e.red}/${e.copia}/${ctl.estado().copia}`); // usa el controlador que devolvió el montaje
+            throw new Error("falla de quien escucha");
+          },
+        });
+        devuelto = true;
+        await ctl.listo;
+        await pausa(800);
+        salida.nodos = caja.querySelectorAll(".instalar:not([hidden])").length;
+        salida.texto = caja.innerText.replace(/\s+/g, " ").trim();
+        // Sin cambios de estado, sincronizar no debe tocar la región role=status.
+        let mutaciones = 0;
+        const ojo = new MutationObserver((lista) => {
+          mutaciones += lista.length;
+        });
+        ojo.observe(caja.querySelector("[role='status']"), { subtree: true, childList: true, characterData: true, attributes: true });
+        for (let i = 0; i < 3; i += 1) {
+          ctl.sincronizar();
+          await pausa(400);
+        }
+        ojo.disconnect();
+        salida.mutaciones = mutaciones;
+        ctl.destruir();
+        salida.trasDestruir = caja.querySelectorAll(".instalar").length;
+      } catch (error) {
+        salida.lanzo = String(error);
+      }
+      return salida;
+    });
+    await aparte.close();
+    check(
+      "alCambiar: el primer aviso llega después de montar y con lo guardado ya leído, puede usar el controlador y, si lanza, el indicador sigue en pie (el error se reporta aparte)",
+      escucha.lanzo === "" && !escucha.dentro && escucha.avisos[0] === "online/lista/lista" && escucha.nodos === 1 &&
+        escucha.texto.includes(TEXTOS.copiaLista) && escucha.trasDestruir === 0 && erroresAparte.some((e) => e.includes("falla de quien escucha")),
+      `avisos: ${escucha.avisos.join(", ") || "—"} · ${escucha.lanzo || escucha.texto} · errores reportados aparte: ${erroresAparte.length}`,
+    );
+    check(
+      "sincronizar sin cambios de estado no toca la región role=status (no se vuelve a anunciar)",
+      escucha.mutaciones === 0,
+      `${escucha.mutaciones} mutación(es) en tres sincronizaciones`,
+    );
+
     // RED PRIMERO: el archivo cambia en el servidor DESPUÉS de guardarse la copia; con red debe llegar el nuevo.
     fs.appendFileSync(path.join(COPIA, "index.html"), `\n${MARCA}\n`);
     const antesDePedir = srv.atendidas.length;
     const conRed = await page.evaluate(async () => (await fetch("index.html")).text());
     check(
       "red primero: con red, un archivo que cambió en el servidor llega nuevo (no la copia guardada)",
-      conRed.includes(MARCA) && srv.atendidas.slice(antesDePedir).includes("/index.html"),
+      conRed.includes(MARCA) && srv.atendidas.slice(antesDePedir).some((a) => a.ruta === "/index.html"),
       `el servidor atendió ${srv.atendidas.length - antesDePedir} petición(es)`,
     );
 
@@ -493,6 +846,10 @@ async function main() {
     check("con la red cortada el servidor no atendió ninguna petición", srv.atendidas.length === atendidasAlCortar, `${srv.atendidas.length - atendidasAlCortar} petición(es)`);
     check("sin errores de página ni de consola de la propia aplicación", errores.length === 0, errores.slice(0, 6).join(" | "));
     if (!teselas.length) omitir("teselas de relieve sin red", "web/data/dem/ no trae teselas");
+
+    // ---------------------------------------------------------- otra visita: la red se corta a media copia
+    await ctx.close();
+    await corteAMediaCopia(navegador, precache);
   } finally {
     await navegador.close().catch(() => {});
     await srv.apagar();

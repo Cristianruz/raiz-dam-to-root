@@ -13,6 +13,11 @@ Qué se comprueba:
    de pytest, así que su huella no puede exigirse aquí; cómo cambia se prueba con una carpeta temporal.
 3. web/sw.js y web/js/instalar.js no nombran ninguna URL remota ni cargan código de fuera, y usan los mismos
    tipos de mensaje, el mismo listado y el mismo prefijo de caché que escribe motor/pwa.py.
+   El rótulo no promete un respaldo que no existe: «Offline — showing the last synced copy» y «Ready to work
+   offline» solo salen con una copia COMPLETA; sin red y sin ella, «Offline — no complete offline copy yet;
+   reconnect before reloading». Con node (si no está, «skip» con su motivo) se corre la regla de los rótulos y
+   el propio web/sw.js con un almacén y una red de mentira: guarda primero lo que la página necesita para abrir,
+   una copia a medias es «incompleta» (no «ninguna») también sin red, y continúa donde quedó al volver la red.
 4. motor/pwa.py: es idempotente, la versión cambia con el contenido, no lista sw.js ni lo oculto, no vuelve a
    dibujar iconos que ya están, y funciona sin Pillow cuando los iconos ya existen (GitHub Actions).
 5. Con Pillow (si no está, se marcan «skip» con su motivo): los iconos versionados son los que dibuja el código de
@@ -38,6 +43,129 @@ DECISION = "docs/decisiones/2026-11-14_gemelo_digital.md"
 PROHIBIDAS = re.compile(r"\b(first|only|sav(e|es|ed|ing|ings))\b", re.I)  # CLAUDE.md regla 10
 URL_REMOTA = re.compile(r"""(?:https?:|wss?:|ftp:)?//[A-Za-z0-9\[]""")     # http://x, https://x, //cdn.x…
 MOTIVO_SIN_PILLOW = "Pillow no está instalado (solo hace falta para dibujar los iconos: pip install Pillow)"
+MOTIVO_SIN_NODE = "node no está instalado (hace falta para ejecutar web/sw.js y web/js/instalar.js sin navegador)"
+ESTADOS_DEL_WORKER = {"ninguna", "guardando", "lista", "incompleta"}
+SIN_SABER = "desconocida"  # estado de la página antes de saber qué hay guardado
+
+# Regla de los rótulos: importa web/js/instalar.js en node y evalúa textosDe con cada combinación.
+SCRIPT_ROTULOS = """
+const { pathToFileURL } = await import('node:url');
+const modulo = await import(pathToFileURL(process.argv[1]).href);
+const casos = [];
+for (const red of ['online', 'offline']) {
+  for (const copia of JSON.parse(process.argv[2])) casos.push({ red, copia, rotulos: modulo.textosDe({ red, copia }) });
+}
+console.log(JSON.stringify({ textos: modulo.TEXTOS, casos }));
+"""
+
+# Listado de mentira para correr web/sw.js sin navegador. En orden alfabético los datos van ANTES que index.html,
+# js/ y vendor/: si el worker guardara en ese orden, se atoraría en los datos sin haber guardado la portada.
+LISTADO_DE_PRUEBA = {
+    "version": "0123456789abcdef",
+    "archivos": sorted(
+        ["index.html", "app.js", "reglas.js", "style.css", "css/instalar.css", "js/instalar.js", "manifest.webmanifest",
+         "icons/raiz.png", "vendor/mapa/mapa.js", "vendor/mapa/mapa.css", "data/precache.json", "data/cubo.json",
+         "data/parcelas.geojson", "data/gemelo.json", "data/manifest.json", "data/ndvi_mensual.json",
+         "data/explicaciones.json", "data/contexto.json", "data/pruebas.json"]
+        + [f"data/dem/zona/9/1/{y}.png" for y in range(8)]),
+}
+
+# Arnés de web/sw.js: lo corre en un contexto de node con un almacén de cachés, una red y una página de mentira,
+# y devuelve lo que el worker guardó, pidió y avisó en cada paso de «la red se corta a media copia».
+ARNES_WORKER = """
+const fs = await import('node:fs');
+const vm = await import('node:vm');
+const fuente = fs.readFileSync(process.argv[1], 'utf-8');
+const listado = JSON.parse(process.argv[2]);
+const BASE = 'http://raiz.invalid/app/';
+const LISTADO = 'data/precache.json';
+const pausa = () => new Promise((seguir) => setTimeout(seguir, 30));
+
+function mundo() {
+  const almacenes = new Map(); // nombre de caché -> Map(url -> Response)
+  const oyentes = {};
+  const avisos = [];
+  const pedidas = [];
+  const red = { hay: true, retener: () => false, retenidas: [] };
+  const caches = {
+    keys: async () => [...almacenes.keys()],
+    delete: async (nombre) => almacenes.delete(nombre),
+    open: async (nombre) => {
+      if (!almacenes.has(nombre)) almacenes.set(nombre, new Map());
+      const guardado = almacenes.get(nombre);
+      return {
+        match: async (url) => guardado.get(String(url.url ?? url).split(/[?#]/)[0])?.clone(),
+        put: async (url, respuesta) => void guardado.set(String(url.url ?? url), respuesta),
+        keys: async () => [...guardado.keys()].map((url) => ({ url })),
+      };
+    },
+  };
+  const fetchDeMentira = (pedido) => {
+    const ruta = new URL(pedido.url ?? pedido).pathname.slice(new URL(BASE).pathname.length);
+    pedidas.push(ruta);
+    if (!red.hay) return Promise.reject(new TypeError('sin red'));
+    if (red.retener(ruta)) return new Promise((_, fallar) => red.retenidas.push(() => fallar(new TypeError('red cortada'))));
+    const cuerpo = ruta === LISTADO ? JSON.stringify(listado) : listado.archivos.includes(ruta) ? 'contenido de ' + ruta : null;
+    return Promise.resolve(cuerpo === null ? new Response('no', { status: 404 }) : new Response(cuerpo, { status: 200 }));
+  };
+  const self = {
+    location: { href: BASE + 'sw.js' },
+    addEventListener: (tipo, oyente) => void (oyentes[tipo] = oyente),
+    skipWaiting: async () => {},
+    clients: { claim: async () => {}, matchAll: async () => [{ postMessage: (aviso) => avisos.push(aviso) }] },
+  };
+  vm.runInNewContext(fuente, { self, caches, fetch: fetchDeMentira, Request, Response, URL, setTimeout, clearTimeout });
+  // Lanza un evento del worker y devuelve la promesa de todo lo que pidió esperar (waitUntil).
+  const lanzar = (tipo, extra = {}) => {
+    const esperas = [];
+    oyentes[tipo]({ waitUntil: (promesa) => esperas.push(promesa), ...extra });
+    return Promise.all(esperas);
+  };
+  const guardados = () => [...almacenes].map(([nombre, m]) => ({ nombre, rutas: [...m.keys()].map((u) => u.slice(BASE.length)).sort() }));
+  return { avisos, pedidas, red, lanzar, guardados };
+}
+
+const preguntar = { data: { tipo: 'raiz-sincronizar' } };
+const salida = {};
+
+// A) Primera visita: el servidor no contesta ninguna descarga de datos. Lo que alcanzó a guardarse.
+const m = mundo();
+m.red.retener = (ruta) => ruta.startsWith('data/') && ruta !== LISTADO;
+const instalacion = m.lanzar('install');
+await pausa();
+salida.aMedias = { guardados: m.guardados(), aviso: m.avisos.at(-1), retenidas: m.red.retenidas.length };
+
+// B) Se corta la red: las descargas detenidas fallan y el worker termina de instalarse y se activa.
+m.red.hay = false;
+m.red.retenidas.forEach((fallar) => fallar());
+await instalacion;
+await m.lanzar('activate');
+salida.alCortar = { guardados: m.guardados(), aviso: m.avisos.at(-1) };
+
+// C) Sin red, la página vuelve a preguntar: hay una caché a medias.
+await m.lanzar('message', preguntar);
+salida.sinRed = { aviso: m.avisos.at(-1) };
+
+// D) Vuelve la red: la copia continúa donde quedó y se completa.
+m.red.hay = true;
+m.red.retener = () => false;
+const antes = m.pedidas.length;
+await m.lanzar('message', preguntar);
+salida.alVolver = { guardados: m.guardados(), aviso: m.avisos.at(-1), pedidas: m.pedidas.slice(antes).sort() };
+
+// E) Con la copia completa y otra vez sin red: sigue «lista».
+m.red.hay = false;
+await m.lanzar('message', preguntar);
+salida.listaSinRed = { aviso: m.avisos.at(-1) };
+
+// F) Otro navegador, primera visita sin red: no hay nada guardado.
+const vacio = mundo();
+vacio.red.hay = false;
+await vacio.lanzar('install');
+salida.nada = { guardados: vacio.guardados(), aviso: vacio.avisos.at(-1) };
+
+console.log(JSON.stringify(salida));
+"""
 TOLERANCIA_PIXEL = 8  # niveles de 0 a 255: margen para otra versión de Pillow, no para otro dibujo
 
 
@@ -67,6 +195,28 @@ def precache():
     ruta = WEB / "data/precache.json"
     assert ruta.exists(), "falta web/data/precache.json: corra python3 motor/pwa.py"
     return leer(ruta)
+
+
+def _node(script, *argumentos):
+    """Corre un script de node (módulo ES) y devuelve su salida JSON; «skip» si node no está."""
+    if shutil.which("node") is None:
+        pytest.skip(MOTIVO_SIN_NODE)
+    p = subprocess.run(["node", "--input-type=module", "-e", script, *argumentos],
+                       capture_output=True, text=True, encoding="utf-8", timeout=60)
+    assert p.returncode == 0, f"node falló: {p.stderr}"
+    return json.loads(p.stdout)
+
+
+@pytest.fixture(scope="module")
+def rotulos():
+    """textosDe de web/js/instalar.js evaluada en node con cada combinación de red y copia."""
+    return _node(SCRIPT_ROTULOS, str(WEB / "js/instalar.js"), json.dumps(sorted(ESTADOS_DEL_WORKER | {SIN_SABER})))
+
+
+@pytest.fixture(scope="module")
+def corte():
+    """web/sw.js corrido en node: la red se corta a media copia, se le pregunta sin red y la red vuelve."""
+    return _node(ARNES_WORKER, str(WEB / "sw.js"), json.dumps(LISTADO_DE_PRUEBA))
 
 
 @pytest.fixture
@@ -220,6 +370,12 @@ def test_el_worker_y_la_pagina_hablan_de_lo_mismo():
         assert constante(sw, nombre) == constante(pagina, nombre), f"{nombre} difiere entre sw.js e instalar.js"
     assert constante(sw, "LISTADO") == pwa.PRECACHE, "sw.js lee otro listado que el que escribe motor/pwa.py"
     assert constante(sw, "PREFIJO") == "raiz-"
+    # La página lee el almacén de cachés con la misma regla del worker (mismo prefijo y misma marca de «completa»).
+    for nombre in ("PREFIJO", "LISTADO"):
+        assert constante(pagina, nombre) == constante(sw, nombre), f"{nombre} difiere entre sw.js e instalar.js"
+    # El orden de guardado nombra carpetas que existen en web/.
+    assert constante(sw, "DATOS") == "data/" and constante(sw, "TESELAS") == "data/dem/"
+    assert (WEB / constante(sw, "DATOS")).is_dir()
     assert constante(sw, "PORTADA") == "index.html"
     assert constante(pagina, "RUTA_WORKER") == "./" + pwa.SERVICE_WORKER
     # Lo que la decisión pide del worker: activar de inmediato, tomar el control y borrar las cachés viejas.
@@ -227,16 +383,106 @@ def test_el_worker_y_la_pagina_hablan_de_lo_mismo():
         assert pieza in sw, f"sw.js ya no usa {pieza}"
     # Los estados que el worker informa son los que la página entiende.
     estados_pagina = set(re.search(r"const COPIAS = \[([^\]]+)\]", pagina).group(1).replace('"', "").replace(" ", "").split(","))
-    estados_worker = set(re.findall(r'estado: (?:[a-z.]+ \? )?"([a-z]+)"(?: : "([a-z]+)")?', sw))
+    estados_worker = set(re.findall(r'estado: (?:[A-Za-z.]+ \? )?"([a-z]+)"(?: : "([a-z]+)")?', sw))
     estados_worker = {e for par in estados_worker for e in par if e}
-    assert estados_worker == estados_pagina == {"ninguna", "guardando", "lista", "incompleta"}, (estados_worker, estados_pagina)
+    assert estados_worker == estados_pagina == ESTADOS_DEL_WORKER, (estados_worker, estados_pagina)
+    assert constante(pagina, "SIN_SABER") == SIN_SABER and SIN_SABER not in ESTADOS_DEL_WORKER
 
 
 def test_textos_de_la_interfaz():
     pagina = (WEB / "js/instalar.js").read_text(encoding="utf-8")
-    for texto in ("Install app", "Online", "Offline — showing the last synced copy", "Ready to work offline"):
+    for texto in ("Install app", "Online", "Offline — showing the last synced copy", "Ready to work offline",
+                  "Offline — no complete offline copy yet; reconnect before reloading"):
         assert f'"{texto}"' in pagina, f"instalar.js ya no dice «{texto}»"
     assert 'role", "status"' in pagina, "el indicador debe ser una región de estado (role=status)"
+    bloque = re.search(r"export const TEXTOS = Object\.freeze\(\{(.*?)\}\);", pagina, re.S).group(1)
+    textos = re.findall(r'^\s*\w+: "([^"]*)",?$', bloque, re.M)
+    assert len(textos) >= 8, "no encuentro los textos de TEXTOS"
+    for texto in textos:
+        assert not PROHIBIDAS.search(texto), f"«first», «only» o «save…» (CLAUDE.md regla 10): {texto!r}"
+        assert not re.search(r"\d", texto), f"cifra escrita a mano (CLAUDE.md regla 3): {texto!r}"
+
+
+def test_el_rotulo_de_copia_sincronizada_exige_copia_completa_en_el_codigo():
+    """Sin node: en instalar.js, «showing the last synced copy» se usa en un solo lugar y tras `copia === "lista"`."""
+    pagina = (WEB / "js/instalar.js").read_text(encoding="utf-8")
+    codigo = "\n".join(linea for linea in pagina.splitlines() if not linea.lstrip().startswith(("//", "*", "/*")))
+    usos = [linea.strip() for linea in codigo.splitlines() if re.search(r"TEXTOS\.sinConexion\b", linea)]
+    assert len(usos) == 1 and 'copia === "lista"' in usos[0], (
+        "«Offline — showing the last synced copy» solo puede mostrarse con una copia completa "
+        f"(la red puede cortarse a media copia): {usos}")
+    assert codigo.count("TEXTOS.sinConexionSinCopia") == 1 and codigo.count("textosDe(e)") == 1, \
+        "el indicador debe pintarse con textosDe (la regla de los rótulos)"
+
+
+def test_sin_conexion_solo_se_afirma_la_copia_si_esta_completa(rotulos):
+    textos = rotulos["textos"]
+    assert len(rotulos["casos"]) == 2 * (len(ESTADOS_DEL_WORKER) + 1)
+    for caso in rotulos["casos"]:
+        red, copia, dicho = caso["red"], caso["copia"], caso["rotulos"]
+        junto = f"{dicho['red']} {dicho['copia'] or ''}"
+        afirma = textos["sinConexion"] in junto or textos["copiaLista"] in junto
+        assert afirma == (copia == "lista"), f"{red}/{copia}: «{junto.strip()}» promete un respaldo que no existe (o lo calla)"
+        if red == "online":
+            assert dicho["red"] == textos["enLinea"]
+        elif copia == "lista":
+            assert dicho == {"red": textos["sinConexion"], "copia": None}
+        elif copia in ESTADOS_DEL_WORKER:
+            assert dicho == {"red": textos["sinConexionSinCopia"], "copia": None}, f"{red}/{copia} debe advertir: {dicho}"
+        else:
+            assert dicho == {"red": textos["sinConexionSinSaber"], "copia": None}
+    assert textos["sinConexionSinCopia"] != textos["sinConexion"] and "last synced copy" not in textos["sinConexionSinCopia"]
+
+
+# --- 3b. web/sw.js corrido en node: la red se corta a media copia -----------------------------------------
+def _aviso(paso):
+    aviso = paso["aviso"]
+    assert aviso and aviso["tipo"] == "raiz-copia", paso
+    return aviso
+
+
+def test_el_worker_guarda_primero_lo_que_la_pagina_necesita_para_abrir(corte):
+    para_abrir = sorted(r for r in LISTADO_DE_PRUEBA["archivos"] if not r.startswith("data/"))
+    a_medias = corte["aMedias"]
+    assert a_medias["retenidas"] >= 1, "el arnés no detuvo ninguna descarga de datos"
+    assert a_medias["guardados"] == [{"nombre": "raiz-" + LISTADO_DE_PRUEBA["version"], "rutas": para_abrir}], (
+        "con los datos sin llegar, la copia debe tener ya el HTML, los estilos, el código y las bibliotecas "
+        "(si se corta, al menos abre) y todavía no el listado, que es la marca de «completa»")
+    assert _aviso(a_medias)["estado"] == "guardando"
+
+
+def test_una_copia_a_medias_es_incompleta_y_no_ninguna(corte):
+    para_abrir = [r for r in LISTADO_DE_PRUEBA["archivos"] if not r.startswith("data/")]
+    datos = sorted(r for r in LISTADO_DE_PRUEBA["archivos"] if r.startswith("data/") and r != pwa.PRECACHE)
+    al_cortar = _aviso(corte["alCortar"])
+    assert al_cortar["estado"] == "incompleta" and al_cortar["conRed"] is False, al_cortar
+    assert al_cortar["faltantes"] == datos and al_cortar["version"] == LISTADO_DE_PRUEBA["version"]
+    assert al_cortar["total"] == len(LISTADO_DE_PRUEBA["archivos"]) and al_cortar["guardados"] == len(para_abrir)
+    assert pwa.PRECACHE not in corte["alCortar"]["guardados"][0]["rutas"], "una copia a medias no lleva la marca de «completa»"
+    # Cuando se le vuelve a preguntar sin red no tiene listado ni faltantes: la caché a medias sigue ahí.
+    sin_red = _aviso(corte["sinRed"])
+    assert sin_red["estado"] == "incompleta", f"con una caché a medias y sin red el worker dijo «{sin_red['estado']}»"
+    assert sin_red["conRed"] is False and sin_red["guardados"] == len(para_abrir) and sin_red["total"] is None
+    assert sin_red["version"] == LISTADO_DE_PRUEBA["version"]
+
+
+def test_al_volver_la_red_la_copia_continua_donde_quedo(corte):
+    datos = sorted(r for r in LISTADO_DE_PRUEBA["archivos"] if r.startswith("data/"))
+    al_volver = corte["alVolver"]
+    aviso = _aviso(al_volver)
+    assert aviso["estado"] == "lista" and aviso["conRed"] is True and aviso["faltantes"] == []
+    assert aviso["total"] == aviso["guardados"] == len(LISTADO_DE_PRUEBA["archivos"])
+    assert al_volver["pedidas"] == datos, "solo debe pedir el listado y lo que faltaba (no lo que ya estaba guardado)"
+    assert al_volver["guardados"] == [{"nombre": "raiz-" + LISTADO_DE_PRUEBA["version"], "rutas": LISTADO_DE_PRUEBA["archivos"]}]
+    # Con la copia completa, quedarse sin red no la degrada.
+    lista = _aviso(corte["listaSinRed"])
+    assert lista["estado"] == "lista" and lista["conRed"] is False
+
+
+def test_sin_red_y_sin_nada_guardado_es_ninguna(corte):
+    nada = _aviso(corte["nada"])
+    assert nada["estado"] == "ninguna" and nada["conRed"] is False and nada["guardados"] == 0 and nada["version"] is None
+    assert corte["nada"]["guardados"] == []
 
 
 # --- 4. motor/pwa.py --------------------------------------------------------------------------------------

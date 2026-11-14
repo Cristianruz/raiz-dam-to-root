@@ -1,7 +1,7 @@
 <!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
 # Textos para el formulario de envío (en inglés)
 
-**BORRADOR para que el equipo lo ajuste (responsable de presentación y pitch, con el integrador).** Cada texto sale del `README.md` del 14-nov; no agrega cifras nuevas. Una sola frase se aparta del README: la del goteo (sección 5), porque en ese punto el README quedó atrasado.
+**BORRADOR para que el equipo lo ajuste (responsable de presentación y pitch, con el integrador).** Cada texto sale del `README.md` del 14-nov, incluidos los cambios de las 22:53 (commit `b73e8b3`: H1-b y «Model against local practice»); no agrega cifras nuevas. Una sola frase se aparta del README: la del goteo (sección 5), porque en ese punto el README quedó atrasado. Además, estos textos no copian una frase del README que otro documento del repo contradice (nota al final de la sección 5).
 
 ## 1. Qué piden el plan y el kit
 
@@ -80,16 +80,16 @@ HOW IT WORKS
 VALIDATION: FIVE TESTS IN SIGHT
 Each criterion was declared before seeing the result.
 1. Crop map: partial. Phenological rules on HLS classify 458 of 1,239 fields; 781 abstain (63.0 %). Random Forest, spatial validation and accuracy assessment: not run.
-2. Back-test 2026 (H1): does not meet the preregistered criterion (partial back-test; press-reported truth). At July 14, 2026 the model's median is 904.6 hm³ against 447.65 hm³; the simple baselines were closer (404.5 and 367.2 hm³). The model computes the full crop demand and overestimates the level.
+2. Back-test 2026 (H1): does not meet the preregistered criterion (partial back-test; press-reported truth). At July 14, 2026 the model's median is 904.6 hm³ against 447.65 hm³; the simple baselines were closer (404.5 and 367.2 hm³). The model computes the full crop demand and overestimates the level. A follow-up test of the seasonal shape over the 1999–2024 cycles (H1-b, specified before running; it does not change H1) does not hold either: the model beats the two simple shapes in 6 of 26 years and places demand earlier than the dam releases it.
 3. 2025 natural experiment (H3): not supported. Among 184 annual-crop fields, the share with an active summer crop was 82.6 % in 2025 against a 2019–2024 median of 84.2 % (−1.6 points; the criterion asked for −25 or more). Among 44 pecan orchards the share stayed at 100 %.
 4. Figure checker: partial. Golden set passed: 30 of 30 cases correct, 5 of 5 traps caught, 0 of 71 numbers altered. Texts written by an LLM: not run; all texts are templates filled from the data.
 5. Regional ET contrast and automated checks: partial. Modeled crop ET of 1,139.3 mm against SSEBop VIIRS v6 of 746.3 mm over October 2025 to September 2026 (+53 %), as a regional comparison, not a field-level validation. WaPOR v3 and the FAO-56 worked examples: not run. Water balance of the drop: passed.
 
 LIMITATIONS
-The tool does not allocate, sell or trade water. It does not forecast the dam. It does not promise that any water will be freed. The twin has no field sensors and no real-time data: it is refreshed on each run, from satellite and climate data. 63 % of the fields are not classified and have no options. Field boundaries are estimated by a model outside its training domain. Crop options are provisional. The field-efficiency range is an assumption, and the model's alfalfa depth (28.4 thousand m³/ha) is above INIFAP's (17.5). The drip scenario uses indicative FAO efficiencies that were not measured in the district. The Money row has no data. The full list is in LIMITATIONS.md.
+The tool does not allocate, sell or trade water. It does not forecast the dam. It does not promise that any water will be freed. The twin has no field sensors and no real-time data: it is refreshed on each run, from satellite and climate data. 63 % of the fields are not classified and have no options. Field boundaries are estimated by a model outside its training domain. Crop options are provisional. The field-efficiency range is an assumption. The model computes the full crop requirement: it is higher than the depths recommended by INIFAP and those applied in the district for alfalfa, pecan, cotton and forage maize, and lower for chile; for alfalfa, 28.4 thousand m³/ha against INIFAP's 17.5. The drip scenario uses indicative FAO efficiencies that were not measured in the district. The Money row has no data. The full list is in LIMITATIONS.md.
 
 WHAT COMES NEXT
-Ask a district technician which on-farm efficiency is realistic for gravity irrigation; classify the remaining fields with the team's blind labels and assess the accuracy of the crop map; review fields and options with farmers of the two pilot areas.
+Ask a district technician which on-farm efficiency is realistic for gravity irrigation and under which conditions the INIFAP depths apply; classify the remaining fields with the team's blind labels and assess the accuracy of the crop map; review fields and options with farmers of the two pilot areas.
 
 This tool supports, never replaces, the judgment of farmers and local experts.
 ```
@@ -118,6 +118,8 @@ Con el goteo conectado, agregue además al punto 2 de «WHAT RAÍZ DOES»: `"Fol
 Por qué esta frase no copia al README: `README.md` («No drip scenario») y `LIMITATIONS.md` («There is no sourced drip efficiency») quedaron atrasados. La eficiencia tiene fuente en `data/processed/supuestos.json` → `ea_goteo` (un valor indicativo de la FAO, no local) y la decisión `docs/decisiones/2026-11-14_opciones_b3.md` §3 ordena conectar el escenario. El integrador corrige esos dos archivos; antes del envío, compruebe que el formulario y el README digan lo mismo.
 
 Nota sobre la palabra «preregistered»: el `README.md` la usa para H1 y H3, y la liga pública de OSF todavía no está en el repo. Si la liga no llega antes del envío, el integrador decide si se conserva la palabra o se cambia por «declared beforehand in the project documents».
+
+Nota sobre H1-b y la lámina del modelo: la prueba 2 ya incluye H1-b (prueba posterior, especificada antes de correr; no cambia H1) y «LIMITATIONS» dice que el modelo queda por encima de lo recomendado y de lo aplicado en el distrito. Las dos cosas salen del `README.md`, «Open question: model against INIFAP depth», puntos «H1-b» y «Model against local practice». Estos textos **no** copian la frase del README «So most of the gap comes from dividing by the field (on-farm) efficiency»: `docs/modelo_vs_practica.md` (§2, punto 3) dice que en alfalfa la diferencia viene de la ET y no solo de la eficiencia. El integrador corrige esa frase en `README.md` y en `LIMITATIONS.md` («Water demand»); antes del envío, compruebe que el formulario y el README digan lo mismo. La sección «Tests in sight» de la página todavía no menciona H1-b.
 
 ## 6. NASA Data
 
@@ -244,10 +246,11 @@ Todas están en el `README.md` del 14-nov, que las cita con su archivo.
 | 1,239 parcelas; 458 clasificadas; 781 sin clasificar (63.0 %) | «Pilot areas»; «Validation», prueba 1 |
 | Plazos: 1 año; 3 a 4 años; horizonte de 10 años | «How it works», «Calculation» |
 | H1: 904.6, 447.65, 404.5 y 367.2 hm³ | «Validation», prueba 2 (`docs/resultado_H1.md`) |
+| H1-b: ciclos de 1999 a 2024; 6 de 26 años | «Open question: model against INIFAP depth», punto «H1-b» (`docs/resultado_H1b.md`; especificación en `docs/h1b_especificacion.md`) |
 | H3: 184 parcelas; 82.6 % y 84.2 %; −1.6 puntos; 44 huertas; 100 % | «Validation», prueba 3 (`docs/resultado_H3.md`) |
 | Verificador: 30 de 30; 5 de 5; 0 de 71 | «Validation», prueba 4 (`docs/figuras/llm_eval.csv`) |
 | ET: 1,139.3 mm y 746.3 mm; +53 % | «Validation», prueba 5 (`docs/resultado_A8.md`) |
-| Alfalfa: 28.4 frente a 17.5 millares/ha | «Open question: model against INIFAP depth» |
+| Alfalfa: 28.4 frente a 17.5 millares/ha | «Open question: model against INIFAP depth» (la lista de cultivos por encima y por debajo, sin cifras, sale del punto «Model against local practice»; detalle en `docs/modelo_vs_practica.md`) |
 | GEDI: 1,072 de 1,239 parcelas | «NASA Data» |
 | Goteo: ninguna cifra en el texto | No viene del README. La eficiencia indicativa está en `data/processed/supuestos.json` → `ea_goteo` |
 | Versiones de bibliotecas | «References» |

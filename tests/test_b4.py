@@ -403,6 +403,7 @@ def test_goteo_lleva_la_fuente_y_la_etiqueta_de_supuestos(con_goteo):
     _, _, cubo, _, _, sup = con_goteo
     meta = cubo["meta"]["goteo"]
     assert meta["disponible"] is True and meta["archivo"] == "data/processed/supuestos.json"
+    assert meta["retorno_sin_tope_es_cota_superior"] is True   # X3.1: sin tope el retorno es una cota superior
     for clave in ("ea_goteo", "ea_superficial_referencia"):
         assert meta[clave] == {k: sup[clave][k] for k in ("valor", "etiqueta", "fuente")}
     for z in (DZ, LC):

@@ -338,6 +338,18 @@ def test_opcion_sin_lamina_en_la_zona_se_omite_con_aviso(tmp_path):
     assert validar_contrato.validar(web) == []
 
 
+def test_menos_de_dos_alternativas_oficiales_no_se_completa_y_el_contrato_lo_marca(tmp_path):
+    """Si B3 da menos de 2 alternativas para un cultivo, el motor NO inventa ni completa con las
+    provisionales: lo avisa, y el contrato (ACTUAL + 2, kit §2.3) lo marca como error."""
+    cambio = _poner(["descanso"], "por_cultivo_actual", "nogal")
+    rep, geo, cubo, _, web = correr(procesados(tmp_path, b3=alterado(cambio)), tmp_path)
+    nogales = [ops for p, ops in parcelas_con_opciones(geo, cubo) if p["cultivo_actual"] == "nogal"]
+    assert nogales and all([o["id"] for o in ops] == ["ACTUAL", "descanso"] for ops in nogales)
+    aviso = [a for a in rep["avisos"] if "parcelas de nogal" in a and "ACTUAL + 2" in a]
+    assert aviso and aviso[0].startswith(f"{len(nogales)} parcelas"), rep["avisos"]
+    assert any("mínimo ACTUAL + 2 alternativas" in e for e in validar_contrato.validar(web))
+
+
 def test_secuencia_distinta_de_la_de_a5_se_avisa(tmp_path):
     cambio = _poner("otro_cultivo", "opciones", "sorgo", "secuencia", 0, "cultivo")
     rep, _, cubo, _, _ = correr(procesados(tmp_path, b3=alterado(cambio)), tmp_path)

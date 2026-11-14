@@ -85,10 +85,10 @@
 |---|---|
 | Title | Five tests, published whatever the result |
 | One idea | Unfavorable results are shown with the same visibility |
-| Text on slide | Back-test 2026 (H1): does not meet its preregistered criterion · 2025 natural experiment (H3): not supported · Crop map: 781 of 1,239 fields not classified · Figure checker: 30 of 30 cases correct, 0 numbers altered (tested on templates) · ET contrast: +53 % against SSEBop, a regional comparison |
+| Text on slide | Back-test 2026 (H1): does not meet its preregistered criterion; follow-up shape test (H1-b): does not hold either · 2025 natural experiment (H3): not supported · Crop map: 781 of 1,239 fields not classified · Figure checker: 30 of 30 cases correct, 0 numbers altered (tested on templates) · ET contrast: +53 % against SSEBop, a regional comparison |
 | Capture | Captura nueva de «About & Data» → «Tests in sight» (no está en `tests/e2e/capturas/`: `escritorio_acerca.png` muestra la parte de «NASA data»). Como apoyo, `docs/h1_backtest.png` |
-| Cifra y fuente | H1 (`docs/resultado_H1.md`). H3 (`docs/resultado_H3.md`). 781 de 1,239 (`web/data/pruebas.json`). 30 de 30 y 0 de 71 (`docs/figuras/llm_eval.csv`). +53 %: 1,139.3 mm frente a 746.3 mm (`docs/resultado_A8.md`) |
-| Nota del orador | Los criterios se declararon antes de ver los resultados (S9 §6). Lo que no se corrió dice «not run»: Random Forest, exactitud del mapa, WaPOR y el verificador sobre texto de un modelo de lenguaje. El verificador se probó con plantillas. Diga por qué esto da confianza: se sabe hacia dónde falla el modelo. |
+| Cifra y fuente | H1 (`docs/resultado_H1.md`). H1-b, sin cifra en la diapositiva: el modelo gana en 6 de 26 años, de 1999 a 2024 (`docs/resultado_H1b.md`). H3 (`docs/resultado_H3.md`). 781 de 1,239 (`web/data/pruebas.json`). 30 de 30 y 0 de 71 (`docs/figuras/llm_eval.csv`). +53 %: 1,139.3 mm frente a 746.3 mm (`docs/resultado_A8.md`) |
+| Nota del orador | Los criterios se declararon antes de ver los resultados (S9 §6). Lo que no se corrió dice «not run»: Random Forest, exactitud del mapa, WaPOR y el verificador sobre texto de un modelo de lenguaje. El verificador se probó con plantillas. Diga por qué esto da confianza: se sabe hacia dónde falla el modelo; calcula más agua de la que el distrito usa. H1-b es una prueba posterior de cómo se reparte el agua dentro del ciclo en los años anteriores: tampoco se sostiene, y no cambia H1. No presente la variante «anclada» de 2026 como punto a favor: fue un año, no una regla. La captura de «Tests in sight» no muestra H1-b; está en el `README.md`. |
 
 ### Slide 7 · Closing
 

@@ -5,8 +5,10 @@
 //
 // QUÉ HACE
 //   Al instalarse    lee data/precache.json ({ version, archivos }) y guarda TODOS esos archivos en la caché
-//                    «raiz-<version>». Activa de inmediato (skipWaiting) aunque algún archivo falle: el estado
-//                    que informa a la página dice si la copia quedó completa.
+//                    «raiz-<version>»: primero lo que la página necesita para abrir (HTML, estilos, código y
+//                    bibliotecas), después los datos y al final las teselas de relieve, para que una copia que
+//                    se corta a la mitad al menos abra. Activa de inmediato (skipWaiting) aunque algún archivo
+//                    falle: el estado que informa a la página dice si la copia quedó completa.
 //   Al activarse     borra las cachés «raiz-…» viejas y toma el control de las páginas abiertas (clients.claim).
 //   En cada petición GET del mismo origen (dentro de la carpeta de la aplicación): RED PRIMERO.
 //                      · la red contesta a tiempo  -> se entrega esa respuesta y se renueva su copia;
@@ -23,21 +25,28 @@
 //                      completa y borra la anterior. Siempre contesta con el estado.
 //   Worker -> páginas  { tipo: "raiz-copia", estado, version, total, guardados, faltantes, conRed }
 //                        estado     "guardando"   se están descargando los archivos de la copia
-//                                   "lista"       hay una copia completa: la aplicación abre sin red
-//                                   "incompleta"  faltó guardar algún archivo (lista en `faltantes`)
-//                                   "ninguna"     no hay copia ni listado con qué hacerla
+//                                   "lista"       hay una copia COMPLETA: la aplicación abre sin red
+//                                   "incompleta"  hay una copia a medias: faltó guardar algún archivo o la red
+//                                                 se cortó antes de terminar. NO es un respaldo: sin red, la
+//                                                 aplicación puede no abrir
+//                                   "ninguna"     no hay nada guardado
 //                        version    versión de la copia de la que se habla (o null)
-//                        total      archivos del listado; guardados: cuántos están ya en la copia
+//                        total      archivos del listado (null si no se pudo leer: copia a medias y sin red)
+//                        guardados  cuántos están ya en la copia
 //                        faltantes  rutas que no se pudieron guardar en el último intento
 //                        conRed     true si el servidor contestó en el último intento de sincronizar;
-//                                   false si no hubo red; null si no se intentó
+//                                   false si no hubo red (o se fue mientras se guardaba); null si no se intentó
 //
 // La marca de «copia completa» es el propio listado: data/precache.json se guarda AL FINAL, dentro de su caché.
+// Solo «lista» permite decir que hay respaldo: la página (web/js/instalar.js) rotula «showing the last synced
+// copy» únicamente con ese estado.
 // Los números de este archivo son límites técnicos (tiempo de espera, descargas a la vez), no datos.
 
 const PREFIJO = "raiz-";
 const LISTADO = "data/precache.json";
 const PORTADA = "index.html";
+const DATOS = "data/";            // carpeta de los datos: se guardan después de lo que la página necesita para abrir
+const TESELAS = "data/dem/";      // teselas de relieve (solo la vista 3D): se guardan al final
 const PEDIR_SINCRONIZAR = "raiz-sincronizar";
 const AVISO_COPIA = "raiz-copia";
 const LIMITE_RED_MS = 3000;       // espera máxima a la red antes de contestar con la copia guardada
@@ -113,17 +122,40 @@ async function avisar(detalle) {
   return detalle;
 }
 
-/** Estado de lo que hay guardado, sin tocar la red. */
-async function estadoGuardado(conRed, faltantes = []) {
+/**
+ * Estado de lo que hay guardado, sin tocar la red.
+ * `intento`: { listado, faltantes } del guardado que acaba de quedar incompleto (si lo hubo).
+ */
+async function estadoGuardado(conRed, intento = null) {
+  const faltantes = intento ? intento.faltantes : [];
   const vigente = await copiaVigente();
   if (vigente) {
     const total = vigente.listado.archivos.length;
     return { estado: "lista", version: vigente.listado.version, total, guardados: total, faltantes, conRed };
   }
-  return { estado: faltantes.length ? "incompleta" : "ninguna", version: null, total: 0, guardados: 0, faltantes, conRed };
+  // Sin copia completa. ¿Quedó una a medias? (la red se cortó o faltó algún archivo): eso no es un respaldo.
+  // La del intento que acaba de fallar o, si solo se pregunta, la más nueva que haya.
+  const nombres = await nombresDeCopias();
+  const aMedias = intento ? PREFIJO + intento.listado.version : nombres[nombres.length - 1];
+  const guardados = aMedias ? (await (await caches.open(aMedias)).keys()).length : 0;
+  const hayAlgo = guardados > 0 || faltantes.length > 0;
+  return {
+    estado: hayAlgo ? "incompleta" : "ninguna",
+    version: hayAlgo && aMedias ? aMedias.slice(PREFIJO.length) : null,
+    total: intento ? intento.listado.archivos.length : null,
+    guardados,
+    faltantes,
+    conRed,
+  };
 }
 
 // ------------------------------------------------------------------------------------------ guardar la copia
+/** Turno de un archivo al guardar la copia: 0 lo que la página necesita para abrir, 1 los datos, 2 las teselas. */
+function turno(ruta) {
+  if (ruta.startsWith(TESELAS)) return 2;
+  return ruta.startsWith(DATOS) ? 1 : 0;
+}
+
 /**
  * Descarga a la caché «raiz-<version>» los archivos del listado que aún no estén (si una descarga anterior se
  * interrumpió, continúa donde quedó) y, solo si están todos, guarda el listado como marca de «completa».
@@ -132,7 +164,8 @@ async function estadoGuardado(conRed, faltantes = []) {
 async function guardarCopia(listado, respuestaListado, conRed) {
   const cache = await caches.open(PREFIJO + listado.version);
   const total = listado.archivos.length;
-  const cola = listado.archivos.filter((ruta) => ruta !== LISTADO);
+  // El orden del listado se conserva dentro de cada turno (sort es estable).
+  const cola = listado.archivos.filter((ruta) => ruta !== LISTADO).sort((a, b) => turno(a) - turno(b));
   const faltantes = [];
   let guardados = total - cola.length; // el listado cuenta desde el principio: ya se leyó
   let ultimoAviso = 0;
@@ -191,7 +224,12 @@ async function hacerSincronizacion() {
   const vigente = await copiaVigente();
   if (!vigente || vigente.nombre !== nombre) {
     const faltantes = await guardarCopia(listado, respuesta, conRed);
-    if (faltantes.length) return avisar(await estadoGuardado(conRed, faltantes));
+    if (faltantes.length) {
+      // ¿Faltaron porque el servidor no los tiene o porque la red se fue a media copia? Se vuelve a preguntar
+      // por el listado: si ya no contesta, la página debe decir «sin conexión» y reintentar más tarde.
+      const sigue = await leerListado();
+      return avisar(await estadoGuardado(sigue.conRed, { listado, faltantes }));
+    }
   }
   // La copia anterior se borra aquí, salvo durante la instalación: mientras otro worker siga al mando,
   // sus copias se quedan hasta que este se active (limpiar), para no quitarle el respaldo antes de tiempo.

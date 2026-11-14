@@ -138,7 +138,7 @@ El bloque 4 dice tres cosas en contra, con naturalidad y sin disculparse:
 
 | Qué se dice | Por qué hace más confiable la herramienta |
 |---|---|
-| H1 no cumple su criterio | El criterio se escribió antes de ver el resultado. Ahora sabemos hacia dónde se equivoca el modelo: pide más agua de la que el distrito usa (`docs/resultado_H1.md`) |
+| H1 no cumple su criterio | El criterio se escribió antes de ver el resultado. Ahora sabemos hacia dónde se equivoca el modelo: pide más agua de la que el distrito usa (`docs/resultado_H1.md`). No diga que «acierta en la forma»: la prueba posterior H1-b tampoco se sostiene (`docs/resultado_H1b.md`) |
 | H3 no se sostiene | El satélite ve el verdor, no de dónde vino el agua. Eso obliga a no leer el verdor como «regó con agua de la presa» (`docs/resultado_H3.md`) |
 | 63 % de las parcelas sin clasificar | El mapa se abstiene en vez de adivinar. Por eso el indicador dice «at least» y esas parcelas no llevan opciones (`LIMITATIONS.md`) |
 
@@ -180,6 +180,7 @@ Las dos versiones no llevan cifras: no dependen de qué zona o qué marca esté 
 | Parcelas sin clasificar | 781 de 1,239, 63.0 % | `web/data/pruebas.json`; `LIMITATIONS.md` |
 | Pruebas declaradas | Cinco | S9 §6 |
 | Eficiencia parcelaria supuesta | 0.45 a 0.70 [S] | `README.md`, «Open question»; `LIMITATIONS.md` |
+| H1-b (no se lee; es para las preguntas) | El modelo gana a las formas simples en 6 de 26 años, de 1999 a 2024; does not hold | `docs/resultado_H1b.md` |
 
 ## 9. Pendientes de este guion
 
@@ -187,6 +188,7 @@ Las dos versiones no llevan cifras: no dependen de qué zona o qué marca esté 
 - Confirmar los nombres de los controles del gemelo cuando queden conectados.
 - La liga pública todavía no existe (`docs/reparto_faltantes.md`, H1).
 - Si la mentoría dio una eficiencia parcelaria o el punto de medición del millar, actualice la petición del bloque 5.
+- **H1-b y la lámina del modelo.** Después de escribir este guion llegaron `docs/resultado_H1b.md` y `docs/modelo_vs_practica.md` (commit `b73e8b3`). El texto que se lee no cambia: el bloque 4 ya dice que el modelo calcula toda el agua que pide el cultivo y que el distrito riega con menos. Dos cuidados: no diga que el modelo «acierta en la forma del ciclo», y no explique toda la diferencia de la alfalfa con la eficiencia (`docs/pitch/preguntas_dificiles.md`, respuestas 8, 15 y 17). Si el equipo quiere que la petición del bloque 5 pregunte por el agua aplicada, hay una frase con las mismas 14 palabras: «Un técnico de módulo que nos diga cuánta agua se aplica en la parcela.»
 - **Protagonista libre.** La decisión ya la cambió a P0632, pero hoy `web/data/parcelas.geojson` marca a P0244. Cuando la sesión de datos regenere `parcelas_base.geojson`, use las filas «[CON P0632]» y vuelva a leer en la página su superficie, su lámina y las hectáreas que alcanzan. Falta además que una persona revise en imagen a P0757, P0632 y L0175.
 - **Goteo.** Desde las 22:46 del 14-nov, `web/data/cubo.json` ya trae el escenario, con el motor en revisión (commit `3924ef6`). Vuelva a leer en la página final los dos porcentajes de L0175. `README.md` y `LIMITATIONS.md` todavía dicen que no hay escenario de goteo ni eficiencia con fuente: quedaron atrasados y los corrige el integrador, porque están fuera de `docs/pitch/`.
 - **Opciones.** Si esta noche entra la tabla oficial de rotaciones (`opciones_b3.json`, pieza B3), cambia la frase del maíz forrajero (bloque 2) y pueden cambiar las tarjetas de P0632. Vuelva a leer las tarjetas de P0757 y de P0632 antes de ensayar.

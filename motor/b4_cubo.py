@@ -820,6 +820,15 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     if provisionales:
         avisos.append(f"{ARCHIVO_B3} no trae alternativas para: {', '.join(sorted(provisionales))}; esas parcelas "
                       f"siguen con el diseño provisional (data/opciones_b4.json, {cfg.get('etiqueta')})")
+    # El contrato pide ACTUAL + 2 alternativas (kit §2.3). Si las oficiales (o las que tienen lámina) no
+    # alcanzan, NO se completa con otras: se dice aquí, y validar_contrato.py lo marca como error.
+    cortas = {}
+    for p_ in props_all:
+        if 0 < len(cubo_parcelas[p_["id"]]["opciones"]) < 3:
+            cortas[p_["cultivo_actual"]] = cortas.get(p_["cultivo_actual"], 0) + 1
+    for cultivo, n in sorted(cortas.items()):
+        avisos.append(f"{n} parcelas de {cultivo} quedan con menos de ACTUAL + 2 opciones (contrato §2.3): "
+                      "faltan alternativas con lámina; no se completa con otras")
     for rot_id in sorted(secuencias_distintas):
         avisos.append(f"{ARCHIVO_B3}: la secuencia de {rot_id} no nombra los mismos cultivos con que A5 calculó "
                       "su lámina; se muestra la de B3 y la lámina sigue siendo la de A5")
@@ -855,6 +864,9 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
         ]
         meta_goteo = {"disponible": True, "archivo": goteo["archivo"],
                       EA_GOTEO: goteo[EA_GOTEO], EA_SUPERFICIAL: goteo[EA_SUPERFICIAL],
+                      # Sin tope, m3_regresan_acuifero es una COTA SUPERIOR (X3.1: mismo coeficiente sobre la
+                      # misma agua de presa): la página puede rotularlo así en vez de leerlo como «sin cambio».
+                      "retorno_sin_tope_es_cota_superior": True,
                       "zonas": {z: {"disponible": goteo_zona[z] is not None, EA_A5: rangos_a5[z]} for z in zonas_con_datos}}
     else:
         notas.append("Drip scenario not available: no sourced drip efficiency yet (params.eficiencia.goteo is null).")

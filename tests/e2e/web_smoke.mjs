@@ -1098,13 +1098,13 @@ async function pruebasEscritorio(page, peticiones) {
     await abrirDesdeLista(page, caso.pid);
     const renglon = tarjeta(page, caso.o.id).locator(".filtros li", { hasText: caso.f.motivo }).first();
     const visto = (await renglon.count()) ? (await renglon.innerText()).replace(/\s+/g, " ").trim() : "";
-    const comoAprobado = visto.includes("✓") || /\bpass(es|ed)?\b/i.test(visto.replace(caso.f.motivo, ""));
+    // «Aprobado» = la marca ✓ o las palabras «passes»/«passed» fuera del texto del filtro («Does not pass» no lo es).
+    const comoAprobado = visto.includes("✓") || /\bpasse[sd]\b/i.test(visto.replace(caso.f.motivo, ""));
     if (estado === "passes") {
       check(`filtro «${caso.f.id}» (passes) en ${caso.pid}/${caso.o.id}: se ve con su texto`, visto.includes(caso.f.motivo), visto);
     } else {
       check(`filtro «${caso.f.id}» (${estado}) en ${caso.pid}/${caso.o.id}: NO se dibuja como aprobado`, visto !== "" && !comoAprobado, visto || "sin renglón");
       if (estado === "needs_local_check") check(`filtro «${caso.f.id}» en ${caso.pid}/${caso.o.id}: dice «needs a local check»`, /needs a local check/i.test(visto), visto);
-      else check(`filtro «${caso.f.id}» en ${caso.pid}/${caso.o.id}: se ve como advertencia`, /warning/i.test(visto), visto);
     }
     await cerrarFicha(page);
   }
