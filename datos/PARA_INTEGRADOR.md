@@ -292,3 +292,40 @@ sea solo local. Hice la parte de datos que se puede hacer hoy sin descargas nuev
   requisitos por cultivo con fuente (ECOCROP de la FAO) o el índice de GAEZ; las dos necesitan una descarga que Cristian
   no ha autorizado. Se lo pregunté. Además, dentro de una misma zona el suelo casi no cambia entre parcelas vecinas:
   no va a ordenar cultivos parcela por parcela; sirve para describir la zona y para llevar la herramienta a otra región.
+
+## 14-nov 17:22 — Respuesta a tu mensaje de las 17:13: S1 y S2 entregados con tu contrato
+Leí `docs/decisiones/2026-11-14_suelo_aptitud.md` (d93c6e7). La nota de las 17:17 de arriba queda sustituida por esta:
+`suelo_parcelas.csv` ya va con TUS columnas. Tu validador (9c9b7a8) aún no trae esquema de estos dos archivos.
+
+- **ENTREGA S1: suelo_parcelas.csv.** 1,239 filas. Columnas del contrato, en orden: `id, arena_pct, limo_pct, arcilla_pct,
+  clase_textura, ph, carbono_organico_g_kg, nitrogeno_g_kg, cic_cmol_kg, salinidad_ce_ds_m, profundidad_cm, n_celdas`; y
+  tres adicionales al final: `zona, clase_textura_olm, distancia_celda_m`. Arena + limo + arcilla suma 100 ± 2 en todas.
+  - Producto: **SoilGrids 2.0** (ISRIC, CC-BY 4.0), `projects/soilgrids-isric/<sand|silt|clay|phh2o|soc|cec>_mean`,
+    capas 0–5, 5–15 y 15–30 cm con peso 5/10/15; factores de ISRIC en el LEEME.
+  - **`nitrogeno_g_kg` va VACÍO a propósito:** el producto sí lo trae, pero da ~10 g/kg con ~10 g/kg de carbono orgánico
+    (C:N cercana a 1). Es lo absurdo que pediste avisar. Queda en el crudo.
+  - **`salinidad_ce_ds_m` va vacío:** ni SoilGrids ni OpenLandMap traen conductividad eléctrica. No la estimé.
+  - `n_celdas` = 0 en 229 parcelas (más chicas que una celda): llevan la celda más cercana al centroide. P0316 va sin dato.
+  - `clase_textura_olm` (OpenLandMap) coincide con `clase_textura` solo en 47 % de las parcelas; difieren a la clase
+    vecina. Si muestras textura, mejor el grupo («medium-textured») que la clase exacta.
+- **Comprobación local que pediste:** no hay análisis de suelo ni carta del INEGI a la mano. Sí hay fuente local del pH:
+  Gutiérrez González et al. 2022 (huertas de Delicias, Saucillo, Meoqui, Rosales y Julimes): solo 14 % de los suelos
+  con pH 6.7–7.3, el resto alcalino. El mapa da 8.1: coincide a grandes rasgos. P0757 y P0632: sandy clay loam, pH 8.1;
+  L0175: sandy loam, pH 7.6. Nada absurdo salvo el nitrógeno.
+- **ENTREGA S2: suelo_requisitos.json.** Con tu forma (`ph.optimo`, `ph.tolerado`, `textura.apta`, `textura.limitante`,
+  `salinidad_umbral_ds_m`, `nutrientes`), para alfalfa, nogal, chile, algodon, maiz_forrajero, sorgo y cereal_invierno.
+  Diferencias que debes saber:
+  - `nogal`: `ph` y `textura` en **null** (no hay ficha de ECOCROP ni otra tabla con fuente). Trae cinco avisos de
+    nutrientes (Zn, Fe, N, P, Cu) con **`condicion: null`**: la fuente no da un umbral de pH, describe el distrito entero.
+    No inventé `ph_mayor_que`.
+  - `cereal_invierno`: `salinidad_umbral_ds_m` null (FAO-29 no da número para avena).
+  - Llaves adicionales: `especie`, `nota`, `grupos_textura` (mi reparto de las 12 clases USDA en light/medium/heavy de
+    ECOCROP, marcado assumption [S]) y `sin_requisitos` (forraje_verano y barbecho).
+  - ECOCROP se leyó en línea en el sitio de la FAO (ecocrop.apps.fao.org), ficha por ficha; no se descargó nada.
+- **OJO con el resultado antes de pintar `outside range` (tabla en `docs/suelo_parcelas.md` §6):** con el pH del mapa,
+  el chile queda fuera de su rango en las 1,238 parcelas, la avena en 1,211 y el algodón y el sorgo en 1,118; y los
+  cuatro se siembran aquí. En algodón y sorgo la diferencia es de 0.1 de pH (8.1 contra 8.0). Mi recomendación:
+  (1) que nunca descarte ni reordene opciones; (2) no decir «outside range» cuando la diferencia es menor que ~0.5 de pH:
+  decir «near the upper limit»; (3) rótulo «general published range (FAO ECOCROP, worldwide), not a local trial»;
+  (4) el mensaje fuerte es de zona, no de parcela: «alkaline soil (pH about 8), above the general optimum of most crops».
+- **GAEZ:** le pedí a Cristian el visto bueno para bajar del portal de la FAO. En cuanto diga que sí, lo hago.

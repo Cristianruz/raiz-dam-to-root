@@ -63,4 +63,5 @@ comprometida) y P0118 (barbecho en 2026 tras años perenne, libre), elegidas por
 - `colab/A11_gedi_parcelas.py --dir data/reto --crudo data/raw/reto` (con `parcelas_base.geojson` en la carpeta) → `gedi_parcelas.csv`.
 - `colab/A12_nogal_cobertura.py --dir data/reto --entrega data/entrega_zonas` (con `supuestos.json` en la carpeta) → `nogal_cobertura.csv` y `nogal_cobertura_resumen.json` (referencia; `docs/nogal_cobertura.md`).
 - `colab/A13_suelo_parcelas.py --dir data/reto --crudo data/raw/reto` (con `parcelas_base.geojson` en la carpeta) → `suelo_parcelas.csv` (suelo por parcela con SoilGrids y OpenLandMap; `docs/suelo_parcelas.md`).
+- `colab/B6_suelo_requisitos.py --dir data/reto --opciones data/entrega_zonas/opciones_b3.json` → `suelo_requisitos.json` (rangos de pH, textura y salinidad por cultivo, con fuente).
 - `colab/B3_opciones.py --dir data/reto --rotaciones <rotaciones.json de cada zona>` → `opciones_b3.json`: opciones y filtros del maestro §5.2, cada uno con su fuente.
