@@ -189,12 +189,18 @@ function colorCSS(nombre, respaldo = "gris") {
   return coloresCache.get(nombre) || (respaldo ? colorCSS(respaldo, null) : "");
 }
 
-/** Tinta legible sobre un color de fondo (luminancia relativa aproximada). */
+/** Tinta legible sobre un color de fondo (luminancia relativa aproximada); se guarda por color. */
+const tintaCache = new Map();
 function textoSobre(color) {
+  if (tintaCache.has(color)) return tintaCache.get(color);
   const c = window.d3?.color?.(color)?.rgb?.();
-  if (!c) return colorCSS("tinta");
-  const luz = (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) / 255;
-  return luz > 0.55 ? colorCSS("tinta") : colorCSS("blanco");
+  let tinta = colorCSS("tinta");
+  if (c) {
+    const luz = (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) / 255;
+    tinta = luz > 0.55 ? colorCSS("tinta") : colorCSS("blanco");
+  }
+  tintaCache.set(color, tinta);
+  return tinta;
 }
 
 function reduceMovimiento() {
@@ -608,31 +614,80 @@ function pintarLeyenda({ esq, salida, min, max }) {
   cont.innerHTML = cuerpo + `<p class="fuente">Source: ${esc(esq.fuente)}</p>`;
 }
 
+/** Orden de la lista: parcelas de la historia, luego clasificadas, luego sin clasificar; cada grupo por id. */
 function ordenParcelas() {
-  return [...estado.parcelas.features].sort((a, b) => {
-    const pa = a.properties.protagonista ? 0 : 1;
-    const pb = b.properties.protagonista ? 0 : 1;
-    return pa - pb || String(a.properties.id).localeCompare(String(b.properties.id));
-  });
+  const grupo = (p) => (p.protagonista ? 0 : p.abstencion ? 2 : 1);
+  return [...estado.parcelas.features].sort(
+    (a, b) => grupo(a.properties) - grupo(b.properties) || String(a.properties.id).localeCompare(String(b.properties.id)),
+  );
+}
+
+// Lista de parcelas: con cientos de renglones no se reconstruye en cada movimiento del deslizador.
+// Se arma una sola vez y después solo se actualizan el color, el símbolo y el texto que cambian.
+const lista = { nodos: new Map(), filtro: "" };
+
+function construirLista() {
+  const ul = $("#lista-parcelas");
+  const fragmento = document.createDocumentFragment();
+  lista.nodos.clear();
+  for (const f of ordenParcelas()) {
+    const p = f.properties;
+    const cultivo = p.abstencion ? "Not classified" : nombreCultivo(p.cultivo_actual);
+    const li = document.createElement("li");
+    li.innerHTML =
+      `<button type="button" class="boton-parcela" data-id="${esc(p.id)}">` +
+      '<span class="sem-circulo" aria-hidden="true"></span>' +
+      `<span class="p-titulo">${esc(p.id)}${p.protagonista ? ' <span class="insignia-historia">story field</span>' : ""}</span>` +
+      '<span class="p-detalle"></span></button>';
+    lista.nodos.set(p.id, {
+      li,
+      boton: li.firstElementChild,
+      circulo: $(".sem-circulo", li),
+      detalle: $(".p-detalle", li),
+      cultivo,
+      base: `${cultivo} · ${fmtDato(p.area_ha)} ha`,
+      busqueda: `${p.id} ${cultivo} ${p.protagonista ? "story field" : ""}`.toLowerCase(),
+      ultimo: null,
+    });
+    fragmento.append(li);
+  }
+  ul.replaceChildren(fragmento);
+  filtrarLista();
 }
 
 function pintarLista({ salida }) {
-  const ul = $("#lista-parcelas");
-  ul.innerHTML = ordenParcelas()
-    .map((f) => {
-      const p = f.properties;
-      const c = salida.get(p.id);
-      const cultivo = p.abstencion ? "Not classified" : nombreCultivo(p.cultivo_actual);
-      const actual = p.id === estado.fichaId ? ' aria-current="true"' : "";
-      return (
-        `<li><button type="button" class="boton-parcela" data-id="${esc(p.id)}"${actual}>` +
-        `<span class="sem-circulo" style="background-color: ${esc(c.color)}; color: ${esc(textoSobre(c.color))}" aria-hidden="true">${esc(c.simbolo)}</span>` +
-        `<span class="p-titulo">${esc(p.id)}${p.protagonista ? ' <span class="insignia-historia">story field</span>' : ""}</span>` +
-        `<span class="p-detalle">${esc(cultivo)} · ${esc(fmtDato(p.area_ha))} ha · ${esc(c.texto)}</span>` +
-        "</button></li>"
-      );
-    })
-    .join("");
+  if (lista.nodos.size !== estado.parcelas.features.length) construirLista();
+  for (const [id, n] of lista.nodos) {
+    const c = salida.get(id);
+    const llave = `${c.color}|${c.simbolo}|${c.texto}`;
+    if (n.ultimo !== llave) {
+      n.ultimo = llave;
+      n.circulo.style.backgroundColor = c.color;
+      n.circulo.style.color = textoSobre(c.color);
+      n.circulo.textContent = c.simbolo;
+      // Sin repetir «Not classified» cuando la clase activa dice lo mismo que el cultivo.
+      n.detalle.textContent = c.texto && c.texto !== n.cultivo ? `${n.base} · ${c.texto}` : n.base;
+    }
+    const actual = id === estado.fichaId;
+    if (actual !== n.boton.hasAttribute("aria-current")) {
+      if (actual) n.boton.setAttribute("aria-current", "true");
+      else n.boton.removeAttribute("aria-current");
+    }
+  }
+}
+
+/** Filtro de la lista por id o cultivo; el resumen dice cuántas parcelas se ven. */
+function filtrarLista() {
+  const q = lista.filtro.trim().toLowerCase();
+  let visibles = 0;
+  for (const n of lista.nodos.values()) {
+    const ver = !q || n.busqueda.includes(q);
+    n.li.hidden = !ver;
+    if (ver) visibles += 1;
+  }
+  const total = lista.nodos.size;
+  $("#lista-resumen").textContent =
+    visibles === total ? `${fmt(total, 0)} fields` : `Showing ${fmt(visibles, 0)} of ${fmt(total, 0)} fields`;
 }
 
 // ---------------------------------------------------------------------------
@@ -707,10 +762,35 @@ function registrarTramas(mapa) {
   }
 }
 
-/** Margen del encuadre: en escritorio deja libre el indicador que flota arriba a la izquierda. */
-function margenMapa() {
+/** Coordenada y de Mercator (en grados equivalentes) para comparar el alto y el ancho de la extensión. */
+function mercatorY(lat) {
+  return (Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) * 180) / Math.PI;
+}
+
+/**
+ * Margen del encuadre. En escritorio el indicador flota arriba a la izquierda sobre el mapa:
+ * se deja libre su espacio por arriba o por la izquierda, lo que deje las parcelas más grandes.
+ * (Dejarlo siempre por arriba encogía la zona piloto a una franja y las parcelas a unos pocos píxeles.)
+ */
+function margenMapa(ext = extension(estado.parcelas)) {
   const m = 32;
-  return esAncho() ? { top: $("#indicador").offsetHeight + m, left: m, right: m, bottom: m } : m;
+  if (!esAncho() || !ext) return m;
+  const ind = $("#indicador");
+  const caja = $("#mapa").getBoundingClientRect();
+  const ancho = ext[1][0] - ext[0][0];
+  const alto = mercatorY(ext[1][1]) - mercatorY(ext[0][1]);
+  const arriba = { top: ind.offsetTop + ind.offsetHeight + m, left: m, right: m, bottom: m };
+  const izquierda = { top: m, left: ind.offsetLeft + ind.offsetWidth + m, right: m, bottom: m };
+  const escala = (p) => {
+    const w = caja.width - p.left - p.right;
+    const h = caja.height - p.top - p.bottom;
+    if (w <= 0 || h <= 0) return 0;
+    return Math.min(ancho > 0 ? w / ancho : Infinity, alto > 0 ? h / alto : Infinity);
+  };
+  const ea = escala(arriba);
+  const ei = escala(izquierda);
+  if (ea <= 0 && ei <= 0) return m;
+  return ei > ea ? izquierda : arriba;
 }
 
 function crearMapa() {
@@ -743,7 +823,7 @@ function crearMapa() {
       container: "mapa",
       style: estilo,
       bounds: ext,
-      fitBoundsOptions: { padding: margenMapa(), maxZoom: 17 },
+      fitBoundsOptions: { padding: margenMapa(ext), maxZoom: 17 },
       attributionControl: { compact: true },
       cooperativeGestures: !esAncho(),
     });
@@ -764,7 +844,7 @@ function crearMapa() {
   mapa.on("zoomstart", marcarMovido);
   mapa.on("resize", () => {
     if (movidoPorUsuario) return;
-    mapa.fitBounds(ext, { padding: margenMapa(), maxZoom: 17, duration: 0 });
+    mapa.fitBounds(ext, { padding: margenMapa(ext), maxZoom: 17, duration: 0 });
   });
 
   // Teselas del mapa base que no cargan: aviso discreto, las parcelas siguen sobre fondo sólido.
@@ -802,7 +882,8 @@ function crearMapa() {
     crearMarcadores();
     estado.mapaListo = true;
     pintarMapa();
-    document.body.dataset.mapa = "listo";
+    // «listo» cuando las parcelas ya están dibujadas (la fuente GeoJSON se procesa aparte, después de «load»).
+    mapa.once("idle", () => { document.body.dataset.mapa = "listo"; });
   });
 }
 
@@ -933,15 +1014,18 @@ function construirFicha(f) {
   const p = f.properties;
   const ops = opcionesDe(p.id);
   $("#ficha-titulo").textContent = `Field ${p.id}`;
+  // Parcela abstenida: sin tarjetas; la memoria sí se muestra (kit C2.1 y C2.2).
+  const sinOpciones = p.abstencion
+    ? '<p class="nota-abstenida">The crop map is not sure what grows here, so no options are computed. ' +
+      "Check the current crop with a technician; the field memory above still shows its history.</p>"
+    : "<p>No options computed for this field yet.</p>";
   $("#ficha-cuerpo").innerHTML = [
     htmlEncabezado(p),
     htmlMemoria(p),
     `<section aria-labelledby="t-opciones"><h3 id="t-opciones">Current rotation and alternatives</h3>` +
-      (ops.length
-        ? `<div class="tarjetas">${ops.map((o) => htmlTarjeta(o)).join("")}</div>`
-        : "<p>No options computed for this field yet.</p>") +
+      (ops.length ? `<div class="tarjetas">${ops.map((o) => htmlTarjeta(o)).join("")}</div>` : sinOpciones) +
       "</section>",
-    htmlGota(ops),
+    htmlGota(ops, p),
     `<p class="aviso-juicio">${esc(AVISO_JUICIO)}</p>`,
     htmlGlosario(),
   ].join("");
@@ -953,9 +1037,11 @@ function construirFicha(f) {
 
 function htmlEncabezado(p) {
   const lugar = p.modulo ? `Module ${esc(p.modulo)}` : "Pilot area";
+  // prob_max puede llegar en null (clasificación por reglas, sin probabilidad): se dice, no se inventa.
+  const confianza = Number.isFinite(p.prob_max) ? `${esc(fmtPct(p.prob_max))} confidence` : "confidence not available";
   const cultivo = p.abstencion
     ? "Not classified — check with technician"
-    : `${esc(nombreCultivo(p.cultivo_actual))} — ${esc(fmtPct(p.prob_max))} confidence`;
+    : `${esc(nombreCultivo(p.cultivo_actual))} — ${confianza}`;
   const metodos = !p.abstencion && p.acuerdo_metodos ? ` <span class="fuente">(methods agree: ${esc(p.acuerdo_metodos)})</span>` : "";
   const plazo = PLAZO[p.estado_plazo ?? "sin_dato"] ?? PLAZO.sin_dato;
   const clavePlazo = p.estado_plazo ?? "sin_dato";
@@ -1223,10 +1309,11 @@ const FILAS_GOTA = [
   },
 ];
 
-function htmlGota(ops) {
+function htmlGota(ops, p = {}) {
   const conGota = ops.filter((o) => o.gota);
   if (!conGota.length) {
-    return '<section class="gota" id="seccion-gota" aria-labelledby="t-gota"><h3 id="t-gota" tabindex="-1">Follow the drop</h3><p>Not available for this field yet.</p></section>';
+    const motivo = p.abstencion ? "Not available: this field is not classified." : "Not available for this field yet.";
+    return `<section class="gota" id="seccion-gota" aria-labelledby="t-gota"><h3 id="t-gota" tabindex="-1">Follow the drop</h3><p>${motivo}</p></section>`;
   }
   return (
     '<section class="gota" id="seccion-gota" aria-labelledby="t-gota">' +
@@ -1234,10 +1321,12 @@ function htmlGota(ops) {
     "<p>Where this option's water goes each year, from La Boquilla to the crop and the aquifer (m³ for this field).</p>" +
     '<div class="gota-controles">' +
     `<label>Option <select id="gota-opcion">${conGota.map((o) => `<option value="${esc(o.id)}">${esc(o.nombre)}</option>`).join("")}</select></label>` +
+    // Botón e interruptor del goteo: pintarGota los oculta si la opción no trae los bloques de goteo.
     '<button type="button" class="boton-goteo" id="gota-goteo" aria-pressed="false">What if this field switches to drip?</button>' +
-    '<label class="interruptor" for="gota-tope"><input type="checkbox" role="switch" id="gota-tope" checked disabled>' +
+    '<label class="interruptor" id="gota-tope-control" for="gota-tope"><input type="checkbox" role="switch" id="gota-tope" checked disabled>' +
     '<span>Consumption cap: <span class="estado-interruptor" id="gota-tope-estado">on</span></span></label>' +
     "</div>" +
+    '<p class="gota-sin-goteo" id="gota-sin-goteo" hidden>Drip scenario not available yet: no sourced drip efficiency.</p>' +
     '<div class="gota-cifras" id="gota-cifras" aria-live="polite"></div>' +
     '<div class="gota-filas" id="gota-filas"></div>' +
     '<ul class="gota-leyenda" id="gota-leyenda"></ul>' +
@@ -1252,9 +1341,14 @@ function opcionGota() {
   return opcionesDe(estado.fichaId).find((o) => o.id === estado.gota.opcion && o.gota);
 }
 
+/** ¿La opción trae el escenario de goteo? (null mientras no haya eficiencia de goteo con fuente) */
+function hayGoteo(o) {
+  return Boolean(o?.gota_goteo_con_tope);
+}
+
 function varianteGota(o) {
-  if (!estado.gota.goteo) return o.gota;
-  return estado.gota.tope ? o.gota_goteo_con_tope : o.gota_goteo_sin_tope;
+  if (!estado.gota.goteo || !hayGoteo(o)) return o.gota;
+  return (estado.gota.tope ? o.gota_goteo_con_tope : o.gota_goteo_sin_tope) ?? o.gota_goteo_con_tope;
 }
 
 function conectarGota() {
@@ -1268,6 +1362,7 @@ function conectarGota() {
     pintarCoberturaGota();
   });
   $("#gota-goteo").addEventListener("click", () => {
+    if (!hayGoteo(opcionGota())) return; // sin escenario de goteo no hay nada que alternar
     estado.gota.goteo = !estado.gota.goteo;
     pintarGota(true);
   });
@@ -1292,16 +1387,22 @@ function construirFilasGota() {
 function pintarGota(animar) {
   const o = opcionGota();
   if (!o || !$("#gota-filas")) return;
+  // Sin bloques de goteo (null en el cubo): se vuelve al riego actual y se ocultan botón e interruptor.
+  const conGoteo = hayGoteo(o);
+  if (!conGoteo) estado.gota.goteo = false;
   const base = o.gota;
   const v = varianteGota(o) ?? base;
   const variantes = [base, o.gota_goteo_con_tope, o.gota_goteo_sin_tope].filter(Boolean);
-  const escala = Math.max(...variantes.map((g) => g.m3_salen_presa));
+  const escala = Math.max(...variantes.map((g) => g.m3_salen_presa ?? 0));
   const d3 = window.d3;
   const duracion = animar && !reduceMovimiento() ? 700 : 0;
 
   // Botones y estados
   const boton = $("#gota-goteo");
+  boton.hidden = !conGoteo;
   boton.setAttribute("aria-pressed", String(estado.gota.goteo));
+  $("#gota-tope-control").hidden = !conGoteo;
+  $("#gota-sin-goteo").hidden = conGoteo;
   const tope = $("#gota-tope");
   tope.disabled = !estado.gota.goteo || !o.gota_goteo_sin_tope;
   tope.checked = estado.gota.tope;
@@ -1398,6 +1499,10 @@ function conectarEventos() {
     const b = e.target.closest(".boton-parcela");
     if (b) abrirFicha(b.dataset.id);
   });
+  $("#buscar-parcela").addEventListener("input", (e) => {
+    lista.filtro = e.target.value;
+    filtrarLista();
+  });
 
   $("#indicador-mensaje").addEventListener("click", (e) => {
     if (!e.target.closest("#enlace-gota")) return;
@@ -1411,14 +1516,64 @@ function conectarEventos() {
   });
 }
 
-// Gancho mínimo para la prueba de humo (tests/e2e/web_smoke.mjs): no cambia el comportamiento.
+// Ganchos mínimos para la prueba de humo (tests/e2e/web_smoke.mjs): solo leen; no cambian el comportamiento.
+/** Espera a que el mapa termine de dibujar lo pendiente (repintado programado y teselas de la fuente). */
+function esperarMapa() {
+  return new Promise((ok) => {
+    if (!estado.mapaListo) {
+      ok(false);
+      return;
+    }
+    // Dos cuadros: el repintado programado con requestAnimationFrame ya llamó a setData.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        if (estado.mapa.loaded()) ok(true);
+        else estado.mapa.once("idle", () => ok(true));
+      }),
+    );
+  });
+}
+
 window.raizDepuracion = {
-  pixelDeParcela(id) {
+  esperarMapa,
+  /** Número de parcelas distintas dibujadas en la vista actual del mapa. */
+  async parcelasDibujadas() {
+    if (!(await esperarMapa())) return 0;
+    const ids = estado.mapa.queryRenderedFeatures({ layers: ["parcelas-relleno"] }).map((f) => f.properties.id);
+    return new Set(ids).size;
+  },
+  /**
+   * Un píxel de la pantalla que cae DENTRO del polígono dibujado de la parcela y que no tapa otro
+   * elemento (marcador, indicador). El centro de la caja no sirve: las parcelas reales son
+   * irregulares y cóncavas, y el centro puede quedar fuera. Se prueba una rejilla sobre la caja y
+   * se elige el punto válido más cercano al centro. null si la parcela no se ve.
+   */
+  async pixelDeParcela(id) {
     const f = estado.porId.get(id);
-    if (!f || !estado.mapaListo) return null;
-    const p = estado.mapa.project(centro(f));
-    const caja = estado.mapa.getCanvas().getBoundingClientRect();
-    return { x: caja.left + p.x, y: caja.top + p.y };
+    if (!f || !(await esperarMapa())) return null;
+    const mapa = estado.mapa;
+    const lienzo = mapa.getCanvas();
+    const caja = lienzo.getBoundingClientRect();
+    const ext = extension({ features: [f] });
+    const a = mapa.project(ext[0]);
+    const b = mapa.project(ext[1]);
+    const x0 = Math.min(a.x, b.x), x1 = Math.max(a.x, b.x);
+    const y0 = Math.min(a.y, b.y), y1 = Math.max(a.y, b.y);
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    const pasos = 12;
+    let mejor = null;
+    for (let i = 0; i <= pasos; i++) {
+      for (let j = 0; j <= pasos; j++) {
+        const x = x0 + ((x1 - x0) * i) / pasos;
+        const y = y0 + ((y1 - y0) * j) / pasos;
+        const enMapa = mapa.queryRenderedFeatures([x, y], { layers: ["parcelas-relleno"] });
+        if (enMapa[0]?.properties?.id !== id) continue;
+        if (document.elementFromPoint(caja.left + x, caja.top + y) !== lienzo) continue;
+        const d = Math.hypot(x - cx, y - cy);
+        if (!mejor || d < mejor.d) mejor = { x: caja.left + x, y: caja.top + y, d };
+      }
+    }
+    return mejor && { x: mejor.x, y: mejor.y };
   },
 };
 

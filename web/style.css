@@ -298,7 +298,20 @@ button, input, select { font: inherit; color: inherit; }
 .fuente { font-size: 0.8rem; color: var(--tinta-suave); }
 .ayuda { font-size: 0.85rem; color: var(--tinta-suave); margin-bottom: 6px; }
 
-.lista-parcelas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 320px; overflow-y: auto; }
+/* Buscador de la lista (cientos de parcelas reales) */
+.buscar { display: block; font-weight: 700; font-size: 0.9rem; }
+.buscar .unidad { font-weight: 400; color: var(--tinta-suave); }
+.buscar-campo {
+  width: 100%; margin: 4px 0 2px; padding: 6px 10px; min-height: 40px;
+  border: 1px solid var(--tinta-suave); border-radius: 8px; background: var(--blanco);
+}
+.lista-resumen { font-size: 0.85rem; color: var(--tinta-suave); margin-bottom: 6px; }
+
+/* La lista se desplaza dentro de su caja (app.js la arma una vez y la actualiza en su lugar). */
+.lista-parcelas {
+  list-style: none; margin: 0; padding: 0 4px 0 0; display: grid; gap: 6px;
+  max-height: 320px; overflow-y: auto; overscroll-behavior: contain;
+}
 .boton-parcela {
   width: 100%; text-align: left; cursor: pointer;
   background: var(--arena); border: 1px solid var(--borde); border-radius: 8px;
@@ -489,6 +502,14 @@ button, input, select { font: inherit; color: inherit; }
 .gota-leyenda li { display: flex; align-items: center; gap: 6px; }
 .gota-leyenda .v { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
 .gota-nota { font-size: 0.9rem; margin-top: 8px; }
+.gota-sin-goteo {
+  font-size: 0.9rem; margin: 4px 0 8px; padding: 6px 8px;
+  background: var(--blanco); border-left: 4px solid var(--gris); border-radius: 4px;
+}
+.nota-abstenida {
+  background: var(--arena); border-left: 4px solid var(--gris);
+  padding: 8px 10px; border-radius: 4px;
+}
 .gota-alerta { background: var(--rojo-claro); border-left: 4px solid var(--rojo); padding: 6px 8px; border-radius: 4px; font-weight: 700; margin-top: 8px; }
 
 .glosario summary { cursor: pointer; font-weight: 700; color: var(--agua-osc); }
@@ -526,7 +547,8 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
   .mapa { position: relative; inset: auto; height: 52vh; min-height: 300px; }
   .mapa-aviso { bottom: 30px; }
   .panel { border-left: none; overflow: visible; padding: 12px; }
-  .lista-parcelas { max-height: none; }
+  /* En teléfono también se desplaza dentro de su caja: cientos de renglones no alargan la página. */
+  .lista-parcelas { max-height: 60vh; max-height: 60dvh; }
 
   .ficha {
     left: 0; width: 100%;
