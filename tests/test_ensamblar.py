@@ -1031,6 +1031,241 @@ def test_no_es_tiff(tmp_path):
 
 
 # ---------------------------------------------------------------------------------------
+# Dos zonas piloto (docs/decisiones/2026-11-14_dos_zonas.md)
+# ---------------------------------------------------------------------------------------
+def parcelas_dos_zonas(cambio=None):
+    """parcelas_base.geojson de buzon_dos_zonas con un cambio (función sobre la lista de features)."""
+    geo = json.loads((BUZON_DOS_ZONAS / "parcelas_base.geojson").read_text(encoding="utf-8"))
+    if cambio:
+        cambio(geo["features"])
+    return json.dumps(geo, ensure_ascii=False)
+
+
+def feature_de(features, pid):
+    return next(f for f in features if f["properties"]["id"] == pid)
+
+
+def cuadro_en(bbox, lado=0.003):
+    """Anillo cuadrado de prueba en el centro de bbox (para mover una parcela de zona)."""
+    o, s = (bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2
+    return [[[o, s], [o + lado, s], [o + lado, s + lado], [o, s + lado], [o, s]]]
+
+
+def test_dos_zonas_todo_entra_con_su_zona(tmp_path):
+    rep = correr(BUZON_DOS_ZONAS, tmp_path)
+    esperados = archivos_de(BUZON_DOS_ZONAS)
+    assert rep["rechazados"] == [] and rep["retenidos"] == [], rep["rechazados"]
+    assert nombres(rep["entraron"]) == esperados
+    por_nombre = {x["archivo"]: x for x in rep["entraron"]}
+    salida = tmp_path / "salida"
+    for n in esperados:
+        # Se copia con su nombre tal cual y sin modificar.
+        assert (salida / n).read_bytes() == (BUZON_DOS_ZONAS / n).read_bytes(), n
+        if n.split(".")[0].endswith(f"_{OTRA}"):
+            assert por_nombre[n]["zona"] == OTRA, n
+    # Los archivos con sufijo se validan con el esquema de su base (pieza de la base).
+    assert por_nombre[f"rotaciones_{OTRA}.json"]["pieza"] == esquemas.ESQUEMAS["rotaciones.json"]["pieza"]
+    assert por_nombre[f"nasadem_zona_piloto_{OTRA}.tif"]["pieza"] == "A9"
+    # Archivos con las dos zonas: cuántos elementos de cada una.
+    assert por_nombre["parcelas_base.geojson"]["zona"] is None
+    assert por_nombre["parcelas_base.geojson"]["zonas"] == {OMISION: 2, OTRA: 2}
+    assert por_nombre["relieve_parcelas.csv"]["zonas"] == {OMISION: 2, OTRA: 2}
+    assert por_nombre["relieve_rutas.geojson"]["zonas"] == {OMISION: 1, OTRA: 1}
+    assert not por_nombre[f"nasadem_zona_piloto_{OTRA}.tif"]["avisos"]
+    # fuentes.json lleva la zona de los archivos por zona; el reporte y la bitácora también.
+    fuentes = {f["archivo"]: f for f in rep["fuentes"]}
+    assert fuentes[f"eto_diaria_{OTRA}.csv"]["zona"] == OTRA and "zona" not in fuentes["relieve_parcelas.csv"]
+    assert f"zona {OTRA}" in ens.texto_reporte(rep)
+    assert f"(zona {OTRA})" in (tmp_path / "log.md").read_text(encoding="utf-8")
+    assert not any("protagonistas" in a for a in por_nombre["parcelas_base.geojson"]["avisos"])
+
+
+def test_parcela_fuera_del_rectangulo_de_su_zona_se_rechaza(tmp_path):
+    """Una parcela L (zona lazaro_cardenas) cuyo centroide cae en el rectángulo de la otra zona."""
+    def mover(features):
+        feature_de(features, "L0001")["geometry"]["coordinates"] = cuadro_en(LIMITES["zonas"][OMISION]["bbox"])
+    b = buzon_con(tmp_path, {"parcelas_base.geojson": parcelas_dos_zonas(mover)}, copiar=())
+    m = motivos_de(correr(b, tmp_path), "parcelas_base.geojson")
+    assert f"centroide fuera del rectángulo de su zona {OTRA}" in m and "L0001" in m
+
+
+@pytest.mark.parametrize("pid, nuevo", [("L0002", "P0099"), ("P0002", "0002")])
+def test_parcela_con_zona_y_sin_su_prefijo_se_rechaza(tmp_path, pid, nuevo):
+    def cambiar(features):
+        feature_de(features, pid)["properties"]["id"] = nuevo
+    zona = OTRA if pid.startswith(LIMITES["zonas"][OTRA]["prefijo_id"]) else OMISION
+    b = buzon_con(tmp_path, {"parcelas_base.geojson": parcelas_dos_zonas(cambiar)}, copiar=())
+    m = motivos_de(correr(b, tmp_path), "parcelas_base.geojson")
+    assert f"id sin el prefijo «{LIMITES['zonas'][zona]['prefijo_id']}» de su zona {zona}" in m and nuevo in m
+
+
+@pytest.mark.parametrize("valor, clave", [
+    ("meoqui", "zona fuera de la lista permitida"),
+    (None, "zona: vacío o null no permitido"),
+    (7, "zona: debe ser texto"),
+])
+def test_parcela_con_zona_invalida_se_rechaza(tmp_path, valor, clave):
+    def cambiar(features):
+        feature_de(features, "L0001")["properties"]["zona"] = valor
+    b = buzon_con(tmp_path, {"parcelas_base.geojson": parcelas_dos_zonas(cambiar)}, copiar=())
+    assert clave in motivos_de(correr(b, tmp_path), "parcelas_base.geojson")
+
+
+def test_ids_unicos_entre_zonas(tmp_path):
+    def repetir(features):
+        feature_de(features, "L0002")["properties"]["id"] = "L0001"
+    b = buzon_con(tmp_path, {"parcelas_base.geojson": parcelas_dos_zonas(repetir)}, copiar=())
+    assert "id repetido" in motivos_de(correr(b, tmp_path), "parcelas_base.geojson")
+
+
+def test_parcela_sin_zona_es_de_la_zona_por_omision_sin_prefijo(tmp_path):
+    """Compatibilidad: sin «zona», no se exige prefijo (los T… de buzon_ok entran) y cuenta en la
+    zona por omisión; mezclar parcelas con y sin «zona» también es válido."""
+    def quitar(features):
+        feature_de(features, "P0001")["properties"].pop("zona")
+        p2 = feature_de(features, "P0002")["properties"]
+        p2.pop("zona")
+        p2["id"] = "T0002"
+    b = buzon_con(tmp_path, {"parcelas_base.geojson": parcelas_dos_zonas(quitar)}, copiar=())
+    rep = correr(b, tmp_path)
+    assert rep["rechazados"] == [], rep["rechazados"]
+    assert rep["entraron"][0]["zonas"] == {OMISION: 2, OTRA: 2}
+
+
+def test_rotaciones_de_la_otra_zona_valido_entra(tmp_path):
+    nombre = f"rotaciones_{OTRA}.json"
+    b = buzon_con(tmp_path, {nombre: (BUZON_DOS_ZONAS / nombre).read_text(encoding="utf-8")}, copiar=())
+    rep = correr(b, tmp_path)
+    assert nombres(rep["entraron"]) == [nombre] and rep["entraron"][0]["zona"] == OTRA
+    assert (tmp_path / "salida" / nombre).read_bytes() == (BUZON_DOS_ZONAS / nombre).read_bytes()
+    # «rotaciones.json» sigue simulado: el de la otra zona no lo sustituye.
+    assert "rotaciones.json" in rep["sigue_simulado"]
+
+
+def test_archivo_con_sufijo_se_valida_con_el_esquema_de_su_base(tmp_path):
+    nombre = f"rotaciones_{OTRA}.json"
+    b = buzon_con(tmp_path, {nombre: rotaciones_con(lambda o: o["rotaciones"][1].update(plazo="bienal"))}, copiar=())
+    rep = correr(b, tmp_path)
+    assert "plazo fuera de la lista" in motivos_de(rep, nombre)
+    assert rep["rechazados"][0]["zona"] == OTRA
+
+
+@pytest.mark.parametrize("nombre, base", [
+    ("rotaciones_meoqui.json", "rotaciones.json"),
+    ("eto_diaria_lazaro.csv", "eto_diaria.csv"),
+    ("relieve_meta_norte.json", "relieve_meta.json"),
+    ("demanda_cultivos_LAZARO_CARDENAS.csv", "demanda_cultivos.csv"),
+])
+def test_sufijo_de_zona_desconocido_se_rechaza(tmp_path, nombre, base):
+    sufijo = nombre.rsplit(".", 1)[0][len(base.rsplit(".", 1)[0]) + 1:]
+    b = buzon_con(tmp_path, {nombre: (BUZON_OK / base).read_bytes()}, copiar=())
+    rep = correr(b, tmp_path)
+    m = motivos_de(rep, nombre)
+    assert f"sufijo de zona «{sufijo}» desconocido" in m and ", ".join(LIMITES["zonas_ids"]) in m
+    assert not (tmp_path / "salida" / nombre).exists()
+
+
+def test_sufijo_de_la_zona_por_omision_se_rechaza(tmp_path):
+    """La zona por omisión va sin sufijo: dos nombres para la misma zona no pueden convivir."""
+    nombre = f"eto_diaria_{OMISION}.csv"
+    b = buzon_con(tmp_path, {nombre: (BUZON_OK / "eto_diaria.csv").read_bytes()}, copiar=())
+    assert "van sin sufijo" in motivos_de(correr(b, tmp_path), nombre)
+
+
+def test_sufijo_sin_zonas_en_params_se_rechaza_y_lo_demas_sigue(tmp_path):
+    """Sin zona_piloto.zonas: un sufijo no se puede comprobar (rechazo); lo demás funciona como
+    con una zona y las parcelas con «zona» solo se avisan."""
+    b = tmp_path / "b"
+    shutil.copytree(BUZON_DOS_ZONAS, b)
+    rep = correr(b, tmp_path, params=params_sin_zonas())
+    sufijados = sorted(n for n in archivos_de(b) if f"_{OTRA}." in n)
+    assert nombres(rep["rechazados"]) == sufijados
+    assert all("no trae zona_piloto.zonas" in motivos_de(rep, n) for n in sufijados)
+    parcelas = next(x for x in rep["entraron"] if x["archivo"] == "parcelas_base.geojson")
+    assert any("no trae zona_piloto.zonas" in a for a in parcelas["avisos"])
+
+
+@pytest.mark.parametrize("cambio, entra, clave", [
+    (lambda f: f[1]["properties"].update(zona="meoqui"), False, "zona fuera de la lista permitida"),
+    (lambda f: f[1]["properties"].pop("zona"), True, None),
+    (lambda f: f[1].update(properties=None), True, None),
+])
+def test_rutas_con_zona(tmp_path, cambio, entra, clave):
+    rutas = json.loads((BUZON_DOS_ZONAS / "relieve_rutas.geojson").read_text(encoding="utf-8"))
+    cambio(rutas["features"])
+    b = buzon_con(tmp_path, {"relieve_rutas.geojson": json.dumps(rutas)}, copiar=())
+    rep = correr(b, tmp_path)
+    if entra:   # sin «zona» (o sin properties) la línea es de la zona por omisión
+        assert rep["entraron"][0]["zonas"] == {OMISION: 2}
+    else:
+        assert clave in motivos_de(rep, "relieve_rutas.geojson")
+
+
+def test_nasadem_cubre_el_rectangulo_de_su_zona_no_la_envolvente(tmp_path):
+    """El NASADEM de una zona cubre SU rectángulo: con sufijo entra; el mismo archivo sin sufijo
+    (zona por omisión) no cubre esa zona y se rechaza."""
+    tif = (BUZON_DOS_ZONAS / f"nasadem_zona_piloto_{OTRA}.tif").read_bytes()
+    b = buzon_con(tmp_path, {f"nasadem_zona_piloto_{OTRA}.tif": tif, "nasadem_zona_piloto.tif": tif}, copiar=())
+    rep = correr(b, tmp_path)
+    assert nombres(rep["entraron"]) == [f"nasadem_zona_piloto_{OTRA}.tif"]
+    assert f"no cubre el rectángulo de la zona {OMISION}" in motivos_de(rep, "nasadem_zona_piloto.tif")
+    assert rep["rechazados"][0]["zona"] == OMISION
+    # Y el de la zona por omisión (buzon_ok) no cubre la otra zona.
+    b2 = buzon_con(tmp_path / "2", {f"nasadem_zona_piloto_{OTRA}.tif": (BUZON_OK / "nasadem_zona_piloto.tif").read_bytes()},
+                   copiar=())
+    assert f"no cubre el rectángulo de la zona {OTRA}" in motivos_de(correr(b2, tmp_path / "2"),
+                                                                     f"nasadem_zona_piloto_{OTRA}.tif")
+
+
+def test_nasadem_que_cubre_las_parcelas_pero_no_el_rectangulo(tmp_path):
+    """Compatibilidad (rectángulo ampliado después de exportar): si no cubre el rectángulo de su
+    zona pero sí todas sus parcelas del parcelas_base.geojson de la corrida, entra con aviso; si
+    tampoco cubre las parcelas, se rechaza."""
+    pytest.importorskip("PIL")
+    geo = json.loads((BUZON_OK / "parcelas_base.geojson").read_text(encoding="utf-8"))
+    # Caja de los vértices de las parcelas de la fixture (todas sin «zona»: zona por omisión).
+    puntos = [ens.revisar_coordenadas(f["geometry"]["type"], f["geometry"]["coordinates"])[1] for f in geo["features"]]
+    caja = [min(p[0] for p in puntos), min(p[1] for p in puntos), max(p[2] for p in puntos), max(p[3] for p in puntos)]
+    b = buzon_con(tmp_path, {"nasadem_zona_piloto.tif": b""})
+    geotiff_que_cubre(b / "nasadem_zona_piloto.tif", caja)
+    rep = correr(b, tmp_path)
+    tif = next(x for x in rep["entraron"] if x["archivo"] == "nasadem_zona_piloto.tif")
+    assert any("re-exportar" in a and f"las {len(geo['features'])} parcelas de la zona {OMISION}" in a
+               for a in tif["avisos"]), tif["avisos"]
+    # Sin parcelas en la corrida no hay con qué comprobar: se rechaza.
+    b2 = buzon_con(tmp_path / "2", {"nasadem_zona_piloto.tif": (b / "nasadem_zona_piloto.tif").read_bytes()}, copiar=())
+    assert "no cubre el rectángulo" in motivos_de(correr(b2, tmp_path / "2"), "nasadem_zona_piloto.tif")
+    # Con parcelas fuera de lo que cubre: se rechaza y lo dice.
+    geo["features"][0]["geometry"]["coordinates"] = cuadro_en(LIMITES["zonas"][OMISION]["bbox"])
+    geo["features"][0]["geometry"]["coordinates"][0] = [[x - 0.1, y] for x, y in geo["features"][0]["geometry"]["coordinates"][0]]
+    b3 = buzon_con(tmp_path / "3", {"parcelas_base.geojson": json.dumps(geo),
+                                    "nasadem_zona_piloto.tif": (b / "nasadem_zona_piloto.tif").read_bytes()}, copiar=())
+    assert "ni las parcelas de la zona" in motivos_de(correr(b3, tmp_path / "3"), "nasadem_zona_piloto.tif")
+
+
+def test_entrega_real_de_una_zona_sigue_validando(tmp_path):
+    """La entrega real actual (data/processed: parcelas sin «zona», archivos sin sufijo) entra
+    completa como un buzón, con LEEME.md generado aquí (fuente «prueba»)."""
+    entregas = sorted(p.name for p in PROCESADOS.iterdir()
+                      if p.is_file() and not p.name.startswith(".") and p.name != ens.NOMBRE_FUENTES)
+    if ens.E.ARCHIVO_PARCELAS not in entregas:
+        pytest.skip("data/processed aún no tiene parcelas_base.geojson")
+    b = tmp_path / "buzon"
+    b.mkdir()
+    for n in entregas:
+        shutil.copy(PROCESADOS / n, b / n)
+    (b / "LEEME.md").write_text("| archivo | fuente | fecha | script |\n|---|---|---|---|\n"
+                                + "".join(f"| {n} | prueba | 2026-11-14 | tests/test_ensamblar.py |\n" for n in entregas),
+                                encoding="utf-8")
+    rep = correr(b, tmp_path)
+    assert rep["rechazados"] == [] and rep["retenidos"] == [], [(x["archivo"], x["motivos"]) for x in rep["rechazados"]]
+    assert nombres(rep["entraron"]) == entregas
+    for x in rep["entraron"]:
+        assert x["zona"] == (OMISION if x["archivo"] in esquemas.ARCHIVOS_POR_ZONA else None), x["archivo"]
+        assert set(x.get("zonas") or {OMISION: 0}) == {OMISION}, x["archivo"]
+
+
+# ---------------------------------------------------------------------------------------
 # Esquemas y límites
 # ---------------------------------------------------------------------------------------
 def test_limites_salen_de_params():

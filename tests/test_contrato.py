@@ -82,12 +82,55 @@ def estado_plazo_fuera_de_lista(cubo, geo, expl):
     geo["features"][0]["properties"]["estado_plazo"] = "vendida"
 
 
+# Dos zonas (decisión 2026-11-14): «zonas» y «localidades» las escribe motor/b4_cubo.py con datos reales.
+def primera_zona(cubo):
+    if not cubo.get("zonas"):
+        pytest.skip("el cubo actual no trae «zonas» (datos simulados)")
+    return next(iter(cubo["zonas"].values()))
+
+
+def zona_de_parcela_fuera_de_params(cubo, geo, expl):
+    geo["features"][0]["properties"]["zona"] = "zona_que_no_existe"
+
+
+def bbox_de_zona_invertido(cubo, geo, expl):
+    b = primera_zona(cubo)["bbox"]
+    b[0], b[2] = b[2], b[0]
+
+
+def zonas_no_suman_el_total(cubo, geo, expl):
+    primera_zona(cubo)["superficie_total_ha"] += cubo["zona"]["superficie_total_ha"]
+
+
+def demanda_de_zona_p50_mayor_que_p90(cubo, geo, expl):
+    banda = primera_zona(cubo)["demanda_perenne_millares"]["0"]
+    banda["p50"] = banda["p90"] + banda["p50"] + cubo["zona"]["superficie_total_ha"]
+
+
+def localidad_con_latitud_fuera_de_rango(cubo, geo, expl):
+    if not cubo.get("localidades"):
+        pytest.skip("el cubo actual no trae «localidades»")
+    cubo["localidades"][0]["lat"] = cubo["localidades"][0]["lat"] + 180
+
+
+def localidad_sin_fuente(cubo, geo, expl):
+    if not cubo.get("localidades"):
+        pytest.skip("el cubo actual no trae «localidades»")
+    cubo["localidades"][0]["fuente"] = ""
+
+
 ALTERACIONES = {
     "P50 > P90": (p50_mayor_que_p90, "P10 ≤ P50 ≤ P90"),
     "semáforo de agua guardado": (semaforo_de_agua_guardado, "semáforo de agua"),
     "balance de La gota roto": (balance_de_gota_roto, "balance no cierra"),
     "dígito escrito en una explicación": (digito_en_explicacion, "dígitos fuera de los marcadores"),
     "estado_plazo fuera de lista": (estado_plazo_fuera_de_lista, "estado_plazo fuera de lista"),
+    "zona de parcela fuera de params": (zona_de_parcela_fuera_de_params, "zona fuera de params.zona_piloto.zonas"),
+    "bbox de zona invertido": (bbox_de_zona_invertido, "oeste debe ser < este"),
+    "zonas que no suman el total": (zonas_no_suman_el_total, "no coincide con zona.superficie_total_ha"),
+    "demanda de zona con P50 > P90": (demanda_de_zona_p50_mayor_que_p90, "P10 ≤ P50 ≤ P90"),
+    "localidad con latitud fuera de rango": (localidad_con_latitud_fuera_de_rango, "localidades[0].lat"),
+    "localidad sin fuente": (localidad_sin_fuente, "falta la fuente"),
 }
 
 

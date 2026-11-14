@@ -829,8 +829,10 @@ def validar_geojson(ruta, esq, ctx):
         p = f.get("properties") if isinstance(f.get("properties"), dict) else None
         donde = f"feature {i}" + (f" (id {p.get('id')})" if p and p.get("id") is not None else "")
         # Zona del feature: la propiedad «zona» si viene; si no, la zona por omisión.
-        zona = (p.get("zona").strip() if isinstance(p.get("zona"), str) else p.get("zona")) \
-            if p and "zona" in p else E.ZONA_POR_OMISION
+        if p is not None and "zona" in p:
+            zona = p["zona"].strip() if isinstance(p["zona"], str) else p["zona"]
+        else:
+            zona = E.ZONA_POR_OMISION
         zona_conocida = isinstance(zona, str) and bool(zona) and (zonas is None or zona in zonas)
         g, caja = f.get("geometry"), None
         if not isinstance(g, dict):

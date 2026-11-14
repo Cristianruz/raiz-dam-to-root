@@ -213,6 +213,21 @@ def paso_simulados(reporte):
     return Paso("simulados", OK, f"regenerados: {len(geo['features'])} parcelas, {n_op} opciones")
 
 
+# --- (b2) relieve para la web ------------------------------------------------
+def paso_relieve():
+    titulo("(b2) Capa de relieve y tormenta (motor/relieve_web.py)")
+    try:
+        rep = importar("motor.relieve_web").construir()
+    except Exception as ex:  # noqa: BLE001
+        print(f"  relieve_web.construir() falló: {type(ex).__name__}: {ex}")
+        return Paso("relieve", FALLA, f"{type(ex).__name__}: {ex}")
+    if not rep.get("ejecutado"):
+        print(f"  {rep.get('motivo')}: la web dirá «terrain layer: not run».")
+        return Paso("relieve", OMITIDO, rep.get("motivo", ""))
+    print(f"  zonas con relieve: {', '.join(rep['zonas'])}; rutas {rep['rutas_bytes']} bytes")
+    return Paso("relieve", OK, f"zonas: {', '.join(rep['zonas'])}")
+
+
 # --- (c) manifest --------------------------------------------------------------
 def paso_manifest():
     titulo("(c) Manifest (motor/manifest.py)")
@@ -326,6 +341,7 @@ def main(argv=None):
     origen = paso_origen() if args.origen else Paso("origen", OMITIDO, "no solicitado (use --origen)")
     ens, reporte = paso_ensamblar()
     sim = paso_simulados(reporte)
+    rel = paso_relieve()
     man = paso_manifest()
     con = paso_contrato()
     if args.rapido:
@@ -335,7 +351,7 @@ def main(argv=None):
         py = paso_pytest()
         js = paso_node()
 
-    pasos = (origen, ens, sim, man, con, py, js)
+    pasos = (origen, ens, sim, rel, man, con, py, js)
     fallas = [p.nombre for p in pasos if p.estado == FALLA]
     pendientes = [p.nombre for p in pasos if p.estado == PENDIENTE]
     if reporte:
@@ -359,7 +375,8 @@ def main(argv=None):
         f" 2. Ensamblado ....: {ens}",
         f" 3. Entregas ......: {entregas}",
         f" 4. Sigue simulado : {estado_simulado(reporte)}",
-        f" 5. Simulados .....: {sim}",
+        f" 5. Cubo ..........: {sim}",
+        f" 5b. Relieve ......: {rel}",
         f" 6. Manifest ......: {man}",
         f" 7. Contrato ......: {con}",
         f" 8. pytest ........: {py}",

@@ -1,0 +1,17 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "fuente": "data/processed/relieve_meta*.json (A9, NASADEM vía Earth Engine)",
+ "zonas": {
+  "delicias_saucillo": {
+   "rotulo": "regional, 30 m (NASADEM); not field drainage design",
+   "umbral_ruta_ha": 50.0,
+   "umbral_ruta_etiqueta": "assumption [S]",
+   "tormenta": {
+    "mm": 15.5,
+    "definicion": "percentil 95 de los días con lluvia >= 1 mm",
+    "fuente": "NASA POWER PRECTOTCORR, punto de la zona piloto",
+    "periodo": "1984-01-01 a 2026-11-09"
+   }
+  }
+ }
+}
