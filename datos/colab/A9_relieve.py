@@ -22,6 +22,7 @@ from rasterio.features import geometry_mask
 from comun import carpeta, registrar_fuentes
 
 UMBRAL_RUTA_HA = None          # se lee de supuestos.json (umbral_ruta_ha, assumption [S])
+SUAVIZADO = 5                  # celdas de la media móvil para la pendiente, assumption [S]
 PROF_DEPRESION_M = 0.1         # profundidad mínima de depresión (kit A9), assumption [S]
 VECINOS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
@@ -104,7 +105,12 @@ def main():
         celda_ha = dx * dy / 10000
         lleno = rellenar(z)
         prof = lleno - z
-        gy, gx = np.gradient(z, dy, dx)
+        # NASADEM tiene ruido de ~1–3 m por celda: la pendiente se calcula sobre el DEM suavizado con una
+        # media móvil de 5 × 5 celdas (~150 m) [S]; el relleno, D8 y la acumulación usan el DEM sin suavizar.
+        k = SUAVIZADO
+        zp = np.pad(z, k // 2, mode="edge")
+        zs = sum(zp[a:a + z.shape[0], b:b + z.shape[1]] for a in range(k) for b in range(k)) / (k * k)
+        gy, gx = np.gradient(zs, dy, dx)
         pendiente = np.hypot(gx, gy) * 100
         destino, acum = d8_y_acumulacion(lleno, dx, dy)
 
@@ -130,7 +136,16 @@ def main():
                 a, b = destino[i, j]
                 if a >= 0 and m[a, b]:
                     externa = max(externa, acum[i, j])
-            filas.append([f["properties"]["id"], round(float(pendiente[m].mean()), 3),
+            # Pendiente de la parcela: plano ajustado por mínimos cuadrados a sus celdas de NASADEM
+            # (el ruido de celda a celda se promedia); si la parcela tiene < 6 celdas, media del DEM suavizado.
+            pi, pj = np.where(m)
+            if pi.size >= 6:
+                A = np.c_[pj * dx, -pi * dy, np.ones(pi.size)]
+                (ax, ay, _), *_ = np.linalg.lstsq(A, z[pi, pj], rcond=None)
+                pend = float(np.hypot(ax, ay) * 100)
+            else:
+                pend = float(pendiente[m].mean())
+            filas.append([f["properties"]["id"], round(pend, 3),
                           round(externa * celda_ha, 2), round(float((prof[m] > PROF_DEPRESION_M).mean()), 3)])
 
         umbral_celdas = UMBRAL_RUTA_HA / celda_ha
@@ -150,7 +165,8 @@ def main():
         "geometry": {"type": "MultiLineString", "coordinates": lineas}}]},
         open("relieve_rutas.geojson", "w"))
     json.dump({"rotulo": "regional, 30 m (NASADEM); not field drainage design",
-               "umbral_ruta_ha": UMBRAL_RUTA_HA, "umbral_ruta_etiqueta": "assumption [S]", "celda_ha": round(celda_ha, 4),
+               "umbral_ruta_ha": UMBRAL_RUTA_HA, "umbral_ruta_etiqueta": "assumption [S]",
+               "pendiente": "por parcela: plano ajustado por mínimos cuadrados a las celdas de NASADEM; zona: DEM suavizado 5 × 5 celdas (~150 m) [S]", "celda_ha": round(celda_ha, 4),
                "tormenta": tormenta_p95()}, open("relieve_meta.json", "w"), ensure_ascii=False, indent=1)
     registrar_fuentes("A9", ["relieve_parcelas.csv", "relieve_rutas.geojson", "relieve_meta.json"],
                       "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; lluvia NASA POWER",
