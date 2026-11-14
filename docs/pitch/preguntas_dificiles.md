@@ -119,7 +119,7 @@
 - **Pendiente.** «El segundo contraste, con WaPOR, no se corrió. Tampoco tenemos un contraste a escala de parcela: ECOSTRESS está pedido y no entregado.»
 
 ### 18. ¿Qué tiene de «gemelo digital» si no hay sensores?
-- **Respuesta.** Usamos el término con sus partes a la vista: una réplica del terreno y de las parcelas, un estado observado por satélite, un modelo físico y escenarios que se ensayan antes de sembrar. No tiene sensores en campo ni datos en tiempo real: se actualiza cada vez que se reconstruye con datos nuevos, y la página lo declara. **[SI ESTÁ CONECTADO]** La tarjeta «Twin status» separa lo observado, lo modelado y el escenario, con la fecha de cada fuente.
+- **Respuesta.** Usamos el término con sus partes a la vista: una réplica del terreno y de las parcelas, un estado observado por satélite, un modelo físico y escenarios que se ensayan antes de sembrar. No tiene sensores en campo ni datos en tiempo real: se actualiza cada vez que se reconstruye con datos nuevos, y así lo declaran el README y LIMITATIONS (la página lo dirá en la tarjeta «Twin status» cuando esté conectada). **[SI ESTÁ CONECTADO]** La tarjeta «Twin status» separa lo observado, lo modelado y el escenario, con la fecha de cada fuente.
 - **Cifra.** 1,239 parcelas; verdor de 2016 a 2026; relieve de 30 m.
 - **Archivo.** `docs/decisiones/2026-11-14_gemelo_digital.md`; `README.md`, «Summary» («What the twin is not»); `LIMITATIONS.md`, «What "digital twin" means here».
 
