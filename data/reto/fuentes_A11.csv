@@ -1,0 +1,2 @@
+archivo,fuente,fecha,script,sha256
+gedi_parcelas.csv,"GEDI L2A v2 (LARSE/GEDI/GEDI02_A_002_MONTHLY, rasterizado a 25 m) vía Google Earth Engine, proyecto iondroplet; rh98; disparos de 2019-04 a 2025-04; filtro: quality_flag = 1, degrade_flag = 0 y sensitivity >= 0.9; un disparo cuenta si el centro de su celda cae dentro de la parcela; 1072 de 1239 parcelas con al menos un disparo",2026-11-14,datos/earthengine/contexto_regional.js + datos/colab/A11_gedi_parcelas.py,5897ac4f2ddce87e36c5c0f89642f445da76c86a93385522a900c8455c2e11ba

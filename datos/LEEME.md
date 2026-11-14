@@ -53,3 +53,12 @@ comprometida) y P0118 (barbecho en 2026 tras años perenne, libre), elegidas por
   archivos del rectángulo original (`et_contraste.csv`, `h3_series.csv`, de `data/processed/`).
 - Rutas de escurrimiento (A9): no se dibujan dentro de depresiones cerradas del DEM de 3 m o más (`prof_depresion_ruta_m` [S] en
   `supuestos.json`); ahí la dirección de flujo sale del relleno y no del terreno. `relieve_parcelas.csv` no depende de esto.
+
+## Bases del reto (decisión del 14-nov, 15:30)
+- `colab/A2_heladas.py` → `heladas.json` (kit A2, NASA POWER): `python datos/colab/A2_heladas.py --dir data/zonas/delicias_saucillo --otra lazaro_cardenas=../lazaro_cardenas`.
+- `earthengine/contexto_regional.js` exporta las series mensuales por zona (SMAP, MODIS, GRACE, GLDAS, NLDAS, ERA5-Land) y los
+  disparos de GEDI; los crudos quedan en `data/raw/reto/`.
+- `colab/A10_contexto_regional.py --dir data/reto --crudo data/raw/reto` → `contexto_regional.csv` (series regionales, nunca por parcela;
+  GRACE como una sola serie «cuenca»).
+- `colab/A11_gedi_parcelas.py --dir data/reto --crudo data/raw/reto` (con `parcelas_base.geojson` en la carpeta) → `gedi_parcelas.csv`.
+

@@ -14,6 +14,8 @@ Reglas:
 - n_celdas: en las mallas geográficas gruesas (SMAP, GRACE, GLDAS, NLDAS, ERA5-Land), celdas del producto que tocan el
   rectángulo de la zona; en MODIS, celdas válidas con centro dentro del rectángulo ese mes.
 - resolucion_m: tamaño nominal de la celda de la malla en que se distribuye el producto.
+- GRACE: una sola serie con zona = «cuenca» (rectángulo que envuelve las dos zonas). ctx_grace.csv (por zona) queda en el
+  crudo solo como constancia de por qué no se entrega por zona.
 """
 import calendar
 import csv
@@ -24,6 +26,9 @@ import os
 from comun import carpeta, registrar_fuentes
 
 ZONAS = {"delicias_saucillo": (-105.56, 28.07, -105.32, 28.19), "lazaro_cardenas": (-105.66, 28.35, -105.56, 28.43)}
+# GRACE va como una sola serie «cuenca»: el rectángulo que envuelve las dos zonas (acuerdo con el integrador, 14-nov 15:40).
+# El borde entre dos mascons de 3° pasa por −105.5°, dentro de ese rectángulo: por zona, la diferencia sería el borde de la malla.
+ZONAS["cuenca"] = (-105.66, 28.07, -105.32, 28.43)
 
 # Mallas geográficas (transformación de la proyección en Earth Engine): x0, dx, y0 (norte), dy
 MALLAS = {
@@ -85,7 +90,7 @@ def main():
     agregar("modis", "et", "mm/mes", RESOLUCION_M["modis_et"], leer(a.crudo, "ctx_modis_et.csv"), "v", 0,
             conv=lambda v, mes: v * dias_mes(mes), dec=1)
     agregar("modis", "temp_superficie_dia", "°C", RESOLUCION_M["modis_lst"], leer(a.crudo, "ctx_modis_lst.csv"), "v", 0, dec=2)
-    agregar("grace", "agua_almacenada_anomalia", "cm", RESOLUCION_M["grace"], leer(a.crudo, "ctx_grace.csv"), "lwe_thickness", 0,
+    agregar("grace", "agua_almacenada_anomalia", "cm", RESOLUCION_M["grace"], leer(a.crudo, "ctx_grace_cuenca.csv"), "lwe_thickness", 0,
             malla="grace", dec=2)
     gldas = leer(a.crudo, "ctx_gldas*.csv")
     agregar("gldas", "et", "mm/mes", RESOLUCION_M["gldas"], gldas, "Evap_tavg", 8,
@@ -111,7 +116,7 @@ def main():
                       "Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: "
                       "smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); "
                       "modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; "
-                      "grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL RL06.x mascon con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°); "
+                      "grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); "
                       "gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); "
                       "nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); "
                       "era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). "

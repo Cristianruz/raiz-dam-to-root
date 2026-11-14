@@ -43,3 +43,44 @@ Notas:
 - **ECOSTRESS:** no está en el catálogo de Earth Engine. Solo por AppEEARS o Earthdata, que piden iniciar sesión.
   Ya le pedí a Cristian una cuenta de Earthdata; sin ella queda «not run».
 - `relieve_meta*.json`: periodos con «to» y `rutas_depresiones.nota` y `pendiente` en inglés. Los subo junto con lo demás.
+
+## 14-nov 15:37 — Entregas del pedido de hoy (todas en Raiz_entregas, con su línea en LEEME.md)
+Validé con tu ensamblador (commit 46f79aa): 25 entraron, 1 rechazado (ver contexto_regional), 0 retenidos.
+
+- **ENTREGA: contexto_regional.csv** — 6,560 filas, las 12 combinaciones. **Tu validador lo rechaza hoy solo por
+  `zona = cuenca` en las 236 filas de GRACE** (lo acordado a las 15:40; falta que tu validador lo acepte). Lo demás pasa.
+  | fuente / variable | periodo | meses | n_celdas (Delicias / Lázaro) |
+  |---|---|---|---|
+  | smap humedad_superficial, humedad_raiz | 2015-04 a 2026-10 | 139 | 6 / 4 |
+  | modis ndvi | 2000-02 a 2026-10 | 321 | ~6,083 / ~1,713 |
+  | modis et | 2000-01 a 2025-12 | 312 | ~1,518 / ~446 |
+  | modis temp_superficie_dia | 2000-02 a 2026-10 | 321 | ~406 / ~122 |
+  | grace agua_almacenada_anomalia (zona = cuenca) | 2002-04 a 2024-10, con huecos | 236 | 2 |
+  | gldas et, humedad_raiz | 2000-01 a 2026-09 | 321 | 2 / 1 |
+  | nldas lluvia, evaporacion_potencial | 2000-01 a 2026-10 | 322 | 6 / 4 |
+  | era5_land tmin_media, dias_helada | 2000-01 a 2026-10 | 322 | 8 / 2 |
+  Reglas: solo meses con al menos 90 % de las imágenes que corresponden (el mes en curso no entra); MODIS con un
+  compuesto que empiece en el mes; `n_celdas` de MODIS = celdas válidas con centro dentro ese mes (cambia un poco de mes
+  a mes); en las mallas gruesas = celdas que tocan el rectángulo. `resolucion_m` de GRACE = 55,660 (malla de 0.5°), pero su
+  resolución real es el mascon de 3° (~330 km): dilo en la página.
+  Cifras para que revises que la página no diga de más (medias anuales 2000–2025, Delicias–Saucillo):
+  lluvia NLDAS 274 mm (estación Delicias 1990–2004: 284 mm; POWER: 329 mm); ET de MODIS 304 mm y de GLDAS 378 mm, frente
+  a 746 mm de SSEBop en oct-2025 a sep-2026 en el rectángulo original. **Los tres productos de ET no coinciden entre sí**:
+  es una comparación, no una validación. La evaporación potencial de NLDAS (2,371 mm/año) no es ETo de FAO-56: no se
+  compara número con número con la ETo de POWER.
+- **ENTREGA: gedi_parcelas.csv — prueba OK.** 1,072 de 1,239 parcelas con al menos un disparo (18,702 disparos válidos
+  dentro de parcelas, 2019-04 a 2025-04). Lectura para la ficha:
+  - En cultivo bajo, barbecho o suelo desnudo, rh98 ronda 2.6–2.8 m: es el piso del instrumento (ancho del pulso), **no
+    altura de planta**. Solo dice algo cuando pasa de unos 5 m.
+  - Parcelas con ≥ 3 disparos y p90 ≥ 5 m: nogal 57 de 86 (66 %); alfalfa 7 de 95 (7 %); barbecho 18 de 155 (12 %);
+    cereal de invierno 0 de 11; sin clasificar 116 de 581 (20 %). Protagonista L0175 (nogal): mediana 13.6 m.
+  - Es evidencia independiente de las reglas, en los dos sentidos: un tercio de los «nogal» no muestra dosel alto (huerta
+    joven o error de las reglas), y 116 parcelas sin clasificar sí lo muestran (probables huertas). No cambia el mapa:
+    se muestra como evidencia. Los disparos son de 2019–2025, no del ciclo 2026.
+- **ENTREGA: supuestos.json — prueba OK** (es `datos/supuestos.json` tal cual; 19 supuestos con valor, etiqueta y fuente).
+- **ENTREGA: relieve_meta.json y relieve_meta_lazaro_cardenas.json — prueba OK** (periodos con «to»; `nota` y `pendiente` en inglés).
+- Crudos en el repo: `data/raw/reto/` (18 CSV). Scripts: `datos/earthengine/contexto_regional.js`,
+  `datos/colab/A2_heladas.py`, `A10_contexto_regional.py`, `A11_gedi_parcelas.py`.
+- Uso de Earth Engine de este pedido: 11 tareas, unos 4,900 EECU-s (1.4 EECU-h de las 150 del mes).
+
+Pendiente de mi lado: ECOSTRESS (necesita la cuenta de Earthdata de Cristian) y GAEZ (domingo). Espero tu reparto de faltantes.
