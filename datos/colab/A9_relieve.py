@@ -93,7 +93,7 @@ def tormenta_p95():
             return None
         return {"mm": round(float(np.percentile(lluvias, 95)), 1),
                 "definicion": "95th percentile of days with rain >= 1 mm", "fuente": fuente,
-                "periodo": f"{filas[0]['fecha']} a {filas[-1]['fecha']}"}
+                "periodo": f"{filas[0]['fecha']} to {filas[-1]['fecha']}"}
     imerg = p95("imerg_diaria.csv", "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), mean over the pilot area rectangle")
     power = p95("eto_diaria.csv", "NASA POWER PRECTOTCORR, pilot area point")
     if imerg and power:
@@ -218,8 +218,8 @@ def main():
                "umbral_ruta_ha": UMBRAL_RUTA_HA, "umbral_ruta_etiqueta": "assumption [S]",
                "rutas_depresiones": {"prof_min_m": prof_ruta, "etiqueta": "assumption [S]", "celdas_de_ruta_omitidas": n_omitidas,
                                      "retazos_omitidos": n_retazos, "retazo_min_celdas": FRAGMENTO_MIN_CELDAS,
-                                     "nota": "no se dibuja ruta dentro de depresiones cerradas del DEM de esa profundidad o más, ni los retazos cortos que quedan entre dos de ellas"},
-               "pendiente": "por parcela: plano ajustado por mínimos cuadrados a las celdas de NASADEM; zona: DEM suavizado 5 × 5 celdas (~150 m) [S]", "celda_ha": round(celda_ha, 4),
+                                     "nota": "No runoff path is drawn inside closed depressions of the elevation model that are this deep or deeper, nor on the short stretches left between two of them: there the 30 m model cannot tell where water leaves."},
+               "pendiente": "per field: least-squares plane fitted to its NASADEM cells; area: elevation model smoothed over 5 x 5 cells (about 150 m) [S]", "celda_ha": round(celda_ha, 4),
                "tormenta": tormenta_p95()}, open("relieve_meta.json", "w"), ensure_ascii=False, indent=1)
     registrar_fuentes("A9", ["relieve_parcelas.csv", "relieve_rutas.geojson", "relieve_meta.json"],
                       "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta); "
