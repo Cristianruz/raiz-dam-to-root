@@ -29,21 +29,21 @@ dato en la ventana de verano en 2019–2026.
 **Desviación declarada:** el 14-nov a las 12:50 el equipo cambió la zona piloto a dos rectángulos, **después** de
 conocer el resultado de arriba. Según la política de desviaciones del preregistro, el análisis registrado (rectángulo
 original, 338 parcelas) queda como resultado principal y el de las zonas nuevas se reporta al lado, con el mismo
-criterio y los mismos umbrales. Script y criterio idénticos; cambian solo las parcelas.
+criterio y los mismos umbrales. Script y criterio idénticos; cambian solo las parcelas. Cifras recalculadas el 14-nov a las 14:20, tras corregir el traslape de 6 pares de parcelas en la geometría de salida (los veredictos no cambian).
 
 | Zona | Parcelas anuales | Mediana 2019–2024 | 2025 | (a) diferencia | Nogal (n) | (b) diferencia | H3 | Sensibilidad 0.35 / 0.45 (a) |
 |---|---|---|---|---|---|---|---|---|
-| Delicias–Saucillo ampliada | 581 | 79.5% | 63.3% | -16.2 pp | 79 | 0.0 pp | not supported | -12.7 / -21.0 pp |
-| Lázaro Cárdenas | 209 | 82.3% | 82.8% | 0.5 pp | 26 | 0.0 pp | not supported | 4.1 / -4.1 pp |
+| Delicias–Saucillo ampliada | 580 | 79.5% | 63.4% | -16.0 pp | 79 | 0.0 pp | not supported | -12.8 / -20.9 pp |
+| Lázaro Cárdenas | 210 | 82.4% | 82.4% | 0.0 pp | 26 | 0.0 pp | not supported | 4.0 / -4.0 pp |
 
 Serie de las parcelas anuales (proporción con verano activo, umbral 0.40):
 
 | Zona | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025 | 2026 |
 |---|---|---|---|---|---|---|---|---|
-| Delicias–Saucillo ampliada | 82% | 83% | 77% | 91% | 77% | 76% | 63% | 59% |
-| Lázaro Cárdenas | 84% | 84% | 78% | 87% | 81% | 67% | 83% | 55% |
+| Delicias–Saucillo ampliada | 82% | 84% | 77% | 91% | 77% | 76% | 63% | 59% |
+| Lázaro Cárdenas | 84% | 84% | 79% | 87% | 81% | 68% | 82% | 54% |
 
-Lectura: en la zona ampliada de Delicias–Saucillo sí hay una baja en 2025 (−16.2 puntos), pero no alcanza los 25
+Lectura: en la zona ampliada de Delicias–Saucillo sí hay una baja en 2025 (−16.0 puntos), pero no alcanza los 25
 puntos del criterio; en Lázaro Cárdenas no hay baja. En las tres áreas el nogal se mantuvo. H3 sigue «not supported».
 
 ## Lectura
