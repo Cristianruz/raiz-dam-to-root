@@ -1,0 +1,61 @@
+{
+ "type": "FeatureCollection",
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_nota": "Fixture de tests/test_ensamblar.py: valores DE PRUEBA, no son datos reales ni se usan en la web.",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "acumulacion_ha": 120
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      -105.41,
+      28.15
+     ],
+     [
+      -105.39,
+      28.13
+     ],
+     [
+      -105.37,
+      28.11
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "acumulacion_ha": 80
+   },
+   "geometry": {
+    "type": "MultiLineString",
+    "coordinates": [
+     [
+      [
+       -105.36,
+       28.15
+      ],
+      [
+       -105.35,
+       28.12
+      ]
+     ],
+     [
+      [
+       -105.35,
+       28.12
+      ],
+      [
+       -105.33,
+       28.09
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

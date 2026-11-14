@@ -1,0 +1,4 @@
+id,cultivo_actual,prob_max,acuerdo_metodos,abstencion
+T0001,alfalfa,0.81,2/2,false
+T0002,chile,0.74,2/2,false
+T0003,nogal,0.92,2/2,false

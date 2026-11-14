@@ -19,7 +19,7 @@ Origen: [anthropics/claude-plugins-official](https://github.com/anthropics/claud
 
 | Agente | sha256 | Herramientas | Qué hace |
 |---|---|---|---|
-| `revisor-contrato` | `8b76bc899e8a57f75ad47a52f60ba088c1b04d2dc8d097942f91c4026987f2ed` | Read, Grep, Glob, Bash | Revisa el contrato de datos v4 contra el kit §2 y `validar_contrato.py`: nombres de campos, listas de valores, P10 ≤ P50 ≤ P90, plazos y compromiso, marca `mock`, `manifest.json`, `params.json` y los huecos del propio validador |
+| `revisor-contrato` | `6e47c5117c2c3095863f924aebe764bf779be4f0de5e0129ec642345473923bf` | Read, Grep, Glob, Bash | Revisa el contrato de datos v4 contra el kit §2 y `validar_contrato.py`: nombres de campos, listas de valores, P10 ≤ P50 ≤ P90, plazos y compromiso, marca `mock`, `manifest.json`, `params.json` y los huecos del propio validador |
 | `revisor-cifras` | `3e35aff89980c1a212dfb4366abdebf8e4b5a5d209c9871dfdf55ac6b0edcf09` | Read, Grep, Glob, Bash | Busca cifras escritas a mano o sin fuente en `web/`, textos y documentos públicos. Aplica las reglas 2, 3, 4, 9, 10 y 11 de `CLAUDE.md`: «first», «only», promesas de ahorro, repartir, vender o intercambiar agua, y pronóstico de la presa |
 
 - Los dos los escribió Claude Code para este repo (encabezado AI-assisted en un comentario HTML después del frontmatter).

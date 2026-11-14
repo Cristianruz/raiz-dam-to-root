@@ -21,7 +21,7 @@ Lea primero `CLAUDE.md` y el kit §2 completo. No dé por buena ninguna regla de
 ## Lo que puede ejecutar (solo lectura)
 - `python validar_contrato.py` (o `python validar_contrato.py <carpeta>`).
 - `PYTHONDONTWRITEBYTECODE=1 python -m pytest -q -p no:cacheprovider tests/test_contrato.py tests/test_unidades.py tests/test_escala.py`.
-- `node --test tests/`.
+- `node --test tests/*.test.js` (en Node 22, `node --test tests/` con la carpeta falla: hay que pasar los archivos, como hace `construir.py`).
 - `git status`, `git diff`, `git log` y `git show`.
 - `python -I -c '…'` para leer JSON e imprimir comprobaciones. Nunca escriba con él.
 
