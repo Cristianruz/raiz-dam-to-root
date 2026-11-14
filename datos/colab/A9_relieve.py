@@ -10,6 +10,9 @@ Salidas:
 Rótulo obligatorio: "regional, 30 m (NASADEM); not field drainage design".
 Método: relleno de depresiones (priority-flood), dirección D8 y acumulación de flujo. Sin dependencias
 hidrológicas externas, para poder auditarlo.
+Rutas y depresiones: dentro de una depresión cerrada del DEM de prof_depresion_ruta_m (supuestos.json, 3 m [S]) o
+más, la dirección de flujo sale del relleno y no del terreno, y las «rutas» salían como rectas de varios kilómetros.
+Ahí no se dibuja ruta. relieve_parcelas.csv no cambia: la aportación y la fracción en depresión se calculan igual.
 """
 import csv
 import heapq
@@ -25,6 +28,7 @@ from comun import carpeta, registrar_fuentes
 UMBRAL_RUTA_HA = None          # se lee de supuestos.json (umbral_ruta_ha, assumption [S])
 SUAVIZADO = 5                  # celdas de la media móvil para la pendiente, assumption [S]
 PROF_DEPRESION_M = 0.1         # profundidad mínima de depresión (kit A9), assumption [S]
+FRAGMENTO_MIN_CELDAS = 10      # un tramo que empieza y termina en una depresión honda se dibuja solo si mide ≥ 10 celdas (~300 m) [S]
 VECINOS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
 
@@ -88,10 +92,10 @@ def tormenta_p95():
         if not lluvias:
             return None
         return {"mm": round(float(np.percentile(lluvias, 95)), 1),
-                "definicion": "percentil 95 de los días con lluvia >= 1 mm", "fuente": fuente,
+                "definicion": "95th percentile of days with rain >= 1 mm", "fuente": fuente,
                 "periodo": f"{filas[0]['fecha']} a {filas[-1]['fecha']}"}
-    imerg = p95("imerg_diaria.csv", "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), media sobre el rectángulo de la zona")
-    power = p95("eto_diaria.csv", "NASA POWER PRECTOTCORR, punto de la zona piloto")
+    imerg = p95("imerg_diaria.csv", "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), mean over the pilot area rectangle")
+    power = p95("eto_diaria.csv", "NASA POWER PRECTOTCORR, pilot area point")
     if imerg and power:
         imerg["contraste"] = {"mm": power["mm"], "fuente": power["fuente"], "periodo": power["periodo"]}
     return imerg or power
@@ -104,6 +108,9 @@ def main():
     if "umbral_ruta_ha" not in sup:
         raise SystemExit("Falta 'umbral_ruta_ha' en supuestos.json")
     UMBRAL_RUTA_HA = float(sup["umbral_ruta_ha"]["valor"])
+    if "prof_depresion_ruta_m" not in sup:
+        raise SystemExit("Falta 'prof_depresion_ruta_m' en supuestos.json")
+    prof_ruta = float(sup["prof_depresion_ruta_m"]["valor"])
     with rasterio.open("nasadem_zona_piloto.tif") as src:
         z = src.read(1).astype(float)
         tr = src.transform
@@ -161,25 +168,39 @@ def main():
         # aportación al final del tramo (aporta_ha), útil para el grosor y el orden de la animación.
         from shapely.geometry import LineString
         umbral_celdas = UMBRAL_RUTA_HA / celda_ha
-        ruta = acum >= umbral_celdas
+        # Dentro de una depresión cerrada de prof_ruta metros o más (relleno del priority-flood), la dirección de
+        # flujo sale del relleno y no del terreno: ahí las «rutas» serían rectas artificiales. No se dibujan; la
+        # ruta se corta al entrar a la depresión y vuelve a empezar donde el terreno vuelve a mandar. [S]
+        ruta = (acum >= umbral_celdas) & (prof < prof_ruta)
+        omitida = (acum >= umbral_celdas) & (prof >= prof_ruta)
+        n_omitidas = int(omitida.sum())
+        sale_de_depresion = np.zeros(z.shape, dtype=bool)      # celdas de ruta que reciben el flujo de una celda omitida
+        for i, j in zip(*np.where(omitida)):
+            a, b = destino[i, j]
+            if a >= 0:
+                sale_de_depresion[a, b] = True
         entradas = np.zeros(z.shape, dtype=int)
         for i, j in zip(*np.where(ruta)):
             a, b = destino[i, j]
             if a >= 0:
                 entradas[a, b] += 1
         centro = lambda r, c: (tr.c + (c + 0.5) * tr.a, tr.f + (r + 0.5) * tr.e)
-        lineas, n_seg = [], 0
+        lineas, n_seg, n_retazos = [], 0, 0
         for i, j in zip(*np.where(ruta)):
             if entradas[i, j] == 1:
                 continue                                # celda intermedia: la recorre el tramo que viene de arriba
             pts, (a, b), fin = [centro(i, j)], destino[i, j], (i, j)
-            while a >= 0:
+            while a >= 0 and ruta[a, b]:
                 pts.append(centro(a, b))
                 fin = (a, b)
                 if entradas[a, b] != 1:
                     break                               # confluencia: ahí empieza otro tramo
                 a, b = destino[a, b]
             if len(pts) < 2:
+                continue
+            # Retazos dentro de una depresión honda (entra y sale de ella en menos de ~300 m): no se dibujan.
+            if sale_de_depresion[i, j] and a >= 0 and not ruta[a, b] and len(pts) - 1 < FRAGMENTO_MIN_CELDAS:
+                n_retazos += 1
                 continue
             n_seg += len(pts) - 1
             g = LineString(pts).simplify(abs(tr.a) / 2)
@@ -195,13 +216,17 @@ def main():
     json.dump({"type": "FeatureCollection", "features": lineas}, open("relieve_rutas.geojson", "w"))
     json.dump({"rotulo": "regional, 30 m (NASADEM); not field drainage design",
                "umbral_ruta_ha": UMBRAL_RUTA_HA, "umbral_ruta_etiqueta": "assumption [S]",
+               "rutas_depresiones": {"prof_min_m": prof_ruta, "etiqueta": "assumption [S]", "celdas_de_ruta_omitidas": n_omitidas,
+                                     "retazos_omitidos": n_retazos, "retazo_min_celdas": FRAGMENTO_MIN_CELDAS,
+                                     "nota": "no se dibuja ruta dentro de depresiones cerradas del DEM de esa profundidad o más, ni los retazos cortos que quedan entre dos de ellas"},
                "pendiente": "por parcela: plano ajustado por mínimos cuadrados a las celdas de NASADEM; zona: DEM suavizado 5 × 5 celdas (~150 m) [S]", "celda_ha": round(celda_ha, 4),
                "tormenta": tormenta_p95()}, open("relieve_meta.json", "w"), ensure_ascii=False, indent=1)
     registrar_fuentes("A9", ["relieve_parcelas.csv", "relieve_rutas.geojson", "relieve_meta.json"],
-                      "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta)",
+                      "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta); "
+                      "sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S]",
                       "datos/colab/A9_relieve.py")
     print(f"Parcelas: {len(filas)} · rutas: {len(lineas)} tramos ({n_seg} segmentos de celda) · "
-          f"pendiente media de la zona: {pendiente.mean():.2f} %")
+          f"pendiente media de la zona: {pendiente.mean():.2f} % · celdas de ruta omitidas por depresión ≥ {prof_ruta:g} m: {n_omitidas}")
 
 
 if __name__ == "__main__":

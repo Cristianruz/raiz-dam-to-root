@@ -68,6 +68,11 @@
   "etiqueta": "assumption [S]",
   "fuente": "Valor de visualización para dibujar rutas de escurrimiento"
  },
+ "prof_depresion_ruta_m": {
+  "valor": 3,
+  "etiqueta": "assumption [S]",
+  "fuente": "Profundidad de relleno a partir de la cual no se dibuja ruta: por encima del ruido vertical de NASADEM (1–3 m por celda), el modelo de elevación marca una depresión cerrada y no permite saber por dónde sale el agua"
+ },
  "elevacion_punto_m": {
   "valor": 1173,
   "etiqueta": "assumption [S]",
