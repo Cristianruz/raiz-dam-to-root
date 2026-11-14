@@ -17,7 +17,11 @@ Fuentes de lo que aquí se exige:
 - la decisión de dos zonas piloto (docs/decisiones/2026-11-14_dos_zonas.md, FUENTE_DOS_ZONAS):
   propiedad «zona» en parcelas_base.geojson y relieve_rutas.geojson, ids con el prefijo de su
   zona y archivos por zona con sufijo «_<zona>» (ARCHIVOS_POR_ZONA). Sin «zona» o sin sufijo =
-  ZONA_POR_OMISION (compatibilidad con la entrega de una sola zona).
+  ZONA_POR_OMISION (compatibilidad con la entrega de una sola zona);
+- la decisión de usar las bases de datos del reto (docs/decisiones/2026-11-14_recursos_del_reto.md,
+  FUENTE_RECURSOS): contexto_regional.csv (A10), gedi_parcelas.csv (A11), ecostress_parcelas.csv
+  (A12) y gaez_zona.csv (A13), cada uno UN archivo para las dos zonas (no van en ARCHIVOS_POR_ZONA).
+  No cambian el cálculo del agua: alimentan web/data/contexto.json (motor/contexto_web.py).
 
 Vocabulario de un campo (columna de CSV, propiedad de GeoJSON o llave de un objeto JSON):
   tipo      texto | numero | entero | fecha (AAAA-MM-DD) | mes (AAAA-MM) |
@@ -45,7 +49,11 @@ Vocabulario de un campo (columna de CSV, propiedad de GeoJSON o llave de un obje
             queda «retenido», no rechazado).
 
 Reglas de tabla («reglas»): orden (c1 ≤ c2 ≤ …), rango_por_banda, dias_ventana_por_anio,
-abstencion_a42, un_solo_valor_por y faltantes_max. ensamblar.py las aplica por nombre.
+abstencion_a42, un_solo_valor_por, faltantes_max y, para las bases de datos del reto,
+combinacion_permitida (la combinación de varias columnas es una fila de una tabla cerrada),
+rango_segun (cota de una columna según el valor de otra: el valor según su unidad) y
+vacias_segun (columnas que van vacías cuando otra vale cierto valor y, con «llenas_si_no»,
+llenas en cualquier otro caso). ensamblar.py las aplica por nombre.
 Reglas de JSON («regla»): heladas, dotaciones, supuestos, rotaciones y objeto (valida «campos»).
 Llave de GeoJSON «por_zona» (parcelas_base): si una parcela trae «zona», su id empieza con el
 prefijo_id de esa zona y su centroide cae en el rectángulo (bbox) de esa zona.
@@ -176,6 +184,44 @@ FUENTE_ACUERDO = "acuerdo con la sesión de Earth Engine y Colab (14-nov-2026)"
 FUENTE_FORMATOS = ("acuerdo de formatos entre la sesión de datos y el integrador (14-nov-2026; "
                    "reemplaza o amplía la fila de la tabla 0.4-B)")
 FUENTE_DOS_ZONAS = "decisión de dos zonas piloto (docs/decisiones/2026-11-14_dos_zonas.md)"
+
+FUENTE_RECURSOS = ("decisión de usar las bases de datos del reto "
+                   "(docs/decisiones/2026-11-14_recursos_del_reto.md, «Contrato de las entregas nuevas»)")
+
+# contexto_regional.csv: las 12 filas (fuente, variable, unidad) de la tabla de FUENTE_RECURSOS,
+# tal cual. Una fila del archivo con otra combinación se rechaza (regla combinacion_permitida).
+COMBINACIONES_CONTEXTO = (
+    ("smap", "humedad_superficial", "m3/m3"),
+    ("smap", "humedad_raiz", "m3/m3"),
+    ("modis", "ndvi", "adimensional"),
+    ("modis", "et", "mm/mes"),
+    ("modis", "temp_superficie_dia", "°C"),
+    ("grace", "agua_almacenada_anomalia", "cm"),
+    ("gldas", "et", "mm/mes"),
+    ("gldas", "humedad_raiz", "kg/m2"),
+    ("nldas", "lluvia", "mm/mes"),
+    ("nldas", "evaporacion_potencial", "mm/mes"),
+    ("era5_land", "tmin_media", "°C"),
+    ("era5_land", "dias_helada", "dias"),
+)
+# Listas cerradas de cada columna, derivadas de la tabla (sin repetir y en su orden).
+FUENTES_CONTEXTO = tuple(dict.fromkeys(f for f, _, _ in COMBINACIONES_CONTEXTO))
+VARIABLES_CONTEXTO = tuple(dict.fromkeys(v for _, v, _ in COMBINACIONES_CONTEXTO))
+UNIDADES_CONTEXTO = tuple(dict.fromkeys(u for _, _, u in COMBINACIONES_CONTEXTO))
+# Límites físicos POR DEFINICIÓN del valor según su unidad o su variable (no son cotas de datos):
+# una fracción de volumen está en [0, 1]; el NDVI, como toda diferencia normalizada, en [−1, 1];
+# una lámina (mm/mes) y una masa por área (kg/m2) no son negativas; un mes tiene a lo más 31 días.
+# °C y cm (anomalía, puede ser negativa) no llevan límite: no se inventa ninguno.
+DIAS_MAX_DE_UN_MES = 31
+LIMITES_CONTEXTO = (
+    {"segun": "unidad", "valores": ("m3/m3",), "min": 0, "max": 1},
+    {"segun": "variable", "valores": ("ndvi",), "min": -1, "max": 1},
+    {"segun": "unidad", "valores": ("mm/mes", "kg/m2"), "min": 0},
+    {"segun": "unidad", "valores": ("dias",), "min": 0, "max": DIAS_MAX_DE_UN_MES},
+)
+# gaez_zona.csv: clases de cultivo del proyecto (contrato v4, kit §2.2) que SÍ son un cultivo:
+# «sin_clasificar» (abstención) y «barbecho» (sin cultivo) no tienen aptitud agroclimática.
+CULTIVOS_GAEZ = tuple(sorted(CULTIVOS - {"sin_clasificar", "barbecho"}))
 
 ID = {"tipo": "texto", "id_parcela": True}
 INDICE = {"tipo": "numero", "min": -1, "max": 1}     # NDVI y demás diferencias normalizadas
@@ -598,6 +644,85 @@ ESQUEMAS = {
         },
         "alimenta": "web/data/manifest.json: cifras",
         "fuente_reglas": f"{FUENTE_TABLA} (clave, valor, unidad, fuente, fecha, etiqueta)",
+    },
+    # ---- A10 a A13 (bases de datos del reto; FUENTE_RECURSOS) --------------------------
+    # Un solo archivo para las dos zonas (no van en ARCHIVOS_POR_ZONA). No llevan «alimenta»:
+    # no hay versión simulada; si faltan, web/data/contexto.json lleva el bloque en null con su
+    # motivo (motor/contexto_web.py) y la página dice «not delivered yet».
+    "contexto_regional.csv": {
+        "pieza": "A10", "tipo": "csv",
+        "columnas": {
+            "zona": {"tipo": "texto", "valores": "@zonas_ids"},
+            "fuente": {"tipo": "texto", "valores": FUENTES_CONTEXTO},
+            "variable": {"tipo": "texto", "valores": VARIABLES_CONTEXTO},
+            "mes": {"tipo": "mes"},
+            "valor": {"tipo": "numero", "nulo": True},
+            "unidad": {"tipo": "texto", "valores": UNIDADES_CONTEXTO},
+            "resolucion_m": {"tipo": "numero", "mayor_que": 0},
+            "n_celdas": {"tipo": "entero", "min": 1},
+        },
+        "llave": ("zona", "fuente", "variable", "mes"),
+        "reglas": [
+            {"regla": "combinacion_permitida", "columnas": ["fuente", "variable", "unidad"],
+             "permitidas": COMBINACIONES_CONTEXTO,
+             "tabla": "docs/decisiones/2026-11-14_recursos_del_reto.md"},
+            {"regla": "rango_segun", "columna": "valor", "grupos": LIMITES_CONTEXTO},
+        ],
+        "fuente_reglas": (f"{FUENTE_RECURSOS}: promedio mensual por zona, fuente y variable; zona de "
+                          "zona_piloto.zonas (params); fuente, variable y unidad en una de las 12 filas de "
+                          "su tabla; llave (zona, fuente, variable, mes); valor vacío si no hay dato. "
+                          "Límites físicos por definición: m3/m3 entre 0 y 1; NDVI entre −1 y 1; mm/mes y "
+                          "kg/m2 ≥ 0; días del mes entre 0 y 31; resolución > 0 y al menos una celda. "
+                          "°C y cm (anomalía) sin límite: no se inventa ninguno"),
+    },
+    "gedi_parcelas.csv": {
+        "pieza": "A11", "tipo": "csv",
+        "columnas": {
+            "id": _con(ID, unico=True),
+            "n_disparos": {"tipo": "entero", "min": 0},
+            "altura_mediana_m": _con(NO_NEGATIVO, nulo=True),
+            "altura_p90_m": _con(NO_NEGATIVO, nulo=True),
+        },
+        "reglas": [
+            # Sin disparos no hay altura (vacía, nunca cero); con disparos, las dos alturas.
+            {"regla": "vacias_segun", "columna": "n_disparos", "valor": 0,
+             "columnas": ["altura_mediana_m", "altura_p90_m"], "llenas_si_no": True},
+            {"regla": "orden", "columnas": ["altura_mediana_m", "altura_p90_m"]},
+        ],
+        "fuente_reglas": (f"{FUENTE_RECURSOS}: una fila por parcela de parcelas_base.geojson; n_disparos "
+                          "entero ≥ 0; alturas (rh98) vacías si n_disparos = 0 y presentes si no; "
+                          "alturas ≥ 0 y mediana ≤ percentil 90 por definición"),
+    },
+    "ecostress_parcelas.csv": {
+        "pieza": "A12", "tipo": "csv",
+        "columnas": {
+            "id": ID,
+            "mes": {"tipo": "mes"},
+            "et_mm_dia": _con(NO_NEGATIVO, nulo=True),
+            "n_escenas": {"tipo": "entero", "min": 0},
+        },
+        "llave": ("id", "mes"),
+        # «vacío si no hubo escena» (FUENTE_RECURSOS): sin escenas no hay ET. Con escenas puede
+        # venir vacía (no se exige «llenas_si_no»).
+        "reglas": [{"regla": "vacias_segun", "columna": "n_escenas", "valor": 0, "columnas": ["et_mm_dia"]}],
+        "fuente_reglas": (f"{FUENTE_RECURSOS}: id de parcelas_base.geojson; mes AAAA-MM; llave (id, mes); "
+                          "et_mm_dia vacío si no hubo escena (n_escenas = 0); n_escenas entero ≥ 0; "
+                          "ET ≥ 0 por definición"),
+    },
+    "gaez_zona.csv": {
+        "pieza": "A13", "tipo": "csv",
+        "columnas": {
+            "zona": {"tipo": "texto", "valores": "@zonas_ids"},
+            "cultivo": {"tipo": "texto", "valores": CULTIVOS_GAEZ},
+            "variable": {"tipo": "texto"},
+            "valor": {"tipo": "numero"},
+            "unidad": {"tipo": "texto"},
+            "resolucion_m": {"tipo": "numero", "mayor_que": 0},
+        },
+        "fuente_reglas": (f"{FUENTE_RECURSOS}: zona de zona_piloto.zonas (params); cultivo de las clases "
+                          "del proyecto (contrato v4, kit §2.2; sin «sin_clasificar» ni «barbecho», que no "
+                          "son cultivos); variable y unidad tal como las publica FAO (texto no vacío); "
+                          "valor numérico; resolución > 0 por definición"),
     },
     # ---- Textos (P6) y resultados ----------------------------------------------------
     "resultado_H1.md": {"pieza": "A6", "tipo": "texto", "fuente_reglas": FUENTE_TABLA},

@@ -7,7 +7,7 @@
 // Las coordenadas y valores de aquí son datos de prueba inventados para el caso, no cifras de la página.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { prepararRutas, puntoEn, htmlRelieveParcela, leerOpcional, cargarRelieve } from "../web/js/relieve.js";
+import { prepararRutas, puntoEn, htmlRelieveParcela, htmlPeriodo, leerOpcional, cargarRelieve } from "../web/js/relieve.js";
 
 const linea = (coords, zona) => ({
   type: "Feature",
@@ -126,4 +126,11 @@ test("leerOpcional y cargarRelieve: 404 es «ausente»; 500 o JSON roto es «err
   } finally {
     globalThis.fetch = original;
   }
+});
+
+test("htmlPeriodo: dos fechas ISO se escriben en inglés; cualquier otro texto se cita tal cual", () => {
+  const html = htmlPeriodo("2001-01-01 a 2026-11-13");
+  assert.match(html, /Period: <time datetime="2001-01-01">Jan 1, 2001<\/time> to <time datetime="2026-11-13">Nov 13, 2026<\/time>/);
+  assert.doesNotMatch(html, / a /, "sin el separador en español");
+  assert.equal(htmlPeriodo("record completo"), "Period, as reported in the data: <q>record completo</q>");
 });

@@ -35,6 +35,13 @@
 //     vuelve en la sesión y «How it works» la reabre; «About & Data» lee manifest.json y pruebas.json solo al abrirse,
 //     muestra las cinco pruebas con el estado de pruebas.json y «Not run» con su insignia, y Escape la cierra sin
 //     cerrar la ficha;
+// - revisión de la auditoría de la web: contraste WCAG (≥ 4.5:1) de los símbolos de los círculos y de las letras
+//   de las muestras; una trama distinta por cultivo en la capa «Crops»; con la ficha abierta, el mapa y el panel
+//   quedan inert (los controles no); sin desplazamiento horizontal a 320 px; en pantalla baja (844×390) la
+//   ficha ocupa todo el alto; una parcela CLASIFICADA sin opciones («sin_clima_zona») no se cuenta como
+//   «Not classified» ni en el indicador, y su ficha y su mensaje dicen el motivo; con relieve.json o pruebas.json
+//   en HTTP 500 y manifest.json roto, la página dice «could not be loaded / could not be read» (no «not run» ni
+//   «not built»); si imprimir falla, un aviso visible; si el arranque falla, el aviso .error-carga;
 // - guarda capturas en tests/e2e/capturas/ (o en RAIZ_CAPTURAS).
 // No supone un juego de datos: los valores esperados y las parcelas de cada prueba se leen de los datos.
 // Los casos que los datos no traen (superficie abstenida, capa ausente, una parcela abstenida, el goteo)
@@ -74,6 +81,13 @@ const TIPOS = {
 };
 
 const leerJSON = (nombre) => JSON.parse(fs.readFileSync(path.join(DATOS, nombre), "utf-8"));
+/** Respuesta alterada que no es un JSON válido de 200 (un HTTP 500, un archivo roto): para page.route. */
+class Respuesta {
+  constructor(status, cuerpo = "") {
+    this.status = status;
+    this.cuerpo = cuerpo;
+  }
+}
 const cubo = leerJSON("cubo.json");
 const parcelas = leerJSON("parcelas.geojson");
 const explicaciones = leerJSON("explicaciones.json");
@@ -118,6 +132,13 @@ const hayRelieve = Boolean(relieve?.zonas && Object.keys(relieve.zonas).length &
 const nf = (opciones) => new Intl.NumberFormat("en-US", opciones);
 const fmt3 = (v) => nf({ maximumFractionDigits: 3 }).format(v);
 const fmtM3 = (v) => `${nf({ maximumFractionDigits: 0 }).format(v).replace("-", "−")} m³`;
+/** Periodo de la tormenta como lo escribe la página: dos fechas ISO en inglés («Jan 1, 2001 to …»); si no, tal cual. */
+const periodoEnPagina = (p) => {
+  const f = String(p ?? "").match(/\d{4}-\d{2}-\d{2}/g) ?? [];
+  if (f.length !== 2) return p;
+  const d = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" });
+  return `${d.format(new Date(`${f[0]}T00:00:00Z`))} to ${d.format(new Date(`${f[1]}T00:00:00Z`))}`;
+};
 const fmtCambio = (f) => nf({ style: "percent", maximumFractionDigits: 0, signDisplay: "exceptZero" }).format(f).replace("-", "−");
 
 // La gota: opción que la ficha muestra al abrirse (la ACTUAL con bloque gota; si no, la primera con bloque gota).
@@ -190,7 +211,9 @@ async function abrir(navegador, base, opciones, etiqueta, alterados = {}, { inic
   // Variantes de los datos solo para esta página (casos que los datos no producen).
   for (const [archivo, contenido] of Object.entries(alterados)) {
     await page.route(`**/data/${archivo}`, (route) =>
-      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(contenido) }),
+      contenido instanceof Respuesta
+        ? route.fulfill({ status: contenido.status, contentType: "application/json", body: contenido.cuerpo })
+        : route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(contenido) }),
     );
   }
   const errores = [];
@@ -236,6 +259,36 @@ async function abrirDesdeLista(page, id) {
 }
 async function cerrarFicha(page) {
   if (await page.locator("#ficha").isVisible()) await page.locator("#ficha-cerrar").click();
+}
+
+/**
+ * Razón de contraste WCAG entre el color del texto y el fondo de cada elemento (los dos, colores calculados).
+ * Devuelve [{texto, razon}] de los elementos visibles con texto.
+ */
+async function contrastes(page, selector) {
+  return page.evaluate((sel) => {
+    const rgb = (c) => (c.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+    const lum = ([r, g, b]) => {
+      const f = (v) => {
+        const x = v / 255;
+        return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+      };
+      return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+    };
+    return [...document.querySelectorAll(sel)]
+      .filter((el) => el.textContent.trim() && el.getClientRects().length)
+      .map((el) => {
+        const cs = getComputedStyle(el);
+        const [a, b] = [lum(rgb(cs.color)), lum(rgb(cs.backgroundColor))].sort((x, y) => y - x);
+        return { texto: el.textContent.trim(), razon: Math.round(((a + 0.05) / (b + 0.05)) * 100) / 100 };
+      });
+  }, selector);
+}
+async function checkContraste(page, selector, nombre) {
+  const xs = await contrastes(page, selector);
+  const malos = xs.filter((x) => x.razon < 4.5);
+  check(`${nombre}: contraste ≥ 4.5:1 en ${xs.length} símbolos`, xs.length > 0 && malos.length === 0,
+    malos.length ? malos.map((x) => `${x.texto} ${x.razon}`).join(", ") : `mínimo ${Math.min(...xs.map((x) => x.razon))}`);
 }
 
 // ---------------------------------------------------------------- pruebas reutilizables
@@ -446,7 +499,7 @@ async function pruebaRelieve(page, prefijo, reducida, captura = null) {
   const tormentas = zonasRel.map((z) => z.tormenta);
   check(
     `${prefijo}«Simulate a storm» muestra la lámina (${tormentas.map((x) => `${fmt3(x.mm)} mm`).join(", ")}) con su definición, periodo y fuente`,
-    tormentas.every((x) => t.includes(`${fmt3(x.mm)} mm`) && t.includes(x.fuente) && (!x.definicion || t.includes(x.definicion)) && (!x.periodo || t.includes(x.periodo))) && t.includes("not a forecast"),
+    tormentas.every((x) => t.includes(`${fmt3(x.mm)} mm`) && t.includes(x.fuente) && (!x.definicion || t.includes(x.definicion)) && (!x.periodo || t.includes(periodoEnPagina(x.periodo)))) && t.includes("not a forecast"),
     t.replace(/\n/g, " ").slice(0, 200),
   );
   const e = await page.evaluate(() => window.raizDepuracion.relieve());
@@ -544,6 +597,33 @@ async function pruebaWhatsApp(page, id, prefijo, telefono, captura = null) {
   }
   await boton.click();
   check(`${prefijo}el botón vuelve a ocultar la maqueta`, (await page.locator("#vista-whatsapp").isHidden()) && (await boton.getAttribute("aria-expanded")) === "false");
+}
+
+/**
+ * Con la ficha abierta, el mapa y el panel (#principal) quedan inert: el foco del teclado no se pierde detrás de
+ * la ficha (WCAG 2.4.3 y 2.4.7). Los controles no: el deslizador se mueve con la ficha abierta. Al cerrar, todo
+ * vuelve a ser operable y el foco regresa al botón de la lista.
+ */
+async function pruebaInert(page, id) {
+  const abierto = await page.evaluate(() => ({
+    principal: document.querySelector("#principal").inert,
+    controles: document.querySelector("#controles").inert,
+  }));
+  check(`ficha de ${id} abierta: el mapa y el panel quedan inert; los controles no`, abierto.principal && !abierto.controles, JSON.stringify(abierto));
+  await page.locator("#ficha-titulo").focus();
+  const destinos = [];
+  for (let i = 0; i < 4; i++) {
+    await page.keyboard.press("Shift+Tab");
+    destinos.push(await page.evaluate(() => (document.activeElement.closest("#principal") ? "principal" : document.activeElement.id || document.activeElement.tagName)));
+  }
+  check(`ficha de ${id}: Shift+Tab desde el título no entra al mapa ni al panel tapados`, !destinos.includes("principal"), destinos.join(" → "));
+  await page.locator("#ficha-cerrar").click();
+  const cerrado = await page.evaluate(() => ({
+    principal: document.querySelector("#principal").inert,
+    foco: document.activeElement?.dataset?.id ?? document.activeElement?.id,
+  }));
+  check(`ficha de ${id} cerrada: el panel vuelve a ser operable y el foco regresa a la lista`, !cerrado.principal && cerrado.foco === id, JSON.stringify(cerrado));
+  await abrirDesdeLista(page, id);
 }
 
 /** «Print field sheet» (kit C4): emulación de impresión, sin mapa ni controles, en una hoja (carta y A4). */
@@ -796,8 +876,19 @@ async function pruebasEscritorio(page, peticiones) {
     const anio = capa.startsWith("memoria_") ? capa.split("_")[1] : null;
     check(`capa ${capa}: leyenda con su fuente${anio ? ` y el año ${anio}` : ""}`, ley.includes("Source:") && (!anio || ley.includes(`Field memory: ${anio}`)), ley.split("\n")[0]);
     if (anio) await page.screenshot({ path: path.join(CAPTURAS, "escritorio_capa_memoria.png") });
+    if (capa === "cultivos") {
+      // Nada depende solo del color: cada cultivo de la leyenda lleva su propia trama (WCAG 1.4.1).
+      const tramas = await page.locator("#leyenda li .muestra").evaluateAll((xs) => xs.map((x) => [...x.classList].find((c) => c.startsWith("trama-"))));
+      check("capa cultivos: una trama distinta por cultivo en la leyenda", tramas.length > 0 && new Set(tramas).size === tramas.length, tramas.join(", "));
+    }
+    if (anio) await checkContraste(page, "#leyenda .muestra-letra", `capa ${capa}: letras de la leyenda`);
   }
+  await page.locator('input[name="colorear"][value="plazo"]').check();
+  await checkContraste(page, "#leyenda .muestra-letra", "leyenda «Water term»");
   await page.locator('input[name="colorear"][value="semaforo"]').check();
+  await checkContraste(page, "#leyenda .muestra-letra", "leyenda «Enough water?»");
+  await checkContraste(page, "#conteos-semaforo .sem-circulo, #conteos-plazo .sem-circulo", "conteos del panel");
+  await checkContraste(page, ".boton-parcela .sem-circulo", "círculos de la lista de parcelas");
 
   // Capa «Terrain & runoff» y «Simulate a storm» (con animación: el escritorio no pide movimiento reducido)
   await pruebaRelieve(page, "", false, "escritorio_relieve_tormenta.png");
@@ -1007,6 +1098,9 @@ async function pruebasEscritorio(page, peticiones) {
   const masOpciones = candidatos.filter((id) => !porId.get(id).abstencion).sort((a, b) => opcionesDe(b).length - opcionesDe(a).length)[0];
   if (masOpciones) {
     await abrirDesdeLista(page, masOpciones);
+    await pruebaInert(page, masOpciones);
+    await checkContraste(page, "#ficha .sem-circulo", `ficha de ${masOpciones}: círculos de los renglones`);
+    await checkContraste(page, "#ficha .leyenda-memoria .muestra-letra, #ficha .franja .caja", `ficha de ${masOpciones}: letras de la memoria`);
     await pruebaImpresion(page, masOpciones);
     await cerrarFicha(page);
   } else {
@@ -1018,6 +1112,12 @@ async function pruebasEscritorio(page, peticiones) {
 async function pruebasTelefono(page, peticiones) {
   const sinDesborde = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
   check("teléfono: sin desplazamiento horizontal de la página", sinDesborde);
+  // Reflujo (WCAG 1.4.10): a 320 px de ancho tampoco hay desplazamiento horizontal (rutas largas del pie).
+  const tamano = page.viewportSize();
+  await page.setViewportSize({ width: 320, height: tamano.height });
+  const a320 = await page.evaluate(() => ({ pagina: document.documentElement.scrollWidth, ventana: document.documentElement.clientWidth }));
+  check("teléfono: a 320 px, sin desplazamiento horizontal", a320.pagina <= a320.ventana, JSON.stringify(a320));
+  await page.setViewportSize(tamano);
   const orden = await page.evaluate(() => {
     const mapa = document.querySelector("#mapa").getBoundingClientRect();
     const panel = document.querySelector(".panel").getBoundingClientRect();
@@ -1123,7 +1223,37 @@ function variante() {
       base_historica: "TEST ONLY",
     };
   }
-  return { c, g, primera, quitada, idAbst, pAbst, idGoteo };
+  // Una parcela CLASIFICADA sin opciones (zona sin clima): el cubo la marca con el código «sin_clima_zona».
+  const idSinCalculo = candidatos.find(
+    (id) => id !== idAbst && id !== idGoteo && !porId.get(id).abstencion && !porId.get(id).protagonista && actualDe(id, c),
+  );
+  if (idSinCalculo) c.parcelas[idSinCalculo] = { opciones: [], sin_opciones: "sin_clima_zona" };
+  return { c, g, primera, quitada, idAbst, pAbst, idGoteo, idSinCalculo };
+}
+
+/** Parcela clasificada sin opciones: su propia clase, fuera del denominador, y el motivo en la ficha y el mensaje. */
+async function pruebaSinCalculo(page, v) {
+  const id = v.idSinCalculo;
+  const fila = await page.locator(`.boton-parcela[data-id="${id}"] .p-detalle`).innerText();
+  check(`clasificada sin opciones ${id}: la lista dice «Not computed yet», no «Not classified»`, fila.includes("Not computed yet") && !fila.includes("Not classified"), fila);
+  const conteos = await texto(page, "#conteos-semaforo");
+  check("clasificada sin opciones: los conteos tienen su propia clase", conteos.includes("Not computed yet"), conteos.replace(/\n/g, " · "));
+  const D = Number(await page.locator("#dotacion").inputValue());
+  const cz = conteosZona(v.g.features, v.c, D, 0);
+  const segunda = await texto(page, "#indicador-segunda");
+  check(
+    "clasificada sin opciones: no cuenta en el denominador del indicador",
+    segunda.includes(`of ${nf({ maximumFractionDigits: 0 }).format(cz.clasificadas - 1)}`) && segunda.includes("not counted"),
+    segunda,
+  );
+  await abrirDesdeLista(page, id);
+  const cuerpo = await texto(page, "#ficha-cuerpo");
+  check(`ficha de ${id}: dice que falta el clima de su zona (no que el mapa no sabe qué hay)`,
+    cuerpo.includes("no climate data for this field's pilot area") && !cuerpo.includes("not sure what grows"), cuerpo.split("\n").slice(0, 8).join(" | "));
+  await page.locator("#boton-whatsapp").click();
+  const wa = await texto(page, "#vista-whatsapp");
+  check(`WhatsApp de ${id}: «falta el clima de su zona», sin «no está seguro»`, wa.includes("falta el clima de su zona") && !wa.includes("no está seguro"), wa.split("\n")[1] ?? wa);
+  await cerrarFicha(page);
 }
 
 // ---------------------------------------------------------------- variante de dos zonas (en memoria)
@@ -1401,8 +1531,73 @@ async function main() {
     } else {
       omitir("variante: escenario de goteo", "ninguna parcela clasificada con bloque gota");
     }
+    if (v.idSinCalculo) await pruebaSinCalculo(alt.page, v);
+    else omitir("variante: parcela clasificada sin opciones", "ninguna parcela clasificada con opción ACTUAL");
     check("variante en memoria: sin errores de consola", alt.errores.length === 0, alt.errores.join(" | "));
     await alt.ctx.close();
+
+    // Fallas de lectura: relieve.json y pruebas.json en HTTP 500 y manifest.json roto. No son «not run» ni
+    // «not built»: la página dice que no se pudieron leer. Además, imprimir que falla deja un aviso visible.
+    const fal = await abrir(navegador, base, { viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" }, "fallas de lectura", {
+      "relieve.json": new Respuesta(500),
+      "pruebas.json": new Respuesta(500),
+      "manifest.json": new Respuesta(200, "{roto"),
+    });
+    const rel = await texto(fal.page, "#capa-relieve");
+    const marcaRel = await fal.page.evaluate(() => document.body.dataset.relieve);
+    check("relieve.json en HTTP 500: «Terrain layer: could not be loaded (relieve.json: HTTP 500)», no «not run»",
+      rel.includes("Terrain layer: could not be loaded") && rel.includes("relieve.json: HTTP 500") && !rel.includes("not run") && marcaRel === "error", `${rel} · ${marcaRel}`);
+    await fal.page.locator("#boton-acerca").click();
+    await fal.page.waitForSelector("body[data-acerca='listo']", { timeout: 10000 });
+    const acerca = await texto(fal.page, "#acerca");
+    check("pruebas.json en HTTP 500: About & Data dice «could not be read (HTTP 500)», no «was not built»",
+      acerca.includes("pruebas.json could not be read (HTTP 500)") && !acerca.includes("pruebas.json was not built"));
+    check("manifest.json roto: About & Data dice «could not be read (invalid JSON…)»", acerca.includes("manifest.json could not be read (invalid JSON"));
+    await fal.page.keyboard.press("Escape");
+    const idImp = candidatos.find((x) => !porId.get(x).abstencion && opcionesDe(x).length);
+    if (idImp) {
+      await abrirDesdeLista(fal.page, idImp);
+      await fal.page.evaluate(() => {
+        window.print = () => {
+          throw new Error("printing blocked in this test");
+        };
+      });
+      await fal.page.locator("#boton-imprimir").click();
+      await fal.page.waitForSelector("#aviso-imprimir:not([hidden])", { timeout: 8000 }).catch(() => null);
+      const avisoImp = (await fal.page.locator("#aviso-imprimir").isVisible()) ? await texto(fal.page, "#aviso-imprimir") : "";
+      check("si imprimir falla, un aviso visible y sin agregados de impresión", avisoImp.includes("could not be printed") && (await fal.page.locator("[data-impresion]").count()) === 0, avisoImp);
+      await cerrarFicha(fal.page);
+    }
+    check("fallas de lectura: sin excepciones de la página", !fal.errores.some((e) => e.startsWith("pageerror")), fal.errores.filter((e) => e.startsWith("pageerror")).join(" | "));
+    await fal.ctx.close();
+
+    // Pantalla baja (teléfono horizontal o zoom de 200 %): la ficha ocupa todo el alto, sobre los controles.
+    const baja = await abrir(navegador, base, { viewport: { width: 844, height: 390 }, reducedMotion: "reduce" }, "pantalla baja");
+    const idBaja = conNecesidad ?? candidatos[0];
+    await abrirDesdeLista(baja.page, idBaja);
+    const alto = await baja.page.evaluate(() => {
+      const r = document.querySelector("#ficha").getBoundingClientRect();
+      return { arriba: Math.round(r.top), fraccion: r.height / window.innerHeight, controlesInert: document.querySelector("#controles").inert };
+    });
+    check("pantalla baja (844×390): la ficha ocupa todo el alto y los controles tapados quedan inert", alto.arriba <= 1 && alto.fraccion > 0.95 && alto.controlesInert, JSON.stringify(alto));
+    await baja.page.screenshot({ path: path.join(CAPTURAS, "pantalla_baja_ficha.png") });
+    await cerrarFicha(baja.page);
+    check("pantalla baja: al cerrar la ficha los controles vuelven a ser operables", !(await baja.page.evaluate(() => document.querySelector("#controles").inert)));
+    check("pantalla baja: sin errores de consola", baja.errores.length === 0, baja.errores.join(" | "));
+    await baja.ctx.close();
+
+    // Arranque que falla después de leer los datos (cubo sin «dotaciones»): aviso visible, no una página a medias.
+    const malo = structuredClone(cubo);
+    delete malo.dotaciones;
+    const ctxMalo = await navegador.newContext({ viewport: { width: 1366, height: 860 } });
+    const pMalo = await ctxMalo.newPage();
+    await pMalo.route((url) => esOpcional(url.href), (route) => route.abort());
+    await pMalo.route("**/data/cubo.json", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(malo) }));
+    await pMalo.goto(`${base}/index.html`);
+    await pMalo.waitForSelector(".error-carga", { timeout: 15000 }).catch(() => null);
+    const avisoMalo = (await pMalo.locator(".error-carga").count()) ? await pMalo.locator(".error-carga").first().innerText() : "";
+    check("arranque fallido: aviso visible «The page could not start: …»", avisoMalo.includes("The page could not start") && (await pMalo.evaluate(() => document.body.dataset.listo)) === "error", avisoMalo);
+    await ctxMalo.close();
 
     // Variante de dos zonas en memoria: selector, indicador, conteos, lista, mapa y localidades por zona.
     const dz = varianteDosZonas();

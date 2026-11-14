@@ -725,6 +725,59 @@ def regla_faltantes_max(regla, filas, ctx, res, faltantes):
             res.aviso(f"{col}: {k} faltantes de {total} filas ({fraccion:.1%}); se admite menos de {regla['fraccion']:.0%}")
 
 
+def regla_combinacion_permitida(regla, filas, ctx, res, faltantes):
+    """La combinación de «columnas» de cada fila es una de las filas de «permitidas», la tabla
+    cerrada de «tabla» (contexto_regional.csv: fuente, variable y unidad). Una fila con alguna
+    de esas celdas vacía o mal escrita ya tiene su motivo y aquí se salta."""
+    cols = regla["columnas"]
+    permitidas = {tuple(p) for p in regla["permitidas"]}
+    for n, fila in filas:
+        clave = tuple(fila.get(c) for c in cols)
+        if any(v is None for v in clave):
+            continue
+        if clave not in permitidas:
+            res.motivo(f"la combinación de ({', '.join(cols)}) no está en la tabla de {regla['tabla']}",
+                       f"fila {n}: {', '.join(map(fmt, clave))}")
+
+
+def regla_rango_segun(regla, filas, ctx, res, faltantes):
+    """Cota inclusiva de «columna» según el valor de otra columna de la fila (el valor según su
+    unidad o su variable). Cada grupo: {"segun": columna, "valores": (...), "min", "max"}; una de
+    las dos cotas puede faltar. Lo que no cae en ningún grupo no tiene cota (no se inventa)."""
+    col = regla["columna"]
+    for n, fila in filas:
+        v = fila.get(col)
+        if not es_numero(v):
+            continue
+        for g in regla["grupos"]:
+            segun = fila.get(g["segun"])
+            if segun not in g["valores"]:
+                continue
+            mn, mx = g.get("min"), g.get("max")
+            if (mn is None or v >= mn) and (mx is None or v <= mx):
+                continue
+            if mn is not None and mx is not None:
+                cota_txt = f"fuera de [{fmt(mn)}, {fmt(mx)}]"
+            else:
+                cota_txt = f"menor que {fmt(mn)}" if mn is not None else f"mayor que {fmt(mx)}"
+            res.motivo(f"{col} con {g['segun']} «{segun}» {cota_txt}", f"fila {n}: {fmt(v)}")
+
+
+def regla_vacias_segun(regla, filas, ctx, res, faltantes):
+    """Las «columnas» van vacías cuando «columna» vale «valor» (sin disparos de GEDI no hay
+    altura; sin escenas no hay ET) y, con «llenas_si_no», traen valor en cualquier otro caso."""
+    col, valor = regla["columna"], regla["valor"]
+    for n, fila in filas:
+        v = fila.get(col)
+        if v is None:
+            continue
+        for c in regla["columnas"]:
+            if v == valor and fila.get(c) is not None:
+                res.motivo(f"{c} debe ir vacío cuando {col} = {fmt(valor)}", f"fila {n}: {fmt(fila[c])}")
+            elif v != valor and regla.get("llenas_si_no") and fila.get(c) is None:
+                res.motivo(f"{c} sin valor con {col} distinto de {fmt(valor)}", f"fila {n}: {col} = {fmt(v)}")
+
+
 REGLAS_CSV = {
     "orden": regla_orden,
     "rango_por_banda": regla_rango_por_banda,
@@ -732,6 +785,10 @@ REGLAS_CSV = {
     "abstencion_a42": regla_abstencion_a42,
     "un_solo_valor_por": regla_un_solo_valor_por,
     "faltantes_max": regla_faltantes_max,
+    # Bases de datos del reto (docs/decisiones/2026-11-14_recursos_del_reto.md).
+    "combinacion_permitida": regla_combinacion_permitida,
+    "rango_segun": regla_rango_segun,
+    "vacias_segun": regla_vacias_segun,
 }
 
 

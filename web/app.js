@@ -71,12 +71,12 @@ const PLAZO = {
 };
 
 const MEMORIA = {
-  perenne: { texto: "Perennial", letra: "P", trama: "ninguna", claro: false },
-  verano: { texto: "Summer crop", letra: "S", trama: "horizontal", claro: true },
-  invierno: { texto: "Winter crop", letra: "W", trama: "vertical", claro: true },
-  doble: { texto: "Double crop", letra: "D", trama: "cruz", claro: false },
-  descanso: { texto: "Rest", letra: "R", trama: "diagonal", claro: true },
-  sin_dato: { texto: "No data", letra: "?", trama: "puntos", claro: true },
+  perenne: { texto: "Perennial", letra: "P", trama: "ninguna" },
+  verano: { texto: "Summer crop", letra: "S", trama: "horizontal" },
+  invierno: { texto: "Winter crop", letra: "W", trama: "vertical" },
+  doble: { texto: "Double crop", letra: "D", trama: "cruz" },
+  descanso: { texto: "Rest", letra: "R", trama: "diagonal" },
+  sin_dato: { texto: "No data", letra: "?", trama: "puntos" },
 };
 
 const CULTIVOS = {

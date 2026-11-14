@@ -382,5 +382,57 @@
       "etiqueta": "[V]",
       "nota": "Déficit oficial, no una pérdida medida"
     }
+  },
+  "gemelo": {
+    "exageracion_vertical": {
+      "valor": 6,
+      "unidad": "factor (veces la altura real del terreno)",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "No es un dato: el valle es casi plano y sin exagerar el relieve no se lee. La vista 3D lo declara en su rótulo (vertical exaggeration applied)"
+    },
+    "metros_por_millar": {
+      "valor": 60,
+      "unidad": "m de altura de la columna por cada millar/ha",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "No es un dato: escala visual de la columna de agua de cada parcela. La altura no se mide en el terreno; solo permite comparar parcelas entre sí",
+      "nota_web": "Column height is a visual scale, not a measurement: every thousand m³ per hectare adds the same height."
+    },
+    "camara": {
+      "valor": {
+        "pitch": 60,
+        "bearing": -20
+      },
+      "unidad": "grados (pitch: inclinación de la cámara; bearing: giro respecto al norte)",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "Vista inicial del modo 3D; el usuario puede girarla"
+    },
+    "reproduccion_intervalo_ms": {
+      "valor": 1200,
+      "unidad": "ms por año agrícola",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "Tiempo que la línea de tiempo se detiene en cada año durante la reproducción"
+    },
+    "dem": {
+      "valor": {
+        "minzoom": 7,
+        "maxzoom": 12
+      },
+      "unidad": "nivel de zoom de las teselas de relieve (XYZ, 256 px)",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "Máximo: en el zoom 12 un píxel de tesela mide cerca de los 30 m de NASADEM; más zoom no añade detalle. Mínimo: MapLibre dibuja el relieve con teselas de un nivel menos que el zoom del mapa, y en un teléfono la zona completa se ve cerca del zoom 10 del mapa; con el mínimo en 9 (el del ejemplo de la decisión) el relieve quedaba plano ahí. Con 7 hay relieve desde el zoom 8 del mapa. Si cambia, regenere las teselas: python motor/dem_teselas.py"
+    },
+    "anio_destacado": {
+      "valor": 2025,
+      "unidad": "año agrícola",
+      "texto": "Year without dam water: the district received no dam allocation",
+      "fuente": "S9 §2 (prensa con cifras de Conagua)",
+      "etiqueta": "[P]",
+      "nota": "Año que la línea de tiempo resalta. S9 §2: en 2025 el distrito no recibió agua de las presas"
+    }
   }
 }

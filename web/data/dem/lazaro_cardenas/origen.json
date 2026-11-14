@@ -1,0 +1,39 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_nota": "Lo escribe motor/dem_teselas.py; no se edita a mano. Dice de qué ráster salieron las teselas de esta carpeta; tests/test_gemelo_motor.py lo compara con el .tif y con las teselas.",
+ "zona": "lazaro_cardenas",
+ "origen": {
+  "archivo": "data/processed/nasadem_zona_piloto_lazaro_cardenas.tif",
+  "sha256": "1e4566efddc29e94996abc3b6f3663c4f80da8b7e693403e0ad271b87736562b"
+ },
+ "encoding": "terrarium",
+ "tileSize": 256,
+ "minzoom": 7,
+ "maxzoom": 12,
+ "bbox": [
+  -105.66,
+  28.35,
+  -105.56,
+  28.43
+ ],
+ "paso_vertical_m": 0.25,
+ "remuestreo": "bilinear (rasterio.warp.reproject a EPSG:3857); fuera del ráster se extiende el borde",
+ "generado_con": {
+  "rasterio": "1.4.3",
+  "gdal": "3.9.3",
+  "numpy": "2.5.3"
+ },
+ "teselas": [
+  "7/26/53.png",
+  "8/52/106.png",
+  "9/105/213.png",
+  "10/211/427.png",
+  "11/422/855.png",
+  "11/423/855.png",
+  "12/845/1710.png",
+  "12/845/1711.png",
+  "12/846/1710.png",
+  "12/846/1711.png"
+ ],
+ "sha256_teselas": "0832a5341430d088e7f91d91f318f09ee0b395def71e27db3ca4d94bfd42af78"
+}

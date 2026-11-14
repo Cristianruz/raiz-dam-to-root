@@ -59,6 +59,10 @@
     "*.js"
    ],
    "motivo": "Tipo de contexto del lienzo: canvas.getContext(\"2d\")"
+  },
+  {
+   "patron": "\\b(crearGemelo)?3D\\b",
+   "motivo": "«3D» es el nombre de la vista en tres dimensiones del gemelo digital (y de la función crearGemelo3D de web/js/gemelo3d.js), no una cifra de los datos"
   }
  ]
 }

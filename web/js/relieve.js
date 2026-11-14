@@ -19,7 +19,8 @@
 //       (que no sea 404) no se guarda: se reintenta la próxima vez.
 //   leerOpcional(url) -> Promise<{estado: "ok", datos} | {estado: "ausente" | "error", detalle}>
 //       Lectura de un JSON opcional que distingue «no existe» (404) de «no se pudo leer».
-//   prepararRutas(fc), puntoEn(camino, s): funciones puras (sin DOM) que prueba tests/relieve.test.js.
+//   prepararRutas(fc), puntoEn(camino, s), htmlPeriodo(periodo): funciones puras (sin DOM) que prueba
+//       tests/relieve.test.js.
 //
 // Reglas de este archivo:
 // - Ninguna cifra escrita a mano: el umbral de las rutas, la lámina de la tormenta, su definición,
@@ -519,8 +520,28 @@ function htmlLeyenda(relieve, bloques, nombreZona) {
     `</ul>` +
     `<p class="relieve-escala">Scale: ${escala}</p>` +
     `<p class="fuente">Thicker lines: more runoff paths have joined. Zone context, not a field measurement.` +
-    `${relieve?.fuente ? ` Source: <span lang="es">${esc(relieve.fuente)}</span>` : ""}</p>`
+    `${relieve?.fuente ? ` Source: ${esc(relieve.fuente)}` : ""}</p>`
   );
+}
+
+/**
+ * Periodo de la tormenta. relieve.json lo trae como texto (p. ej. «AAAA-MM-DD a AAAA-MM-DD», con el
+ * separador en español). Si trae dos fechas ISO, se escriben en inglés con Intl (las fechas son las del
+ * archivo); si no, el texto se cita tal cual como dato del archivo.
+ */
+export function htmlPeriodo(periodo) {
+  const fechas = String(periodo ?? "").match(/\d{4}-\d{2}-\d{2}/g) ?? [];
+  const aFecha = (f) => {
+    const [anio, mes, dia] = f.split("-").map(Number);
+    return new Date(Date.UTC(anio, mes - 1, dia));
+  };
+  const validas = fechas.map(aFecha).filter((d) => !Number.isNaN(d.getTime()));
+  if (validas.length === 2 && fechas.length === 2) {
+    const f = new Intl.DateTimeFormat(LOCALE, { dateStyle: "medium", timeZone: "UTC" });
+    return `Period: <time datetime="${esc(fechas[0])}">${esc(f.format(validas[0]))}</time> to ` +
+      `<time datetime="${esc(fechas[1])}">${esc(f.format(validas[1]))}</time>`;
+  }
+  return `Period, as reported in the data: <q>${esc(periodo)}</q>`;
 }
 
 function htmlTormenta(bloques, nombreZona) {
@@ -533,11 +554,11 @@ function htmlTormenta(bloques, nombreZona) {
         `<div class="relieve-tormenta-zona">` +
         `<p class="relieve-tormenta-titulo">Reference storm${varias ? ` — ${esc(nombreZona(id))}` : ""}</p>` +
         `<p class="relieve-tormenta-cifra">${mm == null ? "<strong>no data</strong>" : `<strong>${esc(fmt(mm, 3))} mm</strong>`}</p>` +
-        // Definición, periodo y fuente: texto del archivo de datos, citado tal cual (viene en español, con
-        // lang="es" para el lector de pantalla); la web no lo traduce ni lo reescribe.
-        `${t.definicion ? `<p class="relieve-tormenta-def">Definition, as reported in the data: <q lang="es">${esc(t.definicion)}</q></p>` : ""}` +
-        `${t.periodo ? `<p class="relieve-tormenta-periodo">Period, as reported in the data: <q lang="es">${esc(t.periodo)}</q></p>` : ""}` +
-        `<p class="fuente">Source: ${t.fuente ? `<span lang="es">${esc(t.fuente)}</span>` : "not available"}</p>` +
+        // Definición y fuente: texto del archivo de datos, citado tal cual (la web no lo traduce ni lo
+        // reescribe). El periodo se da con fechas en inglés si trae dos fechas ISO; si no, tal cual, citado.
+        `${t.definicion ? `<p class="relieve-tormenta-def">Definition: ${esc(t.definicion)}</p>` : ""}` +
+        `${t.periodo ? `<p class="relieve-tormenta-periodo">${htmlPeriodo(t.periodo)}</p>` : ""}` +
+        `<p class="fuente">Source: ${t.fuente ? esc(t.fuente) : "not available"}</p>` +
         `</div>`
       );
     })
