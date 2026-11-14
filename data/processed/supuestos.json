@@ -117,5 +117,32 @@
   "valor": 0.25,
   "etiqueta": "assumption [S]",
   "fuente": "NDVI mensual mínimo del año por debajo del cual se considera que la parcela estuvo desnuda (resiembra o establecimiento de la alfalfa); en la zona piloto los alfalfares establecidos tienen mínimos anuales ≥ 0.26 y los años de establecimiento 0.12–0.24. Sensibilidad 0.20–0.30"
+ },
+ "ea_goteo": {
+  "valor": 0.9,
+  "etiqueta": "[V] indicative, not local",
+  "fuente": "FAO, Irrigation Water Management Training Manual No. 4, «Irrigation Scheduling» (Brouwer, Prins y Heibloem, 1989), Anexo I, Tabla 8 «Indicative values of the field application efficiency (ea)»: riego superficial 60 %, aspersión 75 %, goteo 90 %. https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026. Valor indicativo general, no medido en el DR-005"
+ },
+ "ea_superficial_referencia": {
+  "valor": 0.6,
+  "etiqueta": "[V] indicative, not local",
+  "fuente": "FAO, Irrigation Water Management Training Manual No. 4, «Irrigation Scheduling» (Brouwer, Prins y Heibloem, 1989), Anexo I, Tabla 8 «Indicative values of the field application efficiency (ea)»: riego superficial 60 %, aspersión 75 %, goteo 90 %. https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026. Valor indicativo general, no medido en el DR-005. Solo referencia: el cálculo usa el rango de ea_gravedad"
+ },
+ "gedi_piso_instrumento_m": {
+  "min": 2.5,
+  "max": 3.2,
+  "valor": 2.7,
+  "etiqueta": "own analysis (A11)",
+  "fuente": "Análisis propio (datos/colab/A11_gedi_parcelas.py, 14-nov-2026): percentiles 10 y 90 (valor = mediana) de la mediana de rh98 por parcela en las 261 parcelas con 3 o más disparos que las reglas clasifican como alfalfa, barbecho o cereal de invierno (sin árboles). Por debajo de ese nivel rh98 refleja el ancho del pulso del instrumento, no la altura de la planta"
+ },
+ "gedi_umbral_dosel_alto_m": {
+  "valor": 5,
+  "min_disparos": {
+   "valor": 3,
+   "etiqueta": "own analysis (A11)",
+   "fuente": "Mínimo de disparos válidos por parcela para leer la altura; criterio propio"
+  },
+  "etiqueta": "own analysis (A11), assumption [S]",
+  "fuente": "Criterio propio (A11, 14-nov-2026): percentil 90 de rh98 de la parcela de 5 m o más. Con ese umbral, 57 de 86 parcelas de nogal con 3 o más disparos muestran dosel alto, frente a 7 de 95 de alfalfa y 0 de 11 de cereal de invierno"
  }
 }
