@@ -10,3 +10,4 @@ node_modules/
 # Buzón local sincronizado desde Drive (las entregas validadas se copian a data/processed/)
 buzon/
 .env
+/dist/

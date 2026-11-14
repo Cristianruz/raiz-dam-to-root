@@ -23,9 +23,12 @@
 //         misma insignia que un resultado favorable; la puerta automática (docs/pruebas.md);
 //       - el rastro de cifras de manifest.json, la liga al repo, «SI/AI tools used» en una línea con
 //         liga al README y el aviso de juicio local.
-//         ctx = { manifest, pruebas, cubo, relieve }
+//         ctx = { manifest, pruebas, cubo, relieve, errores }
 //           manifest  contenido de web/data/manifest.json (fuentes_de_origen, resumen, generado, mock)
 //           pruebas   contenido de web/data/pruebas.json (motor/pruebas_web.py); null si no existe
+//           errores   { manifest?, pruebas? }: por qué falta cada archivo, {estado: "ausente" | "error",
+//                     detalle}. «ausente» (404) = no se ha construido; «error» (500, red, JSON roto) = no se
+//                     pudo leer. Sin esta información se dice «could not be read», nunca una causa supuesta.
 //           cubo      contenido de web/data/cubo.json (meta.fuentes; zonas[].nombre_mostrar)
 //           relieve   contenido de web/data/relieve.json (zonas[].rotulo y tormenta.fuente); opcional
 //       Cualquiera puede faltar (null): la parte que depende de él lo dice y el resto se dibuja.
@@ -373,11 +376,17 @@ function htmlArchivo(f, hayCache) {
     `</details></li>`;
 }
 
-function htmlDatosNasa(manifest, cubo, relieve, id) {
+/** Por qué falta un archivo opcional: «was not built (…)» si no existe (404); si no, «could not be read (…)». */
+function motivoFalta(archivo, error, comoConstruir) {
+  if (error?.estado === "ausente") return `${archivo} was not built (${comoConstruir})`;
+  return `${archivo} could not be read${error?.detalle ? ` (${error.detalle})` : ""}`;
+}
+
+function htmlDatosNasa(manifest, cubo, relieve, id, error) {
   const cabeza = `<h3 id="${id}-nasa">NASA data</h3>`;
   if (!manifest) {
     return `<section class="acerca-bloque" aria-labelledby="${id}-nasa">${cabeza}` +
-      `<p class="acerca-vacio">The list of data sources is not available: manifest.json could not be read.</p></section>`;
+      `<p class="acerca-vacio">The list of data sources is not available: ${esc(motivoFalta("manifest.json", error, "python construir.py"))}.</p></section>`;
   }
   const { filas, otras, hayCache } = filasNasa(manifest, cubo, relieve);
   const cuerpo = filas.length
@@ -499,12 +508,14 @@ function htmlPuerta(puerta, id) {
     </div>`;
 }
 
-function htmlPruebas(pruebas, cubo, id) {
+function htmlPruebas(pruebas, cubo, id, error) {
   const cabeza = `<h3 id="${id}-pruebas">Tests in sight</h3>`;
   const lista = Array.isArray(pruebas?.pruebas) ? pruebas.pruebas : null;
   if (!lista) {
+    // Archivo leído pero sin la lista de pruebas: tampoco es «not built».
+    const motivo = pruebas && !error ? { estado: "error", detalle: "no test list in the file" } : error;
     return `<section class="acerca-bloque" aria-labelledby="${id}-pruebas">${cabeza}` +
-      `<p class="acerca-vacio">Test results are not available: pruebas.json was not built (python motor/pruebas_web.py).</p></section>`;
+      `<p class="acerca-vacio">Test results are not available: ${esc(motivoFalta("pruebas.json", motivo, "python construir.py"))}.</p></section>`;
   }
   return `<section class="acerca-bloque" aria-labelledby="${id}-pruebas">${cabeza}
       <p class="acerca-ayuda">Each criterion was declared before seeing the result${
@@ -523,7 +534,9 @@ function htmlRastro(manifest) {
   const r = manifest?.resumen;
   if (!r) return "";
   const simuladas = num(r.simuladas);
-  return `<p class="acerca-rastro">Every figure on this page is traced in <code>manifest.json</code> with its source, date and script: ` +
+  // El manifest registra las cifras de cubo.json, parcelas.geojson, explicaciones.json, relieve.json y
+  // pruebas.json (construir.py lo regenera después del paso 5c): la frase dice lo que hay.
+  return `<p class="acerca-rastro">Every figure on this page, test results included, is traced in <code>manifest.json</code> with its source, date and script: ` +
     `<strong>${esc(fmt(r.cifras))}</strong> figures from <strong>${esc(fmt(r.fuentes_de_origen))}</strong> source files` +
     (simuladas != null ? `, <strong>${esc(fmt(simuladas))}</strong> of them simulated` : "") +
     (manifest.generado ? `. Generated ${esc(fmtFecha(manifest.generado))}.` : ".") +
@@ -550,7 +563,7 @@ function htmlCierre(pruebas, id) {
 export function montarAcerca(contenedor, ctx = {}) {
   if (!contenedor) return null;
   asegurarHoja();
-  const { manifest = null, pruebas = null, cubo = null, relieve = null } = ctx || {};
+  const { manifest = null, pruebas = null, cubo = null, relieve = null, errores = {} } = ctx || {};
   const id = `acerca-${++contador}`;
   const seccion = document.createElement("section");
   seccion.className = "acerca";
@@ -559,8 +572,8 @@ export function montarAcerca(contenedor, ctx = {}) {
     <h2 class="acerca-titulo" id="${id}-titulo">About &amp; Data</h2>
     <p class="acerca-entrada">Where the numbers come from and how we test them. No number in this section is typed by hand: each one is read from the data files.</p>
     ${htmlRastro(manifest)}
-    ${htmlDatosNasa(manifest, cubo, relieve, id)}
-    ${htmlPruebas(pruebas, cubo, id)}
+    ${htmlDatosNasa(manifest, cubo, relieve, id, errores?.manifest)}
+    ${htmlPruebas(pruebas, cubo, id, errores?.pruebas)}
     ${htmlCierre(pruebas, id)}`;
   contenedor.replaceChildren(seccion);
   return {

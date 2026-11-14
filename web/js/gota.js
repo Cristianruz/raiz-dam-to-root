@@ -390,7 +390,11 @@ function crearGota(contenedor, opcion, ctx) {
   const leyenda = el("ul", { class: "gota-mod-leyenda", id: `${pre}-leyenda` });
   const tabla = el("table", { class: "gota-mod-tabla", id: `${pre}-tabla` });
   const supRetorno = (base.supuestos ?? []).find((s) => typeof s === "string" && /return|retorno/i.test(s));
-  const fuente = el("p", { class: "gota-mod-fuente", id: `${pre}-fuente` }, `${TEXTOS.fuenteRetorno} ${supRetorno ? entreParentesis(supRetorno) : TEXTOS.fuenteFalta}`);
+  // La fuente del coeficiente viene de los datos, en español: lang="es" para el lector de pantalla.
+  const fuente = el("p", { class: "gota-mod-fuente", id: `${pre}-fuente` }, [
+    `${TEXTOS.fuenteRetorno} `,
+    supRetorno ? el("span", { lang: "es" }, entreParentesis(supRetorno)) : TEXTOS.fuenteFalta,
+  ]);
   const listaSupuestos = el("ul", { id: `${pre}-supuestos` });
   raiz.append(
     mostrando,

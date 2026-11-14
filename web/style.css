@@ -33,6 +33,7 @@
   --sem-ambar: var(--ambar);
   --sem-rojo: var(--rojo);
   --sem-gris: var(--gris);
+  --sem-sin_calculo: #CDD1D5; /* clasificada sin opciones calculadas (no es la abstención del mapa) */
 
   /* Estado del plazo */
   --plazo-libre: var(--brote);
@@ -335,8 +336,19 @@ button, input, select { font: inherit; color: inherit; }
 .trama-puntos { background-image: radial-gradient(rgba(0,0,0,0.5) 1.2px, transparent 1.6px); background-size: 5px 5px; }
 .trama-horizontal { background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.45) 0 2px, transparent 2px 6px); }
 .trama-vertical { background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.45) 0 2px, transparent 2px 6px); }
+/* Más tramas: una por cultivo en la capa «Crops» (app.js, TRAMAS_CULTIVO; las mismas en el mapa) */
+.trama-contradiagonal { background-image: repeating-linear-gradient(-45deg, rgba(0,0,0,0.45) 0 2px, transparent 2px 6px); }
+.trama-cuadricula { background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.45) 0 1.5px, transparent 1.5px 6px), repeating-linear-gradient(90deg, rgba(0,0,0,0.45) 0 1.5px, transparent 1.5px 6px); }
+.trama-rayas_anchas { background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.45) 0 4px, transparent 4px 9px); }
+.trama-horizontal_anchas { background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.45) 0 4px, transparent 4px 9px); }
+.trama-puntos_gruesos { background-image: radial-gradient(rgba(0,0,0,0.55) 2.2px, transparent 2.7px); background-size: 8px 8px; }
 
-.fuente { font-size: 0.8rem; color: var(--tinta-suave); }
+/* Letra o símbolo dentro de una muestra: su color (tinta o blanco) lo elige app.js por contraste WCAG; el
+   fondo del mismo color tapa la trama detrás de la letra. */
+.muestra-letra { display: inline-block; min-width: 1.1em; padding: 0 2px; border-radius: 2px; line-height: 1.15; text-align: center; }
+
+/* Rutas de archivo y fuentes largas: se cortan donde haga falta (sin desplazamiento horizontal, WCAG 1.4.10). */
+.fuente { font-size: 0.8rem; color: var(--tinta-suave); overflow-wrap: anywhere; }
 .ayuda { font-size: 0.85rem; color: var(--tinta-suave); margin-bottom: 6px; }
 
 /* Buscador de la lista (cientos de parcelas reales) */
@@ -584,6 +596,11 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
   margin: 24px; padding: 16px; background: var(--rojo-claro);
   border-left: 6px solid var(--rojo); border-radius: var(--radio);
 }
+.aviso-imprimir:not([hidden]) {
+  margin-top: 8px; padding: 6px 10px; background: var(--rojo-claro);
+  border-left: 4px solid var(--rojo); border-radius: 4px; font-weight: 700;
+}
+.nota-sin-calculo { padding: 8px 10px; background: var(--arena); border-left: 4px solid var(--sem-sin_calculo); border-radius: 4px; }
 
 /* ---------- Pantallas angostas: el panel pasa debajo del mapa ---------- */
 @media (max-width: 899px) {
@@ -626,6 +643,15 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
   }
   .celda .anio { font-size: 0.6rem; }
   .glosario dl { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Pantallas muy bajas (zoom de 200 %, teléfono horizontal) ----------
+   La barra fija de controles ocuparía la mitad de la pantalla y a la ficha le quedaría una franja (WCAG 1.4.4 y
+   1.4.10). Aquí los controles dejan de ser fijos y la ficha ocupa todo el alto, encima de ellos (app.js los
+   vuelve inert mientras la ficha está abierta). */
+@media (max-height: 500px) {
+  .controles { position: static; box-shadow: none; }
+  .ficha { top: 0; z-index: 35; }
 }
 
 /* Papel (la ficha imprimible la arma css/imprimir.css; aquí, lo que depende de cómo app.js monta los

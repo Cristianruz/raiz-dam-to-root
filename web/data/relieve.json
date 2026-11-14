@@ -8,8 +8,8 @@
    "umbral_ruta_etiqueta": "assumption [S]",
    "tormenta": {
     "mm": 20.2,
-    "definicion": "percentil 95 de los días con lluvia >= 1 mm",
-    "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), media sobre el rectángulo de la zona",
+    "definicion": "95th percentile of days with rain >= 1 mm",
+    "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), mean over the pilot area rectangle",
     "periodo": "2001-01-01 a 2026-11-13"
    }
   },
@@ -19,8 +19,8 @@
    "umbral_ruta_etiqueta": "assumption [S]",
    "tormenta": {
     "mm": 20.7,
-    "definicion": "percentil 95 de los días con lluvia >= 1 mm",
-    "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), media sobre el rectángulo de la zona",
+    "definicion": "95th percentile of days with rain >= 1 mm",
+    "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), mean over the pilot area rectangle",
     "periodo": "2001-01-01 a 2026-11-13"
    }
   }

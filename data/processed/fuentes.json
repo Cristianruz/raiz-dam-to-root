@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/ensamblar.py; no se edita a mano. tipo «entrega»: archivo del buzón copiado sin modificar a esta carpeta (fuente, fecha y script de LEEME.md; url_o_api y fecha_consulta repiten fuente y fecha para motor/manifest.py). tipo «origen»: filas de los fuentes_<pieza>.csv entregados (kit K-ENS paso 6(a)).",
- "generado": "2026-11-14T20:22:42+00:00",
+ "generado": "2026-11-14T21:00:26+00:00",
  "fuentes": [
   {
    "archivo": "cultivos_parcelas.csv",
@@ -15,7 +15,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "6f6fee58eb78e95f085ee17d66e80709a4d2ba811596e47d557e4c70bc2293b6",
    "ruta_buzon": "cultivos_parcelas.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00"
+   "ingreso": "2026-11-14T21:00:26+00:00"
   },
   {
    "archivo": "demanda_cultivos.csv",
@@ -29,7 +29,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "83f3ce1353e5d6d0c9bcdba73992faa4a4540f11fe64d1fe33a0148dd19ef3e7",
    "ruta_buzon": "demanda_cultivos.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -44,7 +44,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "230be28e7df7b6d1101a639202f26734869a9fd435b548381bd8d2d19775fd53",
    "ruta_buzon": "demanda_cultivos_lazaro_cardenas.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -59,7 +59,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "4198a284dc8d350cf22e3eab4368cea7bfded7000f62d5923956f6d9eda7f032",
    "ruta_buzon": "et_contraste.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00"
+   "ingreso": "2026-11-14T21:00:26+00:00"
   },
   {
    "archivo": "eto_diaria.csv",
@@ -73,7 +73,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "89657914bad2e1be107ceb5a8d24833ccab0477cde570e160a683a5c56923046",
    "ruta_buzon": "eto_diaria.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -88,7 +88,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "16af45819b7f02190938043e4a2d67a878baae029fc4eebf1dbbf52a50d51563",
    "ruta_buzon": "eto_diaria_lazaro_cardenas.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -103,7 +103,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "ef8579ef63bd2ca95735bbbb111dc6d0d7b42efda4ce424ff9e444d12537b303",
    "ruta_buzon": "h3_series.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00"
+   "ingreso": "2026-11-14T21:00:26+00:00"
   },
   {
    "archivo": "hls_mensual_parcelas.csv",
@@ -117,7 +117,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "fd97e0ade393c48a45f2b4c27acee672c592af4afbf56976f69cae36bf057fc9",
    "ruta_buzon": "hls_mensual_parcelas.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00"
+   "ingreso": "2026-11-14T21:00:26+00:00"
   },
   {
    "archivo": "imerg_diaria.csv",
@@ -131,7 +131,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "b308b68fa304cf8caa71a8dd6bcdb9a5904429d98851c6277fa426186420104e",
    "ruta_buzon": "imerg_diaria.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -146,7 +146,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "7005e73d8e22b0a897dbf5de4cf512f0b1f09d0f6c723899ca85cc18f6b37197",
    "ruta_buzon": "imerg_diaria_lazaro_cardenas.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -161,7 +161,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "132d19249f1b12e99fa3098794ee9980da7ac5b18d33118d158c80c6d46584f7",
    "ruta_buzon": "memoria_parcelas.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00"
+   "ingreso": "2026-11-14T21:00:26+00:00"
   },
   {
    "archivo": "memoria_resumen.csv",
@@ -175,7 +175,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "ce1cd1b8ed962589ac1d545c569029e3c17aaf4a3982e09c1949cc22ff67a8f3",
    "ruta_buzon": "memoria_resumen.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00"
+   "ingreso": "2026-11-14T21:00:26+00:00"
   },
   {
    "archivo": "nasadem_zona_piloto.tif",
@@ -189,7 +189,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "7ec898b86c90f6360876589af9ebdabdf3469c0c30691f88ecd572a788e8b31e",
    "ruta_buzon": "nasadem_zona_piloto.tif",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -204,7 +204,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "1e4566efddc29e94996abc3b6f3663c4f80da8b7e693403e0ad271b87736562b",
    "ruta_buzon": "nasadem_zona_piloto_lazaro_cardenas.tif",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -219,21 +219,21 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "60888e29f2e0bc5321a4dccec5ca2ef256c2f9b8ab03825d4c81b87e7899aa16",
    "ruta_buzon": "parcelas_base.geojson",
-   "ingreso": "2026-11-14T20:22:42+00:00"
+   "ingreso": "2026-11-14T21:00:26+00:00"
   },
   {
    "archivo": "relieve_meta.json",
    "tipo": "entrega",
    "pieza": "A9",
    "rol": null,
-   "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona delicias_saucillo",
+   "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona delicias_saucillo; sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
    "fecha": "2026-11-14",
    "script": "datos/colab/A9_relieve.py",
-   "url_o_api": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona delicias_saucillo",
+   "url_o_api": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona delicias_saucillo; sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
    "fecha_consulta": "2026-11-14",
-   "sha256": "79db24fe156b8e292d564af5b45c007108d451d57ac6930f095cc56876e9dec2",
+   "sha256": "6fe938e0ded4276cad67d32eeeed4c548c489f4d73663549bafc65762ac74fe5",
    "ruta_buzon": "relieve_meta.json",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -241,14 +241,14 @@
    "tipo": "entrega",
    "pieza": "A9",
    "rol": null,
-   "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona lazaro_cardenas",
+   "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona lazaro_cardenas; sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
    "fecha": "2026-11-14",
    "script": "datos/colab/A9_relieve.py",
-   "url_o_api": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona lazaro_cardenas",
+   "url_o_api": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona lazaro_cardenas; sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
    "fecha_consulta": "2026-11-14",
-   "sha256": "86e5137ef307fff46cb047d96835d10cc3b8537980af6f48f4edddac0ee2644f",
+   "sha256": "a65dfd4bd9445a573521c2414fe0c3633edccdc648387409381774c6bc64a43f",
    "ruta_buzon": "relieve_meta_lazaro_cardenas.json",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -263,21 +263,21 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "019ad831a6e2744a733bed8c51cb45b177e649a911a46096495e278be739dbb3",
    "ruta_buzon": "relieve_parcelas.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00"
+   "ingreso": "2026-11-14T21:00:26+00:00"
   },
   {
    "archivo": "relieve_rutas.geojson",
    "tipo": "entrega",
    "pieza": "A9",
    "rol": null,
-   "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta); dos zonas (propiedad zona)",
+   "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta); dos zonas (propiedad zona); sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
    "fecha": "2026-11-14",
    "script": "datos/colab/A9_relieve.py",
-   "url_o_api": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta); dos zonas (propiedad zona)",
+   "url_o_api": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta); dos zonas (propiedad zona); sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
    "fecha_consulta": "2026-11-14",
-   "sha256": "e5ab349c7c38f448493106cbac936d7ded06fddbcb9771412f1cce17598c14d2",
+   "sha256": "74a53c57d083b901b03a13d973e5392d8065c67af3f0e0c4ed1fc89c51a25674",
    "ruta_buzon": "relieve_rutas.geojson",
-   "ingreso": "2026-11-14T20:22:42+00:00"
+   "ingreso": "2026-11-14T21:00:26+00:00"
   },
   {
    "archivo": "rotaciones.json",
@@ -291,7 +291,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "564232b8dcf2f57e4913f1c475adcc002831e086fa2340dab510c901c18caf7e",
    "ruta_buzon": "rotaciones.json",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -306,7 +306,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "c4d0b72c84e84d66eee2a168506f279f6d276335fd411a11e5ee55d2008c45a3",
    "ruta_buzon": "rotaciones_lazaro_cardenas.json",
-   "ingreso": "2026-11-14T20:22:42+00:00",
+   "ingreso": "2026-11-14T21:00:26+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -321,7 +321,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "64b9dff72e7e2f335adeb68bfa93ff6cad3d61f23eb35ada106ca5cc89c4346f",
    "ruta_buzon": "suelo_desnudo.csv",
-   "ingreso": "2026-11-14T20:22:42+00:00"
+   "ingreso": "2026-11-14T21:00:26+00:00"
   }
  ]
 }

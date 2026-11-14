@@ -1,7 +1,7 @@
 <!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
 # Resultado de las pruebas (generado por `python construir.py`; no se edita a mano)
 
-Corrida: 2026-11-14T20:58:16+00:00 · duración 10.6 s
+Corrida: 2026-11-14T21:00:58+00:00 · duración 12.2 s
 
 | Paso | Estado | Detalle |
 |---|---|---|
@@ -9,10 +9,10 @@ Corrida: 2026-11-14T20:58:16+00:00 · duración 10.6 s
 | ensamblar | OMITIDO | sin RAIZ_BUZON: no se validaron entregas en esta corrida (se usa la caché previa de data/processed) |
 | simulados | OK | cubo REAL: 1239 parcelas, 458 clasificadas, 1492 opciones |
 | relieve | OK | zonas: delicias_saucillo, lazaro_cardenas |
-| manifest | OK | 55186 cifras (0 simuladas), 22 fuentes de origen, 33 avisos |
+| manifest | OK | 55189 cifras (0 simuladas), 22 fuentes de origen, 33 avisos |
 | contrato | OK | CONTRATO OK |
 | verificador | OK | VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv |
-| pytest | OK | 373 passed in 9.13s |
+| pytest | OK | 401 passed in 10.73s |
 | node | OK | 30 pass, 0 fail, 0 skipped |
 
 La prueba con navegador (`node tests/e2e/web_smoke.mjs`) se corre aparte y antes de cada publicación.

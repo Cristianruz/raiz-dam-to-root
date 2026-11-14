@@ -10,12 +10,14 @@
 //       suelo; «Responda 1, 2 o 3» y el aviso «Es una simulación; la asignación oficial la decide Conagua.»
 //         parcela   properties de la parcela (o el Feature completo) de parcelas.geojson
 //         opciones  cubo.parcelas[id].opciones (en el orden del cubo; la ACTUAL va primero)
-//         ctx       { reglas, D, r, plantilla? }
+//         ctx       { reglas, D, r, plantilla?, sinOpciones? }
 //           reglas     el módulo web/reglas.js (se usa reglas.evaluarOpcion; la regla vive solo ahí)
 //           D          dotación elegida con el deslizador (millares/ha)
 //           r          lluvia elegida (0 o la variante seca de cubo.lluvia_pct)
 //           plantilla  contenido de web/data/whatsapp_plantilla.json (opcional). Si falta, se usa la
 //                      última leída con cargarPlantillaWhatsApp() y, si tampoco hay, la plantilla interna.
+//           sinOpciones código cubo.parcelas[id].sin_opciones de una parcela CLASIFICADA sin opciones
+//                      («sin_clima_zona», «sin_actual»): el mensaje dice qué falta, no «el mapa no sabe».
 //       Inserta css/mensaje.css en la página si aún no está enlazada.
 //   textoWhatsApp(parcela, opciones, ctx) -> string
 //       El mismo mensaje como texto plano con el formato de WhatsApp (*negrita*, _cursiva_).
@@ -26,10 +28,11 @@
 //       Imprime la ficha abierta con window.print() y la hoja css/imprimir.css (@media print): encabezado,
 //       memoria, tarjetas con sus tres renglones, La gota estática, la dotación y la lluvia elegidas, la
 //       fecha, las fuentes y el aviso de juicio local; oculta los controles y el mapa. false si no hay ficha.
-//         ctx  { D?, r?, cubo?, manifiesto?, parcela?, ficha?, fecha?, imprimir? }
+//         ctx  { D?, r?, cubo?, manifiesto?, errorManifiesto?, parcela?, ficha?, fecha?, imprimir? }
 //           D, r        dotación y lluvia elegidas; si faltan, se leen de la pantalla (#dotacion, #lluvia)
 //           cubo        cubo.json (marca de la dotación, punto de medición, zona, meta.generado, meta.fuentes)
 //           manifiesto  manifest.json (fuentes_de_origen: la lista de fuentes); sin él, cubo.meta.fuentes
+//           errorManifiesto  detalle si manifest.json existe pero no se pudo leer (la hoja lo dice)
 //           parcela     properties de la parcela (para el nombre de la zona piloto)
 //           ficha       el elemento de la ficha (por omisión #ficha)
 //           fecha       fecha de impresión (por omisión, hoy)
@@ -45,7 +48,9 @@
 //   suelo           {{dias}} {{origen}} {{leguminosa}} {{plagas}}
 //   suelo_sin_dias  {{leguminosa}} {{plagas}}
 //   respuesta       {{numeros}}                              («Responda {{numeros}}.» -> «Responda 1, 2 o 3.»)
-//   sin_opciones    {{parcela}} {{area}}                     (parcela abstenida o sin opciones)
+//   sin_opciones    {{parcela}} {{area}}                     (parcela abstenida: el mapa no sabe qué hay)
+//   sin_calculo     {{parcela}} {{area}} {{motivo}}          (parcela CLASIFICADA sin opciones: el motivo sale
+//                                                             del código cubo.parcelas.<id>.sin_opciones)
 // Se acepta *negrita* y _cursiva_ como en WhatsApp. El aviso de simulación y el de juicio local son fijos.
 //
 // Reglas de este archivo:
@@ -83,7 +88,16 @@ const PLANTILLA_INTERNA = {
   sin_opciones:
     "Buen día. En su parcela {{parcela}} ({{area}} ha) el mapa de cultivos no está seguro de qué hay sembrado, " +
     "así que no calculamos opciones. Revísela con su técnico.",
+  sin_calculo:
+    "Buen día. Su parcela {{parcela}} ({{area}} ha) sí está clasificada, pero aún no calculamos sus opciones: " +
+    "{{motivo}}. Revísela con su técnico.",
 };
+// Motivo de una parcela clasificada sin opciones, por código (motor/b4_cubo.py; la web pone el texto).
+const MOTIVOS_SIN_OPCIONES_ES = {
+  sin_clima_zona: "falta el clima de su zona",
+  sin_actual: "no se pudo armar su rotación actual con los datos de su zona",
+};
+const MOTIVO_SIN_OPCIONES_ES = "faltan datos de su zona";
 // Marcadores que acepta cada llave de una plantilla externa (los demás la invalidan).
 const MARCADORES = {
   saludo: ["parcela", "area", "d", "lluvia"],
@@ -95,6 +109,7 @@ const MARCADORES = {
   suelo_sin_dias: ["leguminosa", "plagas"],
   respuesta: ["numeros"],
   sin_opciones: ["parcela", "area"],
+  sin_calculo: ["parcela", "area", "motivo"],
 };
 // Avisos fijos (kit C4 y CLAUDE.md, regla 10): no se toman de la plantilla.
 const AVISO_SIMULACION = "Es una simulación; la asignación oficial la decide Conagua.";
@@ -102,7 +117,7 @@ const AVISO_JUICIO_ES = "Esta herramienta apoya y no sustituye el juicio del agr
 // Palabras que una plantilla externa no puede usar (CLAUDE.md, regla 10; guía de P6).
 // (\b no sirve con letras acentuadas: se usan lookarounds de Unicode.)
 const PROHIBIDAS =
-  /(?<![\p{L}\p{N}_])(first|only|save|saves|savings|sell|trade|exchange|forecast|primer[oa]?s?|únic[oa]s?|ahorr\p{L}*|vend\p{L}*|intercambi\p{L}*|pronóstic\p{L}*)(?![\p{L}\p{N}_])/iu;
+  /(?<![\p{L}\p{N}_])(first|only|sav(?:e|es|ed|ing|ings)|guarantee\p{L}*|sell|trade|exchange|forecast|primer[oa]?s?|únic[oa]s?|ahorr\p{L}*|garantiza\p{L}*|repart\p{L}*|vend\p{L}*|intercambi\p{L}*|pronóstic\p{L}*)(?![\p{L}\p{N}_])/iu;
 
 // Semáforo de agua en palabras (símbolo + texto: nada depende del color).
 const ESTADO_AGUA = {
@@ -385,7 +400,11 @@ function armarMensaje(parcela, opciones, ctx = {}) {
   const avisos = [AVISO_SIMULACION, AVISO_JUICIO_ES];
   const datosParcela = { parcela: p.id ?? "", area: fmtDatoEs(p.area_ha) };
   if (!ops.length) {
-    return { saludo: rellenar(t.sin_opciones, datosParcela), opciones: [], respuesta: "", avisos };
+    // Abstenida: el mapa no sabe qué hay. Clasificada sin opciones (zona sin clima, rotación actual sin
+    // armar): el cultivo sí se conoce y el mensaje dice lo que falta (ctx.sinOpciones = código del cubo).
+    if (p.abstencion) return { saludo: rellenar(t.sin_opciones, datosParcela), opciones: [], respuesta: "", avisos };
+    const motivo = MOTIVOS_SIN_OPCIONES_ES[ctx.sinOpciones] ?? MOTIVO_SIN_OPCIONES_ES;
+    return { saludo: rellenar(t.sin_calculo, { ...datosParcela, motivo }), opciones: [], respuesta: "", avisos };
   }
   const saludo = rellenar(t.saludo, { ...datosParcela, d: fmtEs(ctx.D), lluvia: textoLluviaEs(ctx.r) });
   const partes = ops.map((o, i) => armarOpcion(o, i, p, ctx, t));
@@ -529,6 +548,10 @@ function htmlFuentes(ctx) {
       .map((f) => String(f).split("/").pop())
       .filter((f) => f && !f.startsWith("."));
     if (archivos.length) items = [`Data files: ${esc(archivos.join(", "))}`];
+    // ctx.errorManifiesto: manifest.json existe pero no se pudo leer; se dice en la hoja (no en silencio).
+    if (ctx.errorManifiesto) {
+      pie = `<p class="impresion-detalle">The source list in manifest.json could not be read (${esc(ctx.errorManifiesto)}); the data files of the cube are listed instead.</p>`;
+    }
   }
   const lista = items.length
     ? `<ul class="impresion-fuentes-lista">${items.map((i) => `<li>${i}</li>`).join("")}</ul>`

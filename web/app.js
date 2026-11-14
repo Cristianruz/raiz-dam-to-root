@@ -28,7 +28,7 @@ import {
   conteosZona,
   rellenarMarcadores,
 } from "./reglas.js";
-import { agregarCapaRelieve, htmlRelieveParcela, cargarRelieve } from "./js/relieve.js";
+import { agregarCapaRelieve, htmlRelieveParcela, cargarRelieve, leerOpcional } from "./js/relieve.js";
 import { dibujarGota } from "./js/gota.js";
 import { htmlWhatsApp, imprimirFicha } from "./js/mensaje.js";
 import { montarInicio, montarAcerca, LLAVE_INICIO } from "./js/acerca.js";
@@ -44,7 +44,16 @@ const SEMAFORO = {
   ambar: { texto: "Tight", detalle: "covers the median need, not the high estimate", simbolo: "!", trama: "diagonal" },
   rojo: { texto: "Not enough water", detalle: "below the median need", simbolo: "✕", trama: "cruz" },
   gris: { texto: "Not classified", detalle: "the crop map abstained; check with a technician", simbolo: "?", trama: "puntos" },
+  // Parcela CLASIFICADA sin opciones (cubo.parcelas.<id>.sin_opciones): no es una abstención del mapa.
+  sin_calculo: { texto: "Not computed yet", detalle: "classified, but its options are not built (see the field sheet)", simbolo: "–", trama: "horizontal", soloSiHay: true },
 };
+
+// Motivo de una parcela clasificada sin opciones: código de motor/b4_cubo.py; la web pone el texto.
+const SIN_OPCIONES = {
+  sin_clima_zona: "There is no climate data for this field's pilot area yet, so its water need and options are not computed. The crop map did classify it.",
+  sin_actual: "The current rotation of this field could not be built from its area's data files, so no options are computed yet. The crop map did classify it.",
+};
+const SIN_OPCIONES_OTRO = "No options computed for this field yet. The crop map did classify it.";
 
 // Semáforo genérico de los renglones Suelo y Dinero (lo trae el cubo, no lo calcula la web).
 const SEMAFORO_OTROS = {
@@ -83,7 +92,23 @@ const CULTIVOS = {
   descanso: "Rest",
   sin_clasificar: "Not classified",
 };
-const TRAMAS_CULTIVO = ["ninguna", "diagonal", "horizontal", "vertical", "cruz"];
+// Una trama distinta por cultivo (barbecho y descanso comparten color: la trama los separa). «puntos» queda
+// para «sin clasificar / sin dato». Las tramas se dibujan en style.css (.trama-*) y en registrarTramas().
+const TRAMAS_CULTIVO = {
+  alfalfa: "ninguna",
+  nogal: "diagonal",
+  chile: "cruz",
+  maiz_forrajero: "horizontal",
+  sorgo: "vertical",
+  algodon: "contradiagonal",
+  cereal_invierno: "cuadricula",
+  forraje_verano: "rayas_anchas",
+  barbecho: "puntos_gruesos",
+  descanso: "horizontal_anchas",
+  sin_clasificar: "puntos",
+};
+const TRAMAS = ["ninguna", "diagonal", "cruz", "puntos", "horizontal", "vertical", "contradiagonal", "cuadricula",
+  "rayas_anchas", "puntos_gruesos", "horizontal_anchas"];
 
 const PREGUNTAS = [
   ["por_que", "Why it's suggested"],
@@ -96,7 +121,7 @@ const PREGUNTAS = [
 const GLOSARIO = [
   ["ET", "Evapotranspiration: the water the crop transpires plus what evaporates from the soil. It is the water actually consumed."],
   ["NDVI (“greenness”)", "A satellite index of how green a field is. Raíz reads it from NASA HLS images."],
-  ["Bare soil", "Days with almost no green cover. Bare soil in the windy season (Feb–Apr) can blow away."],
+  ["Bare soil", "Days with almost no green cover. Bare soil in the windy season can blow away."],
   ["Frost risk", "Chance of a freezing night in the planting window, from NASA POWER temperatures."],
   ["Water balance", "Every cubic metre that leaves the dam ends up as crop consumption, aquifer recharge or other losses."],
   ["Consumption cap", "A rule that drip irrigation may not raise the crop's water consumption (ET) above its historical level."],
@@ -105,6 +130,8 @@ const GLOSARIO = [
 ];
 
 const AVISO_JUICIO = "This tool supports, never replaces, the judgment of farmers and local experts.";
+// Holgura del clic sobre el mapa, en píxeles de pantalla (no es un dato del proyecto): alcanza parcelas muy pequeñas.
+const TOLERANCIA_CLIC_PX = 4;
 
 // ---------------------------------------------------------------------------
 // Estado de la página
@@ -215,18 +242,50 @@ function colorCSS(nombre, respaldo = "gris") {
   return coloresCache.get(nombre) || (respaldo ? colorCSS(respaldo, null) : "");
 }
 
-/** Tinta legible sobre un color de fondo (luminancia relativa aproximada); se guarda por color. */
+/** [r, g, b] (0–255) de un color CSS (#rgb, #rrggbb o rgb()); null si no se entiende. */
+function rgbDe(color) {
+  const c = window.d3?.color?.(color)?.rgb?.();
+  if (c && [c.r, c.g, c.b].every(Number.isFinite)) return [c.r, c.g, c.b];
+  const t = String(color ?? "").trim();
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(t);
+  if (hex) {
+    const h = hex[1].length === 3 ? [...hex[1]].map((x) => x + x).join("") : hex[1];
+    return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+  }
+  const rgb = /^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i.exec(t);
+  return rgb ? rgb.slice(1, 4).map(Number) : null;
+}
+
+/** Luminancia relativa y razón de contraste de WCAG (fórmulas de WCAG; no son datos). */
+function luminancia([r, g, b]) {
+  const canal = (v) => {
+    const x = v / 255;
+    return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * canal(r) + 0.7152 * canal(g) + 0.0722 * canal(b);
+}
+function contraste(a, b) {
+  const [claro, oscuro] = [luminancia(a), luminancia(b)].sort((x, y) => y - x);
+  return (claro + 0.05) / (oscuro + 0.05);
+}
+
+/**
+ * Tinta o blanco, el de MAYOR razón de contraste WCAG sobre el fondo (los símbolos de los círculos y las
+ * letras de las muestras son lo que evita que el semáforo dependa solo del color). Se guarda por color.
+ */
 const tintaCache = new Map();
 function textoSobre(color) {
   if (tintaCache.has(color)) return tintaCache.get(color);
-  const c = window.d3?.color?.(color)?.rgb?.();
-  let tinta = colorCSS("tinta");
-  if (c) {
-    const luz = (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) / 255;
-    tinta = luz > 0.55 ? colorCSS("tinta") : colorCSS("blanco");
-  }
-  tintaCache.set(color, tinta);
-  return tinta;
+  const tinta = colorCSS("tinta");
+  const blanco = colorCSS("blanco");
+  const [f, t, b] = [rgbDe(color), rgbDe(tinta), rgbDe(blanco)];
+  const elegido = f && t && b ? (contraste(f, t) >= contraste(f, b) ? tinta : blanco) : tinta;
+  tintaCache.set(color, elegido);
+  return elegido;
+}
+/** Lo mismo para una variable CSS de color (p. ej. "sem-verde"). */
+function textoSobreVar(colorVar) {
+  return textoSobre(colorCSS(colorVar));
 }
 
 function reduceMovimiento() {
@@ -244,19 +303,25 @@ async function cargarJSON(ruta) {
   return resp.json();
 }
 
-/** Archivo opcional (manifest.json, pruebas.json): se pide una sola vez y solo cuando hace falta; null si falta. */
+/**
+ * Archivo opcional (manifest.json, pruebas.json): se pide solo cuando hace falta. Devuelve
+ * {estado: "ok", datos} · {estado: "ausente", detalle} (404: no se ha construido) ·
+ * {estado: "error", detalle} (otro HTTP, red o JSON roto). Solo se guarda una lectura buena: un error se
+ * reintenta la próxima vez (p. ej. al volver a abrir «About & Data»).
+ */
 const opcionales = new Map();
 function cargarOpcional(ruta) {
   if (!opcionales.has(ruta)) {
-    opcionales.set(
-      ruta,
-      fetch(ruta)
-        .then((resp) => (resp.ok ? resp.json() : null))
-        .catch(() => null),
-    );
+    const promesa = leerOpcional(ruta).then((r) => {
+      if (r.estado !== "ok") opcionales.delete(ruta);
+      if (r.estado === "error") console.error(`Raíz: ${ruta} could not be read (${r.detalle})`);
+      return r;
+    });
+    opcionales.set(ruta, promesa);
   }
   return opcionales.get(ruta);
 }
+const datosDe = (r) => (r?.estado === "ok" ? r.datos : null);
 
 // ---------------------------------------------------------------------------
 // Arranque
@@ -277,11 +342,7 @@ async function iniciar() {
     estado.explicaciones = explicaciones;
     estado.relieveDatos = relieve;
   } catch (err) {
-    console.error(err);
-    const aviso = document.createElement("p");
-    aviso.className = "error-carga";
-    aviso.textContent = `The data files could not be loaded: ${err.message}`;
-    $("#principal").prepend(aviso);
+    mostrarErrorCarga(`The data files could not be loaded: ${err.message}`, err);
     return;
   }
 
@@ -304,10 +365,36 @@ async function iniciar() {
   montarInicio(document.body);
 }
 
+/** Aviso visible de que la página no pudo cargar o arrancar (y en la consola). */
+function mostrarErrorCarga(texto, err) {
+  console.error(err ?? texto);
+  const aviso = document.createElement("p");
+  aviso.className = "error-carga";
+  aviso.setAttribute("role", "alert");
+  aviso.textContent = texto;
+  $("#principal").inert = false;
+  $("#principal").prepend(aviso);
+  document.body.dataset.listo = "error";
+}
+
 /**
  * Medidas que usa style.css: --alto-cabecera (marca + controles; alto del área del mapa en escritorio)
  * y --tope-ficha (borde inferior de los controles fijos en pantalla; la ficha empieza ahí).
  */
+/**
+ * La ficha tapa el mapa y el panel: mientras está abierta, lo de abajo no recibe foco ni clics (inert).
+ * La marca y los controles siguen operables (el deslizador se mueve con la ficha abierta), salvo en pantallas
+ * muy bajas (zoom, teléfono horizontal), donde style.css deja los controles fuera de la barra fija y la ficha
+ * ocupa todo el alto: entonces también quedan tapados y se vuelven inert.
+ */
+function sincronizarInert() {
+  const abierta = Boolean(estado.fichaId) && !$("#ficha").hidden;
+  $("#principal").inert = abierta;
+  const tapados = abierta && getComputedStyle($("#controles")).position !== "sticky";
+  $("#controles").inert = tapados;
+  $("#marca").inert = tapados;
+}
+
 function fijarMedidas() {
   const raiz = document.documentElement.style;
   const controles = $("#controles");
@@ -323,7 +410,10 @@ function observarCabecera() {
     ro.observe($("#marca"));
     ro.observe($("#controles"));
   }
-  window.addEventListener("resize", fijarMedidas);
+  window.addEventListener("resize", () => {
+    fijarMedidas();
+    sincronizarInert();
+  });
   window.addEventListener("scroll", fijarMedidas, { passive: true });
 }
 
@@ -445,8 +535,10 @@ function iniciarControles() {
     contenedor.append(b);
   }
 
-  $("#equivalencia").textContent = equivalencia ?? "not available";
-  $("#punto-medicion").textContent = punto_medicion ?? "not available";
+  // Equivalencia y punto de medición: texto del cubo (de params.json), en español: lang="es" para el
+  // lector de pantalla (el deslizador lo usa como descripción).
+  enEspanol($("#equivalencia"), equivalencia);
+  enEspanol($("#punto-medicion"), punto_medicion);
   if (esAncho()) $("#unidades").open = true;
 
   // Lluvia: la variante base es 0 y la seca es la otra llave del cubo (kit §2.3).
@@ -459,6 +551,18 @@ function iniciarControles() {
   } else {
     $("#lluvia-etiqueta").textContent = `Rain ${fmtSigno(estado.rSeca)}%`;
   }
+}
+
+/** Escribe en el nodo un texto de los datos (en español) con lang="es"; «not available» (inglés) si falta. */
+function enEspanol(nodo, texto) {
+  if (!nodo) return;
+  nodo.textContent = texto ?? "not available";
+  if (texto) nodo.setAttribute("lang", "es");
+  else nodo.removeAttribute("lang");
+}
+/** <span lang="es"> con un texto de los datos (fuentes, notas): la interfaz es inglés; el dato, no. */
+function textoEs(texto) {
+  return `<span lang="es">${esc(texto)}</span>`;
 }
 
 function leerControles() {
@@ -493,10 +597,10 @@ function actualizarValorDeslizador() {
     .filter(Boolean)
     .join(" · ");
   $("#info-marca-fuente").innerHTML = [
-    `Source: ${esc(m.fuente ?? "not available")}`,
-    m.etiqueta ? `Label: ${esc(m.etiqueta)}` : "",
+    `Source: ${m.fuente ? textoEs(m.fuente) : "not available"}`,
+    m.etiqueta ? `Label: ${textoEs(m.etiqueta)}` : "",
     m.fecha_consulta ? `Accessed: ${esc(fmtFecha(m.fecha_consulta))}` : "",
-    m.nota ? `Note: ${esc(m.nota)}` : "",
+    m.nota ? `Note: ${textoEs(m.nota)}` : "",
   ]
     .filter(Boolean)
     .join(" · ");
@@ -510,11 +614,32 @@ function actualizarValorDeslizador() {
 function actualizarTodo() {
   leerControles();
   actualizarValorDeslizador();
-  const conteos = conteosZona(estado.visibles, estado.cubo, estado.D, estado.r);
+  const conteos = conteosConSinCalculo(estado.visibles);
   actualizarIndicador(conteos);
   actualizarConteos(conteos);
   pintarColoreado();
   if (estado.fichaId) actualizarFicha();
+}
+
+/** ¿Parcela clasificada (no abstenida) sin opción ACTUAL? No se evaluó: no es «Not classified». */
+function sinCalculo(p) {
+  return !p.abstencion && !opcionesDe(p.id).some((o) => o.id === "ACTUAL");
+}
+
+/**
+ * conteosZona (web/reglas.js) cuenta como «gris» y como clasificada a toda parcela sin opción ACTUAL. Aquí
+ * las clasificadas sin opciones pasan a su propia clase («sin_calculo») y salen del denominador del
+ * indicador: no se evaluaron, así que no cuentan como «con agua» ni «sin agua».
+ */
+function conteosConSinCalculo(features) {
+  const c = { ...conteosZona(features, estado.cubo, estado.D, estado.r), sin_calculo: 0 };
+  for (const f of features) {
+    if (!sinCalculo(f.properties)) continue;
+    c.gris -= 1;
+    c.clasificadas -= 1;
+    c.sin_calculo += 1;
+  }
+  return c;
 }
 
 function actualizarIndicador(conteos) {
@@ -568,18 +693,23 @@ function actualizarIndicador(conteos) {
 
   $("#indicador-segunda").innerHTML =
     `With ${esc(fmt(D))} thousand m³/ha, <strong>${esc(fmt(conteos.rojo, 0))} of ${esc(fmt(conteos.clasificadas, 0))}</strong> ` +
-    "fields don't have enough water for their current rotation.";
+    "fields don't have enough water for their current rotation." +
+    (conteos.sin_calculo
+      ? ` ${esc(fmt(conteos.sin_calculo, 0))} classified ${conteos.sin_calculo === 1 ? "field is" : "fields are"} not counted: ${conteos.sin_calculo === 1 ? "its" : "their"} options are not computed yet.`
+      : "");
 }
 
 function itemConteo(simbolo, colorVar, texto, n) {
+  // Color del símbolo: tinta o blanco, el de mayor contraste WCAG sobre el fondo del círculo.
   return (
-    `<li><span class="sem-circulo" style="background-color: var(--${colorVar})" aria-hidden="true">${esc(simbolo)}</span>` +
+    `<li><span class="sem-circulo" style="background-color: var(--${colorVar}); color: ${esc(textoSobreVar(colorVar))}" aria-hidden="true">${esc(simbolo)}</span>` +
     `<span>${esc(texto)}</span><span class="n">${esc(fmt(n, 0))}</span></li>`
   );
 }
 
 function actualizarConteos(c) {
   $("#conteos-semaforo").innerHTML = Object.entries(SEMAFORO)
+    .filter(([k, s]) => !s.soloSiHay || c[k] > 0)
     .map(([k, s]) => itemConteo(s.simbolo, `sem-${k}`, s.texto, c[k]))
     .join("");
   $("#conteos-plazo").innerHTML = Object.entries(PLAZO)
@@ -621,7 +751,8 @@ function clasificador() {
 
 function semaforoActual(p) {
   const actual = opcionesDe(p.id).find((o) => o.id === "ACTUAL");
-  if (p.abstencion || !actual) return "gris";
+  if (p.abstencion) return "gris";
+  if (!actual) return "sin_calculo"; // clasificada, pero sin opciones (cubo.parcelas.<id>.sin_opciones)
   return evaluarOpcion(actual, p.area_ha, estado.D, estado.r).semaforo;
 }
 
@@ -648,12 +779,12 @@ function capaCultivos() {
   return {
     titulo: "Crops",
     soloPresentes: true,
-    clases: claves.map((k, i) => ({
+    clases: claves.map((k) => ({
       clave: k,
       colorVar: `cul-${k}`,
       texto: CULTIVOS[k],
       simbolo: "",
-      trama: k === "sin_clasificar" ? "puntos" : TRAMAS_CULTIVO[i % TRAMAS_CULTIVO.length],
+      trama: TRAMAS_CULTIVO[k] ?? "puntos",
     })),
     fuente: "Crop map of the current season from NASA HLS; “Not classified” when the model is unsure.",
     clase: (p) => (p.abstencion ? "sin_clasificar" : (p.cultivo_actual ?? "sin_clasificar")),
@@ -665,7 +796,7 @@ function capaSueloDesnudo() {
     titulo: "Bare soil in the windy season",
     continua: true,
     unidad: "days",
-    fuente: "NASA HLS: days with very low greenness from February to April; median of the years with data (current season if missing).",
+    fuente: "NASA HLS: days with very low greenness in the windy season; median of the years with data (current season if missing).",
     valor: (p) => p.dias_suelo_desnudo_mediana ?? p.dias_suelo_desnudo_feb_abr ?? null,
   };
 }
@@ -714,9 +845,17 @@ function clasificarParcelas() {
   return { esq, salida };
 }
 
+/**
+ * Muestra de color de una leyenda. Si lleva letra o símbolo: tinta o blanco según el contraste WCAG con el
+ * fondo, y un halo del mismo color de fondo para que la trama (p. ej. la cruz) no pase por la letra.
+ */
 function muestra(colorVar, trama, contenido = "", colorDirecto = null) {
+  const color = colorDirecto ?? colorCSS(colorVar);
   const fondo = colorDirecto ? esc(colorDirecto) : `var(--${colorVar})`;
-  return `<span class="muestra trama-${trama}" style="background-color: ${fondo}" aria-hidden="true">${esc(contenido)}</span>`;
+  const letra = contenido
+    ? `<span class="muestra-letra" style="color: ${esc(textoSobre(color))}; background-color: ${fondo}">${esc(contenido)}</span>`
+    : "";
+  return `<span class="muestra trama-${esc(trama)}" style="background-color: ${fondo}" aria-hidden="true">${letra}</span>`;
 }
 
 function pintarColoreado() {
@@ -741,7 +880,9 @@ function pintarLeyenda({ esq, salida, min, max }) {
       `<ul><li>${muestra("gris", "puntos")} No data</li></ul>`;
   } else {
     const presentes = new Set(estado.visibles.map((f) => salida.get(f.properties.id)?.clave));
-    const clases = esq.soloPresentes ? esq.clases.filter((c) => presentes.has(c.clave) || c.clave === "sin_clasificar") : esq.clases;
+    const clases = esq.clases.filter((c) =>
+      esq.soloPresentes ? presentes.has(c.clave) || c.clave === "sin_clasificar" : !c.soloSiHay || presentes.has(c.clave),
+    );
     cuerpo =
       `<p><strong>${esc(esq.titulo)}</strong></p><ul>` +
       clases
@@ -753,7 +894,13 @@ function pintarLeyenda({ esq, salida, min, max }) {
         .join("") +
       "</ul>";
   }
-  cont.innerHTML = cuerpo + `<p class="fuente">Source: ${esc(esq.fuente)}</p>`;
+  // La leyenda es una región aria-live: se reescribe solo si cambió (al cambiar de capa, no en cada paso del
+  // deslizador), para que el lector de pantalla no la repita entera con cada pulsación.
+  const html = cuerpo + `<p class="fuente">Source: ${esc(esq.fuente)}</p>`;
+  if (cont.dataset.html !== html) {
+    cont.innerHTML = html;
+    cont.dataset.html = html;
+  }
 }
 
 /** Orden de la lista: parcelas de la historia, luego clasificadas, luego sin clasificar; cada grupo por id. */
@@ -886,8 +1033,7 @@ function rellenoMapa() {
 function registrarTramas(mapa) {
   const lado = 16;
   const tinta = colorCSS("tinta");
-  const tipos = ["ninguna", "diagonal", "cruz", "puntos", "horizontal", "vertical"];
-  for (const tipo of tipos) {
+  for (const tipo of TRAMAS) {
     const lienzo = document.createElement("canvas");
     lienzo.width = lado;
     lienzo.height = lado;
@@ -903,6 +1049,11 @@ function registrarTramas(mapa) {
     if (tipo === "horizontal") linea(0, lado / 2, lado, lado / 2);
     if (tipo === "vertical") linea(lado / 2, 0, lado / 2, lado);
     if (tipo === "puntos") { ctx.beginPath(); ctx.arc(lado / 2, lado / 2, lado / 8, 0, Math.PI * 2); ctx.fill(); }
+    if (tipo === "contradiagonal") { linea(0, 0, lado, lado); linea(-lado / 2, lado / 2, lado / 2, lado * 1.5); linea(lado / 2, -lado / 2, lado * 1.5, lado / 2); }
+    if (tipo === "cuadricula") { linea(0, lado / 2, lado, lado / 2); linea(lado / 2, 0, lado / 2, lado); }
+    if (tipo === "rayas_anchas") { ctx.lineWidth = lado / 3; linea(lado / 2, 0, lado / 2, lado); }
+    if (tipo === "horizontal_anchas") { ctx.lineWidth = lado / 3; linea(0, lado / 2, lado, lado / 2); }
+    if (tipo === "puntos_gruesos") { ctx.beginPath(); ctx.arc(lado / 2, lado / 2, lado / 4, 0, Math.PI * 2); ctx.fill(); }
     mapa.addImage(`trama-${tipo}`, ctx.getImageData(0, 0, lado, lado), { pixelRatio: 2 });
   }
 }
@@ -1017,8 +1168,16 @@ function crearMapa() {
         "line-width": ["case", ["==", ["get", "_sel"], true], 4, ["==", ["get", "protagonista"], true], 2, 1],
       },
     });
-    mapa.on("click", "parcelas-relleno", (e) => {
-      const id = e.features?.[0]?.properties?.id;
+    // Clic con tolerancia (propuesta de la sesión de datos, rama revision/web-dos-zonas): en la vista de las
+    // dos zonas hay parcelas de menos de un píxel y el clic exacto no las alcanza. Si en el punto no hay
+    // parcela, se busca en cuadros cada vez más grandes (de 1 px hasta la tolerancia) y se abre la más cercana.
+    mapa.on("click", (e) => {
+      const capas = { layers: ["parcelas-relleno"] };
+      let hallados = mapa.queryRenderedFeatures(e.point, capas);
+      for (let t = 1; !hallados.length && t <= TOLERANCIA_CLIC_PX; t++) {
+        hallados = mapa.queryRenderedFeatures([[e.point.x - t, e.point.y - t], [e.point.x + t, e.point.y + t]], capas);
+      }
+      const id = hallados[0]?.properties?.id;
       if (id) abrirFicha(id);
     });
     mapa.on("mouseenter", "parcelas-relleno", () => { mapa.getCanvas().style.cursor = "pointer"; });
@@ -1118,7 +1277,7 @@ function pintarLocalidades() {
     })
     .join("");
   const fuentes = [...new Set(locs.map((l) => l.fuente).filter(Boolean))];
-  $("#localidades-fuente").textContent = `Source: ${fuentes.length ? fuentes.join("; ") : "not available"}`;
+  $("#localidades-fuente").innerHTML = `Source: ${fuentes.length ? textoEs(fuentes.join("; ")) : "not available"}`;
 }
 
 function agregarLocalidades(mapa) {
@@ -1190,12 +1349,18 @@ async function iniciarRelieve(mapa) {
       antesDe: "localidades-punto",
     });
   } catch (err) {
-    console.warn("Raíz: terrain layer not available", err);
+    // Falla inesperada del módulo: no es «not run». Se dice en el bloque (y en la consola).
+    console.error("Raíz: terrain layer could not be built", err);
+    const aviso = document.createElement("p");
+    aviso.className = "relieve-no-corrido relieve-error";
+    aviso.setAttribute("role", "alert");
+    aviso.textContent = `Terrain layer: could not be loaded (${err?.message ?? err})`;
+    $("#capa-relieve").append(aviso);
   }
   estado.relieve = ctl;
   // La zona pudo cambiar mientras se leían los archivos.
   if (ctl && ctl.estado().zona !== estado.zonaSel) ctl.fijarZona(estado.zonaSel);
-  document.body.dataset.relieve = ctl?.disponible ? "listo" : "no-corrido";
+  document.body.dataset.relieve = ctl?.disponible ? "listo" : (ctl?.elemento?.dataset.relieve ?? "error");
 }
 
 // ---------------------------------------------------------------------------
@@ -1215,7 +1380,7 @@ function pintarDistrito() {
         ? `<div class="barra-presa" role="img" aria-label="Storage ${esc(fmtDato(b.almacenamiento_hm3))} hm³ of ${esc(fmtDato(b.namo_hm3))} hm³ at NAMO"><span style="width: ${fraccion * 100}%"></span></div>`
         : "") +
       `<p>Capacity at <abbr title="Normal maximum operating level">NAMO</abbr>: <strong>${esc(fmtDato(b.namo_hm3))} hm³</strong></p>` +
-      `<p class="fuente">Storage: ${esc(b.fuente_almacenamiento ?? "no source")}. Capacity: ${esc(b.fuente_namo ?? "no source")}.</p>`;
+      `<p class="fuente">Storage: ${b.fuente_almacenamiento ? textoEs(b.fuente_almacenamiento) : "no source"}. Capacity: ${b.fuente_namo ? textoEs(b.fuente_namo) : "no source"}.</p>`;
   } else {
     $("#boquilla").innerHTML = "<p>No data.</p>";
   }
@@ -1230,7 +1395,7 @@ function pintarDistrito() {
       "<p>Availability</p>" +
       `<p class="dato-grande">${v == null ? "no data" : `${esc(fmtSigno(v))} hm³ per year`}</p>` +
       (v != null && v < 0 ? "<p>A negative availability is the official deficit published by Conagua, not a measured loss.</p>" : "") +
-      `<p class="fuente">Source: ${esc(a.fuente ?? "no source")}</p>`;
+      `<p class="fuente">Source: ${a.fuente ? textoEs(a.fuente) : "no source"}</p>`;
   } else {
     $("#acuifero").innerHTML = "<p>No data.</p>";
   }
@@ -1239,7 +1404,9 @@ function pintarDistrito() {
 function pintarPie() {
   const meta = estado.cubo.meta ?? {};
   const partes = [];
-  if (Array.isArray(meta.fuentes) && meta.fuentes.length) partes.push(`Data files: ${meta.fuentes.join(", ")}`);
+  // Los archivos ocultos de la caché (p. ej. data/processed/.gitkeep) no son fuentes de datos.
+  const archivos = (Array.isArray(meta.fuentes) ? meta.fuentes : []).filter((f) => !String(f).split("/").pop().startsWith("."));
+  if (archivos.length) partes.push(`Data files: ${archivos.join(", ")}`);
   if (meta.generado) partes.push(`generated ${meta.generado}`);
   if (meta.mock && Array.isArray(meta.mock_campos)) partes.push(`simulated blocks: ${meta.mock_campos.join(", ")}`);
   $("#pie-fuentes").textContent = partes.join(" · ");
@@ -1265,6 +1432,7 @@ function abrirFicha(id, opciones = {}) {
   const ficha = $("#ficha");
   ficha.hidden = false;
   ficha.scrollTop = 0;
+  sincronizarInert();
   pintarGota(); // con la ficha visible: el Sankey toma el ancho real de la sección
   pintarColoreado();
   if (opciones.seccion === "gota") {
@@ -1285,6 +1453,7 @@ function cerrarFicha({ devolverFoco = true } = {}) {
   estado.whatsapp = false;
   $("#ficha").hidden = true;
   $("#ficha-cuerpo").innerHTML = "";
+  sincronizarInert(); // antes de devolver el foco a la lista o al mapa
   pintarColoreado();
   if (!devolverFoco) return;
   const volver = estado.disparador && document.contains(estado.disparador) ? estado.disparador : $(`.boton-parcela[data-id="${CSS.escape(id)}"]`);
@@ -1300,11 +1469,13 @@ function construirFicha(f) {
   // Parcela abstenida: sin tarjetas; la memoria sí se muestra (kit C2.1 y C2.2). Sin tarjetas tampoco hay
   // renglón Soil: la línea de relieve (contexto de la zona) va debajo de la nota.
   const relieve = htmlRelieveParcela(p, { relieve: estado.relieveDatos });
+  // Sin opciones: abstenida (el mapa no sabe qué hay) o clasificada con un motivo (código del cubo).
+  const codigo = estado.cubo.parcelas?.[p.id]?.sin_opciones;
   const sinOpciones =
     (p.abstencion
       ? '<p class="nota-abstenida">The crop map is not sure what grows here, so no options are computed. ' +
         "Check the current crop with a technician; the field memory above still shows its history.</p>"
-      : "<p>No options computed for this field yet.</p>") + relieve;
+      : `<p class="nota-sin-calculo" data-motivo="${esc(codigo ?? "")}">${esc(SIN_OPCIONES[codigo] ?? SIN_OPCIONES_OTRO)}</p>`) + relieve;
   $("#ficha-cuerpo").innerHTML = [
     htmlEncabezado(p),
     // En papel la línea de relieve va una sola vez, aquí (style.css la oculta en las tarjetas al imprimir).
@@ -1372,7 +1543,7 @@ function htmlMemoria(p) {
       const d = MEMORIA[clave];
       return (
         `<li class="celda" data-estado="${esc(clave)}" title="${esc(m.anio)}: ${esc(d.texto)}">` +
-        `<span class="caja trama-${clave === "sin_dato" ? "puntos" : "ninguna"}" style="background-color: var(--mem-${clave});${d.claro ? " color: var(--tinta); text-shadow: none;" : ""}" aria-hidden="true">${esc(d.letra)}</span>` +
+        `<span class="caja trama-${clave === "sin_dato" ? "puntos" : "ninguna"}" style="background-color: var(--mem-${clave}); color: ${esc(textoSobreVar(`mem-${clave}`))}; text-shadow: none;" aria-hidden="true">${esc(d.letra)}</span>` +
         `<span class="anio">${esc(m.anio)}</span><span class="solo-lector">: ${esc(d.texto)}</span></li>`
       );
     })
@@ -1380,7 +1551,7 @@ function htmlMemoria(p) {
   const leyenda = Object.entries(MEMORIA)
     .map(
       ([k, d]) =>
-        `<li data-estado="${esc(k)}"><span class="muestra trama-${k === "sin_dato" ? "puntos" : "ninguna"}" style="background-color: var(--mem-${k})" aria-hidden="true">${esc(d.letra)}</span>` +
+        `<li data-estado="${esc(k)}">${muestra(`mem-${k}`, k === "sin_dato" ? "puntos" : "ninguna", d.letra)}` +
         `<span><strong>${esc(d.letra)}</strong> ${esc(d.texto)}</span></li>`,
     )
     .join("");
@@ -1394,9 +1565,10 @@ function htmlMemoria(p) {
 }
 
 function circulo(clave, tabla) {
-  const s = tabla[clave] ?? tabla.gris;
-  const claro = clave === "ambar" || clave === "gris";
-  return `<span class="sem-circulo${claro ? " claro" : ""}" style="background-color: var(--sem-${esc(clave in tabla ? clave : "gris")})" aria-hidden="true">${esc(s.simbolo)}</span>`;
+  const k = clave in tabla ? clave : "gris";
+  const s = tabla[k];
+  // Símbolo en tinta o blanco, el de mayor contraste WCAG sobre el color del círculo (✓ verde: tinta).
+  return `<span class="sem-circulo" style="background-color: var(--sem-${esc(k)}); color: ${esc(textoSobreVar(`sem-${k}`))}" aria-hidden="true">${esc(s.simbolo)}</span>`;
 }
 
 /** Tarjeta de una opción. `relieve`: la línea de relieve de la parcela (igual en todas sus tarjetas). */
@@ -1659,6 +1831,7 @@ function htmlCompartir() {
     '<button type="button" class="boton-compartir" id="boton-whatsapp" aria-expanded="false" aria-controls="vista-whatsapp">Preview WhatsApp message</button>' +
     '<button type="button" class="boton-compartir" id="boton-imprimir">Print field sheet</button>' +
     "</div>" +
+    '<p class="aviso-imprimir" id="aviso-imprimir" role="status" hidden></p>' +
     '<div class="vista-whatsapp" id="vista-whatsapp" hidden></div>' +
     "</section>"
   );
@@ -1688,7 +1861,12 @@ function pintarWhatsApp() {
     return;
   }
   try {
-    vista.innerHTML = htmlWhatsApp(f.properties, opcionesDe(f.properties.id), { reglas, D: estado.D, r: estado.r });
+    vista.innerHTML = htmlWhatsApp(f.properties, opcionesDe(f.properties.id), {
+      reglas,
+      D: estado.D,
+      r: estado.r,
+      sinOpciones: estado.cubo.parcelas?.[f.properties.id]?.sin_opciones ?? null,
+    });
   } catch (err) {
     console.warn("Raíz: WhatsApp preview not available", err);
     vista.innerHTML = "<p>The message preview is not available for this field.</p>";
@@ -1699,11 +1877,31 @@ function pintarWhatsApp() {
 async function imprimir() {
   const f = estado.porId.get(estado.fichaId);
   if (!f) return;
+  const aviso = $("#aviso-imprimir");
+  if (aviso) {
+    aviso.hidden = true;
+    aviso.textContent = "";
+  }
   try {
-    const manifiesto = await cargarOpcional("data/manifest.json");
-    await imprimirFicha({ D: estado.D, r: estado.r, cubo: estado.cubo, manifiesto, parcela: f.properties });
+    const lectura = await cargarOpcional("data/manifest.json");
+    await imprimirFicha({
+      D: estado.D,
+      r: estado.r,
+      cubo: estado.cubo,
+      manifiesto: datosDe(lectura),
+      // manifest.json existe pero no se pudo leer: la hoja lo dice (no usa la lista de respaldo en silencio).
+      errorManifiesto: lectura?.estado === "error" ? lectura.detalle : null,
+      parcela: f.properties,
+    });
   } catch (err) {
-    console.warn("Raíz: the field sheet could not be printed", err);
+    console.error("Raíz: the field sheet could not be printed", err);
+    // Se quitan los agregados de la hoja (los marca mensaje.js con data-impresion) y se avisa en pantalla.
+    for (const n of $$("[data-impresion]")) n.remove();
+    document.documentElement.classList.remove("imprimir-ficha");
+    if (aviso) {
+      aviso.textContent = `The field sheet could not be printed: ${err?.message ?? err}`;
+      aviso.hidden = false;
+    }
   }
 }
 
@@ -1722,8 +1920,19 @@ function abrirAcerca() {
     cargarOpcional("data/manifest.json"),
     cargarOpcional("data/pruebas.json"),
     cargarRelieve(),
-  ]).then(([manifest, pruebas, relieve]) => {
-    const montado = montarAcerca($("#acerca-cuerpo"), { manifest, pruebas, cubo: estado.cubo, relieve });
+  ]).then(([lecturaManifest, lecturaPruebas, relieve]) => {
+    const errores = {};
+    if (lecturaManifest.estado !== "ok") errores.manifest = lecturaManifest;
+    if (lecturaPruebas.estado !== "ok") errores.pruebas = lecturaPruebas;
+    const montado = montarAcerca($("#acerca-cuerpo"), {
+      manifest: datosDe(lecturaManifest),
+      pruebas: datosDe(lecturaPruebas),
+      cubo: estado.cubo,
+      relieve,
+      errores,
+    });
+    // Si algo no se pudo leer, la próxima apertura lo vuelve a intentar (no se guarda el error).
+    if (errores.manifest?.estado === "error" || errores.pruebas?.estado === "error") estado.acerca = null;
     // Título del diálogo: el encabezado principal de la sección (el primero con id).
     const titulo = montado?.elemento.querySelector(".acerca-titulo[id]");
     if (titulo) {
@@ -1930,4 +2139,5 @@ window.raizDepuracion = {
   },
 };
 
-iniciar();
+// Cualquier error del arranque (no solo de la lectura de datos) se dice en la página.
+iniciar().catch((err) => mostrarErrorCarga(`The page could not start: ${err?.message ?? err}`, err));
