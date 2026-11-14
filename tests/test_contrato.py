@@ -4,7 +4,10 @@
 1) Los archivos de web/data pasan el validador.
 2) Un cubo alterado SÍ da error (si no, el validador no está validando).
 3) manifest.json (§2.5) tiene una entrada por cada número de los bloques que muestra
-   la web, con fuente, script y la marca de datos simulados.
+   la web, con fuente, script y la marca de datos simulados; también las cifras por zona
+   (cubo.zonas.<id>, con el bbox de params.zona_piloto.zonas), las localidades del equipo
+   (params.zona_piloto.localidades_equipo) y las de web/data/relieve.json (tormenta con su
+   fuente y periodo; umbral de las rutas con su etiqueta).
 """
 import json
 import shutil
@@ -169,13 +172,165 @@ def test_manifest_cubre_cada_cifra_del_cubo(man):
                       "agua.compromiso_millares_ha", "gota", "gota_goteo_con_tope",
                       "gota_goteo_sin_tope", "tope_consumo"):
                 esperadas |= {r for r, _ in hojas(manifest.obtener(op, b), f"{base}.{b}")}
-    # El manifiesto agrupa por patrón (parcelas.<id> -> parcelas.*, [n] -> [*]): se compara por patrón.
-    import re
-    patron = lambda r: re.sub(r"\[\d+\]", "[*]", re.sub(r"parcelas\.[^.\[]+", "parcelas.*", r))
+    # Dos zonas (decisión 2026-11-14): cada zona con sus cifras y su bbox; localidades del equipo.
+    for zid, z in (cubo.get("zonas") or {}).items():
+        esperadas |= {r for r, _ in hojas(z, f"zonas.{zid}")}
+    for i, _ in enumerate(cubo.get("localidades") or []):
+        esperadas |= {f"localidades[{i}].{k}" for k in ("lat", "lon")}
     esperadas = {patron(r) for r in esperadas}
     claves = {c["clave"] for c in man["cifras"].values() if c["archivo"] == "web/data/cubo.json"}
     faltan = sorted(esperadas - claves)
     assert not faltan, f"cifras del cubo sin entrada en el manifest: {faltan[:10]}"
+
+
+def patron(ruta):
+    """El manifiesto agrupa por patrón (parcelas.<id> -> parcelas.*, zonas.<id> -> zonas.*,
+    [n] -> [*]); la prueba arma el suyo para comparar sin depender de motor/manifest.py."""
+    import re
+    ruta = re.sub(r"parcelas\.[^.\[]+", "parcelas.*", ruta)
+    ruta = re.sub(r"(^|\.)zonas\.[^.\[]+", r"\1zonas.*", ruta)
+    return re.sub(r"\[\d+\]", "[*]", ruta)
+
+
+def entrada(man, archivo, clave):
+    """Entrada del manifest (por patrón) para la ruta «clave» de web/data/<archivo>."""
+    return man["cifras"].get(f"{archivo}:{patron(clave)}")
+
+
+def contiene(campo, valor):
+    """El campo del manifest es el valor o una lista que lo incluye (patrón con varias fuentes)."""
+    return campo == valor or (isinstance(campo, list) and valor in campo)
+
+
+def test_manifest_zonas_y_localidades_con_su_fuente(man):
+    cubo = leer("cubo.json")
+    if not cubo.get("zonas"):
+        pytest.skip("el cubo actual no trae «zonas» (datos simulados)")
+    params = json.loads((RAIZ / "data/params.json").read_text(encoding="utf-8"))
+    p_zonas = params["zona_piloto"]["zonas"]
+    meta = cubo["meta"]
+    for zid, z in cubo["zonas"].items():
+        # Cálculo de B4 por zona: script del cubo (motor/b4_cubo.py) o el simulador.
+        for ruta, _ in hojas({k: v for k, v in z.items() if k != "bbox"}, f"zonas.{zid}"):
+            e = entrada(man, "cubo.json", ruta)
+            assert e, f"{ruta} sin entrada en el manifest"
+            esperado = manifest.SCRIPT_SIMULADOS if e["mock"] else (meta.get("script") or manifest.SCRIPT_ENSAMBLADO)
+            assert contiene(e["script"], esperado), f"{ruta}: script {e['script']}"
+        # bbox: fuente y etiqueta de params.zona_piloto.zonas.
+        for i in range(len(z["bbox"])):
+            e = entrada(man, "cubo.json", f"zonas.{zid}.bbox[{i}]")
+            assert e, f"zonas.{zid}.bbox[{i}] sin entrada en el manifest"
+            assert contiene(e["fuente"], p_zonas["fuente"]) and contiene(e["etiqueta"], p_zonas["etiqueta"])
+    p_loc = params["zona_piloto"]["localidades_equipo"]
+    for i, _ in enumerate(cubo.get("localidades") or []):
+        for k in ("lat", "lon"):
+            e = entrada(man, "cubo.json", f"localidades[{i}].{k}")
+            assert e, f"localidades[{i}].{k} sin entrada en el manifest"
+            assert contiene(e["fuente"], p_loc["fuente"]) and contiene(e["etiqueta"], p_loc["etiqueta"])
+
+
+def test_manifest_cubre_relieve(man):
+    ruta = RAIZ / "web/data/relieve.json"
+    if not ruta.exists():
+        pytest.skip("sin web/data/relieve.json (la capa de relieve no se ha ejecutado)")
+    relieve = json.loads(ruta.read_text(encoding="utf-8"))
+    assert relieve.get("zonas"), "relieve.json sin zonas"
+    for zid, z in relieve["zonas"].items():
+        for r, _ in hojas(z, f"zonas.{zid}"):
+            assert entrada(man, "relieve.json", r), f"relieve.json:{r} sin entrada en el manifest"
+        t = z["tormenta"]
+        if isinstance(t.get("mm"), (int, float)):
+            e = entrada(man, "relieve.json", f"zonas.{zid}.tormenta.mm")
+            assert contiene(e["fuente"], t["fuente"]), f"tormenta.mm: fuente {e['fuente']}"
+            assert contiene(e.get("periodo"), t["periodo"]), f"tormenta.mm: periodo {e.get('periodo')}"
+            assert e["min"] <= t["mm"] <= e["max"]
+        if isinstance(z.get("umbral_ruta_ha"), (int, float)):
+            e = entrada(man, "relieve.json", f"zonas.{zid}.umbral_ruta_ha")
+            assert contiene(e["etiqueta"], z["umbral_ruta_etiqueta"]), f"umbral_ruta_ha: etiqueta {e['etiqueta']}"
+        # El rótulo de escala lleva una cifra (resolución de NASADEM): también se rastrea.
+        if any(ch.isdigit() for ch in z.get("rotulo") or ""):
+            e = entrada(man, "relieve.json", f"zonas.{zid}.rotulo")
+            assert e and z["rotulo"] in e.get("textos", []), "rótulo de escala sin entrada en el manifest"
+
+
+# --- 3b) manifest con dos zonas (copia temporal de los datos reales) ------------------
+def raiz_con_dos_zonas(tmp_path, alterar=None):
+    """Copia params, web/data y fuentes.json a tmp_path y, si el cubo trae una sola zona, añade la
+    segunda de params.zona_piloto.zonas con las cifras de la primera (no se inventa ninguna) y su
+    bbox de params; lo mismo en relieve.json. alterar(cubo, relieve) cambia algo antes de guardar."""
+    (tmp_path / "data/processed").mkdir(parents=True)
+    (tmp_path / "web/data").mkdir(parents=True)
+    shutil.copy(RAIZ / "data/params.json", tmp_path / "data/params.json")
+    if (RAIZ / "data/processed/fuentes.json").exists():
+        shutil.copy(RAIZ / "data/processed/fuentes.json", tmp_path / "data/processed/fuentes.json")
+    for n in ARCHIVOS + ("relieve.json",):
+        if (RAIZ / "web/data" / n).exists():
+            shutil.copy(RAIZ / "web/data" / n, tmp_path / "web/data" / n)
+    cubo = leer("cubo.json")
+    if not cubo.get("zonas"):
+        pytest.skip("el cubo actual no trae «zonas» (datos simulados)")
+    params = json.loads((RAIZ / "data/params.json").read_text(encoding="utf-8"))
+    ids = [z["id"] for z in params["zona_piloto"]["zonas"]["valor"]]
+    if len(ids) < 2:
+        pytest.skip("params.zona_piloto.zonas tiene una sola zona")
+    primera = next(iter(cubo["zonas"].values()))
+    for z in params["zona_piloto"]["zonas"]["valor"]:
+        if z["id"] not in cubo["zonas"]:
+            cubo["zonas"][z["id"]] = {**json.loads(json.dumps(primera)), "nombre": z["id"],
+                                      "nombre_mostrar": z["nombre"], "bbox": list(z["bbox"])}
+    relieve = None
+    if (tmp_path / "web/data/relieve.json").exists():
+        relieve = json.loads((tmp_path / "web/data/relieve.json").read_text(encoding="utf-8"))
+        base = next(iter(relieve["zonas"].values()))
+        for zid in ids:
+            relieve["zonas"].setdefault(zid, json.loads(json.dumps(base)))
+    if alterar:
+        alterar(cubo, relieve)
+    (tmp_path / "web/data/cubo.json").write_text(json.dumps(cubo, ensure_ascii=False), encoding="utf-8")
+    if relieve is not None:
+        (tmp_path / "web/data/relieve.json").write_text(json.dumps(relieve, ensure_ascii=False), encoding="utf-8")
+    return tmp_path, cubo, relieve
+
+
+def test_manifest_dos_zonas_agrupa_por_zona(tmp_path):
+    raiz, cubo, relieve = raiz_con_dos_zonas(tmp_path)
+    man2 = manifest.generar(raiz=raiz, escribir=False)
+    assert not (raiz / "web/data/manifest.json").exists(), "escribir=False no debe escribir"
+    nz = len(cubo["zonas"])
+    assert nz >= 2
+    # Un patrón por cifra (zonas.*), con un valor por zona; el bbox, cuatro por zona.
+    e = man2["cifras"]["cubo.json:zonas.*.superficie_total_ha"]
+    assert e["n"] == nz
+    bbox = man2["cifras"]["cubo.json:zonas.*.bbox[*]"]
+    todos = [v for z in cubo["zonas"].values() for v in z["bbox"]]
+    assert bbox["n"] == len(todos) and bbox["min"] == min(todos) and bbox["max"] == max(todos)
+    assert not [a for a in man2["avisos"] if ".bbox: el cubo dice" in a], man2["avisos"]
+    de_zonas = [k for k in man2["cifras"] if k.startswith("cubo.json:zonas.")]
+    assert de_zonas and all(k.startswith("cubo.json:zonas.*.") for k in de_zonas), \
+        "el id de zona no debe quedar en la clave del manifest"
+    if relieve is not None:
+        mm = man2["cifras"]["relieve.json:zonas.*.tormenta.mm"]
+        assert mm["n"] == len(relieve["zonas"])
+        # Una zona sin entrega propia en fuentes.json: su fecha queda en null y se avisa.
+        fuentes = man2["fuentes_de_origen"]
+        for z in relieve["zonas"]:
+            if manifest.entrega_de_relieve(fuentes, z) is None:
+                assert f"sin fecha: relieve.json:zonas.{z}.tormenta.mm" in man2["avisos"]
+
+
+def test_manifest_avisa_si_el_cubo_no_coincide_con_params(tmp_path):
+    def alterar(cubo, relieve):
+        ultima = list(cubo["zonas"])[-1]
+        b = cubo["zonas"][ultima]["bbox"]
+        b[0] = b[0] - (b[2] - b[0])  # bbox distinto del de params (a partir de los propios datos)
+        if cubo.get("localidades"):
+            cubo["localidades"][0]["lat"] = cubo["localidades"][0]["lat"] + cubo["localidades"][0]["lat"]
+    raiz, cubo, _ = raiz_con_dos_zonas(tmp_path, alterar)
+    man2 = manifest.generar(raiz=raiz, escribir=False)
+    ultima = list(cubo["zonas"])[-1]
+    assert any(a.startswith(f"zonas.{ultima}.bbox: el cubo dice") for a in man2["avisos"]), man2["avisos"]
+    if cubo.get("localidades"):
+        assert any(a.startswith("localidades[0].lat: el cubo dice") for a in man2["avisos"]), man2["avisos"]
 
 
 def test_manifest_valores_y_campos(man):

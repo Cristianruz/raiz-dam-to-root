@@ -1,0 +1,123 @@
+/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* web/css/mensaje.css — Maqueta del mensaje de WhatsApp (kit C4, parte A; web/js/mensaje.js).
+   Es una MAQUETA: parece un chat, pero no hay campo de texto ni botón de enviar (no se envía nada).
+   Colores de la identidad como variables, tomadas de style.css; el valor tras la coma es el respaldo si
+   style.css no está cargado (mismos códigos de la identidad, kit C1 §10). La barra verde oscura evoca
+   el chat sin usar el logotipo de ninguna marca.
+   Los números de este archivo son medidas de diseño, no datos. */
+
+:root {
+  --wa-barra: var(--mem-perenne, #2F6B1B);   /* barra superior del chat (verde oscuro) */
+  --wa-barra-texto: var(--blanco, #FFFFFF);
+  --wa-fondo: var(--arena-osc, #E9DFD0);     /* fondo del chat */
+  --wa-burbuja: var(--blanco, #FFFFFF);      /* mensaje recibido */
+  --wa-tinta: var(--tinta, #1D2329);
+  --wa-tinta-suave: var(--tinta-suave, #4A525A);
+  --wa-borde: var(--borde, #D8CFC2);
+  --wa-aviso: var(--brote-claro, #E3F0DC);   /* fondo de los avisos */
+}
+
+.wa-maqueta {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.wa-rotulo {
+  font-size: 0.85rem;
+  color: var(--wa-tinta-suave);
+  text-align: center;
+  max-width: 380px;
+}
+
+.wa-telefono {
+  width: 100%;
+  max-width: 380px;
+  border: 1px solid var(--wa-borde);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--wa-fondo);
+  box-shadow: 0 4px 18px rgba(29, 35, 41, 0.18);
+  color: var(--wa-tinta);
+}
+
+.wa-barra {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--wa-barra);
+  color: var(--wa-barra-texto);
+}
+.wa-avatar {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  background: var(--wa-barra-texto);
+  color: var(--wa-barra);
+}
+.wa-contacto { display: grid; line-height: 1.2; }
+.wa-contacto small { font-size: 0.78rem; opacity: 0.9; }
+
+.wa-chat { padding: 12px 10px 14px; }
+
+/* Burbuja de mensaje recibido, con su «colita» arriba a la izquierda */
+.wa-burbuja {
+  position: relative;
+  background: var(--wa-burbuja);
+  border-radius: 0 10px 10px 10px;
+  padding: 8px 10px 10px;
+  box-shadow: 0 1px 1px rgba(29, 35, 41, 0.18);
+  font-size: 0.95rem;
+  line-height: 1.38;
+  overflow-wrap: anywhere;
+  display: grid;
+  gap: 8px;
+}
+.wa-burbuja::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -8px;
+  border-top: 10px solid var(--wa-burbuja);
+  border-left: 8px solid transparent;
+}
+.wa-burbuja p { margin: 0; }
+
+.wa-opciones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.wa-opcion { display: grid; gap: 2px; }
+.wa-titulo strong { font-weight: 700; }
+.wa-agua, .wa-suelo { font-size: 0.92rem; }
+
+.wa-respuesta { font-size: 1rem; }
+.wa-aviso {
+  font-size: 0.85rem;
+  color: var(--wa-tinta-suave);
+  background: var(--wa-aviso);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+/* Teléfono angosto: la maqueta ocupa todo el ancho disponible */
+@media (max-width: 420px) {
+  .wa-telefono { border-radius: 12px; }
+  .wa-chat { padding: 10px 8px 12px; }
+  .wa-burbuja { font-size: 0.93rem; }
+}
+
+/* Impresión: la maqueta no va en la ficha de papel (css/imprimir.css también la oculta) */
+@media print {
+  .wa-maqueta { display: none !important; }
+}

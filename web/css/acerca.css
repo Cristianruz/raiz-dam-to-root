@@ -1,0 +1,251 @@
+/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* web/css/acerca.css — Pantalla de inicio de tres pasos y sección «About & Data» (web/js/acerca.js).
+   Colores de la identidad como variables; toma --agua, --brote, --tinta… de style.css. El valor tras la
+   coma es el respaldo si style.css no está cargado (mismos códigos de la identidad, kit C1 §10).
+   Contraste AA: texto oscuro sobre fondos claros; cada estado lleva símbolo y texto, no solo color.
+   Los números de este archivo son medidas de diseño, no datos. */
+
+:root {
+  --acerca-tinta: var(--tinta, #1D2329);
+  --acerca-tinta-suave: var(--tinta-suave, #4A525A);
+  --acerca-fondo: var(--blanco, #FFFFFF);
+  --acerca-arena: var(--arena, #F5EFE6);
+  --acerca-borde: var(--borde, #D8CFC2);
+  --acerca-agua: var(--agua, #1F6FB2);
+  --acerca-agua-osc: var(--agua-osc, #174F80);
+  --acerca-agua-clara: var(--agua-clara, #DCEAF6);
+
+  /* Estados de las pruebas: borde y fondo de la insignia (el texto siempre es oscuro). */
+  --acerca-ok: var(--brote, #4C9A2A);
+  --acerca-ok-claro: var(--brote-claro, #E3F0DC);
+  --acerca-falla: var(--rojo, #B3261E);
+  --acerca-falla-claro: var(--rojo-claro, #F6DEDC);
+  --acerca-parcial: var(--ambar, #D98E04);
+  --acerca-parcial-claro: var(--ambar-claro, #FBEFD5);
+  --acerca-no-corrida: var(--tinta-suave, #4A525A);
+  --acerca-no-corrida-claro: var(--arena-osc, #E9DFD0);
+  --acerca-corrida: var(--agua, #1F6FB2);
+  --acerca-corrida-claro: var(--agua-clara, #DCEAF6);
+
+  --acerca-velo: rgba(29, 35, 41, 0.55);
+  --acerca-sombra: 0 10px 40px rgba(29, 35, 41, 0.3);
+}
+
+/* ---------- Pantalla de inicio (diálogo modal sobre la página) ---------- */
+.acerca-inicio {
+  position: fixed; inset: 0; z-index: 90; /* sobre la ficha (25) y los controles fijos (30) */
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  background: var(--acerca-velo);
+  animation: acerca-aparecer 0.2s ease-out;
+}
+@keyframes acerca-aparecer { from { opacity: 0; } to { opacity: 1; } }
+
+.acerca-inicio-tarjeta {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+  overflow-y: auto; overscroll-behavior: contain;
+  background: var(--acerca-fondo); color: var(--acerca-tinta);
+  border-radius: 14px; box-shadow: var(--acerca-sombra);
+  padding: 22px 22px 20px;
+  display: grid; gap: 12px;
+}
+.acerca-inicio-tarjeta:focus { outline: none; }
+.acerca-inicio-titulo { font-size: 1.35rem; padding-right: 44px; }
+.acerca-inicio-lema { color: var(--acerca-tinta-suave); }
+
+.acerca-inicio-x {
+  position: absolute; top: 10px; right: 10px;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid var(--acerca-borde); background: var(--acerca-fondo);
+  font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--acerca-tinta);
+}
+.acerca-inicio-x:hover { background: var(--acerca-arena); }
+
+/* Los números de los pasos los dibuja la lista ordenada (contador de CSS), no el texto. */
+.acerca-inicio-pasos {
+  list-style: none; counter-reset: acerca-paso; margin: 4px 0; padding: 0;
+  display: grid; gap: 10px;
+}
+.acerca-inicio-pasos li {
+  counter-increment: acerca-paso;
+  display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 12px; row-gap: 2px;
+  align-items: start;
+  padding: 10px 12px; border-radius: 10px; background: var(--acerca-arena);
+}
+.acerca-inicio-pasos li::before {
+  content: counter(acerca-paso);
+  grid-row: span 2;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--acerca-agua-osc); color: var(--acerca-fondo);
+  font-weight: 700; font-size: 1.15rem;
+}
+.acerca-inicio-pasos strong { font-size: 1.05rem; }
+.acerca-inicio-pasos span { color: var(--acerca-tinta-suave); font-size: 0.92rem; }
+
+.acerca-inicio-aviso {
+  font-size: 0.9rem; font-weight: 700;
+  background: var(--acerca-ok-claro); border-left: 4px solid var(--acerca-ok);
+  padding: 6px 10px; border-radius: 4px;
+}
+.acerca-inicio-boton {
+  justify-self: end;
+  min-height: 44px; padding: 8px 22px; border-radius: 999px; cursor: pointer;
+  border: 2px solid var(--acerca-agua-osc); background: var(--acerca-agua-osc); color: var(--acerca-fondo);
+  font-weight: 700;
+}
+.acerca-inicio-boton:hover { background: var(--acerca-agua); border-color: var(--acerca-agua); }
+
+/* ---------- Sección «About & Data» ---------- */
+.acerca {
+  display: grid; gap: 16px;
+  color: var(--acerca-tinta);
+  max-width: 1100px; margin: 0 auto;
+  padding: 16px;
+}
+.acerca-titulo { font-size: 1.4rem; }
+.acerca-entrada { color: var(--acerca-tinta-suave); }
+.acerca-bloque {
+  background: var(--acerca-fondo); border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(29, 35, 41, 0.12);
+  padding: 14px 16px; display: grid; gap: 10px;
+  min-width: 0;
+}
+.acerca-bloque h3 { font-size: 1.15rem; }
+.acerca-subtitulo { font-size: 1rem; margin-top: 4px; }
+.acerca-ayuda, .acerca-pie { color: var(--acerca-tinta-suave); font-size: 0.88rem; }
+.acerca-vacio {
+  border: 2px dashed var(--acerca-borde); border-radius: 8px; padding: 10px 12px;
+  color: var(--acerca-tinta-suave);
+}
+.acerca code { font-size: 0.85em; overflow-wrap: anywhere; }
+.acerca a { color: var(--acerca-agua-osc); font-weight: 700; }
+.acerca a:hover { color: var(--acerca-agua); }
+.acerca details > summary { cursor: pointer; }
+.acerca ul { margin: 0; padding-left: 1.2em; }
+
+.acerca-rastro {
+  background: var(--acerca-agua-clara); border-left: 4px solid var(--acerca-agua);
+  padding: 8px 12px; border-radius: 4px;
+}
+.acerca-simulado { font-weight: 700; color: var(--acerca-falla); }
+
+/* Tabla de datos NASA y tabla de pasos de la puerta */
+.acerca-tabla-caja { overflow-x: auto; }
+.acerca-tabla { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.acerca-tabla th, .acerca-tabla td {
+  text-align: left; vertical-align: top;
+  padding: 8px 10px; border-bottom: 1px solid var(--acerca-borde);
+}
+.acerca-tabla thead th { background: var(--acerca-arena); font-size: 0.85rem; }
+.acerca-tabla tbody th { font-weight: 700; min-width: 9em; }
+.acerca-producto { display: block; font-weight: 700; overflow-wrap: anywhere; }
+.acerca-escala { display: block; margin-top: 4px; font-size: 0.85rem; color: var(--acerca-tinta-suave); }
+.acerca-usos li + li { margin-top: 2px; }
+.acerca-archivos { list-style: none; padding-left: 0 !important; display: grid; gap: 4px; }
+.acerca-cache {
+  display: inline-block; font-size: 0.78rem; font-weight: 700;
+  border: 1px solid var(--acerca-ok); background: var(--acerca-ok-claro);
+  border-radius: 999px; padding: 0 8px;
+}
+.acerca-cache--no { border-color: var(--acerca-no-corrida); background: var(--acerca-no-corrida-claro); }
+.acerca-fuente-registrada {
+  font-size: 0.82rem; color: var(--acerca-tinta-suave); margin: 4px 0 2px;
+  overflow-wrap: anywhere;
+}
+.acerca-otras { font-size: 0.92rem; }
+.acerca-escalas li + li { margin-top: 4px; }
+
+/* Pruebas: todas con la misma tarjeta; «not run» con la misma visibilidad que un resultado.
+   El <li> sigue siendo «list-item» para que el contador de la lista (con el value que viene de
+   pruebas.json) numere la tarjeta: el número se dibuja en el título con counter(list-item). */
+.acerca-pruebas { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.acerca-prueba, .acerca-puerta {
+  border: 1px solid var(--acerca-borde); border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--acerca-fondo);
+}
+.acerca-prueba { display: list-item; list-style: none; }
+.acerca-prueba > * + *, .acerca-puerta > * + * { margin-top: 6px; }
+.acerca-puerta { background: var(--acerca-arena); }
+.acerca-prueba .acerca-prueba-titulo::before {
+  content: counter(list-item);
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; margin-right: 8px; border-radius: 50%;
+  background: var(--acerca-agua-osc); color: var(--acerca-fondo);
+  font-size: 0.95rem; vertical-align: middle;
+}
+.acerca-prueba-cabeza {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px;
+}
+.acerca-prueba-titulo { font-size: 1.05rem; }
+.acerca-rotulo { font-weight: 700; }
+.acerca-criterio { font-size: 0.92rem; }
+.acerca-resumen { font-weight: 700; }
+.acerca-metricas { display: grid; gap: 2px; font-size: 0.92rem; }
+.acerca-metrica-etiqueta { color: var(--acerca-tinta-suave); }
+.acerca-partes { list-style: none; padding-left: 0 !important; display: grid; gap: 6px; font-size: 0.92rem; }
+.acerca-partes li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.acerca-parte-nombre { font-weight: 700; }
+.acerca-parte-nota { flex-basis: 100%; color: var(--acerca-tinta-suave); font-size: 0.86rem; }
+
+/* Insignia de estado: misma forma y tamaño para todos los estados; cambia el borde, el fondo y el símbolo. */
+.acerca-estado {
+  display: inline-flex; align-items: center; gap: 4px; flex: none;
+  border: 2px solid var(--acerca-no-corrida); background: var(--acerca-no-corrida-claro);
+  color: var(--acerca-tinta);
+  border-radius: 999px; padding: 1px 10px;
+  font-size: 0.85rem; font-weight: 700; white-space: nowrap;
+}
+.acerca-estado-simbolo { font-size: 0.95em; }
+.acerca-estado--passed { border-color: var(--acerca-ok); background: var(--acerca-ok-claro); }
+.acerca-estado--failed { border-color: var(--acerca-falla); background: var(--acerca-falla-claro); }
+.acerca-estado--partial { border-color: var(--acerca-parcial); background: var(--acerca-parcial-claro); }
+.acerca-estado--not-run { border-style: dashed; border-color: var(--acerca-no-corrida); background: var(--acerca-no-corrida-claro); }
+.acerca-estado--run { border-color: var(--acerca-corrida); background: var(--acerca-corrida-claro); }
+.acerca-estado--pending, .acerca-estado--skipped { border-style: dashed; }
+
+.acerca-pasos summary { font-weight: 700; }
+
+/* Repositorio, IA y aviso */
+.acerca-ligas { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.acerca-aviso {
+  font-weight: 700; background: var(--acerca-ok-claro);
+  border-left: 4px solid var(--acerca-ok); padding: 8px 10px; border-radius: 4px;
+}
+.acerca-limites { font-size: 0.88rem; color: var(--acerca-tinta-suave); }
+
+/* Respaldo si style.css no está cargado */
+.acerca .solo-lector, .acerca-inicio .solo-lector {
+  position: absolute !important; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* ---------- Pantallas angostas: las tablas pasan a tarjetas apiladas ---------- */
+@media (max-width: 699px) {
+  .acerca { padding: 12px; gap: 12px; }
+  .acerca-bloque { padding: 12px; }
+  .acerca-inicio { padding: 12px; align-items: flex-end; }
+  .acerca-inicio-tarjeta { padding: 18px 16px 16px; border-radius: 14px; }
+  .acerca-inicio-boton { justify-self: stretch; }
+
+  .acerca-tabla thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .acerca-tabla, .acerca-tabla tbody, .acerca-tabla tr, .acerca-tabla th, .acerca-tabla td { display: block; width: 100%; }
+  .acerca-tabla tr { border: 1px solid var(--acerca-borde); border-radius: 8px; margin-bottom: 10px; padding: 4px 0; }
+  .acerca-tabla th, .acerca-tabla td { border-bottom: none; padding: 4px 10px; }
+  .acerca-tabla tbody td::before {
+    content: attr(data-etiqueta);
+    display: block; font-size: 0.78rem; font-weight: 700; color: var(--acerca-tinta-suave);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acerca-inicio { animation: none; }
+}
+
+/* Impresión: la pantalla de inicio nunca se imprime */
+@media print {
+  .acerca-inicio { display: none !important; }
+}

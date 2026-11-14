@@ -706,7 +706,14 @@ export async function agregarCapaRelieve(mapa, ctx = {}) {
       anuncio.textContent = `Reference storm${lamina}: runoff paths highlighted (reduced motion, no animation).`;
       return { animada: false };
     }
-    const anim = animarTormenta(mapa, caminosZona(), colores);
+    const caminos = caminosZona();
+    if (!caminos.length) {
+      // La zona tiene relieve.json pero sus rutas no vienen en el archivo: nada que animar.
+      elemento.dataset.animando = "false";
+      anuncio.textContent = `Reference storm${lamina}: no runoff paths for this pilot area in the terrain file.`;
+      return { animada: false };
+    }
+    const anim = animarTormenta(mapa, caminos, colores);
     estado.animacion = anim;
     elemento.dataset.animando = "true";
     anuncio.textContent = `Simulating a reference storm${lamina}: drops follow the runoff paths.`;
