@@ -120,16 +120,42 @@ def main():
         limpias.append((round(-g.centroid.y, 6), round(g.centroid.x, 6), c[2], g, gj, ha))
     print(f"Candidatos >= 1 ha: {len(cand)} · tras quitar duplicados y traslapes: {len(limpias)}")
     cand = sorted(limpias)                             # ids estables: de norte a sur, de oeste a este
+    # Geometría de salida simplificada (~10 m en parcelas ≥ 5 ha, ~3 m en las menores; los bordes de FTW son
+    # escalones de píxel de 10 m) y con
+    # 5 decimales (~1 m): pesa ~3 veces menos. Simplificar puede encimar parcelas vecinas (sobre todo franjas
+    # delgadas junto a parcelas grandes), así que se vuelve a quitar el traslape: de menor a mayor área, a cada
+    # parcela simplificada y redondeada se le resta lo ya fijado. El id y el area_ha vienen de la geometría sin simplificar.
+    from shapely.geometry import shape as _shape
+
+    def redondear(geom):
+        return _shape(json.loads(json.dumps(mapping(geom)), parse_float=lambda x: round(float(x), 5)))
+
+    finales, fijadas = {}, []
+    for k in sorted(range(len(cand)), key=lambda q: cand[q][3].area):
+        g = cand[k][3]
+        tol = 0.0001 if cand[k][5] >= 5 else 0.00003      # ~10 m en parcelas de 5 ha o más; ~3 m en las chicas
+        gs = redondear(g.simplify(tol, preserve_topology=True))
+        if not gs.is_valid:
+            gs = gs.buffer(0)
+        if fijadas:
+            arbol = STRtree(fijadas)
+            for j in arbol.query(gs):
+                gs = gs.difference(fijadas[j])
+        if gs.geom_type == "MultiPolygon":
+            gs = max(gs.geoms, key=lambda x: x.area)
+        if gs.is_empty or gs.geom_type != "Polygon":
+            gs = g                                    # si se daña, se deja la original
+        gs = redondear(gs)
+        if not gs.is_valid:
+            gs = gs.buffer(0)
+            if gs.geom_type == "MultiPolygon":
+                gs = max(gs.geoms, key=lambda x: x.area)
+        finales[k] = gs
+        fijadas.append(gs)
     feats = []
-    for k, (_, _, fid, g, gj, ha) in enumerate(cand, 1):
-        # Geometría de salida simplificada a ~10 m (los bordes de FTW son escalones de píxel de 10 m) y con
-        # 5 decimales (~1 m): pesa ~3 veces menos; el área es la de la geometría sin simplificar.
-        gs = g.simplify(0.0001, preserve_topology=True)
-        if not gs.is_valid or gs.geom_type != "Polygon":
-            gs = g                                    # si la simplificación la daña, se deja la original
-        gj = json.loads(json.dumps(mapping(gs)), parse_float=lambda x: round(float(x), 5))
-        feats.append({"type": "Feature", "geometry": gj, "properties": {
-            "id": f"{prefijo}{k:04d}", "zona": a.zona, "area_ha": round(ha, 2), "modulo": None,
+    for k, (_, _, fid, g, gj, ha) in enumerate(cand):
+        feats.append({"type": "Feature", "geometry": json.loads(json.dumps(mapping(finales[k]))), "properties": {
+            "id": f"{prefijo}{k + 1:04d}", "zona": a.zona, "area_ha": round(ha, 2), "modulo": None,
             "ftw_confianza": confianza(g, raster), "protagonista": False, "ftw_id": fid}})
     prot = [x for x in a.protagonistas.split(",") if x]
     for x in feats:
