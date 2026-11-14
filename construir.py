@@ -11,14 +11,18 @@
 Pasos (en este orden; si uno falla, se reporta y se sigue con los demás):
   (a) motor/ensamblar.py: valida las entregas del buzón (variable RAIZ_BUZON) y las
       copia a data/processed. Si el archivo aún no existe, queda «pendiente».
-  (b) motor/simulados.py: regenera los datos simulados mientras no haya datos reales
-      (si el ensamblador metió entregas, se conservan los datos ensamblados).
+  (b) motor/b4_cubo.py con datos reales o motor/simulados.py mientras no los haya.
+  (b2) motor/relieve_web.py: relieve.json y relieve_rutas.geojson para la web.
   (c) motor/manifest.py: genera web/data/manifest.json.
   (d) python validar_contrato.py: debe imprimir «CONTRATO OK».
+  (d2) motor/verificador.py: cifras de las explicaciones (set dorado).
   (e) pytest -q tests/
   (f) node --test con los archivos tests/**/*.test.js
-  (g) reporte de 10 líneas. Sale con 0 solo si todo pasa; lo pendiente (piezas que
-      aún no existen) no cuenta como falla.
+  (5c) docs/pruebas.md (la tabla de esta corrida) y, a partir de ella, motor/pruebas_web.py:
+       web/data/pruebas.json, las cinco pruebas a la vista de «About & Data» (S9 §6; kit C5).
+       Va después de las pruebas para que la «puerta automática» de la web sea esta corrida.
+  (g) reporte. Sale con 0 solo si todo pasa; lo pendiente (piezas que aún no existen)
+      no cuenta como falla.
 
 Solo usa la biblioteca estándar de Python (pytest y node se llaman como procesos).
 """
@@ -285,8 +289,33 @@ def escribir_pruebas_md(pasos, total_s):
         f"Corrida: {ahora} · duración {total_s:.1f} s\n\n"
         "| Paso | Estado | Detalle |\n|---|---|---|\n" + filas + "\n\n"
         "La prueba con navegador (`node tests/e2e/web_smoke.mjs`) se corre aparte y antes de cada publicación.\n"
+        "Después de escribir esta tabla, el paso 5c (`motor/pruebas_web.py`) genera `web/data/pruebas.json` "
+        "a partir de ella: la sección «About & Data» de la web la muestra como «puerta automática».\n"
     )
     (RAIZ / "docs/pruebas.md").write_text(texto, encoding="utf-8")
+
+
+# --- (5c) pruebas a la vista para la web ----------------------------------------------------
+def paso_pruebas_web():
+    """web/data/pruebas.json (motor/pruebas_web.py): las cinco pruebas de S9 §6 con su estado real y la
+    puerta automática leída de docs/pruebas.md. Un resultado desfavorable o «not run» NO es una falla del
+    paso: se publica igual (S9 §6). El paso falla solo si el archivo no se puede generar."""
+    titulo("(5c) Pruebas a la vista para la web (motor/pruebas_web.py)")
+    try:
+        rep = importar("motor.pruebas_web").construir()
+    except Exception as ex:  # noqa: BLE001
+        print(f"  pruebas_web.construir() falló: {type(ex).__name__}: {ex}")
+        return Paso("pruebas_web", FALLA, f"{type(ex).__name__}: {ex}")
+    estados = rep.get("pruebas", {})
+    for id_, est in estados.items():
+        print(f"  {id_}: {est}")
+    print(f"  puerta automática: {rep.get('puerta')} (corrida {rep.get('corrida') or 'sin registrar'})")
+    cuenta = {}
+    for est in estados.values():
+        cuenta[est] = cuenta.get(est, 0) + 1
+    resumen = ", ".join(f"{n} {e}" for e, n in cuenta.items())
+    return Paso("pruebas_web", OK, f"{rep.get('ruta')}: {len(estados)} pruebas ({resumen}); "
+                                   f"puerta {rep.get('puerta')}")
 
 
 # --- (e) pytest --------------------------------------------------------------------
@@ -377,8 +406,13 @@ def main(argv=None):
         js = paso_node()
 
     pasos = (origen, ens, sim, rel, man, con, ver, py, js)
-    fallas = [p.nombre for p in pasos if p.estado == FALLA]
-    pendientes = [p.nombre for p in pasos if p.estado == PENDIENTE]
+    # docs/pruebas.md con la tabla de esta corrida y, a partir de ella, web/data/pruebas.json (5c).
+    if not args.rapido:
+        escribir_pruebas_md(pasos, time.time() - inicio)
+    web = paso_pruebas_web()
+    todos = pasos + (web,)
+    fallas = [p.nombre for p in todos if p.estado == FALLA]
+    pendientes = [p.nombre for p in todos if p.estado == PENDIENTE]
     if reporte:
         entregas = (f"entraron {contar(reporte.get('entraron'))} · rechazados {contar(reporte.get('rechazados'))} · "
                     f"retenidos {contar(reporte.get('retenidos'))} · fuentes {contar(reporte.get('fuentes'))}")
@@ -402,6 +436,7 @@ def main(argv=None):
         f" 4. Sigue simulado : {estado_simulado(reporte)}",
         f" 5. Cubo ..........: {sim}",
         f" 5b. Relieve ......: {rel}",
+        f" 5c. Pruebas web ..: {web}",
         f" 6. Manifest ......: {man}",
         f" 7. Contrato ......: {con}",
         f" 7b. Verificador ..: {ver}",
@@ -410,8 +445,6 @@ def main(argv=None):
         f"10. RESULTADO .....: {final} · {time.time() - inicio:.1f} s · código de salida {codigo}",
     )
     print("\n".join(lineas))
-    if not args.rapido:
-        escribir_pruebas_md(pasos, time.time() - inicio)
     return codigo
 
 

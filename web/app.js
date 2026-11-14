@@ -11,7 +11,16 @@
 // - Dos zonas piloto (docs/decisiones/2026-11-14_dos_zonas.md): el selector «Pilot area» sale de
 //   cubo.zonas y solo aparece con más de una zona. Parcela sin propiedad «zona» = la primera zona del
 //   cubo; sin cubo.zonas todo funciona como con una sola zona (bloque cubo.zona).
+//
+// Módulos de web/js/ que se conectan aquí (cada uno trae su hoja en web/css/, enlazada en index.html):
+// - relieve.js: capa «Terrain & runoff» y botón «Simulate a storm» en el panel (kit A9, parte web), y la
+//   línea de relieve del renglón Soil de cada tarjeta (S9 §4 bis);
+// - gota.js: «Follow the drop» dentro de la ficha, Sankey con d3-sankey (kit X3.1 y X3.2);
+// - mensaje.js: maqueta del mensaje de WhatsApp (en español) y ficha imprimible (kit C4);
+// - acerca.js: pantalla de inicio de tres pasos y sección «About & Data» (kit C5). manifest.json y
+//   pruebas.json se leen solo al abrir «About & Data» o al imprimir (carga perezosa).
 
+import * as reglas from "./reglas.js";
 import {
   llaveLluvia,
   aguaComprometida,
@@ -19,6 +28,10 @@ import {
   conteosZona,
   rellenarMarcadores,
 } from "./reglas.js";
+import { agregarCapaRelieve, htmlRelieveParcela, cargarRelieve } from "./js/relieve.js";
+import { dibujarGota } from "./js/gota.js";
+import { htmlWhatsApp, imprimirFicha } from "./js/mensaje.js";
+import { montarInicio, montarAcerca, LLAVE_INICIO } from "./js/acerca.js";
 
 const LOCALE = "en-US";
 
@@ -110,6 +123,12 @@ const estado = {
   fichaId: null,
   disparador: null,
   gota: { opcion: null, goteo: false, tope: true },
+  gotaApi: null, // instancia de web/js/gota.js en la ficha abierta
+  whatsapp: false, // ¿la maqueta del mensaje está abierta en la ficha?
+  relieveDatos: null, // relieve.json (null si no existe: «Terrain layer: not run»)
+  relieve: null, // controlador de la capa «Terrain & runoff» (web/js/relieve.js)
+  acerca: null, // promesa del montaje de «About & Data» (una sola vez)
+  disparadorAcerca: null,
   mapa: null,
   mapaListo: false,
   marcadores: new Map(),
@@ -160,10 +179,6 @@ function fmtDato(v) {
 function fmtPct(fraccion) {
   if (fraccion == null || !Number.isFinite(fraccion)) return "—";
   return conMenos(formateador({ style: "percent", maximumFractionDigits: 0 }).format(fraccion));
-}
-function fmtPctSigno(fraccion) {
-  if (fraccion == null || !Number.isFinite(fraccion)) return "—";
-  return conMenos(formateador({ style: "percent", maximumFractionDigits: 0, signDisplay: "exceptZero" }).format(fraccion));
 }
 function fmtSigno(v) {
   return conMenos(formateador({ maximumFractionDigits: 3, signDisplay: "exceptZero" }).format(v));
@@ -229,20 +244,38 @@ async function cargarJSON(ruta) {
   return resp.json();
 }
 
+/** Archivo opcional (manifest.json, pruebas.json): se pide una sola vez y solo cuando hace falta; null si falta. */
+const opcionales = new Map();
+function cargarOpcional(ruta) {
+  if (!opcionales.has(ruta)) {
+    opcionales.set(
+      ruta,
+      fetch(ruta)
+        .then((resp) => (resp.ok ? resp.json() : null))
+        .catch(() => null),
+    );
+  }
+  return opcionales.get(ruta);
+}
+
 // ---------------------------------------------------------------------------
 // Arranque
 // ---------------------------------------------------------------------------
 async function iniciar() {
   observarCabecera();
   try {
-    const [cubo, parcelas, explicaciones] = await Promise.all([
+    // relieve.json es opcional: cargarRelieve nunca falla (null si no existe) y la ficha toma de ahí el
+    // rótulo de escala de la línea de relieve aunque se abra antes que el mapa.
+    const [cubo, parcelas, explicaciones, relieve] = await Promise.all([
       cargarJSON("data/cubo.json"),
       cargarJSON("data/parcelas.geojson"),
       cargarJSON("data/explicaciones.json"),
+      cargarRelieve(),
     ]);
     estado.cubo = cubo;
     estado.parcelas = parcelas;
     estado.explicaciones = explicaciones;
+    estado.relieveDatos = relieve;
   } catch (err) {
     console.error(err);
     const aviso = document.createElement("p");
@@ -264,8 +297,11 @@ async function iniciar() {
   actualizarTodo();
   fijarMedidas(); // la cabecera ya tiene su alto final: el mapa se encuadra con él
   crearMapa();
+  if (!estado.mapa) iniciarRelieve(null); // sin mapa, el bloque lo dice; con mapa, se agrega en «load»
   pintarLocalidades(); // después del mapa: sin mapa, la lista queda solo en texto
   document.body.dataset.listo = "si";
+  // Pantalla de inicio de tres pasos (kit C5): una vez por sesión; «How it works» la vuelve a abrir.
+  montarInicio(document.body);
 }
 
 /**
@@ -368,6 +404,8 @@ function cambiarZona(valor) {
   filtrarLista();
   actualizarTodo();
   encuadrar();
+  // Capa de relieve: leyenda y tormenta de la zona elegida (o de todas con «All areas»).
+  estado.relieve?.fijarZona(estado.zonaSel);
 }
 
 // ---------------------------------------------------------------------------
@@ -987,6 +1025,7 @@ function crearMapa() {
     mapa.on("mouseleave", "parcelas-relleno", () => { mapa.getCanvas().style.cursor = ""; });
     crearMarcadores();
     agregarLocalidades(mapa);
+    iniciarRelieve(mapa); // rutas de escurrimiento debajo de los puntos de las localidades
     estado.mapaListo = true;
     pintarMapa();
     // «listo» cuando la fuente de las parcelas ya está procesada (el GeoJSON se tesela aparte, después de «load»).
@@ -1137,6 +1176,29 @@ function mostrarLocalidad(i) {
 }
 
 // ---------------------------------------------------------------------------
+// Relieve y tormenta (S9 §4 bis; kit A9, parte web). Todo lo dibuja web/js/relieve.js en el bloque
+// #capa-relieve del panel: interruptor «Terrain & runoff», botón «Simulate a storm», leyenda y tarjeta de
+// la tormenta con su lámina y su fuente (de relieve.json). Sin relieve.json o sin rutas: «not run».
+// ---------------------------------------------------------------------------
+async function iniciarRelieve(mapa) {
+  let ctl = null;
+  try {
+    ctl = await agregarCapaRelieve(mapa, {
+      zonaActiva: estado.zonaSel,
+      contenedor: "#capa-relieve",
+      nombreZona,
+      antesDe: "localidades-punto",
+    });
+  } catch (err) {
+    console.warn("Raíz: terrain layer not available", err);
+  }
+  estado.relieve = ctl;
+  // La zona pudo cambiar mientras se leían los archivos.
+  if (ctl && ctl.estado().zona !== estado.zonaSel) ctl.fijarZona(estado.zonaSel);
+  document.body.dataset.relieve = ctl?.disponible ? "listo" : "no-corrido";
+}
+
+// ---------------------------------------------------------------------------
 // Panel lateral: La Boquilla, acuífero, pie de fuentes
 // ---------------------------------------------------------------------------
 function pintarDistrito() {
@@ -1196,12 +1258,14 @@ function abrirFicha(id, opciones = {}) {
   if (!estado.fichaId || !$("#ficha").contains(document.activeElement)) estado.disparador = document.activeElement;
   estado.fichaId = id;
   const ops = opcionesDe(id);
-  estado.gota = { opcion: (ops.find((o) => o.id === "ACTUAL") ?? ops[0])?.id ?? null, goteo: false, tope: true };
+  estado.gota = { opcion: (ops.find((o) => o.id === "ACTUAL" && o.gota) ?? ops.find((o) => o.gota) ?? ops[0])?.id ?? null, goteo: false, tope: true };
+  estado.whatsapp = false;
   construirFicha(f);
   fijarMedidas();
   const ficha = $("#ficha");
   ficha.hidden = false;
   ficha.scrollTop = 0;
+  pintarGota(); // con la ficha visible: el Sankey toma el ancho real de la sección
   pintarColoreado();
   if (opciones.seccion === "gota") {
     const h = $("#t-gota");
@@ -1216,6 +1280,9 @@ function cerrarFicha({ devolverFoco = true } = {}) {
   if (!estado.fichaId) return;
   const id = estado.fichaId;
   estado.fichaId = null;
+  estado.gotaApi?.destruir(); // detiene las gotas y los observadores del Sankey
+  estado.gotaApi = null;
+  estado.whatsapp = false;
   $("#ficha").hidden = true;
   $("#ficha-cuerpo").innerHTML = "";
   pintarColoreado();
@@ -1227,26 +1294,33 @@ function cerrarFicha({ devolverFoco = true } = {}) {
 function construirFicha(f) {
   const p = f.properties;
   const ops = opcionesDe(p.id);
+  estado.gotaApi?.destruir();
+  estado.gotaApi = null;
   $("#ficha-titulo").textContent = `Field ${p.id}`;
-  // Parcela abstenida: sin tarjetas; la memoria sí se muestra (kit C2.1 y C2.2).
-  const sinOpciones = p.abstencion
-    ? '<p class="nota-abstenida">The crop map is not sure what grows here, so no options are computed. ' +
-      "Check the current crop with a technician; the field memory above still shows its history.</p>"
-    : "<p>No options computed for this field yet.</p>";
+  // Parcela abstenida: sin tarjetas; la memoria sí se muestra (kit C2.1 y C2.2). Sin tarjetas tampoco hay
+  // renglón Soil: la línea de relieve (contexto de la zona) va debajo de la nota.
+  const relieve = htmlRelieveParcela(p, { relieve: estado.relieveDatos });
+  const sinOpciones =
+    (p.abstencion
+      ? '<p class="nota-abstenida">The crop map is not sure what grows here, so no options are computed. ' +
+        "Check the current crop with a technician; the field memory above still shows its history.</p>"
+      : "<p>No options computed for this field yet.</p>") + relieve;
   $("#ficha-cuerpo").innerHTML = [
     htmlEncabezado(p),
+    // En papel la línea de relieve va una sola vez, aquí (style.css la oculta en las tarjetas al imprimir).
+    ops.length && relieve ? `<div class="solo-impresion relieve-impresion">${relieve}</div>` : "",
     htmlMemoria(p),
     `<section aria-labelledby="t-opciones"><h3 id="t-opciones">Current rotation and alternatives</h3>` +
-      (ops.length ? `<div class="tarjetas">${ops.map((o) => htmlTarjeta(o)).join("")}</div>` : sinOpciones) +
+      (ops.length ? `<div class="tarjetas">${ops.map((o) => htmlTarjeta(o, relieve)).join("")}</div>` : sinOpciones) +
       "</section>",
     htmlGota(ops, p),
+    htmlCompartir(),
     `<p class="aviso-juicio">${esc(AVISO_JUICIO)}</p>`,
     htmlGlosario(),
   ].join("");
   conectarGota();
+  conectarCompartir();
   actualizarFicha();
-  construirFilasGota();
-  pintarGota(true);
 }
 
 function htmlEncabezado(p) {
@@ -1325,7 +1399,8 @@ function circulo(clave, tabla) {
   return `<span class="sem-circulo${claro ? " claro" : ""}" style="background-color: var(--sem-${esc(clave in tabla ? clave : "gris")})" aria-hidden="true">${esc(s.simbolo)}</span>`;
 }
 
-function htmlTarjeta(o) {
+/** Tarjeta de una opción. `relieve`: la línea de relieve de la parcela (igual en todas sus tarjetas). */
+function htmlTarjeta(o, relieve = "") {
   const esActual = o.id === "ACTUAL";
   return (
     `<article class="tarjeta" data-opcion="${esc(o.id)}">` +
@@ -1333,7 +1408,7 @@ function htmlTarjeta(o) {
     (esActual ? '<span class="insignia-actual">Current rotation</span>' : "") +
     `<h4>${esc(o.nombre)}</h4></header>` +
     '<div class="renglon renglon-agua" data-parte="agua"></div>' +
-    htmlSuelo(o) +
+    htmlSuelo(o, relieve) +
     htmlDinero(o) +
     htmlMeses(o) +
     htmlFiltros(o) +
@@ -1343,7 +1418,11 @@ function htmlTarjeta(o) {
   );
 }
 
-function htmlSuelo(o) {
+/**
+ * Renglón Soil: días de suelo desnudo, leguminosa, plagas y salinidad de la opción; al final, la línea de
+ * relieve de la parcela (pendiente, escurrimiento y depresiones, con el rótulo de escala de relieve.json).
+ */
+function htmlSuelo(o, relieve = "") {
   const su = o.suelo ?? {};
   const sem = o.semaforo?.suelo ?? "gris";
   const origen = su.dias_desnudo_origen === "medido" ? "measured" : su.dias_desnudo_origen === "estimado" ? "estimated" : "";
@@ -1356,6 +1435,7 @@ function htmlSuelo(o) {
     `<p>Legume (adds nitrogen): ${siNo(su.leguminosa)}</p>` +
     `<p>Breaks the pest cycle: ${siNo(su.ruptura_plagas)}</p>` +
     (su.riesgo_salinidad != null ? `<p>Salinity risk (regional): ${esc(su.riesgo_salinidad)}</p>` : "") +
+    relieve +
     "</div></div>"
   );
 }
@@ -1471,6 +1551,7 @@ function actualizarFicha() {
     $('[data-parte="respuestas"]', tarjeta).innerHTML = htmlRespuestas(o, ev);
   }
   pintarCoberturaGota();
+  if (estado.whatsapp) pintarWhatsApp(); // el mensaje dice cuántas hectáreas alcanzan con la dotación elegida
 }
 
 function htmlRespuestas(o, ev) {
@@ -1498,31 +1579,10 @@ function htmlGlosario() {
 }
 
 // ---------------------------------------------------------------------------
-// La gota (plan B de X3.2: barras horizontales apiladas; el Sankey llegará después)
+// La gota (kit X3.1 y X3.2). El diagrama, los controles del goteo, las cifras grandes, la frase fija y la
+// tabla para lectores de pantalla los dibuja web/js/gota.js (Sankey con d3-sankey; plan B: barras).
+// Aquí quedan el título, el selector de opción y la línea de cobertura, que depende del deslizador.
 // ---------------------------------------------------------------------------
-// Accesores a los campos del bloque gota del contrato (kit §2.3).
-const FILAS_GOTA = [
-  {
-    rotulo: "Leaves La Boquilla",
-    segmentos: [{ texto: "Released from the dam", colorVar: "gota-agua", v: (g) => g.m3_salen_presa }],
-  },
-  {
-    rotulo: "Along the canal",
-    segmentos: [
-      { texto: "Canal losses", colorVar: "gota-canal", v: (g) => g.m3_perdidas_canal },
-      { texto: "Reaches the field", colorVar: "gota-agua", v: (g) => g.m3_llegan_parcela },
-    ],
-  },
-  {
-    rotulo: "Where it ends up",
-    segmentos: [
-      { texto: "Crop consumption (ET)", colorVar: "gota-et", v: (g) => g.m3_consume_cultivo_et },
-      { texto: "Back to aquifer", colorVar: "gota-acuifero", v: (g) => g.m3_regresan_acuifero },
-      { texto: "Other losses", colorVar: "gota-otras", v: (g) => g.m3_otras_perdidas },
-    ],
-  },
-];
-
 function htmlGota(ops, p = {}) {
   const conGota = ops.filter((o) => o.gota);
   if (!conGota.length) {
@@ -1535,18 +1595,9 @@ function htmlGota(ops, p = {}) {
     "<p>Where this option's water goes each year, from La Boquilla to the crop and the aquifer (m³ for this field).</p>" +
     '<div class="gota-controles">' +
     `<label>Option <select id="gota-opcion">${conGota.map((o) => `<option value="${esc(o.id)}">${esc(o.nombre)}</option>`).join("")}</select></label>` +
-    // Botón e interruptor del goteo: pintarGota los oculta si la opción no trae los bloques de goteo.
-    '<button type="button" class="boton-goteo" id="gota-goteo" aria-pressed="false">What if this field switches to drip?</button>' +
-    '<label class="interruptor" id="gota-tope-control" for="gota-tope"><input type="checkbox" role="switch" id="gota-tope" checked disabled>' +
-    '<span>Consumption cap: <span class="estado-interruptor" id="gota-tope-estado">on</span></span></label>' +
     "</div>" +
-    '<p class="gota-sin-goteo" id="gota-sin-goteo" hidden>Drip scenario not available yet: no sourced drip efficiency.</p>' +
-    '<div class="gota-cifras" id="gota-cifras" aria-live="polite"></div>' +
-    '<div class="gota-filas" id="gota-filas"></div>' +
-    '<ul class="gota-leyenda" id="gota-leyenda"></ul>' +
-    '<p class="gota-alerta" id="gota-alerta" hidden></p>' +
+    '<div class="gota-contenedor" id="gota-modulo"></div>' +
     '<p class="gota-nota" id="gota-cobertura" hidden></p>' +
-    '<p class="fuente" id="gota-supuestos"></p>' +
     "</section>"
   );
 }
@@ -1555,125 +1606,33 @@ function opcionGota() {
   return opcionesDe(estado.fichaId).find((o) => o.id === estado.gota.opcion && o.gota);
 }
 
-/** ¿La opción trae el escenario de goteo? (null mientras no haya eficiencia de goteo con fuente) */
-function hayGoteo(o) {
-  return Boolean(o?.gota_goteo_con_tope);
-}
-
-function varianteGota(o) {
-  if (!estado.gota.goteo || !hayGoteo(o)) return o.gota;
-  return (estado.gota.tope ? o.gota_goteo_con_tope : o.gota_goteo_sin_tope) ?? o.gota_goteo_con_tope;
-}
-
 function conectarGota() {
   const sel = $("#gota-opcion");
   if (!sel) return;
   sel.value = estado.gota.opcion;
   sel.addEventListener("change", () => {
     estado.gota.opcion = sel.value;
-    construirFilasGota();
-    pintarGota(true);
+    pintarGota();
     pintarCoberturaGota();
   });
-  $("#gota-goteo").addEventListener("click", () => {
-    if (!hayGoteo(opcionGota())) return; // sin escenario de goteo no hay nada que alternar
-    estado.gota.goteo = !estado.gota.goteo;
-    pintarGota(true);
-  });
-  $("#gota-tope").addEventListener("change", (e) => {
-    estado.gota.tope = e.target.checked;
-    pintarGota(true);
-  });
 }
 
-function construirFilasGota() {
-  const cont = $("#gota-filas");
-  if (!cont) return;
-  cont.innerHTML = FILAS_GOTA.map(
-    (fila, i) =>
-      `<div class="gota-fila"><span class="rotulo">${esc(fila.rotulo)}</span>` +
-      `<div class="gota-pista" aria-hidden="true"><div class="gota-barra" data-fila="${i}">` +
-      fila.segmentos.map((s) => `<span class="gota-seg" style="background-color: var(--${s.colorVar})"></span>`).join("") +
-      "</div></div></div>",
-  ).join("");
-}
-
-function pintarGota(animar) {
-  const o = opcionGota();
-  if (!o || !$("#gota-filas")) return;
-  // Sin bloques de goteo (null en el cubo): se vuelve al riego actual y se ocultan botón e interruptor.
-  const conGoteo = hayGoteo(o);
-  if (!conGoteo) estado.gota.goteo = false;
-  const base = o.gota;
-  const v = varianteGota(o) ?? base;
-  const variantes = [base, o.gota_goteo_con_tope, o.gota_goteo_sin_tope].filter(Boolean);
-  const escala = Math.max(...variantes.map((g) => g.m3_salen_presa ?? 0));
-  const d3 = window.d3;
-  const duracion = animar && !reduceMovimiento() ? 700 : 0;
-
-  // Botones y estados
-  const boton = $("#gota-goteo");
-  boton.hidden = !conGoteo;
-  boton.setAttribute("aria-pressed", String(estado.gota.goteo));
-  $("#gota-tope-control").hidden = !conGoteo;
-  $("#gota-sin-goteo").hidden = conGoteo;
-  const tope = $("#gota-tope");
-  tope.disabled = !estado.gota.goteo || !o.gota_goteo_sin_tope;
-  tope.checked = estado.gota.tope;
-  $("#gota-tope-estado").textContent = estado.gota.tope ? "on" : "off";
-
-  // Barras: ancho total de la fila contra la mayor salida de presa; segmentos en proporción.
-  FILAS_GOTA.forEach((fila, i) => {
-    const barra = $(`.gota-barra[data-fila="${i}"]`);
-    if (!barra) return;
-    const valores = fila.segmentos.map((s) => Math.max(0, s.v(v) ?? 0));
-    const total = valores.reduce((a, b) => a + b, 0);
-    const anchoFila = escala > 0 ? (total / escala) * 100 : 0;
-    const anchos = valores.map((x) => (total > 0 ? (x / total) * 100 : 0));
-    const segs = Array.from(barra.children);
-    if (d3 && duracion > 0) {
-      d3.select(barra).transition().duration(duracion).style("width", `${anchoFila}%`);
-      d3.selectAll(segs).data(anchos).transition().duration(duracion).style("width", (a) => `${a}%`);
-    } else {
-      barra.style.width = `${anchoFila}%`;
-      segs.forEach((s, j) => { s.style.width = `${anchos[j]}%`; });
-    }
+/**
+ * Dibuja La gota de la opción elegida. El goteo y el tope se conservan al cambiar de opción; si la opción
+ * no trae los bloques de goteo (null en el cubo), el módulo vuelve al riego actual y muestra la nota.
+ */
+function pintarGota() {
+  const cont = $("#gota-modulo");
+  if (!cont || !estado.fichaId) return;
+  estado.gotaApi = dibujarGota(cont, opcionGota() ?? null, {
+    locale: LOCALE,
+    goteo: estado.gota.goteo,
+    tope: estado.gota.tope,
+    alCambiar: (e) => {
+      estado.gota.goteo = e.goteo;
+      estado.gota.tope = e.tope;
+    },
   });
-
-  // Leyenda con valores (alternativa en texto a las barras)
-  const items = [];
-  for (const fila of FILAS_GOTA) {
-    for (const s of fila.segmentos) {
-      if (items.some((x) => x.texto === s.texto)) continue;
-      items.push({ ...s, valor: s.v(v) });
-    }
-  }
-  $("#gota-leyenda").innerHTML = items
-    .map((s) => `<li>${muestra(s.colorVar, "ninguna")}<span>${esc(s.texto)}</span><span class="v">${esc(fmt(s.valor, 0))} m³</span></li>`)
-    .join("");
-
-  // Cifras grandes del goteo (X3.2): cambios contra el riego actual.
-  const cifras = [];
-  const alerta = $("#gota-alerta");
-  alerta.hidden = true;
-  if (estado.gota.goteo && v !== base) {
-    const cambio = (a, b) => (b > 0 ? a / b - 1 : null);
-    cifras.push(`<p class="gota-cifra">Dam water: ${esc(fmtPctSigno(cambio(v.m3_salen_presa, base.m3_salen_presa)))}<small>vs. current irrigation</small></p>`);
-    cifras.push(`<p class="gota-cifra">Back to aquifer: ${esc(fmtPctSigno(cambio(v.m3_regresan_acuifero, base.m3_regresan_acuifero)))}<small>vs. current irrigation</small></p>`);
-    const t = o.tope_consumo;
-    if (!estado.gota.tope && t) {
-      cifras.push(`<p class="gota-cifra">Crop consumption (ET): ${esc(fmtPctSigno(cambio(t.et_goteo_sin_tope_m3, t.et_historica_m3)))}<small>vs. historical</small></p>`);
-      if (t.cumple_sin_tope === false) {
-        alerta.textContent = "Not recommended: district consumption would exceed the historical level.";
-        alerta.hidden = false;
-      }
-    }
-  }
-  $("#gota-cifras").innerHTML = cifras.join("");
-
-  const supuestos = [...(v.supuestos ?? [])];
-  if (estado.gota.goteo && !estado.gota.tope && o.tope_consumo?.base_historica) supuestos.push(`Historical base: ${o.tope_consumo.base_historica}`);
-  $("#gota-supuestos").textContent = supuestos.length ? `Assumptions: ${supuestos.join("; ")}` : "";
 }
 
 /** Línea de cobertura de La gota: depende del deslizador. */
@@ -1685,6 +1644,127 @@ function pintarCoberturaGota() {
   const ev = evaluarOpcion(o, f.properties.area_ha, estado.D, estado.r, Boolean(f.properties.abstencion));
   nodo.hidden = !(ev.cobertura < 1);
   nodo.textContent = "The allocation covers part of this need; the rest comes from wells or stays unmet.";
+}
+
+// ---------------------------------------------------------------------------
+// Mensaje al agricultor y ficha imprimible (kit C4; web/js/mensaje.js). La maqueta de WhatsApp está en
+// español y no se envía; la ficha imprimible es la misma página con css/imprimir.css.
+// ---------------------------------------------------------------------------
+function htmlCompartir() {
+  return (
+    '<section class="compartir no-imprimir" aria-labelledby="t-compartir">' +
+    '<h3 id="t-compartir">Share with the farmer</h3>' +
+    '<p class="ayuda">A preview of the message the farmer would read, in Spanish, and a one-page sheet to print. Nothing is sent or stored.</p>' +
+    '<div class="compartir-botones">' +
+    '<button type="button" class="boton-compartir" id="boton-whatsapp" aria-expanded="false" aria-controls="vista-whatsapp">Preview WhatsApp message</button>' +
+    '<button type="button" class="boton-compartir" id="boton-imprimir">Print field sheet</button>' +
+    "</div>" +
+    '<div class="vista-whatsapp" id="vista-whatsapp" hidden></div>' +
+    "</section>"
+  );
+}
+
+function conectarCompartir() {
+  $("#boton-whatsapp")?.addEventListener("click", () => {
+    estado.whatsapp = !estado.whatsapp;
+    pintarWhatsApp();
+    if (estado.whatsapp) $("#vista-whatsapp").scrollIntoView({ block: "nearest", behavior: reduceMovimiento() ? "auto" : "smooth" });
+  });
+  $("#boton-imprimir")?.addEventListener("click", () => {
+    imprimir();
+  });
+}
+
+/** Maqueta del mensaje con la dotación y la lluvia elegidas (las reglas son las de reglas.js). */
+function pintarWhatsApp() {
+  const vista = $("#vista-whatsapp");
+  const boton = $("#boton-whatsapp");
+  const f = estado.porId.get(estado.fichaId);
+  if (!vista || !boton || !f) return;
+  boton.setAttribute("aria-expanded", String(estado.whatsapp));
+  vista.hidden = !estado.whatsapp;
+  if (!estado.whatsapp) {
+    vista.innerHTML = "";
+    return;
+  }
+  try {
+    vista.innerHTML = htmlWhatsApp(f.properties, opcionesDe(f.properties.id), { reglas, D: estado.D, r: estado.r });
+  } catch (err) {
+    console.warn("Raíz: WhatsApp preview not available", err);
+    vista.innerHTML = "<p>The message preview is not available for this field.</p>";
+  }
+}
+
+/** «Print field sheet»: manifest.json (las fuentes del pie) se lee aquí, la primera vez que se imprime. */
+async function imprimir() {
+  const f = estado.porId.get(estado.fichaId);
+  if (!f) return;
+  try {
+    const manifiesto = await cargarOpcional("data/manifest.json");
+    await imprimirFicha({ D: estado.D, r: estado.r, cubo: estado.cubo, manifiesto, parcela: f.properties });
+  } catch (err) {
+    console.warn("Raíz: the field sheet could not be printed", err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// «About & Data» (kit C5; web/js/acerca.js), en un diálogo modal que se abre desde la barra de la marca.
+// manifest.json y pruebas.json se leen la primera vez que se abre (carga perezosa).
+// ---------------------------------------------------------------------------
+function abrirAcerca() {
+  const dlg = $("#acerca");
+  if (!dlg.open) {
+    estado.disparadorAcerca = document.activeElement;
+    if (typeof dlg.showModal === "function") dlg.showModal();
+    else dlg.setAttribute("open", "");
+  }
+  estado.acerca ??= Promise.all([
+    cargarOpcional("data/manifest.json"),
+    cargarOpcional("data/pruebas.json"),
+    cargarRelieve(),
+  ]).then(([manifest, pruebas, relieve]) => {
+    const montado = montarAcerca($("#acerca-cuerpo"), { manifest, pruebas, cubo: estado.cubo, relieve });
+    // Título del diálogo: el encabezado principal de la sección (el primero con id).
+    const titulo = montado?.elemento.querySelector(".acerca-titulo[id]");
+    if (titulo) {
+      dlg.setAttribute("aria-labelledby", titulo.id);
+      dlg.removeAttribute("aria-label");
+    }
+    document.body.dataset.acerca = "listo";
+    return montado;
+  }).catch((err) => {
+    console.warn("Raíz: About & Data could not be built", err);
+    $("#acerca-cuerpo").innerHTML = '<p class="ayuda">The data sources and test results could not be shown here.</p>';
+    estado.acerca = null; // se reintenta la próxima vez que se abra
+    return null;
+  });
+  return estado.acerca;
+}
+
+function cerrarAcerca() {
+  const dlg = $("#acerca");
+  if (typeof dlg.close === "function") dlg.close();
+  else {
+    dlg.removeAttribute("open");
+    alCerrarAcerca();
+  }
+}
+
+/** Al cerrar (botón, Escape o clic fuera), el foco vuelve a donde estaba. */
+function alCerrarAcerca() {
+  const volver = estado.disparadorAcerca;
+  estado.disparadorAcerca = null;
+  if (volver && document.contains(volver) && typeof volver.focus === "function") volver.focus();
+}
+
+/** «How it works»: vuelve a mostrar la pantalla de inicio aunque ya se haya cerrado en esta sesión. */
+function abrirInicio() {
+  try {
+    window.sessionStorage.removeItem(LLAVE_INICIO);
+  } catch {
+    // sin almacenamiento de sesión: montarInicio la muestra igual
+  }
+  montarInicio(document.body);
 }
 
 // ---------------------------------------------------------------------------
@@ -1732,7 +1812,28 @@ function conectarEventos() {
 
   $("#ficha-cerrar").addEventListener("click", () => cerrarFicha());
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && estado.fichaId) cerrarFicha();
+    // Con «About & Data» abierto, Escape cierra solo el diálogo (lo hace el navegador), no la ficha.
+    if (e.key === "Escape" && estado.fichaId && !$("#acerca").open) cerrarFicha();
+  });
+
+  // «Simulate a storm» (relieve.js ya mostró la tarjeta): en escritorio, la tarjeta de la tormenta entra a la
+  // vista del panel; en teléfono el panel queda debajo del mapa, así que se lleva el mapa a la vista.
+  $("#capa-relieve").addEventListener("click", (e) => {
+    if (!e.target.closest(".relieve-boton-tormenta")) return;
+    const comportamiento = reduceMovimiento() ? "auto" : "smooth";
+    if (esAncho()) $("#capa-relieve .relieve-tormenta:not([hidden])")?.scrollIntoView({ block: "nearest", behavior: comportamiento });
+    else $("#mapa").scrollIntoView({ block: "center", behavior: comportamiento });
+  });
+
+  // Barra de la marca: pantalla de inicio y «About & Data».
+  $("#boton-inicio").addEventListener("click", abrirInicio);
+  $("#boton-acerca").addEventListener("click", () => {
+    abrirAcerca();
+  });
+  $("#acerca-cerrar").addEventListener("click", cerrarAcerca);
+  $("#acerca").addEventListener("close", alCerrarAcerca);
+  $("#acerca").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) cerrarAcerca(); // clic en el fondo, fuera del contenido
   });
 }
 
@@ -1753,7 +1854,8 @@ function esperarMapa() {
       // Dos cuadros como mínimo: el repintado programado con requestAnimationFrame ya llamó a setData.
       // También: la cámara quieta (encuadre de una zona) y la fuente de las localidades, si existe.
       const mapa = estado.mapa;
-      const fuentes = mapa.isSourceLoaded("parcelas") && (!mapa.getSource("localidades") || mapa.isSourceLoaded("localidades"));
+      const lista = (id) => !mapa.getSource(id) || mapa.isSourceLoaded(id);
+      const fuentes = mapa.isSourceLoaded("parcelas") && lista("localidades") && lista("relieve-rutas");
       if (cuadros > 2 && !estado.pintadoPendiente && !mapa.isMoving() && fuentes) ok(true);
       else if (cuadros > 600) ok(false);
       else requestAnimationFrame(revisar);
@@ -1765,6 +1867,23 @@ function esperarMapa() {
 // Ganchos mínimos para la prueba de humo (tests/e2e/web_smoke.mjs): solo leen; no cambian el comportamiento.
 window.raizDepuracion = {
   esperarMapa,
+  /** Estado de la capa de relieve (web/js/relieve.js); null si aún no se agrega. */
+  relieve() {
+    return estado.relieve?.estado() ?? null;
+  },
+  /** Visibilidad de la capa de rutas en MapLibre y cuántas rutas se dibujan en la vista actual. */
+  async rutasRelieve() {
+    const capa = "relieve-rutas-linea";
+    if (!(await esperarMapa()) || !estado.mapa.getLayer(capa)) return { visibilidad: null, dibujadas: 0 };
+    return {
+      visibilidad: estado.mapa.getLayoutProperty(capa, "visibility") ?? "visible",
+      dibujadas: estado.mapa.queryRenderedFeatures({ layers: [capa] }).length,
+    };
+  },
+  /** Estado de La gota en la ficha abierta (web/js/gota.js). */
+  gota() {
+    return estado.gotaApi?.estado() ?? null;
+  },
   /** Nombres de las localidades del equipo dibujadas en la vista actual del mapa. */
   async localidadesDibujadas() {
     if (!(await esperarMapa()) || !estado.mapa.getLayer("localidades-punto")) return [];

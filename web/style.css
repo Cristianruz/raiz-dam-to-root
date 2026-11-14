@@ -1,5 +1,7 @@
 /* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
-/* web/style.css — Centro de control (C1) y ficha de parcela (C2).
+/* web/style.css — Centro de control (C1), ficha de parcela (C2) y lo que app.js pone alrededor de los
+   módulos de web/js/ (barra de la marca, bloque del relieve, «Share with the farmer», diálogo «About & Data»).
+   Cada módulo trae su propia hoja en web/css/ (relieve, gota, mensaje, acerca, imprimir).
    Colores de la identidad como variables; app.js los lee de aquí (no hay colores en el JS).
    Los números de este archivo son medidas de diseño, no datos. */
 
@@ -65,13 +67,6 @@
 
   /* Localidades del equipo (puntos de referencia, no parcelas) */
   --localidad: var(--tinta);
-
-  /* La gota */
-  --gota-agua: var(--agua);
-  --gota-canal: var(--ambar);
-  --gota-et: var(--brote);
-  --gota-acuifero: var(--tierra);
-  --gota-otras: #B9A88F;
 
   --radio: 10px;
   --sombra: 0 2px 10px rgba(29, 35, 41, 0.12);
@@ -141,6 +136,15 @@ button, input, select { font: inherit; color: inherit; }
   padding: 2px 10px; border-radius: 999px; font-size: 0.85rem;
 }
 .aviso-simulado-detalle { color: var(--tinta-suave); font-size: 0.85rem; }
+
+/* Barra de la marca: «How it works» y «About & Data» */
+.marca-acciones { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px; }
+.boton-cabecera {
+  border: 1px solid var(--agua); background: var(--blanco); color: var(--agua-osc);
+  border-radius: 999px; padding: 2px 12px; min-height: 32px; cursor: pointer;
+  font-weight: 700; font-size: 0.88rem;
+}
+.boton-cabecera:hover { background: var(--agua-clara); }
 
 .controles {
   position: sticky; top: 0; z-index: 30;
@@ -312,6 +316,10 @@ button, input, select { font: inherit; color: inherit; }
 .leyenda ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .leyenda li { display: flex; align-items: center; gap: 8px; }
 .leyenda .fuente { margin-top: 6px; }
+
+/* Capa «Terrain & runoff» (el contenido lo dibuja web/js/relieve.js) */
+.capa-relieve { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--borde); display: grid; gap: 6px; }
+.capa-relieve-titulo { font-weight: 700; font-size: 0.9rem; color: var(--tinta-suave); }
 .muestra {
   width: 22px; height: 16px; border-radius: 3px; flex: none;
   border: 1px solid rgba(0, 0, 0, 0.35);
@@ -526,43 +534,51 @@ button, input, select { font: inherit; color: inherit; }
 .porque dt { font-weight: 700; font-size: 0.9rem; }
 .porque dd { margin: 0; font-size: 0.9rem; }
 
-/* La gota (plan B de X3.2: barras horizontales apiladas) */
+/* La gota: la sección y el selector de opción; el diagrama y sus controles viven en css/gota.css */
 .gota { border: 1px solid var(--borde); border-radius: var(--radio); padding: 12px 14px; background: var(--arena); }
 .gota-controles { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin: 8px 0; }
 .gota-controles select { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--borde); background: var(--blanco); min-height: 36px; max-width: 100%; }
-.boton-goteo {
-  border: 2px solid var(--agua); background: var(--blanco); color: var(--agua-osc);
-  border-radius: 8px; padding: 6px 12px; font-weight: 700; cursor: pointer; min-height: 40px;
-}
-.boton-goteo[aria-pressed="true"] { background: var(--agua); color: var(--blanco); }
-.gota-cifras { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 6px 0; }
-.gota-cifra { font-size: 1.5rem; font-weight: 700; color: var(--agua-osc); }
-.gota-cifra small { display: block; font-size: 0.85rem; font-weight: 400; color: var(--tinta-suave); }
-.gota-filas { display: grid; gap: 10px; }
-.gota-fila { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px; align-items: center; }
-.gota-fila .rotulo { font-size: 0.9rem; font-weight: 700; }
-.gota-pista { height: 26px; background: var(--blanco); border: 1px solid var(--borde); border-radius: 4px; overflow: hidden; }
-.gota-barra { display: flex; height: 100%; width: 0; }
-.gota-seg { height: 100%; width: 0; min-width: 0; border-right: 1px solid var(--blanco); }
-.gota-leyenda { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 4px 16px; font-size: 0.88rem; }
-.gota-leyenda li { display: flex; align-items: center; gap: 6px; }
-.gota-leyenda .v { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+.gota-contenedor { min-width: 0; }
 .gota-nota { font-size: 0.9rem; margin-top: 8px; }
-.gota-sin-goteo {
-  font-size: 0.9rem; margin: 4px 0 8px; padding: 6px 8px;
-  background: var(--blanco); border-left: 4px solid var(--gris); border-radius: 4px;
+
+/* «Share with the farmer»: maqueta de WhatsApp (css/mensaje.css) e impresión (css/imprimir.css) */
+.compartir { border: 1px solid var(--borde); border-radius: var(--radio); padding: 12px 14px; background: var(--blanco); display: grid; gap: 8px; }
+.compartir .ayuda { margin-bottom: 0; }
+.compartir-botones { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+.boton-compartir {
+  border: 2px solid var(--agua); background: var(--blanco); color: var(--agua-osc);
+  border-radius: 8px; padding: 6px 14px; font-weight: 700; cursor: pointer; min-height: 44px;
 }
+.boton-compartir:hover { background: var(--agua-clara); }
+.boton-compartir[aria-expanded="true"] { background: var(--agua); color: var(--blanco); }
+.vista-whatsapp { min-width: 0; }
 .nota-abstenida {
   background: var(--arena); border-left: 4px solid var(--gris);
   padding: 8px 10px; border-radius: 4px;
 }
-.gota-alerta { background: var(--rojo-claro); border-left: 4px solid var(--rojo); padding: 6px 8px; border-radius: 4px; font-weight: 700; margin-top: 8px; }
 
 .glosario summary { cursor: pointer; font-weight: 700; color: var(--agua-osc); }
 .glosario dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: 0.9rem; margin: 8px 0 0; }
 .glosario dt { font-weight: 700; }
 .glosario dd { margin: 0; }
 abbr[title] { text-decoration: underline dotted; cursor: help; }
+
+/* Diálogo «About & Data» (el contenido lo dibuja web/js/acerca.js con css/acerca.css) */
+.dialogo-acerca {
+  width: min(1100px, calc(100% - 32px)); max-width: none;
+  max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+  padding: 0; border: none; border-radius: 14px;
+  background: var(--arena); color: var(--tinta);
+  box-shadow: 0 10px 40px rgba(29, 35, 41, 0.3);
+  overflow-y: auto; overscroll-behavior: contain;
+}
+.dialogo-acerca::backdrop { background: rgba(29, 35, 41, 0.55); }
+.dialogo-acerca-cabeza {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; justify-content: flex-end;
+  padding: 10px 16px; background: var(--arena); border-bottom: 1px solid var(--borde);
+}
+.dialogo-acerca-cuerpo > .ayuda { padding: 16px; }
 
 .error-carga {
   margin: 24px; padding: 16px; background: var(--rojo-claro);
@@ -604,9 +620,39 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
   }
   .ficha-cuerpo { padding: 10px 12px 28px; }
   .tarjetas { grid-template-columns: minmax(0, 1fr); }
-  .gota-fila { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .dialogo-acerca {
+    width: 100%; height: 100%; max-height: none; margin: 0;
+    border-radius: 0;
+  }
   .celda .anio { font-size: 0.6rem; }
   .glosario dl { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Papel (la ficha imprimible la arma css/imprimir.css; aquí, lo que depende de cómo app.js monta los
+   módulos). Kit C4: la ficha cabe en una hoja, también con cuatro tarjetas (alfalfa establecida). */
+@media print {
+  .marca-acciones { display: none !important; }
+
+  /* Relieve: una sola vez, bajo el encabezado (en pantalla va en el renglón Soil de cada tarjeta). */
+  #ficha .tarjeta .relieve-parcela { display: none !important; }
+  #ficha .relieve-impresion .relieve-parcela { font-size: 7pt; margin: 0; }
+
+  /* La gota en dos columnas: el diagrama a la izquierda; la nota, las cifras, la clave de colores, la
+     frase fija y la fuente a la derecha. display: contents deja que las piezas del módulo entren a la
+     rejilla (las variables de color se siguen heredando). */
+  #ficha .gota {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 4mm; row-gap: 0; align-content: start;
+  }
+  #ficha .gota > *, #ficha .gota-modulo > *, #ficha .gota-mod-vivo > * { grid-column: 2; margin-bottom: 0.6mm; }
+  #ficha .gota > h3, #ficha .gota > .impresion-gota { grid-column: 1 / -1; }
+  #ficha #gota-modulo, #ficha .gota-modulo, #ficha .gota-mod-vivo { display: contents; }
+  #ficha .gota-mod-diagrama { grid-column: 1; grid-row: 3 / span 12; align-self: start; }
+  #ficha .gota-mod-leyenda { font-size: 6.5pt; gap: 0.3mm 3mm; margin-top: 0; }
+  #ficha .gota-mod-frase { font-size: 7pt; margin: 0 0 0.6mm; }
+  #ficha .gota-mod-fuente, #ficha .gota-mod-nota { font-size: 6.5pt; }
+  /* «Showing: …» repite la línea «Static view of …»; los supuestos van plegados (en papel, solo el título). */
+  #ficha .gota-mod-mostrando, #ficha .gota-mod-supuestos { display: none !important; }
 }
 
 /* Movimiento reducido: sin animaciones ni transiciones */

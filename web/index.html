@@ -1,9 +1,12 @@
 <!doctype html>
 <!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
-<!-- web/index.html — Centro de control (C1) y ficha de parcela (C2).
+<!-- web/index.html — Centro de control (C1), ficha de parcela (C2), La gota (X3.2), mensaje e impresión (C4),
+     inicio y «About & Data» (C5).
      Regla: el texto visible de este archivo NO lleva cifras. Todos los números los escribe
      app.js leyendo web/data/ (cubo.json, parcelas.geojson, explicaciones.json).
-     Librerías locales con versión fija (web/vendor/VERSIONS.json); nada desde un CDN. -->
+     Librerías locales con versión fija (web/vendor/VERSIONS.json); nada desde un CDN.
+     Los módulos de web/js/ los importa app.js; sus hojas de web/css/ se enlazan aquí (imprimir.css al
+     final: solo actúa en papel). -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -15,6 +18,11 @@
        y la página no depende de la red. Copiarla a web/vendor/ queda como pendiente. -->
   <link rel="stylesheet" href="vendor/maplibre-gl-5.24.0/maplibre-gl.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/relieve.css">
+  <link rel="stylesheet" href="css/gota.css">
+  <link rel="stylesheet" href="css/mensaje.css">
+  <link rel="stylesheet" href="css/acerca.css">
+  <link rel="stylesheet" href="css/imprimir.css">
   <script defer src="vendor/maplibre-gl-5.24.0/maplibre-gl.js"></script>
   <script defer src="vendor/d3-7.9.0/d3.min.js"></script>
   <script defer src="vendor/d3-sankey-0.12.3/d3-sankey.min.js"></script>
@@ -29,6 +37,10 @@
     <span><span class="marca-nombre">Raíz</span> <span class="marca-sub">– From Dam to Root<span class="marca-lema"> · pre-planting water commitments</span></span></span>
     <span class="aviso-simulado" id="aviso-simulado" role="note" hidden>SIMULATED DATA</span>
     <span class="aviso-simulado-detalle" id="aviso-simulado-detalle" hidden>Placeholder values so the screens work before the real data arrive. Not real fields or measurements.</span>
+    <nav class="marca-acciones" aria-label="Help and data sources">
+      <button type="button" class="boton-cabecera" id="boton-inicio">How it works</button>
+      <button type="button" class="boton-cabecera" id="boton-acerca" aria-haspopup="dialog" aria-controls="acerca">About &amp; Data</button>
+    </nav>
   </header>
 
   <section class="controles" id="controles" aria-label="Water allocation controls">
@@ -92,6 +104,11 @@
           <legend>Layers</legend>
         </fieldset>
         <div class="leyenda" id="leyenda" aria-live="polite"></div>
+        <!-- Capa «Terrain & runoff» y botón «Simulate a storm»: los dibuja web/js/relieve.js con
+             relieve.json y relieve_rutas.geojson; sin esos archivos dice «Terrain layer: not run». -->
+        <div class="capa-relieve" id="capa-relieve" role="group" aria-labelledby="t-relieve">
+          <p class="capa-relieve-titulo" id="t-relieve">Terrain overlay</p>
+        </div>
       </section>
 
       <section class="bloque" aria-labelledby="t-campos">
@@ -143,6 +160,17 @@
     </div>
     <div class="ficha-cuerpo" id="ficha-cuerpo"></div>
   </section>
+
+  <!-- «About & Data» (kit C5): web/js/acerca.js la dibuja al abrirla; manifest.json y pruebas.json se
+       leen en ese momento. -->
+  <dialog class="dialogo-acerca" id="acerca" aria-label="About and data">
+    <div class="dialogo-acerca-cabeza">
+      <button type="button" class="boton-cerrar" id="acerca-cerrar">Close</button>
+    </div>
+    <div class="dialogo-acerca-cuerpo" id="acerca-cuerpo">
+      <p class="ayuda">Reading the data sources and the test results…</p>
+    </div>
+  </dialog>
 
   <noscript><p class="error-carga">This page needs JavaScript to read its data files.</p></noscript>
 </body>
