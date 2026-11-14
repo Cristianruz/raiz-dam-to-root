@@ -30,7 +30,7 @@ def ind(leg, plagas, raiz, fuente):
 S_ALFALFA = ("09-15", "10-31", f"{INIFAP17}: siembra óptima del 15-sep al 31-oct ({MAESTRO})")
 S_ALGODON = ("04-01", "05-10", f"{INIFAP17}: Sureste-Delicias, del 1-abr al 10-may (óptima del 20 al 30-abr) ({MAESTRO})")
 S_MAIZ = ("04-01", "05-31", f"INIFAP, Folleto Técnico 53 (2014): siembra de primavera con riego del 1-abr al 31-may ({MAESTRO})")
-S_CEREAL = ("11-01", "12-31", f"{MAESTRO}, opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado")
+S_CEREAL = ("11-01", "12-31", f"{MAESTRO}, opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado. El modelo de demanda siembra el 1-dic (punto medio de la ventana) [S]")
 S_CHILE = ("02-01", None, "SDR Chihuahua, 3-mar-2026: chile desde febrero en la región centro-sur (expediente 27 §2.3); es práctica, no ausencia de riesgo de helada. Sin fecha límite en las fuentes")
 S_SORGO = (None, None, "Sin fecha de siembra de sorgo en el maestro ni en el expediente 27")
 
@@ -77,7 +77,8 @@ OPCIONES = {
         "indicadores": ind(False, None, None, "Sin dato en el maestro"),
         "advertir_si_rojo": False,
         "por_que_en": "Current rotation. The project documents give no local planting date or irrigation depth for sorghum.",
-        "fuente": None, "etiqueta": "assumption [S]"},
+        "fuente": "Cultivo actual observado por las reglas de A4 (mapa de cultivos). El maestro §5.2 y el expediente 27 no traen fecha de siembra ni lámina de sorgo; la lámina es la del modelo de demanda (A5)",
+        "etiqueta": "assumption [S]"},
     "cereal_invierno": {
         "letra_maestro": "ACTUAL", "nombre_en": "Winter cereal",
         "secuencia": [sec("OI", "cereal_invierno", *S_CEREAL)],
@@ -162,10 +163,10 @@ FILTROS = [
      "necesita": [],
      "texto_en": "Cotton stalks must be shredded within 10 days after harvest and uprooted before November 30 (official plant-health rule NOM-026).",
      "fuente": f"{MAESTRO}, filtro 4; {INIFAP17} (NOM-026)", "etiqueta": "[V]"},
-    {"id": "alfalfa_no_en_anio_seco", "tipo": "intervalo", "aplica_a": ["avena_maiz"],
-     "regla": {"lamina_establecimiento_cm": 40, "riegos": 5, "lamina_por_riego_cm": 8,
-               "nota": "se compara con la dotación elegida; 40 cm = 4 millares/ha solo para establecer"},
-     "necesita": ["dotación elegida en el deslizador"],
+    {"id": "alfalfa_no_en_anio_seco", "tipo": "dotacion_minima", "aplica_a": ["avena_maiz"],
+     "regla": {"lamina_minima_cm": 40, "riegos": 5, "lamina_por_riego_cm": 8,
+               "nota": "se compara en vivo con la dotación elegida; 40 cm = 4 millares/ha solo para establecer la alfalfa"},
+     "necesita": [],
      "texto_en": "Alfalfa should not be established in a dry year: it needs about 40 cm of irrigation just to establish.",
      "fuente": f"{MAESTRO}, filtro 5; {INIFAP17} (40 cm en cinco riegos de 8 cm)", "etiqueta": "[V]"},
     {"id": "alfalfa_tras_alfalfa", "tipo": "intervalo", "aplica_a": ["avena_maiz"],

@@ -64,8 +64,10 @@ CULTIVOS = {
     "maiz_forrajero":  {"kc": (0.30, 1.20, 0.60), "siembra": (4, 15), "dias": (25, 35, 30, 15),
                         "nota": "corte de ensilaje a ~105 días; etapas FAO maíz escaladas [S]"},
     "sorgo":           {"kc": (0.30, 1.05, 0.55), "siembra": (5, 1), "dias": (20, 35, 45, 30)},
-    "cereal_invierno": {"kc": (0.30, 1.15, 0.25), "siembra": (10, 15), "dias": (15, 35, 45, 20),
-                        "nota": "avena forrajera, corte a ~115 días; etapas FAO escaladas [S]"},
+    "cereal_invierno": {"kc": (0.30, 1.15, 0.25), "siembra": (12, 1), "dias": (15, 35, 45, 20),
+                        "nota": "avena forrajera, corte a ~115 días; etapas FAO escaladas [S]; siembra el 1-dic: punto medio de la "
+                                "ventana «nov–dic» del maestro §5.2 [S]. En HLS, 14 de las 16 parcelas clasificadas como cereal en 2026 "
+                                "tienen su NDVI máximo de febrero a abril"},
 }
 
 ROTACIONES = [

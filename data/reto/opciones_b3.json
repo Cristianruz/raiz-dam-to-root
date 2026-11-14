@@ -149,7 +149,7 @@
    },
    "advertir_si_rojo": false,
    "por_que_en": "Current rotation. The project documents give no local planting date or irrigation depth for sorghum.",
-   "fuente": null,
+   "fuente": "Cultivo actual observado por las reglas de A4 (mapa de cultivos). El maestro §5.2 y el expediente 27 no traen fecha de siembra ni lámina de sorgo; la lámina es la del modelo de demanda (A5)",
    "etiqueta": "assumption [S]"
   },
   "cereal_invierno": {
@@ -163,7 +163,7 @@
       "desde": "11-01",
       "hasta": "12-31"
      },
-     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado"
+     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado. El modelo de demanda siembra el 1-dic (punto medio de la ventana) [S]"
     }
    ],
    "indicadores": {
@@ -188,7 +188,7 @@
       "desde": "11-01",
       "hasta": "12-31"
      },
-     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado"
+     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado. El modelo de demanda siembra el 1-dic (punto medio de la ventana) [S]"
     },
     {
      "ciclo": "PV",
@@ -256,7 +256,7 @@
       "desde": "11-01",
       "hasta": "12-31"
      },
-     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado"
+     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado. El modelo de demanda siembra el 1-dic (punto medio de la ventana) [S]"
     },
     {
      "ciclo": "PV",
@@ -290,7 +290,7 @@
       "desde": "11-01",
       "hasta": "12-31"
      },
-     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado"
+     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado. El modelo de demanda siembra el 1-dic (punto medio de la ventana) [S]"
     },
     {
      "ciclo": "PV",
@@ -436,19 +436,17 @@
   },
   {
    "id": "alfalfa_no_en_anio_seco",
-   "tipo": "intervalo",
+   "tipo": "dotacion_minima",
    "aplica_a": [
     "avena_maiz"
    ],
    "regla": {
-    "lamina_establecimiento_cm": 40,
+    "lamina_minima_cm": 40,
     "riegos": 5,
     "lamina_por_riego_cm": 8,
-    "nota": "se compara con la dotación elegida; 40 cm = 4 millares/ha solo para establecer"
+    "nota": "se compara en vivo con la dotación elegida; 40 cm = 4 millares/ha solo para establecer la alfalfa"
    },
-   "necesita": [
-    "dotación elegida en el deslizador"
-   ],
+   "necesita": [],
    "texto_en": "Alfalfa should not be established in a dry year: it needs about 40 cm of irrigation just to establish.",
    "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), filtro 5; INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (40 cm en cinco riegos de 8 cm)",
    "etiqueta": "[V]"

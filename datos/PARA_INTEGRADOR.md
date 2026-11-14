@@ -211,3 +211,38 @@ Lo que hice, con fuentes ya verificadas en el expediente del proyecto (S2 §3):
   Límite que debe ir a la vista: la referencia es un promedio del distrito, no de la parcela.
 - **No cambié `ea_gravedad`.** Para que lo tengan a la mano: con 0.60–0.70 la alfalfa bajaría de 28.4 a 25.1 millares/ha
   (nogal 19.1 → 16.8; algodón 14.7 → 13.1; chile 14.3 → 12.8; maíz 11.1 → 10.1). No cierra la brecha: en alfalfa viene de la ET.
+
+## 14-nov 17:01 — Respuesta a tus mensajes de las 16:50 y 16:55: opciones_b3.json, rotaciones y tus dos preguntas
+Probado contra tu commit c5de01c.
+
+- **ENTREGA: opciones_b3.json (segunda).** Cambios: (1) filtro `alfalfa_no_en_anio_seco` con `tipo = "dotacion_minima"`,
+  `regla = {"lamina_minima_cm": 40, "riegos": 5, "lamina_por_riego_cm": 8, "nota": …}` y `necesita = []`;
+  (2) la opción `sorgo` ya trae `fuente`. El nogal sigue con `ciclo = "perenne"`, como pediste.
+  Contra c5de01c quedan solo dos motivos, los dos de tu lado: «ciclo fuera de la lista: 'perenne'» y «tipo de filtro
+  fuera de la lista: 'dotacion_minima'». Los 17 avisos son los que ya conoces.
+- **ENTREGA: rotaciones.json, rotaciones_lazaro_cardenas.json, demanda_cultivos.csv y demanda_cultivos_lazaro_cardenas.csv
+  — prueba OK (entran las cuatro).** OJO: reemplazan a las de las 16:29 que ibas a integrar; toma estas.
+  Hice lo que dejaste como opcional: el cereal de invierno ahora se siembra el **1-dic** (antes 15-oct), punto medio de la
+  ventana «nov–dic» del maestro [S]. Lo revisé antes en HLS: de las 16 parcelas clasificadas como cereal en 2026, 14 tienen
+  su NDVI máximo de febrero a abril; eso no cuadra con sembrar el 15-oct y cortar a ~115 días. Sigue siendo supuesto.
+  Mismos nombres, columnas y llaves. Cambian solo cuatro rotaciones (P50 en millares/ha, Delicias / Lázaro Cárdenas):
+  `cereal_invierno` 6.28 → 7.82 / 7.62; `avena_maiz` 17.44 → 18.94 / 18.67; `cereal_algodon` 20.88 → 22.42 / 22.20;
+  `cereal_sorgo` 17.65 → 19.19 / 18.96. Las otras ocho, idénticas. En `demanda_cultivos*.csv` solo cambia `cereal_invierno`.
+  `opciones_b3.json` lo dice en la fuente de la ventana de siembra del cereal. Detalle: `docs/modelo_vs_practica.md` §3-bis.
+- **Cifra que cambia en tus textos:** en el contraste de ET por zona (análisis adicional de `docs/resultado_A8.md`),
+  Delicias–Saucillo ampliada pasa de 830 mm y +27 % a **837 mm y +28 %**. Lázaro Cárdenas no cambia (590 vs 574, +3 %).
+  El `et_contraste.csv` de la entrega (rectángulo original, +53 %) no cambia. H1, H1-b y H3 no cambian.
+- **Tu pregunta (a): referencia local para las rotaciones de dos cultivos y para alfalfa con corte de verano.** No hay.
+  `lamina_local_cm` solo trae cultivos solos (alfalfa, nogal, chile, algodón, maíz forrajero). Para `avena_maiz`,
+  `cereal_algodon`, `cereal_sorgo` y `alfalfa_corte_verano` la ficha debe decir «no local reference». No sumes las de
+  los cultivos por separado: no hay lámina local de avena ni de sorgo, y la suma no es un dato de ninguna fuente.
+- **Tu pregunta (b): ¿«aplicada» es lámina bruta en la parcela?** No se puede afirmar. El resumen del artículo
+  (Villalobos-Cano et al. 2024; leído hoy en https://ideas.repec.org/a/gam/jsusta/v16y2024i5p1851-d1344770.html) habla de
+  «water diversions by Irrigation District 05» y del agua aplicada a cada cultivo, es decir, registros del distrito, no
+  mediciones en parcela. El texto completo (métodos: en qué punto se mide) no lo pude abrir desde aquí; el expediente del
+  proyecto tampoco lo dice. No la rotules como bruta en parcela ni como entregada en la toma. Rótulo seguro:
+  «applied water, district records 2009–2016 (measurement point not confirmed)». Las de INIFAP sí son láminas de riego
+  recomendadas por gravedad, en la parcela. Si alguien del equipo abre el artículo (es de acceso abierto, DOI
+  10.3390/su16051851) y lee la sección de métodos, se cierra la duda.
+- **Pendiente mío, en este orden:** D6 nogal (cobertura del dosel y vida de la huerta, con fuente). Lo de Tena
+  (`etiquetas_unidas.csv`) no ha llegado.
