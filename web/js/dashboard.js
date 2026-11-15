@@ -23,7 +23,7 @@ import {
   icono,
 } from "./interfaz.js";
 import { crearAsesor } from "./asesor.js";
-import { formatoHa } from "./recomendador.js";
+import { formatoHa, nombreOpcion } from "./recomendador.js";
 import { montarInstalacion } from "./instalar.js";
 import {
   aguaComprometida,
@@ -287,6 +287,102 @@ function stats() {
   $("#allocation-value").textContent = fmt(state.allocation);
   $("#scenario-label").textContent =
     `${t("tablero.escenario", { dotacion: fmt(state.allocation), unidad: t("tablero.unidad"), lluvia: fmt(state.rain, 0) })} ↗`;
+  ladoALado();
+}
+
+// Bloque del resumen «con la lluvia del registro y con menos lluvia»: las zonas piloto y las opciones de la
+// parcela elegida, lado a lado. No hay otro cálculo: usa aguaComprometida y evaluarOpcion (reglas.js) con cada
+// lluvia del cubo (cube.lluvia_pct) y la dotación del deslizador. La barra de la lluvia en uso va resaltada.
+const CIEN = 100;
+const DOS_DECIMALES = 2; // la lámina, como en «Comparar opciones»
+function ladoALado() {
+  const cajaZonas = $("#lado-zonas");
+  const cajaOpciones = $("#lado-opciones");
+  if (!cajaZonas || !cajaOpciones || !cube) return;
+  const lluvias = cube.lluvia_pct;
+  const rotulo = (r) =>
+    r < 0 ? t("tablero.lado.menos", { pct: fmt(r, 0) }) : t("tablero.lado.registro");
+  // Una barra: rótulo, pista con el relleno (fracción de «tope») y, si se pide, la marca de la dotación.
+  const barra = ({ r, texto, valor, tope, cifra, marca = null }) => {
+    const ancho =
+      Number.isFinite(valor) && tope > 0 ? Math.min(1, valor / tope) * CIEN : 0;
+    const clases = `lado-barra${r === state.rain ? " activa" : ""}`;
+    const excede = marca != null && valor > 1 ? " excede" : "";
+    const raya =
+      marca == null
+        ? ""
+        : `<span class="lado-marca" style="left:${marca * CIEN}%"></span>`;
+    return `<span class="${clases}"><span class="lado-rotulo">${esc(texto)}</span><span class="lado-pista"><span class="lado-relleno${excede}" style="width:${ancho}%"></span>${raya}</span><strong>${esc(cifra)}</strong></span>`;
+  };
+  // Zonas: agua que ya piden los perennes, como parte de la dotación elegida, con cada lluvia.
+  const zonas = Object.entries(cube.zonas).map(([id, z]) => ({
+    id,
+    z,
+    valores: lluvias.map((r) => aguaComprometida(z, state.allocation, r)),
+  }));
+  const tope = Math.max(
+    1,
+    ...zonas.flatMap((x) => x.valores.map((c) => c.p50 ?? 0)),
+  );
+  cajaZonas.innerHTML = zonas
+    .map(
+      ({ id, z, valores }) =>
+        `<button type="button" class="lado-fila" data-zona="${esc(id)}" aria-pressed="${id === state.zone}"><span class="lado-nombre">${esc(z.nombre_mostrar)}</span><span class="lado-meta">${T("tablero.lado.zona_meta", { parcelas: fmt(z.conteos.total, 0), ha: fmt(z.superficie_total_ha, 0) })}</span>${valores
+          .map((c, i) =>
+            barra({
+              r: lluvias[i],
+              texto: rotulo(lluvias[i]),
+              valor: c.p50,
+              tope,
+              cifra:
+                c.p50 == null
+                  ? t("tablero.sin_dato")
+                  : `${fmt(c.p50 * CIEN, 0)}%`,
+              marca: 1 / tope,
+            }),
+          )
+          .join("")}</button>`,
+    )
+    .join("");
+  // Opciones de la parcela elegida: hectáreas que la dotación cubre con la necesidad mediana, con cada lluvia.
+  const p = selected()?.properties;
+  $("#lado-opciones-titulo").textContent = p
+    ? t("tablero.lado.opciones", { id: p.id })
+    : t("tablero.lado.opciones_sin");
+  const ops = p && !p.abstencion ? options() : [];
+  if (!ops.length) {
+    cajaOpciones.innerHTML = `<p class="micro">${T("tablero.lado.sin_opciones")}</p>`;
+    return;
+  }
+  const ha = haDe(p.area_ha);
+  cajaOpciones.innerHTML = ops
+    .map(
+      (op) =>
+        `<div class="lado-fila"><span class="lado-nombre">${esc(nombreOpcion(op))}</span>${lluvias
+          .map((r) => {
+            const e = evaluarOpcion(op, p.area_ha, state.allocation, r);
+            const pide =
+              e.lamina.p50 > 0
+                ? t("tablero.lado.pide", {
+                    rotulo: rotulo(r),
+                    lamina: fmt(e.lamina.p50, DOS_DECIMALES),
+                    unidad: t("tablero.unidad"),
+                  })
+                : t("tablero.lado.sin_riego", { rotulo: rotulo(r) });
+            return barra({
+              r,
+              texto: pide,
+              valor: e.cobertura,
+              tope: 1,
+              cifra: t("tablero.lado.ha", {
+                cubiertas: ha(e.hectareas.p50),
+                area: ha(p.area_ha),
+              }),
+            });
+          })
+          .join("")}</div>`,
+    )
+    .join("");
 }
 
 function fieldList() {
@@ -360,6 +456,7 @@ function fieldDetails() {
         <a class="field-link" href="${esc(explorerLink(p.id))}">${T("tablero.abrir_explorador")} <span>↗</span></a>`;
   asesor?.actualizar();
   updateHighlight();
+  ladoALado();
 }
 
 function crops() {
@@ -999,6 +1096,12 @@ async function init() {
   if (guardado.parcela) chooseField(guardado.parcela); // solo si sigue en la zona
   pintarDatos();
   $("#zona-dashboard").addEventListener("change", changeZone);
+  $("#lado-zonas")?.addEventListener("click", (e) => {
+    const boton = e.target.closest("[data-zona]");
+    if (!boton || boton.dataset.zona === state.zone) return;
+    $("#zona-dashboard").value = boton.dataset.zona;
+    changeZone();
+  });
   $("#allocation").addEventListener("input", (e) => {
     state.allocation = Number(e.target.value);
     recordarEstado();

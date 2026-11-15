@@ -2935,3 +2935,152 @@ footer a {
     padding-bottom: calc(128px + env(safe-area-inset-bottom));
   }
 }
+
+/* Resumen: zonas piloto y opciones de la parcela, con la lluvia del registro y con menos lluvia (js/dashboard.js,
+   ladoALado). La barra de la lluvia en uso va resaltada; la marca blanca de las zonas es la dotación elegida. */
+[data-panel="resumen"] > .rain-compare {
+  order: 1;
+}
+.rain-compare {
+  margin: 4px 0 10px;
+}
+.rain-compare .section-heading {
+  margin: 22px 0 16px;
+}
+.rain-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.rain-card > h3 {
+  margin: 0 0 8px;
+}
+.rain-card > .micro {
+  font-size: 12px !important;
+  line-height: 1.55;
+  color: #a6ba9b;
+  margin: 0 0 6px;
+}
+.rain-card > .lado-aviso {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #ffffff17;
+}
+.lado-fila {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 15px 16px 16px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: #0f1913;
+  border: 1px solid #ffffff14;
+  border-radius: 16px;
+}
+button.lado-fila {
+  cursor: pointer;
+}
+button.lado-fila:hover,
+button.lado-fila:focus-visible {
+  border-color: #b9ed8777;
+}
+button.lado-fila[aria-pressed="true"] {
+  border-color: #b9ed87;
+  background: #16241a;
+}
+.lado-nombre {
+  display: block;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.35;
+  color: #edf3ed;
+}
+.lado-meta {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: #a6ba9b;
+}
+.lado-barra {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 12px;
+  row-gap: 6px;
+  margin-top: 13px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #9fb096;
+}
+.lado-barra strong {
+  font-size: 13px;
+  font-weight: 650;
+  color: #c6d6bc;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.lado-pista {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 10px;
+  background: #ffffff12;
+  border-radius: 10px;
+}
+.lado-relleno {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 10px;
+  background: #6f9159;
+  transition: width 0.25s ease;
+}
+.lado-relleno.excede {
+  background: #a9665b;
+}
+.lado-marca {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: #edf3ed;
+}
+.lado-barra.activa {
+  color: #e2f2d6;
+}
+.lado-barra.activa strong {
+  color: #f2f8ee;
+}
+.lado-barra.activa .lado-relleno {
+  background: #b9ed87;
+}
+.lado-barra.activa .lado-relleno.excede {
+  background: #f0907f;
+}
+@media (max-width: 900px) {
+  .rain-compare-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lado-relleno {
+    transition: none;
+  }
+}
+/* En cada barra: el rótulo a la izquierda, la cifra a la derecha y la pista debajo. */
+.lado-rotulo {
+  order: 1;
+}
+.lado-barra strong {
+  order: 2;
+  text-align: right;
+}
+.lado-pista {
+  order: 3;
+}
+/* La gráfica de la comprobación de lluvia ocupa todo el ancho de su tarjeta (antes quedaba centrada y angosta). */
+.climate-chart svg {
+  height: auto;
+}

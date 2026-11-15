@@ -108,6 +108,8 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 06:20 | integrador | Video diseñado y regrabado sobre la página final (29 s; 53 comprobaciones), recorrido de 87 s (71 comprobaciones) y diapositivas regeneradas (16 comprobaciones) |
 | 06:28 | integrador | Revisor final de contexto nuevo (contrato, motor, datos, pruebas comunes y documentos): «se puede publicar», contrato v4 intacto. Su corrección de hoy (la fuente de los supuestos del tablero citaba un rol equivocado) entró en `dfbf35e`. CI en verde y las cinco pruebas con navegador repetidas sobre ese commit: tablero 301/301, plan 279/279, aplicación 50/50, sin conexión 23/23 y explorador 878/878 |
 | 06:36 | integrador | PR #9 fusionado en `main` (`084bb30`): el tablero es la portada, en cuatro idiomas y como aplicación; el explorador queda en `explorer.html`. `main` fusionado de vuelta en la integración (`63ccfb7`) |
+| 07:10 | Cristian | Pide revisar todo otra vez y que se vean las zonas y las opciones «si llueve o no» |
+| 07:20 | integrador | Revisión visual del tablero publicado (cinco vistas, computadora y teléfono): todo carga y calcula. Dos mejoras: bloque del resumen con las zonas piloto y las opciones de la parcela lado a lado, con la lluvia del registro y con menos lluvia (mismas reglas de `web/reglas.js`, cuatro idiomas, con su prueba), y la gráfica de la comprobación de lluvia a todo el ancho |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 

@@ -69,7 +69,8 @@ const VISTAS = ["resumen", "terreno", "cultivos", "recomendaciones", "prediccion
 const DE_ASESOR = "#decision-inputs, #decision-summary, #recommendations, #decision-checks, #forecast-analysis, #field-irrigation";
 const DE_DATOS = "#timeline, #history-chart details";
 // Nombres de lugar y citas de las dotaciones del cubo (traen el nombre de un periódico): se muestran como vienen.
-const DE_NOMBRES = "#zona-dashboard, #allocation-presets";
+// El nombre de cada zona en el bloque «lado a lado» es el mismo nombre de lugar del selector de zona.
+const DE_NOMBRES = "#zona-dashboard, #allocation-presets, #lado-zonas .lado-nombre";
 const AVISO_EXACTO = {
   en: "This tool supports, never replaces, the judgment of farmers and local experts.",
   es: "Esta herramienta apoya, y no sustituye, el juicio del agricultor ni del técnico.",
@@ -412,6 +413,34 @@ async function revisarFunciones(browser, base, geo) {
   await marca.click();
   check("dotación: una marca de referencia mueve el deslizador y queda marcada", (await page.locator("#allocation").inputValue()) === valor && (await marca.getAttribute("aria-pressed")) === "true");
   await page.locator("#allocation").fill(original);
+  // Bloque del resumen «con la lluvia del registro y con menos lluvia»: zonas piloto y opciones de la parcela.
+  {
+    const zonaInicial = await page.locator("#zona-dashboard").inputValue();
+    const nZonas = await page.locator("#zona-dashboard option").count();
+    const filasZona = page.locator("#lado-zonas [data-zona]");
+    check("lado a lado: una fila por zona piloto, y la zona en uso va marcada", (await filasZona.count()) === nZonas && (await page.locator('#lado-zonas [data-zona][aria-pressed="true"]').getAttribute("data-zona")) === zonaInicial);
+    const barrasPorZona = await filasZona.first().locator(".lado-barra").count();
+    check("lado a lado: cada zona trae una barra por lluvia (la del registro y la menor)", barrasPorZona >= 2 && (await filasZona.first().locator(".lado-barra.activa").count()) === 1, `${barrasPorZona} barras`);
+    const activa = page.locator('#lado-zonas [data-zona][aria-pressed="true"] .lado-barra.activa');
+    const pctActiva = (await activa.locator("strong").innerText()).trim();
+    check("lado a lado: el porcentaje de la zona en uso es el de la cifra «agua ya comprometida»", pctActiva.length > 0 && (await page.locator("#stats").innerText()).includes(pctActiva), pctActiva);
+    const rotuloAntes = (await activa.locator(".lado-rotulo").innerText()).trim();
+    const lluviaAntes = await page.locator("#rain").isChecked();
+    await page.locator("#rain").setChecked(!lluviaAntes);
+    const rotuloDespues = (await activa.locator(".lado-rotulo").innerText()).trim();
+    check("lado a lado: al cambiar la lluvia, la barra resaltada pasa a la otra lluvia", rotuloDespues !== rotuloAntes, `${rotuloAntes} → ${rotuloDespues}`);
+    await page.locator("#rain").setChecked(lluviaAntes);
+    const filasOpcion = page.locator("#lado-opciones .lado-fila");
+    const parcela = await page.locator("#field-select").inputValue();
+    check("lado a lado: las opciones son las de la parcela elegida, con una barra por lluvia", (await page.locator("#lado-opciones-titulo").innerText()).includes(parcela) && (await filasOpcion.count()) > 0 && (await filasOpcion.first().locator(".lado-barra").count()) === barrasPorZona);
+    const otra = page.locator('#lado-zonas [data-zona][aria-pressed="false"]').first();
+    if (await otra.count()) {
+      const idOtra = await otra.getAttribute("data-zona");
+      await otra.click();
+      check("lado a lado: elegir una zona en el bloque la abre, como el selector", (await page.locator("#zona-dashboard").inputValue()) === idOtra && (await page.locator('#lado-zonas [data-zona][aria-pressed="true"]').getAttribute("data-zona")) === idOtra);
+      await page.locator("#zona-dashboard").selectOption(zonaInicial);
+    }
+  }
   if (await page.locator("[data-parcel-chip]").count()) {
     const acceso = page.locator("[data-parcel-chip]").first();
     const id = await acceso.getAttribute("data-parcel-chip");
@@ -655,6 +684,9 @@ async function revisarArranqueLento(browser, base) {
   check("arranque lento: la vista de la liga (#cultivos) está activa antes de que llegue pronostico.json", !llego && alAbrir.panel === "cultivos" && alAbrir.pestana === "cultivos" && alAbrir.tarjetas > 0, JSON.stringify(alAbrir));
   check("arranque lento: el mapa ya inició antes de que llegue", !llego && ["listo", "local"].includes(alAbrir.mapa) && alAbrir.listo !== "listo", JSON.stringify(alAbrir));
   await page.locator('nav a[data-view="predicciones"]').click();
+  // El cambio de panel llega con el evento «hashchange», un instante después del clic: se le espera un momento
+  // (mucho menos que el retraso del archivo) y la comprobación sigue exigiendo que ocurra antes de que llegue.
+  await page.locator('[data-panel="predicciones"]').waitFor({ state: "visible", timeout: RETRASO_MS / 3 }).catch(() => {});
   const alTocar = await page.evaluate(() => ({ hash: location.hash, panel: [...document.querySelectorAll("[data-panel]")].filter((p) => !p.hidden).map((p) => p.dataset.panel).join() }));
   check("arranque lento: tocar «Historia» cambia el panel antes de que llegue", !llego && alTocar.hash === "#predicciones" && alTocar.panel === "predicciones", JSON.stringify(alTocar));
   await page.waitForSelector('body[data-dashboard="listo"]', { timeout: 60000 }); // el mapa está en otra vista: no se espera su dibujo
