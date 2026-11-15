@@ -22,7 +22,7 @@
 
 | caso | texto_en | cuándo |
 |---|---|---|
-| `zona` | Soils of the municipality (INEGI soil map): {lista}. | zona delicias_saucillo; {lista} = suelo_tipos.json → zona.municipio_delicias_pct, de mayor a menor. |
+| `zona` | Soils of the municipality of Delicias (INEGI soil map): {lista}. | zona delicias_saucillo; {lista} = suelo_tipos.json → zona.municipio_delicias_pct, de mayor a menor. |
 | `parcela` | Predicted soil great group for this field (OpenLandMap, global map): {gran_grupo} ({orden}). | gran_grupo_usda no está vacío en tipo_suelo_parcelas.csv. |
 | `no_coinciden` | The two differ because they come from different maps; neither is a field survey. | cuando se muestren los dos. |
 | `explica` | Regional soil type from a global map, not a soil test. | debajo del tipo de suelo. |

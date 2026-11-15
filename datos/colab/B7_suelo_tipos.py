@@ -22,48 +22,50 @@ import csv
 import json
 import os
 
-LEIDO = "leído el 14-nov-2026"
-DRI = "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO"
+LEIDO = "read on Nov 14, 2026"
+DRI = "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO"
 SET = {1: "y1899e04", 2: "y1899e05", 3: "y1899e06", 4: "y1899e07", 5: "y1899e08", 6: "y1899e08a", 7: "y1899e09",
        8: "y1899e11", 9: "y1899e12", 10: "y1899e13"}
 f_dri = lambda s: f"{DRI}, Set {s} (https://www.fao.org/4/y1899e/{SET[s]}.htm), {LEIDO}"
-NOM = ("NOM-021-SEMARNAT-2000, que establece las especificaciones de fertilidad, salinidad y clasificación de suelos "
-       "(DOF 31-dic-2002), texto en https://www.norlexinternacional.com/arch/N021ST00.htm, " + LEIDO)
-MSU = ("McCauley, A., Jones, C. y Olson-Rutz, K. 2017 (marzo). Soil pH and Organic Matter. Nutrient Management Module 8 "
+NOM = ("NOM-021-SEMARNAT-2000, which sets the specifications for soil fertility, salinity and classification "
+       "(DOF Dec 31, 2002), text at https://www.norlexinternacional.com/arch/N021ST00.htm, " + LEIDO)
+MSU = ("McCauley, A., Jones, C. and Olson-Rutz, K. 2017 (March). Soil pH and Organic Matter. Nutrient Management Module 8 "
        "(4449-8), Montana State University Extension (PDF: https://landresources.montana.edu/nm/documents/soilmodulepdf/4449-8.pdf; "
-       f"ficha: https://apps.msuextension.org/publications/pub.html?sku=4449-8), {LEIDO}")
+       f"page: https://apps.msuextension.org/publications/pub.html?sku=4449-8), {LEIDO}")
 NMSU657 = ("NMSU, Guide H-657 «Diseases and Other Disorders of Pecan in New Mexico» (rev. 2026) "
            f"(https://pubs.nmsu.edu/_h/H657/index.html), {LEIDO}")
 NMSU658 = ("NMSU, Guide H-658 «Diagnosing Nutrient Disorders of New Mexico Pecan Trees» (R. Heerema, rev. 2025) "
            f"(https://pubs.nmsu.edu/_h/H658.pdf), {LEIDO}")
-ILL = ("Illinois Agronomy Handbook, cap. 8 «Managing Soil pH and Crop Nutrients», Tabla 8.10 "
+ILL = ("Illinois Agronomy Handbook, ch. 8 «Managing Soil pH and Crop Nutrients», Table 8.10 "
        f"(http://extension.cropsciences.illinois.edu/handbook/pdfs/chapter08.pdf), {LEIDO}")
-GUT = ("Gutiérrez González, L.S. et al. 2022. Análisis del suelo y su importancia en el cultivo del nogal pecanero en el "
-       "Distrito de Riego 05 Delicias. Rev. Biológico Agropecuaria Tuxpan 10(1), DOI 10.47808/revistabioagro.v10i1.395 "
-       "(resumen en https://agris.fao.org/search/en/records/67598d78c7a957febdfbf098: análisis de 2018 a mayo de 2021 en huertas de "
-       "Delicias, Saucillo, Meoqui, Rosales y Julimes; «la mayoría de los suelos presentan concentraciones bajas de nitrógeno, "
-       f"fosforo, zinc, hierro y cobre»; «solo el 14% de los suelos tienen un pH de 6.7 a 7.3»), {LEIDO}")
-PMD = ("Plan Municipal de Desarrollo de Delicias 2024–2027, anexo del Periódico Oficial del Estado de Chihuahua (2025), que cita "
-       "a INEGI, Diccionario de Datos Edafológicos escala 1:250 000 (versión 4), 2016 "
+GUT = ("Gutiérrez González, L.S. et al. 2022. «Análisis del suelo y su importancia en el cultivo del nogal pecanero en el "
+       "Distrito de Riego 05 Delicias». Rev. Biológico Agropecuaria Tuxpan 10(1), DOI 10.47808/revistabioagro.v10i1.395 "
+       "(abstract at https://agris.fao.org/search/en/records/67598d78c7a957febdfbf098: soil analyses from 2018 to May 2021 in "
+       "orchards of Delicias, Saucillo, Meoqui, Rosales and Julimes; «la mayoría de los suelos presentan concentraciones bajas de "
+       "nitrógeno, fosforo, zinc, hierro y cobre» (most soils have low concentrations of nitrogen, phosphorus, zinc, iron and "
+       f"copper); «solo el 14% de los suelos tienen un pH de 6.7 a 7.3» (14 % of the soils have a pH of 6.7 to 7.3)), {LEIDO}")
+PMD = ("Municipal Development Plan of Delicias 2024–2027 («Plan Municipal de Desarrollo de Delicias 2024–2027»), annex of the "
+       "Official Gazette of the State of Chihuahua (2025), citing INEGI, «Diccionario de Datos Edafológicos», scale 1:250 000 "
+       "(version 4), 2016 "
        "(https://chihuahua.gob.mx/sites/default/atach2/periodico-oficial/anexos/2025-01/ANEXO%2003-2025%20ACUERDO%20N%C2%B0%20203-2024%20PMD%20DELICIAS.pdf), "
        + LEIDO)
-SSSA = ("Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations "
-        "for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y "
+SSSA = ("Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations "
+        "for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and "
         f"https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), {LEIDO}")
-KSU = ("Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», "
-       f"Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), {LEIDO}")
-KSU43 = ("Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4, Tabla 4.3 «Formative elements used to "
+KSU = ("Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», "
+       f"Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), {LEIDO}")
+KSU43 = ("Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4, Table 4.3 «Formative elements used to "
          f"identify various suborders in Soil Taxonomy» (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), {LEIDO}")
 UIDAHO = f"University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), {LEIDO}"
-LANC = ("Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) "
+LANC = ("Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) "
         f"(https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), {LEIDO}")
 EXPLICA = "Regional soil type from a global map, not a soil test."
 AVISO = "Rule-based risk from a global soil map; needs a soil test."
-GAEZ_FAQ = ("FAO e IIASA, GAEZ v4 Frequently Asked Questions, versión 2.0, noviembre de 2022 "
-            "(https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf), pregunta 13: «should be treated "
+GAEZ_FAQ = ("FAO and IIASA, GAEZ v4 Frequently Asked Questions, version 2.0, November 2022 "
+            "(https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf), question 13: «should be treated "
             "in a conservative manner» … «appropriate aggregation levels, which are commensurate with the resolution of basic data»; "
-            "pregunta 16: «It is generally not recommended to calculate statistics at finer administrative levels with this version of "
-            f"the database.» (después de hablar del primer nivel subnacional), {LEIDO}")
+            "question 16: «It is generally not recommended to calculate statistics at finer administrative levels with this version of "
+            f"the database.» (after discussing the subnational level just below the country), {LEIDO}")
 
 
 def g(nombre_es, s, rasgo, textura, ph, cic, mo, ricos, pobres, nota, tox, fija_p, limita, cultivos, ext, texto_en, ph_rango=None):
@@ -71,7 +73,7 @@ def g(nombre_es, s, rasgo, textura, ph, cic, mo, ricos, pobres, nota, tox, fija_
     return {"nombre_es": nombre_es, "rasgo": rasgo, "textura": textura, "ph": ph, "ph_rango": ph_rango, "cic_cmol_kg": cic,
             "materia_organica": mo, "ricos_en": ricos, "pobres_en": pobres, "nutrientes_nota": nota, "toxicidades": tox,
             "fijacion_p": fija_p, "limitaciones": limita, "cultivos_citados": cultivos, "extension_mundial_mha": ext,
-            "texto_en": texto_en, "fuente": f_dri(s), "etiqueta": "[V] resumen propio de la fuente"}
+            "texto_en": texto_en, "fuente": f_dri(s), "etiqueta": "[V] own summary of the source"}
 
 
 WRB = {
@@ -302,20 +304,20 @@ def clase(v, tabla):
 def reglas(margen):
     t = lambda tabla: [{"clase": n, "min": a, "max": b} for n, a, b in tabla]
     return {
-        "fuente": "NOM-021-SEMARNAT-2000 (México) para clases e interpretación; Montana State University Extension para la disponibilidad según el pH; "
-                  "NMSU e Illinois Agronomy Handbook para los avisos por cultivo; " + LEIDO,
+        "fuente": "NOM-021-SEMARNAT-2000 (Mexico) for classes and interpretation; Montana State University Extension for nutrient availability by pH; "
+                  "NMSU and the Illinois Agronomy Handbook for the crop notes; " + LEIDO,
         "nota": "Reglas generales: valen en cualquier región con el pH, la materia orgánica y la CIC de un mapa mundial (SoilGrids) "
                 "o de un análisis. Un «riesgo» es una regla, no un diagnóstico; los nutrientes disponibles se miden con análisis de suelo.",
         "texto_aviso_en": AVISO,
         "textos_ficha_en": textos_ficha(),
         "margen_ph": {"valor": margen, "fuente": "supuestos.json → suelo_margen_ph", "etiqueta": "assumption [S]"},
-        "ph_clases": {"tabla": t(PH_CLASES), "metodo": "pH en agua, relación 1:2", "fuente": f"{NOM}, AS-02", "etiqueta": "[V]"},
+        "ph_clases": {"tabla": t(PH_CLASES), "metodo": "pH in water, 1:2 ratio", "fuente": f"{NOM}, AS-02", "etiqueta": "[V]"},
         "disponibilidad_ph": {
             "grupos": [{"nutrientes": n, "mas_disponible_entre": [a, b]} for n, a, b in DISPONIBLE],
             "toxicidad_ph_menor_que": {"valor": 5.5, "elementos": ["Al", "Mn"]},
             "regla": "un nutriente queda «less available» si el pH sale de su rango por más de margen_ph y «near the limit» si sale por menos",
             "texto_fe": "Iron becomes nearly insoluble as soil pH nears eight; chelated forms raise its availability.",
-            "fuente": MSU, "etiqueta": "[V] rangos de la fuente; margen assumption [S]"},
+            "fuente": MSU, "etiqueta": "[V] ranges from the source; margin assumption [S]"},
         "materia_organica": {"factor_c_a_mo": 1.724, "no_volcanicos": t(MO_NO_VOLC), "volcanicos": t(MO_VOLC), "unidad": "%",
                              "nota": "materia orgánica = carbono orgánico × 1.724 (Van Bemmelen, como en la norma). La CIC y el C orgánico "
                                      "de SoilGrids son estimaciones de un modelo; la norma usa Walkley y Black",
@@ -330,12 +332,12 @@ def reglas(margen):
                        "dato_por_parcela": None, "necesita": ["análisis de suelo (carbonatos)"],
                        "huecos": "la tabla impresa salta de 2.0 a 2.2 y de 15 a 17 %: un valor en un hueco va a la clase de abajo si está a 0.1 "
                                  "o menos de su máximo y, si no, a la de arriba (2.1 → bajo; 16 → alto) [S]",
-                       "fuente": f"{NOM}, AS-30 (Horton y Newson)", "etiqueta": "[V] tabla; huecos assumption [S]"},
+                       "fuente": f"{NOM}, AS-30 (Horton and Newson)", "etiqueta": "[V] table; gaps assumption [S]"},
         "salinidad": {"tabla_ce": t(CE), "unidad": "dS/m a 25 °C, extracto de saturación",
                       "definiciones": {"salino": "CE de la pasta de saturación de 4 dS/m o más",
                                        "salino_sodico": "PSI mayor que 15 y CE mayor que 4 dS/m", "sodico": "PSI de 15 o más"},
                       "dato_por_parcela": None, "necesita": ["análisis de suelo (CE y PSI)"],
-                      "fuente": f"{NOM}, AS-18 y definiciones 4.8 a 4.10", "etiqueta": "[V]"},
+                      "fuente": f"{NOM}, AS-18 and definitions 4.8 to 4.10", "etiqueta": "[V]"},
         "analisis_suelo": {
             "nota": "Para interpretar un análisis de laboratorio (cuando el usuario lo capture). No hay mapas abiertos fiables de estos valores",
             "p_olsen_mg_kg": {"bajo": [None, 5.5], "medio": [5.5, 11], "alto": [11, None], "uso": "suelos neutros a alcalinos", "metodo": "AS-10"},
@@ -369,21 +371,21 @@ def reglas(margen):
                  "fuente": NMSU658, "etiqueta": "[V]"},
                 {"elemento": "varios", "condicion": None, "evidencia_local": True,
                  "texto_en": "Soil tests from pecan orchards in this irrigation district found most soils low in nitrogen, phosphorus, zinc, iron and copper.",
-                 "fuente": GUT, "etiqueta": "[V] resumen; sin cifras por parcela"}],
+                 "fuente": GUT, "etiqueta": "[V] summary; no figures per field"}],
             "maiz_forrajero": [
                 {"elemento": "Zn", "condicion": {"ph_mayor_que": 7.3},
                  "texto_en": "Maize is prone to zinc deficiency on soils with high pH, low organic matter, coarse texture or very high phosphorus.",
-                 "fuente": f"{ILL} (zinc, maíz joven: «High pH (>7.3)», «Low in organic matter», «Coarse-textured (sandy) soils», «Very high phosphorus»)",
+                 "fuente": f"{ILL} (zinc, young maize: «High pH (>7.3)», «Low in organic matter», «Coarse-textured (sandy) soils», «Very high phosphorus»)",
                  "etiqueta": "[V]"}],
             "alfalfa": [
                 {"elemento": "B", "condicion": {"materia_organica_pct_menor_que": 2.0},
                  "texto_en": "Alfalfa on soils with little organic matter, high pH or sandy texture is prone to boron deficiency, mostly in dry periods.",
-                 "fuente": f"{ILL} (boro, alfalfa: «Low organic matter», «High pH», «Coarse-textured (sandy) soils», con «Drought»; y «Application of B on "
+                 "fuente": f"{ILL} (boron, alfalfa: «Low organic matter», «High pH», «Coarse-textured (sandy) soils», with «Drought»; and «Application of B on "
                            "soils with less than 2% organic matter is recommended for areas of high alfalfa production.»)", "etiqueta": "[V]"}],
             "cereal_invierno": [
                 {"elemento": "Mn", "condicion": {"ph_clase_minima": "medianamente alcalino"},
                  "texto_en": "Oats are prone to manganese deficiency on high-pH soils, mostly in cool, wet weather.",
-                 "fuente": f"{ILL} (manganeso, soya y avena: «High pH», «Organic soils», «Restricted root zone», con «Cool, wet»)", "etiqueta": "[V] fuente («high pH», sin cifra); umbral por clase de pH assumption [S]"}],
+                 "fuente": f"{ILL} (manganese, soybean and oats: «High pH», «Organic soils», «Restricted root zone», with «Cool, wet»)", "etiqueta": "[V] source («high pH», no figure); threshold by pH class assumption [S]"}],
             "chile": None, "algodon": None, "sorgo": None,
             "nota": "chile, algodón y sorgo: sin fuente encontrada para avisos de micronutrientes (14-nov-2026); la ficha no muestra ninguno"},
     }
@@ -415,7 +417,7 @@ def textos_ficha():
             "sin_dato": caso("No soil estimate for this field.", "ph vacío en suelo_nutrientes_parcelas.csv"),
         },
         "tipo_suelo": {
-            "zona": caso("Soils of the municipality (INEGI soil map): {lista}.", "zona delicias_saucillo; {lista} = suelo_tipos.json → "
+            "zona": caso("Soils of the municipality of Delicias (INEGI soil map): {lista}.", "zona delicias_saucillo; {lista} = suelo_tipos.json → "
                          "zona.municipio_delicias_pct, de mayor a menor"),
             "parcela": caso("Predicted soil great group for this field (OpenLandMap, global map): {gran_grupo} ({orden}).",
                             "gran_grupo_usda no está vacío en tipo_suelo_parcelas.csv"),
@@ -473,20 +475,20 @@ def main():
     margen = json.load(open(sup))["suelo_margen_ph"]["valor"]
     grupos = json.load(open(req))["grupos_textura"]["valor"]
     tipos = {
-        "fuente": f"{DRI}; Soil Taxonomy (USDA): {KSU}; {UIDAHO}; {LANC}; prefijos: {SSSA}; municipio: {PMD}",
+        "fuente": f"{DRI}; Soil Taxonomy (USDA): {KSU}; {UIDAHO}; {LANC}; prefixes: {SSSA}; municipality: {PMD}",
         "nota": "El tipo de suelo es contexto del paisaje: no dice qué nutrientes tiene una parcela. Los riesgos por parcela salen de "
                 "suelo_reglas.json con las propiedades de la parcela. Los resúmenes son propios; cada grupo lleva su liga.",
         "texto_explica_en": EXPLICA,
         "wrb": {k: (v if v is not None else {"ficha": None, "nota": SIN_FICHA[k]}) for k, v in WRB.items()},
         "usda_ordenes": {k: {"elemento_formativo": e, "definicion_en": d, "fertilidad_en": f,
-                             "fuente": f"elemento formativo: {KSU}; definición: {UIDAHO}" + (f"; fertilidad: {LANC}" if f else ""),
-                             "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"}
+                             "fuente": f"formative element: {KSU}; definition: {UIDAHO}" + (f"; fertility: {LANC}" if f else ""),
+                             "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"}
                          for k, (e, d, f) in USDA.items()},
         "usda_prefijos_gran_grupo": {k: {"significado_en": v[0], "implicacion": v[1],
                                          "fuente": KSU43 if v[2:] == ("KSU43",) else SSSA,
-                                         "etiqueta": "[V] significado; implicación propia [I]"} for k, v in PREFIJOS.items()},
-        "como_leer_un_gran_grupo": "nombre = prefijo(s) de gran grupo + nombre del suborden, que termina en el elemento formativo del orden "
-                                   "(p. ej. Haplo + calc + ids → Aridisols, con horizonte cálcico); " + KSU,
+                                         "etiqueta": "[V] meaning; own implication [I]"} for k, v in PREFIJOS.items()},
+        "como_leer_un_gran_grupo": "name = great-group prefix(es) + suborder name, which ends in the formative element of the order "
+                                   "(e.g. Haplo + calc + ids → Aridisols, with a calcic horizon); " + KSU,
         "zona": {"municipio_delicias_pct": {"Cambisol": 29.25, "Calcisol": 27.81, "Kastañozem": 25.72, "Chernozem": 10.47, "Luvisol": 2.38,
                                             "Feozem": 0.35, "Leptosol": 0.27, "Vertisol": 0.26, "Regosol": 0.02, "zona_urbana": 3.44,
                                             "cuerpo_de_agua": 0.03},
