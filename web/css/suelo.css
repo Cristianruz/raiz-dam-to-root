@@ -142,8 +142,39 @@ div.suelo-aptitud { display: grid; gap: 2px; }
 .suelo-insignia--fits { border-color: var(--suelo-fits); background: var(--suelo-fits-claro); }
 .suelo-insignia--tolerated { border-color: var(--suelo-tolerated); background: var(--suelo-tolerated-claro); }
 .suelo-insignia--outside_range { border-color: var(--suelo-outside); background: var(--suelo-outside-claro); }
+/* Cerca del límite publicado: borde rayado (no solo el color lo distingue de «outside»); también su símbolo. */
+.suelo-insignia--near_limit { border-color: var(--suelo-outside); border-style: dashed; background: var(--suelo-tolerated-claro); }
 .suelo-insignia--no_published_range { border-style: dashed; background: var(--suelo-sin-rango-claro); }
 .suelo-marca-aviso { font-size: 0.8rem; color: var(--suelo-tinta-suave); }
+/* Rótulo de la aptitud: rango general y mundial, no un ensayo local (a la vista, debajo del estado). */
+.suelo-aptitud-rotulo { font-size: 0.8rem; color: var(--suelo-tinta-suave); font-style: italic; }
+
+/* Textura por su grupo; la clase exacta y la coincidencia de los dos mapas van plegadas. */
+.suelo-etiqueta {
+  display: inline-block; margin-left: 4px; padding: 0 5px;
+  border: 1px solid var(--suelo-borde); border-radius: 4px;
+  font-size: 0.75rem; color: var(--suelo-tinta-suave);
+}
+.suelo-clase-exacta > summary {
+  width: fit-content; max-width: 100%; cursor: pointer;
+  font-size: 0.85rem; font-weight: 700; color: var(--suelo-enlace);
+}
+.suelo-clase-exacta > summary:focus-visible { outline: 3px solid var(--suelo-foco); outline-offset: 2px; }
+.suelo-clase-exacta p { margin-top: 4px !important; font-size: 0.85rem; }
+.suelo-datos > div[data-falta="si"] dd { color: var(--suelo-tinta-suave); font-style: italic; }
+.suelo-fuente-detalle > summary {
+  width: fit-content; max-width: 100%; cursor: pointer;
+  font-size: 0.8rem; font-weight: 700; color: var(--suelo-enlace);
+}
+.suelo-fuente-detalle > summary:focus-visible { outline: 3px solid var(--suelo-foco); outline-offset: 2px; }
+
+/* Mensaje de la zona (alcalinidad): una vez por ficha, junto al perfil. */
+.suelo-nota-zona {
+  margin: 0; padding: 6px 10px;
+  border-left: 4px solid var(--suelo-tolerated); border-radius: 0 6px 6px 0;
+  background: var(--suelo-tolerated-claro);
+  color: var(--suelo-tinta); font-size: 0.85rem; line-height: 1.4;
+}
 
 .suelo-porque > summary {
   width: fit-content; max-width: 100%;
@@ -161,10 +192,20 @@ div.suelo-aptitud { display: grid; gap: 2px; }
 .suelo-motivos li[data-estado="fits"] { border-left-color: var(--suelo-fits); }
 .suelo-motivos li[data-estado="tolerated"] { border-left-color: var(--suelo-tolerated); }
 .suelo-motivos li[data-estado="outside_range"] { border-left-color: var(--suelo-outside); }
+.suelo-motivos li[data-estado="near_limit"] { border-left-color: var(--suelo-outside); border-left-style: dashed; }
 .suelo-motivos .suelo-fuente, .suelo-avisos .suelo-fuente { display: block; }
 .suelo-avisos-titulo { margin-top: 8px !important; font-weight: 700; }
 .suelo-evidencia { margin-top: 8px !important; }
 
 @media print {
   .suelo-porque > summary { color: var(--suelo-tinta); }
+  /* En papel, la aptitud va en una línea por tarjeta (estado y rótulo); el «Why?» se lee en la ficha en línea. */
+  .suelo-porque, .suelo-marca-aviso { display: none !important; }
+  .suelo-aptitud { font-size: 6.5pt; line-height: 1.15; gap: 0; }
+  .suelo-aptitud-fila { gap: 0 1mm; }
+  /* En papel la insignia sola («Tolerated by this soil»…) se entiende; el título «Soil fit:» sobra. */
+  .suelo-aptitud-fila > .suelo-titulo { display: none; }
+  .suelo-aptitud[data-nada-sembrado] .suelo-aptitud-fila > .suelo-titulo { display: inline; }
+  .suelo-insignia { padding: 0 0.8mm; border-width: 0.25mm; font-size: 5.8pt; gap: 0.6mm; }
+  .suelo-aptitud-rotulo { font-size: 5.8pt; }
 }

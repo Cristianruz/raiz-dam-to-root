@@ -16,7 +16,8 @@
      28.19
     ],
     "elev_min_m": 1150.75,
-    "elev_max_m": 1331.0
+    "elev_max_m": 1331.0,
+    "exageracion": 6
    },
    "lazaro_cardenas": {
     "teselas": "data/dem/lazaro_cardenas/{z}/{x}/{y}.png",
@@ -27,7 +28,8 @@
      28.43
     ],
     "elev_min_m": 1140.75,
-    "elev_max_m": 1659.25
+    "elev_max_m": 1659.25,
+    "exageracion": 2
    }
   },
   "exageracion": 6,
@@ -74,5 +76,6 @@
    "2026-08",
    "2026-09"
   ]
- }
+ },
+ "zona_inicial": "delicias_saucillo"
 }

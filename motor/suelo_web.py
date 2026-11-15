@@ -47,22 +47,40 @@ Contenido de suelo.json (lo lee web/js/suelo.js; toda cifra de la página sale d
                    con opciones en el cubo. rango_o_lista: {optimo: [min, max], tolerado: [min, max]}
                    (ph), {apta: [...], limitante: [...]} (textura) o {umbral_ds_m: valor} (salinidad).
   avisos           lo que el motor no pudo leer o encontró inconsistente (lista de textos)
+  rotulo_aptitud   texto fijo, en inglés, que acompaña a la aptitud en cada tarjeta: los rangos son generales
+                   y mundiales, no ensayos locales (decisión del integrador con la sesión de datos, 14-nov)
+  margen_ph        {valor, etiqueta, fuente, archivo} de data/processed/supuestos.json → suelo_margen_ph, o
+                   null: el margen del estado «near_limit» (ver las reglas). Sin él no hay ese estado.
+  coincidencia_textura  {valor, etiqueta, fuente, archivo} de supuestos.json → suelo_coincidencia_textura, o
+                   null: fracción de parcelas en que los dos mapas de suelo dan la misma clase exacta (la
+                   ficha la dice junto a la clase exacta; el grupo de textura sale de requisitos.grupos_textura)
+  alcalinidad_zona {zona: {n_con_ph, n_sobre_optimo, n_cultivos, cultivos, mayoria}} | null: cuántas
+                   parcelas de la zona tienen un pH por encima del óptimo general de la MAYORÍA de los cultivos
+                   con rango publicado (n_sobre_optimo de n_con_ph; n_cultivos = cultivos con rango de pH), y si
+                   son la mayoría de la zona (mayoria). La ficha da el mensaje de zona solo con mayoria = true.
+                   null sin perfil o sin requisitos.
 
-REGLAS DE APTITUD (cuatro estados: fits, tolerated, outside_range y no_published_range):
+REGLAS DE APTITUD (cinco estados: fits, tolerated, near_limit, outside_range y no_published_range):
 - Por criterio:
   · pH: dentro del rango óptimo (extremos incluidos) → fits; fuera del óptimo y dentro del tolerado →
-    tolerated; fuera del tolerado → outside_range;
+    tolerated; fuera del tolerado por MENOS que margen_ph (supuestos.json → suelo_margen_ph) → near_limit
+    («near the published limit»: el mapa es un modelo de 250 m y la diferencia es menor que su margen);
+    fuera del tolerado por margen_ph o más (o sin margen) → outside_range;
   · textura: la clase de la parcela está en «apta» → fits; en «limitante» → outside_range; en ninguna de
     las dos → tolerated;
   · salinidad: solo se evalúa si la parcela trae salinidad_ce_ds_m Y el cultivo trae umbral: menor o
     igual al umbral → fits; mayor → outside_range.
   Un criterio sin dato de la parcela o sin rango publicado NO cuenta (no se supone nada).
-- El estado de un cultivo es el PEOR de sus criterios evaluados (outside_range > tolerated > fits). Sin
-  ningún criterio evaluable → no_published_range, con su nota.
+- El estado de un cultivo es el PEOR de sus criterios evaluados (outside_range > near_limit > tolerated >
+  fits). Sin ningún criterio evaluable → no_published_range, con su nota.
 - El estado de la opción es el PEOR de sus cultivos con rango; si ninguno tiene rango →
   no_published_range.
 - «descanso» (no sembrar; esquemas.NO_SIEMBRA) o una secuencia vacía no se evalúan: no_published_range
   con la nota «nothing is planted».
+- Una parcela cuya fila de suelo_parcelas.csv llega sin ningún valor de suelo (el mapa no la cubre) se
+  queda en «perfil» tal como llegó (todo en null), pero no entra a «aptitud»: no hay nada que comparar.
+- La aptitud nunca descarta ni reordena opciones: hay una entrada por opción del cubo, en su orden, y el
+  semáforo de agua no la usa. Es una evidencia más (rotulo_aptitud).
 - Avisos de nutrientes: se agrega el de cada cultivo de la opción cuando su condición se cumple con el
   perfil de la parcela (ph_mayor_que y ph_menor_que: desigualdad estricta; textura_en: la clase de la
   parcela está en la lista; varias llaves: todas). Sin condición → siempre.
@@ -105,12 +123,22 @@ MOTIVO_SIN_CUBO = "The options of each field are not built yet"
 NOTA_NO_SIEMBRA = "nothing is planted"
 NOTA_SIN_RANGO = "no published range for this crop"
 NOTA_SIN_VALOR = "no soil value of this field to compare with the published range"
+# Rótulo de la aptitud (decisión del integrador con la sesión de datos, 14-nov): los rangos de ECOCROP son
+# generales y mundiales; no son ensayos del DR-005.
+ROTULO_APTITUD = "General published range (FAO ECOCROP, worldwide), not a local trial"
+# Supuestos de la sesión de datos que usa este módulo (data/processed/supuestos.json).
+ARCHIVO_SUPUESTOS = "supuestos.json"
+SUPUESTO_MARGEN_PH = "suelo_margen_ph"
+SUPUESTO_COINCIDENCIA = "suelo_coincidencia_textura"
 # Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) van en español.
 IDIOMA_FUENTES = "es"
 
 # Estados de aptitud, de mejor a peor (el peor manda), y el que no entra en esa escala.
-FITS, TOLERATED, OUTSIDE = "fits", "tolerated", "outside_range"
-SEVERIDAD = (FITS, TOLERATED, OUTSIDE)
+FITS, TOLERATED, NEAR, OUTSIDE = "fits", "tolerated", "near_limit", "outside_range"
+SEVERIDAD = (FITS, TOLERATED, NEAR, OUTSIDE)
+# Decimales con que se compara la distancia al borde del rango con el margen: evita que 7.6 − 7.1 (que en
+# coma flotante da 0.49999…) quede por debajo de un margen de 0.5. Es precisión de cálculo, no un dato.
+DECIMALES_DISTANCIA = 9
 SIN_RANGO = "no_published_range"
 ESTADOS = (*SEVERIDAD, SIN_RANGO)
 CRITERIO_PH, CRITERIO_TEXTURA, CRITERIO_SALINIDAD = "ph", "textura", "salinidad"
@@ -336,8 +364,9 @@ def peor(estados):
     return max(en_escala, key=SEVERIDAD.index) if en_escala else SIN_RANGO
 
 
-def criterio_ph(perfil, bloque):
-    """Motivo del pH, o None si no cuenta (sin pH de la parcela o sin rango publicado)."""
+def criterio_ph(perfil, bloque, margen=None):
+    """Motivo del pH, o None si no cuenta (sin pH de la parcela o sin rango publicado). `margen` (número o
+    None): fuera del tolerado por menos que el margen → near_limit; sin margen no existe ese estado."""
     ph = finito(perfil.get("ph"))
     if ph is None or not bloque:
         return None
@@ -347,7 +376,8 @@ def criterio_ph(perfil, bloque):
     elif tolerado[0] <= ph <= tolerado[1]:
         estado = TOLERATED
     else:
-        estado = OUTSIDE
+        distancia = round(tolerado[0] - ph if ph < tolerado[0] else ph - tolerado[1], DECIMALES_DISTANCIA)
+        estado = NEAR if finito(margen) is not None and distancia < margen else OUTSIDE
     return {"criterio": CRITERIO_PH, "estado": estado, "valor_parcela": ph,
             "rango_o_lista": {"optimo": list(optimo), "tolerado": list(tolerado)}, "fuente": bloque["fuente"]}
 
@@ -381,9 +411,9 @@ def criterio_salinidad(perfil, bloque):
 CRITERIOS = ((CRITERIO_PH, criterio_ph), (CRITERIO_TEXTURA, criterio_textura), (CRITERIO_SALINIDAD, criterio_salinidad))
 
 
-def aptitud_de_cultivo(cultivo, perfil, requisitos):
+def aptitud_de_cultivo(cultivo, perfil, requisitos, margen_ph=None):
     """{cultivo, estado, nota, motivos, sin_dato_de_parcela} de UN cultivo en el suelo de UNA parcela.
-    `requisitos` es la salida de normalizar_requisitos."""
+    `requisitos` es la salida de normalizar_requisitos; `margen_ph`, el de supuestos.json (o None)."""
     if cultivo == E.NO_SIEMBRA:
         return {"cultivo": cultivo, "estado": SIN_RANGO, "nota": NOTA_NO_SIEMBRA, "motivos": [], "sin_dato_de_parcela": []}
     req = requisitos.get(cultivo)
@@ -392,7 +422,7 @@ def aptitud_de_cultivo(cultivo, perfil, requisitos):
     motivos, sin_dato = [], []
     for criterio, comparar in CRITERIOS:
         bloque = req[BLOQUE_DE[criterio]]
-        motivo = comparar(perfil, bloque)
+        motivo = comparar(perfil, bloque, margen_ph) if criterio == CRITERIO_PH else comparar(perfil, bloque)
         if motivo is not None:
             motivos.append(motivo)
         elif bloque:
@@ -417,11 +447,11 @@ def condicion_cumplida(condicion, perfil):
     return True
 
 
-def aptitud_de_opcion(secuencia, perfil, requisitos):
+def aptitud_de_opcion(secuencia, perfil, requisitos, margen_ph=None):
     """{estado, nota, por_cultivo, avisos_nutrientes} de UNA opción (su secuencia de cultivos) en el
     suelo de UNA parcela."""
     cultivos = list(dict.fromkeys(c.strip() for c in secuencia or [] if isinstance(c, str) and c.strip()))
-    por_cultivo = [aptitud_de_cultivo(c, perfil, requisitos) for c in cultivos]
+    por_cultivo = [aptitud_de_cultivo(c, perfil, requisitos, margen_ph) for c in cultivos]
     sembrados = [c for c in cultivos if c != E.NO_SIEMBRA]
     avisos = []
     for cultivo in sembrados:
@@ -437,10 +467,16 @@ def aptitud_de_opcion(secuencia, perfil, requisitos):
     }
 
 
-def bloque_aptitud(perfil, requisitos, cubo, avisos):
-    """{id_parcela: {id_opcion: aptitud}} de las parcelas con perfil y con opciones en el cubo."""
+def perfil_vacio(perfil):
+    """True si la fila de la parcela no trae ningún valor de suelo (el mapa no la cubre)."""
+    return all(perfil.get(c) is None for c in (*COLUMNAS_NUMERICAS, "clase_textura"))
+
+
+def bloque_aptitud(perfil, requisitos, cubo, avisos, margen_ph=None):
+    """{id_parcela: {id_opcion: aptitud}} de las parcelas con perfil y con opciones en el cubo. Una parcela
+    con la fila vacía (perfil_vacio) no entra: no hay nada que comparar."""
     listos = normalizar_requisitos(requisitos["cultivos"], avisos)
-    aptitud, sin_perfil, en_secuencias = {}, 0, set()
+    aptitud, sin_perfil, vacias, en_secuencias = {}, 0, 0, set()
     for pid, parcela in ((cubo or {}).get("parcelas") or {}).items():
         opciones = [o for o in (parcela or {}).get("opciones") or [] if isinstance(o, dict) and texto_lleno(o.get("id"))]
         if not opciones:
@@ -451,9 +487,15 @@ def bloque_aptitud(perfil, requisitos, cubo, avisos):
         if suelo is None:
             sin_perfil += 1
             continue
-        aptitud[pid] = {o["id"]: aptitud_de_opcion(o.get("secuencia"), suelo, listos) for o in opciones}
+        if perfil_vacio(suelo):
+            vacias += 1
+            continue
+        aptitud[pid] = {o["id"]: aptitud_de_opcion(o.get("secuencia"), suelo, listos, margen_ph) for o in opciones}
     if sin_perfil:
         avisos.append(f"parcelas con opciones en el cubo y sin fila en {ARCHIVO_PERFIL} (van sin aptitud): {sin_perfil}")
+    if vacias:
+        avisos.append(f"parcelas con opciones en el cubo y con su fila de {ARCHIVO_PERFIL} sin ningún valor de suelo "
+                      f"(van sin aptitud): {vacias}")
     sin_requisitos = sorted(en_secuencias - set(listos))
     if sin_requisitos:
         avisos.append(f"{ARCHIVO_REQUISITOS} no trae requisitos de: {', '.join(sin_requisitos)}; su aptitud queda en "
@@ -467,6 +509,52 @@ def bloque_aptitud(perfil, requisitos, cubo, avisos):
         avisos.append(f"las secuencias del cubo nombran cultivos que el validador aún no admite en {ARCHIVO_REQUISITOS}: "
                       f"{', '.join(fuera_de_lista)} (agréguelos a esquemas.CULTIVOS_DE_SECUENCIAS)")
     return aptitud
+
+
+def supuesto(processed, llave, avisos):
+    """{valor, etiqueta, fuente, archivo} de data/processed/supuestos.json → <llave>, o None si el archivo o la
+    llave faltan o el valor no es un número con fuente (no se inventa ni se completa)."""
+    ruta = Path(processed) / ARCHIVO_SUPUESTOS
+    if not ruta.is_file():
+        return None
+    try:
+        d = leer_json(ruta).get(llave)
+    except (json.JSONDecodeError, UnicodeDecodeError, AttributeError) as ex:
+        avisos.append(f"{ARCHIVO_SUPUESTOS}: no se pudo leer ({type(ex).__name__}: {ex}); {llave} va en null")
+        return None
+    if d is None:
+        return None
+    valor = finito(d.get("valor")) if isinstance(d, dict) else None
+    if valor is None or not texto_lleno(d.get("fuente")):
+        avisos.append(f"{ARCHIVO_SUPUESTOS}: {llave} no trae un número con fuente; va en null")
+        return None
+    return {"valor": valor, "etiqueta": texto_lleno(d.get("etiqueta")), "fuente": d["fuente"],
+            "archivo": f"data/processed/{ARCHIVO_SUPUESTOS}"}
+
+
+def alcalinidad_por_zona(perfil, requisitos, zona_de, avisos):
+    """{zona: {n_con_ph, n_sobre_optimo, n_cultivos, cultivos, mayoria}} (ver el encabezado): una parcela cuenta
+    si su pH queda por encima del óptimo de MÁS de la mitad de los cultivos con rango de pH publicado; la zona
+    da su mensaje si esas parcelas son MÁS de la mitad de las suyas con pH. None si no hay con qué contar."""
+    if perfil is None or requisitos is None or zona_de is None:
+        return None
+    listos = normalizar_requisitos(requisitos.get("cultivos") or {}, [])
+    techos = {c: r["ph"]["optimo"][1] for c, r in sorted(listos.items()) if r.get("ph")}
+    if not techos:
+        avisos.append(f"{ARCHIVO_REQUISITOS} no trae ningún rango de pH: alcalinidad_zona va en null")
+        return None
+    por_zona = {}
+    for pid, p in perfil["parcelas"].items():
+        zona, ph = zona_de.get(pid), finito(p.get("ph"))
+        if zona is None or ph is None:
+            continue
+        z = por_zona.setdefault(zona, {"n_con_ph": 0, "n_sobre_optimo": 0})
+        z["n_con_ph"] += 1
+        if 2 * sum(1 for techo in techos.values() if ph > techo) > len(techos):
+            z["n_sobre_optimo"] += 1
+    return {zona: {**z, "n_cultivos": len(techos), "cultivos": list(techos),
+                   "mayoria": 2 * z["n_sobre_optimo"] > z["n_con_ph"]}
+            for zona, z in sorted(por_zona.items())}
 
 
 # ---------------------------------------------------------------------------------------
@@ -488,8 +576,11 @@ def armar(processed, cubo, generado=None):
         "generado": generado or datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "decision": DECISION,
         "rotulo": ROTULO,
+        "rotulo_aptitud": ROTULO_APTITUD,
         "motivo_pedido": MOTIVO_PEDIDO,
         "idioma_fuentes": IDIOMA_FUENTES,
+        "margen_ph": supuesto(processed, SUPUESTO_MARGEN_PH, avisos),
+        "coincidencia_textura": supuesto(processed, SUPUESTO_COINCIDENCIA, avisos),
     }
     faltan = []
 
@@ -509,9 +600,12 @@ def armar(processed, cubo, generado=None):
         suelo[nombre], suelo[f"{nombre}_motivo"] = valor, None
         return valor
 
+    zona_de = {}
     perfil = bloque_opcional("perfil", ARCHIVO_PERFIL, lambda ruta, registro: bloque_perfil(
-        ruta, registro, zonas_de_parcelas(processed, avisos), avisos))
+        ruta, registro, zona_de.setdefault("z", zonas_de_parcelas(processed, avisos)), avisos))
     requisitos = bloque_opcional("requisitos", ARCHIVO_REQUISITOS, bloque_requisitos)
+    suelo["alcalinidad_zona"] = alcalinidad_por_zona(perfil, requisitos, zona_de.get("z"), avisos)
+    margen = (suelo["margen_ph"] or {}).get("valor")
 
     suelo["aptitud"], suelo["aptitud_falta"] = None, faltan
     if perfil is None or requisitos is None:
@@ -522,7 +616,7 @@ def armar(processed, cubo, generado=None):
         avisos.append(f"{NOMBRE_CUBO} no está o no trae «parcelas»: la aptitud va en null (corra antes motor/b4_cubo.py)")
     else:
         try:
-            suelo["aptitud"], suelo["aptitud_motivo"] = bloque_aptitud(perfil, requisitos, cubo, avisos), None
+            suelo["aptitud"], suelo["aptitud_motivo"] = bloque_aptitud(perfil, requisitos, cubo, avisos, margen), None
         except ERRORES_DE_LECTURA as ex:
             avisos.append(f"aptitud: no se pudo calcular ({type(ex).__name__}: {ex}); va en null")
             suelo["aptitud"], suelo["aptitud_motivo"] = None, MOTIVO_ILEGIBLE

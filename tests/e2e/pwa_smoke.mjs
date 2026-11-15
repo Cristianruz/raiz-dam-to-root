@@ -8,9 +8,9 @@
 //
 // Qué hace:
 // - copia web/ a una carpeta temporal y trabaja SOLO sobre esa copia (no toca el repo);
-// - si la copia aún no conecta el módulo (ni index.html ni app.js nombran instalar.js), le agrega a SU
-//   index.html el <link rel="manifest">, la hoja css/instalar.css y un <script type="module"> que llama a
-//   montarInstalacion; cuando la aplicación ya lo conecte, la prueba usa esa conexión tal cual;
+// - prueba la PÁGINA REAL, sin inyectar nada: comprueba que index.html enlaza el manifest y css/instalar.css y que
+//   app.js importa js/instalar.js y llama a montarInstalacion (el indicador va en la barra de la marca); si falta
+//   una pieza, la prueba falla (antes, cuando la aplicación aún no lo conectaba, se agregaba a la copia);
 // - sirve la copia en localhost (http.createServer, sin dependencias) y abre la página con red;
 // - verifica con red: el listado data/precache.json corresponde a lo que hay en web/, el service worker queda
 //   activo y al mando de la página, el indicador dice «Online» y «Ready to work offline», la caché
@@ -104,39 +104,21 @@ function recorrer(carpeta) {
   return [...rutas].sort();
 }
 
-/** Conecta el módulo en la COPIA si la aplicación aún no lo hace. Devuelve qué se agregó. */
-function conectarEnLaCopia() {
-  const ruta = path.join(COPIA, "index.html");
-  let html = fs.readFileSync(ruta, "utf-8");
+/**
+ * ¿La página real conecta la aplicación instalable? Devuelve las piezas que faltan (vacío si está todo):
+ * <link rel="manifest" href="manifest.webmanifest">, la hoja css/instalar.css, <meta name="theme-color"> y, en
+ * app.js, el import de js/instalar.js y la llamada a montarInstalacion. No toca la copia.
+ */
+function piezasQueFaltan() {
+  const html = fs.readFileSync(path.join(COPIA, "index.html"), "utf-8");
   const app = fs.existsSync(path.join(COPIA, "app.js")) ? fs.readFileSync(path.join(COPIA, "app.js"), "utf-8") : "";
-  const agregado = [];
-  const etiquetas = [];
-  if (!/<link\b[^>]*rel=["']?manifest\b/i.test(html)) {
-    etiquetas.push('<link rel="manifest" href="manifest.webmanifest">');
-    agregado.push("manifest");
-  }
-  if (!html.includes("css/instalar.css")) {
-    etiquetas.push('<link rel="stylesheet" href="css/instalar.css">');
-    agregado.push("css/instalar.css");
-  }
-  if (!html.includes("instalar.js") && !app.includes("instalar.js")) {
-    etiquetas.push(
-      '<script type="module">',
-      '  import { montarInstalacion } from "./js/instalar.js";',
-      '  const caja = document.createElement("div");',
-      '  caja.id = "instalacion-de-prueba";',
-      '  (document.querySelector("#marca") ?? document.body).append(caja);',
-      "  montarInstalacion(caja);",
-      "</script>",
-    );
-    agregado.push("montarInstalacion");
-  }
-  if (etiquetas.length) {
-    if (!html.includes("</head>")) throw new Error("index.html de la copia no tiene </head>");
-    html = html.replace("</head>", `${etiquetas.join("\n")}\n</head>`);
-    fs.writeFileSync(ruta, html);
-  }
-  return agregado;
+  const faltan = [];
+  if (!/<link\b[^>]*rel=["']?manifest\b[^>]*href=["']?manifest\.webmanifest/i.test(html)) faltan.push('<link rel="manifest">');
+  if (!html.includes("css/instalar.css")) faltan.push("css/instalar.css");
+  if (!/<meta\b[^>]*name=["']?theme-color/i.test(html)) faltan.push('<meta name="theme-color">');
+  if (!/from\s+["']\.\/js\/instalar\.js["']/.test(app)) faltan.push("import de js/instalar.js en app.js");
+  if (!/montarInstalacion\(/.test(app)) faltan.push("montarInstalacion() en app.js");
+  return faltan;
 }
 
 // ---------------------------------------------------------------- servidor estático (se puede apagar de golpe)
@@ -508,8 +490,11 @@ async function main() {
   check("web/ trae las piezas de la aplicación instalable", ausentes.length === 0, ausentes.length ? `faltan: ${ausentes.join(", ")}` : necesarios.join(", "));
   if (ausentes.length) return terminar();
 
-  const agregado = conectarEnLaCopia();
-  console.log(agregado.length ? `(a la copia de index.html se le agregó: ${agregado.join(", ")})` : "(la aplicación ya conecta el módulo: se prueba tal cual)");
+  // La página real, tal cual: si no conecta el módulo, la prueba falla (no se inyecta nada en la copia).
+  const faltanPiezas = piezasQueFaltan();
+  check("la página real conecta la aplicación instalable (manifest, theme-color, css/instalar.css y montarInstalacion en app.js)",
+    faltanPiezas.length === 0, faltanPiezas.length ? `faltan: ${faltanPiezas.join(", ")}` : "se prueba tal cual, sin inyectar nada");
+  if (faltanPiezas.length) return terminar();
 
   const precache = JSON.parse(fs.readFileSync(path.join(COPIA, LISTADO), "utf-8"));
   const enDisco = recorrer(COPIA);

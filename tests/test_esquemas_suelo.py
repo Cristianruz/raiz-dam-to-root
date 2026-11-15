@@ -457,6 +457,17 @@ def test_requisitos_avisa_sin_rechazar(tmp_path):
     assert "llaves adicionales (se copian sin validar): fecha_lectura" in avisos
 
 
+def test_requisitos_grupos_de_textura_validos_entran_sin_aviso_y_mal_formados_se_avisan(tmp_path):
+    """grupos_textura (light / medium / heavy de ECOCROP) es una llave opcional conocida: bien formada no se avisa;
+    con una clase ajena o sin fuente se avisa sin rechazar (la ficha muestra la clase exacta)."""
+    x = entra(tmp_path / "bien", REQUISITOS, requisitos_con(lambda o: None))
+    assert not any("grupos_textura" in a for a in x["avisos"])
+    def malo(o):
+        o["grupos_textura"]["valor"]["light"] = ["arenoso"]          # DATOS DE PRUEBA: clase fuera de la lista
+    x = entra(tmp_path / "mal", REQUISITOS, requisitos_con(malo))
+    assert any("grupos_textura" in a and "clase exacta" in a for a in x["avisos"])
+
+
 def test_varios_errores_se_reportan_juntos(tmp_path):
     """El rechazo junta todos los motivos del archivo: quien entrega los corrige de una vez."""
     def cambio(o):

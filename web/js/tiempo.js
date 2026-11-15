@@ -373,7 +373,14 @@ export function crearLineaDeTiempo({ contenedor, gemelo, alCambiar, reducirMovim
   acomodar(raiz.getBoundingClientRect().width);
   const observador =
     typeof ventana.ResizeObserver === "function"
-      ? new ventana.ResizeObserver((entradas) => acomodar(entradas[entradas.length - 1].contentRect.width))
+      ? new ventana.ResizeObserver((entradas) => {
+          // El cambio de clase se difiere un cuadro: hecho dentro del aviso, cambia el alto del nodo observado y el
+          // navegador emite «ResizeObserver loop completed with undelivered notifications».
+          const ancho = entradas[entradas.length - 1].contentRect.width;
+          ventana.requestAnimationFrame(() => {
+            if (!destruido) acomodar(ancho);
+          });
+        })
       : null;
   observador?.observe(raiz);
 

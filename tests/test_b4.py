@@ -575,3 +575,101 @@ def test_avisa_cuando_el_cubo_se_acerca_al_limite_de_peso(tmp_path, monkeypatch)
     rep2 = b4_cubo.construir(FIXTURE, tmp_path / "b")
     aviso = [a for a in rep2["avisos"] if "cerca del límite" in a]
     assert aviso and aviso[0] in leer(tmp_path / "b", "cubo.json")["meta"]["notas"]
+
+
+# --- (g) Lámina local de referencia (campo aditivo agua.lamina_local; decisión del 14-nov) ---------------------
+def lamina_local_esperada(rot_ref, secuencia, sup, params):
+    """La regla del motor escrita aquí, sin usar b4_cubo: un cultivo regado como de costumbre (la rotación lleva
+    su nombre) → la aplicada del distrito o, si no hay, la recomendada; en millares/ha con la constante de params."""
+    cultivos = list(dict.fromkeys(c for c in secuencia if c != "descanso"))
+    if len(cultivos) != 1 or rot_ref != cultivos[0]:
+        return None
+    entradas = (sup.get("lamina_local_cm") or {}).get(cultivos[0]) or {}
+    cm = params["unidades"]["millar"]["valor"]["lamina_cm"]
+    for llave, tipo in (("aplicada_dr005", "aplicada"), ("recomendada_inifap", "recomendada")):
+        e = entradas.get(llave)
+        if not e:
+            continue
+        if "valor" in e:
+            return {"tipo": tipo, "valor_millares_ha": round(e["valor"] / cm, 3), "rango_millares_ha": None, "fuente": e["fuente"]}
+        return {"tipo": tipo, "valor_millares_ha": None, "fuente": e["fuente"],
+                "rango_millares_ha": {"min": round(e["min"] / cm, 3), "max": round(e["max"] / cm, 3)}}
+    return None
+
+
+def test_lamina_local_con_los_datos_actuales(una_zona):
+    _, geo, cubo, _, web, proc = una_zona
+    sup = json.loads((proc / "supuestos.json").read_text(encoding="utf-8"))
+    if "lamina_local_cm" not in sup:
+        pytest.skip("data/processed/supuestos.json no trae lamina_local_cm")
+    vistos = {"aplicada": 0, "recomendada": 0, None: 0}
+    for p, op in opciones_con_area(geo, cubo):
+        ll = op["agua"]["lamina_local"]
+        esperado = lamina_local_esperada(op["rotacion"], op["secuencia"], sup, PARAMS)
+        donde = f"{p['id']}/{op['id']}"
+        if esperado is None:
+            assert ll is None, donde
+            vistos[None] += 1
+            continue
+        vistos[ll["tipo"]] += 1
+        assert {k: ll[k] for k in esperado} == esperado, donde
+        assert ll["etiqueta"] and ll["nota"] and not re.search(r"\d", ll["nota"]), donde
+        assert not re.search(r"\b(first|only|best|recommended|sav(e|es|ed|ing|ings))\b", ll["nota"], re.I)
+        if ll["tipo"] == "aplicada" and ll["periodo"]:
+            assert f"{ll['periodo']['desde']}–{ll['periodo']['hasta']}" in ll["fuente"], "el periodo se lee de la fuente"
+    # La alfalfa con corte de verano y las rotaciones de varios cultivos nunca llevan referencia.
+    for _, op in opciones_con_area(geo, cubo):
+        if op["rotacion"] == "alfalfa_corte_verano" or len(set(op["secuencia"]) - {"descanso"}) > 1:
+            assert op["agua"]["lamina_local"] is None, op["id"]
+    assert vistos["aplicada"] and vistos[None], vistos
+    assert validar_contrato.validar(web) == [], "el campo aditivo no rompe el contrato"
+
+
+def test_lamina_local_sin_supuestos_es_null_y_se_avisa(dos_zonas):
+    rep, _, cubo, _, _ = dos_zonas
+    assert all(op["agua"]["lamina_local"] is None for pc in cubo["parcelas"].values() for op in pc["opciones"])
+    assert any("lamina_local_cm" in a for a in rep["avisos"])
+
+
+def test_lamina_local_rango_y_periodo(tmp_path):
+    """Una recomendada con rango (min, max) va en rango_millares_ha; una aplicada sin dos años en la fuente va sin
+    periodo; una entrada sin fuente no cuenta (DATOS DE PRUEBA)."""
+    proc = tmp_path / "processed"
+    proc.mkdir()
+    (proc / "supuestos.json").write_text(json.dumps({"lamina_local_cm": {
+        "maiz_forrajero": {"recomendada_inifap": {"min": 50, "max": 60, "etiqueta": "[prueba]", "fuente": "prueba 2014"}},
+        "alfalfa": {"aplicada_dr005": {"valor": 150, "etiqueta": "[prueba]", "fuente": "prueba sin periodo"}},
+        "sorgo": {"aplicada_dr005": {"valor": 80, "etiqueta": "[prueba]"}}}}), encoding="utf-8")
+    avisos = []
+    ll = b4_cubo.leer_laminas_locales(proc, PARAMS, avisos)
+    cm = PARAMS["unidades"]["millar"]["valor"]["lamina_cm"]
+    assert ll["maiz_forrajero"]["rango_millares_ha"] == {"min": 50 / cm, "max": 60 / cm}
+    assert ll["maiz_forrajero"]["valor_millares_ha"] is None and ll["maiz_forrajero"]["periodo"] is None
+    assert ll["alfalfa"]["valor_millares_ha"] == 150 / cm and ll["alfalfa"]["periodo"] is None
+    assert "sorgo" not in ll, "sin fuente no hay referencia"
+    assert b4_cubo.lamina_local_de("alfalfa", ["alfalfa"], ll) is ll["alfalfa"]
+    assert b4_cubo.lamina_local_de("alfalfa_corte_verano", ["alfalfa"], ll) is None
+    assert b4_cubo.lamina_local_de("avena_maiz", ["cereal_invierno", "maiz_forrajero"], ll) is None
+    assert b4_cubo.lamina_local_de("descanso", ["descanso"], ll) is None
+
+
+def test_dotaciones_lleva_la_constante_de_la_equivalencia(dos_zonas):
+    _, _, cubo, _, _ = dos_zonas
+    mil = PARAMS["unidades"]["millar"]
+    assert cubo["dotaciones"]["lamina_cm_por_millar"] == {"valor": mil["valor"]["lamina_cm"], "fuente": mil["fuente"],
+                                                         "etiqueta": mil["etiqueta"]}
+
+
+def test_cubo_publicado_lamina_local_y_constante():
+    cubo = leer(WEB, "cubo.json")
+    if cubo["meta"].get("mock"):
+        pytest.skip("cubo simulado")
+    assert cubo["dotaciones"]["lamina_cm_por_millar"]["valor"] == PARAMS["unidades"]["millar"]["valor"]["lamina_cm"]
+    sup = json.loads((PROCESSED / "supuestos.json").read_text(encoding="utf-8"))
+    for pc in cubo["parcelas"].values():
+        for op in pc["opciones"]:
+            esperado = lamina_local_esperada(op["rotacion"], op["secuencia"], sup, PARAMS)
+            ll = op["agua"]["lamina_local"]
+            assert (ll is None) == (esperado is None), op["id"]
+            if ll:
+                assert {k: ll[k] for k in esperado} == esperado

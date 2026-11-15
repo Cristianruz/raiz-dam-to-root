@@ -17,13 +17,37 @@
 //   línea de relieve del renglón Soil de cada tarjeta (S9 §4 bis);
 // - gota.js: «Follow the drop» dentro de la ficha, Sankey con d3-sankey (kit X3.1 y X3.2);
 // - mensaje.js: maqueta del mensaje de WhatsApp (en español) y ficha imprimible (kit C4);
-// - acerca.js: pantalla de inicio de tres pasos y sección «About & Data» (kit C5). manifest.json y
-//   pruebas.json se leen solo al abrir «About & Data» o al imprimir (carga perezosa).
+// - acerca.js: pantalla de inicio de tres pasos y sección «About & Data» (kit C5). pruebas.json se lee solo al
+//   abrir «About & Data» (carga perezosa); manifest.json se lee una vez al arrancar (la tarjeta «Twin status»
+//   muestra la fecha de cada fuente) y «About & Data» y la hoja impresa reutilizan esa lectura.
+// Gemelo digital (docs/decisiones/2026-11-14_gemelo_digital.md), con web/data/gemelo.json (opcional):
+// - gemelo3d.js: botón «3D twin view» en los controles del mapa (solo con una zona elegida que tenga relieve),
+//   relieve de NASADEM con la exageración de la zona y columnas de agua por parcela que siguen al deslizador y a
+//   la lluvia; clic o Enter en una columna abre la ficha; leyenda arriba del panel;
+// - tiempo.js: línea de tiempo «Agricultural year» en el panel; un año pasado colorea el mapa con la memoria de
+//   ese año (seis estados) y el año actual vuelve a la vista normal;
+// - estado_gemelo.js: tarjeta «Twin status» (observado, modelado y escenario, con la fecha de cada fuente);
+// - instalar.js: «Install app» e indicador Online/Offline en la cabecera (service worker web/sw.js).
+// - Inicio: la página abre en la zona de gemelo.json → zona_inicial (params.gemelo.zona_inicial, Delicias–Saucillo);
+//   sin ella, en la primera zona de cubo.zonas. «All areas» sigue en el selector.
+// La ficha completa (etapa 2 del gemelo; decisiones del gemelo §5, del suelo y de las bases del reto):
+// - resumen.js: frase resumen descriptiva arriba de la ficha (con agua, lámina cero, abstenida), gráfica del NDVI
+//   mensual real de la parcela (web/data/ndvi_mensual.json, con sus umbrales de referencia leídos del archivo) y el
+//   enlace directo «#id» (abrir con #P0757 abre esa ficha; abrir una ficha cambia el hash; un id desconocido avisa);
+// - suelo.js: el perfil de suelo UNA vez en la ficha (bloque «Soil and satellite evidence», con el mensaje de zona)
+//   y la aptitud en el renglón Soil de cada tarjeta (web/data/suelo.json); la aptitud nunca descarta ni reordena;
+// - contexto.js: la evidencia por parcela de las bases del reto (GEDI con su nota SIEMPRE junto al valor; ECOSTRESS
+//   si llega) y el riesgo de helada junto a la fecha de siembra de las opciones (web/data/contexto.json);
+// - en cada tarjeta, además: la lámina local de referencia (agua.lamina_local del cubo) con sus hectáreas que
+//   cambian con el deslizador, el rótulo de la propuesta del equipo, la advertencia de advertir_si_rojo con el
+//   plazo del dato y el filtro dotacion_minima evaluado EN VIVO contra el deslizador; el nogal sin rotación dice
+//   su motivo y su fuente en lugar de las alternativas.
 
 import * as reglas from "./reglas.js";
 import {
   llaveLluvia,
   aguaComprometida,
+  cobertura,
   evaluarOpcion,
   conteosZona,
   rellenarMarcadores,
@@ -32,6 +56,13 @@ import { agregarCapaRelieve, htmlRelieveParcela, cargarRelieve, leerOpcional } f
 import { dibujarGota } from "./js/gota.js";
 import { htmlWhatsApp, imprimirFicha } from "./js/mensaje.js";
 import { montarInicio, montarAcerca, LLAVE_INICIO } from "./js/acerca.js";
+import { crearGemelo3D } from "./js/gemelo3d.js";
+import { crearLineaDeTiempo } from "./js/tiempo.js";
+import { montarEstadoGemelo } from "./js/estado_gemelo.js";
+import { montarInstalacion } from "./js/instalar.js";
+import { fraseResumen, casoResumen, dibujarNDVI, idDeHash, hashDe } from "./js/resumen.js";
+import { leerSuelo, htmlPerfilDeSuelo, htmlAptitud, htmlNotaDeZona } from "./js/suelo.js";
+import { evidenciaDeParcela, riesgoDeHelada } from "./js/contexto.js";
 
 const LOCALE = "en-US";
 
@@ -130,6 +161,27 @@ const GLOSARIO = [
 ];
 
 const AVISO_JUICIO = "This tool supports, never replaces, the judgment of farmers and local experts.";
+
+// Vista 3D del gemelo: rótulos del botón y motivo visible cuando no se ofrece (decisión del gemelo, punto 1).
+const TEXTO_3D = "3D twin view";
+const TEXTO_3D_NO = "3D twin view: not available";
+const MOTIVOS_3D = {
+  sin_gemelo: "The twin data file (gemelo.json) was not built.",
+  error_gemelo: "The twin data file (gemelo.json) could not be read.",
+  sin_terreno: "No terrain tiles were built for the pilot areas.",
+  todas: "Choose one pilot area: the terrain is drawn one area at a time.",
+  sin_zona: "No terrain tiles for this pilot area.",
+};
+// Lámina local de referencia (agua.lamina_local del cubo; decisión del integrador con la sesión de datos).
+const LAMINA_LOCAL = {
+  aplicada: { titulo: "Typically applied in this district", limite: "district average, not this field" },
+  recomendada: { titulo: "Recommended by INIFAP", limite: "regional recommendation, not this field" },
+};
+const TEXTO_SIN_REFERENCIA = "no local reference";
+const NOTA_SIN_ROTACION = "No alternatives are compared for this field.";
+// Enlace directo a una parcela con un id que no está en los datos (el id llega de la barra de direcciones).
+const AVISO_ENLACE = (id) => `Field link «${id}»: there is no field with that ID here. Choose a field on the map or in the list.`;
+
 // Holgura del clic sobre el mapa, en píxeles de pantalla (no es un dato del proyecto): alcanza parcelas muy pequeñas.
 const TOLERANCIA_CLIC_PX = 4;
 
@@ -169,6 +221,24 @@ const estado = {
   encuadre: null, // extensión que encuadra el mapa para la zona elegida
   movidoPorUsuario: false, // el usuario movió el mapa: no se vuelve a encuadrar al cambiar de tamaño
   etiquetasLocalidad: [], // [{el, lngLat}]: etiquetas (DOM) de las localidades del equipo en el mapa
+  // Gemelo digital
+  gemelo: null, // web/data/gemelo.json (null: sin vista 3D ni línea de tiempo, y la página lo dice)
+  gemeloLectura: null, // cómo fue su lectura: "ok", "ausente" o "error" (el motivo del botón 3D lo distingue)
+  vista3d: null, // controlador de web/js/gemelo3d.js (se crea al cargar el mapa)
+  minZoomPrevio: null, // zoom mínimo del mapa antes de activar la vista 3D
+  linea: null, // controlador de la línea de tiempo (web/js/tiempo.js)
+  anioNormal: null, // año con el que abre la línea de tiempo: en él el mapa muestra la vista normal
+  anioTiempo: null, // año elegido en la línea de tiempo que colorea el mapa; null = vista normal
+  capasAnio: new Map(), // año -> esquema de memoria de ese año (para la línea de tiempo)
+  estadoGemelo: null, // controlador de la tarjeta «Twin status»
+  instalacion: null, // controlador de web/js/instalar.js
+  // Ficha completa
+  suelo: null, // web/data/suelo.json (null: «not available yet»)
+  sueloError: null, // texto si suelo.json existe y no se pudo leer
+  contexto: null, // web/data/contexto.json (GEDI, ECOSTRESS, heladas); null si no se construyó
+  ndvi: null, // web/data/ndvi_mensual.json (meses, series por parcela, umbrales y fuente)
+  ndviApi: null, // gráfica del NDVI de la ficha abierta (web/js/resumen.js)
+  lecturas: { contexto: null, ndvi: null }, // detalle del error si contexto.json o ndvi_mensual.json no se pudieron leer
 };
 
 // ---------------------------------------------------------------------------
@@ -328,19 +398,38 @@ const datosDe = (r) => (r?.estado === "ok" ? r.datos : null);
 // ---------------------------------------------------------------------------
 async function iniciar() {
   observarCabecera();
+  // Antes de los datos: si la página abre desde una copia a medias y los datos no llegan, el rótulo lo dice.
+  iniciarInstalacion();
   try {
     // relieve.json es opcional: cargarRelieve nunca falla (null si no existe) y la ficha toma de ahí el
-    // rótulo de escala de la línea de relieve aunque se abra antes que el mapa.
-    const [cubo, parcelas, explicaciones, relieve] = await Promise.all([
+    // rótulo de escala de la línea de relieve aunque se abra antes que el mapa. gemelo.json también es opcional
+    // (sin él no hay vista 3D ni línea de tiempo, y la página lo dice); trae la zona con la que abre la página.
+    // La ficha completa lee además suelo.json, contexto.json y ndvi_mensual.json: los tres son opcionales y su
+    // lectura nunca falla (sin ellos, cada bloque dice que no está disponible).
+    const [cubo, parcelas, explicaciones, relieve, gemelo, suelo, contexto, ndvi] = await Promise.all([
       cargarJSON("data/cubo.json"),
       cargarJSON("data/parcelas.geojson"),
       cargarJSON("data/explicaciones.json"),
       cargarRelieve(),
+      cargarOpcional("data/gemelo.json"),
+      leerSuelo(),
+      cargarOpcional("data/contexto.json"),
+      cargarOpcional("data/ndvi_mensual.json"),
     ]);
+    estado.suelo = suelo.estado === "ok" ? suelo.datos : null;
+    estado.sueloError = suelo.estado === "error" ? suelo.detalle : null;
+    if (estado.sueloError) console.error(`Raíz: data/suelo.json could not be read (${estado.sueloError})`);
+    estado.contexto = datosDe(contexto);
+    estado.ndvi = datosDe(ndvi);
+    // Cómo fue cada lectura: «ausente» (404, no se construyó) no es lo mismo que «error» (la ficha lo distingue).
+    estado.lecturas = { contexto: contexto?.estado === "error" ? contexto.detalle : null, ndvi: ndvi?.estado === "error" ? ndvi.detalle : null };
     estado.cubo = cubo;
     estado.parcelas = parcelas;
     estado.explicaciones = explicaciones;
     estado.relieveDatos = relieve;
+    const datosGemelo = datosDe(gemelo);
+    estado.gemelo = datosGemelo && typeof datosGemelo === "object" ? datosGemelo : null;
+    estado.gemeloLectura = gemelo?.estado ?? "error"; // "ok" · "ausente" (404: no se construyó) · "error"
   } catch (err) {
     mostrarErrorCarga(`The data files could not be loaded: ${err.message}`, err);
     return;
@@ -352,6 +441,8 @@ async function iniciar() {
   mostrarAvisoSimulado();
   iniciarControles();
   iniciarColoreado();
+  iniciarLineaDeTiempo();
+  iniciarEstadoGemelo();
   pintarDistrito();
   pintarPie();
   conectarEventos();
@@ -360,9 +451,45 @@ async function iniciar() {
   crearMapa();
   if (!estado.mapa) iniciarRelieve(null); // sin mapa, el bloque lo dice; con mapa, se agrega en «load»
   pintarLocalidades(); // después del mapa: sin mapa, la lista queda solo en texto
+  // Enlace directo (#P0757): abre esa ficha antes de dar la página por lista; quien llega por un enlace a una
+  // parcela no ve la pantalla de inicio encima de la ficha.
+  const porEnlace = abrirDesdeHash();
+  window.addEventListener("hashchange", () => abrirDesdeHash());
   document.body.dataset.listo = "si";
   // Pantalla de inicio de tres pasos (kit C5): una vez por sesión; «How it works» la vuelve a abrir.
-  montarInicio(document.body);
+  if (!porEnlace) montarInicio(document.body);
+}
+
+/**
+ * Enlace directo a una parcela (web/js/resumen.js → idDeHash): «#P0757» abre su ficha (y pasa a su zona si la
+ * elegida es otra). Un hash que no es un id de parcela ni el id de un elemento de la página (p. ej. «#principal»,
+ * el ancla de «Skip to the map») muestra un aviso y no rompe nada. Devuelve true si abrió una ficha.
+ */
+function abrirDesdeHash() {
+  const aviso = $("#aviso-enlace");
+  const hash = window.location.hash;
+  const id = idDeHash(hash, estado.porId);
+  if (id) {
+    if (aviso) aviso.hidden = true;
+    const zona = zonaDe(estado.porId.get(id).properties);
+    if (estado.zonaSel != null && zona !== estado.zonaSel) {
+      $("#zona-sel").value = zona ?? "";
+      cambiarZona(zona);
+    }
+    if (estado.fichaId !== id) abrirFicha(id);
+    return true;
+  }
+  let crudo = hash.replace(/^#/, "");
+  try {
+    crudo = decodeURIComponent(crudo);
+  } catch {
+    // «%» suelto: se muestra tal como llegó
+  }
+  if (crudo && !document.getElementById(crudo) && aviso) {
+    aviso.textContent = AVISO_ENLACE(crudo);
+    aviso.hidden = false;
+  }
+  return false;
 }
 
 /** Aviso visible de que la página no pudo cargar o arrancar (y en la consola). */
@@ -467,20 +594,41 @@ function fijarVisibles() {
   estado.encuadre = extensionZona();
 }
 
+/**
+ * Zona con la que abre la página (decisión del gemelo, punto 6): la de gemelo.json → zona_inicial si está en
+ * cubo.zonas; si no, la primera de cubo.zonas. Con una sola zona (o sin cubo.zonas), null: «todas» es esa zona.
+ */
+function zonaInicial() {
+  if (estado.zonasIds.length < 2) return null;
+  const z = estado.gemelo?.zona_inicial;
+  return z && estado.cubo.zonas?.[z] ? z : estado.zonasIds[0];
+}
+
 /** El selector aparece solo con más de una zona; con una (o sin cubo.zonas) la página queda como antes. */
 function iniciarZonas() {
   estado.zonasIds = idsZonas();
   const varias = estado.zonasIds.length > 1;
   $("#selector-zona").hidden = !varias;
+  estado.zonaSel = zonaInicial();
   if (varias) {
     const sel = $("#zona-sel");
     sel.innerHTML =
       '<option value="">All areas</option>' +
       estado.zonasIds.map((id) => `<option value="${esc(id)}">${esc(nombreZona(id))}</option>`).join("");
-    sel.value = "";
+    sel.value = estado.zonaSel ?? "";
   }
-  estado.zonaSel = null;
   fijarVisibles();
+}
+
+/** Zona de la vista 3D: la elegida; con una sola zona en el cubo, esa (el selector no aparece). */
+function zonaGemelo() {
+  return estado.zonaSel ?? (estado.zonasIds.length === 1 ? estado.zonasIds[0] : null);
+}
+
+/** Nombre de lo que se ve (para la línea de tiempo): la zona elegida o todas las zonas. */
+function rotuloZona() {
+  if (estado.zonaSel) return nombreZona(estado.zonaSel);
+  return estado.zonasIds.length > 1 ? "All areas" : estado.zonasIds.length ? nombreZona(estado.zonasIds[0]) : "";
 }
 
 /** Cambio de zona: indicador, conteos, lista y mapa pasan a las parcelas de esa zona. */
@@ -492,6 +640,13 @@ function cambiarZona(valor) {
   // La ficha abierta de una parcela de otra zona se cierra (sin mover el foco del selector).
   if (estado.fichaId && !estado.idsVisibles.has(estado.fichaId)) cerrarFicha({ devolverFoco: false });
   filtrarLista();
+  // Gemelo: la línea de tiempo cuenta las parcelas de la zona; la tarjeta marca la zona «in view»; la vista 3D
+  // cambia de relieve o, si la zona nueva no tiene (o es «All areas»), se retira sola. Antes de encuadrar: el
+  // encuadre conserva la inclinación solo si la vista sigue activa.
+  estado.linea?.fijarDatos({ features: estado.visibles, rotulo: rotuloZona() });
+  estado.estadoGemelo?.fijarZona(estado.zonaSel);
+  estado.vista3d?.actualizar({ zonaId: zonaGemelo() });
+  sincronizar3D();
   actualizarTodo();
   encuadrar();
   // Capa de relieve: leyenda y tormenta de la zona elegida (o de todas con «All areas»).
@@ -619,6 +774,17 @@ function actualizarTodo() {
   actualizarConteos(conteos);
   pintarColoreado();
   if (estado.fichaId) actualizarFicha();
+  // Gemelo: las columnas de la vista 3D siguen a la dotación y a la lluvia; la tarjeta dice el escenario.
+  estado.vista3d?.actualizar({ D: estado.D, r: estado.r });
+  estado.estadoGemelo?.fijarEscenario(escenarioActual());
+}
+
+/** Lo que la persona movió, como texto (el mismo del deslizador), para «Your scenario» de «Twin status». */
+function escenarioActual() {
+  const marca = (estado.cubo.dotaciones.marcas ?? []).find((m) => Number(m.valor) === estado.D);
+  const dotacion = `${fmt(estado.D)} thousand m³/ha${marca ? ` (${marca.nombre})` : ""}`;
+  const seca = estado.rSeca !== undefined && estado.r === estado.rSeca;
+  return { dotacion, lluvia: seca ? `Rain ${fmtSigno(estado.rSeca)}%` : "Normal rain" };
 }
 
 /** ¿Parcela clasificada (no abstenida) sin opción ACTUAL? No se evaluó: no es «Not classified». */
@@ -743,6 +909,8 @@ function iniciarColoreado() {
 
 /** Clasificador activo: devuelve por parcela {clave, color, trama, simbolo, texto}. */
 function clasificador() {
+  // Un año pasado en la línea de tiempo manda: el mapa muestra el estado observado de ese año.
+  if (estado.anioTiempo != null) return capaDelAnio(estado.anioTiempo);
   const modo = estado.colorear;
   if (modo === "semaforo") return esquemaSemaforo();
   if (modo === "plazo") return esquemaPlazo();
@@ -808,6 +976,16 @@ function capaMemoria(anio) {
     fuente: "Field memory from NASA HLS monthly greenness (rule-based reading; not a crop census).",
     clase: (p) => (Array.isArray(p.memoria) ? (p.memoria.find((m) => m.anio === anio)?.estado ?? "sin_dato") : "sin_dato"),
   };
+}
+
+/** Esquema de la línea de tiempo: la memoria de ese año, con la indicación de cómo volver a la vista normal. */
+function capaDelAnio(anio) {
+  if (!estado.capasAnio.has(anio)) {
+    const capa = capaMemoria(anio);
+    const vuelta = estado.anioNormal != null ? ` Move the timeline back to ${estado.anioNormal} to color fields by water again.` : "";
+    estado.capasAnio.set(anio, { ...capa, fuente: `${capa.fuente}${vuelta}` });
+  }
+  return estado.capasAnio.get(anio);
 }
 
 /** Resultado del esquema activo para cada parcela. */
@@ -1139,11 +1317,13 @@ function crearMapa() {
   mapa.on("zoomstart", marcarMovido);
   mapa.on("resize", () => {
     if (estado.movidoPorUsuario || !estado.encuadre) return;
-    mapa.fitBounds(estado.encuadre, { padding: margenMapa(estado.encuadre), maxZoom: 17, duration: 0 });
+    mapa.fitBounds(estado.encuadre, { padding: margenMapa(estado.encuadre), maxZoom: 17, duration: 0, ...camara3D() });
   });
 
   // Teselas del mapa base que no cargan: aviso discreto, las parcelas siguen sobre fondo sólido.
   mapa.on("error", (ev) => {
+    // Las fuentes de la vista 3D (prefijo «gemelo-») avisan por su cuenta (web/js/gemelo3d.js, alAvisar).
+    if (String(ev?.sourceId ?? ev?.source?.id ?? "").startsWith("gemelo-")) return;
     if (ev?.sourceId === "osm" || ev?.source?.id === "osm" || ev?.tile) {
       if (!estado.avisoTeselas) {
         estado.avisoTeselas = true;
@@ -1172,6 +1352,8 @@ function crearMapa() {
     // dos zonas hay parcelas de menos de un píxel y el clic exacto no las alcanza. Si en el punto no hay
     // parcela, se busca en cuadros cada vez más grandes (de 1 px hasta la tolerancia) y se abre la más cercana.
     mapa.on("click", (e) => {
+      // En 3D la columna tapa a la parcela de atrás: el clic sobre una columna lo atiende la vista 3D.
+      if (estado.vista3d?.activo() && estado.vista3d.columnaEn(e.point, { tolerancia: TOLERANCIA_CLIC_PX })) return;
       const capas = { layers: ["parcelas-relleno"] };
       let hallados = mapa.queryRenderedFeatures(e.point, capas);
       for (let t = 1; !hallados.length && t <= TOLERANCIA_CLIC_PX; t++) {
@@ -1185,6 +1367,7 @@ function crearMapa() {
     crearMarcadores();
     agregarLocalidades(mapa);
     iniciarRelieve(mapa); // rutas de escurrimiento debajo de los puntos de las localidades
+    iniciarGemelo3D(mapa); // después de las capas de la aplicación: el sombreado del relieve va debajo de ellas
     estado.mapaListo = true;
     pintarMapa();
     // «listo» cuando la fuente de las parcelas ya está procesada (el GeoJSON se tesela aparte, después de «load»).
@@ -1208,12 +1391,22 @@ function crearMarcadores() {
   }
 }
 
-/** Encuadra la zona elegida (al cambiar de zona). */
+/** Encuadra la zona elegida (al cambiar de zona). Con la vista 3D activa conserva su inclinación y su rumbo. */
 function encuadrar() {
   const ext = estado.encuadre;
-  if (!estado.mapa || !ext) return;
+  const mapa = estado.mapa;
+  if (!mapa || !ext) return;
   estado.movidoPorUsuario = false;
-  estado.mapa.fitBounds(ext, { padding: margenMapa(ext), maxZoom: 17, duration: reduceMovimiento() ? 0 : 600 });
+  const camara = camara3D();
+  // La vista 3D se acaba de retirar (p. ej. «All areas»): el mapa vuelve plano antes de encuadrar.
+  if (!camara.pitch && (mapa.getPitch() || mapa.getBearing())) mapa.jumpTo({ pitch: 0, bearing: 0 });
+  mapa.fitBounds(ext, { padding: margenMapa(ext), maxZoom: 17, duration: reduceMovimiento() ? 0 : 600, ...camara });
+}
+
+/** Inclinación y rumbo que un encuadre debe conservar: los de la vista 3D si está activa; si no, ninguno. */
+function camara3D() {
+  if (!estado.mapa || !estado.vista3d?.activo()) return {};
+  return { bearing: estado.mapa.getBearing(), pitch: estado.mapa.getPitch() };
 }
 
 function programarPintadoMapa() {
@@ -1364,6 +1557,173 @@ async function iniciarRelieve(mapa) {
 }
 
 // ---------------------------------------------------------------------------
+// Vista 3D del gemelo (web/js/gemelo3d.js; decisión del gemelo digital, punto 1). Un modo adicional del mapa:
+// el botón «3D twin view» va en los controles del mapa; solo se ofrece con una zona elegida que tenga relieve en
+// gemelo.json (si no, dice «not available» y por qué). Las columnas siguen al deslizador y a la lluvia
+// (actualizarTodo) y a la zona (cambiarZona). Al desactivar, el mapa vuelve plano y sin capas del gemelo.
+// ---------------------------------------------------------------------------
+function iniciarGemelo3D(mapa) {
+  try {
+    estado.vista3d = crearGemelo3D({
+      mapa,
+      gemelo: estado.gemelo,
+      reglas,
+      alElegirParcela: (id) => abrirFicha(id),
+      reducirMovimiento: reduceMovimiento,
+      toleranciaClicPx: TOLERANCIA_CLIC_PX,
+      alAvisar: (a) => {
+        // «no_disponible» ya lo dice el botón con su motivo; lo demás (teselas, error) va al aviso del mapa.
+        if (a?.tipo !== "no_disponible" && a?.mensaje) avisoMapa(a.mensaje);
+        sincronizar3D();
+      },
+    });
+    estado.vista3d.actualizar({ features: estado.parcelas.features, cubo: estado.cubo, D: estado.D, r: estado.r });
+  } catch (err) {
+    console.error("Raíz: the 3D twin view could not be prepared", err);
+    estado.vista3d = null;
+  }
+  // Control del mapa con el botón y su motivo (texto + aria-pressed; operable con el teclado: es un <button>).
+  const caja = document.createElement("div");
+  caja.className = "maplibregl-ctrl maplibregl-ctrl-group control-gemelo";
+  caja.innerHTML =
+    '<button type="button" class="boton-gemelo" id="boton-gemelo" aria-pressed="false" aria-describedby="gemelo-motivo"></button>' +
+    '<p class="gemelo-motivo" id="gemelo-motivo" hidden></p>';
+  $(".boton-gemelo", caja).addEventListener("click", alternar3D);
+  mapa.addControl({ onAdd: () => caja, onRemove: () => caja.remove() }, "top-right");
+  $("#t-gemelo3d").textContent = TEXTO_3D;
+  sincronizar3D();
+}
+
+/** Motivo por el que la vista 3D no se ofrece ahora (llave de MOTIVOS_3D), o null si se puede activar. */
+function motivo3D() {
+  if (!estado.gemelo) return estado.gemeloLectura === "ausente" ? "sin_gemelo" : "error_gemelo";
+  if (!estado.gemelo.terreno) return "sin_terreno";
+  const z = zonaGemelo();
+  if (z == null) return estado.zonasIds.length > 1 ? "todas" : "sin_zona";
+  if (!estado.vista3d?.disponible(z)) return "sin_zona";
+  return null;
+}
+
+function alternar3D() {
+  const vista = estado.vista3d;
+  if (!vista || motivo3D()) {
+    sincronizar3D(); // aria-disabled: el motivo ya está a la vista
+    return;
+  }
+  if (vista.activo()) {
+    vista.desactivar();
+  } else {
+    vista.actualizar({ features: estado.parcelas.features, cubo: estado.cubo, D: estado.D, r: estado.r });
+    vista.activar(zonaGemelo());
+  }
+  sincronizar3D();
+}
+
+/**
+ * Botón, leyenda y zoom mínimo según el estado de la vista. Con la vista activa el zoom mínimo del mapa sube a
+ * terreno.minzoom + 1: MapLibre dibuja el relieve con teselas de un nivel menos que el zoom del mapa, así que por
+ * debajo el terreno quedaría plano (motor/gemelo_web.py). Al desactivar vuelve el zoom mínimo de antes.
+ */
+function sincronizar3D() {
+  const mapa = estado.mapa;
+  const vista = estado.vista3d;
+  const activo = Boolean(vista?.activo());
+  if (mapa) {
+    const minimo = Number(estado.gemelo?.terreno?.minzoom);
+    if (activo && estado.minZoomPrevio == null && Number.isFinite(minimo) && minimo + 1 > mapa.getMinZoom()) {
+      estado.minZoomPrevio = mapa.getMinZoom();
+      mapa.setMinZoom(minimo + 1);
+    } else if (!activo && estado.minZoomPrevio != null) {
+      mapa.setMinZoom(estado.minZoomPrevio);
+      estado.minZoomPrevio = null;
+    }
+  }
+  const boton = $("#boton-gemelo");
+  if (boton) {
+    const motivo = motivo3D();
+    boton.textContent = motivo ? TEXTO_3D_NO : TEXTO_3D;
+    boton.setAttribute("aria-pressed", String(activo));
+    if (motivo) boton.setAttribute("aria-disabled", "true");
+    else boton.removeAttribute("aria-disabled");
+    const nota = $("#gemelo-motivo");
+    nota.textContent = motivo ? MOTIVOS_3D[motivo] : "";
+    nota.hidden = !motivo;
+    document.body.dataset.gemelo3d = activo ? "activo" : motivo ? "no-disponible" : "plano";
+  }
+  const bloque = $("#bloque-gemelo3d");
+  const leyenda = $("#gemelo-leyenda");
+  bloque.hidden = !activo;
+  const html = activo ? vista.leyendaHTML(zonaGemelo()) : "";
+  if (leyenda.dataset.html !== html) {
+    leyenda.innerHTML = html;
+    leyenda.dataset.html = html;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Línea de tiempo del gemelo (web/js/tiempo.js; punto 2). Abre en el año más reciente (el estado actual), donde
+// el mapa muestra la vista normal; en otro año, el mapa y la leyenda muestran la memoria de ese año (seis estados).
+// ---------------------------------------------------------------------------
+function iniciarLineaDeTiempo() {
+  const cont = $("#linea-tiempo");
+  if (!cont) return;
+  try {
+    estado.linea = crearLineaDeTiempo({ contenedor: cont, gemelo: estado.gemelo, alCambiar: alCambiarAnio, reducirMovimiento: reduceMovimiento });
+  } catch (err) {
+    console.error("Raíz: the timeline could not be built", err);
+    estado.linea = null;
+    return;
+  }
+  estado.linea.fijarDatos({ features: estado.visibles, rotulo: rotuloZona() });
+  estado.anioNormal = estado.linea.disponible() ? estado.linea.anio() : null;
+}
+
+function alCambiarAnio(anio) {
+  estado.anioTiempo = anio == null || anio === estado.anioNormal ? null : anio;
+  document.body.dataset.anioTiempo = estado.anioTiempo == null ? "" : String(estado.anioTiempo);
+  pintarColoreado();
+}
+
+// ---------------------------------------------------------------------------
+// Tarjeta «Twin status» (web/js/estado_gemelo.js; punto 3) en el panel. manifest.json (las fechas de cada fuente)
+// se lee aquí una vez; «About & Data» y la hoja impresa reutilizan esa lectura (cargarOpcional).
+// ---------------------------------------------------------------------------
+function iniciarEstadoGemelo() {
+  const cont = $("#estado-gemelo");
+  if (!cont) return;
+  try {
+    estado.estadoGemelo = montarEstadoGemelo(cont, {
+      manifest: null,
+      cubo: estado.cubo,
+      gemelo: estado.gemelo,
+      zonaId: estado.zonaSel,
+    });
+  } catch (err) {
+    console.error("Raíz: the twin status card could not be built", err);
+    estado.estadoGemelo = null;
+    return;
+  }
+  cargarOpcional("data/manifest.json").then((lectura) => {
+    estado.estadoGemelo?.fijarDatos({ manifest: datosDe(lectura) });
+    document.body.dataset.estadoGemelo = "listo";
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Aplicación instalable y sin conexión (web/js/instalar.js; punto 4): «Install app» e indicador Online/Offline en
+// la cabecera. Se monta antes de leer los datos. Fuera de https o localhost no dibuja nada.
+// ---------------------------------------------------------------------------
+function iniciarInstalacion() {
+  const cont = $("#marca-instalar");
+  if (!cont) return;
+  try {
+    estado.instalacion = montarInstalacion(cont);
+  } catch (err) {
+    console.warn("Raíz: install and offline indicator not available", err);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Panel lateral: La Boquilla, acuífero, pie de fuentes
 // ---------------------------------------------------------------------------
 function pintarDistrito() {
@@ -1429,6 +1789,10 @@ function abrirFicha(id, opciones = {}) {
   estado.whatsapp = false;
   construirFicha(f);
   fijarMedidas();
+  // Enlace directo: la barra de direcciones dice qué ficha está abierta (sin entrada nueva en el historial).
+  if (window.location.hash !== hashDe(id)) window.history.replaceState(window.history.state, "", hashDe(id));
+  const avisoEnlace = $("#aviso-enlace");
+  if (avisoEnlace) avisoEnlace.hidden = true;
   const ficha = $("#ficha");
   ficha.hidden = false;
   ficha.scrollTop = 0;
@@ -1450,7 +1814,13 @@ function cerrarFicha({ devolverFoco = true } = {}) {
   estado.fichaId = null;
   estado.gotaApi?.destruir(); // detiene las gotas y los observadores del Sankey
   estado.gotaApi = null;
+  estado.ndviApi?.destruir();
+  estado.ndviApi = null;
   estado.whatsapp = false;
+  // Sin ficha abierta, la dirección queda sin «#id» (replaceState no dispara «hashchange»).
+  if (idDeHash(window.location.hash, estado.porId)) {
+    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+  }
   $("#ficha").hidden = true;
   $("#ficha-cuerpo").innerHTML = "";
   sincronizarInert(); // antes de devolver el foco a la lista o al mapa
@@ -1465,6 +1835,8 @@ function construirFicha(f) {
   const ops = opcionesDe(p.id);
   estado.gotaApi?.destruir();
   estado.gotaApi = null;
+  estado.ndviApi?.destruir();
+  estado.ndviApi = null;
   $("#ficha-titulo").textContent = `Field ${p.id}`;
   // Parcela abstenida: sin tarjetas; la memoria sí se muestra (kit C2.1 y C2.2). Sin tarjetas tampoco hay
   // renglón Soil: la línea de relieve (contexto de la zona) va debajo de la nota.
@@ -1476,14 +1848,25 @@ function construirFicha(f) {
       ? '<p class="nota-abstenida">The crop map is not sure what grows here, so no options are computed. ' +
         "Check the current crop with a technician; the field memory above still shows its history.</p>"
       : `<p class="nota-sin-calculo" data-motivo="${esc(codigo ?? "")}">${esc(SIN_OPCIONES[codigo] ?? SIN_OPCIONES_OTRO)}</p>`) + relieve;
+  // Cultivo que no rota (nogal, maestro §5.2): su motivo y su fuente van en lugar de las alternativas.
+  const sinRotacion = estado.cubo.parcelas?.[p.id]?.sin_rotacion;
   $("#ficha-cuerpo").innerHTML = [
+    // Frase resumen descriptiva (web/js/resumen.js): la escribe actualizarFicha (depende del deslizador).
+    '<p class="resumen-frase" id="ficha-resumen" aria-live="polite"></p>',
     htmlEncabezado(p),
     // En papel la línea de relieve va una sola vez, aquí (style.css la oculta en las tarjetas al imprimir).
     ops.length && relieve ? `<div class="solo-impresion relieve-impresion">${relieve}</div>` : "",
     htmlMemoria(p),
-    `<section aria-labelledby="t-opciones"><h3 id="t-opciones">Current rotation and alternatives</h3>` +
-      (ops.length ? `<div class="tarjetas">${ops.map((o) => htmlTarjeta(o, relieve)).join("")}</div>` : sinOpciones) +
+    // Gráfica del NDVI mensual real de la parcela (web/js/resumen.js → dibujarNDVI); en papel no va.
+    '<div class="ficha-ndvi no-imprimir" id="ficha-ndvi"></div>',
+    // En papel, el rótulo de la aptitud de suelo va una vez, en la línea del título (en pantalla, en cada tarjeta).
+    `<section aria-labelledby="t-opciones"><h3 id="t-opciones">${sinRotacion ? "Current rotation" : "Current rotation and alternatives"}` +
+      (ops.length && estado.suelo?.rotulo_aptitud ? `<span class="solo-impresion nota-aptitud-impresion"> · Soil fit: ${esc(estado.suelo.rotulo_aptitud)}</span>` : "") +
+      "</h3>" +
+      (ops.length ? `<div class="tarjetas">${ops.map((o) => htmlTarjeta(o, relieve, p)).join("")}</div>` : sinOpciones) +
+      (ops.length && sinRotacion ? htmlSinRotacion(sinRotacion) : "") +
       "</section>",
+    htmlEvidencia(p),
     htmlGota(ops, p),
     htmlCompartir(),
     `<p class="aviso-juicio">${esc(AVISO_JUICIO)}</p>`,
@@ -1491,7 +1874,95 @@ function construirFicha(f) {
   ].join("");
   conectarGota();
   conectarCompartir();
+  pintarNDVI(p);
   actualizarFicha();
+}
+
+/** Gráfica del NDVI mensual de la parcela, con los umbrales de referencia de ndvi_mensual.json. */
+function pintarNDVI(p) {
+  const cont = $("#ficha-ndvi");
+  if (!cont) return;
+  const n = estado.ndvi;
+  if (!n && estado.lecturas.ndvi) {
+    cont.innerHTML = `<p class="ayuda">Monthly NDVI: could not be read (ndvi_mensual.json: ${esc(estado.lecturas.ndvi)}).</p>`;
+    return;
+  }
+  try {
+    estado.ndviApi = dibujarNDVI(cont, {
+      serie: n?.parcelas?.[p.id],
+      meses: n?.meses ?? [],
+      umbrales: n?.umbrales ?? null,
+      fuente: n?.fuente ?? null,
+      nivel: 3,
+    });
+  } catch (err) {
+    console.error("Raíz: the NDVI chart could not be drawn", err);
+    cont.innerHTML = '<p class="ayuda">Monthly NDVI: could not be drawn for this field.</p>';
+  }
+}
+
+/** El nogal (u otro cultivo que no rota): por qué no hay alternativas, con su fuente y su etiqueta. */
+function htmlSinRotacion(sr) {
+  return (
+    '<div class="sin-rotacion" data-parte="sin-rotacion">' +
+    `<p><strong>${esc(NOTA_SIN_ROTACION)}</strong> ${esc(sr.motivo ?? "")}</p>` +
+    `<p class="fuente">Source: ${sr.fuente ? textoEs(sr.fuente) : "not available"}${sr.etiqueta ? ` ${esc(sr.etiqueta)}` : ""}</p>` +
+    "</div>"
+  );
+}
+
+/**
+ * Bloque «Soil and satellite evidence» de la ficha (una vez por parcela): el perfil de suelo (web/js/suelo.js),
+ * el mensaje de zona cuando la mayoría de sus parcelas es alcalina por encima del óptimo de la mayoría de los
+ * cultivos, y la evidencia de las bases del reto (web/js/contexto.js: GEDI con su nota junto al valor; ECOSTRESS
+ * si llegó, o su motivo). En papel no va: la hoja lleva la aptitud de cada tarjeta.
+ */
+function htmlEvidencia(p) {
+  const zona = zonaDe(p);
+  let perfil;
+  try {
+    perfil =
+      htmlPerfilDeSuelo({ suelo: estado.suelo, id: p.id, error: estado.sueloError }) +
+      htmlNotaDeZona({ suelo: estado.suelo, zonaId: zona, nombreZona: nombreZona(zona) });
+  } catch (err) {
+    console.error("Raíz: the soil profile could not be built", err);
+    perfil = '<p class="suelo-perfil suelo-pendiente">Soil profile: could not be shown for this field.</p>';
+  }
+  const ctx = estado.contexto;
+  let filas = [];
+  try {
+    filas = ctx ? evidenciaDeParcela({ contexto: ctx, id: p.id }) : [];
+  } catch (err) {
+    console.error("Raíz: the satellite evidence could not be read", err);
+  }
+  const items = filas.map(
+    (f) =>
+      `<li data-evidencia="${esc(f.etiqueta)}"${f.lectura ? ` data-lectura="${esc(f.lectura)}"` : ""}>` +
+      `<p><strong>${esc(f.etiqueta)}:</strong> ${esc(f.texto)}</p>` +
+      (f.nota ? `<p class="evidencia-nota">${esc(f.nota)}</p>` : "") +
+      `<p class="fuente">Source: ${f.archivo ? esc([f.archivo, f.fecha].filter(Boolean).join(", ")) : "not available"}</p>` +
+      (f.fuente ? `<details class="evidencia-fuente"><summary>Full source</summary><p class="fuente">${textoEs(f.fuente)}</p></details>` : "") +
+      "</li>",
+  );
+  // ECOSTRESS pedido y no entregado: se dice (no se rellena con nada).
+  if (ctx && !ctx.ecostress && ctx.ecostress_motivo) {
+    items.push(`<li data-evidencia="ecostress"><p><strong>Evapotranspiration (ECOSTRESS):</strong> ${esc(ctx.ecostress_motivo)}</p></li>`);
+  }
+  const satelite = items.length
+    ? `<ul class="evidencia-lista">${items.join("")}</ul>`
+    : `<p class="ayuda">${ctx
+      ? "No satellite evidence for this field yet."
+      : estado.lecturas.contexto
+        ? `Satellite evidence: could not be read (contexto.json: ${esc(estado.lecturas.contexto)}).`
+        : "Satellite evidence: not available (contexto.json was not built)."}</p>`;
+  return (
+    '<section class="evidencia no-imprimir" id="seccion-evidencia" aria-labelledby="t-evidencia">' +
+    '<h3 id="t-evidencia">Soil and satellite evidence</h3>' +
+    `<div class="evidencia-suelo">${perfil}</div>` +
+    '<div class="evidencia-satelite"><h4 class="evidencia-titulo">Satellite evidence</h4>' +
+    satelite +
+    "</div></section>"
+  );
 }
 
 function htmlEncabezado(p) {
@@ -1571,19 +2042,28 @@ function circulo(clave, tabla) {
   return `<span class="sem-circulo" style="background-color: var(--sem-${esc(k)}); color: ${esc(textoSobreVar(`sem-${k}`))}" aria-hidden="true">${esc(s.simbolo)}</span>`;
 }
 
-/** Tarjeta de una opción. `relieve`: la línea de relieve de la parcela (igual en todas sus tarjetas). */
-function htmlTarjeta(o, relieve = "") {
+/**
+ * Tarjeta de una opción. `relieve`: la línea de relieve de la parcela (igual en todas sus tarjetas); `p`: las
+ * properties de la parcela (la aptitud de suelo y el riesgo de helada son de esa parcela y de su zona).
+ * La opción que el motor completó con el diseño del equipo (origen_opcion = team_proposal) lleva su rótulo junto al
+ * nombre. Los filtros se dibujan en actualizarFicha: dotacion_minima depende del deslizador.
+ */
+function htmlTarjeta(o, relieve = "", p = {}) {
   const esActual = o.id === "ACTUAL";
+  const propuesta = o.origen_opcion === "team_proposal" && o.etiqueta_opcion
+    ? `<span class="insignia-propuesta" data-parte="propuesta">${esc(o.etiqueta_opcion)}</span>`
+    : "";
   return (
     `<article class="tarjeta" data-opcion="${esc(o.id)}">` +
     '<header class="tarjeta-cabeza">' +
     (esActual ? '<span class="insignia-actual">Current rotation</span>' : "") +
-    `<h4>${esc(o.nombre)}</h4></header>` +
+    `<h4>${esc(o.nombre)}</h4>${propuesta}</header>` +
     '<div class="renglon renglon-agua" data-parte="agua"></div>' +
-    htmlSuelo(o, relieve) +
+    htmlSuelo(o, relieve, p) +
     htmlDinero(o) +
     htmlMeses(o) +
-    htmlFiltros(o) +
+    htmlSiembra(o, p) +
+    '<div data-parte="filtros"></div>' +
     '<p class="advertencia" data-parte="advertencia" role="alert" hidden></p>' +
     '<details class="porque" data-parte="porque"><summary>Why?</summary><dl data-parte="respuestas"></dl></details>' +
     "</article>"
@@ -1594,13 +2074,21 @@ function htmlTarjeta(o, relieve = "") {
  * Renglón Soil: días de suelo desnudo, leguminosa, plagas y salinidad de la opción; al final, la línea de
  * relieve de la parcela (pendiente, escurrimiento y depresiones, con el rótulo de escala de relieve.json).
  */
-function htmlSuelo(o, relieve = "") {
+function htmlSuelo(o, relieve = "", p = {}) {
   const su = o.suelo ?? {};
   const sem = o.semaforo?.suelo ?? "gris";
   const origen = su.dias_desnudo_origen === "medido" ? "measured" : su.dias_desnudo_origen === "estimado" ? "estimated" : "";
+  // Aptitud de esta opción para el suelo de la parcela (web/js/suelo.js): evidencia, no filtro.
+  let aptitud = "";
+  try {
+    aptitud = htmlAptitud({ suelo: estado.suelo, idParcela: p.id, idOpcion: o.id, nombresCultivo: CULTIVOS, error: estado.sueloError });
+  } catch (err) {
+    console.error("Raíz: the soil fit could not be built", err);
+  }
   return (
     `<div class="renglon renglon-suelo" data-semaforo="${esc(sem)}">${circulo(sem, SEMAFORO_OTROS)}<div>` +
     `<h5>Soil <span class="sem-texto">${esc(SEMAFORO_OTROS[sem]?.texto ?? "no data")}</span></h5>` +
+    aptitud +
     (su.dias_desnudo != null
       ? `<p>Bare soil in the windy season: <strong>${esc(fmtDato(su.dias_desnudo))} days</strong>${origen ? ` <span class="etiqueta-origen">${origen}</span>` : ""}</p>`
       : "<p>Bare soil in the windy season: no data</p>") +
@@ -1642,6 +2130,61 @@ function htmlMeses(o) {
   );
 }
 
+/** «MM-DD» de los datos como «Apr 1»; el texto tal cual si no tiene esa forma. */
+function fmtMesDia(texto) {
+  const m = /^(\d{2})-(\d{2})$/.exec(String(texto ?? ""));
+  if (!m) return String(texto ?? "");
+  return new Intl.DateTimeFormat(LOCALE, { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(0, Number(m[1]) - 1, Number(m[2]))));
+}
+
+/**
+ * Ventana de siembra de cada cultivo de la opción (cubo.opciones_catalogo.<rotación>.secuencia, de la tabla oficial)
+ * y, junto a la fecha, la probabilidad de helada después de esa siembra (web/js/contexto.js → riesgoDeHelada, con
+ * heladas de la zona de la parcela). Sin ventana en los datos no se escribe nada; sin probabilidad (siembra fuera
+ * de las fechas calculadas) va solo la ventana. No decide nada: el filtro de helada lo dice.
+ */
+function htmlSiembra(o, p = {}) {
+  const cat = estado.cubo.opciones_catalogo?.[o.rotacion];
+  const pasos = (Array.isArray(cat?.secuencia) ? cat.secuencia : []).filter((x) => x?.siembra?.desde);
+  if (!pasos.length) return "";
+  let fuente = null;
+  const partes = pasos.map((x) => {
+    const ventana = x.siembra.hasta ? `${fmtMesDia(x.siembra.desde)}–${fmtMesDia(x.siembra.hasta)}` : `from ${fmtMesDia(x.siembra.desde)}`;
+    let riesgo = null;
+    try {
+      riesgo = riesgoDeHelada({ contexto: estado.contexto, fechaSiembra: x.siembra.desde, zonaId: zonaDe(p) });
+    } catch (err) {
+      console.error("Raíz: frost risk could not be read", err);
+    }
+    if (riesgo) fuente = riesgo.fuente;
+    const helada = riesgo
+      ? ` <span class="siembra-helada" data-helada="${esc(fmtPct(riesgo.prob))}">· chance of a frost after ${esc(fmtMesDia(riesgo.fecha))}: <strong>${esc(fmtPct(riesgo.prob))}</strong></span>`
+      : "";
+    return `<span class="siembra-cultivo">${esc(nombreCultivo(x.cultivo))}: ${esc(ventana)}</span>${helada}`;
+  });
+  return (
+    '<p class="siembra no-imprimir" data-parte="siembra">Planting window (official table): ' +
+    partes.join("; ") +
+    (fuente ? ` <span class="fuente">(frost: ${esc(fuente)}; a regional grid cell, not a station)</span>` : "") +
+    "</p>"
+  );
+}
+
+/**
+ * Estado de un filtro con la dotación elegida. dotacion_minima se evalúa EN VIVO: regla.lamina_minima_cm de
+ * cubo.filtros_catalogo, convertida a millares/ha con la constante del cubo (dotaciones.lamina_cm_por_millar), contra
+ * el deslizador: «passes» si la alcanza, «warning» si no. Sin esos datos el filtro queda como lo dejó el motor.
+ */
+function filtroConDotacion(f, D) {
+  if (f?.tipo !== "dotacion_minima") return f;
+  const cm = Number(estado.cubo.filtros_catalogo?.[f.id]?.regla?.lamina_minima_cm);
+  const factor = Number(estado.cubo.dotaciones?.lamina_cm_por_millar?.valor);
+  if (!(cm > 0) || !(factor > 0) || !Number.isFinite(D)) return f;
+  const minimo = cm / factor;
+  const pasa = D >= minimo;
+  return { ...f, estado: pasa ? "passes" : "warning", pasa, razon: null, vivo: { minimo, D } };
+}
+
 // Filtros de la tabla oficial (B3) con tres estados (docs/decisiones/2026-11-14_opciones_b3.md): «passes»,
 // «warning» y «needs_local_check». Un filtro sin decidir NUNCA se dibuja como aprobado.
 const RAZON_FILTRO = {
@@ -1656,8 +2199,8 @@ function estadoDeFiltro(f) {
   if (f.pasa === false) return "warning";
   return "needs_local_check";
 }
-function htmlFiltros(o) {
-  const filtros = Array.isArray(o.filtros) ? o.filtros : [];
+function htmlFiltros(o, D = estado.D) {
+  const filtros = (Array.isArray(o.filtros) ? o.filtros : []).map((f) => filtroConDotacion(f, D));
   if (!filtros.length) return "";
   const marcas = {
     passes: ["si", "✓ Passes:"],
@@ -1685,8 +2228,11 @@ function htmlFiltros(o) {
           ? `<span class="filtro-helada"> Chance of frost after this planting date: ${fmtPct(f.prob_helada)}.</span>`
           : "";
         const etiqueta = f.etiqueta ? ` ${esc(f.etiqueta)}` : "";
+        const vivo = f.vivo
+          ? `<span class="filtro-vivo"> Your allocation, ${esc(fmt(f.vivo.D))} thousand m³/ha, ${f.pasa ? "reaches" : "is below"} the ${esc(fmtDato(f.vivo.minimo))} thousand m³/ha this rule asks for.</span>`
+          : "";
         return (
-          `<li class="${clase}" data-estado="${esc(e)}">${marca} <span class="filtro-texto">${esc(f.motivo ?? f.filtro)}</span>${razon}${helada}` +
+          `<li class="${clase}" data-estado="${esc(e)}" data-filtro="${esc(f.id ?? "")}"${f.vivo ? ' data-vivo="si"' : ""}>${marca} <span class="filtro-texto">${esc(f.motivo ?? f.filtro)}</span>${razon}${helada}${vivo}` +
           `${f.fuente ? ` <span class="fuente">— ${esc(f.fuente)}${etiqueta}</span>` : ""}</li>`
         );
       })
@@ -1711,6 +2257,7 @@ function actualizarFicha() {
   const p90s = ops.map((o) => o.agua?.lamina_bruta?.[llave]?.p90).filter((v) => Number.isFinite(v));
   const escala = Math.max(Number(estado.cubo.dotaciones.deslizador.max), ...p90s);
   const pos = (v) => Math.max(0, Math.min(100, (v / escala) * 100));
+  pintarResumen(p, ops);
 
   for (const o of ops) {
     const tarjeta = $(`.tarjeta[data-opcion="${CSS.escape(o.id)}"]`);
@@ -1745,22 +2292,87 @@ function actualizarFicha() {
       lamina +
       alcanza +
       banda +
+      htmlLaminaLocal(o, L, p.area_ha, D) +
       `<p>${esc(textoPlazo(o.agua?.plazo_anios))}${o.agua?.nota_plazo ? ` <span class="fuente">(${esc(o.agua.nota_plazo)})</span>` : ""}</p>` +
       (o.id === "ACTUAL" && rest ? `<p>Remaining term: ${esc(fmtRango(rest.min, rest.max))} ${anios(rest.max)}</p>` : "") +
       (comp ? `<p>Water committed over the remaining term: ${esc(fmtRango(comp.min, comp.max))} thousand m³/ha</p>` : "") +
       "</div>";
 
+    // advertir_si_rojo (tabla oficial): con el semáforo de agua en rojo, recuerda por cuántos años obliga (el
+    // plazo del dato); si la opción siembra alfalfa, lo dice de la alfalfa.
     const adv = $('[data-parte="advertencia"]', tarjeta);
     adv.hidden = !ev.advertencia;
     const plazo = o.agua?.plazo_anios;
+    const cuanto = plazo ? `${fmtRango(plazo.min, plazo.max)} ${anios(plazo.max)}` : "several years";
+    const quien = (o.secuencia ?? []).includes("alfalfa") ? "alfalfa commits water for" : "it would commit water for";
     adv.textContent = ev.advertencia
-      ? `⚠ Warning: at this allocation this option does not get enough water, and it would commit water for ${plazo ? `${fmtRango(plazo.min, plazo.max)} ${anios(plazo.max)}` : "several years"}.`
+      ? `⚠ Warning: at this allocation this option does not get enough water, and ${quien} ${cuanto}.`
       : "";
+    $('[data-parte="filtros"]', tarjeta).innerHTML = htmlFiltros(o, D);
 
     $('[data-parte="respuestas"]', tarjeta).innerHTML = htmlRespuestas(o, ev);
   }
   pintarCoberturaGota();
   if (estado.whatsapp) pintarWhatsApp(); // el mensaje dice cuántas hectáreas alcanzan con la dotación elegida
+}
+
+/**
+ * Frase resumen arriba de la ficha (web/js/resumen.js): con agua (parcial o completa), lámina cero o abstenida.
+ * Describe; no recomienda. Usa la opción ACTUAL y la misma evaluación de web/reglas.js que la tarjeta.
+ */
+function pintarResumen(p, ops) {
+  const nodo = $("#ficha-resumen");
+  if (!nodo) return;
+  const actual = ops.find((o) => o.id === "ACTUAL") ?? null;
+  let evaluacion = null;
+  try {
+    evaluacion = actual && !p.abstencion ? evaluarOpcion(actual, p.area_ha, estado.D, estado.r) : null;
+  } catch (err) {
+    console.error("Raíz: the summary could not be computed", err);
+  }
+  const datos = { parcela: p, opcionActual: actual, evaluacion, D: estado.D, formato: (v, k) => (k === "area" ? fmtDato(v) : fmt(v)) };
+  const texto = fraseResumen(datos);
+  if (nodo.textContent !== texto) nodo.textContent = texto;
+  nodo.dataset.caso = casoResumen(datos);
+}
+
+/**
+ * Segundo renglón de la necesidad: la lámina local de referencia (agua.lamina_local del cubo), convertida a
+ * millares/ha en el motor con la constante del proyecto, y las hectáreas que alcanzan con la dotación del
+ * deslizador (cobertura de web/reglas.js, la misma de la tarjeta). El semáforo sigue con la lámina del modelo.
+ * Sin referencia (dos o más cultivos, alfalfa con corte de verano, cultivo sin dato): «no local reference».
+ * Una opción que no pide agua no lleva este renglón.
+ */
+function htmlLaminaLocal(o, L, areaHa, D) {
+  if (!(L?.p50 > 0)) return "";
+  const ll = o.agua?.lamina_local;
+  const t = ll ? LAMINA_LOCAL[ll.tipo] : null;
+  if (!ll || !t) {
+    return `<p class="lamina-local" data-tipo="ninguna"><span class="lamina-local-titulo">${esc(LAMINA_LOCAL.aplicada.titulo)}:</span> ${esc(TEXTO_SIN_REFERENCIA)}</p>`;
+  }
+  const periodo = ll.periodo ? `${ll.periodo.desde}–${ll.periodo.hasta} records; ` : "";
+  const titulo = ll.tipo === "aplicada" ? `${t.titulo} (${periodo}measurement point not confirmed)` : t.titulo;
+  const rango = ll.rango_millares_ha;
+  const valor = Number.isFinite(ll.valor_millares_ha) ? ll.valor_millares_ha : null;
+  if (valor == null && !(rango && Number.isFinite(rango.min) && Number.isFinite(rango.max))) {
+    return `<p class="lamina-local" data-tipo="ninguna"><span class="lamina-local-titulo">${esc(t.titulo)}:</span> ${esc(TEXTO_SIN_REFERENCIA)}</p>`;
+  }
+  const lamina = valor != null ? fmtDato(valor) : fmtRango(rango.min, rango.max);
+  const ha = valor != null
+    ? fmt(areaHa * cobertura(D, valor))
+    : fmtRango(areaHa * cobertura(D, rango.max), areaHa * cobertura(D, rango.min), fmt);
+  return (
+    `<div class="lamina-local" data-tipo="${esc(ll.tipo)}"><p><span class="lamina-local-titulo">${esc(titulo)}:</span> ` +
+    `<strong>${esc(lamina)}</strong> thousand m³/ha · ` +
+    `<span class="lamina-local-alcanza">enough for ${esc(ha)} of ${esc(fmtDato(areaHa))} hectares</span> ` +
+    `<span class="lamina-local-limite">— ${esc(t.limite)}</span>${ll.etiqueta ? ` <span class="lamina-local-etiqueta">${esc(ll.etiqueta)}</span>` : ""}</p>` +
+    `<details class="lamina-local-fuente"><summary>Source of the local reference</summary><p class="fuente">${textoEs(ll.fuente)}` +
+    `${ll.nota ? ` ${esc(ll.nota)}` : ""}</p></details></div>` +
+    // En papel, una línea corta (la hoja cabe en una carta): la misma cifra y sus hectáreas, rotulada como promedio del
+    // distrito (o recomendación de INIFAP); el texto completo y la fuente se leen en la ficha en línea.
+    `<p class="solo-impresion lamina-local-impresion">${esc(ll.tipo === "aplicada" ? "District avg." : "INIFAP rec.")}: ` +
+    `<strong>${esc(lamina)}</strong> · ${esc(ha)} ha</p>`
+  );
 }
 
 function htmlRespuestas(o, ev) {
@@ -2031,6 +2643,8 @@ function conectarEventos() {
     radio.addEventListener("change", () => {
       if (!radio.checked) return;
       estado.colorear = radio.value;
+      // Elegir cómo colorear devuelve la línea de tiempo al año actual (la vista normal).
+      if (estado.anioTiempo != null && estado.anioNormal != null) estado.linea?.fijarAnio(estado.anioNormal);
       pintarColoreado();
     });
   }
@@ -2125,6 +2739,93 @@ window.raizDepuracion = {
       visibilidad: estado.mapa.getLayoutProperty(capa, "visibility") ?? "visible",
       dibujadas: estado.mapa.queryRenderedFeatures({ layers: [capa] }).length,
     };
+  },
+  /** Vista 3D del gemelo: estado, cámara, terreno, capas y fuentes propias (prefijo «gemelo-»), y el último cálculo. */
+  gemelo3d() {
+    const mapa = estado.mapa;
+    const vista = estado.vista3d;
+    if (!mapa || !vista) return null;
+    const d = vista.depuracion;
+    const estilo = mapa.getStyle();
+    return {
+      activo: vista.activo(),
+      disponible: vista.disponible(zonaGemelo()),
+      zona: zonaGemelo(),
+      pitch: mapa.getPitch(),
+      bearing: mapa.getBearing(),
+      minZoom: mapa.getMinZoom(),
+      terreno: mapa.getTerrain() ?? null,
+      capas: (mapa.getLayersOrder?.() ?? []).filter((id) => id.startsWith("gemelo-")),
+      fuentes: Object.keys(estilo?.sources ?? {}).filter((id) => id.startsWith("gemelo-")),
+      montado: d.montado,
+      version: d.version,
+      exageracion: d.exageracion,
+      teselasFallidas: d.teselasFallidas.length,
+      relieveCargado: mapa.getSource("gemelo-dem") ? mapa.isSourceLoaded("gemelo-dem") : false,
+      cuenta: d.cuenta,
+      columnas: d.columnas?.features.map((f) => f.properties) ?? null,
+      planas: d.planas?.features.map((f) => f.properties) ?? null,
+    };
+  },
+  /**
+   * Un punto de la página sobre una columna de la vista 3D: el más cercano al centro del mapa cuyo entorno cae en
+   * la misma columna (lejos de sus bordes) y que no tapa otro elemento. null si no hay ninguno.
+   */
+  puntoDeColumna() {
+    const mapa = estado.mapa;
+    const vista = estado.vista3d;
+    if (!mapa || !vista?.activo()) return null;
+    const lienzo = mapa.getCanvas();
+    const caja = lienzo.getBoundingClientRect();
+    const paso = 10;
+    const borde = 3;
+    let mejor = null;
+    for (let y = paso; y < caja.height - paso; y += paso) {
+      for (let x = paso; x < caja.width - paso; x += paso) {
+        const id = vista.columnaEn([x, y]);
+        if (id == null) continue;
+        if ([[borde, 0], [-borde, 0], [0, borde], [0, -borde]].some(([dx, dy]) => vista.columnaEn([x + dx, y + dy]) !== id)) continue;
+        if (document.elementFromPoint(caja.left + x, caja.top + y) !== lienzo) continue;
+        const d = Math.hypot(x - caja.width / 2, y - caja.height / 2);
+        if (!mejor || d < mejor.d) mejor = { x: caja.left + x, y: caja.top + y, id, d };
+      }
+    }
+    return mejor && { x: mejor.x, y: mejor.y, id: mejor.id };
+  },
+  /** Elevación del relieve (m, con la exageración) en las esquinas y el centro de los límites de la zona 3D. */
+  elevacionesDeZona() {
+    const mapa = estado.mapa;
+    const b = estado.gemelo?.terreno?.zonas?.[zonaGemelo()]?.bounds;
+    if (!mapa || !Array.isArray(b) || !mapa.getTerrain()) return [];
+    const [o, s, e, n] = b.map(Number);
+    return [[o, s], [o, n], [e, s], [e, n], [(o + e) / 2, (s + n) / 2]].map((c) => mapa.queryTerrainElevation(c));
+  },
+  /**
+   * El mapa de MapLibre, SOLO para la prueba de identidad de las columnas (tests/e2e/web_smoke.mjs): la prueba pinta
+   * cada columna con un código para saber cuál se ve en cada píxel y después deja el mapa como estaba.
+   */
+  get mapa() {
+    return estado.mapa;
+  },
+  /** Columna que la vista 3D ve en un punto de la página (coordenadas de la ventana); null si no hay. */
+  columnaEn(x, y) {
+    if (!estado.mapa || !estado.vista3d?.activo()) return null;
+    const caja = estado.mapa.getCanvas().getBoundingClientRect();
+    return estado.vista3d.columnaEn([x - caja.left, y - caja.top]);
+  },
+  /** Espera a que la cámara se quede quieta y el mapa termine de cargar (relieve incluido); con límite. */
+  esperarQuieto(ms = 20000) {
+    const mapa = estado.mapa;
+    if (!mapa) return Promise.resolve(false);
+    const t0 = performance.now();
+    return new Promise((ok) => {
+      const revisar = () => {
+        const quieto = mapa.loaded() && !mapa.isMoving();
+        if (quieto || performance.now() - t0 > ms) requestAnimationFrame(() => requestAnimationFrame(() => ok(quieto)));
+        else setTimeout(revisar, 80);
+      };
+      setTimeout(revisar, 120);
+    });
   },
   /** Estado de La gota en la ficha abierta (web/js/gota.js). */
   gota() {

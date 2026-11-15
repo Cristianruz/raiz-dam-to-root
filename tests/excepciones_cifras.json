@@ -63,6 +63,13 @@
   {
    "patron": "\\b(crearGemelo)?3D\\b",
    "motivo": "«3D» es el nombre de la vista en tres dimensiones del gemelo digital (y de la función crearGemelo3D de web/js/gemelo3d.js), no una cifra de los datos"
+  },
+  {
+   "patron": "\\bgemelo3d\\b",
+   "archivos": [
+    "*.js"
+   ],
+   "motivo": "Nombre del módulo web/js/gemelo3d.js (vista 3D del gemelo) y de los id que app.js le da a su leyenda (#t-gemelo3d, #bloque-gemelo3d); «3d» es parte del nombre, no una cifra de los datos"
   }
  ]
 }

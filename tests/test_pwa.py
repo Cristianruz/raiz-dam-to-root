@@ -274,6 +274,20 @@ def test_manifest_usa_los_colores_de_la_identidad(manifest):
     assert manifest["background_color"].upper() == variables["arena"]
 
 
+def test_la_pagina_enlaza_el_manifest_y_monta_la_instalacion(manifest):
+    """La página real conecta la aplicación instalable (decisión del gemelo, punto 4): manifest, theme-color igual al
+    del manifest, icono, la hoja del módulo y montarInstalacion en app.js (tests/e2e/pwa_smoke.mjs lo prueba en vivo)."""
+    index = (WEB / "index.html").read_text(encoding="utf-8")
+    app = (WEB / "app.js").read_text(encoding="utf-8")
+    assert re.search(r'<link\b[^>]*rel="manifest"[^>]*href="manifest\.webmanifest"', index)
+    tema = re.search(r'<meta\b[^>]*name="theme-color"[^>]*content="(#[0-9A-Fa-f]{6})"', index)
+    assert tema and tema.group(1).upper() == manifest["theme_color"].upper(), "theme-color de index.html ≠ theme_color"
+    iconos = re.findall(r'<link\b[^>]*rel="(?:icon|apple-touch-icon)"[^>]*href="([^"]+)"', index)
+    assert iconos and all((WEB / i).exists() for i in iconos) and all(i in {x["src"] for x in manifest["icons"]} for i in iconos)
+    assert 'href="css/instalar.css"' in index
+    assert re.search(r'from "\./js/instalar\.js"', app) and "montarInstalacion(" in app
+
+
 def test_iconos_del_manifest_existen_con_el_tamano_declarado(manifest):
     iconos = manifest["icons"]
     assert len(iconos) >= 3

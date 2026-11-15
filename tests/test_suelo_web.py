@@ -44,7 +44,7 @@ WEB_REAL = RAIZ / "web/data"
 FIXTURE = RAIZ / "tests/fixtures/suelo"
 BLOQUES = ("perfil", "requisitos", "aptitud")
 ARCHIVO_DE = {"perfil": sw.ARCHIVO_PERFIL, "requisitos": sw.ARCHIVO_REQUISITOS}
-ESTADOS = {"fits", "tolerated", "outside_range", "no_published_range"}
+ESTADOS = {"fits", "tolerated", "near_limit", "outside_range", "no_published_range"}
 
 
 def _generador():
@@ -159,7 +159,7 @@ def test_lleno_bloques_presentes_y_resumen(lleno):
     evaluadas = [o for p in suelo["aptitud"].values() for o in p.values()]
     assert resumen["opciones_evaluadas"] == len(evaluadas)
     assert resumen["estados"] == dict(Counter(o["estado"] for o in evaluadas))
-    assert set(resumen["estados"]) == ESTADOS, "la fixture cubre los cuatro estados"
+    assert set(resumen["estados"]) == ESTADOS, "la fixture cubre los cinco estados"
 
 
 def test_lleno_perfil_trae_los_valores_del_csv_sin_cambiarlos(lleno):
@@ -221,6 +221,7 @@ CASOS = {
     ("P0001", "maiz_forrajero"): "tolerated",          # tolerado
     ("P0001", "sorgo"): "outside_range",               # fuera por textura
     ("P0001", "algodon"): "no_published_range",        # sin rango (bloques en null)
+    ("P0001", "forraje_verano"): "near_limit",         # fuera del tolerado por menos que el margen de prueba
     ("P0001", "descanso"): "no_published_range",       # descanso
     ("P0002", "ACTUAL"): "fits",
     ("P0002", "alfalfa"): "tolerated",
@@ -230,12 +231,14 @@ CASOS = {
     ("L0001", "cereal_algodon"): "fits",               # el cultivo sin rango no cuenta
     ("L0001", "no_sembrar"): "no_published_range",     # secuencia vacía
 }
-NIVELES = ["fits", "tolerated", "outside_range"]       # de mejor a peor
+NIVELES = ["fits", "tolerated", "near_limit", "outside_range"]       # de mejor a peor
+MARGEN = GEN.supuestos_de_prueba()[sw.SUPUESTO_MARGEN_PH]["valor"]   # margen de pH DE PRUEBA
 
 
-def estado_independiente(secuencia, fila):
+def estado_independiente(secuencia, fila, margen=MARGEN):
     """La regla de aptitud escrita aquí, sin usar motor/suelo_web.py: el peor nivel de los criterios que
-    se pueden comparar, cultivo por cultivo; «no_published_range» si ninguno se puede comparar."""
+    se pueden comparar, cultivo por cultivo; «no_published_range» si ninguno se puede comparar. Fuera del
+    tolerado por menos que el margen → near_limit."""
     por_cultivo = []
     for cultivo in secuencia:
         req = REQ.get(cultivo)
@@ -244,18 +247,24 @@ def estado_independiente(secuencia, fila):
         niveles = []
         if req["ph"] is not None:
             ph, (o_min, o_max), (t_min, t_max) = float(fila["ph"]), req["ph"]["optimo"], req["ph"]["tolerado"]
-            niveles.append(0 if o_min <= ph <= o_max else 1 if t_min <= ph <= t_max else 2)
+            if o_min <= ph <= o_max:
+                niveles.append(0)
+            elif t_min <= ph <= t_max:
+                niveles.append(1)
+            else:
+                fuera = t_min - ph if ph < t_min else ph - t_max
+                niveles.append(2 if margen is not None and round(fuera, 9) < margen else 3)
         if req["textura"] is not None:
             clase = fila["clase_textura"]
-            niveles.append(0 if clase in req["textura"]["apta"] else 2 if clase in req["textura"]["limitante"] else 1)
+            niveles.append(0 if clase in req["textura"]["apta"] else 3 if clase in req["textura"]["limitante"] else 1)
         if req["salinidad_umbral_ds_m"] is not None and fila["salinidad_ce_ds_m"] != "":
-            niveles.append(0 if float(fila["salinidad_ce_ds_m"]) <= req["salinidad_umbral_ds_m"]["valor"] else 2)
+            niveles.append(0 if float(fila["salinidad_ce_ds_m"]) <= req["salinidad_umbral_ds_m"]["valor"] else 3)
         if niveles:
             por_cultivo.append(max(niveles))
     return NIVELES[max(por_cultivo)] if por_cultivo else "no_published_range"
 
 
-def test_lleno_la_tabla_de_casos_cubre_las_seis_situaciones():
+def test_lleno_la_tabla_de_casos_cubre_las_siete_situaciones():
     assert set(CASOS.values()) == ESTADOS
     assert set(CASOS) == {(pid, oid) for pid in FILAS for oid in OPCIONES[pid]}, "un caso por opción con perfil"
     for caso, estado in CASOS.items():
@@ -312,8 +321,10 @@ def test_peor_estado():
     assert sw.peor(["fits", "fits"]) == "fits"
     assert sw.peor(["fits", "tolerated"]) == sw.peor(["tolerated", "fits"]) == "tolerated"
     assert sw.peor(["tolerated", "outside_range", "fits"]) == "outside_range"
+    assert sw.peor(["tolerated", "near_limit"]) == sw.peor(["near_limit", "fits"] + ["near_limit"]) == "near_limit"
+    assert sw.peor(["near_limit", "outside_range"]) == "outside_range"
     assert sw.peor(["no_published_range", "fits"]) == "fits", "lo que no tiene rango no cuenta"
-    assert sw.SEVERIDAD == ("fits", "tolerated", "outside_range") and set(sw.ESTADOS) == ESTADOS
+    assert sw.SEVERIDAD == ("fits", "tolerated", "near_limit", "outside_range") and set(sw.ESTADOS) == ESTADOS
 
 
 def test_lleno_cada_motivo_trae_valor_rango_y_fuente(lleno):
@@ -388,6 +399,14 @@ def test_los_extremos_de_los_rangos_estan_incluidos():
                 (t_min, "tolerated"), (t_max, "tolerated"), (t_min - paso, "outside_range"), (t_max + paso, "outside_range")]
     for ph, estado in esperado:
         assert sw.criterio_ph({"ph": ph}, listos["alfalfa"]["ph"])["estado"] == estado, ph
+    # Con el margen de prueba: por menos que el margen → near_limit; justo en el margen o más → outside_range.
+    bloque_ph = listos["alfalfa"]["ph"]
+    con_margen = [(t_max + MARGEN / 2, "near_limit"), (t_min - MARGEN / 2, "near_limit"),
+                  (t_max + MARGEN, "outside_range"), (t_min - MARGEN, "outside_range"),
+                  (t_max + 2 * MARGEN, "outside_range"), (t_max, "tolerated"), (o_max, "fits")]
+    for ph, estado in con_margen:
+        assert sw.criterio_ph({"ph": ph}, bloque_ph, MARGEN)["estado"] == estado, ph
+    assert sw.criterio_ph({"ph": t_max + MARGEN / 2}, bloque_ph, None)["estado"] == "outside_range", "sin margen no hay near_limit"
     umbral = REQ["alfalfa"]["salinidad_umbral_ds_m"]["valor"]
     bloque = listos["alfalfa"]["salinidad_umbral_ds_m"]
     assert sw.criterio_salinidad({"salinidad_ce_ds_m": umbral}, bloque)["estado"] == "fits", "igual al umbral: dentro"
@@ -569,7 +588,10 @@ def test_las_entregas_de_prueba_pasan_el_validador_y_encienden_el_modulo(tmp_pat
     assert suelo["perfil"]["fuente"] == registro[sw.ARCHIVO_PERFIL]["fuente"]
     assert suelo["perfil"]["fecha"] == registro[sw.ARCHIVO_PERFIL]["fecha"]
     assert suelo["requisitos"]["entrega"]["fuente"] == registro[sw.ARCHIVO_REQUISITOS]["fuente"]
-    assert {(pid, oid): o["estado"] for pid, ops in suelo["aptitud"].items() for oid, o in ops.items()} == CASOS
+    # El buzón de esta prueba no trae supuestos.json: sin margen de pH no hay «near_limit» (cálculo independiente).
+    esperado = {(pid, oid): estado_independiente(OPCIONES[pid][oid], FILAS[pid], margen=None) for pid, oid in CASOS}
+    assert suelo["margen_ph"] is None
+    assert {(pid, oid): o["estado"] for pid, ops in suelo["aptitud"].items() for oid, o in ops.items()} == esperado
 
 
 def test_cli_escribe_suelo_json(tmp_path):
@@ -591,3 +613,108 @@ def test_cubo_por_omision_es_el_de_la_carpeta_web(tmp_path):
     GEN.escribir_cubo(tmp_path / "web/cubo.json")
     resumen, suelo, _ = construir_en(tmp_path, processed)
     assert resumen["bloques"]["aptitud"] and set(suelo["aptitud"]) == set(FILAS)
+
+
+# ---------------------------------------------------------------------------------------
+# (d) Decisión del integrador con la sesión de datos (14-nov): margen de pH, supuestos, parcela sin dato,
+#     rótulo de la aptitud, mensaje de zona y que la aptitud nunca descarte ni reordene opciones
+# ---------------------------------------------------------------------------------------
+def test_margen_en_coma_flotante_no_cae_por_debajo():
+    """2.3 − 1.8 da 0.49999… en coma flotante: con un margen de 0.5 debe quedar «outside_range», no «near_limit»."""
+    bloque = {"optimo": (1.2, 1.5), "tolerado": (1.0, 1.8), "fuente": "prueba"}       # DATOS DE PRUEBA
+    assert 2.3 - 1.8 < 0.5, "el caso de coma flotante que motiva DECIMALES_DISTANCIA"
+    assert sw.criterio_ph({"ph": 2.3}, bloque, 0.5)["estado"] == "outside_range"
+    assert sw.criterio_ph({"ph": 2.25}, bloque, 0.5)["estado"] == "near_limit"
+
+
+def test_lleno_publica_los_supuestos_de_suelo_con_su_fuente(lleno):
+    suelo = lleno["suelo"]
+    sup = GEN.supuestos_de_prueba()
+    for clave, llave in (("margen_ph", sw.SUPUESTO_MARGEN_PH), ("coincidencia_textura", sw.SUPUESTO_COINCIDENCIA)):
+        assert suelo[clave] == {"valor": sup[llave]["valor"], "etiqueta": sup[llave]["etiqueta"],
+                                "fuente": sup[llave]["fuente"], "archivo": "data/processed/supuestos.json"}, clave
+    assert suelo["rotulo_aptitud"] == sw.ROTULO_APTITUD == "General published range (FAO ECOCROP, worldwide), not a local trial"
+    assert suelo["requisitos"]["grupos_textura"]["valor"], "los grupos de textura llegan con la entrega"
+
+
+def test_sin_supuestos_no_hay_near_limit_y_se_publica_null(tmp_path):
+    processed = GEN.escribir_processed(tmp_path / "processed")
+    (processed / sw.ARCHIVO_SUPUESTOS).unlink()
+    _, suelo, _ = construir_en(tmp_path, processed, GEN.escribir_cubo(tmp_path / "cubo.json"))
+    assert suelo["margen_ph"] is None and suelo["coincidencia_textura"] is None
+    assert suelo["aptitud"]["P0001"]["forraje_verano"]["estado"] == "outside_range", "sin margen, fuera es fuera"
+    assert all(o["estado"] != "near_limit" for ops in suelo["aptitud"].values() for o in ops.values())
+
+
+def test_un_supuesto_sin_fuente_va_en_null_y_se_avisa(tmp_path):
+    processed = GEN.escribir_processed(tmp_path / "processed")
+    sup = GEN.supuestos_de_prueba()
+    sup[sw.SUPUESTO_MARGEN_PH].pop("fuente")
+    (processed / sw.ARCHIVO_SUPUESTOS).write_text(json.dumps(sup), encoding="utf-8")
+    resumen, suelo, _ = construir_en(tmp_path, processed, GEN.escribir_cubo(tmp_path / "cubo.json"))
+    assert suelo["margen_ph"] is None and suelo["coincidencia_textura"] is not None
+    assert any(sw.SUPUESTO_MARGEN_PH in a for a in resumen["avisos"])
+
+
+def test_lleno_alcalinidad_por_zona_coincide_con_un_calculo_independiente(lleno):
+    """Una parcela cuenta si su pH supera el óptimo de MÁS de la mitad de los cultivos con rango de pH; la zona
+    da su mensaje si esas parcelas son más de la mitad de las suyas con pH (cálculo hecho aquí, sin el motor)."""
+    techos = {c: r["ph"]["optimo"][1] for c, r in REQ.items() if r.get("ph")}
+    esperado = {}
+    for pid, fila in FILAS.items():
+        z = esperado.setdefault(ZONA_DE[pid], {"n_con_ph": 0, "n_sobre_optimo": 0})
+        z["n_con_ph"] += 1
+        z["n_sobre_optimo"] += int(sum(float(fila["ph"]) > t for t in techos.values()) > len(techos) / 2)
+    alc = lleno["suelo"]["alcalinidad_zona"]
+    assert sorted(alc) == sorted(esperado)
+    for zona, z in esperado.items():
+        assert {k: alc[zona][k] for k in z} == z, zona
+        assert alc[zona]["n_cultivos"] == len(techos) and sorted(alc[zona]["cultivos"]) == sorted(techos)
+        assert alc[zona]["mayoria"] == (z["n_sobre_optimo"] > z["n_con_ph"] / 2)
+    assert {z["mayoria"] for z in alc.values()} == {True, False}, "la fixture cubre las dos situaciones"
+
+
+def test_sin_requisitos_no_hay_alcalinidad(tmp_path):
+    processed = GEN.escribir_processed(tmp_path / "processed")
+    (processed / sw.ARCHIVO_REQUISITOS).unlink()
+    _, suelo, _ = construir_en(tmp_path, processed, GEN.escribir_cubo(tmp_path / "cubo.json"))
+    assert suelo["alcalinidad_zona"] is None
+
+
+def test_parcela_con_la_fila_vacia_queda_en_el_perfil_y_fuera_de_la_aptitud(tmp_path):
+    """Como P0316 en los datos reales: el mapa no la cubre; su fila llega sin valores (todo null en el perfil) y
+    no entra a la aptitud (la ficha dice «no soil data for this field»)."""
+    processed = GEN.escribir_processed(tmp_path / "processed")
+    filas = [*GEN.FILAS_PERFIL, f"L0002,,,,,,,,,,{GEN.CAPA_PRUEBA},0"]       # DATOS DE PRUEBA
+    (processed / sw.ARCHIVO_PERFIL).write_text(GEN.texto_perfil(filas), encoding="utf-8")
+    resumen, suelo, _ = construir_en(tmp_path, processed, GEN.escribir_cubo(tmp_path / "cubo.json"))
+    vacia = suelo["perfil"]["parcelas"]["L0002"]
+    assert all(v is None for k, v in vacia.items() if k != "n_celdas") and vacia["n_celdas"] == 0
+    assert sw.perfil_vacio(vacia) and "L0002" not in suelo["aptitud"]
+    assert any("sin ningún valor de suelo" in a and a.endswith(": 1") for a in resumen["avisos"])
+
+
+def test_real_la_aptitud_no_descarta_ni_reordena_opciones():
+    """Con los datos publicados: una entrada de aptitud por opción del cubo, en el mismo orden (la aptitud es
+    una evidencia más; nunca quita ni ordena opciones)."""
+    publicado, cubo = WEB_REAL / "suelo.json", WEB_REAL / "cubo.json"
+    if not publicado.is_file() or not cubo.is_file():
+        pytest.skip("web/data/suelo.json o cubo.json aún no existen")
+    suelo = sin_constantes(publicado.read_text(encoding="utf-8"))
+    if not suelo.get("aptitud"):
+        pytest.skip("sin aptitud publicada")
+    parcelas = json.loads(cubo.read_text(encoding="utf-8"))["parcelas"]
+    for pid, ops in suelo["aptitud"].items():
+        assert list(ops) == [o["id"] for o in parcelas[pid]["opciones"]], pid
+
+
+def test_real_mensaje_de_zona_con_los_datos_publicados():
+    publicado = WEB_REAL / "suelo.json"
+    if not publicado.is_file():
+        pytest.skip("web/data/suelo.json aún no existe")
+    suelo = sin_constantes(publicado.read_text(encoding="utf-8"))
+    if suelo.get("alcalinidad_zona") is None:
+        pytest.skip("sin perfil o sin requisitos")
+    for zona, z in suelo["alcalinidad_zona"].items():
+        assert 0 <= z["n_sobre_optimo"] <= z["n_con_ph"] and z["n_cultivos"] == len(z["cultivos"]) > 0, zona
+        assert z["mayoria"] == (2 * z["n_sobre_optimo"] > z["n_con_ph"]), zona

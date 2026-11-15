@@ -13,6 +13,13 @@ De dónde sale cada parte:
                        "terreno": null y la página dice «3D twin view: not available».
   terreno.minzoom, maxzoom, exageracion; columnas; camara; tiempo.intervalo_ms; tiempo.destacados
                        valores de diseño de data/params.json, bloque «gemelo»
+  terreno.zonas.<id>.exageracion
+                       exageración de esa zona (params.gemelo.exageracion_por_zona); si la zona no trae
+                       la suya, la general (exageracion_vertical). La vista 3D usa la de la zona y, si falta,
+                       terreno.exageracion. Motivo: Lázaro Cárdenas tiene cerca de tres veces el desnivel
+                       de Delicias–Saucillo y con el mismo factor sus cerros tapan las columnas.
+  zona_inicial         zona con la que abre la página (params.gemelo.zona_inicial; decisión, punto 6);
+                       null, con aviso, si falta o no es una zona de params.zona_piloto.zonas
   terreno.fuente, terreno.rotulo   textos fijos del contrato de la decisión
   tiempo.anios         [primer año, último año] de la memoria de web/data/parcelas.geojson
   ndvi                 archivo, fuente y meses de web/data/ndvi_mensual.json
@@ -46,6 +53,31 @@ ROTULO_TERRENO = "regional, 30 m (NASADEM); vertical exaggeration applied"
 
 def leer_json(p):
     return json.loads(Path(p).read_text(encoding="utf-8"))
+
+
+def _exageracion_de_zona(g, zid, avisos):
+    """Exageración de una zona: la de params.gemelo.exageracion_por_zona; si no la trae, la general."""
+    general = g["exageracion_vertical"]["valor"]
+    por_zona = (g.get("exageracion_por_zona") or {}).get("valor") or {}
+    v = por_zona.get(zid)
+    if v is None:
+        return general
+    if isinstance(v, bool) or not isinstance(v, (int, float)) or not v > 0:
+        avisos.append(f"gemelo.exageracion_por_zona.{zid} no es un número positivo ({v!r}); se usa la general")
+        return general
+    return v
+
+
+def _zona_inicial(g, zonas_params, avisos):
+    """Id de la zona con la que abre la página, o None (con aviso) si falta o no es una zona de params."""
+    v = (g.get("zona_inicial") or {}).get("valor")
+    if v is None:
+        avisos.append("zona_inicial: params.gemelo no la trae; queda en null (la página abre en la primera zona)")
+        return None
+    if v not in zonas_params:
+        avisos.append(f"zona_inicial: {v!r} no es una zona de params.zona_piloto.zonas; queda en null")
+        return None
+    return v
 
 
 def _terreno_de_zona(zona, web, processed, minzoom, maxzoom, avisos):
@@ -111,7 +143,7 @@ def construir(web=RAIZ / "web/data", params_ruta=RAIZ / "data/params.json", proc
     avisos = []
 
     # 1) NDVI mensual (primero, para que gemelo.json describa el archivo que queda escrito).
-    r_ndvi = ndvi_web.construir(processed=processed, web=web)
+    r_ndvi = ndvi_web.construir(processed=processed, web=web, params_ruta=params_ruta)
     ndvi = None
     if r_ndvi["ejecutado"]:
         d = leer_json(web / ndvi_web.SALIDA)
@@ -123,9 +155,14 @@ def construir(web=RAIZ / "web/data", params_ruta=RAIZ / "data/params.json", proc
     # 2) Terreno: una entrada por zona con su juego completo de teselas.
     dem = g["dem"]["valor"]
     zonas, peso, n_teselas = {}, 0, 0
+    zonas_params = [z["id"] for z in params["zona_piloto"]["zonas"]["valor"]]
+    for zid in (g.get("exageracion_por_zona") or {}).get("valor") or {}:
+        if zid not in zonas_params:
+            avisos.append(f"gemelo.exageracion_por_zona: {zid} no es una zona de params.zona_piloto.zonas")
     for zona in params["zona_piloto"]["zonas"]["valor"]:
         bloque, bytes_zona = _terreno_de_zona(zona, web, processed, dem["minzoom"], dem["maxzoom"], avisos)
         if bloque:
+            bloque["exageracion"] = _exageracion_de_zona(g, zona["id"], avisos)
             zonas[zona["id"]] = bloque
             peso += bytes_zona
             n_teselas += len(dem_teselas.teselas_de_bbox(zona["bbox"], dem["minzoom"], dem["maxzoom"]))
@@ -155,6 +192,7 @@ def construir(web=RAIZ / "web/data", params_ruta=RAIZ / "data/params.json", proc
         "camara": {"pitch": g["camara"]["valor"]["pitch"], "bearing": g["camara"]["valor"]["bearing"]},
         "tiempo": tiempo,
         "ndvi": ndvi,
+        "zona_inicial": _zona_inicial(g, zonas_params, avisos),
     }
     web.mkdir(parents=True, exist_ok=True)
     salida.write_text(json.dumps(gemelo, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

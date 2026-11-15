@@ -88,7 +88,8 @@ const TEXTO_NO_DISPONIBLE = "not available";
 const TEXTO_SIN_FUENTES = "Sources: not available";
 const DETALLE_SIN_FUENTES = "The list of source files (manifest.json) was not loaded, so source dates are not shown.";
 const TEXTO_SIN_ARCHIVO = "no source file registered";
-const TEXTO_FECHA = "Source date";
+// La fecha del manifest es la de consulta de la entrega (kit v4), no la de las observaciones: se dice así.
+const TEXTO_FECHA = "Data retrieved";
 const TEXTO_ARCHIVOS = "Source files";
 const TEXTO_EN_VISTA = "in view";
 const TEXTO_TODAS = "All pilot areas";

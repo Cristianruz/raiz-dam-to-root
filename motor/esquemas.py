@@ -300,6 +300,10 @@ CONDICIONES_NUTRIENTE = ("ph_mayor_que", "ph_menor_que", "textura_en")
 # ({acido_menor_que, alcalino_mayor_que, fuente}). No está en el contrato de la decisión: sin ella la
 # ficha escribe solo el número (ningún corte se escribe a mano en la web).
 ESCALA_PH = "escala_ph"
+# Llave OPCIONAL de suelo_requisitos.json con el reparto de las clases de textura en los grupos de ECOCROP
+# ({valor: {light: [...], medium: [...], heavy: [...]}, etiqueta, fuente}); la ficha muestra la textura por su
+# grupo y la clase exacta en el detalle (decisión del integrador con la sesión de datos, 14-nov).
+GRUPOS_TEXTURA = "grupos_textura"
 
 ID = {"tipo": "texto", "id_parcela": True}
 INDICE = {"tipo": "numero", "min": -1, "max": 1}     # NDVI y demás diferencias normalizadas
@@ -878,6 +882,7 @@ ESQUEMAS = {
         "ph_min": PH_MIN, "ph_max": PH_MAX,
         "condiciones": CONDICIONES_NUTRIENTE,
         "escala_ph": ESCALA_PH,
+        "grupos_textura": GRUPOS_TEXTURA,
         "fuente_reglas": (f"{FUENTE_SUELO}: fuente del archivo; «cultivos» con llaves de las clases de cultivo "
                           "del proyecto (contrato v4, kit §2.2; sin «sin_clasificar» ni «barbecho», que no son "
                           "cultivos), las mismas con que el cubo nombra los cultivos de cada secuencia; por "

@@ -46,6 +46,19 @@ Opciones y filtros oficiales (B3; contrato en la misma decisión, §1):
   Un filtro que necesita un dato que no tenemos, o de un tipo que el motor no sabe evaluar, queda
   «needs_local_check».
 
+Lámina local de referencia (decisión del integrador con la sesión de datos, 14-nov), campo ADITIVO
+agua.lamina_local de cada opción (no cambia ningún campo del contrato; el semáforo sigue con la lámina del modelo):
+- Sale de data/processed/supuestos.json → lamina_local_cm.<cultivo>: la lámina APLICADA en el distrito
+  (aplicada_dr005) y, si no hay, la RECOMENDADA por INIFAP (recomendada_inifap), en cm por año o por ciclo.
+- Se convierte a millares/ha con la constante del proyecto (params.unidades.millar.valor.lamina_cm); nunca un
+  factor escrito a mano. La misma constante va al cubo en dotaciones.lamina_cm_por_millar, para que la página
+  compare en vivo el filtro dotacion_minima (regla.lamina_minima_cm) con el deslizador.
+- Solo para opciones de UN cultivo regado como de costumbre: la rotación lleva el nombre del cultivo (ACTUAL
+  alfalfa, maiz_forrajero, sorgo, nogal…). Las de dos o más cultivos, las que cambian el riego del cultivo
+  (alfalfa_corte_verano) y las que no siembran van con null: la página dice «no local reference».
+- {valor_millares_ha | null, rango_millares_ha {min, max} | null, tipo "aplicada" | "recomendada", cm,
+  periodo {desde, hasta} | null (años de los registros, leídos de la fuente), fuente, etiqueta, nota}.
+
 Dos zonas (decisión docs/decisiones/2026-11-14_dos_zonas.md):
 - La zona de cada parcela es properties.zona; si falta, es delicias_saucillo (compatibilidad con la
   entrega de una sola zona). La zona debe estar en params.zona_piloto.zonas.
@@ -68,6 +81,7 @@ import argparse
 import csv
 import datetime as dt
 import json
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -112,6 +126,15 @@ ETIQUETA_PROPUESTA = "[S] team proposal, not from the agronomic guide"
 # Contrato §2.3: cubo.json pesa menos de 5 MB (lo comprueba validar_contrato.py). Los bloques de goteo y
 # los filtros se repiten en cada opción: desde esta fracción del límite se avisa, antes de que falle.
 LIMITE_CUBO_BYTES = 5 * 1024 * 1024
+# Lámina local de referencia (supuestos.json → lamina_local_cm): de qué entrada sale, en orden de preferencia.
+LAMINA_LOCAL = "lamina_local_cm"
+TIPOS_LAMINA_LOCAL = (("aplicada_dr005", "aplicada"), ("recomendada_inifap", "recomendada"))
+NOTA_LAMINA_LOCAL = {
+    "aplicada": "District average from published records, not measured on this field. The water check uses the model need.",
+    "recomendada": "Regional recommendation, not measured on this field. The water check uses the model need.",
+}
+# Periodo de los registros, tal como lo escribe la fuente («medias 2009–2016»): dos años separados por un guion.
+PATRON_PERIODO = re.compile(r"\b((?:19|20)\d{2})\s*[–-]\s*((?:19|20)\d{2})\b")
 FRACCION_AVISO_PESO = 0.9
 
 
@@ -324,6 +347,49 @@ def leer_goteo(processed):
                       "con esos valores el goteo no cambia la entrega")
     goteo["_ea_a5_respaldo"] = sup.get(EA_A5)
     return goteo, None
+
+
+def leer_laminas_locales(processed, params, avisos):
+    """{cultivo: lamina_local} con las láminas de referencia de supuestos.json (ver el encabezado), ya en
+    millares/ha. {} si el archivo o el bloque faltan (todas las opciones van con null y se avisa)."""
+    ruta = Path(processed) / ARCHIVO_SUPUESTOS
+    bloque = leer_json(ruta).get(LAMINA_LOCAL) if ruta.exists() else None
+    if not isinstance(bloque, dict):
+        avisos.append(f"{ARCHIVO_SUPUESTOS} no trae {LAMINA_LOCAL}: ninguna opción lleva lámina local de referencia")
+        return {}
+    cm_por_millar = params["unidades"]["millar"]["valor"]["lamina_cm"]
+    a_millares = lambda cm: round(cm / cm_por_millar, 3)  # noqa: E731
+    salida = {}
+    for cultivo, entradas in bloque.items():
+        if cultivo.startswith("_") or not isinstance(entradas, dict):
+            continue
+        for llave, tipo in TIPOS_LAMINA_LOCAL:
+            e = entradas.get(llave)
+            if not isinstance(e, dict) or not (con_texto(e.get("fuente")) and con_texto(e.get("etiqueta"))):
+                continue
+            valor, minimo, maximo = e.get("valor"), e.get("min"), e.get("max")
+            if es_num(valor) and valor > 0:
+                cm, millares, rango = valor, a_millares(valor), None
+            elif es_num(minimo) and es_num(maximo) and 0 < minimo <= maximo:
+                cm, millares, rango = {"min": minimo, "max": maximo}, None, {"min": a_millares(minimo), "max": a_millares(maximo)}
+            else:
+                continue
+            m = PATRON_PERIODO.search(e["fuente"]) if tipo == "aplicada" else None
+            periodo = {"desde": int(m.group(1)), "hasta": int(m.group(2))} if m and m.group(1) < m.group(2) else None
+            salida[cultivo] = {"valor_millares_ha": millares, "rango_millares_ha": rango, "tipo": tipo, "cm": cm,
+                               "periodo": periodo, "fuente": e["fuente"], "etiqueta": e["etiqueta"],
+                               "nota": NOTA_LAMINA_LOCAL[tipo]}
+            break
+    return salida
+
+
+def lamina_local_de(rot_ref, secuencia, laminas):
+    """La lámina local de referencia de una opción, o None: solo si siembra UN cultivo y la rotación es la de
+    ese cultivo regado como de costumbre (su id es el del cultivo); ver el encabezado."""
+    cultivos = list(dict.fromkeys(c for c in secuencia or [] if c != "descanso"))
+    if len(cultivos) != 1 or rot_ref != cultivos[0]:
+        return None
+    return laminas.get(cultivos[0])
 
 
 def rango_ea_a5(dz, goteo):
@@ -542,6 +608,10 @@ def completar_distrito_dotaciones(distrito, dotaciones, params, avisos):
         if marca.get("nota") and not marca["nota_en"]:
             faltan.append(f"dotaciones.{marca['id']}.nota_en")
     dotaciones["equivalencia_en"] = params["unidades"]["millar"].get("nota_en")
+    # La constante de la equivalencia como número (para comparar en vivo una lámina en cm con el deslizador).
+    mil = params["unidades"]["millar"]
+    dotaciones["lamina_cm_por_millar"] = {"valor": mil["valor"]["lamina_cm"], "fuente": mil.get("fuente"),
+                                          "etiqueta": mil.get("etiqueta")}
     if not dotaciones["equivalencia_en"]:
         faltan.append("unidades.millar.nota_en")
     pm = dz["punto_medicion"]
@@ -621,6 +691,7 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     # Escenario de goteo (X3.1): eficiencias de supuestos.json y, por zona, que la referencia superficial
     # caiga en el rango de eficiencia con que A5 calculó las láminas de esa zona.
     goteo, motivo_goteo = leer_goteo(processed)
+    laminas_locales = leer_laminas_locales(processed, params, avisos)
     goteo_zona, rangos_a5 = {}, {}
     for z in zonas_con_datos:
         rangos_a5[z] = rango_ea_a5(datos_zona[z], goteo) if goteo else None
@@ -806,7 +877,8 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                     "nombre": (f"Current rotation: {nombre_en(rot_ref)}" if es_actual else nombre_en(rot_ref)),
                     "secuencia": secuencia,
                     "agua": {"lamina_bruta": lam, "plazo_anios": plazo, "plazo_restante": restante,
-                             "compromiso_millares_ha": compromiso, "nota_plazo": nota},
+                             "compromiso_millares_ha": compromiso, "nota_plazo": nota,
+                             "lamina_local": lamina_local_de(rot_ref, secuencia, laminas_locales)},
                     "suelo": suelo_op,
                     "dinero": None,
                     "semaforo": {"suelo": sem_suelo, "dinero": "gris"},

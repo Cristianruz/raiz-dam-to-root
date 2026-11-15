@@ -554,3 +554,48 @@ def test_manifest_rutas_depresiones_con_la_fuente_de_relieve_meta(man):
             e = entrada(man, "relieve.json", f"zonas.{zid}.rutas_depresiones.nota")
             assert e and dep["nota"] in e["textos"] and contiene(e["etiqueta"], dep["etiqueta"])
     assert not [a for a in man["avisos"] if "rutas_depresiones" in a and "sin regla propia" in a], man["avisos"]
+
+
+def test_manifest_cubre_la_ficha_completa(man):
+    """Etapa 2 de la ficha (decisión del gemelo §5 y del suelo): la lámina local de referencia de cada opción y la
+    constante de la equivalencia (cubo), los umbrales del NDVI (ndvi_mensual.json), los supuestos y la alcalinidad
+    de suelo (suelo.json) y GEDI por parcela (contexto.json) tienen su entrada, con fuente y etiqueta."""
+    cubo = leer("cubo.json")
+    claves = {c["clave"] for c in man["cifras"].values() if c["archivo"] == "web/data/cubo.json"}
+    esperadas = set()
+    for pid, pc in cubo["parcelas"].items():
+        for i, op in enumerate(pc["opciones"]):
+            ll = (op.get("agua") or {}).get("lamina_local")
+            if isinstance(ll, dict):
+                esperadas |= {patron(r) for r, _ in hojas(ll, f"parcelas.{pid}.opciones[{i}].agua.lamina_local")}
+    if "lamina_cm_por_millar" in cubo["dotaciones"]:
+        esperadas.add("dotaciones.lamina_cm_por_millar.valor")
+    faltan = sorted(esperadas - claves)
+    assert not faltan, f"cifras de la ficha sin entrada en el manifest: {faltan[:10]}"
+    for clave in [c for c in claves if ".lamina_local." in c]:
+        e = man["cifras"][f"cubo.json:{clave}"]
+        assert e["fuente"] and e["etiqueta"], clave
+    por_archivo = {}
+    for c in man["cifras"].values():
+        por_archivo.setdefault(c["archivo"], set()).add(c["clave"])
+    ruta = RAIZ / "web/data"
+    if (ruta / "ndvi_mensual.json").exists():
+        ndvi = json.loads((ruta / "ndvi_mensual.json").read_text(encoding="utf-8"))
+        for clave, u in (ndvi.get("umbrales") or {}).items():
+            if u:
+                e = man["cifras"][f"ndvi_mensual.json:umbrales.{clave}.valor"]
+                assert e["min"] == e["max"] == u["valor"] and e["fuente"] == u["fuente"] and e["etiqueta"] == u["etiqueta"]
+    if (ruta / "suelo.json").exists():
+        suelo = json.loads((ruta / "suelo.json").read_text(encoding="utf-8"))
+        for clave in ("margen_ph", "coincidencia_textura"):
+            if suelo.get(clave):
+                e = man["cifras"][f"suelo.json:{clave}.valor"]
+                assert e["min"] == e["max"] == suelo[clave]["valor"] and e["fuente"] == suelo[clave]["fuente"]
+        if suelo.get("perfil"):
+            assert "perfil.parcelas.*.ph" in por_archivo["web/data/suelo.json"]
+        if suelo.get("alcalinidad_zona"):
+            assert "alcalinidad_zona.zonas.*.n_sobre_optimo" in por_archivo["web/data/suelo.json"]
+    if (ruta / "contexto.json").exists():
+        ctx = json.loads((ruta / "contexto.json").read_text(encoding="utf-8"))
+        if (ctx.get("gedi") or {}).get("parcelas"):
+            assert "gedi.parcelas.*.altura_mediana_m" in por_archivo["web/data/contexto.json"]

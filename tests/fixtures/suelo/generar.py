@@ -7,7 +7,8 @@ Contrato: docs/decisiones/2026-11-14_suelo_aptitud.md (suelo_parcelas.csv y suel
 Qué escribe:
 - escribir_processed(destino): un data/processed DE PRUEBA con las dos entregas del contrato
   (suelo_parcelas.csv y suelo_requisitos.json), el parcelas_base.geojson de la fixture de dos zonas
-  (tests/fixtures/buzon_dos_zonas) y un fuentes.json con sus líneas de prueba.
+  (tests/fixtures/buzon_dos_zonas), un supuestos.json con los dos supuestos de suelo (margen de pH y
+  coincidencia de textura, valores de ensayo) y un fuentes.json con sus líneas de prueba.
 - escribir_cubo(ruta): un cubo.json DE PRUEBA con solo lo que el motor lee (parcelas → opciones → id,
   secuencia).
 - main(): regenera tests/fixtures/suelo/suelo_lleno.json con motor/suelo_web.py sobre ese processed
@@ -19,6 +20,8 @@ para cubrir cada rama de las reglas de aptitud (motor/suelo_web.py):
   P0001 (loam, pH 3.5, con salinidad)
     ACTUAL          alfalfa                  → fits (pH en el óptimo, textura apta, salinidad bajo el umbral)
     maiz_forrajero  maiz_forrajero           → tolerated (pH fuera del óptimo y dentro del tolerado)
+    forraje_verano  forraje_verano           → near_limit (pH fuera del tolerado por menos que el margen
+                                               de prueba de supuestos.json)
     sorgo           sorgo                    → outside_range por textura (clase limitante)
     algodon         algodon                  → no_published_range (sus tres bloques van en null)
     descanso        descanso                 → no_published_range, «nothing is planted»
@@ -36,6 +39,9 @@ para cubrir cada rama de las reglas de aptitud (motor/suelo_web.py):
     no_sembrar      (secuencia vacía)        → no_published_range, «nothing is planted»
   L0002: con opciones en el cubo y SIN fila en suelo_parcelas.csv → sin aptitud («no soil data»).
   P0099: sin opciones (como una parcela abstenida) → no entra.
+Alcalinidad por zona (cultivos con rango de pH: alfalfa, maíz, cereal y forraje de verano de prueba):
+  P0001 y P0002 (delicias_saucillo) no superan el óptimo de la mayoría → la zona no da mensaje;
+  L0001 (lazaro_cardenas) supera el de tres de cuatro → la zona sí lo da.
 Avisos de nutrientes de la alfalfa de prueba: Zn (pH mayor que el corte), Fe (sin condición), P (textura
 en una lista), K (pH menor que el corte Y textura en una lista) y Mn (pH mayor que el corte Y textura).
 
@@ -65,6 +71,9 @@ GENERADO_PRUEBA = "2026-11-14T00:00:00+00:00"
 FECHA_PRUEBA = "2026-11-14"
 ETIQUETA_PRUEBA = "[prueba]"
 CAPA_PRUEBA = "0-30"
+# Supuestos de suelo DE PRUEBA (las llaves son las de data/processed/supuestos.json).
+MARGEN_PH_PRUEBA = 0.5
+COINCIDENCIA_PRUEBA = 0.25
 
 # Línea de fuente de cada entrega (como la de LEEME.md): la de suelo_parcelas.csv nombra producto, capa y
 # celda, porque de ahí sale la resolución que la página muestra junto al rótulo de escala.
@@ -101,6 +110,11 @@ def requisitos_de_prueba():
     return {
         "_encabezado": ENCABEZADO,
         "fuente": f"{ROTULO} (tabla de ensayo)",
+        # Grupos de textura de prueba (llave de la entrega real: light / medium / heavy de ECOCROP).
+        "grupos_textura": _con_fuente("grupos de textura de ensayo", valor={
+            "light": ["sand", "loamy sand", "sandy loam"],
+            "medium": ["loam", "silt loam", "silt", "sandy clay loam", "clay loam", "silty clay loam"],
+            "heavy": ["sandy clay", "silty clay", "clay"]}),
         # Cortes de prueba para decir «acid», «neutral» o «alkaline» (llave opcional).
         esquemas.ESCALA_PH: _con_fuente("cortes de pH de ensayo", acido_menor_que=4.0, alcalino_mayor_que=10.0),
         "cultivos": {
@@ -138,12 +152,27 @@ def requisitos_de_prueba():
                 "ph": _con_fuente("pH del cereal de ensayo", optimo=[10.5, 11.5], tolerado=[10.0, 12.0]),
                 "textura": None, "salinidad_umbral_ds_m": None, "nutrientes": [],
             },
+            # Su tolerado empieza poco arriba del pH de P0001: queda «near_limit» con el margen de prueba.
+            "forraje_verano": {
+                "ph": _con_fuente("pH del forraje de ensayo", optimo=[4.0, 5.0], tolerado=[3.8, 6.0]),
+                "textura": None, "salinidad_umbral_ds_m": None, "nutrientes": [],
+            },
             # Ninguna opción del cubo de prueba lo siembra (el motor lo avisa).
             "chile": {
                 "ph": None, "textura": None,
                 "salinidad_umbral_ds_m": _con_fuente("salinidad del chile de ensayo", valor=1.5), "nutrientes": [],
             },
         },
+    }
+
+
+def supuestos_de_prueba():
+    """Los dos supuestos de suelo de data/processed/supuestos.json, con valores DE PRUEBA."""
+    return {
+        "_encabezado": ENCABEZADO,
+        "_nota": ROTULO,
+        suelo_web.SUPUESTO_MARGEN_PH: _con_fuente("margen de pH de ensayo", valor=MARGEN_PH_PRUEBA),
+        suelo_web.SUPUESTO_COINCIDENCIA: _con_fuente("coincidencia de textura de ensayo", valor=COINCIDENCIA_PRUEBA),
     }
 
 
@@ -165,7 +194,8 @@ def cubo_de_prueba():
         "_nota": ROTULO,
         "parcelas": {
             "P0001": opciones(("ACTUAL", ["alfalfa"]), ("maiz_forrajero", ["maiz_forrajero"]), ("sorgo", ["sorgo"]),
-                              ("algodon", ["algodon"]), ("descanso", [esquemas.NO_SIEMBRA])),
+                              ("algodon", ["algodon"]), ("forraje_verano", ["forraje_verano"]),
+                              ("descanso", [esquemas.NO_SIEMBRA])),
             "P0002": opciones(("ACTUAL", ["sorgo"]), ("alfalfa", ["alfalfa"]),
                               ("avena_maiz", ["cereal_invierno", "maiz_forrajero"]), ("nogal", ["nogal"])),
             "L0001": opciones(("ACTUAL", ["alfalfa"]), ("cereal_algodon", ["cereal_invierno", "algodon"]),
@@ -190,6 +220,8 @@ def escribir_processed(destino):
     shutil.copy(BUZON_DOS_ZONAS / esquemas.ARCHIVO_PARCELAS, destino / esquemas.ARCHIVO_PARCELAS)
     (destino / suelo_web.ARCHIVO_PERFIL).write_text(texto_perfil(), encoding="utf-8")
     (destino / suelo_web.ARCHIVO_REQUISITOS).write_text(texto_requisitos(), encoding="utf-8")
+    (destino / suelo_web.ARCHIVO_SUPUESTOS).write_text(json.dumps(supuestos_de_prueba(), ensure_ascii=False, indent=1)
+                                                       + "\n", encoding="utf-8")
     fuentes = {"_encabezado": ENCABEZADO, "_nota": ROTULO, "generado": GENERADO_PRUEBA,
                "fuentes": [{"archivo": n, "tipo": "entrega", "fuente": fuente, "fecha": FECHA_PRUEBA,
                             "script": "tests/fixtures/suelo/generar.py"} for n, fuente in FUENTES_PRUEBA.items()]}

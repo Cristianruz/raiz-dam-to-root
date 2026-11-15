@@ -1924,7 +1924,18 @@ def regla_suelo_requisitos(obj, ctx, res, esq):
                        f"{fmt(acido)} > {fmt(alcalino)}")
         if not _texto_lleno(escala.get("fuente")):
             res.motivo(f"{llave} sin fuente")
-    ajenas = [str(k) for k in obj if k not in ("fuente", "cultivos", llave) and not str(k).startswith("_")]
+    # Grupos de textura (opcional): cada grupo, una lista de clases de la lista cerrada; con su fuente. Si no tiene
+    # esa forma se avisa (la ficha muestra entonces la clase exacta); no se rechaza la entrega.
+    llave_grupos = esq.get("grupos_textura")
+    grupos = obj.get(llave_grupos) if llave_grupos else None
+    if grupos is not None:
+        valor = grupos.get("valor") if isinstance(grupos, dict) else None
+        forma = isinstance(valor, dict) and valor and all(
+            isinstance(v, list) and v and all(isinstance(c, str) and en_lista(c, clases) for c in v) for v in valor.values())
+        if not forma or not _texto_lleno(grupos.get("fuente")):
+            res.aviso(f"{llave_grupos}: no es {{valor: {{grupo: [clases de textura]}}, fuente}}; la ficha mostrará la "
+                      "clase exacta en vez del grupo")
+    ajenas = [str(k) for k in obj if k not in ("fuente", "cultivos", llave, llave_grupos) and not str(k).startswith("_")]
     if ajenas:
         res.aviso(f"llaves adicionales (se copian sin validar): {lista(ajenas)}")
 

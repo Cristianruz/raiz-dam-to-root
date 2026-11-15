@@ -12,24 +12,31 @@
 //   leerSuelo(url) -> Promise<{estado: "ok", datos} | {estado: "ausente" | "error", detalle}>
 //       Lo mismo sin lanzar (como leerOpcional de web/js/relieve.js).
 //   htmlPerfilDeSuelo({ suelo, id, error }) -> string
-//       HTML del perfil de UNA parcela (va una vez por ficha, en el renglón Soil o junto a él): clase de
-//       textura con una barra apilada de arena, limo y arcilla (cada tramo con su trama y los
-//       porcentajes en texto), pH (con «acid», «neutral» o «alkaline» SOLO si suelo.json trae los
-//       cortes en requisitos.escala_ph; si no, el número solo), carbono orgánico y, cuando existen,
-//       nitrógeno, capacidad de intercambio catiónico y salinidad; la línea fija «Phosphorus, potassium,
-//       iron, zinc: not mapped — needs a soil test»; el rótulo de escala (suelo.rotulo) y la fuente del
-//       archivo (perfil.fuente: de ahí sale la resolución del mapa, que no se escribe a mano).
+//       HTML del perfil de UNA parcela (va una vez por ficha): la textura por su GRUPO (light, medium o heavy,
+//       de requisitos.grupos_textura, con su etiqueta) y una barra apilada de arena, limo y arcilla (cada
+//       tramo con su trama y los porcentajes en texto); la clase exacta va en un detalle plegado, con la nota
+//       de coincidencia de los dos mapas (suelo.coincidencia_textura); pH (con «acid», «neutral» o «alkaline»
+//       SOLO si suelo.json trae los cortes en requisitos.escala_ph; si no, el número solo), carbono
+//       orgánico y capacidad de intercambio catiónico; nitrógeno y salinidad cuando el mapa los trae y, si
+//       no, «not in the map»; la línea fija «Phosphorus, potassium, iron, zinc: needs a soil test»; el rótulo
+//       de escala (suelo.rotulo) y la fuente del archivo (perfil.fuente: de ahí sale la resolución del mapa,
+//       que no se escribe a mano).
 //         suelo null (404)            → «Soil profile: not available yet»
 //         error (texto)               → «Soil profile: could not be loaded (…)»
 //         suelo.perfil null           → «Soil profile: requested from the data team — not delivered yet»
 //                                       (el motivo de suelo.perfil_motivo)
-//         la parcela no está          → «Soil profile: no soil data for this field»
+//         la parcela no está, o su fila llega sin ningún valor (el mapa no la cubre)
+//                                     → «Soil profile: no soil data for this field»
+//   htmlNotaDeZona({ suelo, zonaId, nombreZona }) -> string
+//       Mensaje de la zona cuando la mayoría de sus parcelas tiene un pH por encima del óptimo general de la
+//       mayoría de los cultivos comparados (suelo.alcalinidad_zona, calculado por el motor); "" si no.
 //   aptitudDeOpcion({ suelo, idParcela, idOpcion, nombresCultivo }) -> objeto | null
 //       { estado, etiqueta, icono, nota, motivos, avisos } de UNA opción, o null si no hay aptitud que
 //       mostrar (sin archivo, bloque en null, parcela sin suelo u opción sin cálculo).
-//         estado    «fits» | «tolerated» | «outside_range» | «no_published_range» (lo calcula el motor)
-//         etiqueta  «Fits this soil» | «Tolerated by this soil» | «Outside the published range» |
-//                   «No published range»; icono: su símbolo (el estado nunca depende solo del color)
+//         estado    «fits» | «tolerated» | «near_limit» | «outside_range» | «no_published_range» (lo calcula
+//                   el motor; «near_limit»: fuera del tolerado por menos que suelo.margen_ph)
+//         etiqueta  «Fits this soil» | «Tolerated by this soil» | «Near the published limit» | «Outside the
+//                   published range» | «No published range»; icono: su símbolo (nunca solo el color)
 //         nota      texto del motor cuando la opción no siembra nada («nothing is planted»), o null
 //         motivos   [{ cultivo, criterio, estado, texto, fuente }]: «texto» es legible y trae el valor de
 //                   la parcela y el rango o la lista con que se comparó; «fuente» es la del rango (null
@@ -38,15 +45,17 @@
 //         nombresCultivo  opcional {id de cultivo: nombre para mostrar}; sin él, el id con espacios
 //   htmlAptitud({ suelo, idParcela, idOpcion, nombresCultivo, error }) -> string
 //       Fila compacta para el renglón Soil de CADA tarjeta de opción: «Soil fit:» + estado en texto y
-//       símbolo, y un <details> «Why?» con los motivos, los avisos de nutrientes y sus fuentes. Si no
-//       hay aptitud, una línea que dice por qué (pedido y no entregado, sin suelo para la parcela…).
+//       símbolo, el rótulo de la aptitud (suelo.rotulo_aptitud: rango general y mundial, no un ensayo local) y
+//       un <details> «Why?» con los motivos, los avisos de nutrientes y sus fuentes. Si no hay aptitud, una
+//       línea que dice por qué (pedido y no entregado, sin suelo para la parcela…). La aptitud nunca descarta
+//       ni reordena opciones: es una evidencia más.
 //   asegurarHojaSuelo()
 //       Enlaza css/suelo.css si la página aún no lo hace (las funciones html… ya la llaman).
 //   Funciones puras (las mismas que usa la página; se prueban en tests/suelo.test.js):
 //       num, formatoNumero, formatoPct, formatoRango, formatoCapa, formatoQueDistingue, nombreDeClase,
 //       nombreDeCultivo, ubicarPh, peorEstado, textoDeMotivo, modeloPerfil, situacionDeAptitud,
-//       minusculaInicial. Textos fijos exportados: ESTADOS_APTITUD, TEXTO_NO_MAPEADO, TEXTO_PEDIDO,
-//       NOTA_EVIDENCIA.
+//       minusculaInicial, grupoDeTextura, nombrarLista, perfilVacio, modeloNotaDeZona. Textos fijos exportados:
+//       ESTADOS_APTITUD, TEXTO_NO_MAPEADO, TEXTO_PEDIDO, TEXTO_NO_EN_MAPA, NOTA_EVIDENCIA, ROTULO_APTITUD.
 //
 // Reglas de este archivo:
 // - Ninguna cifra escrita a mano: valores, rangos, umbrales, cortes de pH, capa, celdas, fuentes y fechas
@@ -73,7 +82,11 @@ const DECIMALES_MAX = 6; // tope al separar un valor de la cota con la que se co
 // ---------------------------------------------------------------------------
 const TITULO_PERFIL = "Soil profile";
 const TITULO_APTITUD = "Soil fit";
-export const TEXTO_NO_MAPEADO = "Phosphorus, potassium, iron, zinc: not mapped — needs a soil test";
+export const TEXTO_NO_MAPEADO = "Phosphorus, potassium, iron, zinc: needs a soil test";
+// Lo que el mapa de suelo podría traer y no trae para la parcela (nitrógeno, salinidad, CIC).
+export const TEXTO_NO_EN_MAPA = "not in the map";
+// Respaldo del rótulo de la aptitud si suelo.json no trae «rotulo_aptitud» (lo publica motor/suelo_web.py).
+export const ROTULO_APTITUD = "General published range (FAO ECOCROP, worldwide), not a local trial";
 export const TEXTO_PEDIDO = "requested from the data team — not delivered yet";
 const TEXTO_SIN_ARCHIVO = "not available yet";
 const TEXTO_SIN_PARCELA = "no soil data for this field";
@@ -91,9 +104,12 @@ export const NOTA_EVIDENCIA =
 export const ESTADOS_APTITUD = {
   fits: { etiqueta: "Fits this soil", icono: "✓", nivel: 0 },
   tolerated: { etiqueta: "Tolerated by this soil", icono: "≈", nivel: 1 },
-  outside_range: { etiqueta: "Outside the published range", icono: "▲", nivel: 2 },
+  near_limit: { etiqueta: "Near the published limit", icono: "△", nivel: 2 },
+  outside_range: { etiqueta: "Outside the published range", icono: "▲", nivel: 3 },
   no_published_range: { etiqueta: "No published range", icono: "○", nivel: null },
 };
+// Grupos de textura de ECOCROP, en el orden en que se nombran (las llaves de requisitos.grupos_textura).
+const NOMBRES_GRUPO = { light: "light", medium: "medium", heavy: "heavy" };
 const SIN_RANGO = "no_published_range";
 const NO_SIEMBRA = "descanso"; // como nombra el cubo la opción que no siembra (motor/esquemas.py, NO_SIEMBRA)
 const ICONO_PENDIENTE = "○";
@@ -111,9 +127,9 @@ const FRACCIONES = [
 
 // Criterio que tiene rango publicado pero no se pudo comparar: la parcela no trae ese valor.
 const SIN_DATO_DE_PARCELA = {
-  ph: "pH not compared — no mapped pH for this field",
-  textura: "texture not compared — no mapped texture for this field",
-  salinidad: "salinity not compared — no mapped salinity value for this field",
+  ph: "pH not compared — not in the map for this field",
+  textura: "texture not compared — not in the map for this field",
+  salinidad: "salinity not compared — not in the map",
 };
 
 // ---------------------------------------------------------------------------
@@ -209,10 +225,6 @@ function plural(n, uno, varios) {
   return n === 1 ? uno : varios;
 }
 
-function lista(valores) {
-  return Array.isArray(valores) && valores.length ? valores.join(", ") : "none listed";
-}
-
 /**
  * Dónde cae un pH según los cortes de suelo.json (requisitos.escala_ph): «acid» por debajo de
  * acido_menor_que, «alkaline» por encima de alcalino_mayor_que y «neutral» entre los dos. null si no
@@ -228,7 +240,45 @@ export function ubicarPh(ph, escala) {
   return CLASES_PH.neutro;
 }
 
-/** El peor de varios estados de aptitud (outside_range > tolerated > fits); sin ninguno en esa escala, «no_published_range». */
+/**
+ * Grupo de textura (light, medium o heavy) de una clase según requisitos.grupos_textura ({valor: {grupo:
+ * [clases]}, etiqueta, fuente}); null si no hay grupos o la clase no está en ninguno.
+ */
+export function grupoDeTextura(clase, grupos) {
+  const valor = grupos && typeof grupos === "object" ? grupos.valor : null;
+  if (!valor || typeof valor !== "object" || typeof clase !== "string") return null;
+  for (const [grupo, clases] of Object.entries(valor)) {
+    if (Array.isArray(clases) && clases.includes(clase)) return NOMBRES_GRUPO[grupo] ?? grupo;
+  }
+  return null;
+}
+
+/**
+ * Una lista de clases dicha por sus grupos cuando la lista es la unión EXACTA de grupos completos («medium,
+ * light»); si no, las clases tal cual. «none listed» si está vacía.
+ */
+export function nombrarLista(valores, grupos) {
+  if (!Array.isArray(valores) || !valores.length) return "none listed";
+  const valor = grupos && typeof grupos === "object" ? grupos.valor : null;
+  if (valor && typeof valor === "object") {
+    const conjunto = new Set(valores);
+    const enteros = Object.entries(valor).filter(([, clases]) => Array.isArray(clases) && clases.length && clases.every((c) => conjunto.has(c)));
+    const cubiertas = new Set(enteros.flatMap(([, clases]) => clases));
+    if (enteros.length && cubiertas.size === conjunto.size && [...conjunto].every((c) => cubiertas.has(c))) {
+      return `${enteros.map(([g]) => NOMBRES_GRUPO[g] ?? g).join(", ")} ${plural(enteros.length, "group", "groups")}`;
+    }
+  }
+  return valores.join(", ");
+}
+
+/** True si la fila de la parcela no trae ningún valor de suelo (el mapa no la cubre: P0316 en los datos reales). */
+export function perfilVacio(p) {
+  if (!p || typeof p !== "object") return true;
+  const campos = ["arena_pct", "limo_pct", "arcilla_pct", "ph", "carbono_organico_g_kg", "nitrogeno_g_kg", "cic_cmol_kg", "salinidad_ce_ds_m"];
+  return campos.every((k) => num(p[k]) == null) && !(typeof p.clase_textura === "string" && p.clase_textura.trim());
+}
+
+/** El peor de varios estados de aptitud (outside_range > near_limit > tolerated > fits); sin ninguno en esa escala, «no_published_range». */
 export function peorEstado(estados) {
   let peor = null;
   for (const e of estados ?? []) {
@@ -243,7 +293,7 @@ export function peorEstado(estados) {
  * valor de la parcela y el rango o la lista con que se comparó. La fuente va aparte (motivo.fuente).
  * Con un estado que este módulo no conoce no afirma nada: escribe solo el valor y con qué se comparó.
  */
-export function textoDeMotivo(motivo) {
+export function textoDeMotivo(motivo, { margen = null, grupos = null } = {}) {
   const m = motivo ?? {};
   const r = m.rango_o_lista ?? {};
   if (m.criterio === "ph") {
@@ -253,15 +303,24 @@ export function textoDeMotivo(motivo) {
     const tolerado = formatoRango(r.tolerado);
     if (m.estado === "fits") return `${valor} is within the optimal range (${optimo})`;
     if (m.estado === "tolerated") return `${valor} is outside the optimal range (${optimo}) and within the tolerated range (${tolerado})`;
+    if (m.estado === "near_limit") {
+      const cuanto = num(margen?.valor ?? margen);
+      const etiqueta = margen?.etiqueta ? ` (${margen.etiqueta})` : "";
+      return `${valor} is just outside the tolerated range (${tolerado})` +
+        (cuanto != null ? `, by less than the map margin of ${formatoNumero(cuanto)}${etiqueta}` : "");
+    }
     if (m.estado === "outside_range") return `${valor} is outside the tolerated range (${tolerado})`;
     return `${valor}, compared with the optimal range (${optimo}) and the tolerated range (${tolerado})`;
   }
   if (m.criterio === "textura") {
-    const clase = `${nombreDeClase(m.valor_parcela) ?? "This"} texture`;
-    if (m.estado === "fits") return `${clase} is on the suitable list (${lista(r.apta)})`;
-    if (m.estado === "outside_range") return `${clase} is on the limiting list (${lista(r.limitante)})`;
-    if (m.estado === "tolerated") return `${clase} is on neither list (suitable: ${lista(r.apta)}; limiting: ${lista(r.limitante)})`;
-    return `${clase}, compared with the lists (suitable: ${lista(r.apta)}; limiting: ${lista(r.limitante)})`;
+    const grupo = grupoDeTextura(m.valor_parcela, grupos);
+    const clase = `${nombreDeClase(m.valor_parcela) ?? "This"} texture${grupo ? ` (${grupo} group)` : ""}`;
+    const apta = nombrarLista(r.apta, grupos);
+    const limitante = nombrarLista(r.limitante, grupos);
+    if (m.estado === "fits") return `${clase} is on the suitable list (${apta})`;
+    if (m.estado === "outside_range") return `${clase} is on the limiting list (${limitante})`;
+    if (m.estado === "tolerated") return `${clase} is on neither list (suitable: ${apta}; limiting: ${limitante})`;
+    return `${clase}, compared with the lists (suitable: ${apta}; limiting: ${limitante})`;
   }
   if (m.criterio === "salinidad") {
     const valor = `Salinity ${formatoQueDistingue(m.valor_parcela, [r.umbral_ds_m])} dS/m`;
@@ -339,23 +398,31 @@ export function modeloPerfil({ suelo, id, error } = {}) {
     return { situacion: "pendiente", motivo: minusculaInicial(suelo.perfil_motivo || suelo.motivo_pedido || TEXTO_PEDIDO) };
   }
   const p = perfil.parcelas?.[id];
-  if (!p || typeof p !== "object") return { situacion: "sin_parcela", motivo: TEXTO_SIN_PARCELA };
+  if (!p || typeof p !== "object" || perfilVacio(p)) return { situacion: "sin_parcela", motivo: TEXTO_SIN_PARCELA };
 
   const valores = FRACCIONES.map((f) => ({ clase: f.clase, nombre: f.nombre, valor: num(p[f.llave]), texto: formatoPct(p[f.llave]) }));
   const fracciones = valores.every((f) => f.valor != null && f.valor >= 0) ? valores : null;
   const ph = num(p.ph);
   const datos = [];
+  // Con dato: el valor y su unidad. Sin dato: «not in the map» (nunca un cero), marcado para el estilo.
   const agregar = (etiqueta, valor, unidad) => {
-    if (num(valor) != null) datos.push({ etiqueta, texto: `${formatoNumero(valor)} ${unidad}` });
+    const hay = num(valor) != null;
+    datos.push({ etiqueta, texto: hay ? `${formatoNumero(valor)} ${unidad}` : TEXTO_NO_EN_MAPA, falta: !hay });
   };
   agregar("Organic carbon", p.carbono_organico_g_kg, "g/kg");
   agregar("Total nitrogen", p.nitrogeno_g_kg, "g/kg");
   agregar("Cation exchange capacity", p.cic_cmol_kg, "cmol(+)/kg");
   agregar("Salinity (electrical conductivity)", p.salinidad_ce_ds_m, "dS/m");
   const celdas = num(p.n_celdas);
+  const grupos = suelo.requisitos?.grupos_textura ?? null;
+  const coincide = suelo.coincidencia_textura;
   return {
     situacion: "ok",
     clase: nombreDeClase(p.clase_textura),
+    grupo: grupoDeTextura(p.clase_textura, grupos),
+    grupoEtiqueta: grupos?.etiqueta || null,
+    grupoFuente: grupos?.fuente || null,
+    coincidencia: coincide && num(coincide.valor) != null ? { valor: num(coincide.valor), etiqueta: coincide.etiqueta || null, fuente: coincide.fuente || null } : null,
     fracciones,
     ph: ph == null ? null : { texto: formatoNumero(ph), clase: ubicarPh(ph, suelo.requisitos?.escala_ph) },
     datos,
@@ -395,6 +462,55 @@ function htmlBarra(fracciones) {
   );
 }
 
+const FORMATO_PCT = new Intl.NumberFormat(LOCALE, { style: "percent", maximumFractionDigits: 0 });
+
+/**
+ * Textura por su grupo (light / medium / heavy, con la etiqueta del reparto) y, plegada, la clase exacta con la
+ * nota de coincidencia de los dos mapas. Sin grupos: la clase exacta a la vista, como antes.
+ */
+function htmlTextura(m) {
+  if (!m.grupo) return `<p class="suelo-textura">Texture: <strong>${esc(m.clase ?? "no data")}</strong></p>`;
+  const etiqueta = m.grupoEtiqueta ? ` <span class="suelo-etiqueta">${esc(m.grupoEtiqueta)}</span>` : "";
+  const c = m.coincidencia;
+  const nota = c
+    ? `<p class="suelo-coincidencia">The two global soil maps compared give the same exact class in ${esc(FORMATO_PCT.format(c.valor))} of the fields${c.etiqueta ? ` (${esc(c.etiqueta)})` : ""}; elsewhere they differ, so read the group, not the exact class.` +
+      (c.fuente ? ` <span class="suelo-fuente">Source: <span lang="es">${esc(c.fuente)}</span></span>` : "") + "</p>"
+    : "";
+  return (
+    `<p class="suelo-textura">Texture group: <strong>${esc(m.grupo)}</strong>${etiqueta}</p>` +
+    '<details class="suelo-clase-exacta"><summary>Exact texture class</summary>' +
+    `<p>${esc(m.clase ?? "no data")} (USDA class).</p>${nota}` +
+    (m.grupoFuente ? `<p class="suelo-fuente">Groups: <span lang="es">${esc(m.grupoFuente)}</span></p>` : "") +
+    "</details>"
+  );
+}
+
+/**
+ * Mensaje de la zona (suelo.alcalinidad_zona, que calcula el motor): {n_con_ph, n_sobre_optimo, n_cultivos} si
+ * la mayoría de las parcelas de la zona tiene un pH por encima del óptimo general de la mayoría de los cultivos;
+ * null en otro caso (sin dato, o sin mayoría).
+ */
+export function modeloNotaDeZona({ suelo, zonaId } = {}) {
+  const z = suelo?.alcalinidad_zona?.[zonaId];
+  if (!z || z.mayoria !== true) return null;
+  const [con, sobre, cultivos] = [z.n_con_ph, z.n_sobre_optimo, z.n_cultivos].map(num);
+  if (con == null || sobre == null || cultivos == null) return null;
+  return { n_con_ph: con, n_sobre_optimo: sobre, n_cultivos: cultivos };
+}
+
+/** HTML del mensaje de zona (ver modeloNotaDeZona); "" si no toca. */
+export function htmlNotaDeZona({ suelo, zonaId, nombreZona } = {}) {
+  const m = modeloNotaDeZona({ suelo, zonaId });
+  if (!m) return "";
+  const zona = nombreZona ? ` in ${nombreZona}` : " in this area";
+  return (
+    '<p class="suelo-nota-zona" data-zona="' + esc(zonaId) + '"><span class="suelo-icono" aria-hidden="true">' + ICONO_AVISO + "</span> " +
+    `<strong>Area note:</strong> ${esc(formatoNumero(m.n_sobre_optimo))} of ${esc(formatoNumero(m.n_con_ph))} mapped fields${esc(zona)} ` +
+    `have a soil pH above the general optimal range of most of the ${esc(formatoNumero(m.n_cultivos))} crops compared here. ` +
+    "Crops already grown in the area share this, so read the soil fit as evidence to weigh, not as a filter.</p>"
+  );
+}
+
 /** HTML del perfil de suelo de una parcela (ver el encabezado del archivo). */
 export function htmlPerfilDeSuelo({ suelo, id, error } = {}) {
   asegurarHojaSuelo();
@@ -409,18 +525,23 @@ export function htmlPerfilDeSuelo({ suelo, id, error } = {}) {
         "</dd></div>",
     );
   }
-  for (const d of m.datos) renglones.push(`<div><dt>${esc(d.etiqueta)}</dt><dd><strong>${esc(d.texto)}</strong></dd></div>`);
+  for (const d of m.datos) {
+    renglones.push(`<div${d.falta ? ' data-falta="si"' : ""}><dt>${esc(d.etiqueta)}</dt><dd>${d.falta ? esc(d.texto) : `<strong>${esc(d.texto)}</strong>`}</dd></div>`);
+  }
   const celdas = m.celdas == null ? "" : ` Mean of ${esc(formatoNumero(m.celdas))} map ${plural(m.celdas, "cell", "cells")} inside the field.`;
   const cita = [m.archivo, m.fecha].filter(Boolean).join(", ");
+  // La línea de fuente de la entrega es larga (producto, versión, capas, cómo se promedió): va plegada, con el
+  // archivo y la fecha a la vista en el resumen.
   const fuente = m.fuente
-    ? `<p class="suelo-fuente">Source: <span${m.idioma ? ` lang="${esc(m.idioma)}"` : ""}>${esc(m.fuente)}</span>${cita ? ` (${esc(cita)})` : ""}</p>`
+    ? `<details class="suelo-fuente-detalle"><summary>Source${cita ? ` (${esc(cita)})` : ""}</summary>` +
+      `<p class="suelo-fuente">Source: <span${m.idioma ? ` lang="${esc(m.idioma)}"` : ""}>${esc(m.fuente)}</span>${cita ? ` (${esc(cita)})` : ""}</p></details>`
     : `<p class="suelo-fuente">Source: not stated in the delivery${cita ? ` (${esc(cita)})` : ""}</p>`;
   return (
     '<div class="suelo-perfil" data-situacion="ok">' +
     `<p class="suelo-perfil-titulo"><span class="suelo-titulo">${TITULO_PERFIL}</span>` +
     (m.capa ? ` <span class="suelo-capa">(${esc(m.capa)} layer)</span>` : "") +
     "</p>" +
-    `<p class="suelo-textura">Texture: <strong>${esc(m.clase ?? "no data")}</strong></p>` +
+    htmlTextura(m) +
     (m.fracciones ? htmlBarra(m.fracciones) : `<p class="suelo-sin-dato">${TEXTO_SIN_FRACCIONES}</p>`) +
     (renglones.length ? `<dl class="suelo-datos">${renglones.join("")}</dl>` : "") +
     `<p class="suelo-no-mapeado">${TEXTO_NO_MAPEADO}</p>` +
@@ -460,13 +581,17 @@ export function aptitudDeOpcion({ suelo, idParcela, idOpcion, nombresCultivo } =
   // El estado lo calcula el motor; si faltara o no fuera uno conocido, es el peor de sus cultivos.
   const estado = ESTADOS_APTITUD[entrada.estado] ? entrada.estado : peorEstado(porCultivo.map((c) => c.estado));
   // Con varios cultivos sembrados, cada renglón dice de cuál habla.
-  const variosCultivos = porCultivo.filter((c) => c.cultivo !== NO_SIEMBRA).length > 1;
+  const sembrados = porCultivo.filter((c) => c.cultivo !== NO_SIEMBRA).length;
+  const variosCultivos = sembrados > 1;
+  const contexto = { margen: suelo.margen_ph ?? null, grupos: suelo.requisitos?.grupos_textura ?? null };
   const motivos = [];
   for (const c of porCultivo) {
+    // «descanso» dentro de una secuencia que sí siembra: no hay nada que decir de él (los demás cultivos hablan).
+    if (c.cultivo === NO_SIEMBRA && sembrados > 0) continue;
     const prefijo = variosCultivos && c.cultivo !== NO_SIEMBRA ? `${capital(nombreDeCultivo(c.cultivo, nombresCultivo))}: ` : "";
     const frase = (texto) => (prefijo ? prefijo + minusculaPrudente(texto) : mayusculaPrudente(texto));
     for (const m of Array.isArray(c.motivos) ? c.motivos : []) {
-      motivos.push({ cultivo: c.cultivo, criterio: m.criterio ?? null, estado: m.estado ?? null, texto: frase(textoDeMotivo(m)), fuente: m.fuente || null });
+      motivos.push({ cultivo: c.cultivo, criterio: m.criterio ?? null, estado: m.estado ?? null, texto: frase(textoDeMotivo(m, contexto)), fuente: m.fuente || null });
     }
     for (const criterio of Array.isArray(c.sin_dato_de_parcela) ? c.sin_dato_de_parcela : []) {
       if (SIN_DATO_DE_PARCELA[criterio]) motivos.push({ cultivo: c.cultivo, criterio, estado: null, texto: frase(SIN_DATO_DE_PARCELA[criterio]), fuente: null });
@@ -477,9 +602,19 @@ export function aptitudDeOpcion({ suelo, idParcela, idOpcion, nombresCultivo } =
     }
   }
   if (!motivos.length && entrada.nota) motivos.push({ cultivo: null, criterio: null, estado, texto: TEXTO_NADA_SEMBRADO, fuente: null });
-  const avisos = (Array.isArray(entrada.avisos_nutrientes) ? entrada.avisos_nutrientes : [])
-    .filter((a) => a && typeof a === "object" && a.texto_en)
-    .map((a) => ({ elemento: a.elemento ?? null, texto: a.texto_en, fuente: a.fuente || null, cultivo: a.cultivo ?? null }));
+  // Avisos con el mismo texto y la misma fuente (p. ej. un estudio que habla de varios elementos) van juntos,
+  // con sus elementos en una lista: no se repite la misma frase una vez por elemento.
+  const avisos = [];
+  for (const a of Array.isArray(entrada.avisos_nutrientes) ? entrada.avisos_nutrientes : []) {
+    if (!a || typeof a !== "object" || !a.texto_en) continue;
+    const igual = avisos.find((x) => x.texto === a.texto_en && x.fuente === (a.fuente || null));
+    if (igual) {
+      if (a.elemento && !igual.elementos.includes(a.elemento)) igual.elementos.push(a.elemento);
+      igual.elemento = igual.elementos.join(", ");
+      continue;
+    }
+    avisos.push({ elemento: a.elemento ?? null, elementos: a.elemento ? [a.elemento] : [], texto: a.texto_en, fuente: a.fuente || null, cultivo: a.cultivo ?? null });
+  }
   return {
     estado,
     etiqueta: ESTADOS_APTITUD[estado].etiqueta,
@@ -512,6 +647,13 @@ export function htmlAptitud({ suelo, idParcela, idOpcion, nombresCultivo, error 
   const s = situacionDeAptitud({ suelo, idParcela, idOpcion, error });
   if (s.situacion !== "ok") return htmlPendiente("suelo-aptitud", TITULO_APTITUD, s.motivo, s.situacion);
   const a = aptitudDeOpcion({ suelo, idParcela, idOpcion, nombresCultivo });
+  // La opción que no siembra nada: no hay cultivo que comparar; se dice en una línea, sin insignia ni rótulo.
+  if (a.nota && !a.motivos.some((m) => m.cultivo && m.cultivo !== NO_SIEMBRA)) {
+    return (
+      `<div class="suelo-aptitud" data-situacion="ok" data-estado="${esc(a.estado)}" data-nada-sembrado="si">` +
+      `<p class="suelo-aptitud-fila"><span class="suelo-titulo">${TITULO_APTITUD}:</span> ${esc(minusculaInicial(TEXTO_NADA_SEMBRADO))}</p></div>`
+    );
+  }
   const motivos = a.motivos
     .map((m) => {
       const icono = ESTADOS_APTITUD[m.estado]?.icono;
@@ -534,6 +676,7 @@ export function htmlAptitud({ suelo, idParcela, idOpcion, nombresCultivo, error 
     `<p class="suelo-aptitud-fila"><span class="suelo-titulo">${TITULO_APTITUD}:</span> ` +
     `<span class="suelo-insignia suelo-insignia--${esc(a.estado)}"><span class="suelo-icono" aria-hidden="true">${a.icono}</span> ${esc(a.etiqueta)}</span>` +
     `${marca}</p>` +
+    `<p class="suelo-aptitud-rotulo">${esc(suelo.rotulo_aptitud || ROTULO_APTITUD)}</p>` +
     '<details class="suelo-porque"><summary>Why?<span class="suelo-solo-lector"> Soil fit of this option</span></summary>' +
     (motivos ? `<ul class="suelo-motivos">${motivos}</ul>` : "") +
     (avisos ? `<p class="suelo-avisos-titulo">${plural(a.avisos.length, "Nutrient note", "Nutrient notes")}</p><ul class="suelo-avisos">${avisos}</ul>` : "") +

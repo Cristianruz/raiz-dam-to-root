@@ -16,8 +16,15 @@ import { existsSync, readFileSync } from "node:fs";
 import {
   ESTADOS_APTITUD,
   NOTA_EVIDENCIA,
+  ROTULO_APTITUD,
+  TEXTO_NO_EN_MAPA,
   TEXTO_NO_MAPEADO,
   TEXTO_PEDIDO,
+  grupoDeTextura,
+  htmlNotaDeZona,
+  modeloNotaDeZona,
+  nombrarLista,
+  perfilVacio,
   aptitudDeOpcion,
   cargarSuelo,
   formatoCapa,
@@ -169,12 +176,13 @@ test("ubicarPh: sin cortes en el JSON no se dice ninguna clase", () => {
 // ---------------------------------------------------------------------------
 // Aptitud: estados, peor estado y textos de los motivos
 // ---------------------------------------------------------------------------
-test("las cuatro etiquetas de aptitud, cada una con su símbolo", () => {
+test("las cinco etiquetas de aptitud, cada una con su símbolo", () => {
   assert.deepEqual(
     Object.fromEntries(Object.entries(ESTADOS_APTITUD).map(([k, v]) => [k, v.etiqueta])),
     {
       fits: "Fits this soil",
       tolerated: "Tolerated by this soil",
+      near_limit: "Near the published limit",
       outside_range: "Outside the published range",
       no_published_range: "No published range",
     },
@@ -192,6 +200,8 @@ test("peorEstado: fuera > tolerado > dentro; lo que no tiene rango no cuenta", (
   assert.equal(peorEstado(["fits", "tolerated"]), "tolerated");
   assert.equal(peorEstado(["tolerated", "fits"]), "tolerated");
   assert.equal(peorEstado(["tolerated", "outside_range", "fits"]), "outside_range");
+  assert.equal(peorEstado(["tolerated", "near_limit", "fits"]), "near_limit");
+  assert.equal(peorEstado(["near_limit", "outside_range"]), "outside_range");
   assert.equal(peorEstado(["no_published_range", "fits"]), "fits");
   assert.equal(peorEstado(["otro_estado", "tolerated"]), "tolerated");
 });
@@ -346,12 +356,13 @@ test("aptitudDeOpcion: un criterio con rango y sin valor de la parcela se dice y
   assert.equal(PARCELAS.P0002.salinidad_ce_ds_m, null);
   assert.equal(a.estado, "tolerated");
   const salinidad = a.motivos.filter((m) => m.criterio === "salinidad");
-  assert.deepEqual(salinidad.map((m) => [m.estado, m.fuente, m.texto]), [[null, null, "Salinity not compared — no mapped salinity value for this field"]]);
+  assert.deepEqual(salinidad.map((m) => [m.estado, m.fuente, m.texto]), [[null, null, "Salinity not compared — not in the map"]]);
 });
 
 test("aptitudDeOpcion: avisos de nutrientes con su elemento, su texto y su fuente", () => {
   const elementos = (idParcela, idOpcion) => aptitudDeOpcion({ suelo: LLENO, idParcela, idOpcion }).avisos.map((n) => n.elemento);
   for (const { idParcela, idOpcion } of TODAS) {
+    // Los textos de prueba son distintos entre sí: un aviso por elemento, en el orden del motor.
     assert.deepEqual(elementos(idParcela, idOpcion), LLENO.aptitud[idParcela][idOpcion].avisos_nutrientes.map((n) => n.elemento));
   }
   const conAvisos = TODAS.filter(({ idParcela, idOpcion }) => LLENO.aptitud[idParcela][idOpcion].avisos_nutrientes.length > 0);
@@ -360,8 +371,91 @@ test("aptitudDeOpcion: avisos de nutrientes con su elemento, su texto y su fuent
   const { idParcela, idOpcion } = conAvisos[0];
   const origen = LLENO.aptitud[idParcela][idOpcion].avisos_nutrientes[0];
   assert.deepEqual(aptitudDeOpcion({ suelo: LLENO, idParcela, idOpcion }).avisos[0], {
-    elemento: origen.elemento, texto: origen.texto_en, fuente: origen.fuente, cultivo: origen.cultivo,
+    elemento: origen.elemento, elementos: [origen.elemento], texto: origen.texto_en, fuente: origen.fuente, cultivo: origen.cultivo,
   });
+});
+
+test("aptitudDeOpcion: avisos con el mismo texto y la misma fuente van juntos, con sus elementos", () => {
+  // Como el nogal real: un estudio del distrito que habla de varios elementos (DATOS DE PRUEBA derivados de la fixture).
+  const base = LLENO.aptitud.P0001.ACTUAL;
+  const igual = { texto_en: "TEST DATA: same note", fuente: "prueba", cultivo: "alfalfa" };
+  const suelo = { ...LLENO, aptitud: { P0001: { ACTUAL: { ...base, avisos_nutrientes: [
+    { ...igual, elemento: "Zn" }, { ...igual, elemento: "Fe" }, { texto_en: "TEST DATA: other", fuente: "prueba", elemento: "P", cultivo: "alfalfa" },
+  ] } } } };
+  const a = aptitudDeOpcion({ suelo, idParcela: "P0001", idOpcion: "ACTUAL" });
+  assert.deepEqual(a.avisos.map((n) => n.elemento), ["Zn, Fe", "P"]);
+  assert.ok(htmlAptitud({ suelo, idParcela: "P0001", idOpcion: "ACTUAL" }).includes("<strong>Zn, Fe</strong>: TEST DATA: same note"));
+});
+
+test("aptitud near_limit: dice que el pH queda apenas fuera del tolerado y el margen con su etiqueta", () => {
+  const a = aptitudDeOpcion({ suelo: LLENO, idParcela: "P0001", idOpcion: "forraje_verano" });
+  assert.equal(a.estado, "near_limit");
+  assert.equal(a.etiqueta, "Near the published limit");
+  const ph = a.motivos.find((m) => m.criterio === "ph");
+  const margen = LLENO.margen_ph;
+  assert.ok(ph.texto.includes("just outside the tolerated range") && ph.texto.includes(`map margin of ${formatoNumero(margen.valor)} (${margen.etiqueta})`), ph.texto);
+  const html = htmlAptitud({ suelo: LLENO, idParcela: "P0001", idOpcion: "forraje_verano" });
+  assert.ok(html.includes('data-estado="near_limit"') && textoVisible(html).includes("Near the published limit"));
+});
+
+test("htmlAptitud: lleva el rótulo de la aptitud (rango general y mundial, no un ensayo local)", () => {
+  assert.equal(LLENO.rotulo_aptitud, ROTULO_APTITUD);
+  assert.equal(ROTULO_APTITUD, "General published range (FAO ECOCROP, worldwide), not a local trial");
+  for (const { idParcela, idOpcion } of SIEMBRAN) {
+    assert.ok(textoVisible(htmlAptitud({ suelo: LLENO, idParcela, idOpcion })).includes(ROTULO_APTITUD), `${idParcela}/${idOpcion}`);
+  }
+});
+
+test("aptitudDeOpcion: «descanso» dentro de una secuencia que sí siembra no dice «nothing is planted»", () => {
+  const base = LLENO.aptitud.P0001.ACTUAL;
+  const descanso = { cultivo: "descanso", estado: "no_published_range", nota: "nothing is planted", motivos: [], sin_dato_de_parcela: [] };
+  const suelo = { ...LLENO, aptitud: { P0001: { ACTUAL: { ...base, por_cultivo: [...base.por_cultivo, descanso] } } } };
+  const a = aptitudDeOpcion({ suelo, idParcela: "P0001", idOpcion: "ACTUAL" });
+  assert.ok(!a.motivos.some((m) => /nothing is planted/i.test(m.texto)), JSON.stringify(a.motivos));
+  assert.equal(a.estado, base.estado);
+});
+
+test("grupoDeTextura y nombrarLista: la textura por su grupo; una lista de grupos completos se dice por sus grupos", () => {
+  const grupos = LLENO.requisitos.grupos_textura;
+  for (const [grupo, clases] of Object.entries(grupos.valor)) {
+    for (const c of clases) assert.equal(grupoDeTextura(c, grupos), grupo);
+  }
+  assert.equal(grupoDeTextura("loam", null), null);
+  assert.equal(grupoDeTextura("otra", grupos), null);
+  // Los grupos se nombran en el orden de requisitos.grupos_textura, no en el de la lista.
+  assert.equal(nombrarLista([...grupos.valor.medium, ...grupos.valor.light], grupos), "light, medium groups");
+  assert.equal(nombrarLista(grupos.valor.heavy, grupos), "heavy group");
+  assert.equal(nombrarLista(["loam", "clay"], grupos), "loam, clay", "una lista que no es de grupos completos va por clases");
+  assert.equal(nombrarLista([], grupos), "none listed");
+  assert.equal(nombrarLista(["loam"], null), "loam");
+});
+
+test("perfilVacio y la parcela sin dato: «no soil data for this field» en el perfil y en la aptitud", () => {
+  const vacia = { arena_pct: null, limo_pct: null, arcilla_pct: null, clase_textura: null, ph: null, carbono_organico_g_kg: null,
+    nitrogeno_g_kg: null, cic_cmol_kg: null, salinidad_ce_ds_m: null, n_celdas: 0 };
+  assert.ok(perfilVacio(vacia) && !perfilVacio(PARCELAS.P0001));
+  const suelo = { ...LLENO, perfil: { ...LLENO.perfil, parcelas: { ...PARCELAS, L0002: vacia } } };
+  assert.equal(modeloPerfil({ suelo, id: "L0002" }).situacion, "sin_parcela");
+  assert.ok(textoVisible(htmlPerfilDeSuelo({ suelo, id: "L0002" })).includes("Soil profile: no soil data for this field"));
+  assert.ok(textoVisible(htmlAptitud({ suelo, idParcela: "L0002", idOpcion: "ACTUAL" })).includes("Soil fit: no soil data for this field"));
+});
+
+test("nota de zona: solo cuando la mayoría de las parcelas supera el óptimo de la mayoría de los cultivos (dato del motor)", () => {
+  for (const [zona, z] of Object.entries(LLENO.alcalinidad_zona)) {
+    const m = modeloNotaDeZona({ suelo: LLENO, zonaId: zona });
+    const html = htmlNotaDeZona({ suelo: LLENO, zonaId: zona, nombreZona: "Test area" });
+    if (z.mayoria) {
+      assert.deepEqual(m, { n_con_ph: z.n_con_ph, n_sobre_optimo: z.n_sobre_optimo, n_cultivos: z.n_cultivos });
+      const t = textoVisible(html);
+      assert.ok(t.includes(`${z.n_sobre_optimo} of ${z.n_con_ph} mapped fields in Test area`) && t.includes(`most of the ${z.n_cultivos} crops`), t);
+      assert.ok(/evidence to weigh, not as a filter/.test(t));
+    } else {
+      assert.equal(m, null);
+      assert.equal(html, "");
+    }
+  }
+  assert.ok(Object.values(LLENO.alcalinidad_zona).some((z) => z.mayoria) && Object.values(LLENO.alcalinidad_zona).some((z) => !z.mayoria));
+  assert.equal(htmlNotaDeZona({ suelo: { ...LLENO, alcalinidad_zona: null }, zonaId: "lazaro_cardenas" }), "");
 });
 
 test("aptitudDeOpcion: null cuando no hay aptitud que mostrar", () => {
@@ -390,8 +484,22 @@ test("situacionDeAptitud: dice por qué no hay aptitud", () => {
 // ---------------------------------------------------------------------------
 // HTML de la aptitud
 // ---------------------------------------------------------------------------
+// Opciones que no siembran nada (descanso, secuencia vacía): su fila es una línea sin insignia (ver abajo).
+const NADA_SEMBRADO = TODAS.filter(({ idParcela, idOpcion }) => LLENO.aptitud[idParcela][idOpcion].nota === "nothing is planted");
+const SIEMBRAN = TODAS.filter((x) => !NADA_SEMBRADO.includes(x));
+
+test("htmlAptitud: la opción que no siembra dice «nothing is planted» en una línea, sin insignia ni rótulo", () => {
+  assert.ok(NADA_SEMBRADO.length > 0, "la fixture trae opciones que no siembran");
+  for (const { idParcela, idOpcion } of NADA_SEMBRADO) {
+    const html = htmlAptitud({ suelo: LLENO, idParcela, idOpcion });
+    const texto = textoVisible(html);
+    assert.ok(texto.startsWith("Soil fit: nothing is planted"), texto);
+    assert.ok(!html.includes("suelo-insignia") && !html.includes(ROTULO_APTITUD) && html.includes('data-nada-sembrado="si"'));
+  }
+});
+
 test("htmlAptitud: estado en texto y símbolo, y un «Why?» con motivos y fuentes", () => {
-  for (const { idParcela, idOpcion } of TODAS) {
+  for (const { idParcela, idOpcion } of SIEMBRAN) {
     const html = htmlAptitud({ suelo: LLENO, idParcela, idOpcion, nombresCultivo: NOMBRES });
     const a = aptitudDeOpcion({ suelo: LLENO, idParcela, idOpcion, nombresCultivo: NOMBRES });
     const texto = textoVisible(html);
@@ -448,6 +556,9 @@ test("modeloPerfil: textura, fracciones, pH con su clase y lo demás que traiga 
   const p = PARCELAS.P0001;
   assert.equal(m.situacion, "ok");
   assert.equal(m.clase, "Loam");
+  assert.equal(m.grupo, "medium");
+  assert.equal(m.grupoEtiqueta, LLENO.requisitos.grupos_textura.etiqueta);
+  assert.deepEqual(m.coincidencia, { valor: LLENO.coincidencia_textura.valor, etiqueta: LLENO.coincidencia_textura.etiqueta, fuente: LLENO.coincidencia_textura.fuente });
   assert.deepEqual(m.fracciones.map((f) => [f.nombre, f.valor, f.texto]), [
     ["Sand", p.arena_pct, `${p.arena_pct}%`], ["Silt", p.limo_pct, `${p.limo_pct}%`], ["Clay", p.arcilla_pct, `${p.arcilla_pct}%`],
   ]);
@@ -461,11 +572,17 @@ test("modeloPerfil: textura, fracciones, pH con su clase y lo demás que traiga 
   assert.equal(m.fecha, LLENO.perfil.fecha);
 });
 
-test("modeloPerfil: lo que la entrega trae vacío no se muestra ni se vuelve cero", () => {
+test("modeloPerfil: lo que la entrega trae vacío se dice «not in the map», nunca un cero", () => {
   const m = modeloPerfil({ suelo: LLENO, id: "P0002" });
   const p = PARCELAS.P0002;
   assert.deepEqual([p.nitrogeno_g_kg, p.cic_cmol_kg, p.salinidad_ce_ds_m], [null, null, null]);
-  assert.deepEqual(m.datos, [{ etiqueta: "Organic carbon", texto: `${p.carbono_organico_g_kg} g/kg` }]);
+  assert.deepEqual(m.datos, [
+    { etiqueta: "Organic carbon", texto: `${p.carbono_organico_g_kg} g/kg`, falta: false },
+    { etiqueta: "Total nitrogen", texto: TEXTO_NO_EN_MAPA, falta: true },
+    { etiqueta: "Cation exchange capacity", texto: TEXTO_NO_EN_MAPA, falta: true },
+    { etiqueta: "Salinity (electrical conductivity)", texto: TEXTO_NO_EN_MAPA, falta: true },
+  ]);
+  assert.equal(TEXTO_NO_EN_MAPA, "not in the map");
   assert.equal(m.ph.clase, "neutral");
 });
 
@@ -512,7 +629,10 @@ test("htmlPerfilDeSuelo: barra de textura accesible con sus porcentajes en texto
     // Un tramo por fracción, con el ancho que da el dato.
     assert.deepEqual([...html.matchAll(/suelo-tramo suelo-tramo--(\w+)" style="flex-grow:([\d.]+)"/g)].map((x) => [x[1], Number(x[2])]),
       [["arena", p.arena_pct], ["limo", p.limo_pct], ["arcilla", p.arcilla_pct]]);
-    assert.ok(texto.includes(`Texture: ${nombreDeClase(p.clase_textura)}`));
+    // La textura va por su grupo (con la etiqueta del reparto); la clase exacta, en el detalle plegado.
+    const grupo = grupoDeTextura(p.clase_textura, LLENO.requisitos.grupos_textura);
+    assert.ok(texto.includes(`Texture group: ${grupo} ${LLENO.requisitos.grupos_textura.etiqueta}`), texto);
+    assert.ok(html.includes('<details class="suelo-clase-exacta"><summary>Exact texture class</summary>') && texto.includes(`${nombreDeClase(p.clase_textura)} (USDA class).`));
     assert.ok(texto.includes(TEXTO_NO_MAPEADO));
     assert.ok(texto.includes(`${LLENO.rotulo}. Mean of ${p.n_celdas} map cells inside the field.`), texto);
     assert.ok(texto.includes(`Source: ${LLENO.perfil.fuente} (${LLENO.perfil.archivo}, ${LLENO.perfil.fecha})`));
@@ -521,13 +641,14 @@ test("htmlPerfilDeSuelo: barra de textura accesible con sus porcentajes en texto
   }
 });
 
-test("htmlPerfilDeSuelo: nitrógeno, CIC y salinidad solo cuando existen", () => {
+test("htmlPerfilDeSuelo: nitrógeno, CIC y salinidad con su valor, o «not in the map» si el mapa no los trae", () => {
   const completo = textoVisible(htmlPerfilDeSuelo({ suelo: LLENO, id: "P0001" }));
   const parcial = textoVisible(htmlPerfilDeSuelo({ suelo: LLENO, id: "P0002" }));
-  for (const rotulo of ["Total nitrogen", "Cation exchange capacity", "Salinity"]) {
-    assert.ok(completo.includes(rotulo), rotulo);
-    assert.ok(!parcial.includes(rotulo), `${rotulo}: la parcela no lo trae`);
+  for (const rotulo of ["Total nitrogen", "Cation exchange capacity", "Salinity (electrical conductivity)"]) {
+    assert.ok(completo.includes(rotulo) && !completo.includes(`${rotulo} not in the map`), rotulo);
+    assert.ok(parcial.includes(`${rotulo} not in the map`), `${rotulo}: la parcela no lo trae`);
   }
+  assert.ok(completo.includes("Phosphorus, potassium, iron, zinc: needs a soil test"));
   assert.ok(completo.includes("Organic carbon") && parcial.includes("Organic carbon"));
   assert.ok(completo.includes(`pH (in water) ${PARCELAS.P0001.ph} acid`), completo);
 });
@@ -638,8 +759,9 @@ test("la aptitud es evidencia: el módulo nunca dice «best» ni «recommended»
 });
 
 test("el módulo no trae cifras: sus textos fijos no tienen dígitos", () => {
-  const fijos = [TEXTO_NO_MAPEADO, TEXTO_PEDIDO, NOTA_EVIDENCIA, ...Object.values(ESTADOS_APTITUD).flatMap((e) => [e.etiqueta, e.icono])];
+  const fijos = [TEXTO_NO_MAPEADO, TEXTO_PEDIDO, TEXTO_NO_EN_MAPA, ROTULO_APTITUD, NOTA_EVIDENCIA,
+    ...Object.values(ESTADOS_APTITUD).flatMap((e) => [e.etiqueta, e.icono])];
   for (const t of fijos) assert.ok(!/\d/.test(t), t);
-  assert.equal(TEXTO_NO_MAPEADO, "Phosphorus, potassium, iron, zinc: not mapped — needs a soil test");
+  assert.equal(TEXTO_NO_MAPEADO, "Phosphorus, potassium, iron, zinc: needs a soil test");
   assert.ok(FUENTE_JS.startsWith("// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"));
 });

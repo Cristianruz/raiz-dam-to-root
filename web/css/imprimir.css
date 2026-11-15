@@ -69,7 +69,8 @@
     border: none !important;
   }
   #ficha .ficha-cabeza h2 { font-size: 12pt; }
-  #ficha .ficha-cuerpo { padding: 0 !important; gap: 1.2mm !important; }
+  /* Separación entre bloques: 0.9 mm deja sitio a la aptitud de suelo y a la lámina local en una carta. */
+  #ficha .ficha-cuerpo { padding: 0 !important; gap: 0.9mm !important; }
   #ficha .ficha-cuerpo h3 { font-size: 9pt; margin-bottom: 1mm; }
   #ficha p { margin: 0; }
 

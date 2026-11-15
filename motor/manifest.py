@@ -81,6 +81,24 @@ ARCHIVO_CUBO = "web/data/cubo.json"
 ARCHIVO_RELIEVE = "web/data/relieve.json"
 ARCHIVO_PARCELAS = "web/data/parcelas.geojson"
 ARCHIVO_PRUEBAS = "web/data/pruebas.json"
+ARCHIVO_GEMELO = "web/data/gemelo.json"
+SCRIPT_GEMELO = "motor/gemelo_web.py"
+ARCHIVO_NDVI = "web/data/ndvi_mensual.json"
+SCRIPT_NDVI = "motor/ndvi_web.py"
+ARCHIVO_SUELO = "web/data/suelo.json"
+SCRIPT_SUELO = "motor/suelo_web.py"
+ARCHIVO_CONTEXTO = "web/data/contexto.json"
+SCRIPT_CONTEXTO = "motor/contexto_web.py"
+# Cifra de gemelo.json -> valor de diseño de data/params.json (bloque «gemelo») del que sale (su fuente y su etiqueta).
+DISENO_GEMELO = {
+    "terreno.exageracion": "exageracion_vertical",
+    "terreno.minzoom": "dem",
+    "terreno.maxzoom": "dem",
+    "columnas.metros_por_millar": "metros_por_millar",
+    "camara.pitch": "camara",
+    "camara.bearing": "camara",
+    "tiempo.intervalo_ms": "reproduccion_intervalo_ms",
+}
 ENTREGA_RELIEVE_PARCELAS = "relieve_parcelas.csv"  # A9: indicadores de relieve por parcela
 ENTREGA_SUPUESTOS = "supuestos.json"      # eficiencias del escenario de goteo (kit X3.1)
 ENTREGA_HELADAS = "heladas.json"          # A2: probabilidad de helada por fecha (filtro de helada)
@@ -232,6 +250,11 @@ def cifras_de_params(m, cubo, params, script_cubo, mock_de):
             if marca["nota_en"] != (p_marca or {}).get("nota_en"):
                 m.avisos.append(f"dotaciones.marcas[{i}].nota_en: el cubo no coincide con params.json")
             con_param(f"dotaciones.marcas[{i}].nota_en", marca["nota_en"], p_marca, "dotaciones")
+    cm = dot.get("lamina_cm_por_millar") or {}
+    if es_numero(cm.get("valor")):
+        p_mil = obtener(params, "unidades.millar")
+        comparar("dotaciones.lamina_cm_por_millar.valor", cm["valor"], ((p_mil or {}).get("valor") or {}).get("lamina_cm"))
+        con_param("dotaciones.lamina_cm_por_millar.valor", cm["valor"], p_mil, "dotaciones")
     for campo in ("equivalencia", "equivalencia_en"):
         if dot.get(campo):
             # Texto con cifras (1 millar/ha = 1,000 m³/ha = 10 cm): se rastrea a params.unidades.millar.
@@ -373,6 +396,98 @@ def cifras_de_filtros(m, base, op, meta, fuentes_origen, script_cubo, mock):
                           fl.get("etiqueta"), mock)
 
 
+def cifras_de_lamina_local(m, base, op, fuentes_origen, script_cubo, mock, fecha_cubo):
+    """agua.lamina_local de una opción (supuestos.json → lamina_local_cm, convertida a millares/ha con la
+    constante de params): cada cifra con la fuente y la etiqueta de su entrada; el periodo, de la misma fuente."""
+    ll = (op.get("agua") or {}).get("lamina_local")
+    if not isinstance(ll, dict):
+        return
+    fecha, script = fecha_y_script(entrega_de(fuentes_origen, ENTREGA_SUPUESTOS), script_cubo)
+    for ruta, valor in hojas_numericas(ll, f"{base}.agua.lamina_local"):
+        m.agregar(ARCHIVO_CUBO, ruta, valor, ll.get("fuente"), fecha or fecha_cubo, script, ll.get("etiqueta"), mock)
+
+
+def cifras_de_ndvi(m, ndvi, fuentes_origen):
+    """web/data/ndvi_mensual.json (motor/ndvi_web.py): los valores mensuales (entrega hls_mensual_parcelas.csv) y
+    los dos umbrales de referencia de la gráfica, cada uno con la fuente y la etiqueta de su archivo."""
+    e = entrega_de(fuentes_origen, "hls_mensual_parcelas.csv") or {}
+    fecha, script = fecha_y_script(e, SCRIPT_NDVI)
+    for pid, serie in (ndvi.get("parcelas") or {}).items():
+        for i, v in enumerate(serie or []):
+            if es_numero(v):
+                m.agregar(ARCHIVO_NDVI, f"parcelas.{pid}[{i}]", v, ndvi.get("fuente") or e.get("fuente"), fecha, script,
+                          ETIQUETA_CALCULO, False)
+    for clave, u in (ndvi.get("umbrales") or {}).items():
+        if isinstance(u, dict) and es_numero(u.get("valor")):
+            archivo = Path(str(u.get("archivo") or "")).name
+            f_u, s_u = fecha_y_script(entrega_de(fuentes_origen, archivo), SCRIPT_NDVI)
+            m.agregar(ARCHIVO_NDVI, f"umbrales.{clave}.valor", u["valor"], u.get("fuente"), f_u or fecha, s_u,
+                      u.get("etiqueta"), False)
+
+
+def cifras_de_suelo(m, suelo, fuentes_origen):
+    """web/data/suelo.json (motor/suelo_web.py): el perfil de cada parcela (entrega suelo_parcelas.csv), los
+    requisitos de cada cultivo (suelo_requisitos.json, con la fuente de cada bloque), lo que el motor calcula
+    (resumen y alcalinidad por zona, valores copiados en la aptitud) y los dos supuestos de supuestos.json."""
+    def de(archivo, fuente=None, etiqueta=ETIQUETA_CALCULO):
+        e = entrega_de(fuentes_origen, archivo) or {}
+        fecha, script = fecha_y_script(e, SCRIPT_SUELO)
+        return fuente or e.get("fuente"), fecha, script, etiqueta
+
+    perfil = suelo.get("perfil") or {}
+    origen_perfil = de("suelo_parcelas.csv", perfil.get("fuente"))
+    for pid, p in (perfil.get("parcelas") or {}).items():
+        for ruta, v in hojas_numericas(p, f"perfil.parcelas.{pid}"):
+            m.agregar(ARCHIVO_SUELO, ruta, v, *origen_perfil, False)
+    for ruta, v in hojas_numericas(perfil.get("resumen_zona") or {}, "perfil.resumen_zona"):
+        m.agregar(ARCHIVO_SUELO, re.sub(r"resumen_zona\.([^.]+)", r"resumen_zona.zonas.\1", ruta), v, *origen_perfil, False)
+    req = suelo.get("requisitos") or {}
+    for cultivo, r in (req.get("cultivos") or {}).items():
+        for bloque, d in (r or {}).items():
+            fuente = d.get("fuente") if isinstance(d, dict) else None
+            for ruta, v in hojas_numericas(d, f"requisitos.cultivos.{cultivo}.{bloque}"):
+                m.agregar(ARCHIVO_SUELO, ruta, v, *de("suelo_requisitos.json", fuente or req.get("fuente"),
+                                                     (d or {}).get("etiqueta") if isinstance(d, dict) else None), False)
+    for ruta, v in hojas_numericas(suelo.get("alcalinidad_zona") or {}, "alcalinidad_zona"):
+        m.agregar(ARCHIVO_SUELO, re.sub(r"^alcalinidad_zona\.([^.]+)", r"alcalinidad_zona.zonas.\1", ruta), v,
+                  *de("suelo_parcelas.csv", "Cálculo de motor/suelo_web.py con suelo_parcelas.csv y suelo_requisitos.json"),
+                  False)
+    for clave in ("margen_ph", "coincidencia_textura"):
+        d = suelo.get(clave)
+        if isinstance(d, dict) and es_numero(d.get("valor")):
+            m.agregar(ARCHIVO_SUELO, f"{clave}.valor", d["valor"], *de("supuestos.json", d.get("fuente"), d.get("etiqueta")),
+                      False)
+    # La aptitud copia el valor de la parcela y el rango publicado en cada motivo (una cifra por opción).
+    for pid, ops in (suelo.get("aptitud") or {}).items():
+        for oid, a in (ops or {}).items():
+            for ruta, v in hojas_numericas(a, f"aptitud.parcelas.{pid}.{oid}"):
+                m.agregar(ARCHIVO_SUELO, ruta, v, *de("suelo_requisitos.json", None), False)
+
+
+def cifras_de_contexto(m, contexto, fuentes_origen):
+    """web/data/contexto.json (motor/contexto_web.py), lo que la ficha de la parcela muestra: GEDI por parcela, su
+    referencia y sus criterios (supuestos.json), y la probabilidad de helada por fecha (heladas.json)."""
+    g = contexto.get("gedi") or {}
+    if g:
+        e = entrega_de(fuentes_origen, g.get("archivo") or "gedi_parcelas.csv") or {}
+        fecha, script = fecha_y_script(e, SCRIPT_CONTEXTO)
+        for ruta, v in hojas_numericas({"parcelas": g.get("parcelas") or {}, "referencia": g.get("referencia") or {},
+                                        "conteos": {k: g.get(k) for k in ("n_con_dato", "n_total", "n_dosel_alto",
+                                                                          "n_sin_dosel_alto", "n_pocos_disparos")}}, "gedi"):
+            m.agregar(ARCHIVO_CONTEXTO, ruta, v, g.get("fuente") or e.get("fuente"), fecha, script, ETIQUETA_CALCULO, False)
+        for nombre, d in ((g.get("criterios") or {}).items()):
+            if isinstance(d, dict):
+                f_c, s_c = fecha_y_script(entrega_de(fuentes_origen, "supuestos.json"), SCRIPT_CONTEXTO)
+                for ruta, v in hojas_numericas(d, f"gedi.criterios.{nombre}"):
+                    m.agregar(ARCHIVO_CONTEXTO, ruta, v, d.get("fuente"), f_c, s_c, d.get("etiqueta"), False)
+    h = contexto.get("heladas") or {}
+    if h:
+        e = entrega_de(fuentes_origen, "heladas.json") or {}
+        fecha, script = fecha_y_script(e, SCRIPT_CONTEXTO)
+        for ruta, v in hojas_numericas(h, "heladas"):
+            m.agregar(ARCHIVO_CONTEXTO, ruta, v, h.get("fuente") or e.get("fuente"), fecha, script, ETIQUETA_CALCULO, False)
+
+
 def cifras_de_catalogos(m, cubo, fuentes_origen, script_cubo, mock_de):
     """cubo.opciones_catalogo y cubo.filtros_catalogo (copia de opciones_b3.json): cifras y textos con
     cifras (fechas de siembra, parámetros de las reglas, frases), con la fuente y la etiqueta de cada
@@ -479,6 +594,74 @@ def cifras_de_relieve(m, relieve, fuentes_origen):
             etiqueta_texto = etiqueta_tormenta if en_tormenta else (z.get("rotulo_etiqueta") or ETIQUETA_ROTULO_RELIEVE)
             m.agregar(ARCHIVO_RELIEVE, ruta, texto, t.get("fuente") if en_tormenta else fuente_zona, fecha,
                       script, etiqueta_texto, mock)
+
+
+def cifras_de_gemelo(m, gemelo, params, fuentes_origen):
+    """web/data/gemelo.json (motor/gemelo_web.py; decisión del gemelo digital):
+    - valores de diseño de params.gemelo (exageración general y la de cada zona, zooms del relieve, metros por
+      millar, cámara, intervalo de la línea de tiempo), con su fuente y su etiqueta «Diseño»;
+    - bounds de cada zona: el rectángulo de params.zona_piloto.zonas;
+    - elev_min_m y elev_max_m de cada zona: mínimo y máximo de sus teselas de relieve (la zona y su margen), de la
+      entrega nasadem_zona_piloto[_<zona>].tif;
+    - tiempo.anios: los años de la memoria de parcelas (entrega memoria_parcelas.csv);
+    - tileSize: el formato de las teselas (XYZ de 256 px); textos con dígitos: el rótulo y los meses del NDVI."""
+    g = params.get("gemelo") or {}
+    zonas_p = obtener(params, "zona_piloto.zonas") or {}
+    terreno = gemelo.get("terreno") or {}
+
+    def diseno(clave):
+        e = g.get(clave)
+        if not isinstance(e, dict):
+            m.avisos.append(f"params.json no tiene la entrada gemelo.{clave}")
+            e = {}
+        return e.get("fuente"), e.get("fecha") or e.get("fecha_consulta"), SCRIPT_GEMELO, e.get("etiqueta")
+
+    def de_entrega(archivo, fuente=None, etiqueta=ETIQUETA_CALCULO):
+        e = entrega_de(fuentes_origen, archivo) or {}
+        script = "; ".join(x for x in (e.get("script"), SCRIPT_GEMELO) if x)
+        return fuente or e.get("fuente"), e.get("fecha_consulta") or e.get("fecha"), script, etiqueta
+
+    def tif_de(zid):
+        con_sufijo = f"nasadem_zona_piloto_{zid}.tif"
+        return con_sufijo if entrega_de(fuentes_origen, con_sufijo) else "nasadem_zona_piloto.tif"
+
+    por_zona = (g.get("exageracion_por_zona") or {}).get("valor") or {}
+    for ruta, valor in hojas_numericas(gemelo, ""):
+        partes = ruta.split(".")
+        if ruta in DISENO_GEMELO:
+            origen = diseno(DISENO_GEMELO[ruta])
+        elif ruta.startswith("terreno.zonas.") and len(partes) >= 4:
+            zid, campo = partes[2], partes[3]
+            if campo == "exageracion":
+                origen = diseno("exageracion_por_zona" if zid in por_zona else "exageracion_vertical")
+            elif campo.startswith("bounds"):
+                origen = (zonas_p.get("fuente"), zonas_p.get("fecha"), SCRIPT_GEMELO, zonas_p.get("etiqueta"))
+            elif campo in ("elev_min_m", "elev_max_m"):
+                origen = de_entrega(tif_de(zid), terreno.get("fuente"))
+            else:
+                origen = None
+        elif ruta == "terreno.tileSize":
+            origen = ("Formato de las teselas de relieve (XYZ de 256 px, terrarium; motor/dem_teselas.py)", None,
+                      SCRIPT_GEMELO, "Método")
+        elif ruta.startswith("tiempo.anios"):
+            origen = de_entrega("memoria_parcelas.csv")
+        else:
+            origen = None
+        if origen is None:  # cifra nueva en gemelo.json: se registra con la fuente del relieve y se avisa
+            m.avisos.append(f"gemelo.json:{ruta}: cifra sin regla propia en motor/manifest.py")
+            origen = (terreno.get("fuente"), None, SCRIPT_GEMELO, None)
+        m.agregar(ARCHIVO_GEMELO, ruta, valor, *origen, False)
+    for ruta, texto in textos_con_digitos(gemelo, ""):
+        ruta = ruta.lstrip(".")
+        if ruta.startswith("_"):
+            continue  # encabezado y nota del archivo (regla 4), no son cifras de la página
+        if ruta.startswith("ndvi.meses"):
+            origen = de_entrega("hls_mensual_parcelas.csv", (gemelo.get("ndvi") or {}).get("fuente"))
+        elif ruta == "terreno.rotulo":
+            origen = (terreno.get("fuente"), None, SCRIPT_GEMELO, ETIQUETA_ROTULO_RELIEVE)
+        else:
+            origen = (terreno.get("fuente"), None, SCRIPT_GEMELO, None)
+        m.agregar(ARCHIVO_GEMELO, ruta, texto, *origen, False)
 
 
 def cifras_de_parcelas(m, geo, fuentes_origen, origen_geo, mock, script_cubo):
@@ -635,6 +818,7 @@ def generar(raiz=RAIZ, escribir=True, hoy=None):
                 for ruta, valor in hojas_numericas(obtener(op, bloque), f"{base}.{bloque}"):
                     m.agregar("web/data/cubo.json", ruta, valor, *origen, mock_op)
             cifras_de_filtros(m, base, op, meta, fuentes_origen, script_cubo, mock_op)
+            cifras_de_lamina_local(m, base, op, fuentes_origen, script_cubo, mock_op, fecha)
             dinero = op.get("dinero")
             if isinstance(dinero, dict):  # solo existe con fuente (contrato §2.3)
                 for k in ("margen_min", "margen_max"):
@@ -664,6 +848,19 @@ def generar(raiz=RAIZ, escribir=True, hoy=None):
     ruta_relieve = raiz / ARCHIVO_RELIEVE
     if ruta_relieve.exists():
         cifras_de_relieve(m, leer_json(ruta_relieve), fuentes_origen)
+
+    # 6b) gemelo.json (motor/gemelo_web.py): vista 3D y línea de tiempo del gemelo. Sin el bloque «gemelo» de
+    #     params no existe y la página dice «3D twin view: not available».
+    ruta_gemelo = raiz / ARCHIVO_GEMELO
+    if ruta_gemelo.exists():
+        cifras_de_gemelo(m, leer_json(ruta_gemelo), params, fuentes_origen)
+
+    # 6c) ndvi_mensual.json, suelo.json y contexto.json: lo que la ficha de la parcela muestra (gráfica del NDVI con
+    #     sus umbrales, perfil y aptitud de suelo, GEDI y riesgo de helada).
+    for archivo, funcion in ((ARCHIVO_NDVI, cifras_de_ndvi), (ARCHIVO_SUELO, cifras_de_suelo),
+                             (ARCHIVO_CONTEXTO, cifras_de_contexto)):
+        if (raiz / archivo).exists():
+            funcion(m, leer_json(raiz / archivo), fuentes_origen)
 
     # 7) pruebas.json (paso 5c): las cifras de «About & Data». Si aún no existe, no hay nada que rastrear.
     ruta_pruebas = raiz / ARCHIVO_PRUEBAS

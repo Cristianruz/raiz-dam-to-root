@@ -46,8 +46,28 @@
 //   «Not classified» ni en el indicador, y su ficha y su mensaje dicen el motivo; con relieve.json o pruebas.json
 //   en HTTP 500 y manifest.json roto, la página dice «could not be loaded / could not be read» (no «not run» ni
 //   «not built»); si imprimir falla, un aviso visible; si el arranque falla, el aviso .error-carga;
+// - gemelo digital (docs/decisiones/2026-11-14_gemelo_digital.md): la página abre en la zona de gemelo.json →
+//   zona_inicial (no en «All areas»); vista 3D (botón «3D twin view» en los controles del mapa: «not available» con su
+//   motivo en «All areas»; con teclado; relieve con la exageración de la zona; una columna por parcela clasificada que
+//   pide agua; el deslizador y la lluvia cambian las alturas; clic, toque o Enter abren la ficha; la columna que
+//   devuelve columnaEn es la que se ve en el píxel, comprobado pintando cada columna con un código binario; al
+//   desactivar, mapa plano y sin capas del gemelo); línea de tiempo (el año pasado colorea el mapa con la memoria y
+//   cuenta los seis estados; 2025 con su nota [P]; Play/Pause o «Next year» con movimiento reducido); tarjeta «Twin
+//   status» (fechas, nota fija, sin undefined/NaN); manifest.webmanifest, theme-color e indicador «Online». Los
+//   contextos bloquean el service worker (si no, page.route dejaría de aplicar las variantes en memoria);
+//   tests/e2e/pwa_smoke.mjs prueba el worker con la página real;
+// - ficha completa (etapa 2 del gemelo): frase resumen en sus tres casos (con agua, lámina cero, abstenida) y que
+//   cambia con el deslizador; gráfica del NDVI con sus umbrales de los datos y con huecos donde hay null (variante en
+//   memoria); enlace directo #P0757 (abre la ficha sin pantalla de inicio, el hash sigue a la ficha, un id
+//   desconocido avisa, «hashchange» a una parcela de otra zona cambia de zona); aptitud de suelo con su rótulo y su
+//   estado en texto en cada tarjeta; perfil de suelo una vez (grupo de textura, «not in the map», «needs a soil
+//   test», nota de zona, parcela sin dato); lámina local de referencia con sus hectáreas que cambian con el
+//   deslizador y «no local reference» donde toca; propuesta del equipo rotulada; nogal sin rotación con su motivo;
+//   dotacion_minima que cambia de estado con el deslizador; GEDI con su nota junto al valor; riesgo de helada junto a
+//   la siembra; la hoja de P0757 en una carta y una A4; suelo.json y contexto.json en HTTP 500 se dicen;
 // - guarda capturas en tests/e2e/capturas/ (o en RAIZ_CAPTURAS).
 // No supone un juego de datos: los valores esperados y las parcelas de cada prueba se leen de los datos.
+// Las comprobaciones que cuentan TODAS las parcelas (las de antes del gemelo) pasan primero a «All areas».
 // Los casos que los datos no traen (superficie abstenida, capa ausente, una parcela abstenida, el goteo)
 // se prueban además con una variante del cubo y de las parcelas servida en memoria (page.route).
 
@@ -56,7 +76,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
-import { aguaComprometida, conteosZona } from "../../web/reglas.js";
+import { aguaComprometida, conteosZona, cobertura, evaluarOpcion } from "../../web/reglas.js";
+import { fraseResumen } from "../../web/js/resumen.js";
+import { ESTADOS_APTITUD, ROTULO_APTITUD, grupoDeTextura } from "../../web/js/suelo.js";
+import { NOTA_GEDI, riesgoDeHelada } from "../../web/js/contexto.js";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
 
 const require = createRequire(import.meta.url);
@@ -122,7 +145,8 @@ const esMock = Boolean(cubo.meta?.mock || parcelas.meta?.mock || explicaciones.m
 
 // Archivos opcionales de web/data: si el juego de datos no los trae, la página lo dice («not run», «not available»)
 // y el 404 de su lectura no cuenta como error de consola. Si están, se leen aquí para comparar con la página.
-const OPCIONALES_DATOS = ["relieve.json", "relieve_rutas.geojson", "manifest.json", "pruebas.json"];
+const OPCIONALES_DATOS = ["relieve.json", "relieve_rutas.geojson", "manifest.json", "pruebas.json", "gemelo.json",
+  "suelo.json", "contexto.json", "ndvi_mensual.json"];
 const existe = (nombre) => fs.existsSync(path.join(DATOS, nombre));
 const ausentes = OPCIONALES_DATOS.filter((f) => !existe(f));
 const esAusente = (url = "") => ausentes.some((f) => url.split("?")[0].endsWith(`/data/${f}`));
@@ -130,6 +154,10 @@ const leerOpcional = (nombre) => (existe(nombre) ? leerJSON(nombre) : null);
 const relieve = leerOpcional("relieve.json");
 const rutasRelieve = leerOpcional("relieve_rutas.geojson");
 const pruebasWeb = leerOpcional("pruebas.json");
+const gemelo = leerOpcional("gemelo.json");
+const suelo = leerOpcional("suelo.json");
+const contexto = leerOpcional("contexto.json");
+const ndviMensual = leerOpcional("ndvi_mensual.json");
 const hayRelieve = Boolean(relieve?.zonas && Object.keys(relieve.zonas).length && rutasRelieve?.features?.length);
 
 // Formatos que usa la página (en-US; el mensaje de WhatsApp, es-MX).
@@ -198,8 +226,9 @@ function omitir(nombre, motivo) {
  * Abre la página en un contexto nuevo. Por omisión la pantalla de inicio se da por cerrada (sessionStorage), para
  * que su diálogo modal no tape los controles; con { inicio: true } aparece como para un visitante nuevo.
  */
-async function abrir(navegador, base, opciones, etiqueta, alterados = {}, { inicio = false } = {}) {
-  const ctx = await navegador.newContext(opciones);
+async function abrir(navegador, base, opciones, etiqueta, alterados = {}, { inicio = false, hash = "" } = {}) {
+  // Sin service worker: con él al mando, page.route deja de interceptar las peticiones del mismo origen.
+  const ctx = await navegador.newContext({ serviceWorkers: "block", ...opciones });
   if (!inicio) {
     await ctx.addInitScript((llave) => {
       try {
@@ -233,7 +262,7 @@ async function abrir(navegador, base, opciones, etiqueta, alterados = {}, { inic
   });
   // Sin red para las teselas (como en esta máquina): se abortan de inmediato.
   await page.route((url) => esOpcional(url.href), (route) => route.abort());
-  await page.goto(`${base}/index.html`, { waitUntil: "load" });
+  await page.goto(`${base}/index.html${hash}`, { waitUntil: "load" });
   await page.waitForSelector("body[data-listo='si']", { timeout: 15000 });
   await page.waitForFunction(() => document.body.dataset.mapa === "listo" || document.body.dataset.mapa === "sin-mapa", null, { timeout: 30000 });
   await page.waitForFunction(() => Boolean(document.body.dataset.relieve), null, { timeout: 15000 });
@@ -766,14 +795,18 @@ async function pruebaInicio(navegador, base, opciones, etiqueta, prefijo, cerrar
 /** «About & Data» (kit C5): carga perezosa, cinco pruebas con su estado, «Not run» visible, Escape la cierra. */
 async function pruebaAcerca(page, peticiones, prefijo, telefono, captura) {
   const pedidos = () => peticiones.filter((u) => /\/data\/(manifest|pruebas)\.json(\?|$)/.test(u));
-  check(`${prefijo}manifest.json y pruebas.json no se piden al cargar la página`, pedidos().length === 0, pedidos().join(", "));
+  const deManifest = () => peticiones.filter((u) => /\/data\/manifest\.json(\?|$)/.test(u)).length;
+  const dePruebas = () => peticiones.filter((u) => /\/data\/pruebas\.json(\?|$)/.test(u)).length;
+  // manifest.json se lee UNA vez al arrancar (la tarjeta «Twin status» muestra la fecha de cada fuente); pruebas.json, no.
+  check(`${prefijo}pruebas.json no se pide al cargar la página; manifest.json, una sola vez (Twin status)`, dePruebas() === 0 && deManifest() <= 1, pedidos().join(", "));
+  const manifestAntes = deManifest();
   const fichaAbierta = await page.locator("#ficha").isVisible();
   await page.locator("#boton-acerca").click();
   await page.waitForSelector("body[data-acerca='listo']", { timeout: 10000 });
   const dlg = page.locator("#acerca");
   check(
-    `${prefijo}«About & Data» se abre como diálogo modal y entonces lee manifest.json y pruebas.json`,
-    (await dlg.isVisible()) && (await dlg.evaluate((d) => d.open && d.matches(":modal"))) && pedidos().length >= 2,
+    `${prefijo}«About & Data» se abre como diálogo modal, entonces lee pruebas.json y reutiliza la lectura de manifest.json`,
+    (await dlg.isVisible()) && (await dlg.evaluate((d) => d.open && d.matches(":modal"))) && dePruebas() >= 1 && deManifest() === Math.max(1, manifestAntes),
     pedidos().map((u) => u.split("/").pop()).join(", "),
   );
   check(`${prefijo}el diálogo se nombra con su título «About & Data»`, await dlg.evaluate((d) => document.getElementById(d.getAttribute("aria-labelledby"))?.textContent.trim() === "About & Data"));
@@ -812,8 +845,761 @@ async function pruebaAcerca(page, peticiones, prefijo, telefono, captura) {
   );
 }
 
+// ---------------------------------------------------------------- gemelo digital (docs/decisiones/2026-11-14_gemelo_digital.md)
+// Zona inicial, vista 3D, línea de tiempo, tarjeta «Twin status» y aplicación instalable, conectadas por app.js.
+const zonasCubo = Object.keys(cubo.zonas ?? {});
+const zonaDeProp = (p) => p.zona ?? zonasCubo[0];
+/** Zona con la que debe abrir la página: gemelo.json → zona_inicial si está en el cubo; si no, la primera del cubo. */
+const zonaInicialDe = (c) => {
+  const ids = Object.keys(c.zonas ?? {});
+  if (ids.length < 2) return null;
+  return gemelo?.zona_inicial && c.zonas[gemelo.zona_inicial] ? gemelo.zona_inicial : ids[0];
+};
+const zonaInicial = zonaInicialDe(cubo);
+const nombreZonaCubo = (id, c = cubo) => c.zonas?.[id]?.nombre_mostrar ?? c.zonas?.[id]?.nombre ?? id;
+const camara = gemelo?.camara ?? {};
+const MEMORIA_CLAVES = ["perenne", "verano", "invierno", "doble", "descanso", "sin_dato"];
+
+/** Pasa a «All areas» (para las comprobaciones que cuentan todas las parcelas); sin selector (una zona), nada. */
+async function verTodas(page) {
+  if (!(await page.locator("#selector-zona").isVisible())) return;
+  if ((await page.locator("#zona-sel").inputValue()) !== "") await page.locator("#zona-sel").selectOption("");
+  await page.evaluate(() => window.raizDepuracion.esperarMapa());
+}
+async function elegirZona(page, id) {
+  await page.locator("#zona-sel").selectOption(id);
+  await page.evaluate(() => window.raizDepuracion.esperarMapa());
+}
+const dosCuadros = (page) => page.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok))));
+const gemelo3d = (page) => page.evaluate(() => window.raizDepuracion.gemelo3d());
+const quieto = (page) => page.evaluate(() => window.raizDepuracion.esperarQuieto());
+
+/** La página abre en la zona inicial (decisión del gemelo, punto 6): selector, lista, mapa e indicador de esa zona. */
+async function pruebaZonaInicial(page, prefijo) {
+  if (!zonaInicial) {
+    omitir(`${prefijo}zona inicial`, "el cubo trae menos de dos zonas: no hay selector");
+    return;
+  }
+  const nombre = nombreZonaCubo(zonaInicial);
+  const valor = await page.locator("#zona-sel").inputValue();
+  check(`${prefijo}la página abre en ${nombre} (gemelo.json → zona_inicial), no en «All areas»`, valor === zonaInicial, valor || "«All areas»");
+  const deZona = props.filter((p) => zonaDeProp(p) === zonaInicial);
+  const enLista = await page.locator(".boton-parcela:visible").count();
+  const resumen = await texto(page, "#lista-resumen");
+  check(`${prefijo}zona inicial: la lista muestra sus ${deZona.length} parcelas y lo dice`, enLista === deZona.length && resumen.includes(nombre), `${enLista} · ${resumen}`);
+  const dibujadas = await page.evaluate(() => window.raizDepuracion.parcelasDibujadas());
+  check(`${prefijo}zona inicial: el mapa encuadra y dibuja sus ${deZona.length} parcelas`, dibujadas === deZona.length, `${dibujadas} dibujadas`);
+  const D = Number(await page.locator("#dotacion").inputValue());
+  const ac = aguaComprometida(cubo.zonas[zonaInicial], D, 0);
+  const pct = nf({ style: "percent", maximumFractionDigits: 0 }).format(ac.p50).replace("-", "−");
+  const ind = await indicador(page);
+  check(`${prefijo}zona inicial: el indicador usa el bloque de ${nombre} (${pct})`, ac.sinDotacion || ind.includes(pct), (await texto(page, "#indicador-cifra")).trim());
+}
+
+/** Manifest de la aplicación instalable, theme-color e indicador Online en la cabecera (instalar.js). */
+async function pruebaInstalable(page, prefijo) {
+  const enlace = await page.evaluate(async () => {
+    const l = document.querySelector('link[rel="manifest"]');
+    if (!l) return null;
+    const r = await fetch(l.href);
+    return { href: l.getAttribute("href"), ok: r.ok, datos: r.ok ? await r.json() : null, tema: document.querySelector('meta[name="theme-color"]')?.content ?? null };
+  });
+  check(`${prefijo}<link rel="manifest" href="manifest.webmanifest"> enlazado y legible`, enlace?.href === "manifest.webmanifest" && enlace.ok && Boolean(enlace.datos?.icons?.length), JSON.stringify(enlace?.href));
+  check(`${prefijo}theme-color de index.html = theme_color del manifest`, Boolean(enlace?.tema) && enlace.tema.toUpperCase() === String(enlace?.datos?.theme_color).toUpperCase(), `${enlace?.tema} · ${enlace?.datos?.theme_color}`);
+  await page.waitForSelector("#marca-instalar .instalar:not([hidden])", { timeout: 10000 }).catch(() => null);
+  const ind = page.locator("#marca-instalar .instalar [role='status']");
+  const textoInd = (await ind.count()) ? (await ind.first().innerText()).trim() : "";
+  check(`${prefijo}cabecera: indicador de conexión accesible (role=status) que dice «Online»`, textoInd.startsWith("Online"), textoInd || "sin indicador");
+  check(`${prefijo}cabecera: «Install app» solo si el navegador lo ofrece (aquí no)`, (await page.locator("#marca-instalar button:visible", { hasText: "Install app" }).count()) === 0);
+}
+
+/** Tarjeta «Twin status»: observado, modelado y escenario, fechas de las fuentes, nota fija; sin undefined ni NaN. */
+async function pruebaEstadoGemelo(page, prefijo) {
+  await page.waitForSelector("body[data-estado-gemelo='listo']", { timeout: 10000 }).catch(() => null);
+  const t = page.locator("#estado-gemelo .estado-gemelo");
+  check(`${prefijo}Twin status: la tarjeta está en el panel`, (await t.count()) === 1 && (await page.locator(".panel #estado-gemelo").count()) === 1);
+  const cuerpo = await t.evaluate((el) => el.textContent);
+  check(`${prefijo}Twin status: sin «undefined», «NaN», «null» ni «Invalid Date»`, !/undefined|NaN|\bnull\b|Invalid Date/.test(cuerpo));
+  const grupos = await t.locator("[data-grupo]").evaluateAll((xs) => xs.map((x) => x.dataset.grupo));
+  check(`${prefijo}Twin status: grupos observado, modelado y escenario`, ["observado", "modelado", "escenario"].every((g) => grupos.includes(g)), grupos.join(", "));
+  check(`${prefijo}Twin status: nota fija (sin sensores en campo, no pronostica la presa)`, cuerpo.includes("no in-field sensors") && cuerpo.includes("It does not forecast the dam."));
+  if (existe("manifest.json")) {
+    const fechas = await t.locator("[data-grupo='observado'] .estado-gemelo-fecha").allInnerTexts();
+    check(
+      `${prefijo}Twin status: cada fuente observada con su fecha (manifest.json)`,
+      (await t.getAttribute("data-fuentes")) === "si" && fechas.length >= 3 && fechas.every((f) => /Data retrieved: \w{3} \d{1,2}, \d{4}/.test(f)),
+      fechas.join(" | "),
+    );
+  }
+  if (zonaInicial) check(`${prefijo}Twin status: la zona en vista es la zona inicial`, (await t.getAttribute("data-zona")) === zonaInicial);
+  await fijarDeslizador(page, D2);
+  const valor = await t.locator("[data-fila='dotacion'] [data-valor]").first().innerText().catch(() => "");
+  check(`${prefijo}Twin status: «Your scenario» repite la dotación del deslizador`, valor.includes(`${fmt3(D2)} thousand m³/ha`), valor);
+}
+
+/** Línea de tiempo: el año pasado colorea el mapa con la memoria (seis estados) y cuenta; 2025 con su nota [P]. */
+async function pruebaLineaDeTiempo(page, prefijo, reducida) {
+  const anios = gemelo?.tiempo?.anios;
+  if (!Array.isArray(anios)) {
+    check(`${prefijo}sin gemelo.tiempo: «Timeline: not available»`, (await texto(page, "#bloque-tiempo")).includes("Timeline: not available"));
+    return;
+  }
+  const [a0, a1] = [Math.min(...anios), Math.max(...anios)];
+  const rango = page.locator("#linea-tiempo .tiempo-rango");
+  const fijarAnio = (a) => rango.evaluate((el, v) => { el.value = String(v); el.dispatchEvent(new Event("input", { bubbles: true })); }, a);
+  const cuentas = () => page.locator("#linea-tiempo .tiempo-estado").evaluateAll((xs) => Object.fromEntries(xs.map((x) => [x.dataset.estado, x.querySelector(".tiempo-cuenta-numero")?.textContent.trim()])));
+  const visibles = props.filter((p) => !zonaInicial || zonaDeProp(p) === (zonaInicial));
+  const esperadas = (a) => {
+    const c = Object.fromEntries(MEMORIA_CLAVES.map((k) => [k, 0]));
+    for (const p of visibles) {
+      const e = Array.isArray(p.memoria) ? p.memoria.find((m) => m.anio === a)?.estado : null;
+      c[MEMORIA_CLAVES.includes(e) ? e : "sin_dato"] += 1;
+    }
+    return Object.fromEntries(Object.entries(c).map(([k, v]) => [k, nf({ maximumFractionDigits: 0 }).format(v)]));
+  };
+  const etiqueta = await texto(page, "#linea-tiempo .tiempo-etiqueta");
+  check(`${prefijo}línea de tiempo «Agricultural year» en el panel, abre en ${a1}`, etiqueta.includes("Agricultural year") && (await rango.inputValue()) === String(a1) && (await page.locator(".panel #linea-tiempo .tiempo").count()) === 1);
+  const c1 = await cuentas();
+  await fijarAnio(a0);
+  const c0 = await cuentas();
+  const ley0 = await texto(page, "#leyenda");
+  const clases = await page.locator("#leyenda li").evaluateAll((xs) => xs.map((x) => x.dataset.clase));
+  check(`${prefijo}línea de tiempo en ${a0}: el mapa y su leyenda muestran la memoria de ${a0} (seis estados)`,
+    ley0.includes(`Field memory: ${a0}`) && MEMORIA_CLAVES.every((k) => clases.includes(k)) && (await page.evaluate(() => document.body.dataset.anioTiempo)) === String(a0), ley0.split("\n")[0]);
+  check(`${prefijo}línea de tiempo en ${a0}: conteos del año (de parcelas.geojson) y distintos de ${a1}`, JSON.stringify(c0) === JSON.stringify(esperadas(a0)) && JSON.stringify(c0) !== JSON.stringify(c1), JSON.stringify(c0));
+  const listaLetra = await page.locator(".boton-parcela:visible .sem-circulo").first().innerText();
+  check(`${prefijo}línea de tiempo en ${a0}: la lista de parcelas usa las letras de la memoria`, ["P", "S", "W", "D", "R", "?"].includes(listaLetra.trim()), listaLetra);
+  const destacado = Object.keys(gemelo.tiempo.destacados ?? {})[0];
+  if (destacado) {
+    await fijarAnio(Number(destacado));
+    const d = gemelo.tiempo.destacados[destacado];
+    const nota = page.locator(`#linea-tiempo .tiempo-destacado[data-anio="${destacado}"]`);
+    const textoNota = (await nota.isVisible()) ? await nota.innerText() : "";
+    check(`${prefijo}línea de tiempo en ${destacado}: nota destacada con su texto, fuente y etiqueta ${d.etiqueta}`, textoNota.includes(d.texto) && textoNota.includes(d.fuente) && textoNota.includes(d.etiqueta), textoNota.replace(/\n/g, " · "));
+    await page.locator("#bloque-tiempo").scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(CAPTURAS, `${reducida ? "telefono" : "escritorio"}_linea_tiempo_${destacado}.png`) });
+  }
+  // Reproducción: con movimiento reducido el botón dice «Next year» y avanza un año por pulsación.
+  await fijarAnio(a0);
+  const boton = page.locator("#linea-tiempo .tiempo-boton");
+  if (reducida) {
+    const t = (await boton.innerText()).trim();
+    await boton.click();
+    check(`${prefijo}línea de tiempo con movimiento reducido: «Next year» sin aria-pressed avanza un año`, t === "Next year" && (await boton.getAttribute("aria-pressed")) === null && (await rango.inputValue()) === String(a0 + 1), `${t} → ${await rango.inputValue()}`);
+  } else {
+    await boton.click();
+    const pulsado = await boton.getAttribute("aria-pressed");
+    await page.waitForTimeout(Number(gemelo.tiempo.intervalo_ms) + 400);
+    const avanzado = Number(await rango.inputValue());
+    await boton.click();
+    check(`${prefijo}línea de tiempo: Play (aria-pressed) avanza los años y Pause la detiene`, pulsado === "true" && avanzado >= a0 + 2 && (await boton.getAttribute("aria-pressed")) === "false", `${pulsado} · año ${avanzado}`);
+  }
+  // Elegir cómo colorear devuelve la línea de tiempo al año actual; también volver a mano al último año.
+  await page.locator('input[name="colorear"][value="plazo"]').check();
+  const ley1 = await texto(page, "#leyenda");
+  check(`${prefijo}línea de tiempo: elegir «Water term» devuelve el año ${a1} y colorea por plazo`,
+    (await rango.inputValue()) === String(a1) && ley1.includes("Water term") && (await page.evaluate(() => document.body.dataset.anioTiempo)) === "", ley1.split("\n")[0]);
+  await page.locator('input[name="colorear"][value="semaforo"]').check();
+  await fijarAnio(a0);
+  await fijarAnio(a1);
+  check(`${prefijo}línea de tiempo: volver a ${a1} restablece el semáforo de agua`, (await texto(page, "#leyenda")).includes("Enough water for the current rotation?"));
+}
+
+/**
+ * ¿Qué columna se VE en cada píxel? Se pinta cada columna con un código binario (un cuadro por bit, blanco o negro) y
+ * se compara con columnaEn (el clic, el toque, Enter y la etiqueta dependen de ella). Devuelve el acierto fuera de
+ * los bordes. Al terminar deja las capas de la aplicación como estaban (las de la vista 3D se retiran al desactivar).
+ */
+async function identidadColumnas(page) {
+  await page.mouse.move(1, 1); // sin etiqueta de columna apuntada
+  const previo = await page.evaluate(() => {
+    const m = window.raizDepuracion.mapa;
+    const lienzo = m.getCanvas();
+    const caja = lienzo.getBoundingClientRect();
+    const ids = window.raizDepuracion.gemelo3d().columnas.map((c) => c.id);
+    const puntos = [];
+    for (let y = 6; y < caja.height - 6; y += 6) {
+      for (let x = 6; x < caja.width - 6; x += 6) {
+        if (document.elementFromPoint(caja.left + x, caja.top + y) === lienzo) puntos.push([x, y]);
+      }
+    }
+    const vistas = puntos.map(([x, y]) => window.raizDepuracion.columnaEn(caja.left + x, caja.top + y));
+    // Lo que se dibuja sobre el lienzo sin recibir el puntero (etiquetas de localidades, marcadores, controles) también
+    // saldría en la captura: se oculta mientras se pinta el código (y se devuelve al terminar).
+    const sobreLienzo = [...document.querySelectorAll("#mapa *")].filter((el) => el !== lienzo && !el.contains(lienzo));
+    const estiloPrevio = sobreLienzo.map((el) => el.style.visibility);
+    for (const el of sobreLienzo) el.style.visibility = "hidden";
+    const ocultas = m.getLayersOrder().filter((id) => !["gemelo-columna-agua", "gemelo-columna-falta", "gemelo-camara", "fondo"].includes(id));
+    const visibilidad = Object.fromEntries(ocultas.map((id) => [id, m.getLayoutProperty(id, "visibility") ?? "visible"]));
+    const fondo = m.getPaintProperty("fondo", "background-color");
+    for (const id of ocultas) m.setLayoutProperty(id, "visibility", "none");
+    m.setPaintProperty("fondo", "background-color", "#000000");
+    m.setPaintProperty("gemelo-columna-falta", "fill-extrusion-pattern", null);
+    // Sin transición de color: si no, el cuadro capturado podría quedar a medio camino entre dos códigos.
+    for (const capa of ["gemelo-columna-agua", "gemelo-columna-falta"]) m.setPaintProperty(capa, "fill-extrusion-color-transition", { duration: 0, delay: 0 });
+    window.__identidad = { puntos, vistas, ids, visibilidad, fondo, cuadros: [], sobreLienzo, estiloPrevio };
+    return { caja: { x: caja.left, y: caja.top, width: caja.width, height: caja.height }, bits: Math.ceil(Math.log2(ids.length + 1)) };
+  });
+  const cuadro = async (expr) => {
+    await page.evaluate((e) => {
+      const m = window.raizDepuracion.mapa;
+      m.setPaintProperty("gemelo-columna-agua", "fill-extrusion-color", e);
+      m.setPaintProperty("gemelo-columna-falta", "fill-extrusion-color", e);
+    }, expr);
+    await quieto(page);
+    await dosCuadros(page);
+    await page.waitForTimeout(150);
+    await dosCuadros(page);
+    const png = await page.screenshot({ clip: previo.caja });
+    await page.evaluate(async (b64) => {
+      const img = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
+      const lienzo = new OffscreenCanvas(img.width, img.height);
+      const ctx = lienzo.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+      window.__identidad.cuadros.push({ ancho: img.width, datos: ctx.getImageData(0, 0, img.width, img.height).data });
+    }, png.toString("base64"));
+  };
+  const ids = await page.evaluate(() => window.__identidad.ids);
+  for (let k = 0; k < previo.bits; k++) {
+    const con = ids.filter((_, i) => ((i + 1) >> k) & 1);
+    await cuadro(con.length ? ["match", ["get", "id"], con, "#ffffff", "#000000"] : "#000000");
+  }
+  await cuadro("#ffffff");
+  return page.evaluate(() => {
+    const m = window.raizDepuracion.mapa;
+    const { puntos, vistas, ids, visibilidad, fondo, cuadros, sobreLienzo, estiloPrevio } = window.__identidad;
+    sobreLienzo.forEach((el, i) => { el.style.visibility = estiloPrevio[i]; });
+    for (const [id, v] of Object.entries(visibilidad)) if (m.getLayer(id)) m.setLayoutProperty(id, "visibility", v);
+    m.setPaintProperty("fondo", "background-color", fondo);
+    const todo = cuadros.pop();
+    const escala = todo.ancho / m.getCanvas().getBoundingClientRect().width;
+    const codigo = (x, y) => {
+      const q = (Math.round(y * escala) * todo.ancho + Math.round(x * escala)) * 4;
+      if (todo.datos[q + 1] < 40) return 0;
+      let v = 0;
+      for (let k = 0; k < cuadros.length; k++) {
+        const g = cuadros[k].datos[q + 1];
+        if (g > 28 && g < 60) return -1;
+        if (g >= 60) v |= 1 << k;
+      }
+      return v;
+    };
+    let n = 0, bien = 0, otra = 0, ninguna = 0, bordes = 0;
+    const ejemplos = [];
+    puntos.forEach(([x, y], j) => {
+      const v = codigo(x, y);
+      if (v < 0 || [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => codigo(x + dx, y + dy) !== v)) { bordes += 1; return; }
+      if (v === 0) return;
+      n += 1;
+      const verdad = ids[v - 1] ?? "?";
+      if (vistas[j] === verdad) bien += 1;
+      else if (vistas[j] == null) ninguna += 1;
+      else { otra += 1; if (ejemplos.length < 3) ejemplos.push(`(${x},${y}) se ve ${verdad}, columnaEn ${vistas[j]}`); }
+    });
+    delete window.__identidad;
+    return { n, bien, otra, ninguna, bordes, ejemplos };
+  });
+}
+
+/** Lo que la vista 3D debe dibujar en una zona (el mismo cálculo que gemelo3d.js, con la lámina del cubo). */
+function columnasEsperadas(zonaId, D, r) {
+  const k = gemelo.columnas.metros_por_millar;
+  const cols = new Map();
+  let sinRiego = 0;
+  let sinClasificar = 0;
+  let clasificadas = 0;
+  for (const p of props) {
+    if (zonaId != null && p.zona != null && p.zona !== zonaId) continue;
+    const actual = actualDe(p.id);
+    const l50 = !p.abstencion && actual ? actual.agua?.lamina_bruta?.[String(r)]?.p50 ?? null : null;
+    if (l50 == null) sinClasificar += 1;
+    else {
+      clasificadas += 1;
+      if (l50 > 0) cols.set(p.id, { cubre: Math.min(Math.max(D, 0), l50) * k, pide: l50 * k });
+      else sinRiego += 1;
+    }
+  }
+  return { cols, sinRiego, sinClasificar, clasificadas };
+}
+const mismasColumnas = (vistas, esperadas) =>
+  vistas.length === esperadas.cols.size &&
+  vistas.every((c) => esperadas.cols.has(c.id) && Math.abs(c.cubre_m - esperadas.cols.get(c.id).cubre) < 1e-6 && Math.abs(c.pide_m - esperadas.cols.get(c.id).pide) < 1e-6);
+
+/** Vista 3D del gemelo (gemelo3d.js conectada por app.js). */
+async function pruebaGemelo3D(page, prefijo, telefono) {
+  const boton = page.locator("#boton-gemelo");
+  const motivo = page.locator("#gemelo-motivo");
+  if (!(await boton.count())) {
+    check(`${prefijo}3D: el botón «3D twin view» está en los controles del mapa`, false, "sin botón");
+    return;
+  }
+  check(`${prefijo}3D: el botón está en los controles del mapa`, (await page.locator("#mapa .maplibregl-ctrl #boton-gemelo").count()) === 1);
+  const z = zonaInicial ?? zonasCubo[0] ?? Object.keys(gemelo?.terreno?.zonas ?? {})[0];
+  if (!gemelo?.terreno?.zonas?.[z]) {
+    check(`${prefijo}3D: sin gemelo.json o sin teselas, «3D twin view: not available» con su motivo`,
+      (await boton.innerText()).trim() === "3D twin view: not available" && (await boton.getAttribute("aria-disabled")) === "true" && (await motivo.isVisible()));
+    return;
+  }
+  const nombre = nombreZonaCubo(z);
+  const exag = gemelo.terreno.zonas[z].exageracion ?? gemelo.terreno.exageracion;
+  if (zonasCubo.length > 1) {
+    await verTodas(page);
+    const t = (await boton.innerText()).trim();
+    const m = (await motivo.isVisible()) ? await motivo.innerText() : "";
+    await boton.dispatchEvent("click"); // aria-disabled: Playwright no lo pulsa; el clic debe quedar sin efecto
+    check(`${prefijo}3D: con «All areas» dice «3D twin view: not available», su motivo, y no se activa`,
+      t === "3D twin view: not available" && (await boton.getAttribute("aria-disabled")) === "true" && m.includes("Choose one pilot area") &&
+        (await boton.getAttribute("aria-pressed")) === "false" && !(await gemelo3d(page)).activo, `${t} · ${m}`);
+    await elegirZona(page, z);
+  }
+  check(`${prefijo}3D: en ${nombre} el botón «3D twin view» se ofrece (aria-pressed=false)`,
+    (await boton.innerText()).trim() === "3D twin view" && (await boton.getAttribute("aria-pressed")) === "false" && (await boton.getAttribute("aria-disabled")) === null && !(await motivo.isVisible()));
+
+  // Activar con el teclado
+  await boton.focus();
+  await page.keyboard.press("Enter");
+  if (telefono) {
+    const g0 = await gemelo3d(page);
+    check(`${prefijo}3D con movimiento reducido: la cámara se inclina sin animación`, Math.abs(g0.pitch - camara.pitch) < 0.5 && Math.abs(g0.bearing - camara.bearing) < 0.5, `pitch ${g0.pitch}`);
+  }
+  await quieto(page);
+  let g = await gemelo3d(page);
+  check(`${prefijo}3D: se activa con el teclado (aria-pressed=true) con el relieve de ${nombre} (×${fmt3(exag)}, la de la zona)`,
+    (await boton.getAttribute("aria-pressed")) === "true" && g.activo && g.terreno?.source === "gemelo-dem" && g.terreno?.exaggeration === exag, JSON.stringify(g.terreno));
+  check(`${prefijo}3D: cámara del gemelo (pitch ${camara.pitch}, bearing ${camara.bearing})`, Math.abs(g.pitch - camara.pitch) < 0.5 && Math.abs(g.bearing - camara.bearing) < 0.5, `${g.pitch} / ${g.bearing}`);
+  const elev = await page.evaluate(() => window.raizDepuracion.elevacionesDeZona());
+  check(`${prefijo}3D: el lienzo tiene terreno (teselas cargadas, elevación > 0 en la zona, ninguna tesela fallida)`,
+    g.relieveCargado && g.teselasFallidas === 0 && elev.some((e) => e > 0), elev.map((e) => Math.round(e)).join(", "));
+  check(`${prefijo}3D: zoom mínimo = terreno.minzoom + 1 mientras está activa`, g.minZoom === gemelo.terreno.minzoom + 1, String(g.minZoom));
+  let D = Number(await page.locator("#dotacion").inputValue());
+  let esp = columnasEsperadas(z, D, 0);
+  check(`${prefijo}3D: una columna por parcela clasificada que pide agua (${esp.cols.size}) y planas las demás (${esp.sinRiego} sin riego, ${esp.sinClasificar} sin clasificar)`,
+    g.cuenta?.columna === esp.cols.size && g.cuenta?.sin_riego === esp.sinRiego && g.cuenta?.sin_clasificar === esp.sinClasificar &&
+      g.cuenta.columna + g.cuenta.sin_riego === esp.clasificadas && mismasColumnas(g.columnas, esp), JSON.stringify(g.cuenta));
+  const leyenda = await texto(page, "#bloque-gemelo3d");
+  check(`${prefijo}3D: la leyenda aparece junto al mapa con la exageración (×${fmt3(exag)}), la escala y la fuente`,
+    (await page.locator("#bloque-gemelo3d").isVisible()) && leyenda.includes(`×${fmt3(exag)}`) && leyenda.includes(`${fmt3(gemelo.columnas.metros_por_millar)} m of height`) && leyenda.includes(gemelo.terreno.fuente));
+  await page.locator("#mapa").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(CAPTURAS, `${telefono ? "telefono" : "escritorio"}_gemelo3d.png`) });
+
+  // El deslizador y la lluvia cambian las alturas.
+  const antes = g.columnas;
+  await fijarDeslizador(page, D === D1 ? D2 : D1);
+  D = Number(await page.locator("#dotacion").inputValue());
+  await dosCuadros(page);
+  g = await gemelo3d(page);
+  esp = columnasEsperadas(z, D, 0);
+  check(`${prefijo}3D: mover el deslizador cambia las alturas (azul hasta lo que cubre la dotación)`, mismasColumnas(g.columnas, esp) && JSON.stringify(g.columnas) !== JSON.stringify(antes));
+  const seca = cubo.lluvia_pct.find((x) => x !== 0);
+  if (seca !== undefined) {
+    await page.locator("#lluvia").check();
+    await dosCuadros(page);
+    const gs = await gemelo3d(page);
+    check(`${prefijo}3D: «Rain ${seca}%» cambia lo que pide cada columna`, mismasColumnas(gs.columnas, columnasEsperadas(z, D, seca)) && JSON.stringify(gs.columnas) !== JSON.stringify(g.columnas));
+    await page.locator("#lluvia").uncheck();
+    await dosCuadros(page);
+  }
+
+  // Clic (o toque) en una columna abre su ficha.
+  await quieto(page);
+  const punto = await page.evaluate(() => window.raizDepuracion.puntoDeColumna());
+  if (punto) {
+    if (telefono) await page.touchscreen.tap(punto.x, punto.y);
+    else await page.mouse.click(punto.x, punto.y);
+    await page.waitForSelector("#ficha:not([hidden])", { timeout: 5000 }).catch(() => null);
+    const titulo = (await page.locator("#ficha").isVisible()) ? await texto(page, "#ficha-titulo") : "";
+    check(`${prefijo}3D: ${telefono ? "tocar" : "clic en"} la columna de ${punto.id} abre su ficha`, titulo === `Field ${punto.id}`, titulo);
+    await cerrarFicha(page);
+  } else {
+    check(`${prefijo}3D: hay columnas a la vista para tocar`, false, "ningún punto sobre una columna");
+  }
+
+  if (!telefono) {
+    // Enter con el mapa enfocado abre la columna bajo la mira del centro.
+    await page.locator("#mapa canvas").focus();
+    await page.keyboard.press("Enter");
+    const centro = await page.evaluate(() => {
+      const c = document.querySelector("#mapa canvas").getBoundingClientRect();
+      return window.raizDepuracion.columnaEn(c.left + c.width / 2, c.top + c.height / 2);
+    });
+    if (centro) {
+      await page.waitForSelector("#ficha:not([hidden])", { timeout: 5000 }).catch(() => null);
+      const titulo = (await page.locator("#ficha").isVisible()) ? await texto(page, "#ficha-titulo") : "";
+      check(`${prefijo}3D: Enter en el mapa abre la columna bajo la mira (${centro})`, titulo === `Field ${centro}`, titulo);
+      await cerrarFicha(page);
+    } else {
+      omitir(`${prefijo}3D: Enter sobre una columna`, "ninguna columna bajo el centro del mapa en esta vista");
+    }
+    await page.locator("#boton-gemelo").focus();
+
+    // Identidad: la columna que se ve en cada píxel es la que columnaEn devuelve (vista inicial y una girada).
+    const r1 = await identidadColumnas(page);
+    check(`${prefijo}3D: en la vista inicial, columnaEn da la columna que se ve en el píxel (≥ 99.5 % de ${r1.n} puntos fuera de bordes)`,
+      r1.n > 200 && r1.bien / r1.n >= 0.995, `${((100 * r1.bien) / Math.max(1, r1.n)).toFixed(2)} % · otra ${r1.otra} · ninguna ${r1.ninguna} ${r1.ejemplos.join(" ; ")}`);
+    const col = g.columnas[Math.floor(g.columnas.length * 0.6)];
+    const centroCol = porId.get(col.id) ? (() => { const f = parcelas.features.find((x) => x.properties.id === col.id); const c = f.geometry.type === "Polygon" ? f.geometry.coordinates[0] : f.geometry.coordinates[0][0]; return [c.reduce((a, p) => a + p[0], 0) / c.length, c.reduce((a, p) => a + p[1], 0) / c.length]; })() : null;
+    await page.evaluate((c) => window.raizDepuracion.mapa.jumpTo({ center: c, zoom: 13.4, bearing: 120, pitch: 60 }), centroCol);
+    await quieto(page);
+    const r2 = await identidadColumnas(page);
+    check(`${prefijo}3D: en una vista girada (zoom 13.4, bearing 120), columnaEn da la columna que se ve (≥ 99.5 % de ${r2.n} puntos)`,
+      r2.n > 200 && r2.bien / r2.n >= 0.995, `${((100 * r2.bien) / Math.max(1, r2.n)).toFixed(2)} % · otra ${r2.otra} · ninguna ${r2.ninguna} ${r2.ejemplos.join(" ; ")}`);
+    // Desactivar deja el mapa plano y sin capas del gemelo (las tramas de la identidad se fueron con ellas).
+    await boton.click();
+    await quieto(page);
+    const plano = await gemelo3d(page);
+    check(`${prefijo}3D: desactivar deja pitch 0, bearing 0, sin terreno ni capas o fuentes «gemelo-», y aria-pressed=false`,
+      !plano.activo && plano.pitch === 0 && plano.bearing === 0 && plano.terreno === null && plano.capas.length === 0 && plano.fuentes.length === 0 &&
+        (await boton.getAttribute("aria-pressed")) === "false" && !(await page.locator("#bloque-gemelo3d").isVisible()) && plano.minZoom < gemelo.terreno.minzoom + 1,
+      JSON.stringify({ pitch: plano.pitch, bearing: plano.bearing, capas: plano.capas, fuentes: plano.fuentes, minZoom: plano.minZoom }));
+    const vuelven = await page.evaluate(() => window.raizDepuracion.parcelasDibujadas());
+    check(`${prefijo}3D: al desactivar, el mapa plano sigue dibujando las parcelas`, vuelven > 0, `${vuelven}`);
+
+    // Otra zona con su propia exageración; después «All areas» retira la vista sola.
+    const otra = zonasCubo.find((id) => id !== z && gemelo.terreno.zonas[id]);
+    if (otra) {
+      await boton.click();
+      await quieto(page);
+      await elegirZona(page, otra);
+      await quieto(page);
+      const go = await gemelo3d(page);
+      const exagOtra = gemelo.terreno.zonas[otra].exageracion ?? gemelo.terreno.exageracion;
+      const leyOtra = await texto(page, "#bloque-gemelo3d");
+      check(`${prefijo}3D: al cambiar a ${nombreZonaCubo(otra)} sigue activa con SU exageración (×${fmt3(exagOtra)}) en el relieve y en la leyenda`,
+        go.activo && go.zona === otra && go.terreno?.exaggeration === exagOtra && go.exageracion === exagOtra && leyOtra.includes(`×${fmt3(exagOtra)}`), JSON.stringify(go.terreno));
+      const espOtra = columnasEsperadas(otra, D, 0);
+      check(`${prefijo}3D: en ${nombreZonaCubo(otra)}, una columna por parcela clasificada que pide agua (${espOtra.cols.size})`, mismasColumnas(go.columnas, espOtra), JSON.stringify(go.cuenta));
+      await page.screenshot({ path: path.join(CAPTURAS, `escritorio_gemelo3d_${otra}.png`) });
+      await verTodas(page);
+      await quieto(page);
+      const gt = await gemelo3d(page);
+      check(`${prefijo}3D: con «All areas» la vista se retira sola: mapa plano, sin capas del gemelo y el botón «not available»`,
+        !gt.activo && gt.pitch === 0 && gt.bearing === 0 && gt.capas.length === 0 && gt.terreno === null && (await boton.innerText()).trim() === "3D twin view: not available",
+        JSON.stringify({ pitch: gt.pitch, capas: gt.capas.length }));
+      await elegirZona(page, z);
+    }
+  } else {
+    await page.locator("#mapa").scrollIntoViewIfNeeded();
+    check(`${prefijo}3D: sin desplazamiento horizontal con la vista activa`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+    await boton.click();
+    await quieto(page);
+    const plano = await gemelo3d(page);
+    check(`${prefijo}3D: desactivar deja el mapa plano (pitch 0) y sin capas del gemelo`, !plano.activo && plano.pitch === 0 && plano.capas.length === 0 && plano.terreno === null);
+  }
+}
+
+
+// ---------------------------------------------------------------- ficha completa (etapa 2 del gemelo)
+const nfFicha = (v, d = 1) => (v == null || !Number.isFinite(Number(v)) ? "—" : nf({ maximumFractionDigits: d }).format(v).replace("-", "−"));
+const pctFicha = (f) => nf({ style: "percent", maximumFractionDigits: 0 }).format(f).replace("-", "−");
+const P0757 = porId.has("P0757") ? "P0757" : protagonistas.find((id) => opcionesDe(id).length > 3) ?? conNecesidad;
+/** Parcela cuya opción ACTUAL no pide agua (lámina cero) y una abstenida, para los tres casos de la frase. */
+const conLaminaCero = candidatos.find((id) => !porId.get(id).abstencion && actualDe(id) && !(l50(actualDe(id)) > 0));
+/** Una opción con su lámina local de referencia (de un solo cultivo) y otra sin ella (dos cultivos o corte de verano). */
+const opcionesTodas = Object.entries(cubo.parcelas).flatMap(([pid, pc]) => pc.opciones.map((o) => ({ pid, o })));
+const conRefLocal = opcionesTodas.find(({ pid, o }) => pid === P0757 && o.agua?.lamina_local) ?? opcionesTodas.find(({ o }) => o.agua?.lamina_local && Number.isFinite(o.agua.lamina_local.valor_millares_ha));
+const conPropuesta = opcionesTodas.find(({ pid, o }) => protagonistas.includes(pid) && o.origen_opcion === "team_proposal") ?? opcionesTodas.find(({ o }) => o.origen_opcion === "team_proposal");
+const conSinRotacion = [...protagonistas, ...candidatos].find((id) => cubo.parcelas?.[id]?.sin_rotacion);
+const conDotMin = opcionesTodas.find(({ pid, o }) => pid === P0757 && (o.filtros ?? []).some((f) => f.tipo === "dotacion_minima")) ??
+  opcionesTodas.find(({ o }) => (o.filtros ?? []).some((f) => f.tipo === "dotacion_minima"));
+
+/** Frase resumen esperada (la misma función de web/js/resumen.js con la evaluación de web/reglas.js). */
+function fraseEsperada(id, D) {
+  const p = porId.get(id);
+  const actual = actualDe(id) ?? null;
+  const evaluacion = actual && !p.abstencion ? evaluarOpcion(actual, p.area_ha, D, 0) : null;
+  return fraseResumen({ parcela: p, opcionActual: actual, evaluacion, D, formato: (v, k) => (k === "area" ? nfFicha(v, 3) : nfFicha(v)) });
+}
+
+/**
+ * Ficha completa: frase resumen (tres casos), NDVI con umbrales, aptitud y perfil de suelo, lámina local, propuesta del
+ * equipo, nogal sin rotación, dotacion_minima en vivo, GEDI con su nota, riesgo de helada y la advertencia con plazo.
+ */
+async function pruebaFichaCompleta(page, prefijo, telefono) {
+  const sufijo = telefono ? "telefono" : "escritorio";
+  // --- Frase resumen: con agua (cambia con el deslizador), lámina cero y abstenida ---
+  if (P0757) {
+    await abrirDesdeLista(page, P0757);
+    for (const D of [D1, D2]) {
+      await fijarDeslizador(page, D);
+      const frase = (await texto(page, "#ficha-resumen")).trim();
+      check(`${prefijo}frase resumen de ${P0757} con ${D} thousand m³/ha (con agua): la de resumen.js con la dotación`, frase === fraseEsperada(P0757, D) && frase.startsWith(`With ${nfFicha(D)} thousand m³/ha`), frase);
+    }
+    const caso = await page.locator("#ficha-resumen").getAttribute("data-caso");
+    check(`${prefijo}frase resumen de ${P0757}: caso «parcial» o «completa»`, ["parcial", "completa"].includes(caso), caso);
+    const frase = await texto(page, "#ficha-resumen");
+    check(`${prefijo}frase resumen: describe, sin «best», «recommended» ni pesos`, !/\b(best|recommended|weight|score)\b/i.test(frase));
+    // --- NDVI mensual con sus umbrales (leídos de ndvi_mensual.json) ---
+    const serie = ndviMensual?.parcelas?.[P0757];
+    if (serie) {
+      const conDato = serie.filter((v) => v != null).length;
+      const g = await page.evaluate(() => {
+        const r = document.querySelector("#ficha-ndvi .resumen-ndvi");
+        return {
+          estado: r?.dataset.estado,
+          puntos: r?.querySelectorAll("circle.resumen-ndvi-punto").length ?? 0,
+          huecos: r?.querySelectorAll("rect.resumen-ndvi-hueco").length ?? 0,
+          umbrales: [...(r?.querySelectorAll("line[data-umbral]") ?? [])].map((x) => x.dataset.umbral),
+          texto: r?.innerText ?? "",
+          cabe: r ? r.getBoundingClientRect().right <= document.querySelector("#ficha").getBoundingClientRect().right + 1 : false,
+        };
+      });
+      check(`${prefijo}NDVI de ${P0757}: un punto por mes con dato (${conDato}) y sin huecos`, g.estado === "con_datos" && g.puntos === conDato && g.huecos === serie.length - conDato, JSON.stringify({ ...g, texto: undefined }));
+      const umbrales = Object.entries(ndviMensual.umbrales ?? {}).filter(([, u]) => u).map(([k]) => k);
+      check(`${prefijo}NDVI: líneas de referencia de los datos (${umbrales.join(", ") || "ninguna"}) con su valor`,
+        umbrales.every((k) => g.umbrales.includes(k)) && umbrales.every((k) => g.texto.includes(nf({ maximumFractionDigits: 3 }).format(ndviMensual.umbrales[k].valor))), g.umbrales.join(", "));
+      check(`${prefijo}NDVI: la gráfica cabe en la ficha (sin desbordar)`, g.cabe);
+      await page.locator("#ficha-ndvi").scrollIntoViewIfNeeded();
+      await esperarAnimaciones(page);
+      await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_resumen_ndvi.png`) });
+    } else {
+      omitir(`${prefijo}NDVI de ${P0757}`, "ndvi_mensual.json no trae la parcela");
+    }
+    // --- Lámina local de referencia: valor, hectáreas que cambian con el deslizador y su límite ---
+    if (conRefLocal && conRefLocal.pid === P0757) {
+      const ll = conRefLocal.o.agua.lamina_local;
+      const area = porId.get(P0757).area_ha;
+      const caja = tarjeta(page, conRefLocal.o.id).locator(".lamina-local").first();
+      const vistos = [];
+      for (const D of [D1, D2]) {
+        await fijarDeslizador(page, D);
+        const t = (await caja.innerText()).replace(/\s+/g, " ");
+        vistos.push(t);
+        const ha = nfFicha(area * cobertura(D, ll.valor_millares_ha));
+        check(`${prefijo}lámina local de ${P0757}/${conRefLocal.o.id} con ${D}: ${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha y «enough for ${ha} of ${nfFicha(area, 3)} hectares»`,
+          t.includes(`${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha`) && t.includes(`enough for ${ha} of ${nfFicha(area, 3)} hectares`), t);
+      }
+      check(`${prefijo}lámina local: las hectáreas cambian con el deslizador`, vistos[0] !== vistos[1]);
+      const titulo = ll.tipo === "aplicada"
+        ? `Typically applied in this district (${ll.periodo ? `${ll.periodo.desde}–${ll.periodo.hasta} records; ` : ""}measurement point not confirmed)`
+        : "Recommended by INIFAP";
+      check(`${prefijo}lámina local: rótulo «${titulo}» y su límite a la vista`, vistos[1].includes(titulo) && /district average, not this field|regional recommendation, not this field/.test(vistos[1]), vistos[1]);
+      check(`${prefijo}lámina local: el semáforo sigue con la lámina del modelo`, (await tarjeta(page, conRefLocal.o.id).getAttribute("data-semaforo")) === evaluarOpcion(conRefLocal.o, area, D2, 0).semaforo);
+      await caja.scrollIntoViewIfNeeded();
+      await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_lamina_local.png`) });
+    }
+    for (const o of opcionesDe(P0757)) {
+      const sinRef = !o.agua?.lamina_local && l50(o) > 0;
+      if (!sinRef) continue;
+      const t = await tarjeta(page, o.id).locator(".lamina-local").innerText().catch(() => "");
+      check(`${prefijo}${P0757}/${o.id} (${o.secuencia.join(" + ")}): «no local reference»`, /no local reference/.test(t), t);
+    }
+    // --- Aptitud de suelo con su rótulo y su estado en texto, en cada tarjeta ---
+    const apt = suelo?.aptitud?.[P0757];
+    if (apt) {
+      for (const o of opcionesDe(P0757)) {
+        const a = apt[o.id];
+        const fila = tarjeta(page, o.id).locator(".renglon-suelo .suelo-aptitud");
+        const t = (await fila.innerText().catch(() => "")).replace(/\s+/g, " ");
+        const estadoVisto = await fila.getAttribute("data-estado").catch(() => null);
+        if (a?.nota === "nothing is planted") {
+          check(`${prefijo}aptitud ${P0757}/${o.id}: «Soil fit: nothing is planted»`, /Soil fit: nothing is planted/.test(t), t);
+        } else if (a) {
+          const e = ESTADOS_APTITUD[a.estado];
+          check(`${prefijo}aptitud ${P0757}/${o.id}: estado «${e.etiqueta}» en texto y con su rótulo`, estadoVisto === a.estado && t.includes(e.etiqueta) && t.includes(suelo.rotulo_aptitud ?? ROTULO_APTITUD), t);
+        }
+      }
+      const orden = await page.locator("#ficha .tarjeta").evaluateAll((ts) => ts.map((x) => x.dataset.opcion));
+      check(`${prefijo}la aptitud no reordena ni quita opciones (orden del cubo)`, JSON.stringify(orden) === JSON.stringify(opcionesDe(P0757).map((o) => o.id)), orden.join(", "));
+    }
+    // --- Perfil de suelo: una vez por ficha, con el grupo de textura y lo que el mapa no trae ---
+    const perfil = suelo?.perfil?.parcelas?.[P0757];
+    if (perfil) {
+      check(`${prefijo}perfil de suelo de ${P0757}: una sola vez en la ficha`, (await page.locator("#ficha .suelo-perfil").count()) === 1);
+      const t = (await texto(page, "#seccion-evidencia")).replace(/\s+/g, " ");
+      const grupo = grupoDeTextura(perfil.clase_textura, suelo.requisitos?.grupos_textura);
+      check(`${prefijo}perfil: textura por su grupo (${grupo}) y la clase exacta plegada`, grupo != null && t.includes(`Texture group: ${grupo}`) && (await page.locator("#ficha .suelo-clase-exacta").count()) === 1, t.slice(0, 160));
+      const faltan = [["Total nitrogen", perfil.nitrogeno_g_kg], ["Salinity (electrical conductivity)", perfil.salinidad_ce_ds_m]].filter(([, v]) => v == null);
+      check(`${prefijo}perfil: lo que el mapa no trae dice «not in the map» (${faltan.map(([k]) => k).join(", ")})`, faltan.every(([k]) => t.includes(`${k}: not in the map`) || t.includes(`${k} not in the map`)), t.slice(0, 400));
+      check(`${prefijo}perfil: «Phosphorus, potassium, iron, zinc: needs a soil test»`, t.includes("Phosphorus, potassium, iron, zinc: needs a soil test"));
+      const zona = zonaDeProp(porId.get(P0757));
+      const alc = suelo.alcalinidad_zona?.[zona];
+      if (alc?.mayoria) {
+        check(`${prefijo}nota de zona: ${alc.n_sobre_optimo} de ${alc.n_con_ph} parcelas con pH sobre el óptimo de la mayoría de ${alc.n_cultivos} cultivos`, t.includes(`Area note: ${alc.n_sobre_optimo} of ${alc.n_con_ph} mapped fields`) && t.includes(`most of the ${alc.n_cultivos} crops`), t.slice(t.indexOf("Area note"), t.indexOf("Area note") + 200));
+      }
+      // --- GEDI con su nota SIEMPRE junto al valor ---
+      if (contexto?.gedi) {
+        const li = page.locator('#seccion-evidencia li[data-evidencia="GEDI height reading"]');
+        const tg = (await li.innerText().catch(() => "")).replace(/\s+/g, " ");
+        check(`${prefijo}GEDI de ${P0757}: el valor y su nota en el mismo renglón`, tg.startsWith("GEDI height reading:") && tg.includes(NOTA_GEDI) && (await li.locator(".evidencia-nota").isVisible()), tg.slice(0, 200));
+      }
+      await page.locator("#seccion-evidencia").scrollIntoViewIfNeeded();
+      await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_suelo_evidencia.png`) });
+    }
+    // --- dotacion_minima evaluado en vivo contra el deslizador ---
+    if (conDotMin && conDotMin.pid === P0757) {
+      const f = conDotMin.o.filtros.find((x) => x.tipo === "dotacion_minima");
+      const minimo = cubo.filtros_catalogo[f.id].regla.lamina_minima_cm / cubo.dotaciones.lamina_cm_por_millar.valor;
+      const li = tarjeta(page, conDotMin.o.id).locator(`.filtros li[data-filtro="${f.id}"]`);
+      const vistos = [];
+      for (const D of [deslizador.min, minimo, deslizador.max]) {
+        await fijarDeslizador(page, D);
+        const e = await li.getAttribute("data-estado");
+        vistos.push(`${D}:${e}`);
+        check(`${prefijo}dotacion_minima «${f.id}» con ${D} thousand m³/ha (mínimo ${nfFicha(minimo, 3)}): ${D >= minimo ? "passes" : "warning"}, nunca «needs a local check»`, e === (D >= minimo ? "passes" : "warning"), (await li.innerText()).replace(/\s+/g, " ").slice(0, 160));
+      }
+      check(`${prefijo}dotacion_minima cambia de estado al mover el deslizador`, new Set(vistos.map((x) => x.split(":")[1])).size === 2, vistos.join(" · "));
+      await fijarDeslizador(page, deslizador.min);
+      await li.scrollIntoViewIfNeeded();
+      await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_dotacion_minima.png`) });
+    }
+    // --- Riesgo de helada junto a la fecha de siembra (opciones que lo tienen) ---
+    for (const o of opcionesDe(P0757)) {
+      const sec = cubo.opciones_catalogo?.[o.rotacion]?.secuencia ?? [];
+      const conRiesgo = sec.filter((x) => x?.siembra?.desde).map((x) => riesgoDeHelada({ contexto, fechaSiembra: x.siembra.desde, zonaId: zonaDeProp(porId.get(P0757)) })).filter(Boolean);
+      if (!conRiesgo.length) continue;
+      const t = (await tarjeta(page, o.id).locator(".siembra").innerText()).replace(/\s+/g, " ");
+      check(`${prefijo}riesgo de helada junto a la siembra en ${P0757}/${o.id}: ${conRiesgo.map((r) => pctFicha(r.prob)).join(", ")}`, conRiesgo.every((r) => t.includes(`${pctFicha(r.prob)}`)) && /Planting window/.test(t) && /chance of a frost after/.test(t), t);
+    }
+    // --- advertir_si_rojo con el plazo del dato ---
+    const conAdv = opcionesDe(P0757).find((o) => o.advertir_si_rojo);
+    if (conAdv) {
+      const D = [deslizador.min, D1, D2].find((x) => evaluarOpcion(conAdv, porId.get(P0757).area_ha, x, 0).semaforo === "rojo");
+      if (D != null) {
+        await fijarDeslizador(page, D);
+        const plazo = conAdv.agua.plazo_anios;
+        const t = await tarjeta(page, conAdv.id).locator(".advertencia").innerText();
+        const esperado = `${plazo.min === plazo.max ? plazo.min : `${plazo.min}–${plazo.max}`} ${plazo.max === 1 ? "year" : "years"}`;
+        check(`${prefijo}advertir_si_rojo en ${P0757}/${conAdv.id}: recuerda que la alfalfa obliga ${esperado}`, t.includes(esperado) && (!conAdv.secuencia.includes("alfalfa") || t.includes("alfalfa")), t);
+      }
+    }
+    await fijarDeslizador(page, D2);
+    await cerrarFicha(page);
+  } else {
+    omitir(`${prefijo}ficha completa`, "ninguna parcela con opciones en estos datos");
+  }
+  // --- Frase en lámina cero y en una abstenida ---
+  if (conLaminaCero) {
+    await abrirDesdeLista(page, conLaminaCero);
+    const f = (await texto(page, "#ficha-resumen")).trim();
+    check(`${prefijo}frase resumen de ${conLaminaCero} (lámina cero): «needs no irrigation»`, (await page.locator("#ficha-resumen").getAttribute("data-caso")) === "sin_riego" && f === fraseEsperada(conLaminaCero, D2) && f.includes("needs no irrigation"), f);
+    await cerrarFicha(page);
+  } else {
+    omitir(`${prefijo}frase en lámina cero`, "ninguna opción ACTUAL con lámina cero");
+  }
+  if (abstenidas.length) {
+    const id = suelo?.perfil?.parcelas?.P0316 && porId.get("P0316")?.abstencion ? "P0316" : abstenidas[0];
+    await abrirDesdeLista(page, id);
+    const f = (await texto(page, "#ficha-resumen")).trim();
+    check(`${prefijo}frase resumen de ${id} (abstenida): «Not classified — check with a technician»`, (await page.locator("#ficha-resumen").getAttribute("data-caso")) === "abstenida" && f.startsWith("Not classified — check with a technician"), f);
+    const p = suelo?.perfil?.parcelas?.[id];
+    if (p && ["ph", "clase_textura", "arena_pct"].every((k) => p[k] == null)) {
+      check(`${prefijo}${id} sin dato de suelo: «Soil profile: no soil data for this field»`, (await texto(page, "#seccion-evidencia")).includes("Soil profile: no soil data for this field"));
+    }
+    await cerrarFicha(page);
+  }
+  // --- Propuesta del equipo rotulada ---
+  if (conPropuesta) {
+    await abrirDesdeLista(page, conPropuesta.pid);
+    const t = await tarjeta(page, conPropuesta.o.id).locator(".tarjeta-cabeza").innerText();
+    check(`${prefijo}propuesta del equipo ${conPropuesta.pid}/${conPropuesta.o.id}: rótulo «${conPropuesta.o.etiqueta_opcion}» junto al nombre`, t.includes(conPropuesta.o.nombre) && t.includes(conPropuesta.o.etiqueta_opcion), t.replace(/\s+/g, " "));
+    const oficiales = opcionesDe(conPropuesta.pid).filter((o) => o.origen_opcion !== "team_proposal").map((o) => o.id);
+    let sinRotulo = true;
+    for (const id of oficiales) sinRotulo &&= (await tarjeta(page, id).locator(".insignia-propuesta").count()) === 0;
+    check(`${prefijo}las opciones de la tabla oficial no llevan el rótulo de propuesta`, sinRotulo);
+    await cerrarFicha(page);
+  }
+  // --- Nogal sin rotación: su motivo y su fuente en lugar de las alternativas ---
+  if (conSinRotacion) {
+    const sr = cubo.parcelas[conSinRotacion].sin_rotacion;
+    await abrirDesdeLista(page, conSinRotacion);
+    const t = (await page.locator("#ficha [data-parte='sin-rotacion']").innerText().catch(() => "")).replace(/\s+/g, " ");
+    check(`${prefijo}${conSinRotacion} (no rota): una tarjeta y su motivo y fuente del dato`, (await page.locator("#ficha .tarjeta").count()) === 1 && t.includes(sr.motivo) && t.includes(sr.fuente.slice(0, 40)), t.slice(0, 160));
+    await page.locator("#ficha [data-parte='sin-rotacion']").scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_nogal_sin_rotacion.png`) });
+    await cerrarFicha(page);
+  }
+  if (telefono) {
+    check(`${prefijo}con la ficha completa, sin desplazamiento horizontal`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  }
+}
+
+/** Enlace directo: #P0757 abre su ficha (sin pantalla de inicio), el hash sigue a la ficha, un id desconocido avisa. */
+async function pruebaEnlaceDirecto(navegador, base, prefijo, opciones) {
+  if (!P0757) return;
+  const ctxE = await abrir(navegador, base, opciones, `${prefijo}enlace #${P0757}`, {}, { inicio: true, hash: `#${P0757}` });
+  const { page } = ctxE;
+  const titulo = (await page.locator("#ficha").isVisible()) ? await texto(page, "#ficha-titulo") : "";
+  check(`${prefijo}#${P0757} abre la ficha de ${P0757} al cargar`, titulo === `Field ${P0757}`, titulo || "ficha cerrada");
+  check(`${prefijo}con un enlace directo no aparece la pantalla de inicio encima de la ficha`, (await page.locator(".acerca-inicio").count()) === 0);
+  const otro = protagonistas.find((x) => x !== P0757 && zonaDeProp(porId.get(x)) === zonaDeProp(porId.get(P0757))) ?? candidatos.find((x) => x !== P0757 && zonaDeProp(porId.get(x)) === zonaDeProp(porId.get(P0757)));
+  if (otro) {
+    await abrirDesdeLista(page, otro);
+    check(`${prefijo}al abrir otra ficha el hash cambia a #${otro}`, (await page.evaluate(() => location.hash)) === `#${otro}`);
+  }
+  await cerrarFicha(page);
+  check(`${prefijo}al cerrar la ficha el hash se quita`, (await page.evaluate(() => location.hash)) === "");
+  // Una parcela de otra zona por «hashchange»: la página pasa a su zona y abre la ficha.
+  const deOtraZona = protagonistas.find((x) => zonaDeProp(porId.get(x)) !== zonaDeProp(porId.get(P0757)));
+  if (deOtraZona && zonasCubo.length > 1) {
+    await page.evaluate((h) => { location.hash = h; }, `#${deOtraZona}`);
+    await page.waitForFunction((id) => document.querySelector("#ficha-titulo")?.textContent === `Field ${id}`, deOtraZona, { timeout: 8000 }).catch(() => null);
+    check(`${prefijo}«hashchange» a #${deOtraZona}: cambia a su zona y abre la ficha`, (await texto(page, "#ficha-titulo")) === `Field ${deOtraZona}` && (await page.locator("#zona-sel").inputValue()) === zonaDeProp(porId.get(deOtraZona)));
+    await cerrarFicha(page);
+  }
+  // El ancla «Skip to the map» (#principal) no es un id de parcela y no avisa.
+  await page.evaluate(() => { location.hash = "#principal"; });
+  await page.waitForTimeout(150);
+  check(`${prefijo}#principal (ancla de la página) no muestra el aviso de enlace`, await page.locator("#aviso-enlace").isHidden());
+  check(`${prefijo}enlace directo: sin errores de consola`, ctxE.errores.length === 0, ctxE.errores.join(" | "));
+  await ctxE.ctx.close();
+  // Un id que no existe: aviso visible, ninguna ficha, la página sigue.
+  const ctxX = await abrir(navegador, base, opciones, `${prefijo}enlace desconocido`, {}, { hash: "#ZZ9999" });
+  const aviso = (await ctxX.page.locator("#aviso-enlace").isVisible()) ? await texto(ctxX.page, "#aviso-enlace") : "";
+  check(`${prefijo}#ZZ9999 (id desconocido): aviso visible, sin ficha y la página sigue`, aviso.includes("ZZ9999") && aviso.includes("no field with that ID") && (await ctxX.page.locator("#ficha").isHidden()) && (await ctxX.page.locator(".boton-parcela").count()) === props.length, aviso);
+  if (!prefijo) await ctxX.page.screenshot({ path: path.join(CAPTURAS, "escritorio_enlace_desconocido.png") });
+  check(`${prefijo}enlace desconocido: sin errores de consola`, ctxX.errores.length === 0, ctxX.errores.join(" | "));
+  await ctxX.ctx.close();
+}
+
+/** NDVI con huecos (variante en memoria de ndvi_mensual.json): la línea se corta donde hay null y el hueco se rotula. */
+async function pruebaNDVIHuecos(navegador, base) {
+  if (!ndviMensual || !P0757 || !ndviMensual.parcelas?.[P0757]) {
+    omitir("NDVI con huecos", "sin ndvi_mensual.json o sin la parcela");
+    return;
+  }
+  const n = structuredClone(ndviMensual);
+  const serie = n.parcelas[P0757];
+  // DATOS DE PRUEBA: dos meses sin dato (uno suelto y otro al final) para cortar la línea.
+  const nulos = [1, serie.length - 1];
+  for (const i of nulos) serie[i] = null;
+  const conDato = serie.filter((v) => v != null).length;
+  const tramos = [];
+  let corrida = 0;
+  for (const v of serie) {
+    if (v == null) { if (corrida) tramos.push(corrida); corrida = 0; } else corrida += 1;
+  }
+  if (corrida) tramos.push(corrida);
+  const ctxN = await abrir(navegador, base, { viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" }, "NDVI con huecos", { "ndvi_mensual.json": n }, { hash: `#${P0757}` });
+  const g = await ctxN.page.evaluate(() => {
+    const r = document.querySelector("#ficha-ndvi .resumen-ndvi");
+    return {
+      puntos: r?.querySelectorAll("circle.resumen-ndvi-punto").length ?? 0,
+      huecos: [...(r?.querySelectorAll("rect.resumen-ndvi-hueco[data-mes]") ?? [])].map((x) => x.dataset.mes),
+      trazos: r?.querySelectorAll("path.resumen-ndvi-linea").length ?? 0,
+      clave: r?.querySelector('[data-clave="hueco"]')?.textContent ?? "",
+    };
+  });
+  check(`NDVI con huecos: ${conDato} puntos, una banda rayada por mes sin dato (${nulos.length}) y la línea cortada en ${tramos.filter((t) => t > 1).length} trazos`,
+    g.puntos === conDato && JSON.stringify(g.huecos) === JSON.stringify(nulos.map((i) => n.meses[i])) && g.trazos === tramos.filter((t) => t > 1).length && /No data/.test(g.clave), JSON.stringify(g));
+  await ctxN.page.locator("#ficha-ndvi").scrollIntoViewIfNeeded();
+  await ctxN.page.screenshot({ path: path.join(CAPTURAS, "escritorio_ndvi_huecos.png") });
+  check("NDVI con huecos: sin errores de consola", ctxN.errores.length === 0, ctxN.errores.join(" | "));
+  await ctxN.ctx.close();
+}
+
 // ---------------------------------------------------------------- pruebas de escritorio
 async function pruebasEscritorio(page, peticiones) {
+  // Gemelo digital (en la zona inicial); después, «All areas» para las comprobaciones de todas las parcelas.
+  await pruebaInstalable(page, "");
+  await pruebaZonaInicial(page, "");
+  await page.screenshot({ path: path.join(CAPTURAS, "escritorio_inicio_zona.png") });
+  await pruebaEstadoGemelo(page, "");
+  await page.locator("#estado-gemelo").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(CAPTURAS, "escritorio_estado_gemelo.png") });
+  await pruebaLineaDeTiempo(page, "", false);
+  await pruebaGemelo3D(page, "", false);
+  await verTodas(page);
+
   // Aviso de datos simulados: visible si y solo si algún archivo trae meta.mock = true
   const visibleMock = await page.locator("#aviso-simulado").isVisible();
   check(`aviso SIMULATED DATA ${esMock ? "visible" : "oculto"} (meta.mock = ${esMock})`, visibleMock === esMock);
@@ -1089,8 +1875,9 @@ async function pruebasEscritorio(page, peticiones) {
 
   // Filtros oficiales (B3) con «estado»: la decisión pide tres estados y que «needs local check» NUNCA se vea
   // como aprobado. Se revisa una opción de cada estado que el cubo traiga, leyendo el renglón por su texto.
+  // dotacion_minima no entra aquí: la página lo evalúa EN VIVO contra el deslizador (pruebaFichaCompleta).
   const conEstado = Object.entries(cubo.parcelas).flatMap(([pid, p]) =>
-    p.opciones.flatMap((o) => (o.filtros ?? []).filter((f) => f.estado).map((f) => ({ pid, o, f }))),
+    p.opciones.flatMap((o) => (o.filtros ?? []).filter((f) => f.estado && f.tipo !== "dotacion_minima").map((f) => ({ pid, o, f }))),
   );
   for (const estado of ["needs_local_check", "warning", "passes"]) {
     const caso = conEstado.find((x) => x.f.estado === estado);
@@ -1169,8 +1956,13 @@ async function pruebasEscritorio(page, peticiones) {
   await pruebaAcerca(page, peticiones, "", false, "escritorio_acerca.png");
   await cerrarFicha(page);
 
-  // Ficha imprimible: la parcela con más tarjetas (peor caso para que quepa en una hoja).
-  const masOpciones = candidatos.filter((id) => !porId.get(id).abstencion).sort((a, b) => opcionesDe(b).length - opcionesDe(a).length)[0];
+  // Ficha completa (etapa 2 del gemelo): frase, NDVI, suelo, lámina local, propuesta, nogal, filtros en vivo, GEDI.
+  await pruebaFichaCompleta(page, "", false);
+
+  // Ficha imprimible: la parcela con más tarjetas (peor caso para que quepa en una hoja); P0757 si está (protagonista
+  // con cuatro tarjetas, la lámina local y la aptitud de suelo).
+  const masOpciones = (P0757 && opcionesDe(P0757).length >= Math.max(...candidatos.map((id) => opcionesDe(id).length)) ? P0757 : null) ??
+    candidatos.filter((id) => !porId.get(id).abstencion).sort((a, b) => opcionesDe(b).length - opcionesDe(a).length)[0];
   if (masOpciones) {
     await abrirDesdeLista(page, masOpciones);
     await pruebaInert(page, masOpciones);
@@ -1187,6 +1979,17 @@ async function pruebasEscritorio(page, peticiones) {
 async function pruebasTelefono(page, peticiones) {
   const sinDesborde = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
   check("teléfono: sin desplazamiento horizontal de la página", sinDesborde);
+  // Gemelo digital en el teléfono (zona inicial, movimiento reducido); después, «All areas».
+  await pruebaInstalable(page, "teléfono: ");
+  await pruebaZonaInicial(page, "teléfono: ");
+  await pruebaLineaDeTiempo(page, "teléfono: ", true);
+  await pruebaEstadoGemelo(page, "teléfono: ");
+  await page.locator("#estado-gemelo").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(CAPTURAS, "telefono_estado_gemelo.png") });
+  await pruebaGemelo3D(page, "teléfono: ", true);
+  check("teléfono: con el gemelo conectado, sin desplazamiento horizontal", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await verTodas(page);
   // Reflujo (WCAG 1.4.10): a 320 px de ancho tampoco hay desplazamiento horizontal (rutas largas del pie).
   const tamano = page.viewportSize();
   await page.setViewportSize({ width: 320, height: tamano.height });
@@ -1242,6 +2045,9 @@ async function pruebasTelefono(page, peticiones) {
   await page.screenshot({ path: path.join(CAPTURAS, "telefono_ficha_gota.png") });
   await pruebaWhatsApp(page, id, "teléfono: ", true, "telefono_ficha_whatsapp.png");
   await cerrarFicha(page);
+
+  // Ficha completa en el teléfono (movimiento reducido).
+  await pruebaFichaCompleta(page, "teléfono: ", true);
 
   // «About & Data» en el teléfono (pantalla completa).
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -1468,6 +2274,12 @@ async function pruebasDosZonas(page, v) {
     return ind;
   }
 
+  // La página abre en la zona inicial (gemelo.json → zona_inicial; si no está en el cubo, la primera), no en «All areas».
+  const esperada = zonaInicialDe(c);
+  check(`dos zonas: la página abre en ${nombreZonaCubo(esperada, c)}, no en «All areas»`, (await sel.inputValue()) === esperada, await sel.inputValue());
+  const zIni = [za, zb].find((x) => x.id === esperada);
+  if (zIni) await revisar(`al abrir, ${zIni.nombre}`, c.zonas[zIni.id], porZona[zIni.id], zIni.prefijo_id);
+  await sel.selectOption("");
   const indTodas = await revisar("All areas", c.zona, g.features, null);
   await page.screenshot({ path: path.join(CAPTURAS, "escritorio_dos_zonas_todas.png") });
 
@@ -1578,6 +2390,11 @@ async function main() {
     check("teléfono: sin errores de consola", tel.errores.length === 0, tel.errores.join(" | "));
     await tel.ctx.close();
 
+    // Enlace directo #id (escritorio y teléfono) y NDVI con huecos (variante en memoria).
+    await pruebaEnlaceDirecto(navegador, base, "", { viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" });
+    await pruebaEnlaceDirecto(navegador, base, "teléfono: ", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
+    await pruebaNDVIHuecos(navegador, base);
+
     // Pantalla de inicio de tres pasos (visitante nuevo): en escritorio se cierra con Escape; en teléfono, con el botón.
     await pruebaInicio(navegador, base, { viewport: { width: 1366, height: 860 } }, "inicio, escritorio", "", "Escape");
     await pruebaInicio(
@@ -1599,6 +2416,7 @@ async function main() {
       "variante en memoria",
       { "cubo.json": v.c, "parcelas.geojson": v.g },
     );
+    await verTodas(alt.page); // el indicador se compara con el bloque total (cubo.zona)
     await fijarDeslizador(alt.page, D2);
     const ind = await indicador(alt.page);
     const pct = new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 0 }).format(v.primera.area_ha / cubo.zona.superficie_total_ha);
@@ -1624,7 +2442,24 @@ async function main() {
       "relieve.json": new Respuesta(500),
       "pruebas.json": new Respuesta(500),
       "manifest.json": new Respuesta(200, "{roto"),
+      "gemelo.json": new Respuesta(500),
+      "suelo.json": new Respuesta(500),
+      "contexto.json": new Respuesta(500),
     });
+    // manifest.json roto: la tarjeta «Twin status» dice que no hay fuentes y no inventa fechas.
+    await fal.page.waitForSelector("body[data-estado-gemelo='listo']", { timeout: 10000 }).catch(() => null);
+    const tarjetaFal = await texto(fal.page, "#estado-gemelo");
+    check("manifest.json roto: Twin status dice «Sources: not available» y ninguna fecha", tarjetaFal.includes("Sources: not available") && !/Data retrieved: \w{3} \d/.test(tarjetaFal));
+    // gemelo.json en HTTP 500: la vista 3D y la línea de tiempo dicen que no están disponibles, y por qué.
+    const boton3D = fal.page.locator("#boton-gemelo");
+    const motivo3D = (await fal.page.locator("#gemelo-motivo").isVisible()) ? await texto(fal.page, "#gemelo-motivo") : "";
+    check("gemelo.json en HTTP 500: «3D twin view: not available» con su motivo («could not be read»)",
+      (await boton3D.count()) === 1 && (await boton3D.innerText()).trim() === "3D twin view: not available" && (await boton3D.getAttribute("aria-disabled")) === "true" && motivo3D.includes("could not be read"), motivo3D);
+    check("gemelo.json en HTTP 500: la línea de tiempo dice «Timeline: not available»", (await texto(fal.page, "#bloque-tiempo")).includes("Timeline: not available"));
+    if (zonasCubo.length > 1) {
+      check("gemelo.json en HTTP 500: la página abre igual en una zona (la primera de cubo.zonas)", (await fal.page.locator("#zona-sel").inputValue()) === zonasCubo[0]);
+    }
+    await verTodas(fal.page);
     const rel = await texto(fal.page, "#capa-relieve");
     const marcaRel = await fal.page.evaluate(() => document.body.dataset.relieve);
     check("relieve.json en HTTP 500: «Terrain layer: could not be loaded (relieve.json: HTTP 500)», no «not run»",
@@ -1639,6 +2474,11 @@ async function main() {
     const idImp = candidatos.find((x) => !porId.get(x).abstencion && opcionesDe(x).length);
     if (idImp) {
       await abrirDesdeLista(fal.page, idImp);
+      // suelo.json y contexto.json en HTTP 500: la ficha dice que no se pudieron leer (no «not available yet»).
+      const ev = (await texto(fal.page, "#seccion-evidencia")).replace(/\s+/g, " ");
+      check("suelo.json en HTTP 500: «Soil profile: could not be loaded (…HTTP 500)» y la aptitud lo dice en cada tarjeta",
+        ev.includes("Soil profile: could not be loaded") && ev.includes("HTTP 500") && (await fal.page.locator('.suelo-aptitud[data-situacion="error"]').count()) === opcionesDe(idImp).length, ev.slice(0, 160));
+      check("contexto.json en HTTP 500: «Satellite evidence: could not be read (contexto.json: HTTP 500)»", ev.includes("Satellite evidence: could not be read (contexto.json: HTTP 500)"), ev.slice(-160));
       await fal.page.evaluate(() => {
         window.print = () => {
           throw new Error("printing blocked in this test");
@@ -1655,6 +2495,7 @@ async function main() {
 
     // Pantalla baja (teléfono horizontal o zoom de 200 %): la ficha ocupa todo el alto, sobre los controles.
     const baja = await abrir(navegador, base, { viewport: { width: 844, height: 390 }, reducedMotion: "reduce" }, "pantalla baja");
+    await verTodas(baja.page);
     const idBaja = conNecesidad ?? candidatos[0];
     await abrirDesdeLista(baja.page, idBaja);
     const alto = await baja.page.evaluate(() => {

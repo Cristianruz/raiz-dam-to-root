@@ -3,7 +3,8 @@
 // (docs/decisiones/2026-11-14_gemelo_digital.md, «Qué cambia en el producto», punto 1). Módulo ES, sin dependencias.
 //
 // QUÉ EXPORTA (lo conecta app.js; este archivo no toca las capas, las fuentes ni los controles de la aplicación):
-//   crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMovimiento, alAvisar, maplibre }) -> controlador
+//   crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMovimiento, alAvisar, maplibre, toleranciaClicPx })
+//     -> controlador
 //     mapa               instancia de maplibregl.Map ya creada (la de la aplicación).
 //     gemelo             contenido de web/data/gemelo.json (contrato de la decisión), o null si no se pudo leer.
 //     reglas             módulo web/reglas.js: se usa reglas.evaluarOpcion (lámina y cobertura de la opción ACTUAL).
@@ -16,13 +17,18 @@
 //                          "error"          el navegador no pudo montar la vista (se desmonta sola).
 //                        `mensaje` va en inglés y sin cifras escritas a mano.
 //     maplibre           opcional: la biblioteca (por omisión, window.maplibregl); se usan addProtocol y removeProtocol.
+//     toleranciaClicPx   opcional: holgura del clic o del toque, en píxeles (la misma que usa la aplicación en 2D).
+//                        Si el punto no cae exacto sobre una columna, se busca la más cercana dentro de ese radio.
 //
 //   controlador:
 //     disponible(zonaId) -> boolean   true solo si gemelo.terreno.zonas[zonaId] existe (con su plantilla de teselas).
 //                                     Con false, la página dice «3D twin view: not available» y no ofrece la vista.
 //     activar(zonaId) -> boolean      monta el relieve de esa zona (fuente raster-dem + sombreado + terreno), inclina
-//                                     la cámara (gemelo.camara) y dibuja las columnas. false si no está disponible.
-//                                     Si el estilo del mapa aún no termina de cargar, se monta al terminar.
+//                                     la cámara (gemelo.camara) y dibuja las columnas. false si no está disponible o
+//                                     si el montaje falló (devuelve activo()). Si el estilo del mapa aún no termina de
+//                                     cargar, se monta al terminar. La exageración es la de la zona
+//                                     (terreno.zonas[zonaId].exageracion) y, si la zona no trae la suya, la general
+//                                     (terreno.exageracion). Un botón debe leer activo() para su aria-pressed.
 //     desactivar()                    retira capas, fuentes e imágenes propias (prefijo «gemelo-»), quita el terreno
 //                                     y devuelve la inclinación y el rumbo a cero. No toca las capas de la aplicación.
 //     actualizar({ features, cubo, D, r, zonaId })
@@ -34,10 +40,16 @@
 //                                       zonaId    si cambia a otra zona con relieve, se cambia de relieve; si esa
 //                                                 zona no tiene relieve (o es «todas»), la vista se desactiva y avisa.
 //     activo() -> boolean
-//     leyendaHTML() -> string         leyenda en inglés; la exageración y los metros por millar salen de gemelo.json.
-//     columnaEn(punto) -> id | null   columna bajo un punto de la pantalla ({x, y} o [x, y] del mapa). Sirve para que
-//                                     el clic de la aplicación sobre sus propias capas ceda ante una columna.
-//     depuracion                      (solo lectura, para pruebas) último cálculo: { version, montado, zonaId, D, r,
+//     leyendaHTML(zonaId) -> string   leyenda en inglés (por omisión, de la zona activa); la exageración de la zona y
+//                                     los metros por millar salen de gemelo.json.
+//     columnaEn(punto, { tolerancia }) -> id | null
+//                                     columna que SE VE en un punto de la pantalla ({x, y} o [x, y] del mapa): si dos
+//                                     columnas se tapan, gana la de adelante en ese píxel (decisión 3). Con tolerancia
+//                                     (píxeles), si el punto no cae sobre ninguna se toma la más cercana en ese radio.
+//                                     Sirve para que el clic de la aplicación sobre sus propias capas ceda ante una
+//                                     columna.
+//     depuracion                      (solo lectura, para pruebas) último cálculo: { version, montado, zonaId,
+//                                     exageracion, D, r,
 //                                     metrosPorMillar, columnas, planas, cuenta, fuenteRelieve, urlTeselas,
 //                                     teselasFallidas }; columnas y planas son los FeatureCollection de setData;
 //                                     urlTeselas es document.baseURI + la plantilla del JSON.
@@ -74,9 +86,13 @@
 //      la zona y no como una meseta de más de un kilómetro sobre el plano sin datos (sin acantilados en el borde
 //      del relieve ni donde falte una tesela). La forma del relieve y el sombreado no cambian. Sin elev_min_m, o
 //      con otra codificación, la fuente usa terreno.encoding tal cual.
-//   3. La columna bajo el puntero se calcula aquí (columnaEn): la consulta de MapLibre no suma la altura del
-//      terreno a las extrusiones y fallaría en la tapa de las columnas. Una capa «custom» sin dibujo recibe la
-//      matriz de proyección de cada cuadro (API pública de MapLibre) y con ella se proyecta cada columna.
+//   3. La columna bajo el puntero se calcula aquí (columnaEn): la consulta de MapLibre (queryRenderedFeatures) no
+//      sirve de sustituto, porque con terreno se equivoca de columna en una parte de los píxeles. Una capa «custom»
+//      sin dibujo recibe la matriz de proyección de cada cuadro (API pública de MapLibre); con ella se proyecta cada
+//      columna (prisma del suelo de su centro hasta su altura) para saber cuáles cubren el punto, y entre ellas gana
+//      la que el rayo de ese píxel toca primero (tapa o cara lateral más cercana a la cámara en ese píxel), no la de
+//      centro más cercano: así, cuando dos columnas se tapan, se elige la que se ve. El relieve no tapa columnas en
+//      este cálculo (las parcelas están en el fondo del valle).
 //   4. Las alturas se recalculan con setData sobre una fuente que solo trae las columnas; las parcelas planas van
 //      en otra fuente que no se reenvía al mover el deslizador.
 //   5. Ninguna cifra escrita a mano: exageración, metros por millar, cámara, zooms y límites salen de gemelo.json;
@@ -135,6 +151,7 @@ const OPACIDAD_SIN_RIEGO = 0.18;
 const SEPARACION_ETIQUETA_PX = 14;
 const MARGEN_ETIQUETA_PX = 8;
 const BAJO_LA_MIRA_PX = 26;
+const DIRECCIONES_TOLERANCIA = 8; // puntos que se prueban en cada anillo de la holgura del clic
 
 // Decodificación de las teselas según terreno.encoding (las mismas fórmulas que usa MapLibre):
 // altura (m) = R × rojo + G × verde + B × azul − base.
@@ -319,6 +336,107 @@ function puntoDentro(px, py, v) {
   return dentro;
 }
 
+/** Inversa de una matriz 4×4 guardada por columnas (la fórmula de gl-matrix); null si no tiene inversa. */
+function invertir(a) {
+  const [a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33] = a;
+  const b00 = a00 * a11 - a01 * a10;
+  const b01 = a00 * a12 - a02 * a10;
+  const b02 = a00 * a13 - a03 * a10;
+  const b03 = a01 * a12 - a02 * a11;
+  const b04 = a01 * a13 - a03 * a11;
+  const b05 = a02 * a13 - a03 * a12;
+  const b06 = a20 * a31 - a21 * a30;
+  const b07 = a20 * a32 - a22 * a30;
+  const b08 = a20 * a33 - a23 * a30;
+  const b09 = a21 * a32 - a22 * a31;
+  const b10 = a21 * a33 - a23 * a31;
+  const b11 = a22 * a33 - a23 * a32;
+  const det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+  if (!det || !Number.isFinite(det)) return null;
+  const k = 1 / det;
+  return Float64Array.from([
+    (a11 * b11 - a12 * b10 + a13 * b09) * k,
+    (a02 * b10 - a01 * b11 - a03 * b09) * k,
+    (a31 * b05 - a32 * b04 + a33 * b03) * k,
+    (a22 * b04 - a21 * b05 - a23 * b03) * k,
+    (a12 * b08 - a10 * b11 - a13 * b07) * k,
+    (a00 * b11 - a02 * b08 + a03 * b07) * k,
+    (a32 * b02 - a30 * b05 - a33 * b01) * k,
+    (a20 * b05 - a22 * b02 + a23 * b01) * k,
+    (a10 * b10 - a11 * b08 + a13 * b06) * k,
+    (a01 * b08 - a00 * b10 - a03 * b06) * k,
+    (a30 * b04 - a31 * b02 + a33 * b00) * k,
+    (a21 * b02 - a20 * b04 - a23 * b00) * k,
+    (a11 * b07 - a10 * b09 - a12 * b06) * k,
+    (a00 * b09 - a01 * b07 + a02 * b06) * k,
+    (a31 * b01 - a30 * b03 - a32 * b00) * k,
+    (a20 * b03 - a21 * b01 + a22 * b00) * k,
+  ]);
+}
+
+/**
+ * Rayo de un píxel de la pantalla en coordenadas Mercator con altura: origen en el plano cercano y dirección
+ * hacia el lejano (t = 0 cerca, t = 1 lejos). null si la matriz no se puede invertir.
+ */
+function rayoDelPixel(inversa, px, py, ancho, alto) {
+  if (!inversa || !(ancho > 0) || !(alto > 0)) return null;
+  const nx = (px / ancho) * 2 - 1;
+  const ny = 1 - (py / alto) * 2;
+  const punto = (nz) => {
+    const m = inversa;
+    const w = m[3] * nx + m[7] * ny + m[11] * nz + m[15];
+    if (!w) return null;
+    return [
+      (m[0] * nx + m[4] * ny + m[8] * nz + m[12]) / w,
+      (m[1] * nx + m[5] * ny + m[9] * nz + m[13]) / w,
+      (m[2] * nx + m[6] * ny + m[10] * nz + m[14]) / w,
+    ];
+  };
+  const cerca = punto(-1);
+  const lejos = punto(1);
+  if (!cerca || !lejos) return null;
+  return { o: cerca, d: [lejos[0] - cerca[0], lejos[1] - cerca[1], lejos[2] - cerca[2]] };
+}
+
+/**
+ * Primer punto en que el rayo toca la columna (prisma vertical de la parcela entre zPie y zCima): la tapa o una
+ * cara lateral. Devuelve t (0 = plano cercano), o null si el rayo no la toca.
+ */
+function profundidadEnColumna(rayo, anillos, zPie, zCima) {
+  const [ox, oy, oz] = rayo.o;
+  const [dx, dy, dz] = rayo.d;
+  let mejor = Infinity;
+  // Tapa: el plano z = zCima, dentro del polígono.
+  if (dz) {
+    const t = (zCima - oz) / dz;
+    if (t >= 0 && t < mejor) {
+      const x = ox + t * dx;
+      const y = oy + t * dy;
+      if (anillos.some((xy) => puntoDentro(x, y, xy))) mejor = t;
+    }
+  }
+  // Caras laterales: el rayo cruza el lado A→B del polígono a una altura entre el pie y la tapa.
+  for (const xy of anillos) {
+    const n = xy.length / 2;
+    for (let i = 0, j = n - 1; i < n; j = i, i += 1) {
+      const ax = xy[j * 2];
+      const ay = xy[j * 2 + 1];
+      const ex = xy[i * 2] - ax;
+      const ey = xy[i * 2 + 1] - ay;
+      const denom = dx * ey - dy * ex;
+      if (!denom) continue;
+      const wx = ax - ox;
+      const wy = ay - oy;
+      const t = (wx * ey - wy * ex) / denom;
+      const s = (wx * dy - wy * dx) / denom;
+      if (!(t >= 0) || t >= mejor || s < 0 || s > 1) continue;
+      const z = oz + t * dz;
+      if (z >= zPie && z <= zCima) mejor = t;
+    }
+  }
+  return Number.isFinite(mejor) ? mejor : null;
+}
+
 /** ¿El punto cae sobre la columna? Tapa, pie o cualquiera de sus caras laterales. */
 function puntoEnColumna(px, py, pie, cima) {
   if (puntoDentro(px, py, cima) || puntoDentro(px, py, pie)) return true;
@@ -476,10 +594,15 @@ export function calcularColumnas({ features, cubo, D, r, zonaId, metrosPorMillar
 // ---------------------------------------------------------------------------
 // Leyenda
 // ---------------------------------------------------------------------------
-function htmlLeyenda(gemelo) {
+/** Exageración del relieve de una zona: la suya (terreno.zonas[id].exageracion) o, si no la trae, la general. */
+function exageracionDe(terreno, zonaId) {
+  return num(terreno?.zonas?.[zonaId]?.exageracion) ?? num(terreno?.exageracion);
+}
+
+function htmlLeyenda(gemelo, zonaId) {
   const terreno = gemelo?.terreno ?? {};
   const columnas = gemelo?.columnas ?? {};
-  const exageracion = num(terreno.exageracion);
+  const exageracion = exageracionDe(terreno, zonaId);
   const metros = num(columnas.metros_por_millar);
   // Renglones de escala: el rótulo del relieve con su exageración, y la escala de las columnas con su nota.
   const escala = [];
@@ -515,11 +638,12 @@ function htmlLeyenda(gemelo) {
 // ---------------------------------------------------------------------------
 // La vista
 // ---------------------------------------------------------------------------
-export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMovimiento, alAvisar, maplibre } = {}) {
+export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMovimiento, alAvisar, maplibre, toleranciaClicPx } = {}) {
   if (typeof reglas?.evaluarOpcion !== "function") {
     throw new TypeError("crearGemelo3D: falta reglas.evaluarOpcion (pase el módulo web/reglas.js)");
   }
   const biblioteca = maplibre ?? globalThis.maplibregl;
+  const holguraClic = Math.max(0, num(toleranciaClicPx) ?? 0);
   const numeroVista = (contadorVistas += 1);
   const est = {
     activo: false, // la vista está pedida (aunque el estilo del mapa aún no termine de cargar)
@@ -537,6 +661,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     conProtocolo: false,
     teselasFallidas: [],
     matriz: null, // Mercator (0 a 1, con altura) -> espacio de recorte, del último cuadro dibujado
+    inversa: null, // inversa de matriz (se calcula al primer uso): espacio de recorte -> Mercator
     camaraCambio: false,
     suelos: new Map(), // id -> altura del terreno bajo la columna (se vacía si cambia el relieve cargado o el zoom)
     avisados: new Set(), // tipos de aviso ya emitidos en esta activación
@@ -682,7 +807,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
       },
       capaSobreElFondo(),
     );
-    const exageracion = num(terreno.exageracion);
+    const exageracion = exageracionDe(terreno, est.zonaId);
     mapa.setTerrain(exageracion == null ? { source: FUENTE_RELIEVE } : { source: FUENTE_RELIEVE, exaggeration: exageracion });
   }
 
@@ -691,8 +816,15 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     const vacio = { type: "FeatureCollection", features: [] };
     const rayasPlana = imagenDeRayas(c.plana, c.planaTrama);
     const rayasFalta = imagenDeRayas(c.falta, c.faltaTrama);
-    if (rayasPlana) mapa.addImage(IMAGEN_PLANA, rayasPlana, { pixelRatio: 2 });
-    if (rayasFalta) mapa.addImage(IMAGEN_FALTA, rayasFalta, { pixelRatio: 2 });
+    // Las tramas se registran una vez y se conservan al desactivar: si se borraran justo después de activar, el hilo
+    // de teselas aún las pediría y MapLibre avisaría que no las encuentra. Se retiran en destruir().
+    const ponerImagen = (id, imagen) => {
+      if (!imagen) return;
+      if (mapa.hasImage(id)) mapa.updateImage(id, imagen);
+      else mapa.addImage(id, imagen, { pixelRatio: 2 });
+    };
+    ponerImagen(IMAGEN_PLANA, rayasPlana);
+    ponerImagen(IMAGEN_FALTA, rayasFalta);
 
     mapa.addSource(FUENTE_PLANAS, { type: "geojson", data: vacio });
     mapa.addSource(FUENTE_COLUMNAS, { type: "geojson", data: vacio, promoteId: "id" });
@@ -770,6 +902,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
         for (let i = 0; igual && i < matriz.length; i += 1) igual = previa[i] === matriz[i];
         if (igual) return;
         est.matriz = Float64Array.from(matriz);
+        est.inversa = null;
         est.camaraCambio = true; // al terminar el cuadro se revisa qué columna quedó bajo la mira o el puntero
       },
     });
@@ -783,6 +916,10 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     for (const id of FUENTES) {
       if (mapa.getSource(id)) mapa.removeSource(id);
     }
+  }
+
+  /** Las dos tramas propias: solo al destruir la vista (ver agregarParcelas). */
+  function quitarImagenes() {
     for (const id of IMAGENES) {
       if (mapa.hasImage(id)) mapa.removeImage(id);
     }
@@ -820,14 +957,29 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
 
   // -------------------------------------------------------------- puntero, teclado y etiqueta
   /**
-   * Columna bajo un punto de la pantalla, o null. Cada columna se proyecta con la matriz del último cuadro:
-   * va de la altura del terreno en su centro (como la dibuja MapLibre) hasta esa altura más pide_m.
-   * Si varias quedan bajo el punto, gana la más cercana a la cámara.
+   * Columna que se ve en un punto de la pantalla, o null. Cada columna se proyecta con la matriz del último cuadro:
+   * va de la altura del terreno en su centro (como la dibuja MapLibre) hasta esa altura más pide_m. De las que
+   * cubren el punto gana la que el rayo de ese píxel toca primero (decisión 3). Con { tolerancia } (píxeles), si el
+   * punto no cae sobre ninguna, se busca en anillos cada vez más anchos y se toma la primera que aparezca.
    */
-  function columnaEn(punto) {
+  function columnaEn(punto, { tolerancia = 0 } = {}) {
     if (!est.montado || !punto) return null;
     const [px, py] = Array.isArray(punto) ? punto : [punto.x, punto.y];
     if (!Number.isFinite(px) || !Number.isFinite(py)) return null;
+    const exacta = columnaExacta(px, py);
+    const radio = Math.max(0, num(tolerancia) ?? 0);
+    if (exacta != null || !radio) return exacta;
+    for (let r = 1; r <= radio; r += 1) {
+      for (let k = 0; k < DIRECCIONES_TOLERANCIA; k += 1) {
+        const angulo = (k / DIRECCIONES_TOLERANCIA) * Math.PI * 2;
+        const id = columnaExacta(px + r * Math.cos(angulo), py + r * Math.sin(angulo));
+        if (id != null) return id;
+      }
+    }
+    return null;
+  }
+
+  function columnaExacta(px, py) {
     const Mercator = biblioteca?.MercatorCoordinate;
     const columnas = est.ultimo?.columnas.features ?? [];
     const m = est.matriz;
@@ -835,8 +987,12 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     const lienzo = mapa.getCanvas(); // el tamaño con el que MapLibre dibujó el cuadro (píxeles CSS)
     const ancho = lienzo.clientWidth;
     const alto = lienzo.clientHeight;
+    est.inversa ??= invertir(m);
+    const rayo = rayoDelPixel(est.inversa, px, py, ancho, alto);
     let mejor = null;
-    let distanciaMejor = Infinity;
+    let tMejor = Infinity; // profundidad en el píxel de la mejor columna (rayo)
+    let respaldo = null; // si el rayo no pudo decidir (matriz rara, borde exacto): la de centro más cercano
+    let distanciaRespaldo = Infinity;
     for (const f of columnas) {
       const g = enMercator(f.geometry, Mercator);
       if (!g.centro) continue;
@@ -844,18 +1000,29 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
       const zPie = suelo * g.zPorMetro;
       const zCima = (suelo + f.properties.pide_m) * g.zPorMetro;
       const distancia = m[3] * g.centroXY[0] + m[7] * g.centroXY[1] + m[11] * zPie + m[15];
-      if (!(distancia > 0) || distancia >= distanciaMejor) continue;
+      if (!(distancia > 0)) continue;
+      let cubre = false;
       for (const xy of g.anillos) {
         const pie = anilloEnPantalla(m, xy, zPie, ancho, alto);
         const cima = pie && anilloEnPantalla(m, xy, zCima, ancho, alto);
         if (cima && puntoEnColumna(px, py, pie, cima)) {
-          mejor = f.properties.id;
-          distanciaMejor = distancia;
+          cubre = true;
           break;
         }
       }
+      if (!cubre) continue;
+      const t = rayo ? profundidadEnColumna(rayo, g.anillos, zPie, zCima) : null;
+      if (t != null) {
+        if (t < tMejor) {
+          tMejor = t;
+          mejor = f.properties.id;
+        }
+      } else if (distancia < distanciaRespaldo) {
+        distanciaRespaldo = distancia;
+        respaldo = f.properties.id;
+      }
     }
-    return mejor;
+    return mejor ?? respaldo;
   }
 
   /** Altura del terreno (metros, ya con la exageración) bajo el centro de una columna; se guarda entre consultas. */
@@ -961,7 +1128,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     alElegirParcela(id);
   }
 
-  const alClic = (ev) => elegir(columnaEn(ev.point));
+  const alClic = (ev) => elegir(columnaEn(ev.point, { tolerancia: holguraClic }));
 
   function alMoverPuntero(ev) {
     est.ultimoPuntero = [ev.point.x, ev.point.y];
@@ -1141,6 +1308,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     est.firmaPlanas = null;
     est.fuenteRelieve = null;
     est.matriz = null;
+    est.inversa = null;
     est.camaraCambio = false;
     est.suelos.clear();
     if (conCamara) {
@@ -1164,7 +1332,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     cuandoEstiloListo(() => {
       if (est.activo && est.zonaId === zonaId && !est.montado) montar();
     });
-    return true;
+    return est.activo; // false si el montaje falló en esta misma llamada (montar ya avisó y limpió)
   }
 
   function desactivar() {
@@ -1191,7 +1359,14 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     if (est.destruido) return;
     const estabaActivo = est.activo;
     est.activo = false;
-    if (mapa) desmontar(estabaActivo, false);
+    if (mapa) {
+      desmontar(estabaActivo, false);
+      try {
+        quitarImagenes();
+      } catch (error) {
+        console.warn("Raíz: twin view images could not be removed cleanly", error);
+      }
+    }
     est.destruido = true;
     est.ultimo = null;
     est.datos = { features: null, cubo: null, D: null, r: null };
@@ -1203,7 +1378,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     desactivar,
     actualizar,
     activo: () => est.activo,
-    leyendaHTML: () => htmlLeyenda(gemelo),
+    leyendaHTML: (zonaId = est.zonaId) => htmlLeyenda(gemelo, zonaId),
     columnaEn,
     destruir,
     get depuracion() {
@@ -1211,6 +1386,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
         version: est.version,
         montado: est.montado,
         zonaId: est.zonaId,
+        exageracion: exageracionDe(gemelo?.terreno, est.zonaId),
         D: est.datos.D,
         r: est.datos.r,
         metrosPorMillar: num(gemelo?.columnas?.metros_por_millar),

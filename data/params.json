@@ -397,6 +397,23 @@
       "etiqueta": "Diseño",
       "nota": "No es un dato: el valle es casi plano y sin exagerar el relieve no se lee. La vista 3D lo declara en su rótulo (vertical exaggeration applied)"
     },
+    "exageracion_por_zona": {
+      "valor": {
+        "delicias_saucillo": 6,
+        "lazaro_cardenas": 2
+      },
+      "unidad": "factor (veces la altura real del terreno), por zona piloto",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "No es un dato. Lázaro Cárdenas tiene cerca de tres veces el desnivel de Delicias–Saucillo (elev_max_m − elev_min_m de cada zona en web/data/gemelo.json): con la exageración general sus cerros quedarían muy por encima de las columnas de agua y la vista no se leería. Con estos factores el relieve exagerado de las dos zonas queda de altura parecida. motor/gemelo_web.py lo publica en terreno.zonas.<id>.exageracion; una zona sin valor aquí usa exageracion_vertical, y la vista 3D usa el general si la zona no trae el suyo"
+    },
+    "zona_inicial": {
+      "valor": "delicias_saucillo",
+      "unidad": "id de params.zona_piloto.zonas",
+      "fuente": "Decisión docs/decisiones/2026-11-14_gemelo_digital.md",
+      "etiqueta": "Diseño",
+      "nota": "Punto 6 de la decisión (Inicio): zona con la que abre la página (no «All areas»); la persona puede cambiarla en «Pilot area». motor/gemelo_web.py la publica en gemelo.json (zona_inicial); sin ella, la página abre en la primera zona de cubo.zonas"
+    },
     "metros_por_millar": {
       "valor": 60,
       "unidad": "m de altura de la columna por cada millar/ha",

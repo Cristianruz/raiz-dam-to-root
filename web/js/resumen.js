@@ -214,9 +214,13 @@ function formatoPorOmision(valor, clave) {
   return numero(valor, { maximumFractionDigits: clave === "area" ? 3 : 1 });
 }
 
-/** Nombre de la rotación actual, tal como lo trae el cubo (sin el prefijo «Current rotation:»). */
+// Aclaración final entre paréntesis del nombre («Pecan orchard (does not rotate)»): la frase ya pone el nombre
+// entre paréntesis y no se anidan; la aclaración sigue a la vista en la tarjeta.
+const ACLARACION_FINAL = /\s*\([^()]*\)\s*$/;
+
+/** Nombre de la rotación actual, tal como lo trae el cubo (sin el prefijo «Current rotation:» ni la aclaración final). */
 function nombreRotacion(opcion, parcela) {
-  const nombre = String(opcion?.nombre ?? "").replace(PREFIJO_ACTUAL, "").trim();
+  const nombre = String(opcion?.nombre ?? "").replace(PREFIJO_ACTUAL, "").replace(ACLARACION_FINAL, "").trim();
   if (nombre) return nombre;
   const secuencia = Array.isArray(opcion?.secuencia) && opcion.secuencia.length ? opcion.secuencia : [parcela?.cultivo_actual];
   return secuencia.filter(Boolean).map((s) => String(s).replace(/_/g, " ")).join(" → ") || "crop not named";
