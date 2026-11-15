@@ -1,5 +1,5 @@
 <!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
-# Decisión: cuatro reglas del motor que quedaron escritas tras la revisión del 15-nov-2026
+# Decisión: cuatro reglas del motor y la frase del goteo, tras la revisión del 15-nov-2026
 
 **Quién decide:** el integrador («Revisión multiagente»), por encargo de Cristian la noche del 14-nov («haz todo el sistema»). Cristian las confirma o las revierte al leer este documento; cada una se puede revertir por separado. Este documento deja por escrito reglas que ya están en el código (`motor/b4_cubo.py`, `validar_contrato.py`) y que la auditoría del contrato pidió documentar. No cambia nombres de archivos ni de campos del contrato v4.
 
@@ -27,7 +27,14 @@
 - **Decisión.** Regla 2 de `CLAUDE.md`: si falta el dato, null y aviso. Sin lámina neta, `gota`, `gota_goteo_con_tope`, `gota_goteo_sin_tope` y `tope_consumo` quedan en null para esa opción y el motor lo avisa por zona. El validador solo acepta ese null cuando el motor lo declaró.
 - **Estado hoy.** Ningún dato real lo activa: todas las rotaciones entregadas traen su lámina neta.
 
-## 5. Lo que falta
+## 5. «Follow the drop» describe el escenario de goteo y no lo recomienda
 
-- Que Cristian confirme las cuatro, sobre todo la 1, que se aparta de la letra del kit.
+- **Quién decide:** Cristian (15-nov-2026, en la conversación con el integrador).
+- **Problema.** El kit X3.2 §4 fija la frase «Drip is recommended only if district ET stays at or below its historical level», y §3 el aviso «Not recommended: …». Dos revisiones independientes (la sesión de datos y la auditoría de cifras) señalaron que la página apoya y no sustituye el juicio del agricultor ni del técnico (`CLAUDE.md`, regla 10), y que los textos del envío dicen que ninguna opción se marca como la mejor.
+- **Decisión.** La frase queda: «The drip scenario is shown without a warning when district ET stays at or below its historical level; if ET would rise above it, the page flags the scenario.» El aviso del escenario sin tope queda: «Flagged: district consumption (ET) would exceed its historical level.» La cita de Grafton et al. (Science 2018) y «We count consumption (ET), not just withdrawals» no cambian. El criterio tampoco: el aviso sigue saliendo según `tope_consumo.cumple_sin_tope`.
+- **Dónde.** `web/js/gota.js` (`TEXTOS.frase` y `TEXTOS.noRecomendado`); prueba `tests/gota.test.js`.
+
+## 6. Lo que falta
+
+- Que Cristian confirme las cuatro reglas del motor (secciones 1 a 4), sobre todo la 1, que se aparta de la letra del kit. La sección 5 ya la decidió él.
 - Si el equipo decide que una alfalfa joven sí debe ver el corte de verano con un aviso, la decisión 3 se cambia en `motor/b4_cubo.py` y aquí.

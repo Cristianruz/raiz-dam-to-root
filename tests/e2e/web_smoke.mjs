@@ -27,7 +27,7 @@
 //   · La gota (X3.2): Sankey con d3-sankey; cada nodo lleva los m³ del cubo y su alto y el ancho de cada banda son la
 //     escala común por los m³; las gotas recorren las bandas una sola vez (o se omiten con movimiento reducido); con
 //     bloques de goteo (los del cubo: escritorio con la transición de d3 y teléfono con movimiento reducido), el
-//     botón, las cifras grandes, la misma escala para las variantes, el tope, el aviso «Not recommended» y la
+//     botón, las cifras grandes, la misma escala para las variantes, el tope, el aviso «Flagged» y la
 //     etiqueta de las eficiencias (cubo.meta.goteo: «indicative, not local») en los supuestos; sin ellos, la nota
 //     «Drip scenario not available yet». El caso que los datos NO traen se prueba con la variante en memoria;
 //   · filtros oficiales (B3; decisión docs/decisiones/2026-11-14_opciones_b3.md): si el cubo trae filtros con
@@ -551,7 +551,7 @@ async function pruebaGota(page, id, c, prefijo, reducida, capturas = null) {
     const et = fmtCambio(op.tope_consumo.et_goteo_sin_tope_m3 / op.tope_consumo.et_historica_m3 - 1);
     check(`${prefijo}sin tope: «Crop consumption (ET) ${et} vs. historical»`, sinTope.includes("Crop consumption (ET)") && sinTope.includes(et) && sinTope.includes("vs. historical"), sinTope.replace(/\n/g, " "));
     const alerta = page.locator("#gota-alerta");
-    check(`${prefijo}sin tope: aviso «Not recommended» solo si cumple_sin_tope = false`, (await alerta.isVisible()) === (op.tope_consumo.cumple_sin_tope === false));
+    check(`${prefijo}sin tope: aviso «Flagged» solo si cumple_sin_tope = false`, (await alerta.isVisible()) === (op.tope_consumo.cumple_sin_tope === false));
     // El retorno al acuífero sin tope es una cota superior (cubo.meta.goteo.retorno_sin_tope_es_cota_superior).
     if (c.meta?.goteo?.retorno_sin_tope_es_cota_superior === true) {
       const acu = await page.locator('#gota-cifras [data-cifra="acuifero"]').innerText();
