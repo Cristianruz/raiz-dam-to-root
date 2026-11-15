@@ -12,7 +12,9 @@
 //        FFMPEG=<ruta> FFPROBE=<ruta> si ffmpeg y ffprobe no están en el PATH
 // No forma parte de `node --test tests/` (necesita Chromium y ffmpeg). Termina con 0 si todo pasa y 1 si algo falla.
 //
-// El video (guion: docs/pitch/guion_video_30s.md) tiene cuatro partes:
+// El video de 30 s sigue los cinco tiempos de la guía de Space Apps (preséntate, el reto y por qué, el nombre y el
+// lema, cómo funciona con el prototipo y los datos de NASA y de agencias socias, y la mirada al futuro).
+// El video (guion: docs/pitch/guion_video_30s.md) tiene estas partes:
 //   qué es            tarjeta de apertura animada (docs/pitch/video/tarjetas.html, vista «apertura»);
 //   cómo funciona     tarjeta «How it works» animada (vista «como»): tres pasos y cuatro señas de cómo está hecha;
 //   qué la distingue  tarjeta «Beyond crop selection» animada (vista «aparte»): nueve señas de lo que reúne;
@@ -136,6 +138,12 @@ const CIERRE_MIN_S = 2.5;
 const AVISO_JUICIO = "This tool supports, never replaces, the judgment of farmers and local experts.";
 
 // Las tomas, en el orden del guion (una por subtítulo de la sección 5). `rotulo`: el nombre del golpe en la banda.
+// Las tarjetas siguen la estructura que pide la guía de Space Apps para el video de 30 s: quién (equipo), qué reto
+// y por qué (reto), nombre y lema (apertura y aparte), cómo funciona (como y las tomas de la página) y mirada al
+// futuro (futuro y cierre).
+const EQUIPO = { tipo: "tarjeta", vista: "equipo" };
+const RETO = { tipo: "tarjeta", vista: "reto" };
+const FUTURO = { tipo: "tarjeta", vista: "futuro" };
 const APERTURA = { tipo: "tarjeta", vista: "apertura" };
 const COMO = { tipo: "tarjeta", vista: "como" };
 const APARTE = { tipo: "tarjeta", vista: "aparte" }; // lo que la aplicación reúne además de la rotación
@@ -159,7 +167,7 @@ const GOLPES = {
 const G = GOLPES;
 const TOMAS = RECORRIDO
   ? [APERTURA, COMO, APARTE, G.dotacion, G.idioma, G.lluvia, G.zonas, G.historia, G.parcela, G.porque, G.gota, G.evidencia, G.suelo, G.otras, G.anios, G.compartir, G.pruebas, CIERRE]
-  : [APERTURA, COMO, APARTE, G.dotacion, G.parcela, G.porque, G.gota, G.evidencia, G.compartir, G.pruebas, CIERRE];
+  : [EQUIPO, RETO, APERTURA, APARTE, COMO, G.dotacion, G.parcela, G.evidencia, FUTURO, CIERRE];
 // Las otras dos parcelas de ejemplo (solo en el recorrido): una con el plazo libre y un nogal comprometido.
 const OTRAS_PARCELAS = ["P0632", "L0175"];
 
@@ -1457,6 +1465,8 @@ async function capturarTarjetas(navegador, baseLocal, cues) {
     if (toma.tipo === "tarjeta") {
       const parametros = { vista: toma.vista };
       if (toma.vista === "apertura") parametros.lema = c.texto;
+      // Los nombres de los integrantes no están en el repo: quien graba los da con RAIZ_INTEGRANTES.
+      if (toma.vista === "equipo" && process.env.RAIZ_INTEGRANTES) parametros.integrantes = process.env.RAIZ_INTEGRANTES;
       if (toma.vista === "cierre") Object.assign(parametros, { frase: c.texto, liga: LIGA.replace(/^https?:\/\//, "").replace(/\/$/, ""), app: esAplicacionInstalable() ? "si" : "no" });
       await abrir(parametros, LIENZO.alto);
       // Para leer el texto y medir si cabe: el estado final de la animación.
@@ -1472,6 +1482,17 @@ async function capturarTarjetas(navegador, baseLocal, cues) {
         const productos = await page.locator('[data-vista="como"] [data-producto]').evaluateAll((ns) => ns.map((n) => n.dataset.producto));
         const faltan = productos.filter((p) => !manifiesto.includes(p));
         check("tarjeta «como»: cada producto de NASA que nombra está en web/data/manifest.json", productos.length > 0 && !faltan.length, faltan.length ? `faltan: ${faltan.join(", ")}` : productos.join(", "));
+        // El dato de la agencia socia (Sentinel de Copernicus, ESA, dentro de HLS) debe estar en el README.
+        const socios = await page.locator('[data-vista="como"] [data-socio]').evaluateAll((ns) => ns.map((n) => n.dataset.socio));
+        const leemeComo = fs.readFileSync(path.join(RAIZ, "README.md"), "utf-8");
+        check("tarjeta «como»: el dato de la agencia socia que nombra está en el README", socios.length > 0 && socios.every((x) => leemeComo.includes(x)), socios.join(", "));
+      }
+      if (toma.vista === "equipo") check("tarjeta «equipo»: el nombre del equipo y su sede", ["Orbital Farming", "Chihuahua, Mexico"].every((x) => t.includes(x)));
+      if (toma.vista === "reto") check("tarjeta «reto»: el reto elegido y lo que llevó a elegirlo", t.includes("Field Shift: Adapting Farms with NASA Data") && t.includes("What inspired us"));
+      if (toma.vista === "futuro") {
+        // La visión va rotulada como tal y en condicional: no es una promesa (CLAUDE.md, regla 10).
+        const frases = await page.locator('[data-vista="futuro"] .vision li').allInnerTexts();
+        check("tarjeta «futuro»: rotulada «Next phase / vision» y cada frase en condicional («could»)", t.includes("Next phase / vision") && frases.length > 0 && frases.every((f) => /\bcould\b/.test(f)), `${frases.length} frases`);
       }
       if (toma.vista === "aparte") {
         // Cada seña de la tarjeta describe algo que la página ya hace: el README debe seguir diciéndolo.

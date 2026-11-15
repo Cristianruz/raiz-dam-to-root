@@ -1,43 +1,39 @@
 1
-00:00:00,000 --> 00:00:02,200
-Before you plant, see the water you are committing.
+00:00:00,000 --> 00:00:02,000
+We are Orbital Farming, from Chihuahua, Mexico.
 
 2
-00:00:02,200 --> 00:00:05,400
-NASA data, a crop-water model, an answer per field.
+00:00:02,000 --> 00:00:05,000
+Our challenge: Field Shift, adapting farms with NASA data.
 
 3
-00:00:05,400 --> 00:00:08,400
-Beyond crop selection: water, soil, seasons and evidence.
+00:00:05,000 --> 00:00:07,600
+Before you plant, see the water you are committing.
 
 4
-00:00:08,400 --> 00:00:10,800
-Set the water allocation. The map and the indicator respond.
+00:00:07,600 --> 00:00:10,000
+Beyond crop selection: water, soil, seasons and evidence.
 
 5
-00:00:10,800 --> 00:00:13,800
-Each option: water required, hectares covered, years committed.
+00:00:10,000 --> 00:00:12,800
+NASA data, a crop-water model, an answer per field.
 
 6
-00:00:13,800 --> 00:00:16,800
-Each option states its rationale and what changes from today.
+00:00:12,800 --> 00:00:15,200
+Set the water allocation. The map and the indicator respond.
 
 7
-00:00:16,800 --> 00:00:19,200
-From the dam to the crop and the aquifer.
+00:00:15,200 --> 00:00:17,600
+Each option: water required, hectares covered, years committed.
 
 8
-00:00:19,200 --> 00:00:21,600
+00:00:17,600 --> 00:00:20,000
 Satellite observations of this field, year by year.
 
 9
-00:00:21,600 --> 00:00:24,000
-A message for the farmer, in their language.
+00:00:20,000 --> 00:00:25,400
+Looking ahead: open data could serve any irrigation district.
 
 10
-00:00:24,000 --> 00:00:26,400
-Five tests, published regardless of the result.
-
-11
-00:00:26,400 --> 00:00:29,000
+00:00:25,400 --> 00:00:29,000
 The farmer decides.
