@@ -42,6 +42,11 @@
     background: none !important;
   }
 
+  /* El logo de la marca (style.css) en papel: del alto de la línea, sin sombra; la hoja sigue en una carta. */
+  :where(html.imprimir-ficha, html:has(#ficha:not([hidden]))) #marca .marca-nombre::before {
+    width: 4mm; height: 4mm; border-radius: 1mm; box-shadow: none;
+  }
+
   /* La ficha deja de ser un panel flotante: fluye en la hoja */
   #ficha {
     position: static !important;
