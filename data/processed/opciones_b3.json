@@ -1,5 +1,5 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), «Candidate rotations» and «Hard filters»; data dossier 27, §2.3 (INIFAP, Agenda Técnica Agrícola de Chihuahua 2017). The primary sources are given in each option and each filter",
  "opciones": {
   "alfalfa": {
@@ -13,7 +13,7 @@
       "desde": "09-15",
       "hasta": "10-31"
      },
-     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: best planting from Sep 15 to Oct 31 (Project master document, §5.2 (v3.1, Oct 29, 2026))"
+     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: planting from Sep 15 to Oct 31 (Project master document, §5.2 (v3.1, Oct 29, 2026))"
     }
    ],
    "indicadores": {
@@ -88,7 +88,7 @@
       "desde": "04-01",
       "hasta": "05-10"
      },
-     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: Southeast–Delicias, from Apr 1 to May 10 (best from Apr 20 to 30) (Project master document, §5.2 (v3.1, Oct 29, 2026))"
+     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: Southeast–Delicias, from Apr 1 to May 10 (optimal from Apr 20 to 30) (Project master document, §5.2 (v3.1, Oct 29, 2026))"
     }
    ],
    "indicadores": {
@@ -206,7 +206,7 @@
       "desde": "09-15",
       "hasta": "10-31"
      },
-     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: best planting from Sep 15 to Oct 31 (Project master document, §5.2 (v3.1, Oct 29, 2026)); alfalfa is sown again after a year, with at least 12 months between stands"
+     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: planting from Sep 15 to Oct 31 (Project master document, §5.2 (v3.1, Oct 29, 2026)); alfalfa is sown again after a year, with at least 12 months between stands"
     }
    ],
    "indicadores": {
@@ -265,7 +265,7 @@
       "desde": "04-01",
       "hasta": "05-10"
      },
-     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: Southeast–Delicias, from Apr 1 to May 10 (best from Apr 20 to 30) (Project master document, §5.2 (v3.1, Oct 29, 2026))"
+     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: Southeast–Delicias, from Apr 1 to May 10 (optimal from Apr 20 to 30) (Project master document, §5.2 (v3.1, Oct 29, 2026))"
     }
    ],
    "indicadores": {
@@ -324,8 +324,8 @@
     "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option E: standing stubble protects against erosion"
    },
    "advertir_si_rojo": false,
-   "por_que_en": "Worst-case option: the field rests with standing stubble, which asks for no irrigation and protects the soil from wind. Income is low.",
-   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option E («the rest rests with standing stubble»; low income)",
+   "por_que_en": "Intended for the worst water-supply scenario (option E of the master document): the field rests with standing stubble, which needs no irrigation and protects the soil against erosion. The master document lists low income as the risk of this option and gives no figure for it.",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option E («worst scenario»: «the rest rests with standing stubble»; supporting data «less demand; protects against erosion»; risk «low income», with no figure); no irrigation: rotaciones.json (A5), zero depth",
    "etiqueta": "[V]"
   }
  },

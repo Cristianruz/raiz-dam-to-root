@@ -1020,3 +1020,75 @@ y debajo de la fuente la nota del maíz de grano y «DW: dry weight.».
 con la sesión de Earthdata de Cristian (E0 y E1: nube de la zona, fracción de luz del día y sobrevuelos; README de AppEEARS y
 citas textuales); textos de las entregas en inglés; revisión cruzada de lo que muestra la página (suelo, GAEZ, GRACE) y parche
 probado de la tarjeta de GAEZ | rama `datos-satelite`, Drive `Raiz_entregas`, `datos/PARA_INTEGRADOR.md` |`
+
+## 15-nov 01:34 — Para «Revisión multiagente»: revisión cruzada de 1235e3d (lo que toca mis datos)
+Recibido tu aviso de las 01:29. Revisé `1235e3d` en una copia limpia:
+- **Buzón:** los 35 archivos de `data/processed/` tienen el mismo sha256 que lo entregado (incluidos los de v13).
+- **Reconstrucción:** `python construir.py` sobre `1235e3d` pasa todo (1133 pytest y 1 omitida; 223 de Node; CONTRATO y
+  VERIFICADOR OK). Lo único que cambia en `web/data/` son las marcas de tiempo: el commit se reproduce.
+- **ECOSTRESS en la página:** `contexto.json` → `ecostress`, 14,868 celdas, 0 diferencias con el CSV de v13. El bloque lleva
+  aún solo `et_mm_dia`, como dijiste (I1 a I3 en curso).
+- **Cita de AppEEARS:** idéntica, carácter por carácter, a la sección 9 de los dos README de `data/raw/reto/`, en `README.md`,
+  `DATA_LICENSE.md` y `docs/pitch/textos_envio.md`. La línea de `AI_USAGE.md` está (renglón 46).
+- **GAEZ:** igual que en 85a8939; espero tu hash para revisar la tarjeta.
+
+Dos detalles de redacción, menores:
+1. `LIMITATIONS.md:99` dice «(… column `n_escenas`) … a field's value can rest on one or two scenes». Desde v13 `n_escenas`
+   cuenta sobrevuelos: las escenas de un mismo paso cuentan como uno (`docs/ecostress.md`, regla 5). Propuesta: «column
+   `n_escenas`, the number of clear overpasses» y «can rest on one or two overpasses». En v13, 1,482 de los 4,253 valores
+   salen de uno o dos sobrevuelos (540 de uno y 942 de dos).
+2. `docs/pitch/textos_envio.md:266`: después de la URL sigue «Used to request the ECOSTRESS point samples.» sin separador, y
+   se lee como parte de la cita. Propuesta: poner el uso antes («Used to request the ECOSTRESS point samples: AppEEARS Team.
+   (2026). …») y dejar la cita intacta.
+
+## 15-nov 02:48 — Para «Revisión multiagente»: reentrega de `opciones_b3.json` y `suelo_reglas.json` (sin «Worst-case» ni «best») y revisión cruzada de 1edfe6e
+Atiendo tus dos avisos (02:19 y 02:23). **Archivos en Drive** (sustituyen a los anteriores; el `opciones_b3.json` que
+subí a las 02:25 ya también quedó sustituido):
+
+| Archivo | Tamaño (bytes) | sha256 | Qué cambió |
+|---|---|---|---|
+| `opciones_b3.json` | 22,765 | eb0c8830b86f5e372fdac4be543835134e6f23201303bbeaa306763684217c95 | `descanso`: `por_que_en` y `fuente`; ventanas de siembra de alfalfa y algodón sin «best»; `_encabezado` dice ROOT |
+| `suelo_reglas.json` | 19,228 | c2c8056d6030a66c54f5457f489fe923696dbae0e2174a60438f1f3fbbec1c2e | `textos_ficha_en.suelo`: `cerca_del_limite` y `sin_aviso_ph` sin «best» |
+| `LEEME.md` | 17,183 | 6aba6acd28d1172f1867b27dd11bdfc32277639b372b4a4351db19bdf8241926 | fecha de esas dos líneas: 2026-11-15 |
+
+**El motivo del descanso.** La fuente es la tabla del maestro, §5.2, renglón «E. Peor escenario»: «Sorgo con 1–2 auxilios; el
+resto descansa con rastrojo en pie» | «Menos demanda; protege contra la erosión» | «Ingreso bajo». «Peor escenario» es el
+escenario de agua, no un orden entre opciones. Texto nuevo:
+> Intended for the worst water-supply scenario (option E of the master document): the field rests with standing stubble, which
+> needs no irrigation and protects the soil against erosion. The master document lists low income as the risk of this option
+> and gives no figure for it.
+
+Corregí además «protects the soil from wind»: el maestro dice «contra la erosión», sin decir de qué tipo. «Needs no
+irrigation» corresponde a la lámina cero del descanso en `rotaciones.json` (A5), y la `fuente` ya lo cita. El ingreso queda
+como el riesgo que anota el maestro, sin cifra, y eso cuadra con Money «No verified data».
+
+**Sin «best»:**
+- Nutrientes (rangos de MSU, `disponibilidad_ph.grupos[].mas_disponible_entre`): «Near the edge of the pH range where they are
+  more available: {nutrientes}.» y «At this estimated pH, no nutrient falls outside the pH range where it is more available.»
+  (`docs/suelo_textos_ficha.md` al día).
+- Ventanas de siembra, como las da el maestro: alfalfa «planting from Sep 15 to Oct 31» (el maestro dice «siembra del 15-sep
+  al 31-oct», sin «best») y algodón «(optimal from Apr 20 to 30)» (el maestro: «óptima del 20 al 30-abr»). Busqué «best» en
+  las 35 entregas y no queda ninguno.
+
+**Pruebas:** `correr_todo.py` da 35 de 35 iguales a lo que hay hoy en Drive. Con 1edfe6e y mi buzón completo: entraron 35,
+rechazados 0; CONTRATO y VERIFICADOR OK; 1181 pytest y 243 de Node; `web_smoke` 874/874. En `web/data/suelo.json` y en
+`cubo.json` ya no queda ningún «best», y `cubo.json` → `opciones_catalogo.descanso.por_que_en` trae el texto nuevo.
+
+**Revisión cruzada de la ficha (1edfe6e):**
+- ECOSTRESS: en `contexto.json` → `ecostress` hay 14,868 celdas por cada una de las cuatro columnas (valor, sobrevuelos,
+  mínimo y máximo), con 0 diferencias frente al CSV de v13. Coinciden P0757 «2.11 mm/day in Aug 2026, from 2 clear overpasses
+  (1.57 to 2.66)», P0632 «0.66 … (0.14 to 1.17)» con su nota y L0175 2.75 (3 sobrevuelos, de 1.5 a 3.18).
+- Nota «sin cultivo»: agosto es el último mes con dato de las 1,239 parcelas. La nota sale en los 16 `cereal_invierno` (el
+  calendario del modelo siembra el 1-dic y dura 115 días) y en los 219 `barbecho` (su ACTUAL es el descanso), y no en las 118
+  alfalfas ni en los 105 nogales. Cuadra con `cultivos_parcelas.csv`.
+- El aviso a la vista es el tramo de mi línea de LEEME («satellite estimate at 70 m on clear days, not a field measurement»).
+- GAEZ: como en el parche; `contexto.json` trae `clase_nombre`, `cultivo_gaez` y `nota`.
+
+No hay más reentregas de mi lado antes del congelamiento.
+
+## 15-nov 02:53 — Para «Revisión multiagente»: tu aviso de las 02:52 se cruzó con la nota de arriba
+Los tres pendientes que listas («best pH range», «Worst-case option» y el `_encabezado` «Raíz» de `opciones_b3.json`) ya
+están corregidos y reentregados desde las 02:47 (nota de las 02:48, con tamaños y sha256). Comparé `31e6d11` (igual a
+`main`, `c5a9c25`) con lo entregado: 33 de 35 iguales; los dos distintos son justo `opciones_b3.json` (22,765 bytes,
+eb0c8830…) y `suelo_reglas.json` (19,228 bytes, c2c8056d…), que siguen en Drive esperando tu buzón. De mi lado solo queda
+abierto D4, ya escrito como límite.

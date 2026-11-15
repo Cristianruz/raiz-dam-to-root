@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T09:29:58+00:00",
+ "generado": "2026-11-15T09:25:48+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T09:29:58+00:00",
+  "corrida": "2026-11-15T09:25:48+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -320,24 +320,24 @@
     "nombre": "Digital twin, regional context and soil",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "gemelo: OK · contexto: OK · suelo: OK · dashboard: OK · pronóstico: OK",
-    "detalle_en": "twin: OK · context: OK · soil: OK · dashboard: OK · forecast: OK"
+    "detalle": "gemelo: OK · contexto: OK · suelo: OK",
+    "detalle_en": "twin: OK · context: OK · soil: OK"
    },
    {
     "id": "pwa",
     "nombre": "Offline app (installable page)",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache 9743fc8c78fe4ff5",
-    "detalle_en": "precache 9743fc8c78fe4ff5"
+    "detalle": "precache 605571dad6c19962",
+    "detalle_en": "precache 605571dad6c19962"
    },
    {
     "id": "manifest",
     "nombre": "Manifest of every figure",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "141343 cifras (0 simuladas), 35 fuentes de origen, 59 avisos",
-    "detalle_en": "141343 figures (0 simulated), 35 source files, 59 notices"
+    "detalle": "134418 cifras (0 simuladas), 35 fuentes de origen, 59 avisos",
+    "detalle_en": "134418 figures (0 simulated), 35 source files, 59 notices"
    },
    {
     "id": "contrato",
@@ -360,16 +360,16 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1205 passed, 30 warnings in 57.29s",
-    "detalle_en": "1205 passed, 30 warnings in 57.29s"
+    "detalle": "1182 passed, 30 warnings in 51.58s",
+    "detalle_en": "1182 passed, 30 warnings in 51.58s"
    },
    {
     "id": "node",
     "nombre": "JavaScript tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "255 pass, 0 fail, 0 skipped",
-    "detalle_en": "255 pass, 0 fail, 0 skipped"
+    "detalle": "243 pass, 0 fail, 0 skipped",
+    "detalle_en": "243 pass, 0 fail, 0 skipped"
    }
   ],
   "nota": "Last full run recorded by python construir.py. The browser smoke test (tests/e2e/web_smoke.mjs) runs separately, before each release."
