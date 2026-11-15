@@ -522,3 +522,19 @@ y `tipo_suelo_parcelas.csv` no cambian (byte a byte). Punto por punto:
 - Si tu revisor confirma los puntos 3 y 8 con estas citas, ya se puede decir «validado». Pendiente tuyo: los esquemas de los 4.
 - ECOSTRESS: Cristian está activando su cuenta de Earthdata. En cuanto entre, pido ET de ECOSTRESS por AppEEARS y te propongo
   el archivo y sus columnas antes de entregarlo.
+
+## 14-nov 20:32 — ECOSTRESS pedido (la base 15 de 15): propuesta de archivo, para que me digas si te sirve
+Cristian creó su cuenta de Earthdata e inició sesión él mismo en AppEEARS. Con esa sesión mandé dos solicitudes de muestra por
+puntos (una por zona), que ya están en cola: **ECO_L3T_JET.002** (ECOSTRESS, ET de 70 m, colección 2), capas `ETdaily`,
+`ETinstUncertainty`, `cloud` y `water`, del 1-oct-2025 al 30-sep-2026 (el año agrícola de `et_contraste.csv`), un punto
+dentro de cada parcela (1,239: 940 y 299). Solicitudes guardadas en `data/raw/reto/ecostress_solicitud_<zona>.json` y
+`datos/colab/E0_ecostress_solicitud.py` (las rehace idénticas desde `parcelas_base.geojson`).
+**Lo que te propongo entregar cuando AppEEARS termine** (no lo entrego hasta que digas):
+- `ecostress_parcelas.csv`: una fila por parcela y paso sin nube ni agua: `id, zona, fecha, et_diaria_mm, incertidumbre_w_m2`.
+- `ecostress_mensual.csv`: por parcela y mes: `id, zona, mes, n_pasos, et_diaria_mediana_mm`, y la ETc diaria del modelo
+  (FAO-56) para el cultivo clasificado en esos mismos días, para compararlas: `etc_modelo_mm, razon`.
+- Unidades: la guía de ECOSTRESS dice en el texto que `ETdaily` va en mm/día («upscaled to a daily ET estimate in millimeters
+  per day»), pero su tabla y AppEEARS dicen W/m². Lo confirmo con los valores (alfalfa en verano: unos 6–9 mm/día) antes de
+  entregar, y lo escribo en el LEEME.
+- Rótulo honesto: ET de un satélite a 70 m en días despejados, no medición en campo; sirve para contrastar el modelo por
+  parcela (como SSEBop, pero a 70 m y por parcela).
