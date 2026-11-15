@@ -891,3 +891,132 @@ Gracias por d5de13f: v11 dentro, el motor ya lee mis frases en inglés (el parch
   B3, B7, `datos/supuestos.json`, `docs/suelo_textos_ficha.md` y estas notas.
 - **(4)** Anotado: 1,267 opciones, el corte de verano con `edad_min_anios` y «Oats (winter) + forage maize (summer)». Mi
   revisión de las 6:40 compara contra `claude/keen-mayer-sp0vvm`.
+
+## 15-nov 00:34 — Para «Revisión multiagente»: ECOSTRESS corregido (D1, D2, D3, D5, D9) y reentregado
+Gracias por la revisión (`docs/revisiones/2026-11-15_ecostress.md`). Comprobé sus cifras en el crudo antes de cambiar nada:
+los tres pares de escenas a 52 s (16-dic, 26-feb y 26-ago), la nube por escena y zona (20-may: 49 %; 2-jul: 57 % y 99 %;
+las demás con dato, 4 % o menos) y `ETinstUncertainty` (percentil 10 de 29, mediana 87, percentil 90 de 231, máximo 431).
+También leí el código de JPL (`ECOv002-L3T-L4T-JET`, commit a785b14): `Rn_diaria = 1.6 · Rn / (π · sen(π · x))` y la salida
+del sol de `FLiES/daylight_hours.py`; E1 calcula x igual.
+
+**Qué cambió en `E1_ecostress_parcelas.py`** (umbrales como supuestos [S] en `datos/supuestos.json`):
+1. Fuera la escena de una zona si más de `ecostress_nube_zona_max` = 0.25 de sus puntos tienen `cloud` = 1 (D2).
+2. Solo pasos con x entre `ecostress_fraccion_luz` = 0.15 y 0.85 (D1): salen el 8-oct, el 28-dic, el 16-ene y el 1-may.
+3. Las escenas de una parcela a menos de `ecostress_sobrevuelo_seg` = 300 s son un sobrevuelo y se promedian (D5): 85
+   parcelas juntan las dos escenas del 26-ago. **`n_escenas` cuenta sobrevuelos.**
+4. En cultivos anuales, sin `etc_modelo_mm` ni `razon` en los meses en que HLS no ve la parcela verde (NDVI < 0.4) (D9).
+5. **Columnas nuevas, al final:** `et_min_mm_dia` y `et_max_mm_dia` (el menor y el mayor de los sobrevuelos usados) e
+   `incertidumbre_w_m2` (mediana de `ETinstUncertainty` de esos sobrevuelos, W/m²; desviación estándar entre los cuatro
+   modelos). Siguen las mismas columnas de antes, en el mismo orden; `et_mm_dia` vacío si y solo si `n_escenas` = 0.
+
+**Efecto:** 4,253 parcela-mes con dato (antes 6,167): octubre 1,239, diciembre 1,239, enero 536 (Delicias–Saucillo, un
+sobrevuelo, el 29-ene) y agosto 1,239; mayo y julio quedan vacíos. Se vacían 1,914 y cambian 2,904 valores; en agosto
+cambian 81 (P0290: 0.22 → 1.91). Agosto de las protagonistas: P0757 2.11 (2 sobrevuelos, de 1.57 a 2.66), L0175 2.75 (3, de
+1.50 a 3.18) y P0632 0.66 (2, de 0.14 a 1.17; parcela sin cultivo, NDVI 0.20). P0632 ya no tiene `etc_modelo_mm` en
+diciembre ni en enero.
+
+**D3, D6 y D7:** `docs/ecostress.md` reescrito: estimación satelital (no «uso real» ni «mide»), integra las horas de luz,
+incertidumbre con su distribución, «de 6.5 a 16.7 h», «34 escenas, 31 sobrevuelos, 20 con dato», método de los cuartiles,
+SSEBop con cifras y exactitud «no evaluada aquí». La línea de LEEME también.
+**D8, en parte:** la cita del producto ya está comprobada, tal como la da la página del DOI en el catálogo de NASA Earthdata
+(https://www.earthdata.nasa.gov/data/catalog/lpcloud-eco-l3t-jet-002, 15-nov): «Hook, Simon, & Halverson, Gregory. (2024).
+ECOSTRESS Tiled Evapotranspiration Instantaneous and Daytime L3 Global 70 m v002 [Data set]. NASA Land Processes Distributed
+Active Archive Center. https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002». La del software AppEEARS sigue pendiente: está en el
+README.md de cada solicitud y bajarlo necesita la sesión de Earthdata de Cristian (la página de ayuda de AppEEARS no se
+deja leer sin navegador). Que siga «to be confirmed»; no la armo a mano.
+**D4:** queda como límite escrito en `docs/ecostress.md` §6 (la marca de ubicación también necesita la sesión de Earthdata).
+**Tu punto 3:** de acuerdo. El contraste con el modelo en la ficha se leería como validación o como déficit, y para P0632 no
+hay ninguna lectura con el cereal en pie. Propuesta de texto con lo que ya trae el CSV: «2.11 mm/day in Aug 2026, from 2
+clear overpasses (1.57 to 2.66). Satellite estimate at 70 m on clear days, not a field measurement.» Con un solo
+sobrevuelo, sin rango. Y en las parcelas que el mes mostrado no se ven verdes, tu nota.
+
+**Archivos (en Drive; sustituyen a los anteriores):**
+
+| Archivo | Tamaño (bytes) | sha256 | Qué cambió |
+|---|---|---|---|
+| `ecostress_parcelas.csv` | 666,813 | ee360cbdeff36ee9f2551de2bf7c31a6caaac270f925ab26d04d941c2c013336 | reglas 1 a 4 y 3 columnas nuevas |
+| `supuestos.json` | 16,373 | 2832d83782415412b76d1650fede19867d04edf19d9411cb8852bc1670ee6a4d | 3 supuestos nuevos de ECOSTRESS; `_encabezado` dice ROOT |
+| `LEEME.md` | 16,932 | b3a46b46ca7f28c7304284fe9c79b9dc828059dc3b81b557babc001fdc94e1ec | líneas de `ecostress_parcelas.csv` y `supuestos.json` |
+
+**Pruebas:** `correr_todo.py` 35 de 35 iguales a lo entregado. Con f0dbf3b y el buzón completo: entraron 35, rechazados 0;
+CONTRATO y VERIFICADOR OK; 1133 pytest y 223 node; `web_smoke` **747/747**. Las columnas nuevas entran «sin validar» hasta que
+las declares en `motor/esquemas.py` (I7). El `_encabezado` de `opciones_b3.json` sigue diciendo «Raíz»: lo cambio en la próxima
+entrega de ese archivo, si la hay.
+
+## 15-nov 00:40 — Para «Revisión multiagente»: D8 resuelto (citas del producto y del software de AppEEARS, textuales)
+Cristian pidió que lo hiciera yo: con su sesión de AppEEARS en Chrome bajé el README.md de las dos solicitudes y los subí sin
+cambios a `data/raw/reto/` (commit f438c3f en `datos-satelite`): `ecostress_readme_delicias_saucillo.md` (87,903 bytes, sha256
+30fc970e644fd9e927e609aec69bdfc27bd6f3d711aeb34ff6c8a908398ce711) y `ecostress_readme_lazaro_cardenas.md` (47,993 bytes,
+bc23f5b55de6749aabb8fe800b418a8336319d4b3200564cfb991e47371af0c1); los dos sha256 son iguales a los de la lista del paquete de
+AppEEARS. Los dos dicen «This request was processed by AppEEARS version 3.137».
+
+**Para sustituir «to be confirmed»** en `README.md`, `DATA_LICENSE.md` y `docs/pitch/textos_envio.md` (sección 9 del README de
+AppEEARS, textual):
+> AppEEARS Team. (2026). Application for Extracting and Exploring Analysis Ready Samples (AppEEARS). Ver. 3.137. NASA EOSDIS Land
+> Processes Distributed Active Archive Center (LP DAAC), USGS/Earth Resources Observation and Science (EROS) Center, Sioux Falls,
+> South Dakota, USA. Accessed November 15, 2026. https://appeears.earthdatacloud.nasa.gov
+
+**Cita del producto** (sección 8, textual):
+> Hook, S., & Halverson, G. (2024). ECOSTRESS Tiled Evapotranspiration Instantaneous and Daytime L3 Global 70 m v002. NASA Land
+> Processes Distributed Active Archive Center. https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002. Accessed November 15, 2026.
+
+`docs/ecostress.md` ya las trae (§1) y la línea de LEEME de `ecostress_parcelas.csv` nombra el software. **Reentrega:** solo
+`LEEME.md` (17,183 bytes, sha256 eabf3a324c206c210f78a149e50d420a03901ac9b102805bda93b18ccf6976d8); los datos no cambian. Lo
+único que sigue pendiente de la revisión es D4 (la marca de ubicación de las escenas), escrito como límite.
+
+## 15-nov 00:52 — Para «Revisión multiagente»: respuesta sobre el aviso de suelo_tipos y cómo leer GAEZ
+**1. `suelo_tipos.json` → `zona.municipio_delicias_pct`: mejor que el validador acepte esas dos llaves como «no suelo»; el
+archivo no cambia.**
+- Las 11 llaves son la Tabla 1 del Plan Municipal de Desarrollo de Delicias 2024–2027 (INEGI 2016) tal cual: 9 grupos de
+  suelo más `zona_urbana` 3.44 y `cuerpo_de_agua` 0.03; suman 100.00. Son porcentajes de la superficie del municipio, no de
+  los suelos: los 9 grupos suman 96.53.
+- Probé sacarlas a una llave aparte (`municipio_delicias_otras_superficies_pct`) contra tu 85a8939 y tu esquema rechaza las
+  dos llaves: «zona.municipio_delicias_pct: … (suman 96.53)» y «zona.municipio_delicias_otras_superficies_pct: … (suman
+  3.47)». Corregirlo en el archivo obligaría a cambiar `motor/esquemas.py`, así que lo regresé: `suelo_tipos.json` sigue
+  siendo el entregado (61,875 bytes, sha256 537756d3d800d919d2cd24b0604313822223c8822f0de3df074e51cf9a5b0a7e, el mismo de
+  Drive). No hay reentrega. Con 85a8939 y mi buzón completo: entraron 35, rechazados 0; CONTRATO y VERIFICADOR OK; 1133
+  pytest y 223 node.
+- Tu `suelos_del_municipio` (`motor/suelo_web.py`) ya las deja fuera de la lista, que es lo correcto. Propuesta: una tupla
+  `NO_SUELO = ("zona_urbana", "cuerpo_de_agua")` (superficies del mismo cuadro del INEGI que no son suelo) que no genere
+  aviso; cualquier otra llave fuera del catálogo WRB, que siga avisando. Si la ficha quiere decir que el resto del municipio es
+  zona urbana y cuerpo de agua, las dos cifras ya están en el archivo con la misma fuente.
+
+**2. GAEZ (`gaez_zona.csv`): la columna `unidad` es la cadena que publica FAO, sin cambios.** `bloque_gaez`
+(`motor/contexto_web.py`) pasa `valor` y `unidad`, y deja fuera `clase_nombre`, `cultivo_gaez` y `nota`, que vienen en la
+entrega justo para esto. Lo que dibuja hoy la tarjeta (leído en la página de 85a8939, zona Delicias–Saucillo) y cómo se lee:
+
+| La página dice | Se lee | Propuesta |
+|---|---|---|
+| «Alfalfa … 1,678.5 10kg DW/ha» | decenas de kg de materia seca (DW, *dry weight*) por ha: 1,678.5 × 10 kg = 16,785 kg/ha, unas 16.8 t (Lázaro Cárdenas: 1,665.5 → 16,655 kg) | «1,678.5 × 10 kg DW/ha»; el factor sale de la propia cadena de la unidad, y una nota «DW: dry weight» |
+| «2 Class», «3 Class» | número de clase de aptitud de FAO (1 es la mejor); el nombre viene en `clase_nombre`: 2 = High, 3 = Good | «High», «Good»; sin los umbrales que imprime la leyenda del servicio, que no cuadran con los índices (77.78 llega como clase 2 y 55.56 como clase 3) |
+| «7,778 Index (0–10000)» | índice de aptitud en la escala de FAO de 0 a 10000: 7,778 equivale a 77.78 de 100 | puede quedarse así |
+| «Cotton … 913 kg lint/ha» | kg de fibra (algodón pluma) por ha | sin cambio |
+| «Forage maize … 9,341 kg DW/ha» y su clase | **es maíz de grano** (GAEZ «Maize», mze): el tema res05 no trae capa de maíz para ensilaje con insumos altos y riego por gravedad (columna `nota`) | mostrar `cultivo_gaez` junto al nombre («Forage maize · GAEZ: Maize») y la `nota`; si no, la fila atribuye al maíz forrajero un rendimiento de grano |
+| «Winter cereal …» | es la avena de GAEZ («Oat») | «Winter cereal · GAEZ: Oat» |
+
+Ninguna de estas lecturas necesita reentrega: todo está en `gaez_zona.csv` (9,049 bytes, sha256
+9a4a04678ac5b04409ac6a924bde53ddbb4769965c9406126d8c3b847372f5e0, el de Drive).
+
+## 15-nov 01:07 — Para «Revisión multiagente»: parche probado de lo anterior (opcional; `motor/` y `web/` son tuyos)
+`datos/parches/2026-11-15_gaez_lectura_y_no_suelo.patch` (16,455 bytes, sha256
+63ea4d4f38966ad20622d82ac621afb6d48fd49dd4156eb8a7f824b080dedb29). `git apply --check` limpio sobre 85a8939. Toca 6 archivos:
+- `motor/contexto_web.py`: `bloque_gaez` pasa `clase_nombre`, `cultivo_gaez` y `nota` (constante `COLUMNAS_TEXTO_GAEZ`) solo
+  cuando traen texto; la fixture de prueba no los trae, así que `contexto_lleno.json` no cambia.
+- `motor/suelo_web.py`: `NO_SUELO = ("zona_urbana", "cuerpo_de_agua")`; quedan fuera de la lista sin aviso, y cualquier otra
+  llave que no sea un grupo WRB sigue avisando.
+- `web/js/contexto.js`: tres funciones puras exportadas (`valorGaez`, `cultivoDeGaez`, `notasDeGaez`) que usa
+  `htmlTarjetaGaez`. Ninguna cifra escrita: el factor sale de la cadena de la unidad.
+- Pruebas: 2 pytest (`test_gaez_lleva_los_textos_de_la_entrega_solo_si_vienen`,
+  `test_zona_urbana_y_cuerpo_de_agua_no_son_suelo_ni_avisan`) y 2 node (una con datos de prueba y otra con
+  `web/data/contexto.json`).
+
+**Resultado sobre 85a8939 con mi buzón completo:** entraron 35, rechazados 0; el aviso «no son grupos de suelo» ya no sale;
+CONTRATO, VERIFICADOR y `test_sin_cifras` OK; 1135 pytest y 225 node; `web_smoke` 747/747. La tarjeta queda así (Delicias–Saucillo):
+«Alfalfa | … | 1,678.5 × 10 kg DW/ha», «… | High», «Forage maize GAEZ: Maize | … | 9,341 kg DW/ha», «Winter cereal GAEZ: Oat»,
+y debajo de la fuente la nota del maíz de grano y «DW: dry weight.».
+
+**Línea para `AI_USAGE.md`** (no la escribo en mi rama para no chocar con tus líneas al final de la tabla):
+`| 2026-11-15 | Sesión de datos | Claude (en el navegador) y Claude Code | ECOSTRESS ECO_L3T_JET.002 por parcela vía AppEEARS
+con la sesión de Earthdata de Cristian (E0 y E1: nube de la zona, fracción de luz del día y sobrevuelos; README de AppEEARS y
+citas textuales); textos de las entregas en inglés; revisión cruzada de lo que muestra la página (suelo, GAEZ, GRACE) y parche
+probado de la tarjeta de GAEZ | rama `datos-satelite`, Drive `Raiz_entregas`, `datos/PARA_INTEGRADOR.md` |`
