@@ -93,3 +93,19 @@ def test_sigue_simulado_lee_cubo_meta_mock(falsos):
 def test_relieve_sin_zonas_no_es_ok(falsos):
     paso = construir.paso_relieve()
     assert paso.estado == construir.PENDIENTE and "sin zonas" in paso.detalle
+
+
+def test_tabla_de_pruebas_tambien_en_ingles(tmp_path, monkeypatch):
+    """docs/en/test_results.md: la misma tabla de docs/pruebas.md con los nombres en inglés de la web,
+    porque «About & Data» la enlaza y la guía de envío pide que lo enlazado esté en inglés."""
+    (tmp_path / "docs").mkdir()
+    monkeypatch.setattr(construir, "RAIZ", tmp_path)
+    construir.escribir_pruebas_md([construir.Paso("contrato", "OK", "CONTRATO OK"),
+                                 construir.Paso("pytest", "FALLA", "1 failed")], 12.3)
+    es = (tmp_path / "docs/pruebas.md").read_text(encoding="utf-8")
+    en = (tmp_path / "docs/en/test_results.md").read_text(encoding="utf-8")
+    assert "| contrato | OK | CONTRATO OK |" in es
+    assert en.startswith("<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->")
+    assert "# Automated test results" in en
+    assert "| Data contract, including the water balance of “Follow the drop” | passed | CONTRATO OK |" in en
+    assert "| Python tests | failed | 1 failed |" in en

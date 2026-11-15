@@ -56,16 +56,19 @@ REPOSITORIO = "https://github.com/Cristianruz/raiz-dam-to-root"
 ENLACES = {
     "repositorio": REPOSITORIO,
     "readme_ia": REPOSITORIO + "#siai-tools-used",  # sección «SI/AI tools used» del README
-    "pruebas_md": REPOSITORIO + "/blob/main/docs/pruebas.md",
+    # La tabla de la puerta en inglés (docs/en/test_results.md, la escribe construir.py junto a docs/pruebas.md):
+    # la guía de envío de Space Apps pide que todo lo que la página enlaza esté en inglés.
+    "pruebas_md": REPOSITORIO + "/blob/main/docs/en/test_results.md",
 }
 # Documentos que «About & Data» enlaza (ruta en el repo, título en inglés y nota). La nota de la revisión de las
 # protagonistas se decide leyendo el documento (revision_documentos).
 DOCUMENTOS = (
-    {"id": "modelo_vs_practica", "ruta": "docs/modelo_vs_practica.md",
+    {"id": "modelo_vs_practica", "ruta": "docs/modelo_vs_practica.md", "ruta_en": "docs/en/model_vs_practice.md",
      "titulo": "The model against what is really irrigated in the district",
      "nota": "Gathers the published local references (water applied in the district and INIFAP guidance) next to the "
              "model's water need; it changes no verdict."},
     {"id": "revision_protagonistas", "ruta": "docs/revision_protagonistas.md",
+     "ruta_en": "docs/en/story_fields_review.md",
      "titulo": "True-color review of the story fields"},
 )
 NOTA_REVISION_IA = ("Done by an AI session (the data session) looking at Sentinel-2 true-color images. The review by a "
@@ -486,8 +489,12 @@ def documentos(raiz):
             hecha_por_ia = any(x in baja for x in MARCAS_REVISION_IA)
             falta_persona = any(x in baja for x in MARCAS_FALTA_PERSONA)
             nota = NOTA_REVISION_IA if (hecha_por_ia and falta_persona) else NOTA_REVISION_VER
+        # La liga va a la traducción en inglés si existe (docs/en/); el contenido se lee del original.
+        ruta_liga = d["ruta"]
+        if d.get("ruta_en") and (Path(raiz) / d["ruta_en"]).exists():
+            ruta_liga = d["ruta_en"]
         salida.append({"id": d["id"], "titulo": d["titulo"], "ruta": d["ruta"],
-                       "url": f"{REPOSITORIO}/blob/main/{d['ruta']}", "existe": texto is not None, "nota": nota})
+                       "url": f"{REPOSITORIO}/blob/main/{ruta_liga}", "existe": texto is not None, "nota": nota})
     return salida
 
 

@@ -374,6 +374,33 @@ def escribir_pruebas_md(pasos, total_s):
         "a partir de ella: la sección «About & Data» de la web la muestra como «puerta automática».\n"
     )
     (RAIZ / "docs/pruebas.md").write_text(texto, encoding="utf-8")
+    escribir_pruebas_md_en(pasos, ahora, total_s)
+
+
+def escribir_pruebas_md_en(pasos, ahora, total_s):
+    """docs/en/test_results.md: la misma tabla en inglés, con los nombres de los pasos que muestra la web
+    (motor/pruebas_web.py, NOMBRES_PASOS). «About & Data» enlaza esta versión porque la guía de envío de
+    Space Apps pide que todo lo enlazado esté en inglés. El detalle de cada paso se copia tal cual."""
+    try:
+        pw = importlib.import_module("motor.pruebas_web")
+    except Exception:  # sin el módulo, los nombres quedan como id del paso (no se pierde la tabla)
+        pw = None
+    nombres = getattr(pw, "NOMBRES_PASOS", {}) or {}
+    estados = {"OK": "passed", "FALLA": "failed", "PENDIENTE": "pending", "OMITIDO": "skipped"}
+    filas = "\n".join(f"| {nombres.get(p.nombre, p.nombre)} | {estados.get(p.estado, p.estado)} | {p.detalle} |"
+                      for p in pasos)
+    texto = (
+        "<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->\n"
+        "# Automated test results (written by `python construir.py`; not edited by hand)\n\n"
+        "English version of [docs/pruebas.md](../pruebas.md); if they differ, the Spanish original prevails.\n\n"
+        f"Run: {ahora} · duration {total_s:.1f} s\n\n"
+        "| Step | Status | Detail |\n|---|---|---|\n" + filas + "\n\n"
+        "The browser test (`node tests/e2e/web_smoke.mjs`) runs separately, before each publication.\n"
+        "After this table is written, step 5c (`motor/pruebas_web.py`) builds `web/data/pruebas.json` from it: "
+        "«About & Data» shows it as the automated gate.\n"
+    )
+    (RAIZ / "docs/en").mkdir(parents=True, exist_ok=True)
+    (RAIZ / "docs/en/test_results.md").write_text(texto, encoding="utf-8")
 
 
 # --- (5c) pruebas a la vista para la web ----------------------------------------------------

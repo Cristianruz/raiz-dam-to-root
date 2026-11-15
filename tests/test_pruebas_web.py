@@ -413,3 +413,25 @@ def test_h1b_y_documentos_del_repo_real():
         assert not ESPANOL.search(h1b["resumen"]) and not ESPANOL.search(h1b.get("nota") or "")
     for doc in d["documentos"]:
         assert doc["existe"] == (RAIZ / doc["ruta"]).exists()
+
+
+def test_documentos_enlazan_la_traduccion_en_ingles(tmp_path):
+    """La guía de envío de Space Apps pide que todo lo enlazado esté en inglés: si existe la traducción en
+    docs/en/, la liga apunta a ella; el contenido (la nota de la revisión) se sigue leyendo del original."""
+    escribir(tmp_path, "docs/modelo_vs_practica.md", "# El modelo frente a la práctica\n")
+    escribir(tmp_path, "docs/revision_protagonistas.md",
+             "**Quién revisó:** la sesión de datos (asistente de IA). La revisión de una persona sigue pendiente.\n")
+    escribir(tmp_path, "docs/en/model_vs_practice.md", "# The model against practice\n")
+    docs = {d["id"]: d for d in pruebas_web.calcular(tmp_path)["documentos"]}
+    assert docs["modelo_vs_practica"]["url"] == f"{pruebas_web.REPOSITORIO}/blob/main/docs/en/model_vs_practice.md"
+    # Sin traducción, la liga sigue en el original.
+    assert docs["revision_protagonistas"]["url"] == f"{pruebas_web.REPOSITORIO}/blob/main/docs/revision_protagonistas.md"
+    assert docs["revision_protagonistas"]["nota"] == pruebas_web.NOTA_REVISION_IA
+    # La tabla de la puerta automática se enlaza en inglés.
+    assert pruebas_web.ENLACES["pruebas_md"].endswith("/blob/main/docs/en/test_results.md")
+
+
+def test_traducciones_del_repo_real_existen():
+    for d in pruebas_web.DOCUMENTOS:
+        if d.get("ruta_en"):
+            assert (RAIZ / d["ruta_en"]).exists(), d["ruta_en"]
