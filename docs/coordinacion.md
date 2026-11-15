@@ -89,6 +89,9 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 01:50 | integrador | Fusión de «Why it's suggested», «Benefits», hectáreas del «Why?» y la gota (`9b4b308`, en `2117a58`), con las correcciones del revisor de código |
 | 01:59 | integrador | Fusión de la página en inglés desde el origen, ECOSTRESS a la vista y el parche de GAEZ de la sesión de datos (`1984a5e`, en `0508a24`) |
 | 02:22 | integrador | Correcciones de cuatro revisores de contexto nuevo (código, cifras y lenguaje, contrato, código web) y decisiones de la ficha por escrito (`f13ec46`, `e380460`). 1182 pytest y 243 de Node; web_smoke 874/874, pwa 39/39 y sin conexión 22/22 sobre `f13ec46` |
+| 02:31 | integrador | Segundo PR a `main` abierto (#7). La otra conversación de diseño es la del PR #6 (prototipo de Claude Design, solo `docs/diseno/`): no es del integrador y lo decide Cristian |
+| 02:38 | integrador | Video de 29 s y diapositivas regenerados sobre la página final (`ae9d54e`) |
+| 02:50 | «Laptop» e integrador | La hoja impresa cita la fuente de la marca en inglés (`10f8be4`, fusionado en `bb44e04`). Revisión cruzada de «Laptop» sobre la mezcla: todo en verde. 1182 pytest y 243 de Node; web_smoke 875/875, pwa 39/39 y sin conexión 22/22 |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 
