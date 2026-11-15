@@ -832,3 +832,35 @@ Para «Revisión multiagente».
   `estado_gemelo.js` marcan esas fuentes con `lang="es"`; ya están en inglés (va con el cambio de `idioma_fuentes`).
 - **La falla de 44 px no viene de mis datos:** con tu v10, sin mi buzón, `web_smoke` da 640/641 con la misma falla (botón
   «Breaks pest cycles» de `web/js/prioridades.js`).
+
+## 14-nov 23:45 — Para «Revisión multiagente»: revisión cruzada de 3239d82 (tipo de suelo y nutrientes) y dos archivos más
+**Cómo:** `construir.py` de 3239d82 con mi buzón: entraron 35, rechazados 0; 1101 pytest y 200 node; `web_smoke` **664/664**
+(la falla de 44 px ya no sale). Comparé `web/data/suelo.json` celda por celda y leí el texto de las tres fichas.
+- **Tipo de suelo:** 1,239 de 1,239 parcelas con el mismo gran grupo y la misma zona que `tipo_suelo_parcelas.csv`; los 12
+  grandes grupos con su orden; definiciones y significados de los prefijos tal como vienen en `suelo_tipos.json`.
+- **Nutrientes:** 1,239 de 1,239 parcelas con la misma clave menos disponibles | cerca del límite | toxicidad que
+  `suelo_nutrientes_parcelas.csv`. En los 4 conjuntos, cada nota es mi texto de `textos_ficha_en`, con los nombres en inglés
+  y en el orden del archivo; «cerca del límite» sale solo sin N, K, Ca, Mg y S (L0175: «Near the edge of their best pH range:
+  phosphorus.»; P0757 y P0632 no lo muestran); la nota del hierro sale donde hay Fe. La única diferencia: el conjunto
+  `sin_dato` (P0316) no trae notas, en lugar de «No soil estimate for this field.»; la ficha ya dice «Soil profile: no soil
+  data for this field», así que basta.
+- **Suelos del municipio:** solo en Delicias–Saucillo, con los nombres WRB bien pasados al inglés (Kastañozem → Kastanozems,
+  Feozem → Phaeozems) y sin zona urbana ni cuerpos de agua. Correcto.
+
+**Lo que corregí de mi lado (y reentregué):** las fuentes de esa sección salían en español: «Descriptions: elemento formativo:
+Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021) … Tabla 4.2 … leído el 14-nov-2026; definición: …», «Municipality soils:
+Plan Municipal de Desarrollo de Delicias … que cita a INEGI …» y «Rule: McCauley, A., Jones, C. y Olson-Rutz, K. 2017
+(marzo) … ficha: … leído el 14-nov-2026 [V] rangos de la fuente; margen assumption [S]». Ahora todas las fuentes y etiquetas
+de `suelo_tipos.json` y `suelo_reglas.json` van en inglés (las citas textuales quedan en su idioma, con traducción). Y la
+plantilla de la zona dice «Soils of the municipality **of Delicias** (INEGI soil map): {lista}.», porque la zona
+Delicias–Saucillo tiene parcelas de dos municipios y la cifra es solo del de Delicias.
+
+| Archivo | Tamaño (bytes) | sha256 |
+|---|---|---|
+| `suelo_tipos.json` | 61,875 | 537756d3d800d919d2cd24b0604313822223c8822f0de3df074e51cf9a5b0a7e |
+| `suelo_reglas.json` | 19,181 | 3dba1d45693c136c13edd9c95e721d6ea8ea9c8725f7a9e02eb5c3c66ed75c8d |
+
+Solo cambian textos (127 en `suelo_tipos.json` y 22 en `suelo_reglas.json`, todos en `fuente`, `etiqueta`, `metodo`,
+`como_leer_un_gran_grupo` y el `texto_en` de la zona); ningún valor, regla ni llave. `correr_todo.py`: 35 de 35. Con 3239d82 y
+el buzón completo: entraron 35, rechazados 0; 1101 pytest y 200 node; en la ficha ya no queda español en la sección de suelo.
+Con esto, mi buzón v11 son 9 archivos: los 7 de las 22:20 (con `opciones_b3.json` de las 22:27) y estos 2.
