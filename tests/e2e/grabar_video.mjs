@@ -4,7 +4,8 @@
 // Uso:   node tests/e2e/grabar_video.mjs
 //        RAIZ_URL=https://<liga pública>/ node tests/e2e/grabar_video.mjs   (graba la página publicada, no la local)
 //        RAIZ_VIDEO=recorrido node tests/e2e/grabar_video.mjs   (el recorrido largo, de 60 a 90 s: las mismas tomas con
-//                                     más calma; guion docs/pitch/guion_video_recorrido.md → video_recorrido.mp4 y .srt)
+//                                     más calma y tres golpes más: el idioma de la portada, las otras dos parcelas y la
+//                                     vista 3D; guion docs/pitch/guion_video_recorrido.md → video_recorrido.mp4 y .srt)
 //        RAIZ_LIGA_PAGINA=<liga>      liga pública que se escribe en la tarjeta de cierre (por omisión, la del proyecto)
 //        RAIZ_FOTOGRAMAS=<carpeta>    dónde dejar un fotograma de cada tramo para revisarlo (por omisión, una temporal)
 //        FFMPEG=<ruta> FFPROBE=<ruta> si ffmpeg y ffprobe no están en el PATH
@@ -73,7 +74,8 @@ const VIDEOS = {
   oficial: { guion: "guion_video_30s.md", salida: "video_30s", maxima: 30.0, objetivo: [28.0, 29.0], megas: 10 },
   recorrido: { guion: "guion_video_recorrido.md", salida: "video_recorrido", maxima: 90.0, objetivo: [60.0, 90.0], megas: 25 },
 };
-const VIDEO = VIDEOS[process.env.RAIZ_VIDEO === "recorrido" ? "recorrido" : "oficial"];
+const RECORRIDO = process.env.RAIZ_VIDEO === "recorrido";
+const VIDEO = VIDEOS[RECORRIDO ? "recorrido" : "oficial"];
 const GUION = path.join(RAIZ, "docs", "pitch", VIDEO.guion);
 const SRT = path.join(RAIZ, "docs", "pitch", `${VIDEO.salida}.srt`);
 const MP4 = path.join(RAIZ, "docs", "pitch", `${VIDEO.salida}.mp4`);
@@ -113,18 +115,28 @@ const CIERRE_MIN_S = 2.5;
 const AVISO_JUICIO = "This tool supports, never replaces, the judgment of farmers and local experts.";
 
 // Las tomas, en el orden del guion (una por subtítulo de la sección 5). `rotulo`: el nombre del golpe en la banda.
-const TOMAS = [
-  { tipo: "tarjeta", vista: "apertura" },
-  { tipo: "tarjeta", vista: "como" },
-  { tipo: "pagina", clave: "dotacion", rotulo: "Set the water" },
-  { tipo: "pagina", clave: "parcela", rotulo: "Pick a field" },
-  { tipo: "pagina", clave: "porque", rotulo: "Ask why" },
-  { tipo: "pagina", clave: "gota", rotulo: "Follow the drop" },
-  { tipo: "pagina", clave: "anios", rotulo: "Look back" },
-  { tipo: "pagina", clave: "compartir", rotulo: "Share" },
-  { tipo: "pagina", clave: "pruebas", rotulo: "Check the tests" },
-  { tipo: "tarjeta", vista: "cierre" },
-];
+const APERTURA = { tipo: "tarjeta", vista: "apertura" };
+const COMO = { tipo: "tarjeta", vista: "como" };
+const CIERRE = { tipo: "tarjeta", vista: "cierre" };
+const GOLPES = {
+  dotacion: { tipo: "pagina", clave: "dotacion", rotulo: "Set the water" },
+  idioma: { tipo: "pagina", clave: "idioma", rotulo: "Your language" },
+  parcela: { tipo: "pagina", clave: "parcela", rotulo: "Pick a field" },
+  porque: { tipo: "pagina", clave: "porque", rotulo: "Ask why" },
+  gota: { tipo: "pagina", clave: "gota", rotulo: "Follow the drop" },
+  evidencia: { tipo: "pagina", clave: "evidencia", rotulo: "Satellite evidence" },
+  suelo: { tipo: "pagina", clave: "suelo", rotulo: "Soil and evidence" },
+  otras: { tipo: "pagina", clave: "otras", rotulo: "Other fields" },
+  anios: { tipo: "pagina", clave: "anios", rotulo: "Look back" },
+  compartir: { tipo: "pagina", clave: "compartir", rotulo: "Share" },
+  pruebas: { tipo: "pagina", clave: "pruebas", rotulo: "Check the tests" },
+};
+const G = GOLPES;
+const TOMAS = RECORRIDO
+  ? [APERTURA, COMO, G.dotacion, G.idioma, G.parcela, G.porque, G.gota, G.evidencia, G.suelo, G.otras, G.anios, G.compartir, G.pruebas, CIERRE]
+  : [APERTURA, COMO, G.dotacion, G.parcela, G.porque, G.gota, G.evidencia, G.compartir, G.pruebas, CIERRE];
+// Las otras dos parcelas de ejemplo (solo en el recorrido): una con el plazo libre y un nogal comprometido.
+const OTRAS_PARCELAS = ["P0632", "L0175"];
 
 // Ritmo del puntero y de los desplazamientos (ms).
 const MOVER_MS = 340;
@@ -362,22 +374,28 @@ async function instalarAyudas(page) {
       estado.anillos = [];
       capa.replaceChildren();
     };
-    window.__grabacionResaltar = (objetivos, opciones = {}) => {
+    /** Un anillo por grupo de elementos (la unión del grupo). Para quien ya tiene los elementos en la mano. */
+    window.__grabacionResaltarElementos = (grupos, opciones = {}) => {
       window.__grabacionQuitarResaltado();
       estado.opciones = opciones;
-      const nuevo = (els) => {
+      for (const els of grupos) {
+        if (!els.length) continue;
         const nodo = document.createElement("div");
         nodo.className = "anillo";
         capa.append(nodo);
         estado.anillos.push({ els, nodo });
-      };
-      for (const o of objetivos) {
-        const els = o.sel.flatMap((s) => [...document.querySelectorAll(s)]);
-        if (o.cada) els.forEach((e) => nuevo([e]));
-        else if (els.length) nuevo(els);
       }
       paso();
       return estado.anillos.length;
+    };
+    window.__grabacionResaltar = (objetivos, opciones = {}) => {
+      const grupos = [];
+      for (const o of objetivos) {
+        const els = o.sel.flatMap((s) => [...document.querySelectorAll(s)]);
+        if (o.cada) els.forEach((e) => grupos.push([e]));
+        else grupos.push(els);
+      }
+      return window.__grabacionResaltarElementos(grupos, opciones);
     };
     /** Anillos a la vista en este momento, como rectángulos de la ventana. */
     window.__grabacionAnillos = () =>
@@ -661,7 +679,7 @@ function tramosDelExplorador(ctx) {
     });
   }
 
-  // ---- Look back: el gemelo en 3D y su línea de tiempo hasta el año destacado
+  // ---- Look back (solo en el recorrido): el gemelo en 3D y su línea de tiempo hasta el año destacado
   lista.push(
     conGemelo
       ? {
@@ -708,21 +726,7 @@ function tramosDelExplorador(ctx) {
             return { encuadre: e, resaltado: "si", anclaVisual: { antes: reloj.dur * 0.45 } };
           },
         }
-      : {
-          // Sin la vista 3D: la memoria satelital de la parcela (misma idea: mirar atrás), en la ficha.
-          toma: "anios", parte: 1, nombre: "sin la vista 3D: la memoria satelital de la parcela",
-          despuesDe: "parcela",
-          async prep(page) {
-            await quitarResaltado(page);
-            await verPuntero(page, false);
-            await desplazarA(page, "#ficha", "#ficha-resumen", { ...FICHA, margen: 8, ms: 0 });
-          },
-          async accion(page) {
-            await desplazarA(page, "#ficha", "section.memoria", { cabecera: ".ficha-cabeza", margen: 12, ms: DESPLAZAR_MS });
-            await resaltar(page, [{ sel: ["section.memoria"] }], FICHA);
-            return { encuadre: await encuadreFicha(page), resaltado: "si" };
-          },
-        },
+      : null, // sin la vista 3D no hay toma «Look back» (solo la pide el recorrido)
   );
 
   // ---- Pick a field: clic en la parcela (corte en el clic), su frase principal y, después, sus opciones lado a lado
@@ -787,6 +791,29 @@ function tramosDelExplorador(ctx) {
         window.__grabacionResaltar(objetivos, op);
       }, [FICHA]);
       return { encuadre: await encuadreFicha(page), resaltado: "si" };
+    },
+  });
+
+  // ---- Satellite evidence: la memoria de la parcela por año (NASA HLS) y su curva de verdor. Se lee bien quieta.
+  lista.push({
+    toma: "evidencia", parte: 1, nombre: `${PARCELA}: la memoria satelital por año y la curva de verdor`,
+    async prep(page) {
+      await quitarResaltado(page);
+      await verPuntero(page, false);
+      await desplazarA(page, "#ficha", "#ficha-resumen", { cabecera: ".ficha-cabeza", margen: 8, ms: 0 });
+    },
+    async accion(page, reloj) {
+      await desplazarA(page, "#ficha", "#ficha section.memoria", { cabecera: ".ficha-cabeza", margen: 10, ms: DESPLAZAR_MS });
+      await resaltar(page, [{ sel: ["#ficha section.memoria"] }], FICHA);
+      const e = await encuadreFicha(page);
+      await reloj.hasta(0.55);
+      // Después, la curva de verdor, si cabe entera a la vista (en la ficha y en el encuadre); si no, el anillo se
+      // queda en la memoria.
+      const curva = await cajaDe(page, "#ficha .resumen-ndvi-lienzo");
+      const ficha = await cajaDe(page, "#ficha");
+      const holgada = curva ? { x: curva.x - 8, y: curva.y - 8, w: curva.w + 16, h: curva.h + 16 } : null;
+      if (holgada && dentro(holgada, e) && dentro(holgada, ficha)) await resaltar(page, [{ sel: ["#ficha .resumen-ndvi-lienzo"] }], FICHA);
+      return { encuadre: e, resaltado: "si" };
     },
   });
 
@@ -883,6 +910,21 @@ function tramosDelExplorador(ctx) {
     },
   });
 
+  // ---- Soil and evidence (solo en el recorrido): la sección de suelo y evidencia satelital de la ficha, con sus fuentes
+  lista.push({
+    toma: "suelo", parte: 1, nombre: `${PARCELA}: la sección «Soil and satellite evidence» de la ficha`,
+    async prep(page) {
+      await quitarResaltado(page);
+      await verPuntero(page, false);
+      await desplazarA(page, "#ficha", "#t-evidencia", { cabecera: ".ficha-cabeza", margen: 220, ms: 0 });
+    },
+    async accion(page) {
+      await desplazarA(page, "#ficha", "#t-evidencia", { cabecera: ".ficha-cabeza", margen: 12, ms: DESPLAZAR_MS });
+      await resaltar(page, [{ sel: ["#ficha #t-evidencia"] }], FICHA);
+      return { encuadre: await encuadreFicha(page), resaltado: "si" };
+    },
+  });
+
   // ---- Share: el mensaje para el agricultor cambia de idioma
   lista.push({
     toma: "compartir", parte: 1, nombre: "«Share with the farmer»: el mensaje de WhatsApp cambia de idioma",
@@ -917,6 +959,29 @@ function tramosDelExplorador(ctx) {
       return { encuadre: e, resaltado: "si" };
     },
   });
+
+  // ---- Other fields (solo en el recorrido): las otras dos parcelas de ejemplo, cada una con su frase y su plazo
+  for (const id of OTRAS_PARCELAS) {
+    lista.push({
+      toma: "otras", parte: 1 / OTRAS_PARCELAS.length, nombre: `${id}: su frase principal y su plazo`,
+      async prep(page) {
+        await quitarResaltado(page);
+        await verPuntero(page, false);
+        if (await page.locator("#ficha").isVisible()) await page.locator("#ficha-cerrar").click();
+        await prepararLista(page);
+        const boton = page.locator(`.boton-parcela[data-id="${id}"]`);
+        await boton.evaluate((el) => el.scrollIntoView({ block: "nearest" }));
+        await boton.click();
+        await page.waitForSelector("#ficha:not([hidden])");
+        await page.mouse.move(1, VIEWPORT.height - 1);
+        await page.waitForTimeout(700); // la entrada de la ficha y su dibujo
+      },
+      async accion(page) {
+        await resaltar(page, [{ sel: ["#ficha-resumen"] }, { sel: ["#ficha .ficha-plazo"] }], FICHA);
+        return { encuadre: await encuadreFicha(page), resaltado: "si" };
+      },
+    });
+  }
 
   // ---- Check the tests: «About & Data» → la lista de pruebas con su estado, también las que no cumplen
   lista.push({
@@ -954,47 +1019,159 @@ function tramosDelExplorador(ctx) {
   });
 
   // Orden de grabación: lo que pide «despuesDe» va justo después del último tramo de esa toma.
-  const ordenada = lista.filter((t) => !t.despuesDe);
-  for (const t of lista.filter((t) => t.despuesDe)) {
+  const ordenada = lista.filter((t) => t && !t.despuesDe);
+  for (const t of lista.filter((t) => t && t.despuesDe)) {
     const i = ordenada.map((x) => x.toma).lastIndexOf(t.despuesDe);
     ordenada.splice(i + 1, 0, t);
   }
   return ordenada;
 }
 
-/** «Set the water» en el tablero (la portada nueva): un clic en su deslizador de dotación, si lo trae. */
-function tramoDelTablero() {
-  return {
-    toma: "dotacion", parte: 1, nombre: "tablero (portada, en inglés): el mapa y el control de la dotación",
+/**
+ * Los tramos de la portada nueva (el tablero). Todo se localiza desde el deslizador `#allocation` y por estructura:
+ * su tarjeta es el <article> que lo contiene, las marcas son los botones con aria-pressed de esa tarjeta y lo que
+ * «responde» son los textos de la tarjeta que cambian con el clic. Ningún texto ni otro id del tablero.
+ */
+function tramosDelTablero() {
+  /** Cajas de la tarjeta de la dotación, de su deslizador y de la primera marca sin pulsar; null si no hay deslizador. */
+  const estructura = (page) =>
+    page.evaluate(() => {
+      const d = document.querySelector("#allocation");
+      if (!d) return null;
+      const t = d.closest("article") ?? d.parentElement;
+      const caja = (e) => {
+        const r = e.getBoundingClientRect();
+        return { x: r.left, y: r.top, w: r.width, h: r.height };
+      };
+      const libre = [...t.querySelectorAll("button[aria-pressed]")].find((b) => b.getAttribute("aria-pressed") === "false");
+      return { tarjeta: caja(t), deslizador: caja(d), libre: libre ? caja(libre) : null, valor: d.value };
+    });
+  const lista = [];
+
+  lista.push({
+    toma: "dotacion", parte: 1, nombre: "tablero (portada, en inglés): una marca de la dotación; cambian el mapa y el indicador",
     async prep(page) {
-      await page.evaluate(() => window.scrollTo(0, 0));
-      await page.waitForTimeout(600);
-      await moverPuntero(page, VIEWPORT.width * 0.5, VIEWPORT.height * 0.6, 0);
+      // La tarjeta de la dotación, entera, en la parte baja de la ventana: arriba y a su derecha queda el mapa.
+      await page.evaluate((alto) => {
+        const d = document.querySelector("#allocation");
+        if (!d) return;
+        const t = d.closest("article") ?? d.parentElement;
+        window.scrollBy(0, t.getBoundingClientRect().bottom - (alto - 110));
+      }, VIEWPORT.height);
+      await page.waitForTimeout(900); // el mapa termina de dibujar donde quedó
+      const e = await estructura(page);
+      if (e) await moverPuntero(page, e.tarjeta.x + e.tarjeta.w + 140, e.tarjeta.y + 40, 0);
+    },
+    async accion(page, reloj) {
+      const antes = await estructura(page);
+      if (!antes) {
+        check("tablero: la portada trae el deslizador de la dotación (#allocation)", false, "no hay #allocation: no se puede mover la dotación");
+        await verPuntero(page, false);
+        return { encuadre: encuadre({ ancho: VIEWPORT.width, x: 0, y: 0 }), resaltado: "no" };
+      }
+      const t = antes.tarjeta;
+      const ancho = Math.max(900, t.w * 2.4);
+      const e = encuadre({ ancho, x: t.x - 26, y: t.y + t.h + 14 - ancho / ASPECTO });
+      // Primero, el anillo en el control: el deslizador y sus marcas. Y un observador de la tarjeta: en cuanto cambie lo
+      // que dice (la cifra, el indicador), el anillo pasa, un instante después, a lo que cambió. Lo hace la página misma,
+      // en el momento: mientras el mapa se vuelve a pintar, las órdenes de este script llegan tarde. Los textos se
+      // comparan por su lugar, porque la tarjeta puede volver a dibujarlos.
+      await page.evaluate(() => {
+        const d = document.querySelector("#allocation");
+        const t = d.closest("article") ?? d.parentElement;
+        const marcas = [...t.querySelectorAll("button[aria-pressed]")];
+        const textos = () => [...t.querySelectorAll("output, strong")];
+        const antes = textos().map((n) => n.textContent);
+        window.__grabacionCambio = null;
+        window.__grabacionResaltarElementos([[d, ...marcas]], { margen: 8 });
+        const obs = new MutationObserver(() => {
+          if (!textos().some((n, k) => n.textContent !== antes[k])) return;
+          obs.disconnect();
+          const en = Date.now();
+          setTimeout(() => {
+            const distintos = textos().filter((n, k) => n.textContent !== antes[k]);
+            window.__grabacionResaltarElementos(distintos.map((n) => [n]), { margen: 8 });
+            window.__grabacionCambio = { en, cuantos: distintos.length };
+          }, 250);
+        });
+        obs.observe(t, { subtree: true, childList: true, characterData: true });
+      });
+      await reloj.hasta(0.1);
+      // El clic: en la primera marca sin pulsar; si la tarjeta no trae marcas, sobre la pista del deslizador.
+      const destino = antes.libre
+        ? { x: antes.libre.x + antes.libre.w / 2, y: antes.libre.y + antes.libre.h / 2 }
+        : { x: antes.deslizador.x + antes.deslizador.w * (Number(antes.valor) > 2 ? 0.1 : 0.8), y: antes.deslizador.y + antes.deslizador.h / 2 };
+      await moverPuntero(page, destino.x, destino.y, 380);
+      await pulsar(page);
+      const clicEn = Date.now();
+      await page.mouse.click(destino.x, destino.y);
+      const cambio = await page.waitForFunction(() => window.__grabacionCambio, null, { timeout: 6000 }).then((h) => h.jsonValue()).catch(() => null);
+      const valor = await page.evaluate(() => document.querySelector("#allocation").value);
+      check("tablero: al pulsar la marca cambian el deslizador y lo que dice la tarjeta de la dotación",
+        Boolean(cambio) && cambio.cuantos > 0 && valor !== antes.valor, cambio ? `${cambio.cuantos} texto(s) con anillo` : "la tarjeta no cambió");
+      await page.mouse.move(1, VIEWPORT.height - 1);
+      await moverPuntero(page, t.x + t.w + 150, t.y + t.h * 0.45, 420);
+      // El tramo se coloca alrededor del cambio: antes se ve el control y el clic; después, lo que cambió (casi 2 s).
+      return { encuadre: e, resaltado: "si", verHasta: (cambio?.en ?? clicEn) + 1950 };
+    },
+  });
+
+  // ---- Your language (solo en el recorrido): el selector de idioma de la portada, del inglés al español
+  /** El selector de idioma, por estructura: el <select> cuyas opciones traen «en» y «es». */
+  const selectorDeIdioma = (page) =>
+    page.evaluateHandle(() => [...document.querySelectorAll("select")].find((s) => ["en", "es"].every((v) => [...s.options].some((o) => o.value === v))) ?? null);
+  const ponerIdioma = async (page, idioma) => {
+    const sel = (await selectorDeIdioma(page)).asElement();
+    if (sel) await sel.selectOption(idioma);
+    return Boolean(sel);
+  };
+  lista.push({
+    toma: "idioma", parte: 1, nombre: "tablero: el selector de idioma, del inglés al español",
+    async prep(page) {
+      await page.evaluate(() => {
+        window.__grabacionQuitarResaltado();
+        window.scrollTo(0, 0);
+      });
+      await ponerIdioma(page, "en");
+      await page.mouse.move(1, VIEWPORT.height - 1);
+      await page.waitForTimeout(700);
+      await moverPuntero(page, VIEWPORT.width * 0.55, 150, 0);
     },
     async accion(page, reloj) {
       const e = encuadre({ ancho: VIEWPORT.width, x: 0, y: 0 });
-      const deslizador = page.locator("#allocation");
-      const caja = (await deslizador.count()) ? await deslizador.first().boundingBox() : null;
-      const aLaVista = caja && dentro({ x: caja.x, y: caja.y, w: caja.width, h: caja.height }, e);
-      if (!aLaVista) {
-        await verPuntero(page, false);
+      const sel = (await selectorDeIdioma(page)).asElement();
+      if (!sel) {
+        check("tablero: la portada trae un selector de idioma con inglés y español", false);
         return { encuadre: e, resaltado: "no" };
       }
-      // Dos clics sobre la pista del deslizador: baja la dotación y la deja a media pista (se ve la respuesta dos veces).
-      await resaltar(page, [{ sel: ["#allocation"] }], { margen: 10 });
-      const y = caja.y + caja.height / 2;
-      await reloj.hasta(0.1);
-      for (const f of [0.18, 0.5]) {
-        const x = caja.x + caja.width * f;
-        await moverPuntero(page, x, y, 320);
-        await pulsar(page);
-        await page.mouse.click(x, y);
-        await page.waitForTimeout(420);
-      }
-      await page.mouse.move(1, VIEWPORT.height - 1);
+      await page.evaluate(() => {
+        const s = [...document.querySelectorAll("select")].find((x) => ["en", "es"].every((v) => [...x.options].some((o) => o.value === v)));
+        window.__grabacionResaltarElementos([[s]], { margen: 6 });
+      });
+      await reloj.hasta(0.2);
+      const c = await sel.boundingBox();
+      await moverPuntero(page, c.x + c.width / 2, c.y + c.height / 2, 380);
+      await pulsar(page);
+      const titulo = await page.evaluate(() => document.querySelector("main h1")?.textContent ?? "");
+      await sel.selectOption("es");
+      const cambio = await page.waitForFunction((t) => (document.querySelector("main h1")?.textContent ?? "") !== t, titulo, { timeout: 5000 }).then(() => true).catch(() => false);
+      check("tablero: al elegir español cambia el título de la portada", cambio);
+      // El anillo pasa al título de la página, ya en español.
+      await page.evaluate(() => {
+        const h = document.querySelector("main h1");
+        if (h) window.__grabacionResaltarElementos([[h]], { margen: 10 });
+      });
+      await moverPuntero(page, c.x - 120, c.y + c.height + 70, 420);
       return { encuadre: e, resaltado: "si" };
     },
-  };
+    // La portada vuelve al inglés: el idioma elegido se guarda y lo demás del video va en inglés.
+    async despues(page) {
+      await page.evaluate(() => window.__grabacionQuitarResaltado());
+      await ponerIdioma(page, "en");
+      await page.waitForTimeout(400);
+    },
+  });
+  return lista;
 }
 
 // ---------------------------------------------------------------- 5. tarjetas y bandas (docs/pitch/video/tarjetas.html)
@@ -1313,10 +1490,12 @@ async function main() {
         ? { x: vistos[0].x, y: vistos[0].y + vistos[0].h / 2, antes: r.anclaVisual.antes, buscarDesde: (inicio - t0) / 1000, buscarHasta: (Date.now() - t0) / 1000 }
         : null;
       tramos.push({ toma: def.toma, parte: def.parte, nombre: def.nombre, inicio: (desde - t0) / 1000, encuadre: r.encuadre, ancla });
+      if (def.despues) await def.despues(page); // fuera de cámara: deja la página como la necesita lo que sigue
       console.log(`tramo · ${def.toma} · ${def.nombre} · empieza a los ${((desde - t0) / 1000).toFixed(2)} s del reloj · acción ${usado.toFixed(2)} s de ${dur.toFixed(2)} s`);
     };
 
     // La portada: si la raíz es el tablero (carga js/dashboard.js) y llega a «listo», el primer golpe se graba ahí.
+    const pedidas = new Set(TOMAS.filter((t) => t.tipo === "pagina").map((t) => t.clave)); // las tomas de este video
     let dotacionEnTablero = false;
     if (hayExplorer) {
       const urlTablero = new URL(raiz);
@@ -1327,18 +1506,22 @@ async function main() {
         const listo = await page.waitForSelector("body[data-dashboard='listo']", { timeout: 20000 }).then(() => true).catch(() => false);
         if (listo) {
           await instalarAyudas(page);
-          await grabar(tramoDelTablero());
+          for (const def of tramosDelTablero()) if (pedidas.has(def.toma)) await grabar(def);
           dotacionEnTablero = true;
         } else aviso("el tablero no llegó a data-dashboard=\"listo\" a tiempo: el golpe de la dotación se graba en el explorador");
       }
     }
     console.log(`«Set the water» se graba en ${dotacionEnTablero ? "el tablero (portada)" : "el explorador"}.`);
 
-    await page.goto(explorador, { waitUntil: "load" });
-    await page.waitForSelector("body[data-listo='si']", { timeout: 30000 });
-    // Sin red, el mapa base tarda en darse por vencido: se le da tiempo y, si no avisa, se sigue con lo dibujado.
-    await page.waitForFunction(() => ["listo", "sin-mapa"].includes(document.body.dataset.mapa), null, { timeout: 75000 })
-      .catch(() => aviso("el mapa no avisó que quedó listo en 75 s: se sigue con lo que haya dibujado"));
+    // El explorador, con su mapa listo. Sin red, a veces una petición del mapa base se queda colgada y el mapa no
+    // llega a darse por listo: entonces se vuelve a cargar la página (hasta tres veces) en lugar de esperar de más.
+    for (let intento = 1; intento <= 3; intento++) {
+      await page.goto(explorador, { waitUntil: "load" });
+      await page.waitForSelector("body[data-listo='si']", { timeout: 30000 });
+      const listo = await page.waitForFunction(() => ["listo", "sin-mapa"].includes(document.body.dataset.mapa), null, { timeout: 25000 }).then(() => true).catch(() => false);
+      if (listo) break;
+      aviso(`el mapa del explorador no avisó que quedó listo en 25 s (intento ${intento} de 3)${intento < 3 ? ": se vuelve a cargar la página" : ": se sigue con lo que haya dibujado"}`);
+    }
     await page.waitForFunction(() => Boolean(document.body.dataset.relieve), null, { timeout: 15000 }).catch(() => {});
     await mapaQuieto(page);
     await instalarAyudas(page);
@@ -1346,12 +1529,17 @@ async function main() {
 
     const variantes = await leerVariantes(page);
     await revisarCantidadDePruebas(page, cues);
-    if (!(variantes.boton3d && variantes.linea && variantes.destacado != null)) aviso("la página no trae la vista 3D con su línea de tiempo: «Look back» se graba con la memoria satelital de la parcela");
     if (await page.locator("#mapa-aviso:not([hidden])").count()) aviso(`aviso del mapa: «${(await page.locator("#mapa-aviso").innerText()).trim()}» (sin red, todas las tomas se graban así)`);
     escribirSrt(cues);
 
     const contexto = { variantes, dotacionEnTablero, selectorPorque: null };
-    for (const def of tramosDelExplorador(contexto)) await grabar(def);
+    for (const def of tramosDelExplorador(contexto)) if (pedidas.has(def.toma)) await grabar(def);
+    const sinGrabar = [...pedidas].filter((clave) => !tramos.some((t) => t.toma === clave));
+    check("todas las tomas de la página se grabaron", !sinGrabar.length, sinGrabar.length ? `faltan: ${sinGrabar.join(", ")} (la portada no es el tablero o la página no trae la vista 3D)` : `${tramos.length} tramos`);
+    if (sinGrabar.length) {
+      await ctx.close();
+      return terminar();
+    }
 
     check("la página grabó sin errores de JavaScript", errores.length === 0, errores.slice(0, 3).join(" | "));
     await page.waitForTimeout(300);

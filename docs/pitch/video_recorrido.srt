@@ -11,29 +11,45 @@ NASA data, a crop-water model, an answer per field.
 Set the water allocation. The map and the indicator respond.
 
 4
-00:00:16,000 --> 00:00:26,000
-Each option: water asked, hectares covered, years committed.
+00:00:16,000 --> 00:00:21,000
+The app speaks the farmer's language.
 
 5
-00:00:26,000 --> 00:00:37,000
-Every option says why, and what changes from today.
+00:00:21,000 --> 00:00:30,000
+Each option: water asked, hectares covered, years committed.
 
 6
-00:00:37,000 --> 00:00:43,000
-From the dam to the crop and the aquifer.
+00:00:30,000 --> 00:00:40,000
+Every option says why, and what changes from today.
 
 7
-00:00:43,000 --> 00:00:49,000
-The year the dam delivered no water.
+00:00:40,000 --> 00:00:46,000
+From the dam to the crop and the aquifer.
 
 8
-00:00:49,000 --> 00:00:55,000
-A message for the farmer, in their language.
+00:00:46,000 --> 00:00:52,000
+What satellites saw on this field, year by year.
 
 9
-00:00:55,000 --> 00:01:01,000
-Five tests, published whatever the result.
+00:00:52,000 --> 00:00:57,000
+Soil and satellite evidence, each with its source.
 
 10
-00:01:01,000 --> 00:01:05,000
+00:00:57,000 --> 00:01:05,000
+A free field can choose. An orchard stays committed.
+
+11
+00:01:05,000 --> 00:01:11,000
+The year the dam delivered no water.
+
+12
+00:01:11,000 --> 00:01:17,000
+A message for the farmer, in their language.
+
+13
+00:01:17,000 --> 00:01:23,000
+Five tests, published whatever the result.
+
+14
+00:01:23,000 --> 00:01:27,000
 The farmer decides.
