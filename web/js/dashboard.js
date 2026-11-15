@@ -1,9 +1,27 @@
 // AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex
-// web/js/dashboard.js — Tablero (página secundaria, web/dashboard.html).
+// web/js/dashboard.js — Tablero (portada de la aplicación, web/index.html).
 // La interfaz lee las cifras publicadas en web/data/. Los cálculos reutilizan reglas.js, sin otro modelo.
-// Textos visibles en inglés (regla 9); comentarios e identificadores, en español.
-// Todo texto que viene de los datos pasa por esc() antes de entrar a innerHTML.
-import { prepararInterfaz, icono } from "./interfaz.js";
+// - Cuatro idiomas: todo texto visible sale de t("tablero.…") (js/textos_tablero.js); los números, de fmtNumero
+//   y las fechas, de fmtFecha (js/i18n.js). Al cambiar el idioma se vuelve a pintar todo, sin recargar.
+// - Los textos que vienen de los datos se leen con deDato (variantes _es, _pt y _fr junto a la llave) y pasan
+//   por esc() antes de entrar a innerHTML.
+// - El mapa usa las teselas de OpenStreetMap (las mismas del explorador) y, sin red o sin WebGL, el modo local.
+import {
+  t,
+  tiene,
+  idioma,
+  alCambiarIdioma,
+  fmtNumero,
+  fmtFecha,
+  deDato,
+} from "./i18n.js";
+import {
+  prepararInterfaz,
+  prepararIdioma,
+  pintarTextos,
+  pintarIdioma,
+  icono,
+} from "./interfaz.js";
 import { crearAsesor } from "./asesor.js";
 import { montarInstalacion } from "./instalar.js";
 import {
@@ -13,12 +31,11 @@ import {
 } from "../reglas.js";
 
 const $ = (s) => document.querySelector(s);
+const PRODUCTO = "ROOT – From Dam to Root"; // el nombre no se traduce
 const fmt = (n, digits = 1) =>
   Number.isFinite(n)
-    ? new Intl.NumberFormat("en-US", { maximumFractionDigits: digits }).format(
-        n,
-      )
-    : "No data";
+    ? fmtNumero(n, { maximumFractionDigits: digits })
+    : t("tablero.sin_dato");
 const esc = (s) =>
   String(s ?? "").replace(
     /[&<>"']/g,
@@ -31,22 +48,8 @@ const esc = (s) =>
         "'": "&apos;",
       })[c],
   );
-// Unidad de la dotación y de la demanda, como en la página principal.
-const UNIDAD = "thousand m³/ha";
-// Nombres de cultivo en inglés: los mismos de la página principal (web/app.js, CULTIVOS).
-const names = {
-  alfalfa: "Alfalfa",
-  nogal: "Pecan orchard",
-  chile: "Chile pepper",
-  algodon: "Cotton",
-  maiz_forrajero: "Forage maize",
-  sorgo: "Sorghum",
-  cereal_invierno: "Winter cereal",
-  barbecho: "Fallow",
-  descanso: "Rest",
-  anual: "Annual crop",
-  sin_clasificar: "Not classified",
-};
+// Texto del tablero listo para innerHTML (los valores pueden traer identificadores de los datos).
+const T = (clave, valores) => esc(t(clave, valores));
 const icons = {
   alfalfa: "♧",
   nogal: "♣",
@@ -60,37 +63,46 @@ const icons = {
 };
 const years = (term) =>
   term.min === term.max
-    ? `${fmt(term.min, 0)} ${term.min === 1 ? "year" : "years"}`
-    : `${fmt(term.min, 0)}–${fmt(term.max, 0)} years`;
+    ? t(term.min === 1 ? "tablero.anio" : "tablero.anios", {
+        n: fmt(term.min, 0),
+      })
+    : t("tablero.anios_rango", {
+        min: fmt(term.min, 0),
+        max: fmt(term.max, 0),
+      });
+// Nombre de un cultivo por su identificador del cubo; uno desconocido se muestra como viene.
 const cropName = (id) =>
-  names[id] ?? String(id ?? "Not classified").replaceAll("_", " ");
-// Por vista: título, descripción y rótulo de la ruta. Las llaves son los identificadores de las vistas
-// (hash, data-view y data-panel), que usan las hojas de estilo y las pruebas.
-const labels = {
-  resumen: [
-    "Water dashboard",
-    "Before you plant, see the water you are committing.",
-    "Overview",
-  ],
+  tiene(`tablero.cultivo.${id}`, "en")
+    ? t(`tablero.cultivo.${id}`)
+    : String(id ?? t("tablero.cultivo.sin_clasificar")).replaceAll("_", " ");
+// Nombre de una opción de rotación de dashboard.json; una desconocida, con el nombre que traigan los datos.
+const optionName = (r) =>
+  tiene(`tablero.opcion.${r.id}`, "en")
+    ? t(`tablero.opcion.${r.id}`)
+    : (deDato(r, "nombre") ?? String(r.id ?? ""));
+// Por vista: claves del título, de la descripción y del rótulo de la ruta. Las llaves son los identificadores
+// de las vistas (hash, data-view y data-panel), que usan las hojas de estilo y las pruebas.
+const vistas = {
+  resumen: ["tablero.titulo", "tablero.lema", "tablero.nav.resumen"],
   terreno: [
-    "Your field, up close",
-    "Each field has its own crop, soil and water need.",
-    "My field",
+    "tablero.vista.terreno.titulo",
+    "tablero.vista.terreno.desc",
+    "tablero.nav.terreno",
   ],
   cultivos: [
-    "What you plant matters",
-    "Compare water need, irrigation and how many years each crop commits.",
-    "Crops and options",
+    "tablero.vista.cultivos.titulo",
+    "tablero.vista.cultivos.desc",
+    "tablero.nav.cultivos",
   ],
   recomendaciones: [
-    "Compare options",
-    "Evidence and questions to go over with your technician.",
-    "Compare options",
+    "tablero.nav.comparar",
+    "tablero.vista.comparar.desc",
+    "tablero.nav.comparar",
   ],
   predicciones: [
-    "History and rainfall range",
-    "Historical rainfall range with its back-test, and past events for context.",
-    "History and rainfall range",
+    "tablero.nav.historia",
+    "tablero.vista.historia.desc",
+    "tablero.nav.historia",
   ],
 };
 const state = {
@@ -106,9 +118,13 @@ const state = {
 let cube, geo, research, soil;
 let soilError = false;
 let asesor = null;
+let interfaz = null;
 let mapMode = "agua";
 let selectionMarker = null;
 let mapBlock, mapAnchor;
+// Aviso bajo el mapa: clave del texto y si se agrega «también puedes elegir en el listado» (modo local).
+let notaMapa = { clave: "tablero.mapa.nota", lista: false };
+let fallo = null; // error de carga, para volver a decirlo en otro idioma
 
 async function read(path) {
   const r = await fetch(path);
@@ -132,13 +148,21 @@ function zone() {
 }
 function fieldLabel(f) {
   const p = f.properties;
-  return `${p.id} · ${p.abstencion ? "Not classified" : cropName(p.cultivo_actual)} · ${fmt(p.area_ha)} ha`;
+  return `${p.id} · ${p.abstencion ? t("tablero.cultivo.sin_clasificar") : cropName(p.cultivo_actual)} · ${fmt(p.area_ha)} ha`;
 }
-// Enlace a la ficha de la parcela en la página principal (explorer.html#<id>).
+// Enlace a la ficha de la parcela en el explorador (explorer.html#<id>).
 function explorerLink(id) {
   return id ? `explorer.html#${encodeURIComponent(id)}` : "explorer.html";
 }
 
+// Título, descripción y ruta de la vista en uso, y el título de la pestaña del navegador.
+function pintarCabecera() {
+  const [titulo, descripcion, ruta] = vistas[state.view];
+  $("#page-title").textContent = t(titulo);
+  $("#page-description").textContent = t(descripcion);
+  $("#breadcrumb").textContent = t(ruta);
+  document.title = `${PRODUCTO} · ${t(titulo)}`;
+}
 function route() {
   let view = location.hash.slice(1) || "resumen";
   // Un hash con el ID de una parcela abre esa parcela en la vista del terreno.
@@ -149,7 +173,7 @@ function route() {
     chooseField(linked.properties.id);
     view = "terreno";
   }
-  state.view = Object.hasOwn(labels, view) ? view : "resumen";
+  state.view = Object.hasOwn(vistas, view) ? view : "resumen";
   document.querySelectorAll("[data-panel]").forEach((el) => {
     el.hidden = el.dataset.panel !== state.view;
   });
@@ -159,10 +183,7 @@ function route() {
     if (active) el.setAttribute("aria-current", "page");
     else el.removeAttribute("aria-current");
   });
-  const [title, description, crumb] = labels[state.view];
-  $("#page-title").textContent = title;
-  $("#page-description").textContent = description;
-  $("#breadcrumb").textContent = crumb;
+  pintarCabecera();
   if (mapBlock) {
     if (state.view === "terreno") $("#terrain-slot").append(mapBlock);
     else mapAnchor.after(mapBlock);
@@ -176,32 +197,34 @@ function stats() {
   const committed = aguaComprometida(z, state.allocation, state.rain);
   const percent =
     committed.p50 == null ? "—" : `${fmt(committed.p50 * 100, 0)}%`;
-  // Solo textos propios y números con formato: nada de esto viene como texto de los datos.
+  // Textos del tablero y números con formato: nada de esto llega como texto de los datos.
   const rows = [
     [
-      "Size of the pilot area",
+      T("tablero.cifra.superficie"),
       `${fmt(z.superficie_total_ha, 0)} <small>ha</small>`,
-      "Area of the estimated polygons",
+      T("tablero.cifra.superficie_nota"),
       "⌘",
     ],
     [
-      "Fields identified",
+      T("tablero.cifra.parcelas"),
       fmt(z.conteos.total, 0),
-      `${fmt(z.conteos.total - z.conteos.abstenida, 0)} with a crop classification`,
+      T("tablero.cifra.parcelas_nota", {
+        n: fmt(z.conteos.total - z.conteos.abstenida, 0),
+      }),
       "♧",
     ],
     [
-      "Water already committed",
+      T("tablero.cifra.comprometida"),
       percent,
       committed.sinDotacion
-        ? "No allocation in this scenario"
-        : "At least · need of perennial crops / allocation",
+        ? T("tablero.cifra.sin_dotacion_nota")
+        : T("tablero.cifra.comprometida_nota"),
       "◉",
     ],
     [
-      "Area not classified",
+      T("tablero.cifra.sin_clasificar"),
       `${fmt(committed.fraccionSinClasificar * 100, 0)}%`,
-      "Needs checking in the field",
+      T("tablero.cifra.sin_clasificar_nota"),
       "↗",
     ],
   ];
@@ -213,7 +236,7 @@ function stats() {
     .join("");
   const commitment = $("#water-commitment");
   if (commitment)
-    commitment.innerHTML = `<span class="commitment-icon">${icono("drop")}</span><div><strong>${committed.sinDotacion ? "No allocation" : `At least ${percent} committed`}</strong><span>Need of perennial crops · current scenario</span></div><a href="#recomendaciones" aria-label="Compare options for this field">${icono("arrow")}</a>`;
+    commitment.innerHTML = `<span class="commitment-icon">${icono("drop")}</span><div><strong>${committed.sinDotacion ? T("tablero.compromiso.sin_dotacion") : T("tablero.compromiso.al_menos", { pct: percent })}</strong><span>${T("tablero.compromiso.nota")}</span></div><a href="#recomendaciones" aria-label="${T("tablero.compromiso.aria")}">${icono("arrow")}</a>`;
   document
     .querySelectorAll("[data-allocation]")
     .forEach((b) =>
@@ -225,13 +248,13 @@ function stats() {
   actualizarColoresMapa();
   $("#allocation-value").textContent = fmt(state.allocation);
   $("#scenario-label").textContent =
-    `Scenario: ${fmt(state.allocation)} ${UNIDAD} · rain change ${fmt(state.rain, 0)}% ↗`;
+    `${t("tablero.escenario", { dotacion: fmt(state.allocation), unidad: t("tablero.unidad"), lluvia: fmt(state.rain, 0) })} ↗`;
 }
 
 function fieldList() {
-  const query = $("#field-search").value.trim().toLocaleLowerCase("en");
+  const query = $("#field-search").value.trim().toLocaleLowerCase(idioma());
   const list = features().filter((f) =>
-    fieldLabel(f).toLocaleLowerCase("en").includes(query),
+    fieldLabel(f).toLocaleLowerCase(idioma()).includes(query),
   );
   $("#field-select").innerHTML = list.length
     ? list
@@ -240,14 +263,20 @@ function fieldList() {
             `<option value="${esc(f.properties.id)}">${esc(fieldLabel(f))}</option>`,
         )
         .join("")
-    : '<option value="">No matches</option>';
+    : `<option value="">${T("tablero.ficha.sin_coincidencias")}</option>`;
   if (list.some((f) => f.properties.id === state.field))
     $("#field-select").value = state.field;
+}
+// Clase de textura del perfil regional (suelo.json la trae en inglés): con nombre en los cuatro idiomas si es
+// una de las conocidas; si no, como viene.
+function texturaDe(clase) {
+  const clave = `tablero.textura.${String(clase).replaceAll(" ", "_")}`;
+  return tiene(clave, "en") ? t(clave) : String(clase);
 }
 function fieldDetails() {
   const p = selected()?.properties;
   if (!p) {
-    $("#field-detail").textContent = "No fields available in this pilot area.";
+    $("#field-detail").textContent = t("tablero.ficha.sin_parcelas");
     return;
   }
   const op = current();
@@ -256,25 +285,39 @@ function fieldDetails() {
       ? evaluarOpcion(op, p.area_ha, state.allocation, state.rain)
       : null;
   const profile = soil?.perfil?.parcelas?.[p.id];
-  const sinSuelo = soilError ? "Could not load" : "No data";
-  // La clase de textura se muestra como viene del perfil regional (suelo.json).
-  const texture = profile?.clase_textura ?? sinSuelo;
+  const sinSuelo = soilError ? t("tablero.no_cargo") : t("tablero.sin_dato");
+  const texture = profile?.clase_textura
+    ? texturaDe(profile.clase_textura)
+    : sinSuelo;
   const term = !p.abstencion && op?.agua?.plazo_anios;
-  const termLabel = term ? years(term) : "No data";
-  const demand = evalOp ? `${fmt(evalOp.lamina.p50)} ${UNIDAD}` : "Not computed";
-  const coverage = evalOp
-    ? `${fmt(evalOp.cobertura * 100, 0)}%`
-    : "Not computed";
+  const termLabel = term ? years(term) : t("tablero.sin_dato");
+  const sinCalculo = t("tablero.sin_calculo");
+  const demand = evalOp
+    ? `${fmt(evalOp.lamina.p50)} ${t("tablero.unidad")}`
+    : sinCalculo;
+  const coverage = evalOp ? `${fmt(evalOp.cobertura * 100, 0)}%` : sinCalculo;
   const title = p.abstencion
-    ? "Crop not classified"
+    ? t("tablero.ficha.sin_clasificar")
     : cropName(p.cultivo_actual);
-  const ancho = evalOp && Number.isFinite(evalOp.cobertura) ? evalOp.cobertura * 100 : 0;
+  const ancho =
+    evalOp && Number.isFinite(evalOp.cobertura) ? evalOp.cobertura * 100 : 0;
+  const pendiente = Number.isFinite(p.relieve?.pendiente_media_pct)
+    ? `${fmt(p.relieve.pendiente_media_pct)}%`
+    : t("tablero.sin_dato");
+  const nota = evalOp
+    ? T("tablero.ficha.hectareas", {
+        cubiertas: fmt(evalOp.hectareas.p50),
+        area: fmt(p.area_ha),
+        bajo: fmt(evalOp.hectareas.bajo),
+        alto: fmt(evalOp.hectareas.alto),
+      })
+    : T("tablero.ficha.sin_calculo_nota");
   $("#field-detail").innerHTML =
-    `<div class="field-title"><span class="crop-symbol">${icons[p.cultivo_actual] ?? "♧"}</span><div><h4>${esc(title)}</h4><p>Field ${esc(p.id)} · ${fmt(p.area_ha)} ha</p></div></div>
-        <dl class="field-metrics"><div><dt>Yearly water need · median</dt><dd>${demand}</dd></div><div><dt>Soil · regional map</dt><dd>${profile ? `pH ${fmt(profile.ph)}` : sinSuelo}</dd></div><div><dt>Actual irrigation system</dt><dd id="field-irrigation">Not recorded</dd></div><div><dt>Mean slope</dt><dd>${Number.isFinite(p.relieve?.pendiente_media_pct) ? `${fmt(p.relieve.pendiente_media_pct)}%` : "No data"}</dd></div><div><dt>Estimated texture · map</dt><dd>${esc(texture)}</dd></div><div><dt>Water term in the model</dt><dd>${termLabel}</dd></div></dl>
-        <div class="coverage">Area covered in this scenario <strong>${coverage}</strong><div class="progress"><div style="width:${ancho}%"></div></div></div>
-        <p class="micro">${evalOp ? `${fmt(evalOp.hectareas.p50)} of ${fmt(p.area_ha)} ha have water at the median need. Likely range: ${fmt(evalOp.hectareas.bajo)}–${fmt(evalOp.hectareas.alto)} ha.` : "Nothing is computed for a field without a crop classification. Confirm the crop with your technician."}</p>
-        <a class="field-link" href="${esc(explorerLink(p.id))}">Open the field explorer <span>↗</span></a>`;
+    `<div class="field-title"><span class="crop-symbol">${icons[p.cultivo_actual] ?? "♧"}</span><div><h4>${esc(title)}</h4><p>${T("tablero.ficha.parcela", { id: p.id, area: fmt(p.area_ha) })}</p></div></div>
+        <dl class="field-metrics"><div><dt>${T("tablero.ficha.demanda")}</dt><dd>${esc(demand)}</dd></div><div><dt>${T("tablero.ficha.suelo")}</dt><dd>${esc(profile ? `pH ${fmt(profile.ph)}` : sinSuelo)}</dd></div><div><dt>${T("tablero.ficha.riego")}</dt><dd id="field-irrigation">${T("tablero.ficha.sin_registrar")}</dd></div><div><dt>${T("tablero.ficha.pendiente")}</dt><dd>${esc(pendiente)}</dd></div><div><dt>${T("tablero.ficha.textura")}</dt><dd>${esc(texture)}</dd></div><div><dt>${T("tablero.ficha.plazo")}</dt><dd>${esc(termLabel)}</dd></div></dl>
+        <div class="coverage">${T("tablero.ficha.cobertura")} <strong>${esc(coverage)}</strong><div class="progress"><div style="width:${ancho}%"></div></div></div>
+        <p class="micro">${nota}</p>
+        <a class="field-link" href="${esc(explorerLink(p.id))}">${T("tablero.abrir_explorador")} <span>↗</span></a>`;
   $("#recommendation-link").href = explorerLink(p.id);
   asesor?.actualizar();
   updateHighlight();
@@ -283,35 +326,45 @@ function fieldDetails() {
 function crops() {
   const rotations = research.rotaciones?.[state.zone];
   if (!rotations) {
-    $("#crop-grid").textContent = "No rotation data for this pilot area.";
+    $("#crop-grid").textContent = t("tablero.cultivos.sin_datos");
     return;
   }
+  const unidad = T("tablero.unidad");
   $("#crop-grid").innerHTML = rotations
     .map((r) => {
       const l = r.lamina_bruta_millares[String(state.rain)];
       const area = selected()?.properties.area_ha;
       const ha = hectareasQueAlcanzan(area, state.allocation, l);
       const crop = r.cultivos[0];
-      // Nombre en inglés del catálogo del cubo; si la opción no está en el catálogo, el nombre como viene.
-      const catalogo = cube.opciones_catalogo[r.id];
-      const nombre = catalogo?.nombre_en ?? r.nombre;
-      const kc = catalogo?.secuencia?.[0]?.siembra;
+      const kc = cube.opciones_catalogo[r.id]?.secuencia?.[0]?.siembra;
       const planting =
-        kc?.desde && kc?.hasta ? `${kc.desde} to ${kc.hasta}` : "Not in the data";
+        kc?.desde && kc?.hasta
+          ? t("tablero.cultivos.siembra_rango", {
+              desde: kc.desde,
+              hasta: kc.hasta,
+            })
+          : t("tablero.cultivos.sin_siembra");
       const plazo =
         r.plazo === "anual"
-          ? "ANNUAL CROP"
+          ? "tablero.cultivos.plazo.anual"
           : r.plazo === "nogal"
-            ? "ORCHARD · MODEL HORIZON"
-            : "PERENNIAL CROP";
-      return `<article class="card crop-card"><span class="crop-symbol">${icons[crop] ?? "♧"}</span><h3>${esc(nombre)}</h3><span class="pill">${plazo}</span><div class="water-number">${fmt(l.p50)} <small style="font-size:11px">${UNIDAD}</small></div><p>Likely range: ${fmt(l.p10)}–${fmt(l.p90)}</p><div class="crop-meta"><span>Water term <strong>${years(r.plazo_anios)}</strong></span><span>Planting · month-day <strong>${esc(planting)}</strong></span><span>Calculation basis <strong>${l.p50 === 0 ? "No irrigation" : "Modeled surface irrigation"}</strong></span></div><p class="micro">${state.field ? `For the area of ${esc(state.field)}: ${fmt(ha.p50)} of ${fmt(area)} ha covered at the median need. This compares area; it is not a suitability rating or advice for this field.` : "Select a field to compare area."}</p></article>`;
+            ? "tablero.cultivos.plazo.huerta"
+            : "tablero.cultivos.plazo.perenne";
+      const nota = state.field
+        ? T("tablero.cultivos.area", {
+            id: state.field,
+            cubiertas: fmt(ha.p50),
+            area: fmt(area),
+          })
+        : T("tablero.cultivos.sin_parcela");
+      return `<article class="card crop-card"><span class="crop-symbol">${icons[crop] ?? "♧"}</span><h3>${esc(optionName(r))}</h3><span class="pill">${T(plazo)}</span><div class="water-number">${fmt(l.p50)} <small style="font-size:11px">${unidad}</small></div><p>${T("tablero.cultivos.rango", { bajo: fmt(l.p10), alto: fmt(l.p90) })}</p><div class="crop-meta"><span>${T("tablero.cultivos.compromiso")} <strong>${esc(years(r.plazo_anios))}</strong></span><span>${T("tablero.cultivos.siembra")} <strong>${esc(planting)}</strong></span><span>${T("tablero.cultivos.base")} <strong>${l.p50 === 0 ? T("tablero.cultivos.sin_riego") : T("tablero.cultivos.riego_modelado")}</strong></span></div><p class="micro">${nota}</p></article>`;
     })
     .join("");
 }
 function chart() {
   const values = research.historia ?? [];
   if (!values.length) {
-    $("#history-chart").textContent = "No history data available.";
+    $("#history-chart").textContent = t("tablero.historia.sin_datos");
     return;
   }
   const max = Math.max(...values.map((x) => x.superficie_ha));
@@ -321,14 +374,18 @@ function chart() {
     return Number.isFinite(pct) ? pct : 0;
   };
   $("#history-chart").innerHTML =
-    `<div class="bars" role="img" aria-label="Irrigated area in hectares, for selected years">${values.map((x) => `<div class="bar-group"><small>${fmt(x.superficie_ha, 0)}</small><div class="bar" style="height:${alto(x)}%" title="${esc(x.anio)}: ${fmt(x.superficie_ha, 0)} ha"></div><span>${esc(x.anio)}</span></div>`).join("")}</div><details class="micro"><summary>Source and values as a table</summary><p>${esc(research.historia_fuente)}</p><table><caption>Irrigated area, hectares</caption><tbody>${values.map((x) => `<tr><th scope="row">${esc(x.anio)}</th><td>${fmt(x.superficie_ha, 0)}</td></tr>`).join("")}</tbody></table></details>`;
+    `<div class="bars" role="img" aria-label="${T("tablero.historia.aria")}">${values.map((x) => `<div class="bar-group"><small>${fmt(x.superficie_ha, 0)}</small><div class="bar" style="height:${alto(x)}%" title="${esc(x.anio)}: ${fmt(x.superficie_ha, 0)} ha"></div><span>${esc(x.anio)}</span></div>`).join("")}</div><details class="micro"><summary>${T("tablero.historia.fuente_resumen")}</summary><p>${esc(deDato(research, "historia_fuente"))}</p><table><caption>${T("tablero.historia.tabla")}</caption><tbody>${values.map((x) => `<tr><th scope="row">${esc(x.anio)}</th><td>${fmt(x.superficie_ha, 0)}</td></tr>`).join("")}</tbody></table></details>`;
+}
+function eventosFiltrados() {
+  return research.eventos.filter(
+    (e) => state.filter === "todos" || e.tipo === state.filter,
+  );
 }
 function timeline() {
-  $("#timeline").innerHTML = research.eventos
-    .filter((e) => state.filter === "todos" || e.tipo === state.filter)
+  $("#timeline").innerHTML = eventosFiltrados()
     .map(
       (e) =>
-        `<article class="event"><time>${esc(e.periodo)}</time><div><h3>${esc(e.titulo)}</h3><p>${esc(e.detalle)}</p><small>[P] ${esc(e.fuente)}</small></div></article>`,
+        `<article class="event"><time>${esc(deDato(e, "periodo"))}</time><div><h3>${esc(deDato(e, "titulo"))}</h3><p>${esc(deDato(e, "detalle"))}</p><small>[P] ${esc(deDato(e, "fuente"))}</small></div></article>`,
     )
     .join("");
   document.querySelectorAll("[data-filter]").forEach((b) => {
@@ -358,6 +415,7 @@ function download(name, rows) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+// Los nombres de las columnas van en inglés en los cuatro idiomas (un mismo archivo para quien lo procese).
 function exportSummary() {
   const p = selected()?.properties,
     op = current();
@@ -392,16 +450,31 @@ function exportSummary() {
       e?.lamina.p10,
       e?.lamina.p50,
       e?.lamina.p90,
-      "thousand cubic meters per hectare per year",
+      t("tablero.csv.unidad"),
       e?.hectareas.p50,
       `cubo.json + parcelas.geojson; ${cube.meta.script}`,
-      "Scenario; not a forecast and not planting advice",
+      t("tablero.csv.alcance"),
     ],
   ]);
 }
+function exportTimeline() {
+  download("root-timeline.csv", [
+    ["period", "type", "event", "detail", "source", "status"],
+    ...eventosFiltrados().map((e) => [
+      deDato(e, "periodo"),
+      e.tipo,
+      deDato(e, "titulo"),
+      deDato(e, "detalle"),
+      deDato(e, "fuente"),
+      t("tablero.csv.estado"),
+    ]),
+  ]);
+}
+// Margen del encuadre del mapa: en teléfono el mapa va solo, sin tarjetas encima; en escritorio la ficha y
+// la dotación flotan sobre el mapa.
 function paddingMapa() {
   return window.innerWidth <= 850
-    ? { top: 90, bottom: 390, left: 22, right: 22 }
+    ? { top: 28, bottom: 28, left: 22, right: 22 }
     : { top: 90, bottom: 100, left: 105, right: 365 };
 }
 function chooseField(id) {
@@ -493,13 +566,13 @@ function actualizarColoresMapa() {
       mapMode === "agua" ? agua : cultivos,
     );
   }
-  // Mismos rótulos del semáforo que la página principal (web/app.js, SEMAFORO).
+  // Los mismos estados del semáforo que el explorador (web/app.js, SEMAFORO).
   const legend = $(".map-legend");
   if (legend)
     legend.innerHTML =
       mapMode === "agua"
-        ? '<span><i class="legend-green"></i>Enough water</span><span><i class="legend-yellow"></i>Tight</span><span><i class="legend-red"></i>Not enough water</span><span><i class="legend-gray"></i>Not classified</span>'
-        : '<span><i class="legend-green"></i>Classified crop</span><span><i class="legend-gray"></i>Not classified</span>';
+        ? `<span><i class="legend-green"></i>${T("tablero.leyenda.verde")}</span><span><i class="legend-yellow"></i>${T("tablero.leyenda.ambar")}</span><span><i class="legend-red"></i>${T("tablero.leyenda.rojo")}</span><span><i class="legend-gray"></i>${T("tablero.leyenda.gris")}</span>`
+        : `<span><i class="legend-green"></i>${T("tablero.leyenda.clasificado")}</span><span><i class="legend-gray"></i>${T("tablero.leyenda.gris")}</span>`;
 }
 function accesosParcelas() {
   const box = $("#scene-parcels");
@@ -560,7 +633,7 @@ function drawFallback() {
   const project = ([x, y]) =>
     `${((x - west) / (east - west)) * 600},${((north - y) / (north - south)) * 320}`;
   $("#map-fallback").innerHTML =
-    `<svg viewBox="0 0 600 320" role="img" aria-label="Estimated field polygons of the pilot area, without a base map">${features()
+    `<svg viewBox="0 0 600 320" role="img" aria-label="${T("tablero.mapa.local_aria")}">${features()
       .map((f) => {
         const op = cube.parcelas[f.properties.id]?.opciones?.find(
           (o) => o.id === "ACTUAL",
@@ -598,17 +671,22 @@ function drawFallback() {
       })
       .join("")}</svg>`;
 }
-function fallback(message) {
+function pintarNotaMapa() {
+  $("#map-note").textContent =
+    t(notaMapa.clave) +
+    (notaMapa.lista ? ` ${t("tablero.mapa.elige_lista")}` : "");
+}
+function fallback(clave) {
   $("#map").hidden = true;
   $("#map-fallback").hidden = false;
   document.body.dataset.dashboardMap = "local";
-  $("#map-note").textContent =
-    message + " You can also choose a field from the list.";
+  notaMapa = { clave, lista: true };
+  pintarNotaMapa();
   drawFallback();
 }
 function mapInit() {
   if (!window.maplibregl?.Map) {
-    fallback("The base map is not available. The field polygons are drawn from local data.");
+    fallback("tablero.mapa.sin_base");
     return;
   }
   try {
@@ -617,7 +695,7 @@ function mapInit() {
       style: {
         version: 8,
         sources: {
-          // La misma fuente de teselas de la página principal (web/app.js, crearMapa): ningún dominio nuevo.
+          // La misma fuente de teselas del explorador (web/app.js, crearMapa): ningún dominio nuevo.
           osm: {
             type: "raster",
             tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
@@ -701,26 +779,62 @@ function mapInit() {
       });
     });
     // Sin red no llegan las teselas: los polígonos siguen dibujados con los datos locales y se avisa una vez.
-    let warned = false;
     state.map.on("error", () => {
-      if (!warned) {
-        warned = true;
-        $("#map-note").textContent =
-          "Part of the map could not load. The field polygons and the field list use local data; the base map needs a connection.";
+      if (notaMapa.clave === "tablero.mapa.nota") {
+        notaMapa = { clave: "tablero.mapa.sin_teselas", lista: false };
+        pintarNotaMapa();
       }
     });
     state.map
       .getCanvas()
       .addEventListener("webglcontextlost", () =>
-        fallback(
-          "The graphics context was lost. The field polygons are drawn from local data.",
-        ),
+        fallback("tablero.mapa.sin_contexto"),
       );
   } catch (err) {
-    fallback(
-      "The interactive map could not start. The field polygons are drawn from local data.",
-    );
+    fallback("tablero.mapa.sin_inicio");
   }
+}
+
+// Lo que el propio tablero escribe y depende del idioma (lo fijo del HTML lo pinta interfaz.js).
+function pintarDatos() {
+  const slider = cube.dotaciones.deslizador;
+  const unidad = T("tablero.unidad");
+  $("#range-labels").innerHTML =
+    `<span>${fmt(slider.min)} ${unidad}</span><span>${fmt(slider.max)} ${unidad}</span>`;
+  $("#rain-pct").textContent =
+    `(${fmt(cube.lluvia_pct.find((v) => v < 0), 0)}%)`;
+  // Fecha del corte en hora de Chihuahua (UTC−6 fijo; «America/Guatemala» tiene el mismo desfase sin horario de verano).
+  const generado = cube.meta.generado;
+  $("#data-date").textContent = t("tablero.corte", {
+    fecha:
+      generado && Number.isFinite(Date.parse(generado))
+        ? fmtFecha(generado, {
+            dateStyle: "medium",
+            timeZone: "America/Guatemala",
+          })
+        : t("tablero.corte_sin_fecha"),
+  });
+  pintarNotaMapa();
+  pintarCabecera();
+  fieldList();
+  accesosParcelas();
+  stats();
+  fieldDetails();
+  crops();
+  chart();
+  timeline();
+}
+// El aviso de fallo ofrece el camino al explorador, que no depende de este tablero.
+function pintarFallo() {
+  const status = $("#load-status");
+  delete status.dataset.i18n;
+  status.className = "error";
+  status.hidden = false;
+  status.textContent = `${t("tablero.error.carga", { detalle: fallo })} `;
+  const link = document.createElement("a");
+  link.href = "explorer.html";
+  link.textContent = t("tablero.abrir_explorador");
+  status.append(link);
 }
 
 async function init() {
@@ -736,7 +850,8 @@ async function init() {
     soilError = true;
   }
   if (!cube.zonas || !Array.isArray(geo.features) || !research.eventos)
-    throw new Error("the data files do not have the expected structure");
+    throw new Error(t("tablero.error.estructura"));
+  // Los nombres de lugar se muestran como vienen del cubo.
   $("#zona-dashboard").innerHTML = Object.entries(cube.zonas)
     .map(
       ([id, z]) =>
@@ -754,17 +869,10 @@ async function init() {
       slider.min,
   });
   state.allocation = Number($("#allocation").value);
-  const menosLluvia = cube.lluvia_pct.find((v) => v < 0);
-  $("#range-labels").innerHTML =
-    `<span>${fmt(slider.min)} ${UNIDAD}</span><span>${fmt(slider.max)} ${UNIDAD}</span>`;
-  $("#rain-pct").textContent = `(${fmt(menosLluvia, 0)}%)`;
-  // Fecha del corte en hora de Chihuahua (UTC−6 fijo; «America/Guatemala» tiene el mismo desfase sin horario de verano).
-  $("#data-date").textContent =
-    `Data as of ${cube.meta.generado && Number.isFinite(Date.parse(cube.meta.generado)) ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "America/Guatemala" }).format(new Date(cube.meta.generado)) : "date not available"}`;
   mapBlock = $(".map-detail-grid");
   mapAnchor = document.createComment("map-anchor");
   mapBlock.before(mapAnchor);
-  prepararInterfaz({
+  interfaz = prepararInterfaz({
     cubo: cube,
     cambiarModo: (modo) => {
       mapMode = modo;
@@ -775,8 +883,7 @@ async function init() {
     },
   });
   changeZone();
-  chart();
-  timeline();
+  pintarDatos();
   $("#zona-dashboard").addEventListener("change", changeZone);
   $("#allocation").addEventListener("input", (e) => {
     state.allocation = Number(e.target.value);
@@ -785,7 +892,7 @@ async function init() {
     crops();
   });
   $("#rain").addEventListener("change", (e) => {
-    state.rain = e.target.checked ? menosLluvia : 0;
+    state.rain = e.target.checked ? cube.lluvia_pct.find((v) => v < 0) : 0;
     stats();
     fieldDetails();
     crops();
@@ -818,21 +925,7 @@ async function init() {
     }),
   );
   $("#exportar").addEventListener("click", exportSummary);
-  $("#export-timeline").addEventListener("click", () =>
-    download("root-timeline.csv", [
-      ["period", "type", "event", "detail", "source", "status"],
-      ...research.eventos
-        .filter((e) => state.filter === "todos" || e.tipo === state.filter)
-        .map((e) => [
-          e.periodo,
-          e.tipo,
-          e.titulo,
-          e.detalle,
-          e.fuente,
-          "Secondary reference; not a validated data set",
-        ]),
-    ]),
-  );
+  $("#export-timeline").addEventListener("click", exportTimeline);
   $("#app-content").hidden = false;
   $("#load-status").hidden = true;
   asesor = await crearAsesor(() => ({
@@ -847,16 +940,26 @@ async function init() {
   window.addEventListener("hashchange", route);
   document.body.dataset.dashboard = "listo";
 }
+
+// Arranque: el idioma y los textos fijos se pintan antes de leer los datos.
+prepararIdioma();
+pintarTextos();
+pintarIdioma();
+document.title = `${PRODUCTO} · ${t("tablero.titulo")}`;
+// Cambio de idioma: todo se vuelve a pintar con los datos ya cargados, sin recargar la página.
+alCambiarIdioma(() => {
+  if (interfaz) interfaz.repintar();
+  else {
+    pintarTextos();
+    pintarIdioma();
+  }
+  if (fallo) pintarFallo();
+  else if (interfaz) pintarDatos();
+  else document.title = `${PRODUCTO} · ${t("tablero.titulo")}`;
+});
 montarInstalacion($("#dashboard-install"));
 init().catch((err) => {
-  // El aviso de fallo ofrece el camino a la página principal, que no depende de este tablero.
-  const status = $("#load-status");
-  status.className = "error";
-  status.hidden = false;
-  status.textContent = `The dashboard could not load: ${err.message}. Reload the page or `;
-  const link = document.createElement("a");
-  link.href = "explorer.html";
-  link.textContent = "open the field explorer";
-  status.append(link, ".");
+  fallo = err.message;
+  pintarFallo();
   document.body.dataset.dashboard = "error";
 });
