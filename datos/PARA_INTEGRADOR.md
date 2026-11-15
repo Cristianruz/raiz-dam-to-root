@@ -578,3 +578,25 @@ dentro de cada parcela (1,239: 940 y 299). Solicitudes guardadas en `data/raw/re
 - `correr_todo.py` ya corre E0 (comprueba que las solicitudes rehechas son las mismas que se subieron) y E1.
 - Después de la entrega: `web_smoke` con tu e560743 y el buzón completo, **480/480**; `correr_todo.py` **35 de 35** idénticos
   (con ECOSTRESS).
+
+## 14-nov 21:45 — Revisión cruzada (pedido de Cristian: «que se vayan revisando»): tu ecd8d59 contra mis datos
+Cristian pidió que nos revisemos mutuamente. Te propongo así: **yo reviso que la web muestre fielmente mis datos** (corro tu
+`construir.py` con mi buzón y comparo celda por celda `web/data` contra mis archivos), y **tu revisor independiente revisa
+ECOSTRESS** como hizo con el suelo (unidades, filtro de nubes, fecha en tiempo solar local, cómo se calcula `etc_modelo_mm`;
+todo en `datos/colab/E1_ecostress_parcelas.py` y `docs/ecostress.md`). Avísame cuando ingieras y vuelvo a comparar.
+**Resultado de mi revisión (ecd8d59 + buzón completo):**
+- `construir.py` OK: entraron 35, rechazados 0; 1026 pytest y 162 node. `web_smoke` **480/480**.
+- **Fidelidad, celda por celda, de mis archivos a `web/data`:** ECOSTRESS 1,239 parcelas × 12 meses: **0 diferencias**. GAEZ, 30
+  filas: **0**. Perfil de suelo, 1,239 parcelas (pH, arena, arcilla, CIC y C orgánico): **0**.
+**Lo que encontré (de más a menos importante):**
+1. **La ficha todavía no muestra** los nutrientes por parcela (`menos_disponibles`, `cerca_del_limite`, `toxicidad_posible`),
+   el tipo de suelo de la parcela (OpenLandMap) junto al de la zona (INEGI), ni los `textos_ficha_en`. Ni `web/js` ni
+   `web/data` los usan todavía. Ya sé que están en tu cola; lo anoto para que no se quede fuera del congelamiento de mañana.
+2. **README desactualizado:** la línea 134 dice que ECOSTRESS está «Requested, not delivered yet» (ya está entregado:
+   `ecostress_parcelas.csv`, `docs/ecostress.md`); la línea 146 dice que GAEZ está «requested, not delivered yet» (ya está
+   entregado y validado). En la prueba 5 dice «1,139.3 mm»; con la siembra del cereal el 1-dic es **1,139.5** (la suma de
+   `et_contraste.csv` actual), o «1,140» como en `docs/resultado_A8.md`. Los +393 mm y el +53 % siguen igual. Ya se usan las
+   15 bases del reto.
+3. **Detalle de presentación:** con la dotación al máximo, P0632 (descanso) dice «Enough for 20.7 of 20.66 hectares (range 20.7
+   to 20.7)»: mezcla uno y dos decimales y parece más que la parcela. Sugerencia: cuando alcance para todo, «Enough for the whole
+   field (20.66 ha)», o los mismos decimales en los dos números.
