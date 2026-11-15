@@ -1,0 +1,48 @@
+/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 */
+/* web/css/terreno2d.css — Relieve del mapa plano (web/js/terreno2d.js): sombreado, rampa de elevación, velo
+   fuera de las zonas piloto y su leyenda. Lo mínimo: el estilo final lo da el chat de diseño.
+   Los colores del mapa se leen de estas variables (no hay colores en el JS). MapLibre solo entiende colores
+   simples: hex, rgb() o hsl(); no use color-mix(), oklch() ni var() anidados con funciones aquí.
+   Toma --tinta, --blanco, --gris… de style.css; el valor tras la coma es el respaldo.
+   Los números de este archivo son medidas de diseño, no datos. */
+
+:root {
+  --terreno2d-sombra: #3B3329;                 /* lado en sombra del relieve */
+  --terreno2d-luz: #FFFFFF;                    /* lado iluminado */
+  --terreno2d-rampa-baja: #7FA36B;             /* terreno más bajo de la zona (fondo del valle) */
+  --terreno2d-rampa-media: #E8D9A8;            /* a media altura */
+  --terreno2d-rampa-alta: #9A6B4A;             /* terreno más alto de la zona (cerros) */
+  --terreno2d-velo: #6B7076;                   /* velo fuera de las zonas piloto */
+}
+
+/* Bloque de la leyenda (app.js lo coloca antes de «Terrain overlay») */
+.terreno2d { display: grid; gap: 6px; font-size: 0.9rem; margin-top: 10px; }
+.terreno2d-titulo { font-weight: 700; }
+
+/* El interruptor reutiliza .interruptor de style.css; aquí solo se ajusta el texto. */
+.terreno2d-interruptor span { font-weight: 700; }
+
+/* Leyenda de la rampa (se oculta con el interruptor apagado) */
+.terreno2d-leyenda { display: grid; gap: 4px; }
+.terreno2d-leyenda[hidden] { display: none; }
+.terreno2d-rampa {
+  height: 12px; border-radius: 3px; border: 1px solid var(--borde, #D8CFC2);
+  background: linear-gradient(to right, var(--terreno2d-rampa-baja), var(--terreno2d-rampa-media), var(--terreno2d-rampa-alta));
+}
+.terreno2d-rampa-extremos { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--tinta-suave, #4A525A); }
+.terreno2d-zonas { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 0.85rem; }
+.terreno2d-nota { font-size: 0.85rem; color: var(--tinta-suave, #4A525A); }
+
+/* Velo: muestra del gris y su texto */
+.terreno2d-velo-nota { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+.terreno2d-muestra-velo {
+  width: 18px; height: 12px; flex: none; border-radius: 2px;
+  background: var(--terreno2d-velo); border: 1px solid var(--borde, #D8CFC2);
+}
+
+/* Sin teselas de elevación en los datos, o un error al dibujar */
+.terreno2d-no-disponible {
+  font-size: 0.9rem; color: var(--tinta-suave, #4A525A);
+  background: var(--arena, #F5EFE6); border: 1px dashed var(--borde, #D8CFC2);
+  border-radius: 6px; padding: 6px 10px;
+}

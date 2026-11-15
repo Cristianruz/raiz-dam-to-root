@@ -70,6 +70,13 @@
     "*.js"
    ],
    "motivo": "Nombre del módulo web/js/gemelo3d.js (vista 3D del gemelo) y de los id que app.js le da a su leyenda (#t-gemelo3d, #bloque-gemelo3d); «3d» es parte del nombre, no una cifra de los datos"
+  },
+  {
+   "patron": "\\bterreno2d\\b",
+   "archivos": [
+    "*.js"
+   ],
+   "motivo": "Nombre del módulo web/js/terreno2d.js (relieve del mapa plano) y prefijo de sus fuentes, capas, variables CSS e id; «2d» es parte del nombre, no una cifra de los datos"
   }
  ]
 }
