@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/suelo_web.py con las entregas validadas de data/processed y las opciones de cubo.json; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
- "generado": "2026-11-15T05:25:37+00:00",
+ "generado": "2026-11-15T05:30:20+00:00",
  "decision": "docs/decisiones/2026-11-14_suelo_aptitud.md",
  "rotulo": "Regional soil map; not a soil test",
  "rotulo_aptitud": "General published range (FAO ECOCROP, worldwide), not a local trial",
