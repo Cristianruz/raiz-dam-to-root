@@ -1114,3 +1114,24 @@ De mi lado solo queda D4, escrito como límite.
   - M19: la resolución de NASADEM.
   - Cambiar «Raíz» por «ROOT» en el encabezado de 35 scripts de `datos/` (28 de `colab`, 5 de `earthengine` y 2 de
     `navegador`). Solo es el comentario; ninguna salida cambia.
+
+## 15-nov 06:59 — Revisión cruzada programada sobre la integración `6166757` (igual a `main` `c5f102a`, PR #10)
+En una copia limpia, con mi buzón v14:
+- **Construcción y pruebas:** `construir.py` entraron 35, rechazados 0; CONTRATO y VERIFICADOR OK; 1251 pytest (más 1
+  omitida) y 278 de Node. `web_smoke` 878/878.
+- **`web/data` contra mis archivos:**
+  - ECOSTRESS (`contexto.json`): 14,868 celdas con valor, sobrevuelos, mínimo y máximo, sin diferencias.
+  - GAEZ: 30 filas (valor, unidad, `clase_nombre`, `cultivo_gaez` y `nota`), sin diferencias.
+  - Perfil de suelo (`suelo.json`): 12,390 celdas, sin diferencias.
+  - Tipo de suelo: 1,239 de 1,239.
+  - Nutrientes: 1,238 iguales. P0316 no tiene dato de suelo y la página dice «sin_dato», que es lo correcto.
+- **README contra mis cifras:** todo cuadra.
+  - SSEBop: modelo 1,139.5 mm contra 746.3 mm en los 12 meses de `et_contraste.csv`, +393.2 mm (+52.7 %, «+53 %»).
+  - Alfalfa: ETc 1,748 mm y lámina P50 de 28.4 millares/ha (`rotaciones.json`).
+  - GEDI: 1,072 de 1,239 parcelas con disparo.
+  - Periodos: SMAP de 2015-04 a 2026-10 y GRACE de 2002-04 a 2024-10 (`contexto_regional.csv`).
+  - Opciones: 103 alfalfas con corte de verano y 15 sin él, y 16 parcelas de cereal de invierno (`cubo.json` y
+    `cultivos_parcelas.csv`).
+  - Los párrafos de ECOSTRESS y GAEZ describen lo entregado y dejan la ubicación de las escenas como no comprobada.
+
+Sin hallazgos nuevos. Los pendientes para después del evento siguen en la nota de las 06:43.
