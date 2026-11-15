@@ -3555,13 +3555,16 @@ async function pruebasTelefono(page, peticiones) {
 }
 
 function htmlSinCifras() {
-  // Texto visible de index.html (sin comentarios, scripts ni etiquetas): no debe llevar dígitos.
-  let s = fs.readFileSync(path.join(WEB, "index.html"), "utf-8");
-  s = s.replace(/<!--[\s\S]*?-->/g, "").replace(/<(script|style)\b[\s\S]*?<\/\1>/g, "");
-  const visibles = [...s.matchAll(/\s(?:aria-label|title|alt|placeholder)="([^"]*)"/g)].map((m) => m[1]);
-  const textoVisible = s.replace(/<[^>]+>/g, " ");
-  const malos = [...(textoVisible.match(/.{0,15}\d.{0,15}/g) ?? []), ...visibles.filter((v) => /\d/.test(v))];
-  check("index.html sin cifras en el texto visible", malos.length === 0, malos.join(" | "));
+  // Texto visible de las dos páginas (sin comentarios, scripts ni etiquetas): no debe llevar dígitos. Primero
+  // explorer.html, que es la página que esta prueba abre; después index.html, la portada (el tablero).
+  for (const pagina of ["explorer.html", "index.html"]) {
+    let s = fs.readFileSync(path.join(WEB, pagina), "utf-8");
+    s = s.replace(/<!--[\s\S]*?-->/g, "").replace(/<(script|style)\b[\s\S]*?<\/\1>/g, "");
+    const visibles = [...s.matchAll(/\s(?:aria-label|title|alt|placeholder)="([^"]*)"/g)].map((m) => m[1]);
+    const textoVisible = s.replace(/<[^>]+>/g, " ");
+    const malos = [...(textoVisible.match(/.{0,15}\d.{0,15}/g) ?? []), ...visibles.filter((v) => /\d/.test(v))];
+    check(`${pagina} sin cifras en el texto visible`, malos.length === 0, malos.join(" | "));
+  }
 }
 
 // ---------------------------------------------------------------- variante en memoria

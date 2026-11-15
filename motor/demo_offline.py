@@ -442,7 +442,11 @@ ESTILO_NOTA = """<style data-raiz-offline="nota">
 /* Nota de la copia sin red: una línea propia al final de la cabecera; no sale en papel. */
 .nota-offline { flex: 1 0 100%; margin: 0; font-size: 0.8rem; color: var(--tinta-suave, inherit); }
 @media print { .nota-offline { display: none !important; } }
+/* Enlaces a otra página del sitio (p. ej. «Dashboard» → index.html): ese archivo no viaja en la copia de un solo
+   archivo, así que el enlace no se muestra (un botón que lleva a una página que no está sería un enlace roto). */
+[data-raiz-sin-red="otra-pagina"] { display: none !important; }
 </style>"""
+ATRIBUTO_OTRA_PAGINA = 'data-raiz-sin-red="otra-pagina"'
 
 # Arranque de la página sin red. Va en un <script> clásico al final del cuerpo, después de las
 # bibliotecas y de los bloques de datos y antes de que corra ningún módulo de la web.
@@ -614,7 +618,7 @@ def construir(web=WEB, salida=SALIDA, commit=None):
     pagina = Pagina(texto)
     informe = {"salida": str(salida), "entradas": [], "modulos": [], "hojas": [], "bibliotecas": [], "datos": [],
                "datos_binarios": [], "datos_no_incrustados": [], "remotas_bloquean": [], "remotas_solas": [], "remotas_codigo": [],
-               "remotas_enlaces": [], "menciones": [], "enlaces_locales": [], "quitadas": [], "escapes_script": 0}
+               "remotas_enlaces": [], "menciones": [], "enlaces_locales": [], "paginas_ocultas": [], "quitadas": [], "escapes_script": 0}
     cambios = []    # (de, a, texto nuevo) sobre el index.html original
     al_final = []   # scripts con defer/async: corren al final del cuerpo, en su orden
     licencias = set()
@@ -686,7 +690,13 @@ def construir(web=WEB, salida=SALIDA, commit=None):
                 elif not es_local(valor):
                     continue
                 elif tag in ("a", "area"):
-                    informe["enlaces_locales"].append(valor)
+                    destino = valor.split("#")[0].split("?")[0]
+                    if destino.lower().endswith((".html", ".htm")) and (web / destino).is_file():
+                        # Otra página del sitio: no viaja en el archivo suelto; el enlace se oculta y se informa.
+                        informe["paginas_ocultas"].append(valor)
+                        crudo = f"{crudo[:len(tag) + 1]} {ATRIBUTO_OTRA_PAGINA}{crudo[len(tag) + 1:]}"
+                    else:
+                        informe["enlaces_locales"].append(valor)
                 elif (tag, nombre) in INCRUSTABLES or (tag == "link" and "icon" in at.get("rel", "").lower()):
                     archivo = web / ruta_local(valor, "", web, "index.html")
                     crudo = cambiar_atributo(crudo, nombre, uri_de_datos(archivo))
@@ -858,6 +868,9 @@ def texto_informe(informe):
                   + ("; ".join(menciones) or "ninguna"))
     if informe["quitadas"]:
         lineas.append("Etiquetas <link> quitadas (no sirven en un archivo suelto): " + " ".join(informe["quitadas"]))
+    if informe.get("paginas_ocultas"):
+        lineas.append("Enlaces a otras páginas del sitio, ocultos en la copia (esa página no viaja en el archivo): "
+                      + ", ".join(informe["paginas_ocultas"]))
     if informe["enlaces_locales"]:
         lineas.append("AVISO — enlaces <a> a archivos locales que no viajan con la copia: "
                       + ", ".join(informe["enlaces_locales"]))

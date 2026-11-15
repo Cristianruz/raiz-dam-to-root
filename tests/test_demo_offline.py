@@ -252,6 +252,20 @@ def test_nota_visible_y_sin_recursos_remotos_que_detengan_la_pagina(copia):
         assert esperado in resumen
 
 
+def test_el_enlace_a_la_portada_no_queda_roto_en_el_archivo_suelto(copia):
+    """explorer.html enlaza la portada («Dashboard» → index.html). Esa página no viaja en la copia de un solo archivo:
+    el enlace va oculto y el informe lo dice, en lugar de llevar a un archivo que no está."""
+    if not (copia["web"] / "explorer.html").exists():
+        pytest.skip("esta web no trae explorer.html")
+    informe, texto = copia["informe"], copia["texto"]
+    assert informe["paginas_ocultas"] == ["index.html"]
+    assert "index.html" not in informe["enlaces_locales"]
+    enlace = re.search(r'<a\b[^>]*id="enlace-tablero"[^>]*>', texto)
+    assert enlace and demo_offline.ATRIBUTO_OTRA_PAGINA in enlace.group(0)
+    assert '[data-raiz-sin-red="otra-pagina"] { display: none !important; }' in texto
+    assert "ocultos en la copia" in demo_offline.texto_informe(informe)
+
+
 def test_la_orden_escribe_la_copia_con_el_commit_de_git(tmp_path):
     if not (WEB / "index.html").exists() or not (WEB / "app.js").exists():
         pytest.skip("web/index.html o web/app.js aún no existen (los escribe la pieza web)")
