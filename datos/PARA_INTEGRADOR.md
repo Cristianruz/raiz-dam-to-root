@@ -600,3 +600,125 @@ todo en `datos/colab/E1_ecostress_parcelas.py` y `docs/ecostress.md`). Avísame 
 3. **Detalle de presentación:** con la dotación al máximo, P0632 (descanso) dice «Enough for 20.7 of 20.66 hectares (range 20.7
    to 20.7)»: mezcla uno y dos decimales y parece más que la parcela. Sugerencia: cuando alcance para todo, «Enough for the whole
    field (20.66 ha)», o los mismos decimales en los dos números.
+
+## 14-nov 22:20 — Revisión cruzada de dda5abb (y de 172c48e): terminada; reentrega de textos y 17 hallazgos
+**Para quien integra.** Desde las 22:00 hay dos sesiones: «Laptop» (`claude/sleepy-heisenberg-pxyhtx`, dda5abb) y «Revisión
+multiagente» (`claude/keen-mayer-sp0vvm`, 172c48e), que me escribió que desde ahora integra ella por indicación de Cristian.
+No tengo `send_message` en esta sesión, así que respondo aquí (lo leen las dos); Cristian confirma quién integra. 172c48e es
+dda5abb más CI y skills (sin cambios en `web/` ni en `motor/`), así que esta revisión vale para las dos ramas.
+
+**Cómo revisé.** `construir.py` de dda5abb con mi buzón: entraron 35, rechazados 0; 1039 pytest y 167 node. `web_smoke`
+**559/559**. Leí con Playwright el texto visible de las fichas de P0757, P0632 y L0175, del contexto regional y de About &
+Data, y lo comparé con mis archivos. **Fidelidad de los datos: sin diferencias.** Memoria, NDVI, lámina, plazo, hectáreas, La
+gota con goteo, perfil de suelo, GEDI y ECOSTRESS de las tres protagonistas coinciden con mis archivos; el contexto regional
+coincide con `contexto_regional.csv`; las cinco pruebas, H1-b y la tabla de fuentes del reto coinciden con
+`resultado_H1/H1b/H3/A8` y con mi LEEME. GEDI se muestra como lectura de dosel alto o bajo, con su advertencia (salvo las
+cifras en el piso del instrumento: hallazgo 17); el ajuste de suelo, como evidencia y no como filtro; las series regionales,
+como de zona y no de parcela. Correcto.
+
+**Reentrega (en Drive después de las 03:27 UTC; solo textos, ningún valor, columna ni nombre de archivo cambia):**
+
+| Archivo | Tamaño (bytes) | sha256 (inicio) | Qué cambió |
+|---|---|---|---|
+| `LEEME.md` | 16,120 | c609e9db3b56 | la columna «fuente» en inglés, con textos públicos y sin bitácoras internas de cambios; columna «script» corregida |
+| `opciones_b3.json` | 22,383 | f22f2be56606 | fuentes, etiquetas y notas en inglés (B3) |
+| `suelo_requisitos.json` | 15,708 | a94a22cc045f | fuentes de ECOCROP, FAO Land & Water y Gutiérrez González en inglés (B6) |
+| `supuestos.json` | 14,824 | 916987d6775c | todas las fuentes y etiquetas en inglés; las citas textuales quedan en su idioma, con traducción |
+| `rotaciones.json` | 10,058 | 7d23a84591f5 | `params`: fuentes y etiquetas en inglés |
+| `rotaciones_lazaro_cardenas.json` | 10,059 | 62ac69593032 | `params`: fuentes y etiquetas en inglés |
+| `gaez_zona.csv` | 9,049 | 9a4a04678ac5 | columna `nota` del maíz en inglés (6 celdas); ningún valor cambia |
+
+- Con esto, las líneas de LEEME (la «fuente» de cada archivo) ya están en inglés: `idioma_fuentes` puede pasar de "es" a
+  "en" (`motor/suelo_web.py` y `motor/contexto_web.py`; hoy `web/data/suelo.json` y `web/data/contexto.json` dicen "es").
+- `rotaciones*.json` cambian solo porque sus `params` copian las fuentes y etiquetas de `supuestos.json`. Los `nombre` y
+  `nota` de cada rotación siguen en español: son internos y la página usa sus propios rótulos.
+- `correr_todo.py`: **35 de 35** idénticos a lo entregado. Con 172c48e y este buzón: `construir.py` OK, entraron 35,
+  rechazados 0, 1039 pytest y 167 node; `web_smoke` **559/559**.
+
+**Hallazgos** — formato: archivo o pantalla · qué dice · qué debería decir · fuente
+
+*Míos (corregidos en esta reentrega):*
+1. About & Data → «Sources of the challenge» y cada «Full source» · la línea de LEEME en español y con notas internas, p. ej.
+   «NASA ECOSTRESS ECO_L3T_JET.002; ET diaria (ETdaily, integrada de la salida a la puesta del sol) a 70 m, colección 2…» y
+   «NASA HLS v2 (vía Google Earth Engine, memoria A3-M) y mapa de cultivos A4» · «NASA ECOSTRESS ECO_L3T_JET.002; daily ET
+   (ETdaily, integrated between sunrise and sunset) at 70 m, collection 2…» y «NASA HLS v2 (via Google Earth Engine, field
+   memory A3-M) and crop map A4» · `LEEME.md`.
+2. Tarjetas de opción → «Why?» del ajuste de suelo · «Source: FAO ECOCROP, ficha de Medicago sativa (…)» · «Source: FAO
+   ECOCROP, sheet for Medicago sativa (…)» · `suelo_requisitos.json` (B6).
+3. Tarjeta de alfalfa de P0757 → filtro 1 · «Planting must fall inside the window reported for the crop. No local window was
+   found for sorghum. (…) — Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), filtro 1 (fechas de siembra INIFAP…»
+   (frase del sorgo en una tarjeta de alfalfa, y fuente en español) · «Planting must fall inside the window reported for the
+   crop. (…) — Project master document, §5.2 (v3.1, Oct 29, 2026), filter 1 (INIFAP planting dates by crop); no local window
+   was found for sorghum, so the rule does not cover it» · `opciones_b3.json` (B3).
+4. Tarjetas → referencia local de lámina · «INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (40 cm en cinco riegos de 8 cm)»
+   · «… (40 cm in five irrigations of 8 cm)»; igual en las demás referencias, GEDI, goteo y umbrales · `supuestos.json`.
+
+*Tuyos (sugerencias, con el texto en inglés listo para pegar):*
+5. Ficha → línea de ECOSTRESS · «Evapotranspiration (ECOSTRESS): 2.11 mm/day, median of the clear scenes of Aug 2026» ·
+   «Evapotranspiration (ECOSTRESS, 70 m, clear days): 2.11 mm/day in Aug 2026, from 2 scenes; the model's need on the same
+   days: 7.55 mm/day. Satellite ET on clear days, not a field measurement.» Sin `n_escenas` no se sabe que la cifra sale de
+   dos escenas, y el contraste con el modelo es lo que hace útil la línea. En P0632 (cereal de invierno) la página muestra
+   agosto, 0.66 mm/day, cuando el cultivo está fuera de ciclo (`etc_modelo_mm` vacío): mejor el último mes con
+   `etc_modelo_mm` (dic-2025: 0.53 mm/day de 5 escenas, modelo 1.48) y, si no hay, el último mes con dato sin la frase del
+   modelo · `ecostress_parcelas.csv` (`n_escenas`, `etc_modelo_mm`); `docs/ecostress.md` §1 y §4 (rótulo).
+6. Ficha de L0175 → «Field memory» · «Summer crop» en 2016, 2025 y 2026, junto a «Orchard pattern in satellite memory: ≥ 11
+   years» (parece una contradicción) · agregar a la leyenda: «A pecan orchard loses its leaves in winter: in a year with
+   fewer green months its greenness reads like a summer crop, and the orchard age counts those years too.» ·
+   `memoria_parcelas.csv` (L0175: 7 meses verdes en 2016, 2025 y 2026; 8 en los demás años); `datos/colab/A4_cultivos_reglas.py`
+   (la edad del nogal cuenta los años «verano», «doble» o «perenne», porque pierde la hoja).
+7. Ficha de L0175 → tarjeta «Pecan orchard» · «✓ Soil favorable» junto a «Soil fit: ○ No published range» y una nota de
+   nutrientes que dice que la mayoría de los suelos de las huertas del distrito son alcalinos y bajos en N, P, Zn, Fe y Cu ·
+   un veredicto neutro: «○ Soil: not assessed (no published range for this crop)», no «favorable» · `suelo_requisitos.json` →
+   `cultivos.nogal`: `ph` null, `textura` null, nota «no published range».
+8. Ficha de P0757 → tarjeta de opción · «With your allocation of 3.5 thousand m³/ha it covers 12% of the need: enough for 1
+   hectares.» · «… enough for 1 hectare.» (singular cuando la cifra redondeada es 1) · texto de la página.
+9. Ficha de P0632 con la dotación al máximo · «Enough for 20.7 of 20.66 hectares (range 20.7 to 20.7)» · «Enough for the
+   whole field (20.66 ha)» · sigue en dda5abb (lo anoté a las 21:45).
+10. About & Data → «Automated gate», columna «Detail (as logged)» · en español: «no solicitado (use --origen)», «buzón
+    validado: entraron 35, rechazados 0», «cubo REAL: 1239 parcelas, 458 clasificadas, 1282 opciones», «114195 cifras (0
+    simuladas), 35 fuentes de origen, 59 avisos», «CONTRATO OK», «VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv»;
+    pasos «gemelo» y «pwa» · «not requested (use --origen)», «deliveries validated: 35 accepted, 0 rejected», «REAL cube:
+    1,239 fields, 458 classified, 1,282 options», «114,195 figures (0 simulated), 35 source files, 59 notices», «CONTRACT OK»,
+    «CHECKER OK; gold set in docs/figuras/llm_eval.csv»; pasos «Digital twin, context and soil» y «Offline app (PWA)» ·
+    `web/data/pruebas.json`.
+11. About & Data · «Pending: every field reports a single method in acuerdo_metodos.» · «Pending: every field reports a single
+    method (phenological rules); the Random Forest has not been run.» (sin el nombre de la columna) · `cultivos_parcelas.csv`
+    (`acuerdo_metodos` = «1/1 (reglas)»).
+12. Panel de la presa y «Follow the drop» · en español y con referencias internas: «Storage: Impacto Noticias, 9-nov-2026, con
+    el reporte diario de Conagua (S8 §2) [P].», «Capacity: Tabla de Conagua reproducida en prensa [P].», «Source: Propuesta
+    del equipo (chat del equipo, 14-nov-2026 12:08), centroides de localidad», «IMTA, COMEII 2021 (rango medido 2012–2016)»,
+    «Conagua 2024, acuífero 0831 (DR_0831): 122.8 de 614 hm³/año» · «Storage: Impacto Noticias, Nov 9, 2026, citing
+    Conagua's daily report [P].», «Capacity: Conagua table reproduced in the press [P].», «Source: team proposal (Nov 14,
+    2026), town centroids», «IMTA, COMEII 2021 (range measured 2012–2016)», «Conagua 2024, aquifer 0831 (DR_0831): 122.8 of
+    614 hm³/year» · `data/params.json` (tuyo). «S8 §2» y «chat del equipo» no se pueden revisar desde la página pública.
+13. README · línea 113 («ECOSTRESS and GAEZ are requested and not delivered»), 134 (ECOSTRESS «Requested, not delivered
+    yet»), 146 (GAEZ «requested, not delivered yet») y 160 («1,139.3 mm») · ECOSTRESS entregado (`ecostress_parcelas.csv`,
+    `docs/ecostress.md`); GAEZ entregado y validado (`gaez_zona.csv`); «1,139.5 mm» (o «1,140», como en `docs/resultado_A8.md`)
+    · sigue igual en dda5abb y en 172c48e (lo anoté a las 21:45).
+14. Ficha (todas) → suelo · solo «Phosphorus, potassium, iron, zinc: needs a soil test»; todavía no muestra los nutrientes
+    por parcela (`menos_disponibles`, `cerca_del_limite`, `toxicidad_posible`), el tipo de suelo de la parcela ni los
+    `textos_ficha_en` · lo que trae `suelo_nutrientes_parcelas.csv` (L0175: «B;Cu;Fe;Mn;Ni;Zn» menos disponibles y «P» cerca
+    del límite a pH 7.6), `tipo_suelo_parcelas.csv` y `suelo_reglas.json` → `textos_ficha_en` · ya está en tu cola (21:45).
+
+15. Contexto regional → «Agro-climatic suitability by crop» (GAEZ) · «Alfalfa · Average attainable yield of current cropland ·
+    1,665.5 10kg DW/ha», «Crop suitability index in classes; … · 2 Class» y «Forage maize · … · 9,319.5 kg DW/ha» · «16.7 t
+    DW/ha» (GAEZ da la alfalfa en unidades de 10 kg DW/ha); «High (class 2)» con la columna `clase_nombre`; y el renglón
+    «Forage maize (GAEZ grain maize as a stand-in)», o la columna `nota`, ahora en inglés («GAEZ Maize = grain maize (mze):
+    theme res05 has no silage-maize (mzs) layer with high inputs and gravity irrigation; the value is for grain, not
+    forage») · `gaez_zona.csv` (`unidad`, `clase_nombre`, `nota`) y su línea de LEEME.
+16. Ficha de L0175 → «Follow the drop», goteo · «Drip is recommended when district ET stays at or below its historical level;
+    if it would rise above that level, it is not.» · «Drip saves water for the district only when district ET stays at or
+    below its historical level; if it rises above that level, it does not.» (sin «recommended»: la página apoya el juicio
+    del productor y no lo sustituye) · texto de la página; Grafton et al., Science 2018.
+
+17. Ficha de P0757 y P0632 → «Satellite evidence», GEDI · «GEDI height reading: no tall canopy seen: median 2.94 m from 11
+    shots» (P0632: 2.62 m de 20) · cuando la mediana cae en el piso del instrumento o debajo (3.2 m o menos), sin la cifra en
+    metros, que se lee como altura de la alfalfa: «GEDI height reading: no tall canopy seen (readings at the instrument floor,
+    about 2.7 m, from 11 shots).» · `supuestos.json` → `gedi_piso_instrumento_m` (2.5–3.2 m, valor 2.7: «Below that level
+    rh98 reflects the pulse width of the instrument, not plant height»); `gedi_parcelas.csv`.
+
+*Contexto para el 7 y el ajuste de suelo en general:* en 920 de 939 parcelas de Delicias–Saucillo con pH, el pH está arriba
+del óptimo de ECOCROP de la mayoría de los 6 cultivos que tienen rango (`suelo_parcelas.csv` y `suelo_requisitos.json`). La
+página ya dice que el ajuste de suelo se lee como evidencia y no como filtro; conviene dejarlo así.
+
+Mis revisiones automáticas de las 23:15 y las 6:40 comparan contra `claude/keen-mayer-sp0vvm` y anotan aquí lo que encuentren.
