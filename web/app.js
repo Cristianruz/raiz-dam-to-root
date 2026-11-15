@@ -167,7 +167,20 @@ const GLOSARIO = [
   ["Consumption cap", "A rule that drip irrigation may not raise the crop's water consumption (ET) above its historical level."],
   ["Millar", "The unit used in the district: a thousand m³ of water per hectare. See the equivalence under the slider."],
   ["Water term", "How many years a crop ties up water: one season for annual crops, several years for alfalfa, a long horizon for orchards."],
+  // I9 de la revisión total: las etiquetas de evidencia aparecen junto a las fuentes y no tenían leyenda en inglés.
+  // Vocabulario de data/params.json (_nota): [V], [P], [S], [NE] y «Diseño».
+  ["[V] [P] [S]", "Evidence labels next to each source: [V] verified in a primary source · [P] press or secondary source · [S] stated assumption · [NE] not found · Design value: an interface setting, not data."],
 ];
+
+// Etiquetas de evidencia (data/params.json → _nota): lo que dice cada una, para el title de cada rótulo (I9).
+const ETIQUETAS_EVIDENCIA = [
+  ["[V]", "verified in a primary source"],
+  ["[P]", "press or secondary source"],
+  ["[S]", "stated assumption"],
+  ["[NE]", "not found"],
+];
+/** «Diseño» (valor de interfaz) se escribe en inglés; las demás etiquetas son códigos y van tal cual. */
+const ETIQUETA_DISENO = /^dise[ñn]o$/i;
 
 const AVISO_JUICIO = "This tool supports, never replaces, the judgment of farmers and local experts.";
 
@@ -1163,7 +1176,7 @@ function construirLista() {
     li.innerHTML =
       `<button type="button" class="boton-parcela" data-id="${esc(p.id)}">` +
       '<span class="sem-circulo" aria-hidden="true"></span>' +
-      `<span class="p-titulo">${esc(p.id)}${p.protagonista ? ' <span class="insignia-historia">story field</span>' : ""}</span>` +
+      `<span class="p-titulo">${esc(p.id)}${p.protagonista ? ' <span class="insignia-historia">example field</span>' : ""}</span>` +
       '<span class="p-detalle"></span></button>';
     lista.nodos.set(p.id, {
       li,
@@ -1172,7 +1185,7 @@ function construirLista() {
       detalle: $(".p-detalle", li),
       cultivo,
       base: `${cultivo} · ${fmtDato(p.area_ha)} ha`,
-      busqueda: `${p.id} ${cultivo} ${p.protagonista ? "story field" : ""}`.toLowerCase(),
+      busqueda: `${p.id} ${cultivo} ${p.protagonista ? "example field story field" : ""}`.toLowerCase(),
       ultimo: null,
     });
     fragmento.append(li);
@@ -1861,11 +1874,16 @@ function pintarDistrito() {
   }
 }
 
-/** Etiqueta de un dato del distrito ([P], [V]…) junto a su fuente; con «label not stated» si el cubo no la trae. */
+/**
+ * Etiqueta de un dato ([P], [V]…) junto a su fuente; con «label not stated» si el cubo no la trae. El title dice qué
+ * significa (I9 de la revisión total); el glosario de la ficha trae la misma leyenda.
+ */
 function etiquetaDato(etiqueta) {
-  return etiqueta
-    ? ` <span class="etiqueta-dato" title="Evidence label">${esc(etiqueta)}</span>`
-    : ' <span class="etiqueta-dato etiqueta-dato--falta">label not stated</span>';
+  if (!etiqueta) return ' <span class="etiqueta-dato etiqueta-dato--falta">label not stated</span>';
+  const texto = ETIQUETA_DISENO.test(String(etiqueta).trim()) ? "Design value" : String(etiqueta);
+  const significados = ETIQUETAS_EVIDENCIA.filter(([k]) => texto.includes(k)).map(([k, d]) => `${k} ${d}`);
+  const titulo = texto === "Design value" ? "Evidence label: an interface setting, not data" : `Evidence label${significados.length ? `: ${significados.join(" · ")}` : ""}`;
+  return ` <span class="etiqueta-dato" title="${esc(titulo)}" aria-label="${esc(`${texto} (${titulo})`)}">${esc(texto)}</span>`;
 }
 
 function pintarPie() {
@@ -2080,7 +2098,9 @@ function htmlEncabezado(p) {
   const cultivo = p.abstencion
     ? "Not classified — check with technician"
     : `${esc(nombreCultivo(p.cultivo_actual))} — ${confianza}`;
-  const metodos = !p.abstencion && p.acuerdo_metodos ? ` <span class="fuente">(methods agree: ${esc(p.acuerdo_metodos)})</span>` : "";
+  // «methods agree: 1/1» no dice nada con un solo método (I9): solo se muestra con dos o más.
+  const denominador = Number(/\/\s*(\d+)\s*$/.exec(String(p.acuerdo_metodos ?? ""))?.[1]);
+  const metodos = !p.abstencion && p.acuerdo_metodos && denominador > 1 ? ` <span class="fuente">(methods agree: ${esc(p.acuerdo_metodos)})</span>` : "";
   const plazo = PLAZO[p.estado_plazo ?? "sin_dato"] ?? PLAZO.sin_dato;
   const clavePlazo = p.estado_plazo ?? "sin_dato";
   const edad = textoEdad(p);
@@ -2088,7 +2108,7 @@ function htmlEncabezado(p) {
     '<header class="ficha-encabezado">' +
     `<p class="ficha-meta">${lugar} · ${esc(fmtDato(p.area_ha))} ha` +
     (p.ftw_confianza != null ? ` · boundary confidence (Fields of The World): ${esc(fmtDato(p.ftw_confianza))}%` : "") +
-    (p.protagonista ? ' · <span class="insignia-historia">story field</span>' : "") +
+    (p.protagonista ? ' · <span class="insignia-historia">example field</span>' : "") +
     "</p>" +
     `<p class="ficha-cultivo">${cultivo}${metodos}</p>` +
     '<p class="ficha-plazo">' +

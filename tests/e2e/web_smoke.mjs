@@ -1861,6 +1861,9 @@ async function pruebaAuditoriaMotor(page, prefijo, telefono) {
     const namo = await page.locator('#boquilla [data-dato="namo"]').textContent();
     check(`${prefijo}La Boquilla: almacenamiento con su fuente y su etiqueta ${b.etiqueta_almacenamiento}`, alm.includes(b.fuente_almacenamiento) && alm.includes(b.etiqueta_almacenamiento), alm);
     check(`${prefijo}La Boquilla: capacidad (NAMO) con su fuente y su etiqueta ${b.etiqueta_namo}`, namo.includes(b.fuente_namo) && namo.includes(b.etiqueta_namo), namo);
+    // I9: cada etiqueta de evidencia dice qué significa (title) y el glosario de la ficha trae la leyenda.
+    const titulos = await page.locator("#boquilla .etiqueta-dato").evaluateAll((xs) => xs.map((x) => x.title));
+    check(`${prefijo}La Boquilla: las etiquetas de evidencia llevan su significado en el title`, titulos.length > 0 && titulos.every((t) => /^Evidence label: (\[(V|P|S|NE)\] |an interface)/.test(t)), titulos.join(" | "));
   }
   const llave = Object.keys(d).find((k) => k.startsWith("acuifero_"));
   if (llave) {
@@ -2134,6 +2137,8 @@ async function pruebasEscritorio(page, peticiones) {
       const nota = await page.locator(".nota-fija").innerText();
       check(`nota fija de la memoria en ${id}`, nota.includes("Rule-based reading of monthly greenness; not a crop census."));
     }
+    const glosario = await page.locator("#ficha .glosario").textContent();
+    check(`ficha de ${id}: el glosario explica las etiquetas [V] [P] [S] (I9)`, /\[V\] verified in a primary source/.test(glosario) && /\[S\] stated assumption/.test(glosario));
     const aviso = await page.locator("#ficha .aviso-juicio").innerText();
     check(`aviso de juicio local en ${id}`, aviso.includes("This tool supports, never replaces, the judgment of farmers and local experts."));
     // I6 de la revisión total: la ficha no es bitácora (ninguna nota de proceso del equipo a la vista).

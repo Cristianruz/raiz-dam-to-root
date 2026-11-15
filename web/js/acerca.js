@@ -332,7 +332,8 @@ function usoDe(f, familia, zonasIds, tormentas) {
   const uso = USOS[base];
   if (typeof uso === "string") return uso;
   if (uso && typeof uso === "object") return uso[familia.id] ?? uso["*"];
-  return f?.pieza ? `Input of kit piece ${f.pieza}` : nombreArchivo(f?.archivo);
+  // Sin uso registrado: no se muestra la pieza interna del kit («Input of kit piece A7», I9 de la revisión total).
+  return f?.pieza ? "Input to the build (no use recorded)" : nombreArchivo(f?.archivo);
 }
 
 /** Quita los productos que son el principio de otro («NASA HLS v…» dentro de «NASA HLS v… (…)»). */
