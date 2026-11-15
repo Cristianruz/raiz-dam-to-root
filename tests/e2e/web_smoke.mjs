@@ -27,7 +27,7 @@
 //   · La gota (X3.2): Sankey con d3-sankey; cada nodo lleva los m³ del cubo y su alto y el ancho de cada banda son la
 //     escala común por los m³; las gotas recorren las bandas una sola vez (o se omiten con movimiento reducido); con
 //     bloques de goteo (los del cubo: escritorio con la transición de d3 y teléfono con movimiento reducido), el
-//     botón, las cifras grandes, la misma escala para las variantes, el tope, el aviso «Not recommended» y la
+//     botón, las cifras grandes, la misma escala para las variantes, el tope, el aviso «Above the cap» y la
 //     etiqueta de las eficiencias (cubo.meta.goteo: «indicative, not local») en los supuestos; sin ellos, la nota
 //     «Drip scenario not available yet». El caso que los datos NO traen se prueba con la variante en memoria;
 //   · filtros oficiales (B3; decisión docs/decisiones/2026-11-14_opciones_b3.md): si el cubo trae filtros con
@@ -87,7 +87,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { aguaComprometida, conteosZona, cobertura, evaluarOpcion } from "../../web/reglas.js";
-import { fraseResumen } from "../../web/js/resumen.js";
+import { fraseResumen, hectareasQueAlcanzanTexto } from "../../web/js/resumen.js";
 import { ESTADOS_APTITUD, ROTULO_APTITUD, grupoDeTextura } from "../../web/js/suelo.js";
 import { NOTA_GEDI, NOTA_REGIONAL, riesgoDeHelada, climaDelAnio, contarEstados, diasIncompletos, formatoNumero, textoMascon } from "../../web/js/contexto.js";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
@@ -167,6 +167,7 @@ const pruebasWeb = leerOpcional("pruebas.json");
 const gemelo = leerOpcional("gemelo.json");
 const suelo = leerOpcional("suelo.json");
 const contexto = leerOpcional("contexto.json");
+const manifestWeb = leerOpcional("manifest.json");
 const ndviMensual = leerOpcional("ndvi_mensual.json");
 const hayRelieve = Boolean(relieve?.zonas && Object.keys(relieve.zonas).length && rutasRelieve?.features?.length);
 
@@ -547,7 +548,8 @@ async function pruebaGota(page, id, c, prefijo, reducida, capturas = null) {
     const et = fmtCambio(op.tope_consumo.et_goteo_sin_tope_m3 / op.tope_consumo.et_historica_m3 - 1);
     check(`${prefijo}sin tope: «Crop consumption (ET) ${et} vs. historical»`, sinTope.includes("Crop consumption (ET)") && sinTope.includes(et) && sinTope.includes("vs. historical"), sinTope.replace(/\n/g, " "));
     const alerta = page.locator("#gota-alerta");
-    check(`${prefijo}sin tope: aviso «Not recommended» solo si cumple_sin_tope = false`, (await alerta.isVisible()) === (op.tope_consumo.cumple_sin_tope === false));
+    check(`${prefijo}sin tope: aviso «Above the cap» solo si cumple_sin_tope = false`, (await alerta.isVisible()) === (op.tope_consumo.cumple_sin_tope === false) &&
+      (op.tope_consumo.cumple_sin_tope !== false || /^Above the cap: /.test(await alerta.innerText())));
     // El retorno al acuífero sin tope es una cota superior (cubo.meta.goteo.retorno_sin_tope_es_cota_superior).
     if (c.meta?.goteo?.retorno_sin_tope_es_cota_superior === true) {
       const acu = await page.locator('#gota-cifras [data-cifra="acuifero"]').innerText();
@@ -877,6 +879,16 @@ async function pruebaAcerca(page, peticiones, prefijo, telefono, captura) {
   }
   if (existe("manifest.json")) {
     check(`${prefijo}About & Data: tabla de datos NASA leída de manifest.json`, (await page.locator("#acerca .acerca-tabla tbody tr[data-familia]").count()) > 0);
+    // La columna Product nombra productos, no la plataforma; los usos van en inglés (sin «Input of kit piece»); las
+    // series regionales del reto que manifest.json registra (SMAP, GRACE, GLDAS, NLDAS, GEDI) tienen su renglón.
+    const nasa = await page.locator("#acerca .acerca-tabla tbody tr[data-familia]").evaluateAll((xs) =>
+      xs.map((x) => ({ id: x.dataset.familia, producto: x.querySelector('[data-etiqueta="Product"]')?.textContent ?? "", uso: x.querySelector('[data-etiqueta="What ROOT uses it for"]')?.textContent ?? "" })));
+    check(`${prefijo}About & Data: «Product» sin la plataforma (Earth Engine) y usos sin «Input of kit piece»`,
+      nasa.every((r) => !/Earth Engine|proyecto/i.test(r.producto) && !/Input of kit piece/.test(r.uso)), JSON.stringify(nasa.filter((r) => /Earth Engine|proyecto/i.test(r.producto) || /Input of kit piece/.test(r.uso))).slice(0, 200));
+    const fuentesManifest = (manifestWeb?.fuentes_de_origen ?? []).map((f) => String(f.fuente ?? ""));
+    const esperadas = [["smap", /\bSMAP\b/], ["grace", /\bGRACE\b/], ["gldas", /\bGLDAS\b/], ["nldas", /\bNLDAS\b/], ["gedi", /\bGEDI L2A\b|LARSE\/GEDI/]].filter(([, re]) => fuentesManifest.some((t) => re.test(t))).map(([id]) => id);
+    check(`${prefijo}About & Data: renglones de las series del reto que registra el manifest (${esperadas.join(", ") || "ninguna"})`,
+      esperadas.every((id) => nasa.some((r) => r.id === id)), nasa.map((r) => r.id).join(", "));
   }
   await pruebaRecursosReto(page, prefijo, telefono);
   await pruebaH1b(page, prefijo, telefono);
@@ -1014,6 +1026,11 @@ async function pruebaLineaDeTiempo(page, prefijo, reducida) {
   const clases = await page.locator("#leyenda li").evaluateAll((xs) => xs.map((x) => x.dataset.clase));
   check(`${prefijo}línea de tiempo en ${a0}: el mapa y su leyenda muestran la memoria de ${a0} (seis estados)`,
     ley0.includes(`Field memory: ${a0}`) && MEMORIA_CLAVES.every((k) => clases.includes(k)) && (await page.evaluate(() => document.body.dataset.anioTiempo)) === String(a0), ley0.split("\n")[0]);
+  check(`${prefijo}línea de tiempo en ${a0}: la leyenda dice cómo volver a «Enough water for the current rotation?» (el modo elegido)`,
+    ley0.includes(`Move the timeline back to ${a1} to see “Enough water for the current rotation?” again.`), ley0.replace(/\n/g, " · ").slice(-180));
+  const notaRadios = page.locator("#nota-colorear");
+  check(`${prefijo}línea de tiempo en ${a0}: «Color fields by» avisa que el mapa muestra ${a0} (nota ligada por aria-describedby)`,
+    (await notaRadios.isVisible()) && (await notaRadios.innerText()).includes(`field memory of ${a0}`) && (await page.locator('fieldset[aria-describedby~="nota-colorear"]').count()) >= 1);
   check(`${prefijo}línea de tiempo en ${a0}: conteos del año (de parcelas.geojson) y distintos de ${a1}`, JSON.stringify(c0) === JSON.stringify(esperadas(a0)) && JSON.stringify(c0) !== JSON.stringify(c1), JSON.stringify(c0));
   const listaLetra = await page.locator(".boton-parcela:visible .sem-circulo").first().innerText();
   check(`${prefijo}línea de tiempo en ${a0}: la lista de parcelas usa las letras de la memoria`, ["P", "S", "W", "D", "R", "?"].includes(listaLetra.trim()), listaLetra);
@@ -1035,18 +1052,33 @@ async function pruebaLineaDeTiempo(page, prefijo, reducida) {
     await boton.click();
     check(`${prefijo}línea de tiempo con movimiento reducido: «Next year» sin aria-pressed avanza un año`, t === "Next year" && (await boton.getAttribute("aria-pressed")) === null && (await rango.inputValue()) === String(a0 + 1), `${t} → ${await rango.inputValue()}`);
   } else {
+    const antes = (await boton.innerText()).trim();
     await boton.click();
+    const durante = (await boton.innerText()).trim();
     const pulsado = await boton.getAttribute("aria-pressed");
     await page.waitForTimeout(Number(gemelo.tiempo.intervalo_ms) + 400);
     const avanzado = Number(await rango.inputValue());
     await boton.click();
-    check(`${prefijo}línea de tiempo: Play (aria-pressed) avanza los años y Pause la detiene`, pulsado === "true" && avanzado >= a0 + 2 && (await boton.getAttribute("aria-pressed")) === "false", `${pulsado} · año ${avanzado}`);
+    const despues = (await boton.innerText()).trim();
+    // El nombre dice la acción («Play» / «Pause») y no lleva aria-pressed (un lector no oye «Pause, pressed»).
+    check(`${prefijo}línea de tiempo: Play avanza los años y Pause la detiene; el texto dice la acción, sin aria-pressed`,
+      antes === "Play" && durante === "Pause" && despues === "Play" && pulsado === null && (await boton.getAttribute("aria-pressed")) === null && avanzado >= a0 + 2,
+      `${antes} → ${durante} → ${despues} · aria-pressed ${pulsado} · año ${avanzado}`);
   }
   // Elegir cómo colorear devuelve la línea de tiempo al año actual; también volver a mano al último año.
   await page.locator('input[name="colorear"][value="plazo"]').check();
   const ley1 = await texto(page, "#leyenda");
   check(`${prefijo}línea de tiempo: elegir «Water term» devuelve el año ${a1} y colorea por plazo`,
     (await rango.inputValue()) === String(a1) && ley1.includes("Water term") && (await page.evaluate(() => document.body.dataset.anioTiempo)) === "", ley1.split("\n")[0]);
+  // Con «Water term» y un año pasado, la leyenda nombra «Water term» (no el agua) como la vista a la que se vuelve.
+  await fijarAnio(a0);
+  const leyPlazo = await texto(page, "#leyenda");
+  check(`${prefijo}línea de tiempo con «Water term» en ${a0}: la leyenda dice que al volver se ve «Water term»`,
+    leyPlazo.includes(`to see “Water term” again.`) && !leyPlazo.includes("color fields by water"), leyPlazo.replace(/\n/g, " · ").slice(-160));
+  // Pulsar la opción ya marcada también devuelve al año actual.
+  await page.locator('input[name="colorear"][value="plazo"]').click();
+  check(`${prefijo}línea de tiempo: pulsar la opción ya marcada («Water term») vuelve a ${a1} y quita la nota`,
+    (await rango.inputValue()) === String(a1) && (await page.evaluate(() => document.body.dataset.anioTiempo)) === "" && !(await page.locator("#nota-colorear").isVisible()));
   await page.locator('input[name="colorear"][value="semaforo"]').check();
   await fijarAnio(a0);
   await fijarAnio(a1);
@@ -1291,6 +1323,19 @@ async function pruebaGemelo3D(page, prefijo, telefono) {
     const r2 = await identidadColumnas(page);
     check(`${prefijo}3D: en una vista girada (zoom 13.4, bearing 120), columnaEn da la columna que se ve (≥ 99.5 % de ${r2.n} puntos)`,
       r2.n > 200 && r2.bien / r2.n >= 0.995, `${((100 * r2.bien) / Math.max(1, r2.n)).toFixed(2)} % · otra ${r2.otra} · ninguna ${r2.ninguna} ${r2.ejemplos.join(" ; ")}`);
+    // «Show on map» de una localidad con la vista 3D activa conserva la inclinación y el rumbo (como encuadrar).
+    const locBoton = page.locator(".boton-localidad").first();
+    if ((await locBoton.count()) && (await locBoton.isVisible())) {
+      const antes = await gemelo3d(page);
+      await locBoton.click();
+      await quieto(page);
+      const tras = await gemelo3d(page);
+      check(`${prefijo}3D: «Show on map» de una localidad conserva la inclinación y el rumbo de la vista`,
+        tras.activo && Math.abs(tras.pitch - antes.pitch) < 0.5 && Math.abs(tras.bearing - antes.bearing) < 0.5, `${antes.pitch}/${antes.bearing} → ${tras.pitch}/${tras.bearing}`);
+      await boton.scrollIntoViewIfNeeded();
+    } else {
+      omitir(`${prefijo}3D: «Show on map» conserva la cámara`, "no hay botón de localidad visible");
+    }
     // Desactivar deja el mapa plano y sin capas del gemelo (las tramas de la identidad se fueron con ellas).
     await boton.click();
     await quieto(page);
@@ -1355,7 +1400,7 @@ function fraseEsperada(id, D) {
   const p = porId.get(id);
   const actual = actualDe(id) ?? null;
   const evaluacion = actual && !p.abstencion ? evaluarOpcion(actual, p.area_ha, D, 0) : null;
-  return fraseResumen({ parcela: p, opcionActual: actual, evaluacion, D, formato: (v, k) => (k === "area" ? nfFicha(v, 3) : nfFicha(v)) });
+  return fraseResumen({ parcela: p, opcionActual: actual, evaluacion, D, formato: (v, k) => (k === "area" ? nfFicha(v, 3) : nfFicha(v)), formatoDecimales: nfFicha });
 }
 
 /**
@@ -1412,15 +1457,16 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
         await fijarDeslizador(page, D);
         const t = (await caja.innerText()).replace(/\s+/g, " ");
         vistos.push(t);
-        const ha = nfFicha(area * cobertura(D, ll.valor_millares_ha));
-        check(`${prefijo}lámina local de ${P0757}/${conRefLocal.o.id} con ${D}: ${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha y «enough for ${ha} of ${nfFicha(area, 3)} hectares»`,
-          t.includes(`${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha`) && t.includes(`enough for ${ha} of ${nfFicha(area, 3)} hectares`), t);
+        // La misma regla que la tarjeta: nunca más hectáreas que la parcela, nunca «0» si alcanza algo.
+        const ha = hectareasQueAlcanzanTexto(area * cobertura(D, ll.valor_millares_ha), area, nfFicha).texto;
+        check(`${prefijo}lámina local de ${P0757}/${conRefLocal.o.id} con ${D}: ${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha y «enough for ${ha}»`,
+          t.includes(`${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha`) && t.includes(`enough for ${ha}`), t);
       }
       check(`${prefijo}lámina local: las hectáreas cambian con el deslizador`, vistos[0] !== vistos[1]);
       const titulo = ll.tipo === "aplicada"
         ? `Typically applied in this district (${ll.periodo ? `${ll.periodo.desde}–${ll.periodo.hasta} records; ` : ""}measurement point not confirmed)`
-        : "Recommended by INIFAP";
-      check(`${prefijo}lámina local: rótulo «${titulo}» y su límite a la vista`, vistos[1].includes(titulo) && /district average, not this field|regional recommendation, not this field/.test(vistos[1]), vistos[1]);
+        : "INIFAP guideline";
+      check(`${prefijo}lámina local: rótulo «${titulo}» y su límite a la vista`, vistos[1].includes(titulo) && /district average, not this field|regional guideline, not this field/.test(vistos[1]), vistos[1]);
       check(`${prefijo}lámina local: el semáforo sigue con la lámina del modelo`, (await tarjeta(page, conRefLocal.o.id).getAttribute("data-semaforo")) === evaluarOpcion(conRefLocal.o, area, D2, 0).semaforo);
       await caja.scrollIntoViewIfNeeded();
       await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_lamina_local.png`) });
@@ -1556,9 +1602,69 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
     await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_nogal_sin_rotacion.png`) });
     await cerrarFicha(page);
   }
+  await pruebaTarjetasCoherentes(page, prefijo, sufijo);
   if (telefono) {
     check(`${prefijo}con la ficha completa, sin desplazamiento horizontal`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   }
+}
+
+/**
+ * Coherencia de las tarjetas que verá el jurado (auditoría final): en las protagonistas y en P0005, con las dos marcas
+ * y con la dotación más baja del deslizador:
+ *  · «Enough for X of N hectares» nunca dice más hectáreas que la parcela (ni «0» si alcanza algo), y es el texto de
+ *    hectareasQueAlcanzanTexto (web/js/resumen.js) con la evaluación de web/reglas.js;
+ *  · la ficha no dice «recommend…» ni «best»;
+ *  · el renglón Soil separa sus dos veredictos: «Soil cover: …» (semáforo de suelo desnudo) y «Soil fit: …» (pH, textura);
+ *  · un filtro no habla de un cultivo sin ventana que la opción no siembra («No local window was found for sorghum»).
+ */
+async function pruebaTarjetasCoherentes(page, prefijo, sufijo) {
+  const ids = [...new Set([...protagonistas, "P0005"])].filter((id) => porId.has(id) && opcionesDe(id).length && !porId.get(id).abstencion);
+  const paso = Number(cubo.dotaciones.deslizador.paso);
+  const dotaciones = [...new Set([D1, D2, Number.isFinite(paso) && paso > 0 ? paso : D1])];
+  const numero = (t) => Number(String(t).replace(/,/g, "").replace("−", "-"));
+  for (const id of ids) {
+    await abrirDesdeLista(page, id);
+    const area = porId.get(id).area_ha;
+    const malos = [];
+    for (const D of dotaciones) {
+      await fijarDeslizador(page, D);
+      for (const o of opcionesDe(id)) {
+        const t = (await tarjeta(page, o.id).locator(".alcanza").innerText().catch(() => "")).replace(/\s+/g, " ");
+        const ev = evaluarOpcion(o, area, D, 0);
+        const esperado = `Enough for ${hectareasQueAlcanzanTexto(ev.hectareas.p50, area, nfFicha).texto}`;
+        const m = t.match(/Enough for ([\d.,]+) of ([\d.,]+) hectare/);
+        if (!t.startsWith(esperado) || (m && numero(m[1]) > numero(m[2])) || (m && numero(m[1]) === 0 && ev.hectareas.p50 > 0)) malos.push(`${o.id}@${D}: «${t}» (esperado «${esperado}»)`);
+      }
+    }
+    check(`${prefijo}${id}: «Enough for X of N» nunca pasa de la parcela ni dice 0 si alcanza algo (${dotaciones.join(", ")})`, malos.length === 0, malos.slice(0, 3).join(" | "));
+    const visible = (await texto(page, "#ficha")).replace(/\s+/g, " ");
+    const vetada = visible.match(/\b(recommend\w*|best)\b/i);
+    check(`${prefijo}${id}: la ficha no dice «recommend…» ni «best»`, !vetada, vetada ? visible.slice(Math.max(0, vetada.index - 80), vetada.index + 60) : "");
+    const suelos = await page.locator("#ficha .tarjeta").evaluateAll((ts) =>
+      ts.map((t) => ({
+        id: t.dataset.opcion,
+        h5: t.querySelector(".renglon-suelo h5")?.textContent.replace(/\s+/g, " ").trim() ?? "",
+        apt: t.querySelector(".renglon-suelo .suelo-aptitud-fila")?.textContent.replace(/\s+/g, " ").trim() ?? null,
+      })),
+    );
+    check(`${prefijo}${id}: el renglón Soil rotula sus dos veredictos («Soil cover: …» y «Soil fit: …»)`,
+      suelos.every((x) => /^Soil cover: (favorable|watch|unfavorable|no data)$/.test(x.h5) && !/\bfit\b/i.test(x.h5) && (x.apt == null || x.apt.startsWith("Soil fit"))),
+      JSON.stringify(suelos.slice(0, 2)));
+    const filtrosAjenos = [];
+    for (const o of opcionesDe(id)) {
+      const li = tarjeta(page, o.id).locator('li[data-filtro="fecha_siembra"]');
+      if (!(await li.count())) continue;
+      const t = await li.first().innerText();
+      if (/sorghum/i.test(t) && !(o.secuencia ?? []).includes("sorgo")) filtrosAjenos.push(`${o.id}: ${t}`);
+    }
+    check(`${prefijo}${id}: el filtro de fecha de siembra no habla de sorgo en opciones sin sorgo`, filtrosAjenos.length === 0, filtrosAjenos[0] ?? "");
+    if (id === "P0005" && !prefijo) {
+      await tarjeta(page, opcionesDe(id)[0].id).scrollIntoViewIfNeeded();
+      await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_P0005_coherente.png`) });
+    }
+    await cerrarFicha(page);
+  }
+  await fijarDeslizador(page, D1);
 }
 
 /** Enlace directo: #P0757 abre su ficha (sin pantalla de inicio), el hash sigue a la ficha, un id desconocido avisa. */
@@ -1594,7 +1700,12 @@ async function pruebaEnlaceDirecto(navegador, base, prefijo, opciones) {
   const ctxX = await abrir(navegador, base, opciones, `${prefijo}enlace desconocido`, {}, { hash: "#ZZ9999" });
   const aviso = (await ctxX.page.locator("#aviso-enlace").isVisible()) ? await texto(ctxX.page, "#aviso-enlace") : "";
   check(`${prefijo}#ZZ9999 (id desconocido): aviso visible, sin ficha y la página sigue`, aviso.includes("ZZ9999") && aviso.includes("no field with that ID") && (await ctxX.page.locator("#ficha").isHidden()) && (await ctxX.page.locator(".boton-parcela").count()) === props.length, aviso);
-  if (!prefijo) await ctxX.page.screenshot({ path: path.join(CAPTURAS, "escritorio_enlace_desconocido.png") });
+  // El aviso queda dentro de la pantalla (en el teléfono vive al pie del mapa y la página lo trae a la vista).
+  await ctxX.page.waitForTimeout(200);
+  const caja = await ctxX.page.locator("#aviso-enlace").boundingBox();
+  const alto = await ctxX.page.evaluate(() => window.innerHeight);
+  check(`${prefijo}#ZZ9999: el aviso queda dentro de la pantalla sin desplazarse`, Boolean(caja) && caja.y >= 0 && caja.y + caja.height <= alto + 1, JSON.stringify({ caja, alto }));
+  await ctxX.page.screenshot({ path: path.join(CAPTURAS, `${prefijo ? "telefono" : "escritorio"}_enlace_desconocido.png`) });
   check(`${prefijo}enlace desconocido: sin errores de consola`, ctxX.errores.length === 0, ctxX.errores.join(" | "));
   await ctxX.ctx.close();
 }
@@ -1638,7 +1749,7 @@ async function pruebaNDVIHuecos(navegador, base) {
 // ---------------------------------------------------------------- paneles y registro (etapa 3 de la integración)
 const zonaContexto = zonaInicial ?? (zonasCubo.length === 1 ? zonasCubo[0] : null);
 // Frases que las advertencias de la sesión de datos deben poner a la vista (data/recursos_reto.json → tarjetas).
-const ADVERTENCIAS = { evapotranspiracion: "comparison, not validation", segundo_clima: "not the FAO-56 reference evapotranspiration", agua_almacenada: "basin series", temperatura_minima: "not from NASA" };
+const ADVERTENCIAS = { evapotranspiracion: "comparison, not validation", segundo_clima: "not the FAO-56 reference evapotranspiration", agua_almacenada: "basin series", temperatura_minima: "not from NASA", humedad_suelo: "assimilated product" };
 
 /** Abre «Regional context» (plegable) y espera a que se dibuje. */
 async function abrirContexto(page) {
@@ -1675,6 +1786,13 @@ async function pruebaContextoRegional(page, prefijo, telefono) {
   check(`${prefijo}Regional context ligado a la zona (${nombre}) y al año de la línea de tiempo (${anio})`, donde.includes(nombre) && donde.includes(`agricultural year ${anio}`), donde);
   const nota = await raiz.locator("p.contexto-nota").last().innerText();
   check(`${prefijo}Regional context: nota de que las series regionales no describen una parcela`, nota === NOTA_REGIONAL && /not a single field/.test(nota) && (await texto(page, "#bloque-contexto > summary")).includes("not a single field"));
+  // Nombre accesible del plegable: solo «Regional context» (la ayuda va como descripción; el «+»/«−» es decorativo).
+  const plegable = await page.locator("#bloque-contexto > summary").evaluate((s) => {
+    const ayuda = document.getElementById(s.getAttribute("aria-describedby") ?? "");
+    const signo = getComputedStyle(s, "::after").content;
+    return { ayuda: Boolean(ayuda && s.contains(ayuda) && ayuda.getAttribute("aria-hidden") === "true"), signo };
+  });
+  check(`${prefijo}Regional context: la ayuda del plegable es su descripción y el signo no entra al nombre`, plegable.ayuda && /\/\s*""/.test(plegable.signo), JSON.stringify(plegable));
   // Una tarjeta por grupo de series de contexto.json, con gráfica si la serie llegó.
   const tarjetas = await raiz.locator(".contexto-tarjeta[data-tarjeta]").evaluateAll((xs) => xs.map((x) => ({ id: x.dataset.tarjeta, figuras: x.querySelectorAll(".contexto-figura svg").length })));
   const ids = (contexto.tarjetas ?? []).map((t) => t.id);
@@ -1772,6 +1890,10 @@ async function pruebaRecursosReto(page, prefijo, telefono) {
   for (const [k, texto] of [["in_use", "In use"], ["requested", "Requested, not delivered yet"], ["not_applicable", "Not applicable"]]) {
     if (cuenta[k]) check(`${prefijo}Challenge data sources: estado «${texto}» con símbolo y texto`, estados.filter((x) => x.includes(texto)).length === cuenta[k]);
   }
+  // La nota no afirma que ninguna fuente cambia el cálculo: NASA POWER (y HLS) sí entran en el agua de la parcela.
+  const nota = (await hueco.locator(".contexto-recursos-nota").innerText().catch(() => "")).replace(/\s+/g, " ");
+  check(`${prefijo}Challenge data sources: la nota dice qué fuentes entran al cálculo del agua (NASA POWER, HLS) y no niega todas`,
+    nota.includes("NASA POWER") && nota.includes("HLS") && !/None of these sources/i.test(nota), nota);
   const era5 = contexto.recursos.find((r) => r.id === "era5_land");
   if (era5) check(`${prefijo}Challenge data sources: ERA5-Land rotulado con su organismo (ECMWF/Copernicus, no NASA)`, filas.find((f) => f.id === "era5_land")?.texto.includes("ECMWF") && !/^NASA/.test(era5.organismo));
   await hueco.locator(".contexto-titulo").scrollIntoViewIfNeeded();
@@ -1829,6 +1951,9 @@ async function pruebaAuditoriaMotor(page, prefijo, telefono) {
     await page.locator(`.boton-marca[data-marca="${m.id}"]`).click();
     const info = await page.locator("#info-marca-fuente").textContent();
     check(`${prefijo}marca ${m.id}: nota en inglés «${m.nota_en}» (no la de español)`, info.includes(`Note: ${m.nota_en}`) && (m.nota === m.nota_en || !info.includes(m.nota)), info.slice(-120));
+    if (/por confirmar/.test(m.etiqueta ?? "")) {
+      check(`${prefijo}marca ${m.id}: etiqueta «${m.etiqueta}» leída en inglés («to be confirmed»)`, info.includes("to be confirmed") && !info.includes("por confirmar"), info.slice(0, 200));
+    }
   }
   // Ventana de suelo desnudo (cubo.meta.ventana_desnudo) en la capa del mapa.
   const v = cubo.meta?.ventana_desnudo;
@@ -2113,7 +2238,7 @@ async function pruebasEscritorio(page, peticiones) {
     const area = new Intl.NumberFormat("en-US", { maximumFractionDigits: 3 }).format(porId.get(id).area_ha);
     const alcanza = await t.locator(".alcanza").innerText();
     check(`necesidad cero (${id}/${o.id}): «No irrigation needed», semáforo verde`, lamina.includes("No irrigation needed") && sem === "verde", `${lamina} · ${sem}`);
-    check(`necesidad cero (${id}/${o.id}): alcanza para toda la parcela`, alcanza.includes(`of ${area} hectares`) && alcanza.startsWith(`Enough for ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(porId.get(id).area_ha)}`), alcanza);
+    check(`necesidad cero (${id}/${o.id}): alcanza para toda la parcela («Enough for all ${area} hectares»)`, alcanza.startsWith(`Enough for all ${area} hectare`), alcanza);
     await cerrarFicha(page);
   } else {
     omitir("necesidad cero «No irrigation needed»", "ninguna opción con lámina P50 = 0 en estos datos");
@@ -2599,6 +2724,12 @@ async function pruebasDosZonas(page, v) {
     textoLoc.includes("Team reference localities (not fields)") && c.localidades.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(c.localidades[0].fuente),
   );
   check("dos zonas: una etiqueta en el mapa por localidad", (await page.locator(".etiqueta-localidad").count()) === c.localidades.length);
+  // Los marcadores de las protagonistas quedan por encima de las etiquetas de localidad (no se tapa su símbolo).
+  const capas = await page.evaluate(() => ({
+    marcador: Number(getComputedStyle(document.querySelector(".maplibregl-marker.marcador") ?? document.body).zIndex),
+    localidad: Number(getComputedStyle(document.querySelector(".maplibregl-marker.etiqueta-localidad") ?? document.body).zIndex),
+  }));
+  check("dos zonas: los marcadores de las protagonistas van encima de las etiquetas de localidad", capas.marcador > capas.localidad, JSON.stringify(capas));
   const locA = c.localidades.find((l) => l !== locB);
   if (locA) {
     await page.locator(".boton-localidad", { hasText: locA.nombre }).click();
@@ -2722,7 +2853,9 @@ async function main() {
     const motivo3D = (await fal.page.locator("#gemelo-motivo").isVisible()) ? await texto(fal.page, "#gemelo-motivo") : "";
     check("gemelo.json en HTTP 500: «3D twin view: not available» con su motivo («could not be read»)",
       (await boton3D.count()) === 1 && (await boton3D.innerText()).trim() === "3D twin view: not available" && (await boton3D.getAttribute("aria-disabled")) === "true" && motivo3D.includes("could not be read"), motivo3D);
-    check("gemelo.json en HTTP 500: la línea de tiempo dice «Timeline: not available»", (await texto(fal.page, "#bloque-tiempo")).includes("Timeline: not available"));
+    const tiempoFal = await texto(fal.page, "#bloque-tiempo");
+    check("gemelo.json en HTTP 500: la línea de tiempo dice «Timeline: not available» con su motivo («could not be read»)",
+      tiempoFal.includes("Timeline: not available") && tiempoFal.includes("The twin data file (gemelo.json) could not be read."), tiempoFal.replace(/\n/g, " · "));
     if (zonasCubo.length > 1) {
       check("gemelo.json en HTTP 500: la página abre igual en una zona (la primera de cubo.zonas)", (await fal.page.locator("#zona-sel").inputValue()) === zonasCubo[0]);
     }

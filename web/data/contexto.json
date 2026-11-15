@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/contexto_web.py con las entregas validadas de data/processed; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
- "generado": "2026-11-15T03:34:57+00:00",
+ "generado": "2026-11-15T04:38:28+00:00",
  "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
  "zonas": {
   "delicias_saucillo": {
@@ -25459,7 +25459,7 @@
    "id": "smap",
    "nombre": "SMAP",
    "organismo": "NASA",
-   "papel": "Observed state: soil moisture of the region, month by month",
+   "papel": "Soil moisture of the region, month by month: SMAP radiometer observations assimilated into a land surface model (the root zone is modeled)",
    "aplica": true,
    "estado": "in_use",
    "entregas_presentes": [
@@ -25689,7 +25689,14 @@
     "smap",
     "gldas"
    ],
-   "nota": "A satellite radiometer (SMAP) and a land surface model (GLDAS). Regional grid cells, not field probes.",
+   "nota": "SMAP radiometer observations assimilated into a land surface model (its root zone is modeled), and GLDAS, a land surface model. Regional grid cells, not field probes.",
+   "advertencias": [
+    {
+     "id": "smap_asimilado",
+     "fuente_id": "smap",
+     "texto": "The SMAP series is the assimilated product: the satellite sees the surface layer, and the root-zone value comes from the model, not from a measurement."
+    }
+   ],
    "paneles": [
     {
      "titulo": "SMAP",

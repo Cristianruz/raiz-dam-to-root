@@ -733,6 +733,54 @@ def test_textos_de_la_ficha_en_el_cubo_real_sin_lenguaje_prohibido():
     assert fuera_de_regla(notas_del_motor) == []
 
 
+def test_oracion_de_un_cultivo_sin_ventana_solo_va_en_las_opciones_que_lo_siembran():
+    """fecha_siembra (B3) trae {"sorgo": null}: «No local window was found for sorghum.» solo vale para las
+    opciones que siembran sorgo. Las demás (alfalfa, maíz, cereal) llevan el texto sin esa oración."""
+    nombres = {"alfalfa": "Alfalfa", "sorgo": "Forage sorghum", "maiz_forrajero": "Forage maize"}
+    assert b4_cubo.palabras_distintivas("sorgo", nombres) == {"sorghum"}   # «forage» también es del maíz
+    filtro = {"texto_en": "TEST DATA: sow inside the window. No local window was found for sorghum.",
+              "regla": {"ventana_por_cultivo": "texto", "sorgo": None}}
+    assert b4_cubo.motivo_para_secuencia(filtro, ["alfalfa"], nombres) == "TEST DATA: sow inside the window."
+    assert b4_cubo.motivo_para_secuencia(filtro, ["maiz_forrajero", "sorgo"], nombres) == filtro["texto_en"]
+    # Sin nombres, o si la oración es todo el texto, el motivo va completo (nunca vacío).
+    assert b4_cubo.motivo_para_secuencia(filtro, ["alfalfa"], {}) == filtro["texto_en"]
+    solo = {"texto_en": "No local window was found for sorghum.", "regla": {"sorgo": None}}
+    assert b4_cubo.motivo_para_secuencia(solo, ["alfalfa"], nombres) == solo["texto_en"]
+    # Una regla sin cultivos sin valor no cambia nada.
+    assert b4_cubo.motivo_para_secuencia({"texto_en": "x. y.", "regla": {"antes_de": "11-30"}}, [], nombres) == "x. y."
+
+
+def test_ningun_motivo_del_cubo_real_habla_de_un_cultivo_sin_ventana_que_la_opcion_no_siembra():
+    """Cubo publicado: en cada filtro cuya regla nombra un cultivo sin valor (fecha_siembra: sorgo), el
+    motivo solo menciona ese cultivo si la secuencia de la opción lo trae."""
+    if not (WEB / "cubo.json").exists():
+        pytest.skip("web/data/cubo.json aún no existe")
+    cubo = leer(WEB, "cubo.json")
+    catalogo = cubo.get("filtros_catalogo") or {}
+    opciones = cubo.get("opciones_catalogo") or {}
+    # Como el motor: el nombre de cada cultivo de las secuencias es el de su rotación de un solo cultivo.
+    cultivos = {x.get("cultivo") for d in opciones.values() for x in d.get("secuencia") or []}
+    nombres = {c: opciones[c].get("nombre_en") for c in cultivos if c in opciones and opciones[c].get("nombre_en")}
+    revisados = 0
+    for pc in cubo["parcelas"].values():
+        for o in pc.get("opciones") or []:
+            for fl in o.get("filtros") or []:
+                regla = (catalogo.get(fl.get("id")) or {}).get("regla")
+                if not isinstance(regla, dict):
+                    continue
+                for c, v in regla.items():
+                    if v is not None or c in (o.get("secuencia") or []):
+                        continue
+                    for w in b4_cubo.palabras_distintivas(c, nombres) if c in nombres else set():
+                        revisados += 1
+                        assert not re.search(rf"\b{w}\b", fl["motivo"], re.I), (o["id"], o["secuencia"], fl["motivo"])
+    if not catalogo:
+        pytest.skip("el cubo publicado no trae filtros oficiales (B3)")
+    sin_valor = [c for d in catalogo.values() if isinstance(d.get("regla"), dict) for c, v in d["regla"].items()
+                 if v is None and c in nombres]
+    assert revisados > 0 or not sin_valor, "la prueba no revisó ningún motivo aunque hay cultivos sin ventana"
+
+
 def test_muchos_textos_con_la_misma_palabra_se_cuentan(tmp_path):
     """El rótulo anterior de la fixture («TEST ONLY» en cada por_que_en): un motivo con el número de casos."""
     def cambio(o):

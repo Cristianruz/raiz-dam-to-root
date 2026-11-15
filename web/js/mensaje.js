@@ -199,6 +199,22 @@ const fmtDatoUi = (v) => fmtNum(v, 3, LOCALE_UI);
 function fmtRango(a, b, f) {
   return num(a) === num(b) ? f(a) : `${f(a)}–${f(b)}`;
 }
+/**
+ * Hectáreas que alcanzan, en español, con la misma regla que la tarjeta (web/js/resumen.js,
+ * hectareasQueAlcanzanTexto): nunca se leen más que la superficie («8 de 7,95») ni «0» si alcanza algo.
+ * Con x ≥ superficie va la superficie; si x redondeada a un decimal llega a ella, x con su precisión (o «casi»);
+ * si redondeada se lee cero, «menos de» el paso del formato.
+ */
+function haQueAlcanzanEs(x, area) {
+  const v = num(x);
+  const a = num(area);
+  if (v == null || a == null) return fmtEs(x);
+  const r1 = Math.round(v * 10) / 10;
+  if (v >= a) return fmtDatoEs(a);
+  if (v > 0 && r1 === 0) return `menos de ${fmtEs(1 / 10)}`;
+  if (r1 >= a) return Math.round(v * 1000) / 1000 < a ? fmtDatoEs(v) : `casi ${fmtDatoEs(a)}`;
+  return fmtEs(v);
+}
 function fmtPctEs(fraccion) {
   const n = num(fraccion);
   return n == null ? "—" : formateador(LOCALE_ES, { style: "percent", maximumFractionDigits: 0 }).format(n);
@@ -375,13 +391,15 @@ function armarOpcion(o, i, p, ctx, t) {
     agua = rellenar(t.agua_sin_riego, { estado, plazo });
   } else {
     const h = ev.hectareas;
-    const rango = fmtEs(h.bajo) === fmtEs(h.alto) ? "" : ` (entre ${fmtEs(h.bajo)} y ${fmtEs(h.alto)})`;
+    const bajo = haQueAlcanzanEs(h.bajo, p.area_ha);
+    const alto = haQueAlcanzanEs(h.alto, p.area_ha);
+    const rango = bajo === alto ? "" : ` (entre ${bajo} y ${alto})`;
     agua = rellenar(t.agua, {
       estado,
       lamina: fmtDatoEs(ev.lamina.p50),
       plazo,
       d: fmtEs(D),
-      ha: fmtEs(h.p50),
+      ha: haQueAlcanzanEs(h.p50, p.area_ha),
       area,
       rango_ha: rango,
     });

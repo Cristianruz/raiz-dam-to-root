@@ -20,6 +20,9 @@
 //         formato       opcional: función (valor, clave) -> texto, con clave «d» (dotación), «ha»
 //                       (hectáreas que alcanzan) o «area» (superficie de la parcela). Por omisión, un
 //                       decimal para «d» y «ha» y hasta tres para «area», como la ficha.
+//         formatoDecimales  opcional: función (valor, decimales) -> texto (en app.js, fmt), para el caso
+//                       parcial: X se escribe con hectareasQueAlcanzanTexto (nunca más que N, nunca «0»
+//                       si alcanza algo). Sin ella se usa «formato» con «ha» y «area».
 //       Variantes (casoResumen dice cuál toca):
 //         parcial      «With {D} thousand m³/ha, the current rotation ({cultivo}) has enough water for
 //                      {X} of {N} hectares.»
@@ -31,6 +34,9 @@
 //         sin_calculo  parcela clasificada sin opción ACTUAL, o sin dotación: lo dice, sin números.
 //       {cultivo} sale de opcionActual.nombre (sin el prefijo «Current rotation:»); si falta, de su
 //       secuencia o de parcela.cultivo_actual.
+//   hectareasQueAlcanzanTexto(x, area, formato(v, decimales)) -> { caso, cifra, texto }
+//       «all N hectares», «X of N hectares» (X nunca se lee mayor que N: con la precisión de N o «almost
+//       all»), «less than 0.1 of N hectares» (el paso sale de DECIMALES_HA). La usan la tarjeta y la frase.
 //   casoResumen({ parcela, opcionActual, evaluacion, D }) -> "parcial" | "completa" | "sin_riego" |
 //       "abstenida" | "sin_calculo"    (para un data-atributo o para las pruebas)
 //
@@ -226,6 +232,45 @@ function nombreRotacion(opcion, parcela) {
   return secuencia.filter(Boolean).map((s) => String(s).replace(/_/g, " ")).join(" → ") || "crop not named";
 }
 
+// Precisión con que se escriben las hectáreas: un decimal las que calcula la web (como fmt de app.js) y hasta
+// tres la superficie leída del archivo (como fmtDato). Son decimales de pantalla, no datos del proyecto.
+export const DECIMALES_HA = 1;
+export const DECIMALES_AREA = 3;
+const redondear = (v, d) => Math.round(v * 10 ** d) / 10 ** d;
+const formatoDecimalesPorOmision = (v, d) => (esNumero(v) ? numero(v, { maximumFractionDigits: d }) : "—");
+
+/**
+ * Hectáreas que alcanzan, escritas sin pasar de la superficie de la parcela ni redondear a cero lo que no es
+ * cero (la tarjeta, la lámina local y la frase resumen usan la misma regla):
+ *   «todas»     x ≥ N                              → «all N hectares»
+ *   «casi»      x < N, pero redondeada se lee ≥ N    → con la precisión de N («1.169 of 1.17») o, si aun así se
+ *                                                   lee igual, «almost all N hectares»
+ *   «menos_de»  0 < x y redondeada se lee 0          → «less than <el paso del formato> of N hectares»
+ *   «valor»     el resto                            → «X of N hectares»
+ * formato(v, decimales) -> texto (en app.js, fmt). Devuelve { caso, cifra, texto }: cifra es lo que va en
+ * lugar de X en un rango («all», «almost all», «less than …» o X); texto, la frase completa sin «Enough for».
+ */
+export function hectareasQueAlcanzanTexto(x, area, formato = formatoDecimalesPorOmision) {
+  const f = typeof formato === "function" ? formato : formatoDecimalesPorOmision;
+  const nArea = f(area, DECIMALES_AREA);
+  const unidad = esNumero(area) && redondear(area, DECIMALES_AREA) === 1 ? "hectare" : "hectares";
+  if (!esNumero(x) || !esNumero(area)) return { caso: "valor", cifra: f(x, DECIMALES_HA), texto: `${f(x, DECIMALES_HA)} of ${nArea} ${unidad}` };
+  if (x >= area) return { caso: "todas", cifra: "all", texto: `all ${nArea} ${unidad}` };
+  if (x > 0 && redondear(x, DECIMALES_HA) === 0) {
+    const menos = `less than ${f(10 ** -DECIMALES_HA, DECIMALES_HA)}`;
+    return { caso: "menos_de", cifra: menos, texto: `${menos} of ${nArea} ${unidad}` };
+  }
+  if (redondear(x, DECIMALES_HA) >= area) {
+    if (redondear(x, DECIMALES_AREA) < area) {
+      const fino = f(x, DECIMALES_AREA);
+      return { caso: "casi", cifra: fino, texto: `${fino} of ${nArea} ${unidad}` };
+    }
+    return { caso: "casi", cifra: "almost all", texto: `almost all ${nArea} ${unidad}` };
+  }
+  const cifra = f(x, DECIMALES_HA);
+  return { caso: "valor", cifra, texto: `${cifra} of ${nArea} ${unidad}` };
+}
+
 export function casoResumen({ parcela, opcionActual, evaluacion, D } = {}) {
   if (parcela?.abstencion || evaluacion?.semaforo === "gris") return "abstenida";
   const lamina = evaluacion?.lamina;
@@ -235,7 +280,7 @@ export function casoResumen({ parcela, opcionActual, evaluacion, D } = {}) {
   return evaluacion.cobertura >= 1 ? "completa" : "parcial";
 }
 
-export function fraseResumen({ parcela, opcionActual, evaluacion, D, formato } = {}) {
+export function fraseResumen({ parcela, opcionActual, evaluacion, D, formato, formatoDecimales } = {}) {
   const f = typeof formato === "function" ? formato : formatoPorOmision;
   const caso = casoResumen({ parcela, opcionActual, evaluacion, D });
   if (caso === "abstenida") {
@@ -255,7 +300,11 @@ export function fraseResumen({ parcela, opcionActual, evaluacion, D, formato } =
       ? `${inicio} all ${area} hectares at the median estimate of its need, not at the high estimate.`
       : `${inicio} all ${area} hectares.`;
   }
-  return `${inicio} ${f(evaluacion.hectareas.p50, "ha")} of ${area} hectares.`;
+  // Parcial: la misma regla que la tarjeta (nunca «1.2 of 1.17» ni «0 of 1.64» con agua que sí alcanza algo).
+  const fd = typeof formatoDecimales === "function"
+    ? formatoDecimales
+    : (v, d) => (d === DECIMALES_HA ? f(v, "ha") : d === DECIMALES_AREA ? f(v, "area") : formatoDecimalesPorOmision(v, d));
+  return `${inicio} ${hectareasQueAlcanzanTexto(evaluacion.hectareas.p50, parcela.area_ha, fd).texto}.`;
 }
 
 // ---------------------------------------------------------------------------

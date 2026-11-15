@@ -807,6 +807,8 @@ ADVERTENCIAS_PEDIDAS = {
     "segundo_clima": "not the FAO-56 reference evapotranspiration",
     "agua_almacenada": "basin series",
     "temperatura_minima": "not from NASA",
+    # SMAP es el producto asimilado (L4): la zona de raíces es del modelo, no del radiómetro (auditoría final).
+    "humedad_suelo": "assimilated product",
 }
 
 

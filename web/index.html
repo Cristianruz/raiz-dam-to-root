@@ -124,14 +124,15 @@
 
       <section class="bloque" aria-labelledby="t-colorear">
         <h2 id="t-colorear">Color fields by</h2>
-        <fieldset>
+        <fieldset aria-describedby="nota-colorear">
           <legend>Water</legend>
           <label class="opcion-radio"><input type="radio" name="colorear" value="semaforo" checked> Enough water?</label>
           <label class="opcion-radio"><input type="radio" name="colorear" value="plazo"> Water term</label>
         </fieldset>
-        <fieldset id="capas" hidden>
+        <fieldset id="capas" hidden aria-describedby="nota-colorear">
           <legend>Layers</legend>
         </fieldset>
+        <p class="nota-colorear" id="nota-colorear" hidden></p>
         <div class="leyenda" id="leyenda" aria-live="polite"></div>
         <!-- Capa «Terrain & runoff» y botón «Simulate a storm»: los dibuja web/js/relieve.js con
              relieve.json y relieve_rutas.geojson; sin esos archivos dice «Terrain layer: not run». -->
@@ -168,9 +169,11 @@
       <!-- «Regional context» (web/js/contexto.js, montarContextoRegional): series de la zona elegida, con el año de la línea
            de tiempo resaltado. Plegable: se dibuja la primera vez que se abre. -->
       <details class="bloque bloque-contexto" id="bloque-contexto">
-        <summary class="bloque-plegable">
+        <!-- El nombre accesible del plegable es solo su título; la ayuda (a la vista aunque esté cerrado) va como
+             descripción (aria-describedby) y no entra al nombre. El signo «+» / «−» es decorativo (style.css). -->
+        <summary class="bloque-plegable" aria-describedby="ayuda-contexto">
           <h2 id="t-contexto">Regional context</h2>
-          <span class="bloque-plegable-ayuda">Climate, soil moisture, basin water and frost of the pilot area, year by year. They describe the area or the basin, not a single field.</span>
+          <span class="bloque-plegable-ayuda" id="ayuda-contexto" aria-hidden="true">Climate, soil moisture, basin water and frost of the pilot area, year by year. They describe the area or the basin, not a single field.</span>
         </summary>
         <div id="contexto-regional"></div>
       </details>

@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const RAIZ = new URL("..", import.meta.url).href.replace(/\/$/, "");
-const { fraseResumen, casoResumen, modeloNDVI, idDeHash, hashDe } = await import(`${RAIZ}/web/js/resumen.js`);
+const { fraseResumen, casoResumen, modeloNDVI, idDeHash, hashDe, hectareasQueAlcanzanTexto } = await import(`${RAIZ}/web/js/resumen.js`);
 const { modeloEstado, NOTA_GEMELO } = await import(`${RAIZ}/web/js/estado_gemelo.js`);
 const { evaluarOpcion } = await import(`${RAIZ}/web/reglas.js`);
 
@@ -61,6 +61,41 @@ test("fraseResumen: nombre de la rotación y formato de la app", () => {
   assert.equal(fraseResumen({ ...con(2.5), formato: (v, k) => `<${k}:${v}>` }),
     "With <d:2.5> thousand m³/ha, the current rotation (Forage maize) has enough water for <ha:5> of <area:10> hectares.");
   assert.match(fraseResumen(con(1, 0, { ...parcela, area_ha: 7.953 })), /for 1\.6 of 7\.953 hectares\.$/, "un decimal para lo calculado; el área con su precisión");
+});
+
+test("hectareasQueAlcanzanTexto: nunca más que la parcela, nunca «0» si alcanza algo (auditoría final)", () => {
+  const f = (v, d) => new Intl.NumberFormat("en-US", { maximumFractionDigits: d }).format(v);
+  // Datos de prueba con la forma de los casos reales de la auditoría (P0005, P0757, P0034).
+  assert.deepEqual(hectareasQueAlcanzanTexto(1.17, 1.17, f), { caso: "todas", cifra: "all", texto: "all 1.17 hectares" });
+  assert.deepEqual(hectareasQueAlcanzanTexto(9, 7.95, f), { caso: "todas", cifra: "all", texto: "all 7.95 hectares" });
+  assert.equal(hectareasQueAlcanzanTexto(1.16, 1.17, f).texto, "1.16 of 1.17 hectares", "redondeada a un decimal se leería 1.2");
+  assert.equal(hectareasQueAlcanzanTexto(1.1699, 1.17, f).texto, "almost all 1.17 hectares");
+  assert.equal(hectareasQueAlcanzanTexto(0.04, 1.64, f).texto, "less than 0.1 of 1.64 hectares");
+  assert.equal(hectareasQueAlcanzanTexto(0, 1.64, f).texto, "0 of 1.64 hectares", "sin agua sí es cero");
+  assert.equal(hectareasQueAlcanzanTexto(0.5, 1, f).texto, "0.5 of 1 hectare");
+  assert.equal(hectareasQueAlcanzanTexto(7.9, 7.95, f).texto, "7.9 of 7.95 hectares");
+  // Barrido: lo que se lee nunca pasa de la superficie y nunca es «0» con agua.
+  for (const area of [1.01, 1.17, 1.64, 7.95, 20.66]) {
+    for (let i = 1; i < 400; i++) {
+      const x = (area * i) / 400;
+      const t = hectareasQueAlcanzanTexto(x, area, f);
+      const m = t.texto.match(/^([\d.,]+) of /);
+      if (m) {
+        assert.ok(Number(m[1].replace(/,/g, "")) <= area, `${x} de ${area}: ${t.texto}`);
+        assert.ok(Number(m[1].replace(/,/g, "")) > 0, `${x} de ${area}: ${t.texto}`);
+      }
+    }
+  }
+});
+
+test("fraseResumen: con poca agua no dice «0 of N» ni más hectáreas que la parcela", () => {
+  const chica = { ...parcela, area_ha: 1.64 };
+  const pecan = { ...opcion, nombre: "Current rotation: Pecan orchard", agua: { lamina_bruta: { 0: { p10: 18, p50: 20, p90: 22 } } } };
+  assert.match(fraseResumen(con(0.5, 0, chica, pecan)), /has enough water for less than 0\.1 of 1\.64 hectares\.$/);
+  const casi = { ...parcela, area_ha: 1.17 };
+  // 1.16 ha alcanzan (cobertura < 1): «1.16 of 1.17», no «1.2 of 1.17».
+  const o = { ...opcion, agua: { lamina_bruta: { 0: { p10: 4, p50: (1.17 * 5) / 1.16, p90: 6.5 } } } };
+  assert.match(fraseResumen(con(5, 0, casi, o)), /for 1\.16 of 1\.17 hectares\.$/);
 });
 
 test("idDeHash y hashDe", () => {

@@ -144,7 +144,9 @@
   #ficha .renglon-dinero > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 1.5mm; }
   #ficha .renglon h5 { font-size: 7.5pt; gap: 0.5mm 1.5mm; }
   #ficha .renglon h5 .sem-texto { font-size: 7pt; }
-  #ficha .renglon p { font-size: 6.8pt; margin-top: 0.2mm; line-height: 1.2; }
+  /* Interlineado 1.15: el renglón Soil rotula sus dos veredictos («Soil cover: …» y la aptitud) y ocupa una línea más;
+     así la hoja de la protagonista sigue cabiendo en una carta con holgura. */
+  #ficha .renglon p { font-size: 6.8pt; margin-top: 0.2mm; line-height: 1.15; }
   #ficha .sem-circulo { width: 3.6mm; height: 3.6mm; font-size: 6pt; border-width: 0.3mm; }
   #ficha .lamina strong { font-size: 8.5pt; }
   #ficha .alcanza { padding: 0.5mm 1mm; margin-top: 0.6mm !important; }

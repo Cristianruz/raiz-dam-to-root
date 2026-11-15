@@ -56,7 +56,7 @@
 //     not forecast the dam.»
 //   Ganchos para las pruebas con navegador: la raíz lleva data-zona (zona en vista o "") y data-fuentes
 //   ("si" | "no"); cada grupo, data-grupo ("observado" | "modelado" | "escenario"); cada renglón, data-fila
-//   (limites, verdor, terreno, clima, precipitacion · agua, rutas · dotacion, lluvia, tormenta); cada zona,
+//   (verdor, terreno, clima, precipitacion · limites, agua, rutas · dotacion, lluvia, tormenta); cada zona,
 //   data-zona y aria-current="true" si está en vista; el valor de un control del escenario, data-valor.
 //
 // DECISIONES DE ESTE ARCHIVO (para quien lo integre o lo revise):
@@ -105,7 +105,6 @@ const GRUPOS = [
     simbolo: "◉",
     nota: "Read from satellite and climate data.",
     filas: [
-      { clave: "limites", etiqueta: "Field boundaries", archivos: /^parcelas_base/ },
       { clave: "verdor", etiqueta: "Greenness history", archivos: /^(hls_mensual|memoria_|suelo_desnudo)/ },
       { clave: "terreno", etiqueta: "Terrain", archivos: /^nasadem/ },
       { clave: "clima", etiqueta: "Climate", archivos: /^(eto_diaria|heladas)/ },
@@ -118,6 +117,9 @@ const GRUPOS = [
     simbolo: "ƒ",
     nota: "Computed from the observed data with a stated method.",
     filas: [
+      // Los límites son predicciones de una red neuronal sobre imágenes de satélite (fuera de su dominio de
+      // entrenamiento), no un levantamiento: van con lo modelado, no con lo observado.
+      { clave: "limites", etiqueta: "Field boundaries", metodo: "Fields of The World: neural-network predictions from satellite images, not surveyed", archivos: /^parcelas_base/ },
       { clave: "agua", etiqueta: "Water need", metodo: "FAO Penman–Monteith with NASA POWER", archivos: /^(demanda_cultivos|rotaciones)/ },
       { clave: "rutas", etiqueta: "Runoff paths", metodo: "NASADEM", archivos: /^relieve_/ },
     ],

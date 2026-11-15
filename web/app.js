@@ -69,7 +69,7 @@ import { crearGemelo3D } from "./js/gemelo3d.js";
 import { crearLineaDeTiempo } from "./js/tiempo.js";
 import { montarEstadoGemelo } from "./js/estado_gemelo.js";
 import { montarInstalacion } from "./js/instalar.js";
-import { fraseResumen, casoResumen, dibujarNDVI, idDeHash, hashDe } from "./js/resumen.js";
+import { fraseResumen, casoResumen, dibujarNDVI, idDeHash, hashDe, hectareasQueAlcanzanTexto } from "./js/resumen.js";
 import { leerSuelo, htmlPerfilDeSuelo, htmlAptitud, htmlNotaDeZona } from "./js/suelo.js";
 import { evidenciaDeParcela, riesgoDeHelada, montarContextoRegional, montarRecursosReto } from "./js/contexto.js";
 
@@ -184,7 +184,7 @@ const MOTIVOS_3D = {
 // Lámina local de referencia (agua.lamina_local del cubo; decisión del integrador con la sesión de datos).
 const LAMINA_LOCAL = {
   aplicada: { titulo: "Typically applied in this district", limite: "district average, not this field" },
-  recomendada: { titulo: "Recommended by INIFAP", limite: "regional recommendation, not this field" },
+  recomendada: { titulo: "INIFAP guideline", limite: "regional guideline, not this field" },
 };
 const TEXTO_SIN_REFERENCIA = "no local reference";
 const NOTA_SIN_ROTACION = "No alternatives are compared for this field.";
@@ -238,7 +238,7 @@ const estado = {
   linea: null, // controlador de la línea de tiempo (web/js/tiempo.js)
   anioNormal: null, // año con el que abre la línea de tiempo: en él el mapa muestra la vista normal
   anioTiempo: null, // año elegido en la línea de tiempo que colorea el mapa; null = vista normal
-  capasAnio: new Map(), // año -> esquema de memoria de ese año (para la línea de tiempo)
+  capasAnio: new Map(), // «año|modo» -> esquema de memoria de ese año (para la línea de tiempo)
   estadoGemelo: null, // controlador de la tarjeta «Twin status»
   instalacion: null, // controlador de web/js/instalar.js
   // Ficha completa
@@ -500,6 +500,9 @@ function abrirDesdeHash() {
   if (crudo && !document.getElementById(crudo) && aviso) {
     aviso.textContent = AVISO_ENLACE(crudo);
     aviso.hidden = false;
+    // En el teléfono el aviso vive al pie del mapa, debajo de los controles: se trae a la vista (sin animación,
+    // así respeta el movimiento reducido) para que quien abre un enlace viejo lo lea sin desplazarse.
+    if (!esAncho()) requestAnimationFrame(() => aviso.scrollIntoView({ block: "nearest", behavior: "auto" }));
   }
   return false;
 }
@@ -737,6 +740,15 @@ function textoEs(texto) {
   return `<span lang="es">${esc(texto)}</span>`;
 }
 
+// Partes de las etiquetas de los datos que vienen en español («[P], por confirmar») y su lectura en la interfaz en
+// inglés. Sin cifras: solo palabras. Si la etiqueta trae otra cosa en español, va entera marcada lang="es".
+const ETIQUETAS_EN = [["por confirmar", "to be confirmed"]];
+function etiquetaEn(etiqueta) {
+  let texto = String(etiqueta ?? "");
+  for (const [es, en] of ETIQUETAS_EN) texto = texto.split(es).join(en);
+  return /[áéíóúñ]|\b(por|de|para|sin|con|del)\b/i.test(texto) ? textoEs(texto) : esc(texto);
+}
+
 function leerControles() {
   estado.D = Number($("#dotacion").value);
   estado.r = $("#lluvia").checked && estado.rSeca !== undefined ? estado.rSeca : estado.rBase;
@@ -770,7 +782,7 @@ function actualizarValorDeslizador() {
     .join(" · ");
   $("#info-marca-fuente").innerHTML = [
     `Source: ${m.fuente ? textoEs(m.fuente) : "not available"}`,
-    m.etiqueta ? `Label: ${textoEs(m.etiqueta)}` : "",
+    m.etiqueta ? `Label: ${etiquetaEn(m.etiqueta)}` : "",
     m.fecha_consulta ? `Accessed: ${esc(fmtFecha(m.fecha_consulta))}` : "",
     // La nota en inglés (nota_en, copia de params); la de español solo si no hay traducción.
     m.nota_en ? `Note: ${esc(m.nota_en)}` : m.nota ? `Note: ${textoEs(m.nota)}` : "",
@@ -929,6 +941,11 @@ function iniciarColoreado() {
 function clasificador() {
   // Un año pasado en la línea de tiempo manda: el mapa muestra el estado observado de ese año.
   if (estado.anioTiempo != null) return capaDelAnio(estado.anioTiempo);
+  return clasificadorNormal();
+}
+
+/** El esquema elegido en «Color fields by» (sin la línea de tiempo): al que vuelve el mapa en el año actual. */
+function clasificadorNormal() {
   const modo = estado.colorear;
   if (modo === "semaforo") return esquemaSemaforo();
   if (modo === "plazo") return esquemaPlazo();
@@ -1002,14 +1019,18 @@ function capaMemoria(anio) {
   };
 }
 
-/** Esquema de la línea de tiempo: la memoria de ese año, con la indicación de cómo volver a la vista normal. */
+/**
+ * Esquema de la línea de tiempo: la memoria de ese año, con la indicación de cómo volver a la vista normal, que
+ * nombra el modo elegido en «Color fields by» (agua, plazo o una capa). La caché va por año y por modo.
+ */
 function capaDelAnio(anio) {
-  if (!estado.capasAnio.has(anio)) {
+  const llave = `${anio}|${estado.colorear}`;
+  if (!estado.capasAnio.has(llave)) {
     const capa = capaMemoria(anio);
-    const vuelta = estado.anioNormal != null ? ` Move the timeline back to ${estado.anioNormal} to color fields by water again.` : "";
-    estado.capasAnio.set(anio, { ...capa, fuente: `${capa.fuente}${vuelta}` });
+    const vuelta = estado.anioNormal != null ? ` Move the timeline back to ${estado.anioNormal} to see “${clasificadorNormal().titulo}” again.` : "";
+    estado.capasAnio.set(llave, { ...capa, fuente: `${capa.fuente}${vuelta}` });
   }
-  return estado.capasAnio.get(anio);
+  return estado.capasAnio.get(llave);
 }
 
 /** Resultado del esquema activo para cada parcela. */
@@ -1545,7 +1566,8 @@ function mostrarLocalidad(i) {
     [Math.min(base[0][0], lon), Math.min(base[0][1], lat)],
     [Math.max(base[1][0], lon), Math.max(base[1][1], lat)],
   ];
-  estado.mapa.fitBounds(ext, { padding: margenMapa(ext), maxZoom: 15, duration: reduceMovimiento() ? 0 : 600 });
+  // Con la vista 3D activa conserva su inclinación y su rumbo (como encuadrar y el cambio de tamaño).
+  estado.mapa.fitBounds(ext, { padding: margenMapa(ext), maxZoom: 15, duration: reduceMovimiento() ? 0 : 600, ...camara3D() });
   estado.movidoPorUsuario = true; // que un cambio de tamaño no lo devuelva al encuadre de la zona
   estado.etiquetasLocalidad.forEach(({ el }, j) => el.classList.toggle("activa", j === i));
   if (!esAncho()) $("#mapa").scrollIntoView({ block: "center", behavior: reduceMovimiento() ? "auto" : "smooth" });
@@ -1700,11 +1722,20 @@ function iniciarLineaDeTiempo() {
   }
   estado.linea.fijarDatos({ features: estado.visibles, rotulo: rotuloZona() });
   estado.anioNormal = estado.linea.disponible() ? estado.linea.anio() : null;
+  // «Timeline: not available» con su motivo: el mismo que da el botón 3D (gemelo.json no se construyó o no se leyó).
+  if (!estado.gemelo) {
+    const motivo = document.createElement("p");
+    motivo.className = "tiempo-motivo";
+    motivo.id = "tiempo-motivo";
+    motivo.textContent = MOTIVOS_3D[estado.gemeloLectura === "ausente" ? "sin_gemelo" : "error_gemelo"];
+    cont.append(motivo);
+  }
 }
 
 function alCambiarAnio(anio) {
   estado.anioTiempo = anio == null || anio === estado.anioNormal ? null : anio;
   document.body.dataset.anioTiempo = estado.anioTiempo == null ? "" : String(estado.anioTiempo);
+  pintarNotaColorear();
   pintarColoreado();
   // «Regional context» resalta el mismo año agrícola (también el actual: ahí el mapa vuelve a la vista normal).
   estado.contextoRegional?.fijarAnio(anio);
@@ -2159,7 +2190,9 @@ function htmlSuelo(o, relieve = "", p = {}) {
   }
   return (
     `<div class="renglon renglon-suelo" data-semaforo="${esc(sem)}">${circulo(sem, SEMAFORO_OTROS)}<div>` +
-    `<h5>Soil <span class="sem-texto">${esc(SEMAFORO_OTROS[sem]?.texto ?? "no data")}</span></h5>` +
+    // El semáforo de este renglón mide la cobertura del suelo (días de suelo desnudo en la temporada de viento,
+    // frente a la parcela o la zona); la aptitud del suelo (pH, textura) va aparte, con su propio título.
+    `<h5>Soil <span class="sem-texto"><span class="sem-que">cover:</span> ${esc(SEMAFORO_OTROS[sem]?.texto ?? "no data")}</span></h5>` +
     aptitud +
     (su.dias_desnudo != null
       ? `<p>Bare soil in the windy season<span class="ventana-desnudo">${esc(textoVentanaDesnudo())}</span>: <strong>${esc(fmtDato(su.dias_desnudo))} days</strong>${origen ? ` <span class="etiqueta-origen">${origen}</span>` : ""}</p>`
@@ -2305,12 +2338,26 @@ function htmlFiltros(o, D = estado.D) {
           : "";
         return (
           `<li class="${clase}" data-estado="${esc(e)}" data-filtro="${esc(f.id ?? "")}"${f.vivo ? ' data-vivo="si"' : ""}>${marca} <span class="filtro-texto">${esc(f.motivo ?? f.filtro)}</span>${razon}${helada}${vivo}` +
-          `${f.fuente ? ` <span class="fuente">— ${esc(f.fuente)}${etiqueta}</span>` : ""}</li>`
+          `${f.fuente ? ` <span class="fuente">— ${textoEs(f.fuente)}${etiqueta}</span>` : ""}</li>`
         );
       })
       .join("") +
     "</ul>"
   );
+}
+
+/**
+ * «Enough for X of N hectares (range B to A)» de la tarjeta, con la regla de web/js/resumen.js
+ * (hectareasQueAlcanzanTexto): X nunca se lee mayor que N («all N hectares» cuando alcanza para toda la
+ * parcela) ni «0» cuando alcanza algo («less than …»). Si alcanza para toda aun con la necesidad alta (o la opción
+ * no pide riego), no hay rango que dar: «Enough for all N hectares», sin «(range all to all)».
+ */
+function htmlAlcanza(h, areaHa) {
+  const p50 = hectareasQueAlcanzanTexto(h.p50, areaHa, fmt);
+  const bajo = hectareasQueAlcanzanTexto(h.bajo, areaHa, fmt);
+  const alto = hectareasQueAlcanzanTexto(h.alto, areaHa, fmt);
+  const rango = bajo.caso === "todas" ? "" : ` <span>(range ${esc(bajo.cifra)} to ${esc(alto.cifra)})</span>`;
+  return `<p class="alcanza" data-caso="${esc(p50.caso)}"><strong>Enough for ${esc(p50.texto)}</strong>${rango}</p>`;
 }
 
 function textoPlazo(plazo) {
@@ -2354,9 +2401,7 @@ function actualizarFicha() {
           `<div class="leyenda-banda" aria-hidden="true"><span>likely range ${esc(fmtDato(L.p10))}–${esc(fmtDato(L.p90))}</span><span>┆ dashed line: your allocation (${esc(fmt(D))})</span></div>`
         : "";
 
-    const alcanza =
-      `<p class="alcanza"><strong>Enough for ${esc(fmt(ev.hectareas.p50))} of ${esc(fmtDato(p.area_ha))} hectares</strong> ` +
-      `<span>(range ${esc(fmt(ev.hectareas.bajo))} to ${esc(fmt(ev.hectareas.alto))})</span></p>`;
+    const alcanza = htmlAlcanza(ev.hectareas, p.area_ha);
 
     $('[data-parte="agua"]', tarjeta).innerHTML =
       `${circulo(ev.semaforo, SEMAFORO)}<div>` +
@@ -2402,7 +2447,7 @@ function pintarResumen(p, ops) {
   } catch (err) {
     console.error("ROOT: the summary could not be computed", err);
   }
-  const datos = { parcela: p, opcionActual: actual, evaluacion, D: estado.D, formato: (v, k) => (k === "area" ? fmtDato(v) : fmt(v)) };
+  const datos = { parcela: p, opcionActual: actual, evaluacion, D: estado.D, formato: (v, k) => (k === "area" ? fmtDato(v) : fmt(v)), formatoDecimales: fmt };
   const texto = fraseResumen(datos);
   if (nodo.textContent !== texto) nodo.textContent = texto;
   nodo.dataset.caso = casoResumen(datos);
@@ -2430,19 +2475,39 @@ function htmlLaminaLocal(o, L, areaHa, D) {
     return `<p class="lamina-local" data-tipo="ninguna"><span class="lamina-local-titulo">${esc(t.titulo)}:</span> ${esc(TEXTO_SIN_REFERENCIA)}</p>`;
   }
   const lamina = valor != null ? fmtDato(valor) : fmtRango(rango.min, rango.max);
-  const ha = valor != null
-    ? fmt(areaHa * cobertura(D, valor))
-    : fmtRango(areaHa * cobertura(D, rango.max), areaHa * cobertura(D, rango.min), fmt);
+  // Las mismas reglas que la tarjeta: nunca más hectáreas que la parcela («8 of 7.95») ni «0» si alcanza algo.
+  const haDe = (lam) => hectareasQueAlcanzanTexto(areaHa * cobertura(D, lam), areaHa, fmt);
+  let alcanzaLocal;
+  let ha;
+  if (valor != null) {
+    const h = haDe(valor);
+    alcanzaLocal = h.texto;
+    ha = h.caso === "todas" ? fmtDato(areaHa) : h.cifra;
+  } else {
+    // Rango de la referencia: la lámina alta da las hectáreas bajas y la baja, las altas.
+    const [bajo, alto] = [haDe(rango.max), haDe(rango.min)];
+    const n = fmtDato(areaHa);
+    if (bajo.caso === "todas" || bajo.cifra === alto.cifra) {
+      alcanzaLocal = bajo.texto;
+      ha = bajo.caso === "todas" ? n : bajo.cifra;
+    } else if (alto.caso === "todas") {
+      alcanzaLocal = `${bajo.cifra} to all ${n} hectares`;
+      ha = `${bajo.cifra}–${n}`;
+    } else {
+      alcanzaLocal = `${bajo.cifra}–${alto.cifra} of ${n} hectares`;
+      ha = `${bajo.cifra}–${alto.cifra}`;
+    }
+  }
   return (
     `<div class="lamina-local" data-tipo="${esc(ll.tipo)}"><p><span class="lamina-local-titulo">${esc(titulo)}:</span> ` +
     `<strong>${esc(lamina)}</strong> thousand m³/ha · ` +
-    `<span class="lamina-local-alcanza">enough for ${esc(ha)} of ${esc(fmtDato(areaHa))} hectares</span> ` +
+    `<span class="lamina-local-alcanza">enough for ${esc(alcanzaLocal)}</span> ` +
     `<span class="lamina-local-limite">— ${esc(t.limite)}</span>${ll.etiqueta ? ` <span class="lamina-local-etiqueta">${esc(ll.etiqueta)}</span>` : ""}</p>` +
     `<details class="lamina-local-fuente"><summary>Source of the local reference</summary><p class="fuente">${textoEs(ll.fuente)}` +
     `${ll.nota ? ` ${esc(ll.nota)}` : ""}</p></details></div>` +
     // En papel, una línea corta (la hoja cabe en una carta): la misma cifra y sus hectáreas, rotulada como promedio del
-    // distrito (o recomendación de INIFAP); el texto completo y la fuente se leen en la ficha en línea.
-    `<p class="solo-impresion lamina-local-impresion">${esc(ll.tipo === "aplicada" ? "District avg." : "INIFAP rec.")}: ` +
+    // distrito (o la guía regional de INIFAP); el texto completo y la fuente se leen en la ficha en línea.
+    `<p class="solo-impresion lamina-local-impresion">${esc(ll.tipo === "aplicada" ? "District avg." : "INIFAP guideline")}: ` +
     `<strong>${esc(lamina)}</strong> · ${esc(ha)} ha</p>`
   );
 }
@@ -2724,6 +2789,20 @@ function parcelaParaGota() {
   return f?.properties.id;
 }
 
+/**
+ * Con un año pasado en la línea de tiempo, el grupo «Color fields by» conserva su opción marcada, pero el mapa
+ * muestra la memoria de ese año: una nota visible (ligada con aria-describedby a los dos grupos) lo dice, y cómo volver.
+ */
+function pintarNotaColorear() {
+  const nota = $("#nota-colorear");
+  if (!nota) return;
+  const anio = estado.anioTiempo;
+  nota.hidden = anio == null;
+  nota.textContent = anio == null
+    ? ""
+    : `The map is showing the field memory of ${anio} from the timeline. Pick an option${estado.anioNormal != null ? `, or move the timeline back to ${estado.anioNormal},` : ""} to go back.`;
+}
+
 function conectarEventos() {
   $("#dotacion").addEventListener("input", actualizarTodo);
   $("#lluvia").addEventListener("change", actualizarTodo);
@@ -2735,6 +2814,10 @@ function conectarEventos() {
       // Elegir cómo colorear devuelve la línea de tiempo al año actual (la vista normal).
       if (estado.anioTiempo != null && estado.anioNormal != null) estado.linea?.fijarAnio(estado.anioNormal);
       pintarColoreado();
+    });
+    // La opción ya marcada no dispara «change»: con un año pasado, pulsarla también devuelve al año actual.
+    radio.addEventListener("click", () => {
+      if (radio.value === estado.colorear && estado.anioTiempo != null && estado.anioNormal != null) estado.linea?.fijarAnio(estado.anioNormal);
     });
   }
 

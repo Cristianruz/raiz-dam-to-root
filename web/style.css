@@ -280,6 +280,11 @@ button, input, select { font: inherit; color: inherit; }
   padding: 2px 8px; font-weight: 700; font-size: 0.85rem;
   box-shadow: var(--sombra); cursor: pointer; white-space: nowrap;
 }
+/* Las protagonistas quedan encima de las etiquetas de localidad (decorativas): su símbolo («×», «✓»…) es la señal
+   que no depende del color y no debe quedar tapado, en 2D ni en 3D. */
+.maplibregl-marker.marcador { z-index: 3; }
+.maplibregl-marker.etiqueta-localidad { z-index: 1; }
+.maplibregl-marker.etiqueta-localidad.activa { z-index: 2; }
 
 /* Localidades del equipo: punto oscuro con borde blanco y su nombre (no se pueden pulsar en el mapa) */
 .etiqueta-localidad {
@@ -313,6 +318,10 @@ button, input, select { font: inherit; color: inherit; }
 .opcion-radio { display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
 .opcion-radio input { accent-color: var(--agua); width: 18px; height: 18px; }
 
+/* Con un año pasado en la línea de tiempo: qué muestra el mapa y cómo volver (la opción marcada no cambia). */
+.nota-colorear { margin: 4px 0 0; padding: 6px 8px; font-size: 0.85rem; color: var(--tinta-suave); border-left: 3px solid var(--tinta-suave); }
+/* Motivo de «Timeline: not available» (gemelo.json no se construyó o no se pudo leer). */
+.tiempo-motivo { margin: 4px 0 0; font-size: 0.85rem; color: var(--tinta-suave); }
 .leyenda { margin-top: 8px; font-size: 0.9rem; }
 .leyenda ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .leyenda li { display: flex; align-items: center; gap: 8px; }
@@ -645,12 +654,13 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
 .bloque-plegable::-webkit-details-marker { display: none; }
 .bloque-plegable h2 { margin: 0; }
 .bloque-plegable::after {
-  content: "+"; grid-row: 1; grid-column: 2;
+  /* Signo decorativo: con texto alternativo vacío no entra al nombre del plegable (el primer valor es el respaldo). */
+  content: "+"; content: "+" / ""; grid-row: 1; grid-column: 2;
   display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; border-radius: 50%;
   border: 2px solid var(--agua); color: var(--agua-osc); font-weight: 700;
 }
-details[open] > .bloque-plegable::after { content: "−"; background: var(--agua); color: var(--blanco); }
+details[open] > .bloque-plegable::after { content: "−"; content: "−" / ""; background: var(--agua); color: var(--blanco); }
 .bloque-plegable-ayuda { grid-column: 1 / -1; font-size: 0.85rem; color: var(--tinta-suave); }
 .bloque-plegable:focus-visible { outline: 3px solid var(--agua-osc); outline-offset: 2px; border-radius: 6px; }
 .bloque-contexto[open] > .bloque-plegable { margin-bottom: 10px; }

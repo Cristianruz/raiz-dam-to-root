@@ -92,15 +92,25 @@ const ESTADOS_PASO = {
 // Conjuntos de datos NASA. «patron» decide qué entradas de manifest.fuentes_de_origen pertenecen al
 // conjunto (la fuente lo menciona); «producto» reconoce la entrada cuya fuente EMPIEZA con el producto
 // (de ahí sale el nombre del producto que se muestra). Una entrada puede pertenecer a dos conjuntos
-// (p. ej., relieve_meta.json: NASADEM y la lluvia de la tormenta).
+// (p. ej., relieve_meta.json: NASADEM y la lluvia de la tormenta). «ids» (opcional) saca de la fuente
+// los identificadores de catálogo del producto cuando la fuente no empieza con él (contexto_regional.csv
+// empieza con la plataforma, «Earth Engine (…)», y lista un producto por serie): así la columna Product
+// nunca muestra la plataforma.
 const FAMILIAS = [
   { id: "hls", patron: /\bHLS\b/, producto: /^NASA HLS\b/, dato: "Satellite imagery: Harmonized Landsat and Sentinel (HLS)" },
   { id: "power", patron: /\bPOWER\b/, producto: /^NASA POWER\b/, dato: "Daily weather: NASA POWER" },
   { id: "nasadem", patron: /\bNASADEM/, producto: /^NASADEM\b/, dato: "Elevation: NASADEM" },
   { id: "imerg", patron: /\bIMERG\b|\bGPM\b/, producto: /^(NASA )?GPM\b/, dato: "Rainfall: GPM IMERG" },
   { id: "viirs", patron: /\bSSEBop\b|\bVIIRS\b/, producto: /^(USGS )?SSEBop\b|^VIIRS\b/, dato: "Evapotranspiration: SSEBop on VIIRS" },
-  { id: "modis", patron: /\bMODIS\b/, producto: /^(NASA )?MODIS\b/, dato: "Vegetation: MODIS" },
+  { id: "modis", patron: /\bMODIS\b/, producto: /^(NASA )?MODIS\b/, ids: /\bMODIS\/\w+\/\w+/g, dato: "Vegetation, evapotranspiration and land surface temperature: MODIS" },
+  { id: "smap", patron: /\bSMAP\b/, producto: /^(NASA )?SMAP\b/, ids: /\bNASA\/SMAP\/[\w/]+/g, dato: "Soil moisture: SMAP (assimilated into a land surface model)" },
+  { id: "grace", patron: /\bGRACE\b/, producto: /^(NASA )?GRACE\b/, ids: /\bNASA\/GRACE\/[\w/]+/g, dato: "Water stored in the basin: GRACE / GRACE-FO" },
+  { id: "gldas", patron: /\bGLDAS\b/, producto: /^(NASA )?GLDAS\b/, ids: /\bNASA\/GLDAS\/[\w/]+/g, dato: "Land surface model: GLDAS" },
+  { id: "nldas", patron: /\bNLDAS\b/, producto: /^(NASA )?NLDAS\b/, ids: /\bNASA\/NLDAS\/[\w/]+/g, dato: "Second climate source: NLDAS" },
+  { id: "gedi", patron: /\bGEDI L2A\b|\bLARSE\/GEDI\b/, producto: /^GEDI\b/, ids: /\bLARSE\/GEDI\/\w+/g, dato: "Laser height reading: GEDI" },
 ];
+// Remite a la tabla del reto, que dice el papel de cada serie regional y su estado.
+const VER_RECURSOS = "see “Challenge data sources” below";
 
 // Para qué se usa cada archivo (nombre sin extensión ni sufijo de zona). Un objeto da un texto por
 // conjunto de datos («*» = cualquier otro). Lo que no está aquí se describe por su pieza del kit.
@@ -118,6 +128,17 @@ const USOS = {
   relieve_parcelas: "Mean slope and run-on of each field (Soil row)",
   relieve_meta: { nasadem: "Scale label of the “Terrain & runoff” layer", "*": "Storm depth of “Simulate a storm”" },
   et_contraste: "Regional contrast of the modeled ET (test of the water need)",
+  heladas: "Chance of frost after each planting date (rules and filters of the options)",
+  h3_series: "Field memory series behind the H3 test",
+  contexto_regional: {
+    modis: `Regional greenness, a second evapotranspiration contrast and land surface temperature (Regional context; ${VER_RECURSOS})`,
+    smap: `Regional soil moisture, surface layer and root zone (Regional context; ${VER_RECURSOS})`,
+    grace: `Water stored in the basin, month by month (Regional context; ${VER_RECURSOS})`,
+    gldas: `A third evapotranspiration contrast and root-zone moisture (Regional context; ${VER_RECURSOS})`,
+    nldas: `Rainfall and potential evaporation from a second climate source (Regional context; ${VER_RECURSOS})`,
+    "*": `Regional context series (${VER_RECURSOS})`,
+  },
+  gedi_parcelas: `Laser height reading of each field, evidence in the field card (${VER_RECURSOS})`,
 };
 const USO_IMERG_TORMENTA = "Storm depth of “Simulate a storm”";
 const USO_IMERG_RESERVA = "Daily rainfall over the pilot area; not used in the calculation yet";
@@ -353,6 +374,10 @@ function filasNasa(manifest, cubo, relieve) {
     miembros.forEach((f) => usadas.add(f));
     const cortos = miembros.map((f) => productoCorto(f.fuente));
     let productos = sinPrefijos(unicos(cortos.filter((p) => familia.producto.test(p))));
+    // Sin una fuente que empiece con el producto: sus identificadores de catálogo, leídos de la fuente.
+    if (!productos.length && familia.ids) {
+      productos = unicos(miembros.flatMap((f) => String(f.fuente ?? "").match(familia.ids) ?? []).map((x) => x.replace(/\/+$/, "")));
+    }
     if (!productos.length) productos = unicos(cortos).slice(0, 1);
     const escala = familia.id === "nasadem" ? unicos(zonasRelieve.map((z) => z?.rotulo)) : [];
     filas.push({

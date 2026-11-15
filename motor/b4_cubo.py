@@ -39,6 +39,8 @@ Opciones y filtros oficiales (B3; contrato en la misma decisión, §1):
 - opciones[].filtros lleva una entrada por filtro que aplica a la opción, con los campos del contrato
   («motivo» = texto_en y «fuente») más id, tipo, etiqueta, estado («passes», «warning» o
   «needs_local_check»), «pasa» (true, false o null = sin decidir) y «razon» (código) cuando no se decide.
+  Si la regla nombra un cultivo sin valor (fecha_siembra trae {"sorgo": null}: no hay ventana local), la
+  oración de ese cultivo solo va en el motivo de las opciones que lo siembran (motivo_para_secuencia).
   Nunca se decide con un umbral inventado: el filtro de helada adjunta prob_helada (heladas.json de la
   zona de la parcela, en la fecha calculada más cercana anterior o igual a la siembra «desde»; null fuera
   de las fechas calculadas) y solo pasa o advierte si el filtro trae regla.prob_helada_max. Con varias
@@ -131,7 +133,7 @@ LAMINA_LOCAL = "lamina_local_cm"
 TIPOS_LAMINA_LOCAL = (("aplicada_dr005", "aplicada"), ("recomendada_inifap", "recomendada"))
 NOTA_LAMINA_LOCAL = {
     "aplicada": "District average from published records, not measured on this field. The water check uses the model need.",
-    "recomendada": "Regional recommendation, not measured on this field. The water check uses the model need.",
+    "recomendada": "Regional guideline, not measured on this field. The water check uses the model need.",
 }
 # Periodo de los registros, tal como lo escribe la fuente («medias 2009–2016»): dos años separados por un guion.
 PATRON_PERIODO = re.compile(r"\b((?:19|20)\d{2})\s*[–-]\s*((?:19|20)\d{2})\b")
@@ -552,16 +554,57 @@ def evidencia_helada(definicion, bloque_heladas):
     return principal["prob_helada"], evidencia, len(con_prob) == len(siembras)
 
 
-def filtros_de_opcion(rot_ref, b3, bloque_heladas):
+ORACION = re.compile(r"(?<=[.!?])\s+")
+PALABRA = re.compile(r"[a-z]{3,}")
+
+
+def palabras_distintivas(cultivo, nombres_en):
+    """Palabras del nombre en inglés de un cultivo que no salen en el nombre de ningún otro cultivo
+    (sorgo, «Forage sorghum» → {"sorghum»}: «forage» también es de «Forage maize»). nombres_en es
+    {cultivo: nombre en inglés} y sale de los datos (B3 o el diseño provisional), nunca de este archivo."""
+    propias = set(PALABRA.findall(str(nombres_en.get(cultivo) or "").lower()))
+    otras = set()
+    for c, n in nombres_en.items():
+        if c != cultivo:
+            otras |= set(PALABRA.findall(str(n or "").lower()))
+    return propias - otras
+
+
+def motivo_para_secuencia(filtro, secuencia, nombres_en):
+    """texto_en de un filtro para una opción concreta. Si la «regla» nombra un cultivo sin valor (p. ej.
+    fecha_siembra trae {"sorgo": null}: B3 no halló su ventana local), la oración que habla de ese cultivo
+    solo vale para las opciones que lo siembran: en las demás se quita, para que la tarjeta de alfalfa no
+    diga «No local window was found for sorghum». Si quitarla dejara el texto vacío, va completo."""
+    texto = filtro.get("texto_en")
+    regla = filtro.get("regla")
+    if not con_texto(texto) or not isinstance(regla, dict) or not nombres_en:
+        return texto
+    sin_valor = [c for c, v in regla.items() if v is None and c in nombres_en and c not in (secuencia or [])]
+    ajenas = set()
+    for c in sin_valor:
+        ajenas |= palabras_distintivas(c, nombres_en)
+    if not ajenas:
+        return texto
+    oraciones = [o for o in ORACION.split(texto.strip()) if o]
+    quedan = [o for o in oraciones if not (set(PALABRA.findall(o.lower())) & ajenas)]
+    return " ".join(quedan) if quedan and len(quedan) < len(oraciones) else texto
+
+
+def filtros_de_opcion(rot_ref, b3, bloque_heladas, nombres_en=None):
     """Entradas de opciones[].filtros para la rotación rot_ref: una por filtro de B3 que la nombra en
-    «aplica_a». Campos del contrato (§2.3): «motivo» (= texto_en) y «fuente»; además id, tipo, etiqueta,
-    estado, «pasa» (true, false o null) y «razon» cuando no se decide. Ver el encabezado del archivo."""
+    «aplica_a». Campos del contrato (§2.3): «motivo» (= texto_en, sin la oración de un cultivo sin ventana
+    que la opción no siembra: ver motivo_para_secuencia) y «fuente»; además id, tipo, etiqueta,
+    estado, «pasa» (true, false o null) y «razon» cuando no se decide. Ver el encabezado del archivo.
+    nombres_en: {cultivo: nombre en inglés} para reconocer de qué cultivo habla cada oración."""
     salida = []
+    definicion = (b3.get("opciones") or {}).get(rot_ref) or {}
+    secuencia = [x.get("cultivo") for x in definicion.get("secuencia") or [] if isinstance(x, dict)]
     for f in b3.get("filtros") or []:
         if rot_ref not in (f.get("aplica_a") or []):
             continue
         entrada = {"id": f.get("id"), "tipo": f.get("tipo"), "estado": NEEDS_LOCAL_CHECK, "pasa": None,
-                   "motivo": f.get("texto_en"), "fuente": f.get("fuente"), "etiqueta": f.get("etiqueta")}
+                   "motivo": motivo_para_secuencia(f, secuencia, nombres_en),
+                   "fuente": f.get("fuente"), "etiqueta": f.get("etiqueta")}
         faltan = [n for n in (f.get("necesita") or []) if n not in DATOS_DISPONIBLES]
         prob, umbral, completa = None, None, False
         if f.get("tipo") == "helada":
@@ -744,12 +787,18 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
         """La rotación actual es la que el maestro declara «no rota» (nogal): no se le buscan alternativas."""
         return (def_b3.get(rot_actual) or {}).get("letra_maestro") == LETRA_NO_ROTA
 
+    # Nombre en inglés de cada cultivo que nombran las secuencias de B3 (el de su rotación de un solo cultivo):
+    # sirve para saber de qué cultivo habla cada oración de un filtro (motivo_para_secuencia).
+    nombres_cultivo = {c: nombre_en(c) for d in def_b3.values() for c in
+                       ((x or {}).get("cultivo") for x in (d or {}).get("secuencia") or []) if con_texto(c)}
+
     def filtros_de(zona, rot_ref):
         """Filtros de B3 de una rotación en una zona (no dependen de la parcela: se calculan una vez)."""
         if b3 is None:
             return []
         if (zona, rot_ref) not in filtros_cache:
-            filtros_cache[(zona, rot_ref)] = filtros_de_opcion(rot_ref, b3, heladas_de_zona(heladas, zona))
+            filtros_cache[(zona, rot_ref)] = filtros_de_opcion(rot_ref, b3, heladas_de_zona(heladas, zona),
+                                                               nombres_cultivo)
         return filtros_cache[(zona, rot_ref)]
 
     features, cubo_parcelas, usadas = [], {}, set()
