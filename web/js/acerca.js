@@ -404,7 +404,13 @@ function filasNasa(manifest, cubo, relieve) {
   return { filas, otras, hayCache: enCache.size > 0 };
 }
 
-function htmlArchivo(f, hayCache) {
+/** Atributo «lang» de un texto de los datos: nada si llega en inglés (el idioma de la página); si no, su idioma
+ *  (español cuando el archivo no lo declara). */
+function langDe(idioma) {
+  return idioma === "en" ? "" : ` lang="${esc(typeof idioma === "string" && idioma ? idioma : "es")}"`;
+}
+
+function htmlArchivo(f, hayCache, idioma) {
   const cache = hayCache
     ? f.enCache
       ? `<span class="acerca-cache">in the build cache</span>`
@@ -415,7 +421,7 @@ function htmlArchivo(f, hayCache) {
     f.script ? `Script: <code>${esc(f.script)}</code>` : "",
   ].filter(Boolean).join(" · ");
   return `<li><details><summary><code>${esc(nombreArchivo(f.archivo))}</code> ${cache}</summary>` +
-    `<p class="acerca-fuente-registrada" lang="es">${esc(f.fuente)}</p>` +
+    `<p class="acerca-fuente-registrada"${langDe(idioma)}>${esc(f.fuente)}</p>` +
     (detalle ? `<p class="acerca-pie">${detalle}</p>` : "") +
     `</details></li>`;
 }
@@ -445,7 +451,7 @@ function htmlDatosNasa(manifest, cubo, relieve, id, error) {
               (r.escala.length ? `<span class="acerca-escala">Scale: ${r.escala.map(esc).join(" · ")}</span>` : "") +
               `</td>
               <td data-etiqueta="What ROOT uses it for"><ul class="acerca-usos">${r.usos.map((u) => `<li>${esc(u)}</li>`).join("")}</ul></td>
-              <td data-etiqueta="Files and recorded source"><ul class="acerca-archivos">${r.archivos.map((f) => htmlArchivo(f, hayCache)).join("")}</ul></td>
+              <td data-etiqueta="Files and recorded source"><ul class="acerca-archivos">${r.archivos.map((f) => htmlArchivo(f, hayCache, manifest.idioma_fuentes)).join("")}</ul></td>
             </tr>`,
           )
           .join("")}</tbody></table></div>`
@@ -454,8 +460,8 @@ function htmlDatosNasa(manifest, cubo, relieve, id, error) {
     ? `<details class="acerca-otras"><summary>Other sources in the build</summary><ul class="acerca-archivos">${otras
         .map(
           // Solo el archivo, el producto corto y la fecha: la fuente registrada completa es el registro de entregas del
-          // equipo (en español, con notas de proceso) y no va a la página (I6 de la revisión total). Está en manifest.json.
-          (f) => `<li><code>${esc(nombreArchivo(f.archivo))}</code> <span lang="es">${esc(productoCorto(f.fuente))}</span>` +
+          // equipo (con notas de proceso) y no va a la página (I6 de la revisión total). Está en manifest.json.
+          (f) => `<li><code>${esc(nombreArchivo(f.archivo))}</code> <span${langDe(manifest.idioma_fuentes)}>${esc(productoCorto(f.fuente))}</span>` +
             (f.fecha ? ` <span class="acerca-pie">· ${esc(f.fecha)}</span>` : "") + `</li>`,
         )
         .join("")}</ul></details>`
@@ -569,12 +575,16 @@ function htmlPuerta(puerta, id) {
   const tabla = pasos.length
     ? `<details class="acerca-pasos"><summary>Steps of the last recorded run</summary>
         <div class="acerca-tabla-caja"><table class="acerca-tabla acerca-tabla--pasos">
-          <thead><tr><th scope="col">Step</th><th scope="col">Result</th><th scope="col">Detail (as logged)</th></tr></thead>
+          <thead><tr><th scope="col">Step</th><th scope="col">Result</th><th scope="col">${pasos.every((s) => s.detalle_en != null) ? "Detail" : "Detail (as logged)"}</th></tr></thead>
           <tbody>${pasos
             .map(
               (s) => `<tr><th scope="row" data-etiqueta="Step">${esc(s.nombre || s.id)}</th>` +
                 `<td data-etiqueta="Result">${insignia(s.estado, ESTADOS_PASO)}</td>` +
-                `<td data-etiqueta="Detail (as logged)" lang="es">${esc(s.detalle)}</td></tr>`,
+                // El detalle en inglés (detalle_en: lo escribe construir.py con los mismos valores que el de español);
+                // si la corrida registrada no lo trae, el de español, marcado.
+                (s.detalle_en != null
+                  ? `<td data-etiqueta="Detail">${esc(s.detalle_en)}</td></tr>`
+                  : `<td data-etiqueta="Detail (as logged)" lang="es">${esc(s.detalle)}</td></tr>`),
             )
             .join("")}</tbody></table></div></details>`
     : "";

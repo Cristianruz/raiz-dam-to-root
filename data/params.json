@@ -91,6 +91,7 @@
       ],
       "unidad": "grados decimales, EPSG:4326 (centroide de la localidad)",
       "fuente": "Propuesta del equipo (chat del equipo, 14-nov-2026 12:08), centroides de localidad",
+      "fuente_en": "Team proposal (team chat, Nov 14, 2026, 12:08), locality centroids",
       "etiqueta": "[S]",
       "nota": "Referencia para el mapa y para buscar registros de siembra y técnicos; no son parcelas"
     }
@@ -129,6 +130,7 @@
       },
       "unidad": "millares/ha",
       "fuente": "El Diario de Chihuahua, 28-oct-2024, según la investigación (S8 §2). Referencia: Módulo 4, 1 millar/ha a 4,976 ha desde 11 pozos",
+      "fuente_en": "El Diario de Chihuahua, Oct 28, 2024, as cited in the project research (project synthesis S8 §2). Reference: Module 4, 1 millar/ha for 4,976 ha from 11 wells",
       "fecha_consulta": null,
       "etiqueta": "[P]",
       "nota": "≈1 millar/ha, de pozos; sin agua de las presas",
@@ -142,6 +144,7 @@
       },
       "unidad": "millares/ha",
       "fuente": "El Diario de Chihuahua, 27-jul-2026; nota no leída directamente (S8 §2)",
+      "fuente_en": "El Diario de Chihuahua, Jul 27, 2026; article not read directly (project synthesis S8 §2)",
       "fecha_consulta": null,
       "etiqueta": "[P], por confirmar",
       "nota": "valor = punto medio del rango",
@@ -155,6 +158,7 @@
       },
       "unidad": "millares/ha",
       "fuente": "El Diario de Chihuahua, 27-jul-2026; nota no leída directamente (S8 §2)",
+      "fuente_en": "El Diario de Chihuahua, Jul 27, 2026; article not read directly (project synthesis S8 §2)",
       "fecha_consulta": null,
       "etiqueta": "[P], por confirmar",
       "nota": "valor = punto medio del rango",
@@ -329,6 +333,7 @@
       },
       "unidad": "fracción",
       "fuente": "IMTA, COMEII 2021 (rango medido 2012–2016)",
+      "fuente_en": "IMTA, COMEII 2021 (range measured 2012–2016)",
       "etiqueta": "[V]",
       "nota": ""
     },
@@ -352,6 +357,7 @@
       "valor": 0.2,
       "unidad": "fracción del volumen superficial agrícola",
       "fuente": "Conagua 2024, acuífero 0831 (DR_0831): 122.8 de 614 hm³/año",
+      "fuente_en": "Conagua 2024, aquifer 0831 (DR_0831): 122.8 of 614 hm³/year",
       "etiqueta": "[V]",
       "nota": "Confirmar a qué volumen se refiere el 614 (kit X3.1)"
     },
@@ -359,6 +365,7 @@
       "valor": 0.18,
       "unidad": "fracción del volumen bombeado",
       "fuente": "Conagua 2024, acuífero 0831 (DR_0831): 53.1 de 294.9 hm³/año",
+      "fuente_en": "Conagua 2024, aquifer 0831 (DR_0831): 53.1 of 294.9 hm³/year",
       "etiqueta": "[V]",
       "nota": ""
     }
@@ -368,6 +375,7 @@
       "valor": 2846.78,
       "unidad": "hm³",
       "fuente": "Tabla de Conagua reproducida en prensa",
+      "fuente_en": "Conagua table reproduced in the press",
       "etiqueta": "[P]",
       "nota": "La Boquilla, capacidad al NAMO"
     },
@@ -376,6 +384,7 @@
       "fecha": "2026-11-09",
       "unidad": "hm³",
       "fuente": "Impacto Noticias, 9-nov-2026, con el reporte diario de Conagua (S8 §2)",
+      "fuente_en": "Impacto Noticias, Nov 9, 2026, citing Conagua's daily report (project synthesis S8 §2)",
       "etiqueta": "[P]",
       "nota": "Último dato con fecha y fuente"
     }
@@ -385,6 +394,7 @@
       "valor": -167.12,
       "unidad": "hm³/año",
       "fuente": "Conagua 2024, documento técnico DR_0831",
+      "fuente_en": "Conagua 2024, technical document DR_0831",
       "etiqueta": "[V]",
       "nota": "Déficit oficial, no una pérdida medida"
     }
@@ -454,6 +464,7 @@
       "unidad": "año agrícola",
       "texto": "Year without dam water: the district received no dam allocation",
       "fuente": "S9 §2 (prensa con cifras de Conagua)",
+      "fuente_en": "Project synthesis S9 §2 (press reports with Conagua figures)",
       "etiqueta": "[P]",
       "nota": "Año que la línea de tiempo resalta. S9 §2: en 2025 el distrito no recibió agua de las presas"
     }

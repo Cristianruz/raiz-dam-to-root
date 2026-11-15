@@ -412,6 +412,62 @@ def test_ecostress_et_vacia_con_escenas_entra(tmp_path):
     entra(tmp_path, "ecostress_parcelas.csv", cambiar(ECOSTRESS_VALIDO, "P0001,2026-02,2.4,2", "P0001,2026-02,,2"))
 
 
+# Entrega corregida del 15-nov (nota «15-nov 00:34» de datos/PARA_INTEGRADOR.md, rama datos-satelite): las columnas de
+# antes, en el mismo orden, y al final el menor y el mayor de los sobrevuelos usados y la incertidumbre. DE PRUEBA.
+ENC_ECOSTRESS_NUEVO = "id,mes,et_mm_dia,n_escenas,zona,etc_modelo_mm,razon,et_min_mm_dia,et_max_mm_dia,incertidumbre_w_m2"
+ECOSTRESS_NUEVO = "\n".join([
+    ENC_ECOSTRESS_NUEVO,
+    f"P0001,2026-01,1.8,3,{ZONA_A},5.0,0.36,1.2,2.6,90",
+    f"P0001,2026-02,2.4,1,{ZONA_A},,,2.4,2.4,75",
+    f"P0002,2026-01,,0,{ZONA_A},,,,,",
+    f"L0001,2026-01,0.0,2,{ZONA_B},,,0.0,0.1,40",
+    f"L0002,2026-02,,0,{ZONA_B},,,,,",
+]) + "\n"
+
+
+def test_ecostress_columnas_opcionales_del_intervalo():
+    """La ficha lee et_min_mm_dia y et_max_mm_dia (el intervalo entre sobrevuelos): se declaran, y como opcionales,
+    porque la entrega anterior no las trae (I7 de la revisión independiente de ECOSTRESS)."""
+    esq = esquemas.ESQUEMAS["ecostress_parcelas.csv"]
+    assert tuple(esq["columnas_opcionales"]) == ("et_min_mm_dia", "et_max_mm_dia")
+    assert not set(esq["columnas_opcionales"]) & set(esq["columnas"]), "una columna es obligatoria u opcional, no las dos"
+    assert all(c["nulo"] and c["min"] == 0 for c in esq["columnas_opcionales"].values())
+    assert "incertidumbre_w_m2" not in esq["columnas_opcionales"], "no se muestra: sigue sin declararse"
+
+
+def test_ecostress_entrega_corregida_entra_y_la_anterior_tambien(tmp_path):
+    """Las dos formas del archivo pasan: la anterior (cuatro columnas) y la corregida (con el intervalo)."""
+    x = entra(tmp_path / "nuevo", "ecostress_parcelas.csv", ECOSTRESS_NUEVO)
+    assert x["zonas"] == {ZONA_A: 2, ZONA_B: 2}
+    # Las opcionales se validan: ya no están entre las «adicionales (se copian sin validar)»; las demás, sí.
+    aviso = next(a for a in x["avisos"] if a.startswith("columnas adicionales"))
+    assert "et_min_mm_dia" not in aviso and "et_max_mm_dia" not in aviso
+    assert all(c in aviso for c in ("zona", "etc_modelo_mm", "razon", "incertidumbre_w_m2"))
+    entra(tmp_path / "anterior", "ecostress_parcelas.csv", ECOSTRESS_VALIDO)
+
+
+@pytest.mark.parametrize("vieja, nueva, clave", [
+    (",1.2,2.6,90", ",-1.2,2.6,90", "et_min_mm_dia menor que 0"),
+    (",1.2,2.6,90", ",1.2,dos,90", "et_max_mm_dia"),
+    # Por definición: menor ≤ mediana ≤ mayor.
+    (",1.2,2.6,90", ",1.9,2.6,90", "no se cumple et_min_mm_dia ≤ et_mm_dia ≤ et_max_mm_dia"),
+    (",1.2,2.6,90", ",1.2,1.7,90", "no se cumple et_min_mm_dia ≤ et_mm_dia ≤ et_max_mm_dia"),
+    # Sin sobrevuelos no hay ni menor ni mayor.
+    (f"P0002,2026-01,,0,{ZONA_A},,,,,", f"P0002,2026-01,,0,{ZONA_A},,,0.5,,", "et_min_mm_dia debe ir vacío cuando n_escenas = 0"),
+    (f"L0002,2026-02,,0,{ZONA_B},,,,,", f"L0002,2026-02,,0,{ZONA_B},,,,0.9,", "et_max_mm_dia debe ir vacío cuando n_escenas = 0"),
+])
+def test_ecostress_intervalo_invalido(tmp_path, vieja, nueva, clave):
+    assert clave in rechazo(tmp_path, "ecostress_parcelas.csv", cambiar(ECOSTRESS_NUEVO, vieja, nueva))
+
+
+def test_ecostress_una_sola_de_las_dos_opcionales_tambien_se_valida(tmp_path):
+    """Una columna opcional que viene se valida aunque la otra falte (y la que falta no se pide)."""
+    solo_min = "\n".join(",".join(f.split(",")[:8]) for f in ECOSTRESS_NUEVO.strip().split("\n")) + "\n"
+    assert solo_min.splitlines()[0].endswith(",et_min_mm_dia")
+    entra(tmp_path / "bien", "ecostress_parcelas.csv", solo_min)
+    assert "et_min_mm_dia menor que 0" in rechazo(tmp_path / "mal", "ecostress_parcelas.csv", cambiar(solo_min, ",1.2\n", ",-1.2\n"))
+
+
 # ---------------------------------------------------------------------------------------
 # gaez_zona.csv (A13)
 # ---------------------------------------------------------------------------------------

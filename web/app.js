@@ -820,6 +820,21 @@ function enEspanol(nodo, texto) {
 function textoEs(texto) {
   return `<span lang="es">${esc(texto)}</span>`;
 }
+/**
+ * Un texto de los datos con el idioma en que llegó: va marcado con su «lang» solo si no es el de la página (inglés).
+ * Sin idioma declarado se toma por español (los textos de data/params.json sin variante en inglés).
+ */
+function textoDato(texto, idioma = "es") {
+  return idioma === "en" ? esc(texto) : `<span lang="${esc(idioma || "es")}">${esc(texto)}</span>`;
+}
+/**
+ * Idioma de las citas que llegan del buzón dentro del cubo (filtros, referencias locales, por qué un cultivo no rota):
+ * cubo.meta.idioma_fuentes, que escribe motor/b4_cubo.py. Un cubo que no lo declare (los simulados) se toma en español.
+ */
+function idiomaBuzon() {
+  const idioma = estado.cubo?.meta?.idioma_fuentes;
+  return typeof idioma === "string" && idioma ? idioma : "es";
+}
 
 // Partes de las etiquetas de los datos que vienen en español («[P], por confirmar») y su lectura en la interfaz en
 // inglés. Sin cifras: solo palabras. Si la etiqueta trae otra cosa en español, va entera marcada lang="es".
@@ -831,16 +846,18 @@ function etiquetaEn(etiqueta) {
 }
 
 /**
- * Fuente de un dato (I5 de la revisión total). Las citas del cubo llegan en español y con códigos internos del proyecto
- * (S#, §, kit…); la interfaz es inglés y aquí no se traducen. Si el dato trae su versión en inglés (…_en), esa va a la
- * vista; si no, la cita completa queda plegada en un <details> «Source» con lang="es". La etiqueta de evidencia
- * ([V], [P], [S]) va siempre a la vista, en el rótulo. `etiqueta` undefined = este dato no lleva etiqueta.
+ * Fuente de un dato (I5 de la revisión total). Las citas de data/params.json están en español y con códigos internos
+ * del proyecto (S#, §, kit…); la interfaz es inglés y aquí no se traducen. Si el dato trae su versión en inglés
+ * (…_en, que el motor copia de params), esa va a la vista; si no, la cita completa queda plegada en un <details>
+ * «Source», marcada con el idioma en que llegó: `idioma` (español por omisión; las citas del buzón, el de
+ * cubo.meta.idioma_fuentes). La etiqueta de evidencia ([V], [P], [S]) va siempre a la vista, en el rótulo.
+ * `etiqueta` undefined = este dato no lleva etiqueta.
  */
-function htmlFuente(fuente, { en = null, etiqueta = undefined, rotulo = "Source" } = {}) {
+function htmlFuente(fuente, { en = null, etiqueta = undefined, rotulo = "Source", idioma = "es" } = {}) {
   const marca = etiqueta === undefined ? "" : etiquetaDato(etiqueta);
   if (en) return `<span class="fuente-en">${esc(rotulo)}: ${esc(en)}</span>${marca}`;
   if (!fuente) return `${esc(rotulo)}: not available${marca}`;
-  return `<details class="fuente-plegada"><summary>${esc(rotulo)}${marca}</summary><p class="fuente">${textoEs(fuente)}</p></details>`;
+  return `<details class="fuente-plegada"><summary>${esc(rotulo)}${marca}</summary><p class="fuente">${textoDato(fuente, idioma)}</p></details>`;
 }
 
 function leerControles() {
@@ -875,7 +892,8 @@ function actualizarValorDeslizador() {
     .filter(Boolean)
     .join(" · ");
   $("#info-marca-fuente").innerHTML = [
-    `Source: ${m.fuente ? textoEs(m.fuente) : "not available"}`,
+    // La fuente en inglés (fuente_en, copia de params); la de español, marcada, solo si no hay traducción.
+    `Source: ${m.fuente_en ? esc(m.fuente_en) : m.fuente ? textoEs(m.fuente) : "not available"}`,
     m.etiqueta ? `Label: ${etiquetaEn(m.etiqueta)}` : "",
     m.fecha_consulta ? `Accessed: ${esc(fmtFecha(m.fecha_consulta))}` : "",
     // La nota en inglés (nota_en, copia de params); la de español solo si no hay traducción.
@@ -883,8 +901,8 @@ function actualizarValorDeslizador() {
   ]
     .filter(Boolean)
     .join(" · ");
-  // «Source and note» queda plegado (punto 2 / I3): la fuente y la etiqueta de la marca están en español en params.json
-  // (no hay fuente_en ni etiqueta_en); se leen al abrirlo, con lang="es", y no se traducen aquí.
+  // «Source and note» queda plegado (punto 2 / I3): al abrirlo se leen la fuente y la nota en inglés (fuente_en y
+  // nota_en del cubo, copia de params.json) y la etiqueta con su parte en español leída en inglés (etiquetaEn).
   info.hidden = false;
 }
 
@@ -1616,7 +1634,9 @@ function pintarLocalidades() {
     })
     .join("");
   const fuentes = [...new Set(locs.map((l) => l.fuente).filter(Boolean))];
-  $("#localidades-fuente").innerHTML = htmlFuente(fuentes.join("; "));
+  // La cita en inglés (fuente_en, copia de params) va a la vista solo si TODAS las localidades con fuente la traen.
+  const fuentesEn = locs.every((l) => !l.fuente || l.fuente_en) ? [...new Set(locs.map((l) => l.fuente_en).filter(Boolean))] : [];
+  $("#localidades-fuente").innerHTML = htmlFuente(fuentes.join("; "), { en: fuentesEn.join("; ") || null });
 }
 
 function agregarLocalidades(mapa) {
@@ -2135,6 +2155,7 @@ function pintarNDVI(p) {
       meses: n?.meses ?? [],
       umbrales: n?.umbrales ?? null,
       fuente: n?.fuente ?? null,
+      idiomaFuente: n?.idioma_fuentes ?? null,
       nivel: 3,
     });
   } catch (err) {
@@ -2148,7 +2169,7 @@ function htmlSinRotacion(sr) {
   return (
     '<div class="sin-rotacion" data-parte="sin-rotacion">' +
     `<p><strong>${esc(NOTA_SIN_ROTACION)}</strong> ${esc(sr.motivo ?? "")}</p>` +
-    `<div class="fuente">${htmlFuente(sr.fuente, { en: sr.fuente_en, etiqueta: sr.etiqueta || undefined })}</div>` +
+    `<div class="fuente">${htmlFuente(sr.fuente, { en: sr.fuente_en, etiqueta: sr.etiqueta || undefined, idioma: idiomaBuzon() })}</div>` +
     "</div>"
   );
 }
@@ -2173,7 +2194,10 @@ function htmlEvidencia(p) {
   const ctx = estado.contexto;
   let filas = [];
   try {
-    filas = ctx ? evidenciaDeParcela({ contexto: ctx, id: p.id }) : [];
+    // Calendario del modelo de la rotación actual (opción ACTUAL): para decir si el mes del valor de ECOSTRESS
+    // no tiene cultivo. Una parcela sin clasificar no tiene opción ACTUAL: no se dice nada.
+    const actual = (estado.cubo.parcelas?.[p.id]?.opciones ?? []).find((o) => o.id === "ACTUAL");
+    filas = ctx ? evidenciaDeParcela({ contexto: ctx, id: p.id, mesesCultivo: actual?.meses_cultivo }) : [];
   } catch (err) {
     console.error("ROOT: the satellite evidence could not be read", err);
   }
@@ -2183,7 +2207,8 @@ function htmlEvidencia(p) {
       `<p><strong>${esc(f.etiqueta)}:</strong> ${esc(f.texto)}</p>` +
       (f.nota ? `<p class="evidencia-nota">${esc(f.nota)}</p>` : "") +
       `<p class="fuente">Source: ${f.archivo ? esc([f.archivo, f.fecha].filter(Boolean).join(", ")) : "not available"}</p>` +
-      (f.fuente ? `<details class="evidencia-fuente"><summary>Full source</summary><p class="fuente">${textoEs(f.fuente)}</p></details>` : "") +
+      // La cita completa es la línea de LEEME de la entrega, en el idioma que declara contexto.json (idioma_fuentes).
+      (f.fuente ? `<details class="evidencia-fuente"><summary>Full source</summary><p class="fuente">${textoDato(f.fuente, ctx?.idioma_fuentes || "es")}</p></details>` : "") +
       "</li>",
   );
   // ECOSTRESS sin dato: se dice con un texto neutro (no se rellena con nada). El motivo del motor («Requested from the
@@ -2276,7 +2301,30 @@ function htmlMemoria(p) {
     `<ol class="franja" style="--n: ${p.memoria.length}" aria-label="Agricultural years, from oldest to newest">${celdas}</ol>` +
     `<ul class="leyenda-memoria" aria-label="Legend">${leyenda}</ul>` +
     '<p class="nota-fija">Rule-based reading of monthly greenness; not a crop census.</p>' +
+    htmlNotaNogal(p) +
     "</section>"
+  );
+}
+
+// Estados de la memoria que la regla del nogal cuenta como años de huerta además de «perenne»
+// (datos/colab/A4_cultivos_reglas.py: la edad del nogal suma los años «verano», «doble» o «perenne»).
+const ESTADOS_NOGAL_NO_PERENNE = ["verano", "doble"];
+
+/**
+ * Nota bajo la memoria de una huerta de nogal (hallazgo 6 de la revisión cruzada de la sesión de datos, 14-nov):
+ * la franja puede decir «Summer crop» en algunos años junto a «Orchard pattern in satellite memory: ≥ N years», y
+ * parece una contradicción. El nogal pierde la hoja en invierno: un año con menos meses verdes se lee como cultivo
+ * de verano, y la edad de la huerta también cuenta esos años. Solo va si la parcela es nogal y su memoria trae al
+ * menos un año así; nombra los estados tal como los escribe la leyenda. Sin cifras.
+ */
+function htmlNotaNogal(p) {
+  if (p.cultivo_actual !== "nogal" || !Array.isArray(p.memoria)) return "";
+  const estados = ESTADOS_NOGAL_NO_PERENNE.filter((e) => p.memoria.some((m) => m.estado === e));
+  if (!estados.length) return "";
+  const nombres = estados.map((e) => `“${MEMORIA[e].texto}”`).join(" or ");
+  return (
+    `<p class="nota-fija" data-parte="nota-nogal">A pecan orchard loses its leaves in winter: in a year with fewer green ` +
+    `months the rules read its greenness as ${esc(nombres)}, and the orchard age counts those years too.</p>`
   );
 }
 
@@ -2484,8 +2532,8 @@ function htmlFiltros(o, D = estado.D) {
           : "";
         return (
           `<li class="${clase}" data-estado="${esc(e)}" data-filtro="${esc(f.id ?? "")}"${f.vivo ? ' data-vivo="si"' : ""}>${marca} <span class="filtro-texto">${esc(f.motivo ?? f.filtro)}</span>${razon}${helada}${vivo}` +
-          // La cita de la tabla oficial (en español, con códigos internos) va plegada en «Source» (I5).
-          `${f.fuente ? htmlFuente(f.fuente, { en: f.fuente_en, etiqueta: f.etiqueta || undefined }) : ""}</li>`
+          // La cita de la tabla oficial (con códigos internos) va plegada en «Source» (I5), en el idioma del buzón.
+          `${f.fuente ? htmlFuente(f.fuente, { en: f.fuente_en, etiqueta: f.etiqueta || undefined, idioma: idiomaBuzon() }) : ""}</li>`
         );
       })
       .join("") +
@@ -2656,7 +2704,7 @@ function htmlLaminaLocal(o, L, areaHa, D) {
     `<strong>${esc(lamina)}</strong> thousand m³/ha · ` +
     `<span class="lamina-local-alcanza">${alcanzaLocal}</span> ` +
     `<span class="lamina-local-limite">— ${esc(t.limite)}</span>${ll.etiqueta ? ` <span class="lamina-local-etiqueta">${esc(ll.etiqueta)}</span>` : ""}</p>` +
-    `<details class="lamina-local-fuente"><summary>Source of the local reference</summary><p class="fuente">${textoEs(ll.fuente)}` +
+    `<details class="lamina-local-fuente"><summary>Source of the local reference</summary><p class="fuente">${textoDato(ll.fuente, idiomaBuzon())}` +
     `${ll.nota ? ` ${esc(ll.nota)}` : ""}</p></details></div>` +
     // En papel, una línea corta (la hoja cabe en una carta): la misma cifra y sus hectáreas, rotulada como promedio del
     // distrito (o la guía regional de INIFAP); el texto completo y la fuente se leen en la ficha en línea.
@@ -2748,6 +2796,12 @@ function htmlGota(ops, p = {}) {
     const motivo = p.abstencion ? "Not available: this field is not classified." : "Not available for this field yet.";
     return `<section class="gota" id="seccion-gota" aria-labelledby="t-gota"><h3 id="t-gota" tabindex="-1">Follow the drop</h3><p>${motivo}</p></section>`;
   }
+  // Opciones sin bloque «gota» (el motor lo deja en null cuando falta la lámina neta: nunca toma la ET como cero).
+  // No entran al selector; la ficha dice cuáles son y que no se estima nada en su lugar (hallazgo H6 de la auditoría).
+  const sinGota = ops.filter((o) => !o.gota);
+  const sinDato = sinGota.length
+    ? `<p class="gota-nota" id="gota-sin-dato">No water-flow data for: ${esc(sinGota.map((o) => o.nombre).join("; "))}. Nothing is estimated in its place.</p>`
+    : "";
   return (
     '<section class="gota" id="seccion-gota" aria-labelledby="t-gota">' +
     '<h3 id="t-gota" tabindex="-1">Follow the drop</h3>' +
@@ -2758,6 +2812,7 @@ function htmlGota(ops, p = {}) {
     "</div>" +
     '<div class="gota-contenedor" id="gota-modulo"></div>' +
     '<p class="gota-nota" id="gota-cobertura" hidden></p>' +
+    sinDato +
     "</section>"
   );
 }
@@ -2788,6 +2843,8 @@ function pintarGota() {
     locale: LOCALE,
     // Eficiencias del goteo con su etiqueta y su fuente, y si el retorno sin tope es una cota superior (cubo.meta.goteo).
     metaGoteo: estado.cubo.meta?.goteo ?? null,
+    // Idioma de las citas de los supuestos y de las eficiencias (cubo.meta.idioma_fuentes).
+    idiomaFuentes: estado.cubo.meta?.idioma_fuentes ?? null,
     goteo: estado.gota.goteo,
     tope: estado.gota.tope,
     alCambiar: (e) => {

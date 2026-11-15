@@ -1244,5 +1244,6 @@
   "P0940": [0.712,0.624,0.298,0.28,0.363,0.592,0.753,0.781,0.804,0.762,0.795,0.778]
  },
  "umbrales": {"verde":{"valor":0.4,"etiqueta":"assumption [S]","fuente":"S9 §5; sensitivity 0.35–0.45; to be calibrated with blind labels","archivo":"data/processed/supuestos.json"},"desnudo":{"valor":0.2,"etiqueta":"assumption [S]","fuente":"Kit A3","archivo":"data/processed/supuestos.json"}},
- "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) via Google Earth Engine; monthly median inside each field; two pilot areas"
+ "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) via Google Earth Engine; monthly median inside each field; two pilot areas",
+ "idioma_fuentes": "en"
 }

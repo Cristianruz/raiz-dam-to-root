@@ -1,6 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "fuente": "data/processed/relieve_meta*.json (A9, NASADEM vía Earth Engine)",
+ "fuente_en": "data/processed/relieve_meta*.json (A9, NASADEM via Earth Engine)",
  "zonas": {
   "delicias_saucillo": {
    "rotulo": "regional, 30 m (NASADEM); not field drainage design",

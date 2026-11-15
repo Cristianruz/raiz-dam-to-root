@@ -91,7 +91,10 @@ def test_gemelo_cumple_el_contrato(gemelo, zonas_params):
     assert gemelo["_encabezado"].startswith("AI-assisted (Claude Code)")
     t = gemelo["terreno"]
     if t is not None:
-        assert set(t) == {"encoding", "tileSize", "minzoom", "maxzoom", "zonas", "exageracion", "fuente", "rotulo"}
+        # fuente_en: campo paralelo opcional con la misma cita en inglés (la página la prefiere).
+        assert set(t) - {"fuente_en"} == {"encoding", "tileSize", "minzoom", "maxzoom", "zonas", "exageracion",
+                                          "fuente", "rotulo"}
+        assert t.get("fuente_en") == "NASADEM (NASA/NASADEM_HGT/001), 30 m, via Google Earth Engine"
         assert t["encoding"] == "terrarium" and t["tileSize"] == 256
         assert isinstance(t["minzoom"], int) and isinstance(t["maxzoom"], int) and t["minzoom"] <= t["maxzoom"]
         assert t["zonas"], "terreno sin zonas debe ser null"
@@ -109,7 +112,8 @@ def test_gemelo_cumple_el_contrato(gemelo, zonas_params):
     tiempo = gemelo["tiempo"]
     assert set(tiempo) == {"anios", "intervalo_ms", "destacados"}
     for d in tiempo["destacados"].values():
-        assert set(d) == {"texto", "fuente", "etiqueta"} and d["texto"] and d["fuente"]
+        # fuente_en: campo paralelo opcional con la cita en inglés.
+        assert set(d) - {"fuente_en"} == {"texto", "fuente", "etiqueta"} and d["texto"] and d["fuente"]
     if gemelo["ndvi"] is not None:
         assert set(gemelo["ndvi"]) == {"archivo", "fuente", "meses"}
         assert gemelo["ndvi"]["archivo"] == "data/ndvi_mensual.json"
@@ -131,7 +135,9 @@ def test_valores_de_diseno_son_los_de_params(gemelo, params):
     assert gemelo["tiempo"]["intervalo_ms"] == g["reproduccion_intervalo_ms"]["valor"]
     assert gemelo["zona_inicial"] == g["zona_inicial"]["valor"]
     d = g["anio_destacado"]
+    # fuente_en: la cita en inglés de params (campo paralelo opcional).
     assert gemelo["tiempo"]["destacados"] == {str(d["valor"]): {"texto": d["texto"], "fuente": d["fuente"],
+                                                                "fuente_en": d["fuente_en"],
                                                                 "etiqueta": d["etiqueta"]}}
 
 
@@ -619,7 +625,8 @@ def csv_ndvi():
 
 
 def test_ndvi_una_serie_por_parcela(ndvi, gemelo):
-    assert set(ndvi) - META == {"meses", "parcelas", "umbrales", "fuente"}
+    # idioma_fuentes: campo opcional con el idioma del texto de «fuente» (como en contexto.json y suelo.json).
+    assert set(ndvi) - META - {"idioma_fuentes"} == {"meses", "parcelas", "umbrales", "fuente"}
     meses = ndvi["meses"]
     assert meses == sorted(set(meses)) and all(len(m) == 7 and m[4] == "-" for m in meses)
     ids = [f["properties"]["id"] for f in leer(WEB / "parcelas.geojson")["features"]]

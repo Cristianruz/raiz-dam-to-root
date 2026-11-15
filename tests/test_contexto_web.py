@@ -562,6 +562,158 @@ def test_lleno_ecostress_alineado_a_los_meses(lleno):
     assert set(eco["parcelas"]["L0002"]) == {None}
 
 
+def test_ecostress_lleva_las_escenas_de_cada_valor(lleno):
+    """Revisión independiente de ECOSTRESS (docs/revisiones/2026-11-15_ecostress.md, I1): la ficha dice de cuántas
+    escenas sale cada valor. «escenas_parcelas» va alineada a «meses», como los valores, y es la columna n_escenas del CSV."""
+    eco = lleno["contexto"]["ecostress"]
+    assert set(eco["escenas_parcelas"]) == set(eco["parcelas"])
+    # La fixture grande es la forma anterior del archivo: cuenta escenas y no trae intervalo.
+    assert eco["conteo"] == cw.CONTEO_ESCENAS and "minimos_parcelas" not in eco
+    with (lleno["processed"] / "ecostress_parcelas.csv").open(encoding="utf-8", newline="") as f:
+        filas = list(csv.DictReader(f))
+    assert filas, "la fixture trae filas"
+    for fila in filas:
+        i = eco["meses"].index(fila["mes"])
+        assert eco["escenas_parcelas"][fila["id"]][i] == int(fila["n_escenas"]), (fila["id"], fila["mes"])
+        # Sin escenas no hay valor (regla del esquema): el cero se conserva, no se vuelve null.
+        if int(fila["n_escenas"]) == 0:
+            assert eco["parcelas"][fila["id"]][i] is None
+    assert any(n and n > 1 for serie in eco["escenas_parcelas"].values() for n in serie), "la fixture trae meses con varias escenas"
+    # El contraste con el modelo de la entrega no se lleva a la página (I3 de la revisión).
+    texto = json.dumps(eco, ensure_ascii=False)
+    assert "etc_modelo" not in texto and "razon" not in texto
+
+
+# Dos fixtures pequeñas de ecostress_parcelas.csv, DE PRUEBA: la forma anterior (n_escenas cuenta escenas) y la de la
+# entrega corregida del 15-nov (n_escenas cuenta sobrevuelos; al final, el menor y el mayor y la incertidumbre).
+ECOSTRESS_ANTERIOR = (
+    "id,mes,et_mm_dia,n_escenas,zona,etc_modelo_mm,razon\n"
+    "P0001,2026-01,0.9,1,zona_a,3.0,0.3\n"
+    "P0001,2026-08,2.11,2,zona_a,7.5,0.28\n"
+    "P0002,2026-01,,0,zona_a,,\n"
+    "P0002,2026-08,0.66,2,zona_a,,\n"
+)
+ECOSTRESS_CORREGIDO = (
+    "id,mes,et_mm_dia,n_escenas,zona,etc_modelo_mm,razon,et_min_mm_dia,et_max_mm_dia,incertidumbre_w_m2\n"
+    "P0001,2026-01,0.9,1,zona_a,3.0,0.3,0.9,0.9,56\n"
+    "P0001,2026-08,2.11,2,zona_a,7.5,0.28,1.57,2.66,110\n"
+    "P0002,2026-01,,0,zona_a,,,,,\n"
+    "P0002,2026-08,0.66,2,zona_a,,,0.14,1.17,86\n"
+)
+REGISTRO_ECOSTRESS = {"archivo": "ecostress_parcelas.csv", "fecha": "prueba",
+                      "fuente": "producto de prueba; satellite estimate at 70 m on clear days, not a field measurement"}
+
+
+def bloque_ecostress_de(tmp_path, texto):
+    ruta = tmp_path / "ecostress_parcelas.csv"
+    ruta.write_text(texto, encoding="utf-8")
+    return cw.bloque_ecostress(ruta, REGISTRO_ECOSTRESS)
+
+
+def test_ecostress_archivo_anterior_cuenta_escenas_y_no_trae_intervalo(tmp_path):
+    """Con el archivo de hoy (sin et_min_mm_dia ni et_max_mm_dia): los valores, las escenas y el aviso; el conteo
+    se declara «escenas» y el bloque no lleva mínimos ni máximos (la ficha no escribe intervalo)."""
+    eco = bloque_ecostress_de(tmp_path, ECOSTRESS_ANTERIOR)
+    assert eco["meses"] == ["2026-01", "2026-08"]
+    assert eco["parcelas"] == {"P0001": [0.9, 2.11], "P0002": [None, 0.66]}
+    assert eco["escenas_parcelas"] == {"P0001": [1, 2], "P0002": [0, 2]}
+    assert eco["conteo"] == cw.CONTEO_ESCENAS
+    assert "minimos_parcelas" not in eco and "maximos_parcelas" not in eco
+
+
+def test_ecostress_entrega_corregida_cuenta_sobrevuelos_y_trae_el_intervalo(tmp_path):
+    """Con la entrega corregida: los mismos campos, el conteo «sobrevuelos» y el menor y el mayor de cada mes,
+    alineados a «meses» (vacíos donde no hubo sobrevuelo). Ni el contraste con el modelo ni la incertidumbre."""
+    eco = bloque_ecostress_de(tmp_path, ECOSTRESS_CORREGIDO)
+    anterior = bloque_ecostress_de(tmp_path, ECOSTRESS_ANTERIOR)
+    for campo in ("meses", "parcelas", "escenas_parcelas", "aviso", "archivo", "fuente", "fecha"):
+        assert eco[campo] == anterior[campo], campo
+    assert eco["conteo"] == cw.CONTEO_SOBREVUELOS
+    assert eco["minimos_parcelas"] == {"P0001": [0.9, 1.57], "P0002": [None, 0.14]}
+    assert eco["maximos_parcelas"] == {"P0001": [0.9, 2.66], "P0002": [None, 1.17]}
+    assert eco["aviso"] == "Satellite estimate at 70 m on clear days, not a field measurement"
+    texto = json.dumps(eco, ensure_ascii=False)
+    assert "etc_modelo" not in texto and "razon" not in texto and "incertidumbre" not in texto and "110" not in texto
+
+
+def test_ecostress_con_una_sola_de_las_dos_columnas_no_hay_intervalo(tmp_path):
+    """El intervalo necesita sus dos extremos: un archivo con solo et_min_mm_dia se lee como el anterior."""
+    solo_min = "\n".join(",".join(f.split(",")[:8]) for f in ECOSTRESS_CORREGIDO.strip().split("\n")) + "\n"
+    eco = bloque_ecostress_de(tmp_path, solo_min)
+    assert eco["conteo"] == cw.CONTEO_ESCENAS and "minimos_parcelas" not in eco
+
+
+def test_ecostress_aviso_sale_de_la_linea_de_la_entrega(lleno):
+    """El aviso que la ficha pone a la vista es el rótulo de la propia entrega (el tramo de su línea de LEEME que
+    dice «not a field measurement»), con su resolución: ninguna cifra se escribe en el JavaScript ni en el motor."""
+    eco = lleno["contexto"]["ecostress"]
+    esperado = GEN.AVISO_ECOSTRESS_PRUEBA
+    assert eco["aviso"] == esperado[:1].upper() + esperado[1:]
+    assert cw.aviso_de_ecostress("producto; satellite ET at 70 m on clear days, not a field measurement; crudo") == \
+        "Satellite ET at 70 m on clear days, not a field measurement"
+    # Una línea que no trae el rótulo: null (la página usa su aviso sin resolución); nunca se inventa uno.
+    assert cw.aviso_de_ecostress("NASA ECOSTRESS ECO_L3T_JET.002 via AppEEARS") is None
+    assert cw.aviso_de_ecostress(None) is None
+
+
+def test_ecostress_sin_cultivo_del_calendario_coincide_con_la_entrega():
+    """La ficha dice «the crop calendar has no crop on this field in that month» cuando el calendario del modelo de
+    la rotación actual (cubo → opción ACTUAL → meses_cultivo) no tiene cultivo en el mes del valor de ECOSTRESS que
+    muestra (el último con dato). La entrega dice lo mismo por su lado: en esos meses no calcula la ETc del modelo
+    (etc_modelo_mm vacío; datos/colab/E1_ecostress_parcelas.py: «solo parcelas clasificadas y días dentro del
+    ciclo del cultivo»). Aquí se cruzan las dos lecturas con los datos reales: donde la ficha pone la nota, la
+    entrega no trae ETc del modelo. La página no lee etc_modelo_mm ni compara con él."""
+    ruta, cubo_ruta = RAIZ / "data/processed/ecostress_parcelas.csv", RAIZ / "web/data/cubo.json"
+    if not ruta.exists() or not cubo_ruta.exists():
+        pytest.skip("sin ecostress_parcelas.csv o sin cubo.json")
+    with ruta.open(encoding="utf-8", newline="") as f:
+        filas = list(csv.DictReader(f))
+    if "etc_modelo_mm" not in filas[0]:
+        pytest.skip("la entrega no trae la columna adicional etc_modelo_mm")
+    cubo = json.loads(cubo_ruta.read_text(encoding="utf-8"))
+    ultimo = {}   # id -> fila del último mes con dato (el que muestra la ficha)
+    for fila in filas:
+        if fila["et_mm_dia"].strip() and fila["mes"] >= ultimo.get(fila["id"], {"mes": ""})["mes"]:
+            ultimo[fila["id"]] = fila
+    con_nota, sin_nota = 0, 0
+    for pid, fila in ultimo.items():
+        actual = next((o for o in cubo["parcelas"].get(pid, {}).get("opciones", []) if o["id"] == "ACTUAL"), None)
+        meses = (actual or {}).get("meses_cultivo")
+        if not isinstance(meses, list) or len(meses) != cw.MESES_DEL_ANIO:
+            continue   # parcela sin clasificar: la ficha no dice nada del calendario
+        if not meses[int(fila["mes"][5:7]) - 1]:
+            con_nota += 1
+            assert fila["etc_modelo_mm"].strip() == "", \
+                f"{pid} {fila['mes']}: el calendario no tiene cultivo, pero la entrega trae ETc del modelo"
+        else:
+            sin_nota += 1
+    assert con_nota and sin_nota, "los datos reales ejercitan los dos casos (con y sin cultivo en el mes mostrado)"
+
+
+def test_ecostress_real_trae_escenas_y_aviso():
+    """Con la entrega real: cada valor con sus escenas (las del CSV) y el aviso con la resolución que dice la línea."""
+    ruta = RAIZ / "data/processed/ecostress_parcelas.csv"
+    web = RAIZ / "web/data/contexto.json"
+    if not ruta.exists() or not web.exists():
+        pytest.skip("sin ecostress_parcelas.csv o sin contexto.json")
+    eco = json.loads(web.read_text(encoding="utf-8"))["ecostress"]
+    with ruta.open(encoding="utf-8", newline="") as f:
+        filas = list(csv.DictReader(f))
+    corregida = cw.COLUMNA_ET_MIN in filas[0] and cw.COLUMNA_ET_MAX in filas[0]
+    assert eco["conteo"] == (cw.CONTEO_SOBREVUELOS if corregida else cw.CONTEO_ESCENAS)
+    assert ("minimos_parcelas" in eco) == corregida and ("maximos_parcelas" in eco) == corregida
+    for fila in filas:
+        i = eco["meses"].index(fila["mes"])
+        assert eco["escenas_parcelas"][fila["id"]][i] == int(fila["n_escenas"])
+        assert (eco["parcelas"][fila["id"]][i] is None) == (fila["et_mm_dia"].strip() == "")
+        if corregida:   # el intervalo, tal como viene en la entrega
+            for lista, columna in (("minimos_parcelas", cw.COLUMNA_ET_MIN), ("maximos_parcelas", cw.COLUMNA_ET_MAX)):
+                esperado = float(fila[columna]) if fila[columna].strip() else None
+                assert eco[lista][fila["id"]][i] == esperado, (fila["id"], fila["mes"], columna)
+    assert eco["aviso"] and "not a field measurement" in eco["aviso"] and eco["aviso"] in eco["fuente"].replace(
+        eco["aviso"][:1].lower() + eco["aviso"][1:], eco["aviso"])
+
+
 def test_lleno_gaez_y_heladas(lleno):
     gaez = lleno["contexto"]["gaez"]
     assert set(gaez["zonas"]) == set(ZONAS) and gaez["fuente"]
@@ -572,6 +724,23 @@ def test_lleno_gaez_y_heladas(lleno):
     original = json.loads((lleno["processed"] / "heladas.json").read_text(encoding="utf-8"))
     assert {k: v for k, v in heladas.items() if k != "entrega"} == original, "el contenido de heladas.json, tal cual"
     assert heladas["entrega"]["fuente"] and heladas["entrega"]["fecha"] == GEN.FECHA_PRUEBA
+
+
+def test_gaez_lleva_los_textos_de_la_entrega_solo_si_vienen(tmp_path):
+    """bloque_gaez: clase_nombre, cultivo_gaez y nota (columnas adicionales de G1) pasan tal cual cuando traen texto; la
+    celda vacía no se escribe. Valores de prueba."""
+    zona = ZONAS[0]
+    ruta = tmp_path / cw.ARCHIVO_GAEZ
+    ruta.write_text("zona,cultivo,variable,valor,unidad,resolucion_m,cultivo_gaez,clase_nombre,nota\n"
+                    f"{zona},alfalfa,Clase de prueba,2,Class,9000,Alfalfa,High,\n"
+                    f"{zona},maiz_forrajero,Rendimiento de prueba,10,kg DW/ha,9000,Maize,,nota de prueba\n",
+                    encoding="utf-8")
+    avisos = []
+    bloque = cw.bloque_gaez(ruta, set(ZONAS), {"archivo": cw.ARCHIVO_GAEZ, "fuente": "prueba", "fecha": "prueba"}, avisos)
+    clase, maiz = bloque["zonas"][zona]
+    assert (clase["clase_nombre"], clase["cultivo_gaez"]) == ("High", "Alfalfa") and "nota" not in clase
+    assert (maiz["cultivo_gaez"], maiz["nota"]) == ("Maize", "nota de prueba") and "clase_nombre" not in maiz
+    assert set(cw.COLUMNAS_TEXTO_GAEZ) <= set(clase) | set(maiz) and avisos == []
 
 
 def test_et_contraste_lleva_la_zona_del_archivo_sin_sufijo(lleno):
