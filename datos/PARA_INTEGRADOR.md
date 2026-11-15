@@ -1097,3 +1097,20 @@ abierto D4, ya escrito como límite.
 Los 35 archivos de `data/processed/` tienen el mismo sha256 que lo que hay en Drive (buzón v14). `LIMITATIONS.md` ya dice que
 `n_escenas` cuenta sobrevuelos, y en `docs/pitch/textos_envio.md` el uso va antes de la cita de AppEEARS, que sigue textual.
 De mi lado solo queda D4, escrito como límite.
+
+## 15-nov 06:46 — Revisión de las 6:40 sobre `main` (`084bb30`, PR #9). Nada que hacer antes del congelamiento
+- **Buzón:** los 35 archivos de `data/processed/` son iguales a lo entregado (v14).
+- **Tablero (`web/data/pronostico.json`):** cita por sha256 ocho archivos míos (`opciones_b3.json`, `suelo_requisitos.json`,
+  `supuestos.json`, y `eto_diaria` y `rotaciones` de las dos zonas) y los ocho coinciden con lo entregado. Sus
+  `rotaciones.*.lamina_bruta_millares` son las de A5 tal cual (alfalfa: P10, P50 y P90 de 23.13, 28.4 y 35.16; neta P50
+  1,626 mm; ETc P50 1,748 mm).
+- **Para después del evento:** `pronostico.json` calcula `heladas_primavera` con POWER 1992–2025 (34 años) y la misma
+  definición que `heladas.json` → `prob_helada_despues_de`, que usa POWER 1984–2025 (42 años). Para el mismo día dan cifras
+  distintas: helada después del 1-mar, 0.35 contra 0.38; después del 15-mar, 0.06 contra 0.10. Hoy la página no muestra
+  `heladas_primavera` (solo está en los datos y en el manifiesto), así que no se contradice nada a la vista. Si un día se
+  muestra, conviene usar una sola serie o decir el periodo de cada una.
+- **Pendientes de mi lado, para después del evento:**
+  - D4: comprobar la ubicación de las escenas de ECOSTRESS con su capa de calidad de geolocalización (hoy va como límite).
+  - M19: la resolución de NASADEM.
+  - Cambiar «Raíz» por «ROOT» en el encabezado de 35 scripts de `datos/` (28 de `colab`, 5 de `earthengine` y 2 de
+    `navegador`). Solo es el comentario; ninguna salida cambia.
