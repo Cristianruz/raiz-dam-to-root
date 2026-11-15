@@ -28,19 +28,19 @@ dos zonas nuevas. SSEBop: `data/raw/ssebop/ssebop_<zona>_mensual.csv` (media del
 | Zona | ETc modelada | SSEBop | Diferencia | Superficie clasificada (ha) |
 |---|---|---|---|---|
 | Rectángulo original | 1,139 mm | 746 mm | +393 mm (+53 %) | 2,005: nogal 871, alfalfa 584, barbecho 547, cereal de invierno 3 |
-| Delicias–Saucillo ampliada | 830 mm | 652 mm | +178 mm (+27 %) | 7,168: barbecho 3,021, alfalfa 1,909, nogal 1,538, cereal de invierno 700 |
+| Delicias–Saucillo ampliada | 837 mm | 652 mm | +185 mm (+28 %) | 7,168: barbecho 3,021, alfalfa 1,909, nogal 1,538, cereal de invierno 700 |
 | Lázaro Cárdenas | 590 mm | 574 mm | +16 mm (+3 %) | 1,272: barbecho 765, nogal 349, alfalfa 158 |
 
 Por mes (mm; modelo / SSEBop):
 
 | Mes | Delicias–Saucillo ampliada | Lázaro Cárdenas |
 |---|---|---|
-| 2025-10 | 38.7 / 49.8 | 16.9 / 50.5 |
-| 2025-11 | 36.7 / 30.9 | 13.1 / 28.8 |
-| 2025-12 | 34.8 / 20.4 | 11.1 / 16.2 |
-| 2026-01 | 32.4 / 19.1 | 10.7 / 12.3 |
-| 2026-02 | 30.9 / 28.9 | 13.7 / 18.7 |
-| 2026-03 | 59.3 / 48.2 | 36.5 / 31.3 |
+| 2025-10 | 36.4 / 49.8 | 16.9 / 50.5 |
+| 2025-11 | 29.0 / 30.9 | 13.1 / 28.8 |
+| 2025-12 | 27.8 / 20.4 | 11.1 / 16.2 |
+| 2026-01 | 32.1 / 19.1 | 10.7 / 12.3 |
+| 2026-02 | 43.5 / 28.9 | 13.7 / 18.7 |
+| 2026-03 | 70.8 / 48.2 | 36.5 / 31.3 |
 | 2026-04 | 94.8 / 63.1 | 73.2 / 54.5 |
 | 2026-05 | 127.9 / 73.4 | 103.3 / 71.1 |
 | 2026-06 | 114.4 / 78.3 | 97.0 / 76.3 |
