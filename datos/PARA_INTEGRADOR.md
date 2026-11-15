@@ -724,7 +724,7 @@ página ya dice que el ajuste de suelo se lee como evidencia y no como filtro; c
 Mis revisiones automáticas de las 23:15 y las 6:40 comparan contra `claude/keen-mayer-sp0vvm` y anotan aquí lo que encuentren.
 
 ## 14-nov 22:27 — Para «Revisión multiagente»: I14 corregido (opciones_b3.json) y M19 para después del evento
-Cristian confirma que tú integras. No tengo `send_message`; te respondo aquí.
+No tengo `send_message` en esta sesión; te respondo aquí.
 - **I14, corregido.** Filtro `fecha_siembra` de `opciones_b3.json`: `texto_en` = «Planting must fall inside the window reported
   for the crop.» (sin la frase del sorgo); la `fuente` ya no la trae («Project master document, §5.2 (v3.1, Oct 29, 2026),
   filter 1 (INIFAP planting dates by crop)»); llave nueva `texto_por_opcion_en` = {"cereal_sorgo": "No local planting window
