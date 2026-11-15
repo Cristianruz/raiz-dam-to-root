@@ -1,0 +1,85 @@
+/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 */
+/* web/css/prioridades.css — fila «What matters most to you?» de la ficha y marcas en las tarjetas
+   (web/js/prioridades.js; hallazgo I24).
+   Colores de la identidad como variables; toma --tinta, --borde, --brote… de style.css. El valor tras la coma es
+   el respaldo si style.css no está cargado (mismos códigos de la identidad, kit C1 §10).
+   Nada depende solo del color: el botón activo dice ✓ (inactivo «+») y lleva aria-pressed; cada marca de tarjeta
+   lleva ✓ y su texto. Objetivos táctiles de al menos 44 px. Texto oscuro sobre fondos claros (AA).
+   Los números de este archivo son medidas de diseño, no datos. */
+
+:root {
+  --prio-tinta: var(--tinta, #1D2329);
+  --prio-tinta-suave: var(--tinta-suave, #4A525A);
+  --prio-fondo: var(--blanco, #FFFFFF);
+  --prio-borde: var(--borde, #D8CFC2);
+  --prio-papel: var(--arena, #F5EFE6);
+  --prio-gris: var(--gris, #8E9399);
+  --prio-verde: var(--brote, #4C9A2A);
+  --prio-verde-osc: var(--mem-perenne, #2F6B1B);
+  --prio-verde-claro: var(--brote-claro, #E3F0DC);
+  --prio-foco: var(--agua-osc, #174F80);
+}
+
+/* ---------- Fila de interruptores ---------- */
+.prioridades {
+  color: var(--prio-tinta);
+  background: var(--prio-fondo);
+  border: 1px solid var(--prio-borde);
+  border-radius: var(--radio, 10px);
+  padding: 10px 12px;
+  margin: 0 0 12px;
+  min-width: 0; max-width: 100%;
+}
+.prioridades-titulo { font-size: var(--fs-3); }
+.prioridades-botones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+.prioridad-boton {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 44px; min-width: 44px; padding: 6px 14px;
+  border: 2px solid var(--prio-verde); border-radius: 22px;
+  background: var(--prio-fondo); color: var(--prio-tinta);
+  font-weight: 700; line-height: 1.2; text-align: left;
+  cursor: pointer;
+}
+.prioridad-boton:hover { background: var(--prio-verde-claro); }
+.prioridad-boton:focus-visible { outline: 3px solid var(--prio-foco); outline-offset: 2px; }
+.prioridad-boton[aria-pressed="true"] {
+  background: var(--prio-verde-claro); border-color: var(--prio-verde-osc);
+  box-shadow: inset 0 0 0 1px var(--prio-verde-osc);
+}
+.prioridad-simbolo { display: inline-block; min-width: 1em; text-align: center; font-weight: 700; }
+
+/* Prioridades sin dato en el cubo: se listan, desactivadas (no son objetivos táctiles) */
+.prioridades-sin-dato {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  margin-top: 10px; font-size: var(--fs-2); color: var(--prio-tinta-suave);
+}
+.prioridades-sin-dato-titulo { font-style: italic; }
+.prioridades-sin-dato .prioridad-boton,
+.prioridades-sin-dato .prioridad-boton:hover {
+  min-height: 0; min-width: 0; padding: 2px 10px;
+  border: 1px dashed var(--prio-gris); border-radius: 12px;
+  background: var(--prio-papel); color: var(--prio-tinta-suave);
+  font-weight: 400; cursor: not-allowed;
+}
+
+.prioridades-nota { font-size: var(--fs-2); color: var(--prio-tinta-suave); font-style: italic; margin-top: 10px; }
+.prioridades-estado { font-size: var(--fs-2); margin-top: 4px; }
+
+/* ---------- Marcas en las tarjetas ---------- */
+.prioridad-marcas {
+  list-style: none; margin: 0; padding: 6px 12px;
+  display: grid; gap: 2px;
+  background: var(--prio-verde-claro); color: var(--prio-tinta);
+  border-bottom: 1px solid var(--prio-borde);
+  font-size: var(--fs-2); font-weight: 700;
+}
+.prioridad-marcas li { display: flex; gap: 6px; align-items: baseline; }
+.prioridad-marca-simbolo { flex: none; }
+.tarjeta[data-prioridad="cumple"] { box-shadow: 0 0 0 3px var(--prio-verde-osc); }
+
+/* En papel no van: la hoja impresa es la de la ficha (css/imprimir.css), sin interruptores ni resaltes. */
+@media print {
+  .prioridades, .prioridad-marcas { display: none !important; }
+  .tarjeta[data-prioridad="cumple"] { box-shadow: none; }
+}

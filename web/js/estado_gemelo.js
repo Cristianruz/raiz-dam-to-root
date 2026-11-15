@@ -56,7 +56,7 @@
 //     not forecast the dam.»
 //   Ganchos para las pruebas con navegador: la raíz lleva data-zona (zona en vista o "") y data-fuentes
 //   ("si" | "no"); cada grupo, data-grupo ("observado" | "modelado" | "escenario"); cada renglón, data-fila
-//   (limites, verdor, terreno, clima, precipitacion · agua, rutas · dotacion, lluvia, tormenta); cada zona,
+//   (verdor, terreno, clima, precipitacion · limites, agua, rutas · dotacion, lluvia, tormenta); cada zona,
 //   data-zona y aria-current="true" si está en vista; el valor de un control del escenario, data-valor.
 //
 // DECISIONES DE ESTE ARCHIVO (para quien lo integre o lo revise):
@@ -105,7 +105,6 @@ const GRUPOS = [
     simbolo: "◉",
     nota: "Read from satellite and climate data.",
     filas: [
-      { clave: "limites", etiqueta: "Field boundaries", archivos: /^parcelas_base/ },
       { clave: "verdor", etiqueta: "Greenness history", archivos: /^(hls_mensual|memoria_|suelo_desnudo)/ },
       { clave: "terreno", etiqueta: "Terrain", archivos: /^nasadem/ },
       { clave: "clima", etiqueta: "Climate", archivos: /^(eto_diaria|heladas)/ },
@@ -118,6 +117,9 @@ const GRUPOS = [
     simbolo: "ƒ",
     nota: "Computed from the observed data with a stated method.",
     filas: [
+      // Los límites son predicciones de una red neuronal sobre imágenes de satélite (fuera de su dominio de
+      // entrenamiento), no un levantamiento: van con lo modelado, no con lo observado.
+      { clave: "limites", etiqueta: "Field boundaries", metodo: "Fields of The World: neural-network predictions from satellite images, not surveyed", archivos: /^parcelas_base/ },
       { clave: "agua", etiqueta: "Water need", metodo: "FAO Penman–Monteith with NASA POWER", archivos: /^(demanda_cultivos|rotaciones)/ },
       { clave: "rutas", etiqueta: "Runoff paths", metodo: "NASADEM", archivos: /^relieve_/ },
     ],
@@ -319,6 +321,8 @@ export function modeloEstado({ manifest, cubo, gemelo, zonaId } = {}) {
     reconstruido: instante(cubo?.meta?.generado),
     simulado: Boolean(cubo?.meta?.mock || manifest?.mock),
     fuentesDisponibles,
+    // Idioma del texto «fuente» de cada archivo (manifest.idioma_fuentes); null si el manifest no lo declara.
+    idiomaFuentes: typeof manifest?.idioma_fuentes === "string" && manifest.idioma_fuentes ? manifest.idioma_fuentes : null,
     zonas: filasZonas,
     total,
     grupos: GRUPOS.map((g) => ({
@@ -382,8 +386,11 @@ function htmlEspejo(modelo, sub) {
   return `<div class="estado-gemelo-espejo">${titulo}<ul class="estado-gemelo-zonas">${zonas}${total}</ul></div>`;
 }
 
-function htmlArchivos(fila) {
+function htmlArchivos(fila, idioma) {
   if (!fila.archivos.length) return "";
+  // La fuente se muestra tal como se registró. Solo se marca su idioma si no es el de la página (inglés); un
+  // manifest que no lo declare se toma por español, como antes de la reentrega en inglés del buzón.
+  const lang = idioma === "en" ? "" : ` lang="${esc(idioma || "es")}"`;
   const items = fila.archivos
     .map(
       (a) =>
@@ -391,8 +398,7 @@ function htmlArchivos(fila) {
         `<span class="estado-gemelo-archivo">${esc(a.archivo)}</span>` +
         (a.fecha ? ` · ${htmlTiempo(a.fecha)}` : "") +
         (a.zona ? ` · ${esc(a.zona)}` : "") +
-        // La fuente se muestra tal como se registró (en español); la interfaz va en inglés.
-        (a.fuente ? `<span class="estado-gemelo-registrada" lang="es">${esc(a.fuente)}</span>` : "") +
+        (a.fuente ? `<span class="estado-gemelo-registrada"${lang}>${esc(a.fuente)}</span>` : "") +
         "</li>",
     )
     .join("");
@@ -425,7 +431,7 @@ function htmlFila(fila, modelo, escenario) {
     fecha = `<span class="estado-gemelo-fecha estado-gemelo-fecha--falta">${esc(fila.archivos.length ? `${TEXTO_FECHA}: ${TEXTO_NO_DISPONIBLE}` : TEXTO_SIN_ARCHIVO)}</span>`;
   }
   // La etiqueta y la fecha comparten renglón si caben; si no, la fecha baja (en el teléfono o en el panel).
-  return `<li class="estado-gemelo-fila" data-fila="${esc(fila.clave)}"><span class="estado-gemelo-fila-cabeza">${etiqueta}${fecha}</span>${fuente}${detalles}${htmlArchivos(fila)}</li>`;
+  return `<li class="estado-gemelo-fila" data-fila="${esc(fila.clave)}"><span class="estado-gemelo-fila-cabeza">${etiqueta}${fecha}</span>${fuente}${detalles}${htmlArchivos(fila, modelo.idiomaFuentes)}</li>`;
 }
 
 function htmlGrupo(grupo, modelo, escenario, sub, id) {

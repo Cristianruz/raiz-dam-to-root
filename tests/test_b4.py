@@ -19,6 +19,7 @@ Las opciones y los filtros oficiales (B3) se prueban en tests/test_opciones_b3.p
 Todo se escribe en carpetas temporales: web/data no se toca.
 """
 import csv
+import datetime as dt
 import json
 import re
 import shutil
@@ -152,14 +153,24 @@ def test_una_zona_compatibilidad(una_zona):
         for op in pc["opciones"]:
             ref = rot_ref(op, props[pid]["cultivo_actual"])
             assert op["agua"]["lamina_bruta"] == lam[ref], (pid, op["id"])
-            assert op["preguntas_ref"] == f"EXP_ZONA_{ref}"
+            # Una opción que agrega el equipo con un nombre distinto del de la tabla oficial lleva su propia
+            # explicación (misma llave más el sufijo); las demás, la llave de siempre.
+            del_equipo = op["preguntas_ref"].endswith(b4_cubo.SUFIJO_EXPL_PROPUESTA)
+            assert op["preguntas_ref"] == f"EXP_ZONA_{ref}" + (b4_cubo.SUFIJO_EXPL_PROPUESTA if del_equipo else "")
+            if del_equipo:
+                assert op["origen_opcion"] == b4_cubo.ORIGEN_OPCION_PROPUESTA and op["id"] != "ACTUAL", (pid, op["id"])
+                assert expl["explicaciones"][op["preguntas_ref"]]["textos"]["por_que"].startswith(op["nombre"])
+                oficial = expl["explicaciones"].get(f"EXP_ZONA_{ref}")   # solo si alguna parcela lleva la oficial
+                assert oficial is None or expl["explicaciones"][op["preguntas_ref"]]["valores"] == oficial["valores"]
 
 
 def test_localidades_de_params(una_zona):
     cubo = una_zona[2]
     loc = PARAMS["zona_piloto"]["localidades_equipo"]
+    # fuente_en: la misma cita en inglés (campo paralelo; la página la prefiere).
     assert cubo["localidades"] == [{"nombre": x["nombre"], "municipio": x["municipio"], "lat": x["lat"],
-                                    "lon": x["lon"], "fuente": loc["fuente"]} for x in loc["valor"]]
+                                    "lon": x["lon"], "fuente": loc["fuente"], "fuente_en": loc["fuente_en"]}
+                                   for x in loc["valor"]]
 
 
 # --- (b) fixture de dos zonas ----------------------------------------------------------
@@ -333,6 +344,10 @@ def comprobar_goteo_x31(geo, cubo, ea_goteo, ea_superficial):
         g = op["gota"]
         con, sin, tope = (op[b] for b in BLOQUES_GOTEO)
         donde = f"{p['id']}/{op['id']}"
+        if g is None:
+            # Sin lámina neta no hay La gota ni goteo (ver test_sin_lamina_neta_…): los cuatro van en null.
+            assert con is None and sin is None and tope is None, f"{donde}: goteo sin La gota"
+            continue
         if not g["m3_salen_presa"] > 0:
             assert con is None and sin is None and tope is None, f"{donde}: una opción sin agua no lleva goteo"
             sin_agua += 1
@@ -673,3 +688,143 @@ def test_cubo_publicado_lamina_local_y_constante():
             assert (ll is None) == (esperado is None), op["id"]
             if ll:
                 assert {k: ll[k] for k in esperado} == esperado
+
+
+# --- (h) Revisión de dda5abb: puntos 1, 7, 11 y 12 ------------------------------------------------------------
+def test_sin_lamina_neta_la_gota_y_el_goteo_quedan_en_null_y_se_avisa(tmp_path):
+    """Punto 1: con neta_mm_p50 en null la ET no se conoce. Antes valía 0 y el goteo salía con una baja de la
+    presa inventada; ahora los cuatro bloques de esa opción van en null, se avisa y el contrato pasa. Solo se
+    quita la neta de UNA rotación de UNA zona (fixture de dos zonas con el supuestos.json DE PRUEBA)."""
+    sup = supuestos_de_prueba()
+    processed = procesados_con(tmp_path, sup)
+    ruta = processed / "rotaciones.json"
+    rot = json.loads(ruta.read_text(encoding="utf-8"))
+    rid = "algodon"
+    r = next(x for x in rot["rotaciones"] if x["id"] == rid)
+    assert r["lamina_bruta_millares"]["0"]["p50"] > 0, "la prueba necesita una opción que pida agua"
+    r["lamina_bruta_millares"]["0"]["neta_mm_p50"] = None
+    ruta.write_text(json.dumps(rot, ensure_ascii=False), encoding="utf-8")
+    rep, geo, cubo, _, web = correr(processed, tmp_path)
+
+    sin_neta = otras_dz = otras_lc = 0
+    for p, op in opciones_con_area(geo, cubo):
+        bloques = [op[b] for b in ("gota", *BLOQUES_GOTEO)]
+        if p["zona"] == DZ and op["rotacion"] == rid:
+            assert bloques == [None] * 4, f"{p['id']}/{op['id']}: sin neta no hay La gota ni goteo"
+            sin_neta += 1
+        elif op["agua"]["lamina_bruta"]["0"]["p50"] > 0:
+            assert all(b is not None for b in bloques), f"{p['id']}/{op['id']}: las demás opciones no cambian"
+            otras_lc += p["zona"] == LC and op["rotacion"] == rid   # la otra zona trae su neta: sí lleva La gota
+            otras_dz += p["zona"] == DZ
+    assert sin_neta and otras_dz and otras_lc
+    aviso = [a for a in rep["avisos"] if rid in a and "neta_mm_p50" in a]
+    assert aviso and aviso[0] in cubo["meta"]["notas"] and str(sin_neta) in aviso[0], rep["avisos"]
+    assert rep["con_goteo"] == sum(1 for _, op in opciones_con_area(geo, cubo) if op["gota_goteo_con_tope"])
+    comprobar_goteo_x31(geo, cubo, sup["ea_goteo"]["valor"], sup["ea_superficial_referencia"]["valor"])
+    assert validar_contrato.validar(web) == []
+
+
+def test_flujos_de_la_gota_sin_neta_son_none():
+    """La función de flujos no convierte una neta null en ET = 0."""
+    assert b4_cubo.flujos_gota(1.0, 1.0, None, PARAMS, M3_MILLAR) is None
+    assert b4_cubo.flujos_gota(1.0, 1.0, 0, PARAMS, M3_MILLAR)["et"] == 0, "una neta de cero sí es un dato"
+
+
+def test_explicacion_dice_el_compromiso_tipico_desde_la_siembra(dos_zonas):
+    """Punto 7: la explicación es una por zona y rotación, y la comparten la opción ACTUAL (cuya tarjeta muestra
+    el plazo RESTANTE) y la alternativa nueva. Un plazo de varios años se redacta como el compromiso típico del
+    cultivo desde la siembra, no como el de esta parcela; el de una temporada sigue igual. Sin dígitos."""
+    _, geo, cubo, expl, web = dos_zonas
+    anual = PARAMS["plazo"]["anual"]["valor"]
+    vistos = set()
+    for p, op in opciones_con_area(geo, cubo):
+        t = expl["explicaciones"][op["preguntas_ref"]]["textos"]["por_que"]
+        plazo = op["agua"]["plazo_anios"]
+        if op["rotacion"] == "nogal":
+            # El plazo del nogal es un horizonte de cálculo, no la vida de la huerta (kit §2.3; su nota_plazo).
+            assert "calculation horizon of {{f2}} years" in t and "orchards live longer" in t, t
+            vistos.add("nogal")
+        elif plazo["max"] > anual:
+            assert "from planting" in t and "typically" in t, (op["preguntas_ref"], t)
+            # Auditoría del 15-nov: la variante que conserva el rodal (corte de verano) no siembra nada; el texto
+            # habla del cultivo y remite a la tarjeta, que es la que muestra los años que le quedan a la parcela.
+            assert "this crop typically commits" in t and "the card shows the term left for this field" in t, t
+            assert "per year and commits water for {{f2}}" not in t, "la redacción anterior parecía el plazo de la parcela"
+            restante = op["agua"]["plazo_restante"]
+            vistos.add("restante_menor" if op["id"] == "ACTUAL" and restante["max"] < plazo["max"] else "varios_anios")
+        else:
+            assert "for one season" in t, t
+            vistos.add("anual")
+        assert not re.search(r"\d", re.sub(r"\{\{\w+\}\}", "", t)), "cifras fuera de los marcadores"
+    assert {"restante_menor", "anual", "nogal"} <= vistos, "la fixture debe traer alfalfa ACTUAL con restante menor y nogal"
+    from motor import verificador
+    assert verificador.verificar_archivo(web / "explicaciones.json") == {}
+
+
+def test_ventana_de_suelo_desnudo_que_cruza_el_anio():
+    """Punto 11: una ventana con inicio > fin (p. ej. de diciembre a enero) cruza el año; antes daba 0 días."""
+    anio = b4_cubo.ANIO_VENTANA
+    params = {"suelo": {"ventana_desnudo": {"valor": {"inicio": "12-01", "fin": "01-31"}}}}
+    todos = (dt.date(anio + 1, 1, 31) - dt.date(anio, 12, 1)).days + 1
+    assert b4_cubo.dias_desnudo_ventana(set(), params) == todos
+    diciembre = set(range(dt.date(anio, 12, 1).timetuple().tm_yday, dt.date(anio, 12, 31).timetuple().tm_yday + 1))
+    assert b4_cubo.dias_desnudo_ventana(diciembre, params) == todos - len(diciembre)
+    # La ventana del proyecto (inicio < fin) no cambia.
+    v = PARAMS["suelo"]["ventana_desnudo"]["valor"]
+    a, b = (dt.date(anio, *(int(x) for x in v[k].split("-"))).timetuple().tm_yday for k in ("inicio", "fin"))
+    assert a <= b and b4_cubo.dias_desnudo_ventana(set(), PARAMS) == b - a + 1
+
+
+def test_params_eficiencia_goteo_apunta_a_supuestos():
+    """Punto 12: el escenario de goteo usa ea_goteo de data/processed/supuestos.json (entregado). params no duplica
+    el valor (sigue en null) y su nota ya no dice «pendiente»: dice de dónde sale."""
+    goteo, motivo = b4_cubo.leer_goteo(PROCESSED)
+    if goteo is None:
+        pytest.skip(f"data/processed sin eficiencia de goteo con fuente: {motivo}")
+    g = PARAMS["eficiencia"]["goteo"]
+    assert g["valor"] is None, "el valor vive en supuestos.json; params no lo duplica"
+    assert "supuestos.json" in g["nota"] and "ea_goteo" in g["nota"] and "pendiente" not in g["nota"].lower()
+
+
+def test_corte_de_verano_sobre_la_alfalfa_actual_descuenta_la_edad(tmp_path):
+    """Punto 13 (integrador): S9 §5 («En alfalfa, plazo restante = plazo − edad observada, con mínimo cero») y el
+    contrato (kit §2.3, plazo_restante = plazo − edad observada). Una alternativa que sigue con el MISMO rodal de
+    alfalfa (el corte de riego en verano: su único cultivo es el cultivo actual) descuenta la edad como la ACTUAL;
+    las que siembran algo nuevo llevan el plazo completo y el nogal nunca descuenta (horizonte de cálculo). Con
+    edad null, plazo completo y la nota «age not available». Fixture de dos zonas con UNA alfalfa sin edad."""
+    processed = procesados_con(tmp_path)
+    ruta = processed / "cultivos_parcelas.csv"
+    with open(ruta, encoding="utf-8", newline="") as f:
+        filas = list(csv.DictReader(f))
+    sin_edad = next(r for r in filas if r["cultivo_actual"] == "alfalfa" and r["abstencion"] == "False")
+    sin_edad["edad_perenne_anios"] = ""
+    with open(ruta, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(filas[0]))
+        w.writeheader()
+        w.writerows(filas)
+    _, geo, cubo, _, web = correr(processed, tmp_path)
+
+    vistos = set()
+    for p, op in opciones_con_area(geo, cubo):
+        ag, edad = op["agua"], p["edad_perenne_anios"]
+        plazo = ag["plazo_anios"]
+        mismo_rodal = p["cultivo_actual"] == "alfalfa" and [x for x in op["secuencia"] if x != "descanso"] == ["alfalfa"]
+        donde = f"{p['id']}/{op['id']}"
+        if mismo_rodal and edad is not None:
+            esperado = {k: max(0, plazo[k] - edad) for k in ("min", "max")}
+            vistos.add("actual" if op["id"] == "ACTUAL" else "corte_verano")
+        else:
+            esperado = dict(plazo)
+            if mismo_rodal:
+                assert ag["nota_plazo"] == "age not available", donde
+                vistos.add("sin_edad")
+            elif p["cultivo_actual"] == "nogal":
+                vistos.add("nogal")
+            elif p["cultivo_actual"] == "alfalfa":
+                vistos.add("siembra_nueva")
+        assert ag["plazo_restante"] == esperado, donde
+        for r in b4_cubo.LLUVIAS:   # compromiso = lámina P50 × plazo restante
+            p50 = ag["lamina_bruta"][r]["p50"]
+            assert ag["compromiso_millares_ha"][r] == {k: round(p50 * esperado[k], 2) for k in ("min", "max")}, donde
+    assert {"actual", "corte_verano", "sin_edad", "siembra_nueva", "nogal"} <= vistos, vistos
+    assert validar_contrato.validar(web) == []

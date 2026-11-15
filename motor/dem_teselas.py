@@ -21,8 +21,11 @@ Cómo se hacen:
   MapLibre dibuja el relieve con teselas de un nivel menos que el zoom del mapa: por eso el
   mínimo baja hasta donde la zona completa todavía cabe en un teléfono (nota de params.gemelo.dem).
 - Remuestreo: rasterio.warp.reproject a EPSG:3857, bilinear, un mosaico por zoom.
-- Fuera de la cobertura del ráster se repite la elevación válida más cercana (extensión del
-  borde). Nunca se rellena con 0: dejaría un acantilado en la vista 3D.
+- Fuera de la cobertura del ráster (revisión independiente, fila I16): un valor plano, la mediana del
+  anillo de celdas del borde del ráster (una elevación que ya está en el ráster, la misma en todos los
+  zooms), al que se llega con una rampa lineal de RAMPA_M metros desde el borde. Antes se copiaba el
+  borde hacia fuera y eso dibujaba estrías y crestas falsas en la vista 3D; un plano sin rampa dejaría
+  un escalón donde el borde cae en un cerro. Nunca se rellena con 0: sería un acantilado.
 - La elevación se guarda en pasos de 1/PASOS_POR_METRO m (el ráster trae metros enteros): las
   teselas pesan la mitad que con 1/256 m y la diferencia no se ve.
 - Determinista: la misma entrada da los mismos bytes (PNG escrito aquí con zlib, sin fechas).
@@ -35,6 +38,7 @@ API (para motor/gemelo_web.py y las pruebas; todo lo de esta lista usa solo la b
   centro_de_pixel(z, x, y, columna, fila) -> (lon, lat)
   leer_tesela(ruta) -> filas de elevaciones en metros;  rango_tesela(ruta) -> (mín, máx)
   leer_png_rgb(ruta) -> (ancho, alto, filas RGB);  rango_de_filas(filas) -> (mín, máx)
+  valor_plano(np, banda, sin_dato) -> elevación de fuera del ráster (esta usa numpy)
   ruta_tif(processed, zona), sha256_archivo(ruta), sha256_teselas(carpeta, teselas)
 
 Uso:  python motor/dem_teselas.py            (todas las zonas)
@@ -55,6 +59,8 @@ ZONA_POR_OMISION = "delicias_saucillo"  # el .tif sin sufijo (docs/decisiones/20
 LADO = 256                # píxeles por lado de tesela (tileSize del contrato de gemelo.json)
 CODIFICACION = "terrarium"
 PASOS_POR_METRO = 4       # la elevación se guarda en pasos de 1/4 m; debe dividir a 256
+RAMPA_M = 2000.0          # Diseño (no es un dato): ancho, en metros de Web Mercator, de la rampa que lleva del
+                          # borde del ráster al valor plano de fuera; solo da forma a donde no hay dato
 SIN_DATO = -32768.0       # marca interna del remuestreo: Terrarium no puede guardar nada menor
 RADIO_M = 6378137.0       # radio de la esfera de Web Mercator (EPSG:3857)
 FIRMA_PNG = b"\x89PNG\r\n\x1a\n"
@@ -240,8 +246,20 @@ def versiones(np, rasterio):
             "zlib": zlib.ZLIB_RUNTIME_VERSION}
 
 
-def _mosaico(np, reproject, Resampling, from_bounds, origen, transformada, crs, sin_dato_origen, z, rango):
-    """Elevaciones (float32) de todas las teselas del zoom z juntas, ya con el borde extendido."""
+def valor_plano(np, origen, sin_dato_origen):
+    """Elevación de fuera del ráster: la mediana del anillo de celdas del borde (sin las celdas sin dato).
+    Es la misma para todos los zooms, así el terreno de fuera no salta al cambiar de zoom."""
+    anillo = np.concatenate([origen[0], origen[-1], origen[1:-1, 0], origen[1:-1, -1]]).astype("float64")
+    if sin_dato_origen is not None:
+        anillo = anillo[anillo != sin_dato_origen]
+    anillo = anillo[np.isfinite(anillo)]
+    if not anillo.size:
+        raise ValueError("el borde del ráster no tiene ninguna celda con dato")
+    return float(np.median(anillo))
+
+
+def _mosaico(np, reproject, Resampling, from_bounds, origen, transformada, crs, sin_dato_origen, z, rango, plano):
+    """Elevaciones (float32) de todas las teselas del zoom z juntas; fuera del ráster, rampa hacia `plano`."""
     x0, y0, x1, y1 = rango
     nx, ny = x1 - x0 + 1, y1 - y0 + 1
     mitad = math.pi * RADIO_M
@@ -257,11 +275,16 @@ def _mosaico(np, reproject, Resampling, from_bounds, origen, transformada, crs, 
     filas, columnas = np.where(valido.any(axis=1))[0], np.where(valido.any(axis=0))[0]
     f0, f1, c0, c1 = filas[0], filas[-1], columnas[0], columnas[-1]
     if not valido[f0:f1 + 1, c0:c1 + 1].all():
-        raise ValueError(f"zoom {z}: el ráster tiene huecos sin dato; este script solo extiende el borde de un rectángulo")
-    # Extensión del borde: cada píxel de fuera copia el píxel válido más cercano (se recorta el índice).
-    ii = np.clip(np.arange(destino.shape[0]), f0, f1)
-    jj = np.clip(np.arange(destino.shape[1]), c0, c1)
-    return destino[np.ix_(ii, jj)]
+        raise ValueError(f"zoom {z}: el ráster tiene huecos sin dato; este script solo rellena fuera de un rectángulo")
+    # Valor del borde más cercano (se recorta el índice) y distancia en metros al rectángulo con dato.
+    filas_i, columnas_j = np.arange(destino.shape[0]), np.arange(destino.shape[1])
+    borde = destino[np.ix_(np.clip(filas_i, f0, f1), np.clip(columnas_j, c0, c1))]
+    df = np.maximum(np.maximum(f0 - filas_i, filas_i - f1), 0)[:, None]
+    dc = np.maximum(np.maximum(c0 - columnas_j, columnas_j - c1), 0)[None, :]
+    distancia_m = np.hypot(df, dc) * (lado_m / LADO)
+    # Peso del borde: 1 dentro del ráster (queda igual), baja en línea recta y vale 0 a RAMPA_M o más.
+    peso = np.clip(1.0 - distancia_m / RAMPA_M, 0.0, 1.0)
+    return (plano + (borde.astype("float64") - plano) * peso).astype("float32")
 
 
 def _png_terrarium(np, elev):
@@ -284,10 +307,11 @@ def _generar_zona(mods, zona, tif, carpeta, minzoom, maxzoom):
     with rasterio.open(tif) as ds:
         origen = ds.read(1).astype("float32")
         transformada, crs, sin_dato = ds.transform, ds.crs, ds.nodata
+    plano = valor_plano(np, origen, sin_dato)
     nuevas = {}
     for z in range(minzoom, maxzoom + 1):
         rango = rango_de_teselas(zona["bbox"], z)
-        mosaico = _mosaico(np, reproject, Resampling, from_bounds, origen, transformada, crs, sin_dato, z, rango)
+        mosaico = _mosaico(np, reproject, Resampling, from_bounds, origen, transformada, crs, sin_dato, z, rango, plano)
         for x in range(rango[0], rango[2] + 1):
             for y in range(rango[1], rango[3] + 1):
                 f, c = (y - rango[1]) * LADO, (x - rango[0]) * LADO
@@ -316,7 +340,14 @@ def _generar_zona(mods, zona, tif, carpeta, minzoom, maxzoom):
         "encoding": CODIFICACION, "tileSize": LADO, "minzoom": minzoom, "maxzoom": maxzoom,
         "bbox": zona["bbox"],
         "paso_vertical_m": 1 / PASOS_POR_METRO,
-        "remuestreo": "bilinear (rasterio.warp.reproject a EPSG:3857); fuera del ráster se extiende el borde",
+        "remuestreo": "bilinear (rasterio.warp.reproject a EPSG:3857); fuera del ráster, valor plano con rampa "
+                      "(ver fuera_del_raster)",
+        # Revisión I16: qué hay donde el ráster no llega (no es dato: solo da forma a la vista 3D).
+        "fuera_del_raster": {
+            "valor_m": plano, "regla": "mediana del anillo de celdas del borde del ráster",
+            "rampa_m": RAMPA_M, "rampa_unidad": "metros de Web Mercator, lineal desde el borde del ráster",
+            "etiqueta": "Diseño",
+        },
         "generado_con": versiones(np, rasterio),
         # Rutas relativas a esta carpeta: sirven para guardar el relieve sin conexión sin repetir las cuentas.
         "teselas": [f"{z}/{x}/{y}.png" for z, x, y in sorted(nuevas)],

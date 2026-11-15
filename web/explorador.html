@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="vendor/maplibre-gl-5.24.0/maplibre-gl.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="css/relieve.css">
+  <link rel="stylesheet" href="css/terreno2d.css">
   <link rel="stylesheet" href="css/gota.css">
   <link rel="stylesheet" href="css/mensaje.css">
   <link rel="stylesheet" href="css/acerca.css">
@@ -40,6 +41,7 @@
   <link rel="stylesheet" href="css/instalar.css">
   <link rel="stylesheet" href="css/suelo.css">
   <link rel="stylesheet" href="css/contexto.css">
+  <link rel="stylesheet" href="css/prioridades.css">
   <link rel="stylesheet" href="css/imprimir.css">
   <script defer src="vendor/maplibre-gl-5.24.0/maplibre-gl.js"></script>
   <script defer src="vendor/d3-7.9.0/d3.min.js"></script>
@@ -65,9 +67,11 @@
 
   <section class="controles" id="controles" aria-label="Water allocation controls">
     <div class="control-dotacion">
-      <label for="dotacion" class="etiqueta-control">Water allocation <span class="unidad">(thousand m³ per hectare · millares/ha)</span></label>
+      <label for="dotacion" class="etiqueta-control">Water allocation <span class="unidad">(thousand m³ per hectare)</span></label>
       <div class="fila-deslizador">
-        <input type="range" id="dotacion" list="dotacion-marcas" aria-describedby="punto-medicion">
+        <!-- data-cargando: oculto (sin mover el diseño) hasta que app.js le pone min, max y valor del cubo; así no salta
+             del valor por omisión del navegador al de los datos. -->
+        <input type="range" id="dotacion" list="dotacion-marcas" aria-describedby="punto-medicion" data-cargando>
         <datalist id="dotacion-marcas"></datalist>
         <output id="dotacion-valor" class="valor-dotacion" for="dotacion" aria-live="off"></output>
       </div>
@@ -102,7 +106,8 @@
         </div>
         <h1 class="indicador-titulo">Water already committed by perennial crops</h1>
         <div aria-live="polite" aria-atomic="true">
-          <p class="indicador-cifra" id="indicador-cifra"></p>
+          <!-- Estado de carga (sin cifras): app.js lo reemplaza con el indicador cuando llegan los datos. -->
+          <p class="indicador-cifra" id="indicador-cifra"><span class="cargando">Loading field data…</span></p>
           <p class="indicador-rango" id="indicador-rango"></p>
           <div class="indicador-mensaje" id="indicador-mensaje" hidden></div>
           <p class="indicador-segunda" id="indicador-segunda"></p>
@@ -124,14 +129,15 @@
 
       <section class="bloque" aria-labelledby="t-colorear">
         <h2 id="t-colorear">Color fields by</h2>
-        <fieldset>
+        <fieldset aria-describedby="nota-colorear">
           <legend>Water</legend>
           <label class="opcion-radio"><input type="radio" name="colorear" value="semaforo" checked> Enough water?</label>
           <label class="opcion-radio"><input type="radio" name="colorear" value="plazo"> Water term</label>
         </fieldset>
-        <fieldset id="capas" hidden>
+        <fieldset id="capas" hidden aria-describedby="nota-colorear">
           <legend>Layers</legend>
         </fieldset>
+        <p class="nota-colorear" id="nota-colorear" hidden></p>
         <div class="leyenda" id="leyenda" aria-live="polite"></div>
         <!-- Capa «Terrain & runoff» y botón «Simulate a storm»: los dibuja web/js/relieve.js con
              relieve.json y relieve_rutas.geojson; sin esos archivos dice «Terrain layer: not run». -->
@@ -148,7 +154,7 @@
 
       <section class="bloque" aria-labelledby="t-campos">
         <h2 id="t-campos">Fields</h2>
-        <p class="ayuda">Select a field to open its sheet. Story fields are at the top, then classified fields, then fields not classified.</p>
+        <p class="ayuda">Select a field to open its sheet. Example fields are at the top, then classified fields, then fields not classified.</p>
         <label class="buscar" for="buscar-parcela">Find a field <span class="unidad">(ID or crop)</span></label>
         <input type="search" id="buscar-parcela" class="buscar-campo" autocomplete="off" spellcheck="false" aria-controls="lista-parcelas" aria-describedby="lista-resumen">
         <p class="lista-resumen" id="lista-resumen" aria-live="polite"></p>
@@ -168,9 +174,11 @@
       <!-- «Regional context» (web/js/contexto.js, montarContextoRegional): series de la zona elegida, con el año de la línea
            de tiempo resaltado. Plegable: se dibuja la primera vez que se abre. -->
       <details class="bloque bloque-contexto" id="bloque-contexto">
-        <summary class="bloque-plegable">
+        <!-- El nombre accesible del plegable es solo su título; la ayuda (a la vista aunque esté cerrado) va como
+             descripción (aria-describedby) y no entra al nombre. El signo «+» / «−» es decorativo (style.css). -->
+        <summary class="bloque-plegable" aria-describedby="ayuda-contexto">
           <h2 id="t-contexto">Regional context</h2>
-          <span class="bloque-plegable-ayuda">Climate, soil moisture, basin water and frost of the pilot area, year by year. They describe the area or the basin, not a single field.</span>
+          <span class="bloque-plegable-ayuda" id="ayuda-contexto" aria-hidden="true">Climate, soil moisture, basin water and frost of the pilot area, year by year. They describe the area or the basin, not a single field.</span>
         </summary>
         <div id="contexto-regional"></div>
       </details>
@@ -180,7 +188,7 @@
         <h2 id="t-localidades">Team reference localities (not fields)</h2>
         <p class="ayuda">Places to find your way on the map. They are not fields and carry no water data.</p>
         <ul class="lista-localidades" id="lista-localidades"></ul>
-        <p class="fuente" id="localidades-fuente"></p>
+        <div class="fuente" id="localidades-fuente"></div>
       </section>
 
       <section class="bloque" aria-labelledby="t-boquilla">

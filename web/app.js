@@ -16,6 +16,7 @@
 // - relieve.js: capa «Terrain & runoff» y botón «Simulate a storm» en el panel (kit A9, parte web), y la
 //   línea de relieve del renglón Soil de cada tarjeta (S9 §4 bis);
 // - gota.js: «Follow the drop» dentro de la ficha, Sankey con d3-sankey (kit X3.1 y X3.2);
+// - beneficios.js: «Benefits» del «Why?» de cada tarjeta, la opción comparada con la rotación ACTUAL de la parcela (I10);
 // - mensaje.js: maqueta del mensaje de WhatsApp (en español) y ficha imprimible (kit C4);
 // - acerca.js: pantalla de inicio de tres pasos y sección «About & Data» (kit C5). pruebas.json se lee solo al
 //   abrir «About & Data» (carga perezosa); manifest.json se lee una vez al arrancar (la tarjeta «Twin status»
@@ -63,15 +64,18 @@ import {
 } from "./reglas.js";
 import { agregarCapaRelieve, htmlRelieveParcela, cargarRelieve, leerOpcional } from "./js/relieve.js";
 import { dibujarGota } from "./js/gota.js";
+import { beneficiosDeOpcion } from "./js/beneficios.js";
 import { htmlWhatsApp, imprimirFicha } from "./js/mensaje.js";
 import { montarInicio, montarAcerca, LLAVE_INICIO } from "./js/acerca.js";
 import { crearGemelo3D } from "./js/gemelo3d.js";
+import { agregarTerreno2D } from "./js/terreno2d.js";
 import { crearLineaDeTiempo } from "./js/tiempo.js";
 import { montarEstadoGemelo } from "./js/estado_gemelo.js";
 import { montarInstalacion } from "./js/instalar.js";
-import { fraseResumen, casoResumen, dibujarNDVI, idDeHash, hashDe } from "./js/resumen.js";
+import { fraseResumen, casoResumen, dibujarNDVI, idDeHash, hashDe, formatoHectareas, hectareasTexto } from "./js/resumen.js";
 import { leerSuelo, htmlPerfilDeSuelo, htmlAptitud, htmlNotaDeZona } from "./js/suelo.js";
 import { evidenciaDeParcela, riesgoDeHelada, montarContextoRegional, montarRecursosReto } from "./js/contexto.js";
+import { montarPrioridades } from "./js/prioridades.js";
 
 const LOCALE = "en-US";
 
@@ -167,7 +171,20 @@ const GLOSARIO = [
   ["Consumption cap", "A rule that drip irrigation may not raise the crop's water consumption (ET) above its historical level."],
   ["Millar", "The unit used in the district: a thousand m³ of water per hectare. See the equivalence under the slider."],
   ["Water term", "How many years a crop ties up water: one season for annual crops, several years for alfalfa, a long horizon for orchards."],
+  // I9 de la revisión total: las etiquetas de evidencia aparecen junto a las fuentes y no tenían leyenda en inglés.
+  // Vocabulario de data/params.json (_nota): [V], [P], [S], [NE] y «Diseño».
+  ["[V] [P] [S]", "Evidence labels next to each source: [V] verified in a primary source · [P] press or secondary source · [S] stated assumption · [NE] not found · Design value: an interface setting, not data."],
 ];
+
+// Etiquetas de evidencia (data/params.json → _nota): lo que dice cada una, para el title de cada rótulo (I9).
+const ETIQUETAS_EVIDENCIA = [
+  ["[V]", "verified in a primary source"],
+  ["[P]", "press or secondary source"],
+  ["[S]", "stated assumption"],
+  ["[NE]", "not found"],
+];
+/** «Diseño» (valor de interfaz) se escribe en inglés; las demás etiquetas son códigos y van tal cual. */
+const ETIQUETA_DISENO = /^dise[ñn]o$/i;
 
 const AVISO_JUICIO = "This tool supports, never replaces, the judgment of farmers and local experts.";
 
@@ -184,7 +201,7 @@ const MOTIVOS_3D = {
 // Lámina local de referencia (agua.lamina_local del cubo; decisión del integrador con la sesión de datos).
 const LAMINA_LOCAL = {
   aplicada: { titulo: "Typically applied in this district", limite: "district average, not this field" },
-  recomendada: { titulo: "Recommended by INIFAP", limite: "regional recommendation, not this field" },
+  recomendada: { titulo: "INIFAP guideline", limite: "regional guideline, not this field" },
 };
 const TEXTO_SIN_REFERENCIA = "no local reference";
 const NOTA_SIN_ROTACION = "No alternatives are compared for this field.";
@@ -206,6 +223,7 @@ const estado = {
   r: null, // lluvia elegida (0 o la variante seca)
   rBase: null,
   rSeca: null,
+  atrasPropio: false, // cerrarFicha llamó a history.back(): el «popstate» que sigue no cierra ni abre nada
   colorear: "semaforo", // "semaforo" | "plazo" | id de capa
   capas: new Map(), // id de capa -> definición
   fichaId: null,
@@ -238,7 +256,7 @@ const estado = {
   linea: null, // controlador de la línea de tiempo (web/js/tiempo.js)
   anioNormal: null, // año con el que abre la línea de tiempo: en él el mapa muestra la vista normal
   anioTiempo: null, // año elegido en la línea de tiempo que colorea el mapa; null = vista normal
-  capasAnio: new Map(), // año -> esquema de memoria de ese año (para la línea de tiempo)
+  capasAnio: new Map(), // «año|modo» -> esquema de memoria de ese año (para la línea de tiempo)
   estadoGemelo: null, // controlador de la tarjeta «Twin status»
   instalacion: null, // controlador de web/js/instalar.js
   // Ficha completa
@@ -288,8 +306,32 @@ function fmtPct(fraccion) {
   if (fraccion == null || !Number.isFinite(fraccion)) return "—";
   return conMenos(formateador({ style: "percent", maximumFractionDigits: 0 }).format(fraccion));
 }
+/**
+ * Cobertura de la dotación, en porcentaje entero HACIA ABAJO: una cobertura de 0.996 no puede leerse «100%» junto a
+ * «the rest comes from wells» ni junto a unas hectáreas que no llegan al área (mismo criterio que formatoHectareas).
+ */
+function fmtCobertura(fraccion) {
+  if (fraccion == null || !Number.isFinite(fraccion)) return fmtPct(fraccion);
+  const CIEN = 100;
+  return fmtPct(Math.floor(fraccion * CIEN) / CIEN);
+}
 function fmtSigno(v) {
   return conMenos(formateador({ maximumFractionDigits: 3, signDisplay: "exceptZero" }).format(v));
+}
+/**
+ * Decimales por unidad (I8 de la revisión total: «28.4, 25.49 y 18.94» o «825.577 hm³» junto a «2,846.78 hm³»).
+ * La misma unidad lleva siempre los mismos decimales como máximo; el valor exacto del dato va en el title.
+ */
+const DECIMALES_UNIDAD = { millares: 1, hm3: 1 };
+/** Lámina o dotación en millares/ha (thousand m³/ha): un decimal. */
+const fmtMillares = (v) => fmt(v, DECIMALES_UNIDAD.millares);
+/** Volumen en hm³: un decimal. */
+const fmtHm3 = (v) => fmt(v, DECIMALES_UNIDAD.hm3);
+/** <span> con la cifra redondeada y el valor exacto del dato en el title (si el redondeo lo cambió). */
+function conExacto(v, f) {
+  const corto = f(v);
+  const exacto = fmtDato(v);
+  return corto === exacto ? esc(corto) : `<span title="${esc(exacto)}">${esc(corto)}</span>`;
 }
 function fmtRango(a, b, f = fmtDato) {
   return a === b ? f(a) : `${f(a)}–${f(b)}`;
@@ -411,6 +453,12 @@ async function iniciar() {
   observarCabecera();
   // Antes de los datos: si la página abre desde una copia a medias y los datos no llegan, el rótulo lo dice.
   iniciarInstalacion();
+  // Pantalla de inicio ANTES de esperar los datos (punto 5: en 3G/4G eran 5 a 10 s de página vacía): se lee mientras
+  // llegan. Con un enlace directo a una parcela (#P0757) no se muestra: la ficha se abre al llegar los datos. Un «#»
+  // que es el id de un elemento de la página (p. ej. #principal) no es un enlace a una parcela.
+  const hashInicial = window.location.hash.replace(/^#/, "");
+  const posibleEnlace = Boolean(hashInicial) && !document.getElementById(decodeURIComponentSeguro(hashInicial));
+  const inicioTemprano = posibleEnlace ? null : montarInicio(document.body);
   try {
     // relieve.json es opcional: cargarRelieve nunca falla (null si no existe) y la ficha toma de ahí el
     // rótulo de escala de la línea de relieve aunque se abra antes que el mapa. gemelo.json también es opcional
@@ -467,9 +515,21 @@ async function iniciar() {
   // parcela no ve la pantalla de inicio encima de la ficha.
   const porEnlace = abrirDesdeHash();
   window.addEventListener("hashchange", () => abrirDesdeHash());
+  window.addEventListener("popstate", alVolverEnHistoria);
   document.body.dataset.listo = "si";
-  // Pantalla de inicio de tres pasos (kit C5): una vez por sesión; «How it works» la vuelve a abrir.
-  if (!porEnlace) montarInicio(document.body);
+  // Pantalla de inicio de tres pasos (kit C5): una vez por sesión; «How it works» la vuelve a abrir. Ya se mostró antes
+  // de los datos, salvo con un «#» que parecía un enlace a una parcela y no lo era: entonces se muestra ahora.
+  if (porEnlace) inicioTemprano?.cerrar?.();
+  else if (posibleEnlace) montarInicio(document.body);
+}
+
+/** decodeURIComponent que no lanza con un «%» suelto (devuelve el texto tal como llegó). */
+function decodeURIComponentSeguro(texto) {
+  try {
+    return decodeURIComponent(texto);
+  } catch {
+    return texto;
+  }
 }
 
 /**
@@ -500,13 +560,35 @@ function abrirDesdeHash() {
   if (crudo && !document.getElementById(crudo) && aviso) {
     aviso.textContent = AVISO_ENLACE(crudo);
     aviso.hidden = false;
+    // En el teléfono el aviso vive al pie del mapa, debajo de los controles: se trae a la vista (sin animación,
+    // así respeta el movimiento reducido) para que quien abre un enlace viejo lo lea sin desplazarse.
+    if (!esAncho()) requestAnimationFrame(() => aviso.scrollIntoView({ block: "nearest", behavior: "auto" }));
   }
   return false;
+}
+
+/**
+ * Botón Atrás / Adelante (punto 4). Si la entrada a la que se llega no es de una ficha y hay una abierta, se cierra.
+ * Abrir una ficha al ir hacia adelante lo hace «hashchange» (abrirDesdeHash). El «popstate» que provoca cerrarFicha
+ * con history.back() se ignora; si mientras tanto se abrió otra ficha, su entrada se vuelve a poner.
+ */
+function alVolverEnHistoria() {
+  if (estado.atrasPropio) {
+    estado.atrasPropio = false;
+    if (estado.fichaId && window.location.hash !== hashDe(estado.fichaId)) {
+      window.history.pushState({ ...(window.history.state ?? {}), [LLAVE_HISTORIA]: estado.fichaId }, "", hashDe(estado.fichaId));
+    }
+    return;
+  }
+  if (estado.fichaId && !idDeHash(window.location.hash, estado.porId)) cerrarFicha({ desdeHistoria: true });
 }
 
 /** Aviso visible de que la página no pudo cargar o arrancar (y en la consola). */
 function mostrarErrorCarga(texto, err) {
   console.error(err ?? texto);
+  // El estado de carga del indicador no queda diciendo «Loading…» (punto 5).
+  const cifra = $("#indicador-cifra");
+  if (cifra?.querySelector(".cargando")) cifra.textContent = "Field data could not be loaded.";
   const aviso = document.createElement("p");
   aviso.className = "error-carga";
   aviso.setAttribute("role", "alert");
@@ -681,6 +763,7 @@ function iniciarControles() {
   const anioActual = estado.parcelas.meta?.anio_actual;
   const inicial = marcas.find((m) => anioActual != null && m.id === `como_${anioActual}`) ?? marcas[0];
   input.value = String(inicial ? inicial.valor : deslizador.min);
+  input.removeAttribute("data-cargando"); // ya con su valor: se muestra (punto 5)
 
   const lista = $("#dotacion-marcas");
   const contenedor = $("#marcas");
@@ -711,7 +794,8 @@ function iniciarControles() {
   else enEspanol($("#equivalencia"), equivalencia);
   if (puntoEn) $("#punto-medicion").textContent = puntoEn;
   else enEspanol($("#punto-medicion"), punto_medicion);
-  if (esAncho()) $("#unidades").open = true;
+  // «Units and measuring point» queda plegado (revisión con Playwright, 2026-11-15, punto 2; I3 de la revisión total):
+  // abierto, la franja fija ocupaba un tercio de la pantalla con notas internas.
 
   // Lluvia: la variante base es 0 y la seca es la otra llave del cubo (kit §2.3).
   const lluvias = (estado.cubo.lluvia_pct ?? []).map(Number);
@@ -735,6 +819,45 @@ function enEspanol(nodo, texto) {
 /** <span lang="es"> con un texto de los datos (fuentes, notas): la interfaz es inglés; el dato, no. */
 function textoEs(texto) {
   return `<span lang="es">${esc(texto)}</span>`;
+}
+/**
+ * Un texto de los datos con el idioma en que llegó: va marcado con su «lang» solo si no es el de la página (inglés).
+ * Sin idioma declarado se toma por español (los textos de data/params.json sin variante en inglés).
+ */
+function textoDato(texto, idioma = "es") {
+  return idioma === "en" ? esc(texto) : `<span lang="${esc(idioma || "es")}">${esc(texto)}</span>`;
+}
+/**
+ * Idioma de las citas que llegan del buzón dentro del cubo (filtros, referencias locales, por qué un cultivo no rota):
+ * cubo.meta.idioma_fuentes, que escribe motor/b4_cubo.py. Un cubo que no lo declare (los simulados) se toma en español.
+ */
+function idiomaBuzon() {
+  const idioma = estado.cubo?.meta?.idioma_fuentes;
+  return typeof idioma === "string" && idioma ? idioma : "es";
+}
+
+// Partes de las etiquetas de los datos que vienen en español («[P], por confirmar») y su lectura en la interfaz en
+// inglés. Sin cifras: solo palabras. Si la etiqueta trae otra cosa en español, va entera marcada lang="es".
+const ETIQUETAS_EN = [["por confirmar", "to be confirmed"]];
+function etiquetaEn(etiqueta) {
+  let texto = String(etiqueta ?? "");
+  for (const [es, en] of ETIQUETAS_EN) texto = texto.split(es).join(en);
+  return /[áéíóúñ]|\b(por|de|para|sin|con|del)\b/i.test(texto) ? textoEs(texto) : esc(texto);
+}
+
+/**
+ * Fuente de un dato (I5 de la revisión total). Las citas de data/params.json están en español y con códigos internos
+ * del proyecto (S#, §, kit…); la interfaz es inglés y aquí no se traducen. Si el dato trae su versión en inglés
+ * (…_en, que el motor copia de params), esa va a la vista; si no, la cita completa queda plegada en un <details>
+ * «Source», marcada con el idioma en que llegó: `idioma` (español por omisión; las citas del buzón, el de
+ * cubo.meta.idioma_fuentes). La etiqueta de evidencia ([V], [P], [S]) va siempre a la vista, en el rótulo.
+ * `etiqueta` undefined = este dato no lleva etiqueta.
+ */
+function htmlFuente(fuente, { en = null, etiqueta = undefined, rotulo = "Source", idioma = "es" } = {}) {
+  const marca = etiqueta === undefined ? "" : etiquetaDato(etiqueta);
+  if (en) return `<span class="fuente-en">${esc(rotulo)}: ${esc(en)}</span>${marca}`;
+  if (!fuente) return `${esc(rotulo)}: not available${marca}`;
+  return `<details class="fuente-plegada"><summary>${esc(rotulo)}${marca}</summary><p class="fuente">${textoDato(fuente, idioma)}</p></details>`;
 }
 
 function leerControles() {
@@ -761,23 +884,25 @@ function actualizarValorDeslizador() {
     info.hidden = true;
     return;
   }
-  const rango = fmtRango(m.min, m.max);
+  const rango = fmtRango(m.min, m.max, fmtMillares);
   $("#info-marca-resumen").innerHTML = [
     `<strong>${esc(m.nombre)}:</strong> ${esc(rango)} thousand m³/ha`,
-    m.min !== m.max ? `slider set to the midpoint, ${esc(fmtDato(m.valor))}` : "",
+    m.min !== m.max ? `slider set to the midpoint, ${esc(fmtMillares(m.valor))}` : "",
   ]
     .filter(Boolean)
     .join(" · ");
   $("#info-marca-fuente").innerHTML = [
-    `Source: ${m.fuente ? textoEs(m.fuente) : "not available"}`,
-    m.etiqueta ? `Label: ${textoEs(m.etiqueta)}` : "",
+    // La fuente en inglés (fuente_en, copia de params); la de español, marcada, solo si no hay traducción.
+    `Source: ${m.fuente_en ? esc(m.fuente_en) : m.fuente ? textoEs(m.fuente) : "not available"}`,
+    m.etiqueta ? `Label: ${etiquetaEn(m.etiqueta)}` : "",
     m.fecha_consulta ? `Accessed: ${esc(fmtFecha(m.fecha_consulta))}` : "",
     // La nota en inglés (nota_en, copia de params); la de español solo si no hay traducción.
     m.nota_en ? `Note: ${esc(m.nota_en)}` : m.nota ? `Note: ${textoEs(m.nota)}` : "",
   ]
     .filter(Boolean)
     .join(" · ");
-  if (info.hidden && esAncho()) $("#info-marca-detalle").open = true;
+  // «Source and note» queda plegado (punto 2 / I3): al abrirlo se leen la fuente y la nota en inglés (fuente_en y
+  // nota_en del cubo, copia de params.json) y la etiqueta con su parte en español leída en inglés (etiquetaEn).
   info.hidden = false;
 }
 
@@ -857,7 +982,11 @@ function actualizarIndicador(conteos) {
       `${ac.alMenos ? '<span class="al-menos">at least </span>' : ""}` +
       `${esc(fmtPct(ac.p50))} <span class="de-dotacion">of the allocation</span>`;
     rango.hidden = false;
-    rango.textContent = `Likely range: ${fmtPct(ac.p10)} to ${fmtPct(ac.p90)}`;
+    // Con superficie sin clasificar el porcentaje es un mínimo («at least»): el rango es el de la superficie clasificada
+    // y lo sin clasificar puede subirlo, no bajarlo (I4 de la revisión total: «at least 125%» junto a «101% to 155%»).
+    rango.textContent = ac.alMenos
+      ? `Likely range for the classified area: ${fmtPct(ac.p10)} to ${fmtPct(ac.p90)}; unclassified fields can raise it, not lower it`
+      : `Likely range: ${fmtPct(ac.p10)} to ${fmtPct(ac.p90)}`;
     if (ac.excede) {
       partes.push(
         "<p>Perennial crops alone ask for more than the allocation; the gap comes from wells or stays unmet.</p>" +
@@ -876,8 +1005,9 @@ function actualizarIndicador(conteos) {
   mensaje.classList.toggle("alerta", ac.sinDotacion || ac.excede);
 
   $("#indicador-segunda").innerHTML =
-    `With ${esc(fmt(D))} thousand m³/ha, <strong>${esc(fmt(conteos.rojo, 0))} of ${esc(fmt(conteos.clasificadas, 0))}</strong> ` +
-    "fields don't have enough water for their current rotation." +
+    // «of N classified fields»: N son las clasificadas, no todas las del mapa (I4).
+    `With ${esc(fmt(D))} thousand m³/ha, <strong>${esc(fmt(conteos.rojo, 0))} of ${esc(fmt(conteos.clasificadas, 0))} classified fields</strong> ` +
+    "don't have enough water for their current rotation." +
     (conteos.sin_calculo
       ? ` ${esc(fmt(conteos.sin_calculo, 0))} classified ${conteos.sin_calculo === 1 ? "field is" : "fields are"} not counted: ${conteos.sin_calculo === 1 ? "its" : "their"} options are not computed yet.`
       : "");
@@ -929,6 +1059,11 @@ function iniciarColoreado() {
 function clasificador() {
   // Un año pasado en la línea de tiempo manda: el mapa muestra el estado observado de ese año.
   if (estado.anioTiempo != null) return capaDelAnio(estado.anioTiempo);
+  return clasificadorNormal();
+}
+
+/** El esquema elegido en «Color fields by» (sin la línea de tiempo): al que vuelve el mapa en el año actual. */
+function clasificadorNormal() {
   const modo = estado.colorear;
   if (modo === "semaforo") return esquemaSemaforo();
   if (modo === "plazo") return esquemaPlazo();
@@ -1002,14 +1137,18 @@ function capaMemoria(anio) {
   };
 }
 
-/** Esquema de la línea de tiempo: la memoria de ese año, con la indicación de cómo volver a la vista normal. */
+/**
+ * Esquema de la línea de tiempo: la memoria de ese año, con la indicación de cómo volver a la vista normal, que
+ * nombra el modo elegido en «Color fields by» (agua, plazo o una capa). La caché va por año y por modo.
+ */
 function capaDelAnio(anio) {
-  if (!estado.capasAnio.has(anio)) {
+  const llave = `${anio}|${estado.colorear}`;
+  if (!estado.capasAnio.has(llave)) {
     const capa = capaMemoria(anio);
-    const vuelta = estado.anioNormal != null ? ` Move the timeline back to ${estado.anioNormal} to color fields by water again.` : "";
-    estado.capasAnio.set(anio, { ...capa, fuente: `${capa.fuente}${vuelta}` });
+    const vuelta = estado.anioNormal != null ? ` Move the timeline back to ${estado.anioNormal} to see “${clasificadorNormal().titulo}” again.` : "";
+    estado.capasAnio.set(llave, { ...capa, fuente: `${capa.fuente}${vuelta}` });
   }
-  return estado.capasAnio.get(anio);
+  return estado.capasAnio.get(llave);
 }
 
 /** Resultado del esquema activo para cada parcela. */
@@ -1128,7 +1267,7 @@ function construirLista() {
     li.innerHTML =
       `<button type="button" class="boton-parcela" data-id="${esc(p.id)}">` +
       '<span class="sem-circulo" aria-hidden="true"></span>' +
-      `<span class="p-titulo">${esc(p.id)}${p.protagonista ? ' <span class="insignia-historia">story field</span>' : ""}</span>` +
+      `<span class="p-titulo">${esc(p.id)}${p.protagonista ? ' <span class="insignia-historia">example field</span>' : ""}</span>` +
       '<span class="p-detalle"></span></button>';
     lista.nodos.set(p.id, {
       li,
@@ -1137,7 +1276,7 @@ function construirLista() {
       detalle: $(".p-detalle", li),
       cultivo,
       base: `${cultivo} · ${fmtDato(p.area_ha)} ha`,
-      busqueda: `${p.id} ${cultivo} ${p.protagonista ? "story field" : ""}`.toLowerCase(),
+      busqueda: `${p.id} ${cultivo} ${p.protagonista ? "example field story field" : ""}`.toLowerCase(),
       ultimo: null,
     });
     fragmento.append(li);
@@ -1392,6 +1531,7 @@ function crearMapa() {
     agregarLocalidades(mapa);
     iniciarRelieve(mapa); // rutas de escurrimiento debajo de los puntos de las localidades
     iniciarGemelo3D(mapa); // después de las capas de la aplicación: el sombreado del relieve va debajo de ellas
+    agregarTerreno2D(mapa, { gemelo: estado.gemelo, cubo: estado.cubo, nombreZona, junto: "#capa-relieve" }); // mapa plano: sombreado, rampa, velo y escala
     estado.mapaListo = true;
     pintarMapa();
     // «listo» cuando la fuente de las parcelas ya está procesada (el GeoJSON se tesela aparte, después de «load»).
@@ -1494,7 +1634,9 @@ function pintarLocalidades() {
     })
     .join("");
   const fuentes = [...new Set(locs.map((l) => l.fuente).filter(Boolean))];
-  $("#localidades-fuente").innerHTML = `Source: ${fuentes.length ? textoEs(fuentes.join("; ")) : "not available"}`;
+  // La cita en inglés (fuente_en, copia de params) va a la vista solo si TODAS las localidades con fuente la traen.
+  const fuentesEn = locs.every((l) => !l.fuente || l.fuente_en) ? [...new Set(locs.map((l) => l.fuente_en).filter(Boolean))] : [];
+  $("#localidades-fuente").innerHTML = htmlFuente(fuentes.join("; "), { en: fuentesEn.join("; ") || null });
 }
 
 function agregarLocalidades(mapa) {
@@ -1545,7 +1687,8 @@ function mostrarLocalidad(i) {
     [Math.min(base[0][0], lon), Math.min(base[0][1], lat)],
     [Math.max(base[1][0], lon), Math.max(base[1][1], lat)],
   ];
-  estado.mapa.fitBounds(ext, { padding: margenMapa(ext), maxZoom: 15, duration: reduceMovimiento() ? 0 : 600 });
+  // Con la vista 3D activa conserva su inclinación y su rumbo (como encuadrar y el cambio de tamaño).
+  estado.mapa.fitBounds(ext, { padding: margenMapa(ext), maxZoom: 15, duration: reduceMovimiento() ? 0 : 600, ...camara3D() });
   estado.movidoPorUsuario = true; // que un cambio de tamaño no lo devuelva al encuadre de la zona
   estado.etiquetasLocalidad.forEach(({ el }, j) => el.classList.toggle("activa", j === i));
   if (!esAncho()) $("#mapa").scrollIntoView({ block: "center", behavior: reduceMovimiento() ? "auto" : "smooth" });
@@ -1700,11 +1843,20 @@ function iniciarLineaDeTiempo() {
   }
   estado.linea.fijarDatos({ features: estado.visibles, rotulo: rotuloZona() });
   estado.anioNormal = estado.linea.disponible() ? estado.linea.anio() : null;
+  // «Timeline: not available» con su motivo: el mismo que da el botón 3D (gemelo.json no se construyó o no se leyó).
+  if (!estado.gemelo) {
+    const motivo = document.createElement("p");
+    motivo.className = "tiempo-motivo";
+    motivo.id = "tiempo-motivo";
+    motivo.textContent = MOTIVOS_3D[estado.gemeloLectura === "ausente" ? "sin_gemelo" : "error_gemelo"];
+    cont.append(motivo);
+  }
 }
 
 function alCambiarAnio(anio) {
   estado.anioTiempo = anio == null || anio === estado.anioNormal ? null : anio;
   document.body.dataset.anioTiempo = estado.anioTiempo == null ? "" : String(estado.anioTiempo);
+  pintarNotaColorear();
   pintarColoreado();
   // «Regional context» resalta el mismo año agrícola (también el actual: ahí el mapa vuelve a la vista normal).
   estado.contextoRegional?.fijarAnio(anio);
@@ -1797,15 +1949,15 @@ function pintarDistrito() {
     const fraccion = hay && b.namo_hm3 > 0 ? Math.min(1, b.almacenamiento_hm3 / b.namo_hm3) : null;
     $("#boquilla").innerHTML =
       (hay
-        ? `<p>Storage on ${esc(fmtFecha(b.fecha_almacenamiento))}</p><p class="dato-grande">${esc(fmtDato(b.almacenamiento_hm3))} hm³</p>`
+        ? `<p>Storage on ${esc(fmtFecha(b.fecha_almacenamiento))}</p><p class="dato-grande">${conExacto(b.almacenamiento_hm3, fmtHm3)} hm³</p>`
         : "<p>Storage: <strong>no data</strong></p>") +
       (fraccion != null
-        ? `<div class="barra-presa" role="img" aria-label="Storage ${esc(fmtDato(b.almacenamiento_hm3))} hm³ of ${esc(fmtDato(b.namo_hm3))} hm³ at NAMO"><span style="width: ${fraccion * 100}%"></span></div>`
+        ? `<div class="barra-presa" role="img" aria-label="Storage ${esc(fmtHm3(b.almacenamiento_hm3))} hm³ of ${esc(fmtHm3(b.namo_hm3))} hm³ at NAMO"><span style="width: ${fraccion * 100}%"></span></div>`
         : "") +
-      `<p>Capacity at <abbr title="Normal maximum operating level">NAMO</abbr>: <strong>${esc(fmtDato(b.namo_hm3))} hm³</strong></p>` +
+      `<p>Capacity at <abbr title="Normal maximum operating level">NAMO</abbr>: <strong>${conExacto(b.namo_hm3, fmtHm3)} hm³</strong></p>` +
       // Fuente y etiqueta de cada cifra ([P] prensa, [V] verificado; cubo.distrito, copia de params.json).
-      `<p class="fuente" data-dato="almacenamiento">Storage: ${b.fuente_almacenamiento ? textoEs(b.fuente_almacenamiento) : "no source"}${etiquetaDato(b.etiqueta_almacenamiento)}.</p>` +
-      `<p class="fuente" data-dato="namo">Capacity: ${b.fuente_namo ? textoEs(b.fuente_namo) : "no source"}${etiquetaDato(b.etiqueta_namo)}.</p>`;
+      `<div class="fuente" data-dato="almacenamiento">${htmlFuente(b.fuente_almacenamiento, { en: b.fuente_almacenamiento_en, etiqueta: b.etiqueta_almacenamiento ?? null, rotulo: "Storage source" })}</div>` +
+      `<div class="fuente" data-dato="namo">${htmlFuente(b.fuente_namo, { en: b.fuente_namo_en, etiqueta: b.etiqueta_namo ?? null, rotulo: "Capacity source" })}</div>`;
   } else {
     $("#boquilla").innerHTML = "<p>No data.</p>";
   }
@@ -1820,26 +1972,37 @@ function pintarDistrito() {
       "<p>Availability</p>" +
       `<p class="dato-grande">${v == null ? "no data" : `${esc(fmtSigno(v))} hm³ per year`}</p>` +
       (v != null && v < 0 ? "<p>A negative availability is the official deficit published by Conagua, not a measured loss.</p>" : "") +
-      `<p class="fuente" data-dato="acuifero">Source: ${a.fuente ? textoEs(a.fuente) : "no source"}${etiquetaDato(a.etiqueta)}</p>`;
+      `<div class="fuente" data-dato="acuifero">${htmlFuente(a.fuente, { en: a.fuente_en, etiqueta: a.etiqueta ?? null })}</div>`;
   } else {
     $("#acuifero").innerHTML = "<p>No data.</p>";
   }
 }
 
-/** Etiqueta de un dato del distrito ([P], [V]…) junto a su fuente; con «label not stated» si el cubo no la trae. */
+/**
+ * Etiqueta de un dato ([P], [V]…) junto a su fuente; con «label not stated» si el cubo no la trae. El title dice qué
+ * significa (I9 de la revisión total); el glosario de la ficha trae la misma leyenda.
+ */
 function etiquetaDato(etiqueta) {
-  return etiqueta
-    ? ` <span class="etiqueta-dato" title="Evidence label">${esc(etiqueta)}</span>`
-    : ' <span class="etiqueta-dato etiqueta-dato--falta">label not stated</span>';
+  if (!etiqueta) return ' <span class="etiqueta-dato etiqueta-dato--falta">label not stated</span>';
+  const texto = ETIQUETA_DISENO.test(String(etiqueta).trim()) ? "Design value" : String(etiqueta);
+  const significados = ETIQUETAS_EVIDENCIA.filter(([k]) => texto.includes(k)).map(([k, d]) => `${k} ${d}`);
+  const titulo = texto === "Design value" ? "Evidence label: an interface setting, not data" : `Evidence label${significados.length ? `: ${significados.join(" · ")}` : ""}`;
+  return ` <span class="etiqueta-dato" title="${esc(titulo)}" aria-label="${esc(`${texto} (${titulo})`)}">${esc(texto)}</span>`;
 }
 
+/**
+ * Pie del panel (M6 de la revisión total): una línea con la fecha en que se generaron los datos y cuántos archivos los
+ * forman (cubo.meta.generado y cubo.meta.fuentes); la lista de fuentes se lee en «About & Data», no aquí.
+ */
 function pintarPie() {
   const meta = estado.cubo.meta ?? {};
   const partes = [];
   // Los archivos ocultos de la caché (p. ej. data/processed/.gitkeep) no son fuentes de datos.
   const archivos = (Array.isArray(meta.fuentes) ? meta.fuentes : []).filter((f) => !String(f).split("/").pop().startsWith("."));
-  if (archivos.length) partes.push(`Data files: ${archivos.join(", ")}`);
-  if (meta.generado) partes.push(`generated ${meta.generado}`);
+  const cuantos = archivos.length ? ` from ${fmtDato(archivos.length)} data ${archivos.length === 1 ? "file" : "files"}` : "";
+  const fechaValida = meta.generado && !Number.isNaN(new Date(meta.generado).getTime());
+  const cuando = !meta.generado ? "" : ` ${fechaValida ? fmtFecha(meta.generado) : String(meta.generado)}`;
+  if (meta.generado || cuantos) partes.push(`Built${cuando}${cuantos} — see About & Data`);
   if (meta.mock && Array.isArray(meta.mock_campos)) partes.push(`simulated blocks: ${meta.mock_campos.join(", ")}`);
   $("#pie-fuentes").textContent = partes.join(" · ");
 }
@@ -1851,18 +2014,32 @@ function opcionesDe(id) {
   return estado.cubo.parcelas?.[id]?.opciones ?? [];
 }
 
+// Historial (revisión con Playwright, 2026-11-15, punto 4): abrir una ficha agrega una entrada propia con «#id», así el
+// botón Atrás del teléfono cierra la ficha en lugar de salir de la aplicación. La entrada es nuestra si su estado lleva
+// LLAVE_HISTORIA; un enlace directo (#P0757 al cargar) o un «#id» escrito a mano no lo son.
+const LLAVE_HISTORIA = "raizFicha";
+const entradaPropia = () => Boolean(window.history.state && window.history.state[LLAVE_HISTORIA]);
+
 function abrirFicha(id, opciones = {}) {
   const f = estado.porId.get(id);
   if (!f) return;
+  const yaAbierta = Boolean(estado.fichaId);
   if (!estado.fichaId || !$("#ficha").contains(document.activeElement)) estado.disparador = document.activeElement;
   estado.fichaId = id;
   const ops = opcionesDe(id);
   estado.gota = { opcion: (ops.find((o) => o.id === "ACTUAL" && o.gota) ?? ops.find((o) => o.gota) ?? ops[0])?.id ?? null, goteo: false, tope: true };
   estado.whatsapp = false;
   construirFicha(f);
+  // Teléfono: con la ficha abierta la franja de controles se compacta (style.css, punto 3).
+  document.body.dataset.ficha = "abierta";
   fijarMedidas();
-  // Enlace directo: la barra de direcciones dice qué ficha está abierta (sin entrada nueva en el historial).
-  if (window.location.hash !== hashDe(id)) window.history.replaceState(window.history.state, "", hashDe(id));
+  // Enlace directo: la barra de direcciones dice qué ficha está abierta. Si la dirección aún no lo dice, entrada nueva
+  // en el historial (Atrás la cierra); si ya hay una ficha nuestra abierta, se reemplaza (una sola entrada por visita).
+  if (window.location.hash !== hashDe(id)) {
+    const entrada = { ...(window.history.state ?? {}), [LLAVE_HISTORIA]: id };
+    if (yaAbierta && entradaPropia()) window.history.replaceState(entrada, "", hashDe(id));
+    else window.history.pushState(entrada, "", hashDe(id));
+  }
   const avisoEnlace = $("#aviso-enlace");
   if (avisoEnlace) avisoEnlace.hidden = true;
   const ficha = $("#ficha");
@@ -1880,7 +2057,7 @@ function abrirFicha(id, opciones = {}) {
   }
 }
 
-function cerrarFicha({ devolverFoco = true } = {}) {
+function cerrarFicha({ devolverFoco = true, desdeHistoria = false } = {}) {
   if (!estado.fichaId) return;
   const id = estado.fichaId;
   estado.fichaId = null;
@@ -1889,12 +2066,24 @@ function cerrarFicha({ devolverFoco = true } = {}) {
   estado.ndviApi?.destruir();
   estado.ndviApi = null;
   estado.whatsapp = false;
-  // Sin ficha abierta, la dirección queda sin «#id» (replaceState no dispara «hashchange»).
-  if (idDeHash(window.location.hash, estado.porId)) {
-    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+  // Sin ficha abierta, la dirección queda sin «#id» (replaceState no dispara «hashchange»). Si la entrada es nuestra
+  // (la abrió abrirFicha), además se vuelve a la anterior: así el historial no acumula fichas cerradas. Si el cierre
+  // viene del botón Atrás (popstate), el navegador ya cambió de entrada y no se toca nada.
+  if (!desdeHistoria) {
+    const propia = entradaPropia();
+    if (idDeHash(window.location.hash, estado.porId) || propia) {
+      const { [LLAVE_HISTORIA]: _quitada, ...resto } = window.history.state ?? {};
+      window.history.replaceState(Object.keys(resto).length ? resto : null, "", window.location.pathname + window.location.search);
+    }
+    if (propia) {
+      estado.atrasPropio = true; // el «popstate» que sigue es nuestro: no cierra ni abre nada
+      window.history.back();
+    }
   }
   $("#ficha").hidden = true;
   $("#ficha-cuerpo").innerHTML = "";
+  delete document.body.dataset.ficha;
+  fijarMedidas();
   sincronizarInert(); // antes de devolver el foco a la lista o al mapa
   pintarColoreado();
   if (!devolverFoco) return;
@@ -1944,6 +2133,7 @@ function construirFicha(f) {
     `<p class="aviso-juicio">${esc(AVISO_JUICIO)}</p>`,
     htmlGlosario(),
   ].join("");
+  montarPrioridades($("#ficha-cuerpo .tarjetas"), ops); // «What matters most to you?» encima de las tarjetas (web/js/prioridades.js)
   conectarGota();
   conectarCompartir();
   pintarNDVI(p);
@@ -1965,6 +2155,7 @@ function pintarNDVI(p) {
       meses: n?.meses ?? [],
       umbrales: n?.umbrales ?? null,
       fuente: n?.fuente ?? null,
+      idiomaFuente: n?.idioma_fuentes ?? null,
       nivel: 3,
     });
   } catch (err) {
@@ -1978,7 +2169,7 @@ function htmlSinRotacion(sr) {
   return (
     '<div class="sin-rotacion" data-parte="sin-rotacion">' +
     `<p><strong>${esc(NOTA_SIN_ROTACION)}</strong> ${esc(sr.motivo ?? "")}</p>` +
-    `<p class="fuente">Source: ${sr.fuente ? textoEs(sr.fuente) : "not available"}${sr.etiqueta ? ` ${esc(sr.etiqueta)}` : ""}</p>` +
+    `<div class="fuente">${htmlFuente(sr.fuente, { en: sr.fuente_en, etiqueta: sr.etiqueta || undefined, idioma: idiomaBuzon() })}</div>` +
     "</div>"
   );
 }
@@ -2003,7 +2194,13 @@ function htmlEvidencia(p) {
   const ctx = estado.contexto;
   let filas = [];
   try {
-    filas = ctx ? evidenciaDeParcela({ contexto: ctx, id: p.id }) : [];
+    // Calendario del modelo de la rotación actual (opción ACTUAL): para decir si el mes del valor de ECOSTRESS
+    // no tiene cultivo. Una parcela sin clasificar no tiene opción ACTUAL: no se dice nada.
+    const actual = (estado.cubo.parcelas?.[p.id]?.opciones ?? []).find((o) => o.id === "ACTUAL");
+    // Una huerta que no rota tiene árboles todo el año: en sus meses de reposo el calendario marca «sin cultivo», pero
+    // la nota de ECOSTRESS «field without a crop» no aplica (revisor del contrato, 15-nov). Sin calendario, sin nota.
+    const noRota = estado.cubo.opciones_catalogo?.[actual?.rotacion]?.letra_maestro === LETRA_NO_ROTA;
+    filas = ctx ? evidenciaDeParcela({ contexto: ctx, id: p.id, mesesCultivo: noRota ? null : actual?.meses_cultivo }) : [];
   } catch (err) {
     console.error("ROOT: the satellite evidence could not be read", err);
   }
@@ -2013,12 +2210,14 @@ function htmlEvidencia(p) {
       `<p><strong>${esc(f.etiqueta)}:</strong> ${esc(f.texto)}</p>` +
       (f.nota ? `<p class="evidencia-nota">${esc(f.nota)}</p>` : "") +
       `<p class="fuente">Source: ${f.archivo ? esc([f.archivo, f.fecha].filter(Boolean).join(", ")) : "not available"}</p>` +
-      (f.fuente ? `<details class="evidencia-fuente"><summary>Full source</summary><p class="fuente">${textoEs(f.fuente)}</p></details>` : "") +
+      // La cita completa es la línea de LEEME de la entrega, en el idioma que declara contexto.json (idioma_fuentes).
+      (f.fuente ? `<details class="evidencia-fuente"><summary>Full source</summary><p class="fuente">${textoDato(f.fuente, ctx?.idioma_fuentes || "es")}</p></details>` : "") +
       "</li>",
   );
-  // ECOSTRESS pedido y no entregado: se dice (no se rellena con nada).
-  if (ctx && !ctx.ecostress && ctx.ecostress_motivo) {
-    items.push(`<li data-evidencia="ecostress"><p><strong>Evapotranspiration (ECOSTRESS):</strong> ${esc(ctx.ecostress_motivo)}</p></li>`);
+  // ECOSTRESS sin dato: se dice con un texto neutro (no se rellena con nada). El motivo del motor («Requested from the
+  // data team — not delivered yet») es una nota de proceso y no va a la ficha (I6 de la revisión total).
+  if (ctx && !ctx.ecostress) {
+    items.push('<li data-evidencia="ecostress"><p><strong>Field-scale evapotranspiration (ECOSTRESS):</strong> not included in this version.</p></li>');
   }
   const satelite = items.length
     ? `<ul class="evidencia-lista">${items.join("")}</ul>`
@@ -2044,7 +2243,9 @@ function htmlEncabezado(p) {
   const cultivo = p.abstencion
     ? "Not classified — check with technician"
     : `${esc(nombreCultivo(p.cultivo_actual))} — ${confianza}`;
-  const metodos = !p.abstencion && p.acuerdo_metodos ? ` <span class="fuente">(methods agree: ${esc(p.acuerdo_metodos)})</span>` : "";
+  // «methods agree: 1/1» no dice nada con un solo método (I9): solo se muestra con dos o más.
+  const denominador = Number(/\/\s*(\d+)\s*$/.exec(String(p.acuerdo_metodos ?? ""))?.[1]);
+  const metodos = !p.abstencion && p.acuerdo_metodos && denominador > 1 ? ` <span class="fuente">(methods agree: ${esc(p.acuerdo_metodos)})</span>` : "";
   const plazo = PLAZO[p.estado_plazo ?? "sin_dato"] ?? PLAZO.sin_dato;
   const clavePlazo = p.estado_plazo ?? "sin_dato";
   const edad = textoEdad(p);
@@ -2052,7 +2253,7 @@ function htmlEncabezado(p) {
     '<header class="ficha-encabezado">' +
     `<p class="ficha-meta">${lugar} · ${esc(fmtDato(p.area_ha))} ha` +
     (p.ftw_confianza != null ? ` · boundary confidence (Fields of The World): ${esc(fmtDato(p.ftw_confianza))}%` : "") +
-    (p.protagonista ? ' · <span class="insignia-historia">story field</span>' : "") +
+    (p.protagonista ? ' · <span class="insignia-historia">example field</span>' : "") +
     "</p>" +
     `<p class="ficha-cultivo">${cultivo}${metodos}</p>` +
     '<p class="ficha-plazo">' +
@@ -2103,7 +2304,30 @@ function htmlMemoria(p) {
     `<ol class="franja" style="--n: ${p.memoria.length}" aria-label="Agricultural years, from oldest to newest">${celdas}</ol>` +
     `<ul class="leyenda-memoria" aria-label="Legend">${leyenda}</ul>` +
     '<p class="nota-fija">Rule-based reading of monthly greenness; not a crop census.</p>' +
+    htmlNotaNogal(p) +
     "</section>"
+  );
+}
+
+// Estados de la memoria que la regla del nogal cuenta como años de huerta además de «perenne»
+// (datos/colab/A4_cultivos_reglas.py: la edad del nogal suma los años «verano», «doble» o «perenne»).
+const ESTADOS_NOGAL_NO_PERENNE = ["verano", "doble"];
+
+/**
+ * Nota bajo la memoria de una huerta de nogal (hallazgo 6 de la revisión cruzada de la sesión de datos, 14-nov):
+ * la franja puede decir «Summer crop» en algunos años junto a «Orchard pattern in satellite memory: ≥ N years», y
+ * parece una contradicción. El nogal pierde la hoja en invierno: un año con menos meses verdes se lee como cultivo
+ * de verano, y la edad de la huerta también cuenta esos años. Solo va si la parcela es nogal y su memoria trae al
+ * menos un año así; nombra los estados tal como los escribe la leyenda. Sin cifras.
+ */
+function htmlNotaNogal(p) {
+  if (p.cultivo_actual !== "nogal" || !Array.isArray(p.memoria)) return "";
+  const estados = ESTADOS_NOGAL_NO_PERENNE.filter((e) => p.memoria.some((m) => m.estado === e));
+  if (!estados.length) return "";
+  const nombres = estados.map((e) => `“${MEMORIA[e].texto}”`).join(" or ");
+  return (
+    `<p class="nota-fija" data-parte="nota-nogal">A pecan orchard loses its leaves in winter: in a year with fewer green ` +
+    `months the rules read its greenness as ${esc(nombres)}, and the orchard age counts those years too.</p>`
   );
 }
 
@@ -2121,14 +2345,13 @@ function circulo(clave, tabla) {
  * nombre. Los filtros se dibujan en actualizarFicha: dotacion_minima depende del deslizador.
  */
 function htmlTarjeta(o, relieve = "", p = {}) {
-  const esActual = o.id === "ACTUAL";
   const propuesta = o.origen_opcion === "team_proposal" && o.etiqueta_opcion
     ? `<span class="insignia-propuesta" data-parte="propuesta">${esc(o.etiqueta_opcion)}</span>`
     : "";
   return (
     `<article class="tarjeta" data-opcion="${esc(o.id)}">` +
+    // M4 de la revisión total: el nombre de la opción ACTUAL ya dice «Current rotation: …»; sin insignia encima.
     '<header class="tarjeta-cabeza">' +
-    (esActual ? '<span class="insignia-actual">Current rotation</span>' : "") +
     `<h4>${esc(o.nombre)}</h4>${propuesta}</header>` +
     '<div class="renglon renglon-agua" data-parte="agua"></div>' +
     htmlSuelo(o, relieve, p) +
@@ -2159,7 +2382,9 @@ function htmlSuelo(o, relieve = "", p = {}) {
   }
   return (
     `<div class="renglon renglon-suelo" data-semaforo="${esc(sem)}">${circulo(sem, SEMAFORO_OTROS)}<div>` +
-    `<h5>Soil <span class="sem-texto">${esc(SEMAFORO_OTROS[sem]?.texto ?? "no data")}</span></h5>` +
+    // El semáforo de este renglón mide la cobertura del suelo (días de suelo desnudo en la temporada de viento,
+    // frente a la parcela o la zona); la aptitud del suelo (pH, textura) va aparte, con su propio título.
+    `<h5>Soil <span class="sem-texto"><span class="sem-que">cover:</span> ${esc(SEMAFORO_OTROS[sem]?.texto ?? "no data")}</span></h5>` +
     aptitud +
     (su.dias_desnudo != null
       ? `<p>Bare soil in the windy season<span class="ventana-desnudo">${esc(textoVentanaDesnudo())}</span>: <strong>${esc(fmtDato(su.dias_desnudo))} days</strong>${origen ? ` <span class="etiqueta-origen">${origen}</span>` : ""}</p>`
@@ -2177,7 +2402,7 @@ function htmlDinero(o) {
   const d = o.dinero;
   const cuerpo =
     d && d.margen_min != null
-      ? `<p>Margin: <strong>${esc(fmtRango(d.margen_min, d.margen_max))}</strong></p><p class="fuente">Source: ${esc(d.fuente ?? "no source")}</p>`
+      ? `<p>Margin: <strong>${esc(fmtRango(d.margen_min, d.margen_max))}</strong></p><div class="fuente">${htmlFuente(d.fuente, { en: d.fuente_en })}</div>`
       : "<p><strong>No verified data</strong></p>";
   return (
     `<div class="renglon renglon-dinero" data-semaforo="${esc(sem)}">${circulo(sem, SEMAFORO_OTROS)}<div>` +
@@ -2217,7 +2442,12 @@ function fmtMesDia(texto) {
  */
 function htmlSiembra(o, p = {}) {
   const cat = estado.cubo.opciones_catalogo?.[o.rotacion];
-  const pasos = (Array.isArray(cat?.secuencia) ? cat.secuencia : []).filter((x) => x?.siembra?.desde);
+  // Solo los cultivos de la secuencia que publica la opción (o.secuencia): si el motor calculó el agua con otra
+  // secuencia que la del catálogo (avena_maiz sin la alfalfa), no se muestra la ventana de un cultivo que no está.
+  const publicados = Array.isArray(o.secuencia) && o.secuencia.length ? new Set(o.secuencia) : null;
+  const pasos = (Array.isArray(cat?.secuencia) ? cat.secuencia : [])
+    .filter((x) => x?.siembra?.desde)
+    .filter((x) => !publicados || publicados.has(x.cultivo));
   if (!pasos.length) return "";
   let fuente = null;
   const partes = pasos.map((x) => {
@@ -2299,17 +2529,39 @@ function htmlFiltros(o, D = estado.D) {
         const helada = Number.isFinite(f.prob_helada)
           ? `<span class="filtro-helada"> Chance of frost after this planting date: ${fmtPct(f.prob_helada)}.</span>`
           : "";
-        const etiqueta = f.etiqueta ? ` ${esc(f.etiqueta)}` : "";
+
         const vivo = f.vivo
-          ? `<span class="filtro-vivo"> Your allocation, ${esc(fmt(f.vivo.D))} thousand m³/ha, ${f.pasa ? "reaches" : "is below"} the ${esc(fmtDato(f.vivo.minimo))} thousand m³/ha this rule asks for.</span>`
+          ? `<span class="filtro-vivo"> Your allocation, ${esc(fmt(f.vivo.D))} thousand m³/ha, ${f.pasa ? "reaches" : "is below"} the ${esc(fmtMillares(f.vivo.minimo))} thousand m³/ha this rule asks for.</span>`
           : "";
         return (
           `<li class="${clase}" data-estado="${esc(e)}" data-filtro="${esc(f.id ?? "")}"${f.vivo ? ' data-vivo="si"' : ""}>${marca} <span class="filtro-texto">${esc(f.motivo ?? f.filtro)}</span>${razon}${helada}${vivo}` +
-          `${f.fuente ? ` <span class="fuente">— ${esc(f.fuente)}${etiqueta}</span>` : ""}</li>`
+          // La cita de la tabla oficial (con códigos internos) va plegada en «Source» (I5), en el idioma del buzón.
+          `${f.fuente ? htmlFuente(f.fuente, { en: f.fuente_en, etiqueta: f.etiqueta || undefined, idioma: idiomaBuzon() }) : ""}</li>`
         );
       })
       .join("") +
     "</ul>"
+  );
+}
+
+/**
+ * «Enough for …» de la tarjeta (revisión con Playwright, 2026-11-15, punto 6). Si la mediana cubre toda la parcela:
+ * «Enough for the whole field ({área} ha)» y, si la estimación alta no la cubre, cuántas hectáreas cubre esa. Si no:
+ * «Enough for {X} of {área} hectares (range …)», con lo que alcanza y el área en el MISMO formato
+ * (formatoHectareas de web/js/resumen.js: los decimales del área, hacia abajo, nunca más que el área).
+ */
+function htmlAlcanza(ev, areaHa) {
+  const fh = formatoHectareas(areaHa);
+  const { p50, bajo, alto } = ev.hectareas;
+  if (ev.cobertura >= 1) {
+    const alta = Number.isFinite(bajo) && bajo < areaHa
+      ? ` <span>(at the high estimate of its need: ${esc(fh(bajo))} ${hectareasTexto(bajo)})</span>`
+      : "";
+    return `<p class="alcanza" data-alcanza="toda"><strong>Enough for the whole field (${esc(fmtDato(areaHa))} ha)</strong>${alta}</p>`;
+  }
+  return (
+    `<p class="alcanza" data-alcanza="parte"><strong>Enough for ${esc(fh(p50))} of ${esc(fh(areaHa))} ${hectareasTexto(areaHa)}</strong> ` +
+    `<span>(range ${esc(fh(bajo))} to ${esc(fh(alto))})</span></p>`
   );
 }
 
@@ -2343,20 +2595,18 @@ function actualizarFicha() {
 
     const lamina =
       L.p50 > 0
-        ? `<p class="lamina"><strong>${esc(fmtDato(L.p50))}</strong> thousand m³/ha per year <span class="fuente">(median)</span></p>`
+        ? `<p class="lamina"><strong>${conExacto(L.p50, fmtMillares)}</strong> thousand m³/ha per year <span class="fuente">(median)</span></p>`
         : '<p class="lamina"><strong>No irrigation needed</strong></p>';
     const banda =
       L.p50 > 0
-        ? `<div class="barra-banda" role="img" aria-label="Need: median ${esc(fmtDato(L.p50))}, likely range ${esc(fmtDato(L.p10))} to ${esc(fmtDato(L.p90))} thousand m³/ha per year; your allocation: ${esc(fmt(D))}">` +
+        ? `<div class="barra-banda" role="img" aria-label="Need: median ${esc(fmtMillares(L.p50))}, likely range ${esc(fmtMillares(L.p10))} to ${esc(fmtMillares(L.p90))} thousand m³/ha per year; your allocation: ${esc(fmt(D))}">` +
           `<span class="banda" style="left: ${pos(L.p10)}%; width: ${pos(L.p90) - pos(L.p10)}%"></span>` +
           `<span class="mediana" style="left: ${pos(L.p50)}%"></span>` +
           `<span class="marca-d" style="left: ${pos(D)}%"></span></div>` +
-          `<div class="leyenda-banda" aria-hidden="true"><span>likely range ${esc(fmtDato(L.p10))}–${esc(fmtDato(L.p90))}</span><span>┆ dashed line: your allocation (${esc(fmt(D))})</span></div>`
+          `<div class="leyenda-banda" aria-hidden="true"><span>likely range ${esc(fmtMillares(L.p10))}–${esc(fmtMillares(L.p90))}</span><span>┆ dashed line: your allocation (${esc(fmt(D))})</span></div>`
         : "";
 
-    const alcanza =
-      `<p class="alcanza"><strong>Enough for ${esc(fmt(ev.hectareas.p50))} of ${esc(fmtDato(p.area_ha))} hectares</strong> ` +
-      `<span>(range ${esc(fmt(ev.hectareas.bajo))} to ${esc(fmt(ev.hectareas.alto))})</span></p>`;
+    const alcanza = htmlAlcanza(ev, p.area_ha);
 
     $('[data-parte="agua"]', tarjeta).innerHTML =
       `${circulo(ev.semaforo, SEMAFORO)}<div>` +
@@ -2365,9 +2615,13 @@ function actualizarFicha() {
       alcanza +
       banda +
       htmlLaminaLocal(o, L, p.area_ha, D) +
-      `<p>${esc(textoPlazo(o.agua?.plazo_anios))}${o.agua?.nota_plazo ? ` <span class="fuente">(${esc(o.agua.nota_plazo)})</span>` : ""}</p>` +
-      (o.id === "ACTUAL" && rest ? `<p>Remaining term: ${esc(fmtRango(rest.min, rest.max))} ${anios(rest.max)}</p>` : "") +
-      (comp ? `<p>Water committed over the remaining term: ${esc(fmtRango(comp.min, comp.max))} thousand m³/ha</p>` : "") +
+      `<p>${esc(textoPlazo(o.agua?.plazo_anios))}${o.agua?.nota_plazo ? ` <span class="fuente nota-plazo">(${esc(o.agua.nota_plazo)})</span>` : ""}</p>` +
+      // «Remaining term» en cualquier tarjeta (el motor descuenta la edad observada en las que conservan el alfalfar),
+      // cuando dice algo distinto del plazo completo; en la ACTUAL, siempre.
+      (rest && (o.id === "ACTUAL" || rest.min !== o.agua?.plazo_anios?.min || rest.max !== o.agua?.plazo_anios?.max)
+        ? `<p>Remaining term: ${esc(fmtRango(rest.min, rest.max))} ${anios(rest.min === rest.max ? rest.max : null)}</p>`
+        : "") +
+      (comp ? `<p>Water committed over the remaining term: ${esc(fmtRango(comp.min, comp.max, fmtMillares))} thousand m³/ha</p>` : "") +
       "</div>";
 
     // advertir_si_rojo (tabla oficial): con el semáforo de agua en rojo, recuerda por cuántos años obliga (el
@@ -2382,7 +2636,11 @@ function actualizarFicha() {
       : "";
     $('[data-parte="filtros"]', tarjeta).innerHTML = htmlFiltros(o, D);
 
-    $('[data-parte="respuestas"]', tarjeta).innerHTML = htmlRespuestas(o, ev);
+    // El motivo oficial trae su fuente plegada: si estaba abierta, sigue abierta al mover el deslizador.
+    const respuestas = $('[data-parte="respuestas"]', tarjeta);
+    const fuenteAbierta = Boolean($("details.fuente-plegada[open]", respuestas));
+    respuestas.innerHTML = htmlRespuestas(o, ev, p.area_ha, ops);
+    if (fuenteAbierta) $("details.fuente-plegada", respuestas)?.setAttribute("open", "");
   }
   pintarCoberturaGota();
   if (estado.whatsapp) pintarWhatsApp(); // el mensaje dice cuántas hectáreas alcanzan con la dotación elegida
@@ -2402,7 +2660,11 @@ function pintarResumen(p, ops) {
   } catch (err) {
     console.error("ROOT: the summary could not be computed", err);
   }
-  const datos = { parcela: p, opcionActual: actual, evaluacion, D: estado.D, formato: (v, k) => (k === "area" ? fmtDato(v) : fmt(v)) };
+  // Hectáreas y área con el mismo formato que la tarjeta (formatoHectareas); dotación con un decimal; años del plazo,
+  // con la precisión del dato.
+  const fh = formatoHectareas(p.area_ha);
+  const formato = (v, k) => (k === "ha" || k === "area" ? fh(v) : k === "anios" ? fmtDato(v) : fmt(v));
+  const datos = { parcela: p, opcionActual: actual, evaluacion, D: estado.D, formato };
   const texto = fraseResumen(datos);
   if (nodo.textContent !== texto) nodo.textContent = texto;
   nodo.dataset.caso = casoResumen(datos);
@@ -2429,37 +2691,110 @@ function htmlLaminaLocal(o, L, areaHa, D) {
   if (valor == null && !(rango && Number.isFinite(rango.min) && Number.isFinite(rango.max))) {
     return `<p class="lamina-local" data-tipo="ninguna"><span class="lamina-local-titulo">${esc(t.titulo)}:</span> ${esc(TEXTO_SIN_REFERENCIA)}</p>`;
   }
-  const lamina = valor != null ? fmtDato(valor) : fmtRango(rango.min, rango.max);
+  const lamina = valor != null ? fmtMillares(valor) : fmtRango(rango.min, rango.max, fmtMillares);
+  // Hectáreas que alcanzan con la referencia local: mismo formato que el área (formatoHectareas, punto 6 de la
+  // revisión); si alcanza para toda la parcela, lo dice así.
+  const fh = formatoHectareas(areaHa);
+  const peor = cobertura(D, valor ?? rango.max); // con la lámina mayor alcanza para menos
   const ha = valor != null
-    ? fmt(areaHa * cobertura(D, valor))
-    : fmtRango(areaHa * cobertura(D, rango.max), areaHa * cobertura(D, rango.min), fmt);
+    ? fh(areaHa * cobertura(D, valor))
+    : fmtRango(areaHa * cobertura(D, rango.max), areaHa * cobertura(D, rango.min), fh);
+  const alcanzaLocal = peor >= 1
+    ? `enough for the whole field (${esc(fmtDato(areaHa))} ha)`
+    : `enough for ${esc(ha)} of ${esc(fh(areaHa))} ${hectareasTexto(areaHa)}`;
   return (
     `<div class="lamina-local" data-tipo="${esc(ll.tipo)}"><p><span class="lamina-local-titulo">${esc(titulo)}:</span> ` +
     `<strong>${esc(lamina)}</strong> thousand m³/ha · ` +
-    `<span class="lamina-local-alcanza">enough for ${esc(ha)} of ${esc(fmtDato(areaHa))} hectares</span> ` +
+    `<span class="lamina-local-alcanza">${alcanzaLocal}</span> ` +
     `<span class="lamina-local-limite">— ${esc(t.limite)}</span>${ll.etiqueta ? ` <span class="lamina-local-etiqueta">${esc(ll.etiqueta)}</span>` : ""}</p>` +
-    `<details class="lamina-local-fuente"><summary>Source of the local reference</summary><p class="fuente">${textoEs(ll.fuente)}` +
+    `<details class="lamina-local-fuente"><summary>Source of the local reference</summary><p class="fuente">${textoDato(ll.fuente, idiomaBuzon())}` +
     `${ll.nota ? ` ${esc(ll.nota)}` : ""}</p></details></div>` +
     // En papel, una línea corta (la hoja cabe en una carta): la misma cifra y sus hectáreas, rotulada como promedio del
-    // distrito (o recomendación de INIFAP); el texto completo y la fuente se leen en la ficha en línea.
-    `<p class="solo-impresion lamina-local-impresion">${esc(ll.tipo === "aplicada" ? "District avg." : "INIFAP rec.")}: ` +
+    // distrito (o la guía regional de INIFAP); el texto completo y la fuente se leen en la ficha en línea.
+    `<p class="solo-impresion lamina-local-impresion">${esc(ll.tipo === "aplicada" ? "District avg." : "INIFAP guideline")}: ` +
     `<strong>${esc(lamina)}</strong> · ${esc(ha)} ha</p>`
   );
 }
 
-function htmlRespuestas(o, ev) {
+// «Why it's suggested» de una opción sin motivo en la tabla oficial (I10 de la revisión total): se dice; no se inventa.
+const TEXTO_SIN_MOTIVO = "The official rotation table gives no reason for this option.";
+// Final de la frase del agua de explicaciones.json («… enough for {{ha}} hectares.»): se escribe como en la tarjeta.
+const MARCADOR_ALCANZA = /enough for \{\{ha\}\} hectares/;
+// Valores de opciones_catalogo[rotación].letra_maestro con que la tabla oficial describe lo que la parcela YA tiene
+// (su rotación actual o una huerta que no rota). Con cualquier otro, la tabla habla de una alternativa.
+const LETRA_NO_ROTA = "nogal_no_rota";
+const LETRAS_DE_ESTADO_ACTUAL = ["ACTUAL", LETRA_NO_ROTA];
+const TEXTO_ESTADO_ACTUAL =
+  "This is the field's current state. The official rotation table describes it as an alternative for a cropped field, so it gives no reason for a field that is already in it.";
+
+/**
+ * Motivo oficial de una opción (I10): cubo.opciones_catalogo[rotación].por_que_en, con su etiqueta de evidencia y su
+ * fuente plegada (htmlFuente). Una propuesta del equipo (origen_opcion = team_proposal) no tiene motivo en la tabla
+ * oficial: el texto del catálogo para esa rotación habla de otro uso («Current rotation…», «Suggested for an old
+ * alfalfa stand…»), así que no se muestra ni se inventa otro; va la etiqueta de la opción.
+ */
+function htmlMotivo(o) {
+  const d = estado.cubo.opciones_catalogo?.[o.rotacion];
+  // La tarjeta ACTUAL de una parcela que hoy está en un estado que la tabla ofrece como ALTERNATIVA (el descanso: 219
+  // parcelas) no toma prestado ese motivo: «the field rests with standing stubble…» describe la alternativa, no una
+  // parcela que ya descansa y cuyo suelo desnudo se midió (hallazgo H1 del revisor de cifras, 15-nov).
+  if (o.id === "ACTUAL" && d && !LETRAS_DE_ESTADO_ACTUAL.includes(d.letra_maestro)) {
+    return `<p data-parte="motivo" data-motivo="estado">${esc(TEXTO_ESTADO_ACTUAL)}</p>`;
+  }
+  if (o.origen_opcion !== "team_proposal" && d?.por_que_en) {
+    return (
+      `<p data-parte="motivo">${esc(d.por_que_en)}</p>` +
+      `<div class="fuente">${htmlFuente(d.fuente, { en: d.fuente_en, etiqueta: d.etiqueta || undefined, idioma: idiomaBuzon() })}</div>`
+    );
+  }
+  const etiqueta = o.etiqueta_opcion || d?.etiqueta;
+  return `<p data-parte="motivo" data-motivo="sin">${esc(TEXTO_SIN_MOTIVO)}${etiqueta ? etiquetaDato(etiqueta) : ""}</p>`;
+}
+
+/**
+ * Las cinco respuestas del «Why?» (explicaciones.json). Dos se arman además con los datos de la parcela:
+ * - «Why it's suggested» (I10 y C2 de la revisión total): primero el motivo de la tabla oficial (htmlMotivo) y después
+ *   la frase del agua, con las hectáreas escritas como en la tarjeta (htmlAlcanza: formatoHectareas, nunca más que el
+ *   área, y «the whole field» cuando alcanza para toda la parcela);
+ * - «Benefits» (I10): la opción comparada con la rotación ACTUAL de la misma parcela (web/js/beneficios.js), con el
+ *   formato de las tarjetas; donde no hay con qué comparar (el nogal) se conserva la frase de explicaciones.json.
+ */
+function htmlRespuestas(o, ev, areaHa, ops = []) {
   const bloque = estado.explicaciones?.explicaciones?.[o.preguntas_ref];
   if (!bloque?.textos) return "<dt>Explanation</dt><dd>Not available yet for this option.</dd>";
   const dinamicos = { d: estado.D, ha: ev.hectareas.p50, cobertura: ev.cobertura };
+  // La lámina de la frase es la del escenario de lluvia elegido y con el formato de la tarjeta: antes decía «asks for
+  // 25.49» junto a «25.5» y, con la lluvia seca, la lámina de la lluvia base (hallazgo H3 del revisor de cifras).
+  // f1, f4 y f5 son la mediana, la baja y la alta de explicaciones.json; si la opción no trae esa lámina, quedan esas.
+  const LAMINA = { f1: ev.lamina?.p50, f4: ev.lamina?.p10, f5: ev.lamina?.p90 };
+  for (const [k, v] of Object.entries(LAMINA)) if (Number.isFinite(v)) dinamicos[k] = v;
+  const fh = formatoHectareas(areaHa);
   const formatear = (v, k) => {
-    if (k === "cobertura") return fmtPct(v);
-    if (k === "ha" || k === "d") return fmt(v);
+    if (k === "cobertura") return fmtCobertura(v);
+    if (k === "ha") return fh(v);
+    if (k === "d") return fmt(v);
+    if (k in LAMINA) return fmtMillares(v);
     return fmtDato(v);
   };
+  const alcanza = ev.cobertura >= 1
+    ? `enough for the whole field (${fmtDato(areaHa)} ha)`
+    : `enough for ${fh(ev.hectareas.p50)} of ${fh(areaHa)} ${hectareasTexto(areaHa)}`;
+  let beneficios = null;
+  try {
+    beneficios = beneficiosDeOpcion({ opcion: o, opciones: ops, llave: llaveLluvia(estado.r), formato: { millares: fmtMillares, dato: fmtDato } });
+  } catch (err) {
+    console.error("ROOT: the benefits comparison could not be built", err);
+  }
   return PREGUNTAS.map(([k, titulo]) => {
     const t = bloque.textos[k];
-    const texto = t ? rellenarMarcadores(t, bloque.valores, dinamicos, formatear) : "Not available yet.";
-    return `<dt>${esc(titulo)}</dt><dd>${esc(texto)}</dd>`;
+    const plantilla = t && k === "por_que" ? t.replace(MARCADOR_ALCANZA, () => alcanza) : t;
+    const texto = plantilla ? rellenarMarcadores(plantilla, bloque.valores, dinamicos, formatear) : "Not available yet.";
+    let cuerpo = esc(texto);
+    if (k === "por_que") cuerpo = `${htmlMotivo(o)}<p data-parte="frase-agua">${cuerpo}</p>`;
+    else if (k === "beneficios" && beneficios) {
+      cuerpo = beneficios.renglones.map((r) => `<p>${r.rotulo ? `<strong>${esc(r.rotulo)}:</strong> ` : ""}${esc(r.texto)}</p>`).join("");
+    }
+    return `<dt>${esc(titulo)}</dt><dd data-respuesta="${esc(k)}">${cuerpo}</dd>`;
   }).join("");
 }
 
@@ -2482,15 +2817,23 @@ function htmlGota(ops, p = {}) {
     const motivo = p.abstencion ? "Not available: this field is not classified." : "Not available for this field yet.";
     return `<section class="gota" id="seccion-gota" aria-labelledby="t-gota"><h3 id="t-gota" tabindex="-1">Follow the drop</h3><p>${motivo}</p></section>`;
   }
+  // Opciones sin bloque «gota» (el motor lo deja en null cuando falta la lámina neta: nunca toma la ET como cero).
+  // No entran al selector; la ficha dice cuáles son y que no se estima nada en su lugar (hallazgo H6 de la auditoría).
+  const sinGota = ops.filter((o) => !o.gota);
+  const sinDato = sinGota.length
+    ? `<p class="gota-nota" id="gota-sin-dato">No water-flow data for: ${esc(sinGota.map((o) => o.nombre).join("; "))}. Nothing is estimated in its place.</p>`
+    : "";
   return (
     '<section class="gota" id="seccion-gota" aria-labelledby="t-gota">' +
     '<h3 id="t-gota" tabindex="-1">Follow the drop</h3>' +
-    "<p>Where this option's water goes each year, from La Boquilla to the crop and the aquifer (m³ for this field).</p>" +
+    // I15 de la revisión total: el diagrama dibuja lo que la opción necesita, no lo que la presa entrega.
+    "<p>Where the water this option needs would go each year, counted from La Boquilla dam to the crop and the aquifer (m³ for this field).</p>" +
     '<div class="gota-controles">' +
     `<label>Option <select id="gota-opcion">${conGota.map((o) => `<option value="${esc(o.id)}">${esc(o.nombre)}</option>`).join("")}</select></label>` +
     "</div>" +
     '<div class="gota-contenedor" id="gota-modulo"></div>' +
     '<p class="gota-nota" id="gota-cobertura" hidden></p>' +
+    sinDato +
     "</section>"
   );
 }
@@ -2521,6 +2864,8 @@ function pintarGota() {
     locale: LOCALE,
     // Eficiencias del goteo con su etiqueta y su fuente, y si el retorno sin tope es una cota superior (cubo.meta.goteo).
     metaGoteo: estado.cubo.meta?.goteo ?? null,
+    // Idioma de las citas de los supuestos y de las eficiencias (cubo.meta.idioma_fuentes).
+    idiomaFuentes: estado.cubo.meta?.idioma_fuentes ?? null,
     goteo: estado.gota.goteo,
     tope: estado.gota.tope,
     alCambiar: (e) => {
@@ -2530,7 +2875,12 @@ function pintarGota() {
   });
 }
 
-/** Línea de cobertura de La gota: depende del deslizador. */
+/**
+ * Línea de cobertura de La gota: depende del deslizador. El diagrama dibuja lo que la opción NECESITA, contado desde
+ * La Boquilla (bloque gota del cubo, con el riego actual); esta nota dice cuánto de eso cubre la dotación elegida (I15
+ * de la revisión total): la cobertura de evaluarOpcion (web/reglas.js, la misma de la tarjeta) y esa fracción de los
+ * m³ del primer nodo. Sin ese dato en el bloque, solo la cobertura.
+ */
 function pintarCoberturaGota() {
   const nodo = $("#gota-cobertura");
   const o = opcionGota();
@@ -2538,7 +2888,16 @@ function pintarCoberturaGota() {
   if (!nodo || !o || !f) return;
   const ev = evaluarOpcion(o, f.properties.area_ha, estado.D, estado.r, Boolean(f.properties.abstencion));
   nodo.hidden = !(ev.cobertura < 1);
-  nodo.textContent = "The allocation covers part of this need; the rest comes from wells or stays unmet.";
+  // Los m³ del diagrama (gota.m3_salen_presa) se calculan con la lluvia base. Con la lluvia seca la cobertura es la
+  // del escenario seco, así que no se multiplica por esos m³: se da el porcentaje y se dice a qué lluvia corresponde
+  // el diagrama (hallazgo del revisor de código, 15-nov).
+  const lluviaBase = estado.r === estado.rBase;
+  const necesita = o.gota?.m3_salen_presa;
+  const cuanto = lluviaBase && Number.isFinite(necesita) && necesita > 0
+    ? `: about ${fmt(ev.cobertura * necesita, 0)} of the ${fmt(necesita, 0)} m³ this option needs with the current irrigation, counted from La Boquilla (canal losses included)`
+    : "";
+  const seca = lluviaBase ? "" : " in the drier-rain scenario; the amounts in the diagram are for the base rainfall";
+  nodo.textContent = `With ${fmt(estado.D)} thousand m³/ha, the allocation covers ${fmtCobertura(ev.cobertura)} of this need${cuanto}${seca}. The rest comes from wells or stays unmet.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -2724,6 +3083,20 @@ function parcelaParaGota() {
   return f?.properties.id;
 }
 
+/**
+ * Con un año pasado en la línea de tiempo, el grupo «Color fields by» conserva su opción marcada, pero el mapa
+ * muestra la memoria de ese año: una nota visible (ligada con aria-describedby a los dos grupos) lo dice, y cómo volver.
+ */
+function pintarNotaColorear() {
+  const nota = $("#nota-colorear");
+  if (!nota) return;
+  const anio = estado.anioTiempo;
+  nota.hidden = anio == null;
+  nota.textContent = anio == null
+    ? ""
+    : `The map is showing the field memory of ${anio} from the timeline. Pick an option${estado.anioNormal != null ? `, or move the timeline back to ${estado.anioNormal},` : ""} to go back.`;
+}
+
 function conectarEventos() {
   $("#dotacion").addEventListener("input", actualizarTodo);
   $("#lluvia").addEventListener("change", actualizarTodo);
@@ -2735,6 +3108,10 @@ function conectarEventos() {
       // Elegir cómo colorear devuelve la línea de tiempo al año actual (la vista normal).
       if (estado.anioTiempo != null && estado.anioNormal != null) estado.linea?.fijarAnio(estado.anioNormal);
       pintarColoreado();
+    });
+    // La opción ya marcada no dispara «change»: con un año pasado, pulsarla también devuelve al año actual.
+    radio.addEventListener("click", () => {
+      if (radio.value === estado.colorear && estado.anioTiempo != null && estado.anioNormal != null) estado.linea?.fijarAnio(estado.anioNormal);
     });
   }
 

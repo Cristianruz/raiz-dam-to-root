@@ -9,7 +9,8 @@ Qué se comprueba:
    (eso sería un acantilado en la vista 3D).
 3. Las teselas salieron del ráster que hoy está en data/processed (huella en origen.json).
 4. Con rasterio (no está en GitHub Actions: esas pruebas se marcan «skip» con su motivo): cinco
-   puntos de una tesela coinciden con el ráster; regenerar da los mismos bytes; el borde se extiende.
+   puntos de una tesela coinciden con el ráster; regenerar da los mismos bytes; fuera del ráster la tesela
+   queda plana (mediana del borde del ráster) tras una rampa, sin estrías ni escalón (revisión I16).
 5. motor/dem_teselas.py no borra teselas cuando falta rasterio o falta el .tif.
 6. web/data/ndvi_mensual.json: una serie por parcela de parcelas.geojson, valores en [−1, 1] o
    null, y coincide con el CSV de HLS.
@@ -90,7 +91,10 @@ def test_gemelo_cumple_el_contrato(gemelo, zonas_params):
     assert gemelo["_encabezado"].startswith("AI-assisted (Claude Code)")
     t = gemelo["terreno"]
     if t is not None:
-        assert set(t) == {"encoding", "tileSize", "minzoom", "maxzoom", "zonas", "exageracion", "fuente", "rotulo"}
+        # fuente_en: campo paralelo opcional con la misma cita en inglés (la página la prefiere).
+        assert set(t) - {"fuente_en"} == {"encoding", "tileSize", "minzoom", "maxzoom", "zonas", "exageracion",
+                                          "fuente", "rotulo"}
+        assert t.get("fuente_en") == "NASADEM (NASA/NASADEM_HGT/001), 30 m, via Google Earth Engine"
         assert t["encoding"] == "terrarium" and t["tileSize"] == 256
         assert isinstance(t["minzoom"], int) and isinstance(t["maxzoom"], int) and t["minzoom"] <= t["maxzoom"]
         assert t["zonas"], "terreno sin zonas debe ser null"
@@ -108,7 +112,8 @@ def test_gemelo_cumple_el_contrato(gemelo, zonas_params):
     tiempo = gemelo["tiempo"]
     assert set(tiempo) == {"anios", "intervalo_ms", "destacados"}
     for d in tiempo["destacados"].values():
-        assert set(d) == {"texto", "fuente", "etiqueta"} and d["texto"] and d["fuente"]
+        # fuente_en: campo paralelo opcional con la cita en inglés.
+        assert set(d) - {"fuente_en"} == {"texto", "fuente", "etiqueta"} and d["texto"] and d["fuente"]
     if gemelo["ndvi"] is not None:
         assert set(gemelo["ndvi"]) == {"archivo", "fuente", "meses"}
         assert gemelo["ndvi"]["archivo"] == "data/ndvi_mensual.json"
@@ -130,7 +135,9 @@ def test_valores_de_diseno_son_los_de_params(gemelo, params):
     assert gemelo["tiempo"]["intervalo_ms"] == g["reproduccion_intervalo_ms"]["valor"]
     assert gemelo["zona_inicial"] == g["zona_inicial"]["valor"]
     d = g["anio_destacado"]
+    # fuente_en: la cita en inglés de params (campo paralelo opcional).
     assert gemelo["tiempo"]["destacados"] == {str(d["valor"]): {"texto": d["texto"], "fuente": d["fuente"],
+                                                                "fuente_en": d["fuente_en"],
                                                                 "etiqueta": d["etiqueta"]}}
 
 
@@ -432,10 +439,26 @@ def zona_sintetica(tmp_path):
     (tmp_path / "params.json").write_text(json.dumps(params), encoding="utf-8")
     cobertura = (oeste, norte - filas * paso, oeste + columnas * paso, norte)
     return {"processed": proc, "web": tmp_path / "web", "params": tmp_path / "params.json", "bbox": bbox,
-            "cobertura": cobertura, "min": int(banda.min()), "max": int(banda.max())}
+            "cobertura": cobertura, "min": int(banda.min()), "max": int(banda.max()), "banda": banda}
 
 
-def test_el_script_extiende_el_borde_y_no_deja_acantilados(zona_sintetica):
+def _mosaico_de_zoom(carpeta, lista, z):
+    """Elevaciones de todas las teselas del zoom z juntas (filas de norte a sur), y la tesela de cada bloque."""
+    import numpy as np
+    del_zoom = [t for t in lista if t[0] == z]
+    xs, ys = sorted({x for _, x, _ in del_zoom}), sorted({y for _, _, y in del_zoom})
+    mosaico = np.zeros((len(ys) * 256, len(xs) * 256))
+    for _, x, y in del_zoom:
+        f, c = ys.index(y) * 256, xs.index(x) * 256
+        mosaico[f:f + 256, c:c + 256] = dem_teselas.leer_tesela(dem_teselas.ruta_tesela(carpeta, z, x, y))
+    return mosaico, xs[0], ys[0]
+
+
+def test_fuera_del_raster_queda_plano_con_rampa_y_sin_acantilados(zona_sintetica):
+    """Revisión I16: fuera del ráster ya no se copia el borde (dibujaba estrías en la vista 3D). Lejos del ráster
+    la tesela vale la mediana del borde del ráster (un valor plano que ya está en el ráster); cerca, una rampa
+    de dem_teselas.RAMPA_M lleva del borde a ese valor sin escalón."""
+    import numpy as np
     s = zona_sintetica
     r = dem_teselas.generar(processed=s["processed"], web=s["web"], params_ruta=s["params"])
     assert r["ejecutado"] and r["zonas"]["prueba"]["generada"], r
@@ -446,25 +469,46 @@ def test_el_script_extiende_el_borde_y_no_deja_acantilados(zona_sintetica):
         minimo, maximo = dem_teselas.rango_tesela(dem_teselas.ruta_tesela(carpeta, z, x, y))
         # Todo píxel, también fuera del ráster, queda entre el mínimo y el máximo del ráster: ni 0 ni huecos.
         assert s["min"] - 0.5 <= minimo <= maximo <= s["max"] + 0.5, (z, x, y, minimo, maximo)
-    # En el zoom máximo: fuera de la cobertura cada píxel repite el píxel válido más cercano.
-    z = 12
+    b = s["banda"]
+    plano = float(np.median(np.concatenate([b[0], b[-1], b[1:-1, 0], b[1:-1, -1]])))
+    origen = leer(carpeta / "origen.json")["fuera_del_raster"]
+    assert origen["valor_m"] == plano and origen["rampa_m"] == dem_teselas.RAMPA_M and origen["etiqueta"] == "Diseño"
+    paso = 1 / dem_teselas.PASOS_POR_METRO
     oeste, sur, este, norte = s["cobertura"]
-    comprobadas = 0
-    for _, x, y in [t for t in lista if t[0] == z]:
-        elev = dem_teselas.leer_tesela(dem_teselas.ruta_tesela(carpeta, z, x, y))
-        lons = [dem_teselas.centro_de_pixel(z, x, y, c, 0)[0] for c in range(256)]
-        lats = [dem_teselas.centro_de_pixel(z, x, y, 0, f)[1] for f in range(256)]
-        cols = [c for c in range(256) if oeste < lons[c] < este]
-        filas = [f for f in range(256) if sur < lats[f] < norte]
-        if not cols or not filas or (len(cols) == 256 and len(filas) == 256):
-            continue                      # tesela sin ráster o cubierta entera: no hay borde que mirar
-        cerca_c = [min(max(c, cols[0]), cols[-1]) for c in range(256)]
-        cerca_f = [min(max(f, filas[0]), filas[-1]) for f in range(256)]
-        for f in (0, 100, 255):
-            for c in (0, 100, 255):
-                assert elev[f][c] == elev[cerca_f[f]][cerca_c[c]], (x, y, f, c)
-        comprobadas += 1
-    assert comprobadas, "la prueba debe mirar al menos una tesela con borde extendido"
+    for z in (10, 11, 12):
+        mosaico, x0, y0 = _mosaico_de_zoom(carpeta, lista, z)
+        pixel_m = 2 * math.pi * dem_teselas.RADIO_M / 2 ** z / 256
+        n = 2 ** z
+        # Fila y columna del mosaico de cada borde de la cobertura del ráster.
+        c_oeste, c_este = (dem_teselas.fraccion_x(oeste) * n - x0) * 256, (dem_teselas.fraccion_x(este) * n - x0) * 256
+        f_norte, f_sur = (dem_teselas.fraccion_y(norte) * n - y0) * 256, (dem_teselas.fraccion_y(sur) * n - y0) * 256
+        filas, cols = np.arange(mosaico.shape[0]) + 0.5, np.arange(mosaico.shape[1]) + 0.5
+        df = np.maximum(np.maximum(f_norte - filas, filas - f_sur), 0)[:, None]
+        dc = np.maximum(np.maximum(c_oeste - cols, cols - c_este), 0)[None, :]
+        distancia_m = np.hypot(df, dc) * pixel_m
+        lejos = distancia_m > dem_teselas.RAMPA_M + 2 * pixel_m
+        assert lejos.any(), f"zoom {z}: la prueba debe mirar píxeles más allá de la rampa"
+        assert np.all(np.abs(mosaico[lejos] - plano) <= paso / 2), f"zoom {z}: lejos del ráster no queda plano"
+        # Sin escalón ni estría: el mayor salto entre píxeles vecinos fuera del ráster no pasa del que hay dentro
+        # más la pendiente de la rampa (del borde más alejado del valor plano, repartido en RAMPA_M).
+        dentro = distancia_m == 0
+        saltos_f, saltos_c = np.abs(np.diff(mosaico, axis=0)), np.abs(np.diff(mosaico, axis=1))
+        interior = max(saltos_f[dentro[1:] & dentro[:-1]].max(), saltos_c[dentro[:, 1:] & dentro[:, :-1]].max())
+        rampa = (max(s["max"] - plano, plano - s["min"])) * pixel_m / dem_teselas.RAMPA_M
+        assert max(saltos_f.max(), saltos_c.max()) <= interior + rampa + 2 * paso, f"zoom {z}: escalón en el borde del ráster"
+
+
+def test_teselas_versionadas_quedan_planas_lejos_del_raster(gemelo, teselas):
+    """Sin rasterio: la esquina de la tesela del zoom mínimo (lejos del ráster) vale el valor plano que anota
+    origen.json. Si falla, las teselas son de antes de la revisión I16: python motor/dem_teselas.py."""
+    t = gemelo["terreno"]
+    for zid, b in t["zonas"].items():
+        fuera = leer(WEB / "dem" / zid / "origen.json").get("fuera_del_raster")
+        assert fuera and fuera["etiqueta"] == "Diseño", f"{zid}: origen.json sin «fuera_del_raster»"
+        z, x, y = dem_teselas.teselas_de_bbox(b["bounds"], t["minzoom"], t["minzoom"])[0]
+        elev = dem_teselas.leer_tesela(WEB.parent / b["teselas"].format(z=z, x=x, y=y))
+        for f, c in ((0, 0), (0, 255), (255, 0), (255, 255)):
+            assert abs(elev[f][c] - fuera["valor_m"]) <= 1 / dem_teselas.PASOS_POR_METRO / 2, (zid, z, x, y, f, c)
 
 
 def test_generar_es_idempotente_y_quita_lo_que_sobra(zona_sintetica):
@@ -581,7 +625,8 @@ def csv_ndvi():
 
 
 def test_ndvi_una_serie_por_parcela(ndvi, gemelo):
-    assert set(ndvi) - META == {"meses", "parcelas", "umbrales", "fuente"}
+    # idioma_fuentes: campo opcional con el idioma del texto de «fuente» (como en contexto.json y suelo.json).
+    assert set(ndvi) - META - {"idioma_fuentes"} == {"meses", "parcelas", "umbrales", "fuente"}
     meses = ndvi["meses"]
     assert meses == sorted(set(meses)) and all(len(m) == 7 and m[4] == "-" for m in meses)
     ids = [f["properties"]["id"] for f in leer(WEB / "parcelas.geojson")["features"]]

@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Referencias de cultivos de la SDR de Chihuahua (solo lectura; NO son entregas ni cifras citables todavía)
 
 **Origen:** http://sdr.chihuahua.gob.mx/Archivos_portal/Cultivos_Gob_Edo/, enlazado desde https://www.chihuahua.gob.mx/info/principales-cultivos-del-estado-de-chihuahua.
@@ -28,5 +28,5 @@ El rendimiento de unas 93 ton/ha parece de forraje verde y no de heno; hay que v
 - **Municipios del DR-005:** rendimientos de unas 30 ton/ha.
 - **Por aclarar:** la diferencia entre el rendimiento estatal y el municipal puede venir de mezclar chile seco con verde; hay que cotejarlo en el PDF.
 
-## Uso posible en Raíz
+## Uso posible en ROOT
 Contraste del área por cultivo del mapa frente a la estadística (kit A4.2, prueba). Se rotularía como «2022, municipio completo, no la zona piloto», y solo después de cotejar las cifras contra el PDF.

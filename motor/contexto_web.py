@@ -39,7 +39,8 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                    decisión): va bajo la llave «cuenca» (esquemas.ZONA_CUENCA) con ambito «cuenca», y
                    la página la muestra igual en las dos zonas; las demás series llevan ambito «zona».
                    «malla_mascon» (solo si la línea de LEEME de la entrega lo dice, p. ej. GRACE: «malla de
-                   0.5° sobre mascons de 3°»): {malla_grados, mascon_grados, texto_fuente}. Son cifras de la
+                   0.5° sobre mascons de 3°» o, en inglés, «0.5° grid on 3° mascons»): {malla_grados,
+                   mascon_grados, texto_fuente}. Son cifras de la
                    entrega, no de este archivo: la página las escribe para decir que la resolución real es la
                    del mascon y no la de la malla del producto (resolucion_m).
   gedi             null + gedi_motivo, o {archivo, fuente, fecha, parcelas: {id: {n_disparos,
@@ -57,9 +58,27 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                      no, null si tiene menos disparos que min_disparos o no hay criterio. Los tres
                      conteos (null sin criterio) suman n_con_dato.
   ecostress        null + ecostress_motivo, o {archivo, fuente, fecha, meses, parcelas: {id: [valores
-                   por mes]}}
+                   por mes]}, escenas_parcelas: {id: [n_escenas por mes]}, conteo, aviso} y, solo con la
+                   entrega corregida del 15-nov, minimos_parcelas y maximos_parcelas: {id: [valor por mes]}.
+                   Todas las listas van alineadas a «meses». Los nombres terminan en «parcelas» para que el
+                   manifiesto las agrupe por patrón (parcelas.*) y no crezca con el número de parcelas.
+                   · escenas_parcelas: lo que hay detrás de cada valor (columna n_escenas); la ficha lo
+                     escribe junto a la cifra.
+                   · conteo: qué cuenta n_escenas. «sobrevuelos» en la entrega corregida (la que trae
+                     et_min_mm_dia y et_max_mm_dia: las escenas del mismo sobrevuelo se promedian);
+                     «escenas» en la anterior, donde un sobrevuelo podía contar dos veces (D5 de la
+                     revisión). La ficha dice «clear overpasses» o «clear-sky scenes» según este campo.
+                   · minimos_parcelas y maximos_parcelas: el menor y el mayor de los sobrevuelos usados
+                     (et_min_mm_dia y et_max_mm_dia); la ficha escribe el intervalo con dos o más.
+                   · aviso: el rótulo que la propia entrega trae en su línea de LEEME («satellite … at
+                     70 m on clear days, not a field measurement»), para que la ficha lo ponga a la
+                     vista; null si la línea no lo trae (la página usa entonces un aviso sin la resolución).
+                   El contraste con el modelo (etc_modelo_mm, razon) y la incertidumbre (incertidumbre_w_m2)
+                   NO van a la página (docs/revisiones/2026-11-15_ecostress.md: el contraste se leería
+                   como validación o como déficit).
   gaez             null + gaez_motivo, o {archivo, fuente, fecha, zonas: {zona: [{cultivo, variable,
-                   valor, unidad, resolucion_m}]}}
+                   valor, unidad, resolucion_m, y si la entrega los trae: clase_nombre, cultivo_gaez,
+                   nota}]}}
   heladas          null + heladas_motivo, o el contenido de heladas.json más «entrega» {archivo,
                    fuente, fecha}
   et_contraste     null + et_contraste_motivo, o {zona, motivo_otras_zonas, archivo, fuente, fecha,
@@ -126,10 +145,19 @@ DEFINICION_HELADA = (f"Frost day: daily minimum temperature at or below {UMBRAL_
 # Texto de data/params.json (memoria.anio_actual.unidad) que confirma la definición del año.
 MARCAS_PARAMS_ANIO = ("1-oct", "30-sep")
 
-# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) se escriben en español,
-# como el resto de la operación del equipo (CLAUDE.md, OPERACIÓN). La interfaz va en inglés: la
-# página marca esos textos con este idioma para los lectores de pantalla.
-IDIOMA_FUENTES = "es"
+# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) llegan en inglés desde la
+# reentrega del 15-nov (buzón v11); antes iban en español. La página marca esos textos con este
+# idioma para los lectores de pantalla.
+IDIOMA_FUENTES = "en"
+
+# Frase con que la entrega de ECOSTRESS rotula su dato en la línea de LEEME («satellite ET at 70 m on clear days,
+# not a field measurement»): el tramo de la línea que la contiene va a la ficha como aviso a la vista.
+MARCA_AVISO_ECOSTRESS = "not a field measurement"
+# Columnas de la entrega corregida del 15-nov: el menor y el mayor de los sobrevuelos usados en el mes. Si el archivo
+# las trae, además, su n_escenas cuenta sobrevuelos (las escenas del mismo sobrevuelo van promediadas); el archivo
+# anterior no las trae y cuenta escenas.
+COLUMNA_ET_MIN, COLUMNA_ET_MAX = "et_min_mm_dia", "et_max_mm_dia"
+CONTEO_SOBREVUELOS, CONTEO_ESCENAS = "sobrevuelos", "escenas"
 
 # Redondeos de presentación (no cambian el dato de origen).
 DECIMALES_MM = 1
@@ -151,6 +179,11 @@ ARCHIVO_CONTEXTO = "contexto_regional.csv"
 ARCHIVO_GEDI = "gedi_parcelas.csv"
 ARCHIVO_ECOSTRESS = "ecostress_parcelas.csv"
 ARCHIVO_GAEZ = "gaez_zona.csv"
+# Columnas adicionales de gaez_zona.csv (pieza G1 de la sesión de datos) que la tarjeta necesita para leer la fila:
+# el nombre de la clase de aptitud de FAO (en esa fila «valor» es el número de clase), el cultivo con que GAEZ evalúa
+# la clase del proyecto (Maize para maiz_forrajero, Oat para cereal_invierno) y la nota de la entrega (el maíz de
+# GAEZ es de grano). Son textos; la fila que no los trae va sin ellos.
+COLUMNAS_TEXTO_GAEZ = ("clase_nombre", "cultivo_gaez", "nota")
 ARCHIVO_HELADAS = "heladas.json"
 # Criterios para leer la altura de GEDI: entrega de la sesión de datos (pieza A11), ya validada.
 ARCHIVO_SUPUESTOS = "supuestos.json"
@@ -405,8 +438,15 @@ def resumen_anual(meses, valores, aditiva):
 
 
 # La línea de LEEME de contexto_regional.csv enumera sus productos como «<fuente> = <producto> (…)»; de GRACE dice
-# además «malla de 0.5° sobre mascons de 3°» (la malla del producto es más fina que los mascons de los que sale).
-MALLA_MASCON = re.compile(r"malla de\s*([0-9]+(?:[.,][0-9]+)?)\s*°\s*sobre mascons de\s*([0-9]+(?:[.,][0-9]+)?)\s*°", re.I)
+# además la malla del producto y la de los mascons de los que sale (la primera es más fina). La frase llega en
+# español («malla de 0.5° sobre mascons de 3°», hasta el buzón v10) o en inglés («0.5° grid on 3° mascons», desde
+# el v11; también «grid over», «grid built on» y «product grid»). En las dos, el primer grupo es la malla y el
+# segundo, el mascon.
+_GRADOS = r"([0-9]+(?:[.,][0-9]+)?)\s*°"
+MALLAS_MASCON = (
+    re.compile(rf"malla de\s*{_GRADOS}\s*sobre mascons de\s*{_GRADOS}", re.I),
+    re.compile(rf"{_GRADOS}\s*(?:product\s+)?grid\s+(?:built\s+)?(?:on|over)\s+{_GRADOS}\s*mascons", re.I),
+)
 
 
 def tramo_de_fuente(texto, fuente_id, fuentes=E.FUENTES_CONTEXTO):
@@ -424,9 +464,9 @@ def tramo_de_fuente(texto, fuente_id, fuentes=E.FUENTES_CONTEXTO):
 
 def malla_mascon(fuente_texto, fuente_id):
     """{malla_grados, mascon_grados, texto_fuente} si la línea de LEEME dice, para esa fuente, «malla de X° sobre
-    mascons de Y°»; None si no lo dice (no se supone nada)."""
-    tramo = tramo_de_fuente(fuente_texto, fuente_id)
-    m = MALLA_MASCON.search(tramo or "")
+    mascons de Y°» o «X° grid on Y° mascons»; None si no lo dice (no se supone nada)."""
+    tramo = tramo_de_fuente(fuente_texto, fuente_id) or ""
+    m = next((m for m in (patron.search(tramo) for patron in MALLAS_MASCON) if m), None)
     if not m:
         return None
     a_numero = lambda s: float(s.replace(",", "."))   # noqa: E731
@@ -607,16 +647,43 @@ def bloque_gedi(ruta, registro, criterios=None):
             "n_pocos_disparos": lecturas[None] if criterio else None}
 
 
+def aviso_de_ecostress(fuente):
+    """El rótulo con que la entrega describe su dato, tomado de su línea de LEEME: el tramo (entre «;») que
+    dice MARCA_AVISO_ECOSTRESS, con mayúscula inicial. None si la línea no lo trae: no se inventa un texto con
+    una resolución que el dato no dice."""
+    for tramo in str(fuente or "").split(";"):
+        tramo = tramo.strip().rstrip(".")
+        if MARCA_AVISO_ECOSTRESS in tramo.lower():
+            return tramo[:1].upper() + tramo[1:]
+    return None
+
+
 def bloque_ecostress(ruta, registro):
+    """ET de ECOSTRESS por parcela y mes, lo que hay detrás de cada valor (n_escenas) y, si la entrega es la
+    corregida del 15-nov, el menor y el mayor de los sobrevuelos usados. Funciona con los dos archivos: el
+    anterior (sin et_min_mm_dia ni et_max_mm_dia; n_escenas cuenta escenas) y el corregido (con ellas; n_escenas
+    cuenta sobrevuelos). El contraste con el modelo (etc_modelo_mm, razon) y la incertidumbre no van a la página."""
     filas = leer_csv(ruta)
     meses = sorted({fila["mes"].strip() for fila in filas if _mes(fila["mes"]) is not None})
     indice = {m: i for i, m in enumerate(meses)}
-    parcelas = {}
+    con_intervalo = bool(filas) and COLUMNA_ET_MIN in filas[0] and COLUMNA_ET_MAX in filas[0]
+    parcelas, escenas, minimos, maximos = {}, {}, {}, {}
     for fila in filas:
         mes = fila["mes"].strip()
         if mes in indice:
-            parcelas.setdefault(fila["id"].strip(), [None] * len(meses))[indice[mes]] = numero(fila["et_mm_dia"])
-    return {**procedencia(registro), "meses": meses, "parcelas": parcelas}
+            pid, i = fila["id"].strip(), indice[mes]
+            parcelas.setdefault(pid, [None] * len(meses))[i] = numero(fila["et_mm_dia"])
+            escenas.setdefault(pid, [None] * len(meses))[i] = entero(fila.get("n_escenas"))
+            if con_intervalo:
+                minimos.setdefault(pid, [None] * len(meses))[i] = numero(fila[COLUMNA_ET_MIN])
+                maximos.setdefault(pid, [None] * len(meses))[i] = numero(fila[COLUMNA_ET_MAX])
+    procedencia_ = procedencia(registro)
+    bloque = {**procedencia_, "meses": meses, "parcelas": parcelas, "escenas_parcelas": escenas,
+              "conteo": CONTEO_SOBREVUELOS if con_intervalo else CONTEO_ESCENAS,
+              "aviso": aviso_de_ecostress(procedencia_.get("fuente"))}
+    if con_intervalo:
+        bloque["minimos_parcelas"], bloque["maximos_parcelas"] = minimos, maximos
+    return bloque
 
 
 def bloque_gaez(ruta, zonas, registro, avisos):
@@ -628,13 +695,19 @@ def bloque_gaez(ruta, zonas, registro, avisos):
                 avisos.append(f"{ARCHIVO_GAEZ}: zona «{zona}» que no está en data/params.json; sus filas no se usan")
             ajenas.add(zona)
             continue
-        por_zona.setdefault(zona, []).append({
+        renglon = {
             "cultivo": fila["cultivo"].strip(),
             "variable": fila["variable"].strip(),
             "valor": numero(fila["valor"]),
             "unidad": fila["unidad"].strip(),
             "resolucion_m": numero_limpio(fila["resolucion_m"]),
-        })
+        }
+        # Los textos que leen la fila (COLUMNAS_TEXTO_GAEZ), solo si la entrega los trae y no están vacíos.
+        for columna in COLUMNAS_TEXTO_GAEZ:
+            texto = (fila.get(columna) or "").strip()
+            if texto:
+                renglon[columna] = texto
+        por_zona.setdefault(zona, []).append(renglon)
     return {**procedencia(registro), "zonas": por_zona}
 
 

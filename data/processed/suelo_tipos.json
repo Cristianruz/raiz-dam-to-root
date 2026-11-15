@@ -1,5 +1,5 @@
 {
- "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO; Soil Taxonomy (USDA): Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026; prefijos: Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026; municipio: Plan Municipal de Desarrollo de Delicias 2024–2027, anexo del Periódico Oficial del Estado de Chihuahua (2025), que cita a INEGI, Diccionario de Datos Edafológicos escala 1:250 000 (versión 4), 2016 (https://chihuahua.gob.mx/sites/default/atach2/periodico-oficial/anexos/2025-01/ANEXO%2003-2025%20ACUERDO%20N%C2%B0%20203-2024%20PMD%20DELICIAS.pdf), leído el 14-nov-2026",
+ "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO; Soil Taxonomy (USDA): Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026; prefixes: Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026; municipality: Municipal Development Plan of Delicias 2024–2027 («Plan Municipal de Desarrollo de Delicias 2024–2027»), annex of the Official Gazette of the State of Chihuahua (2025), citing INEGI, «Diccionario de Datos Edafológicos», scale 1:250 000 (version 4), 2016 (https://chihuahua.gob.mx/sites/default/atach2/periodico-oficial/anexos/2025-01/ANEXO%2003-2025%20ACUERDO%20N%C2%B0%20203-2024%20PMD%20DELICIAS.pdf), read on Nov 14, 2026",
  "nota": "El tipo de suelo es contexto del paisaje: no dice qué nutrientes tiene una parcela. Los riesgos por parcela salen de suelo_reglas.json con las propiedades de la parcela. Los resúmenes son propios; cada grupo lleva su liga.",
  "texto_explica_en": "Regional soil type from a global map, not a soil test.",
  "wrb": {
@@ -51,8 +51,8 @@
     375
    ],
    "texto_en": "Organic (peat) soil: a large nitrogen stock but little of it available; crops need fertilizer with sulfur and micronutrients.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 1 (https://www.fao.org/4/y1899e/y1899e04.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 1 (https://www.fao.org/4/y1899e/y1899e04.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Anthrosols": {
    "nombre_es": "Antrosol",
@@ -84,8 +84,8 @@
    ],
    "extension_mundial_mha": null,
    "texto_en": "Soil shaped by long irrigation or cultivation: in dry irrigation districts it is usually base-rich and alkaline, and some are saline.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 2 (https://www.fao.org/4/y1899e/y1899e05.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 2 (https://www.fao.org/4/y1899e/y1899e05.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Technosols": {
    "ficha": null,
@@ -118,8 +118,8 @@
    ],
    "extension_mundial_mha": null,
    "texto_en": "Permafrost soil: nitrogen, potassium and phosphorus are generally low.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 10 (https://www.fao.org/4/y1899e/y1899e13.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 10 (https://www.fao.org/4/y1899e/y1899e13.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Leptosols": {
    "nombre_es": "Leptosol",
@@ -147,8 +147,8 @@
    ],
    "extension_mundial_mha": 1655,
    "texto_en": "Very shallow or stony soil with little water storage; usually free of harmful salts.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Solonetz": {
    "nombre_es": "Solonetz",
@@ -179,8 +179,8 @@
    ],
    "extension_mundial_mha": 135,
    "texto_en": "Sodic soil: excess sodium harms sensitive crops and hinders the uptake of other nutrients; it is reclaimed with gypsum.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Vertisols": {
    "nombre_es": "Vertisol",
@@ -226,8 +226,8 @@
    ],
    "extension_mundial_mha": 335,
    "texto_en": "Heavy cracking clay, rich in calcium and magnesium but often low in nitrogen and available phosphorus.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 3 (https://www.fao.org/4/y1899e/y1899e06.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 3 (https://www.fao.org/4/y1899e/y1899e06.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Solonchaks": {
    "nombre_es": "Solonchak",
@@ -259,8 +259,8 @@
     340
    ],
    "texto_en": "Saline soil: salts make nutrients less available and sodium and chloride are toxic; it needs leaching and drainage.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Gleysols": {
    "nombre_es": "Gleysol",
@@ -291,8 +291,8 @@
    ],
    "extension_mundial_mha": 720,
    "texto_en": "Waterlogged soil: lack of oxygen is the main limit; once drained it can be productive.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Andosols": {
    "nombre_es": "Andosol",
@@ -326,8 +326,8 @@
    ],
    "extension_mundial_mha": 110,
    "texto_en": "Volcanic ash soil, generally fertile, that locks up phosphorus.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 3 (https://www.fao.org/4/y1899e/y1899e06.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 3 (https://www.fao.org/4/y1899e/y1899e06.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Podzols": {
    "nombre_es": "Podzol",
@@ -361,8 +361,8 @@
    ],
    "extension_mundial_mha": 485,
    "texto_en": "Strongly acid sandy soil: low nutrients, phosphorus deficiency and aluminium toxicity are common.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Plinthosols": {
    "nombre_es": "Plintosol",
@@ -390,8 +390,8 @@
    ],
    "extension_mundial_mha": 60,
    "texto_en": "Iron-rich soil that hardens when it dries; low natural fertility.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Planosols": {
    "nombre_es": "Planosol",
@@ -419,8 +419,8 @@
    ],
    "extension_mundial_mha": 130,
    "texto_en": "Seasonally waterlogged soil over a dense subsoil, with poor fertility.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Stagnosols": {
    "ficha": null,
@@ -458,8 +458,8 @@
    ],
    "extension_mundial_mha": 200,
    "texto_en": "Deep red tropical clay, rich in iron, that holds phosphorus tightly.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Ferralsols": {
    "nombre_es": "Ferralsol",
@@ -499,8 +499,8 @@
    ],
    "extension_mundial_mha": 750,
    "texto_en": "Deeply weathered tropical soil, chemically poor, that fixes phosphorus; it needs lime and full fertilization.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Chernozems": {
    "nombre_es": "Chernozem",
@@ -542,8 +542,8 @@
    ],
    "extension_mundial_mha": 230,
    "texto_en": "Deep black, humus-rich steppe soil, rich in nitrogen, calcium and magnesium; phosphorus is partly available.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 8 (https://www.fao.org/4/y1899e/y1899e11.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 8 (https://www.fao.org/4/y1899e/y1899e11.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Kastanozems": {
    "nombre_es": "Kastañozem",
@@ -581,8 +581,8 @@
    ],
    "extension_mundial_mha": 465,
    "texto_en": "Brown steppe soil, chemically rich in calcium and magnesium, with lime in the subsoil; irrigation can salinize it.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 8 (https://www.fao.org/4/y1899e/y1899e11.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 8 (https://www.fao.org/4/y1899e/y1899e11.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Phaeozems": {
    "nombre_es": "Feozem",
@@ -618,8 +618,8 @@
    ],
    "extension_mundial_mha": 190,
    "texto_en": "Dark, fertile prairie soil; drought and erosion are the main limits.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 8 (https://www.fao.org/4/y1899e/y1899e11.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 8 (https://www.fao.org/4/y1899e/y1899e11.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Umbrisols": {
    "nombre_es": "Umbrisol",
@@ -647,8 +647,8 @@
    ],
    "extension_mundial_mha": 100,
    "texto_en": "Dark acid soil with moderate fertility that depends on its organic matter.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Durisols": {
    "nombre_es": "Durisol",
@@ -680,8 +680,8 @@
    ],
    "extension_mundial_mha": null,
    "texto_en": "Soil with a silica-cemented layer that stops roots and water; often high in sodium.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Gypsisols": {
    "nombre_es": "Gypsisol",
@@ -719,8 +719,8 @@
    ],
    "extension_mundial_mha": 100,
    "texto_en": "Gypsum-rich soil, low in nitrogen, phosphorus and potassium; with much gypsum, phosphorus, potassium and magnesium are less available.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Calcisols": {
    "nombre_es": "Calcisol",
@@ -760,8 +760,8 @@
    ],
    "extension_mundial_mha": 1000,
    "texto_en": "Lime-rich soil of dry regions, rich in calcium and magnesium; it can be highly productive when irrigated, drained and fertilized.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Retisols": {
    "nombre_es": "Retisol (Albeluvisol en Driessen et al. 2001)",
@@ -794,8 +794,8 @@
    ],
    "extension_mundial_mha": 320,
    "texto_en": "Acid, leached soil with low nutrient status and high aluminium.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source",
    "nota": "Driessen et al. 2001 describe los Albeluvisols (WRB 1998); en la WRB 2022 el grupo equivalente se llama Retisols [P] (correspondencia sin verificar en la WRB 2022)"
   },
   "Acrisols": {
@@ -827,8 +827,8 @@
    ],
    "extension_mundial_mha": 1000,
    "texto_en": "Acid, nutrient-poor soil with aluminium toxicity; it needs lime and full fertilization.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Lixisols": {
    "nombre_es": "Lixisol",
@@ -854,8 +854,8 @@
    ],
    "extension_mundial_mha": 435,
    "texto_en": "Weathered soil with low nutrient reserves and little capacity to hold nutrients.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Alisols": {
    "nombre_es": "Alisol",
@@ -891,8 +891,8 @@
    ],
    "extension_mundial_mha": 100,
    "texto_en": "Very acid soil where aluminium is toxic; calcium and potassium are low.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Luvisols": {
    "nombre_es": "Luvisol",
@@ -923,8 +923,8 @@
     600
    ],
    "texto_en": "Fertile soil with a clay-enriched subsoil and high base saturation.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Cambisols": {
    "nombre_es": "Cambisol",
@@ -952,8 +952,8 @@
    ],
    "extension_mundial_mha": 1500,
    "texto_en": "Young soil with satisfactory chemical fertility; it makes good farmland in most settings.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 5 (https://www.fao.org/4/y1899e/y1899e08.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 5 (https://www.fao.org/4/y1899e/y1899e08.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Fluvisols": {
    "nombre_es": "Fluvisol",
@@ -985,8 +985,8 @@
    ],
    "extension_mundial_mha": 350,
    "texto_en": "Young river-deposit soil with good natural fertility; flooding and salinity are the usual limits.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Arenosols": {
    "nombre_es": "Arenosol",
@@ -1016,8 +1016,8 @@
    ],
    "extension_mundial_mha": 900,
    "texto_en": "Sandy soil that holds little water and few nutrients; drip irrigation and frequent small fertilizer doses suit it.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 3 (https://www.fao.org/4/y1899e/y1899e06.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 3 (https://www.fao.org/4/y1899e/y1899e06.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   },
   "Regosols": {
    "nombre_es": "Regosol",
@@ -1045,8 +1045,8 @@
    ],
    "extension_mundial_mha": 260,
    "texto_en": "Weakly developed soil; drought and surface crusting are the main limits.",
-   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), leído el 14-nov-2026",
-   "etiqueta": "[V] resumen propio de la fuente"
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. and Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), read on Nov 14, 2026",
+   "etiqueta": "[V] own summary of the source"
   }
  },
  "usda_ordenes": {
@@ -1054,210 +1054,210 @@
    "elemento_formativo": "alf",
    "definicion_en": "Moderately leached soils with relatively high native fertility",
    "fertilidad_en": "fertile, nutrient-rich",
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; fertility: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Andisols": {
    "elemento_formativo": "and",
    "definicion_en": "Soils formed in volcanic ash or other volcanic ejecta",
    "fertilidad_en": "strong nutrient retention and high organic matter",
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; fertility: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Aridisols": {
    "elemento_formativo": "id",
    "definicion_en": "Calcium carbonate-containing soils of arid regions with subsurface horizon development",
    "fertilidad_en": "limited nutrients, often alkaline",
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; fertility: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Entisols": {
    "elemento_formativo": "ent",
    "definicion_en": "Soils of recent origin",
    "fertilidad_en": "depends on parent material",
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; fertility: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Gelisols": {
    "elemento_formativo": "el",
    "definicion_en": "Soils of very cold climates with permafrost within two meters of the surface",
    "fertilidad_en": null,
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Histosols": {
    "elemento_formativo": "ist",
    "definicion_en": "Soils composed mainly of organic materials",
    "fertilidad_en": "nutrient-rich enough for specific vegetation; productive when drained",
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; fertility: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Inceptisols": {
    "elemento_formativo": "ept",
    "definicion_en": "Soils with minimal horizon development",
    "fertilidad_en": "moderately fertile; may need amendments",
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; fertility: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Mollisols": {
    "elemento_formativo": "oll",
    "definicion_en": "Soils of grassland ecosystems",
    "fertilidad_en": "highly fertile, with calcium and magnesium",
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; fertility: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Oxisols": {
    "elemento_formativo": "ox",
    "definicion_en": "Very highly weathered soils, mainly in the intertropical regions",
    "fertilidad_en": "low nutrient reserves, high acidity, poor fertility",
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; fertility: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Spodosols": {
    "elemento_formativo": "od",
    "definicion_en": "Acid soils with subsurface accumulation of humus complexed with Al and Fe",
    "fertilidad_en": "low natural fertility; bases strongly leached",
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; fertility: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Ultisols": {
    "elemento_formativo": "ult",
    "definicion_en": "Strongly leached, acid forest soils with relatively low native fertility",
    "fertilidad_en": "low base saturation, acidic and nutrient-poor",
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026; fertility: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, modified 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   },
   "Vertisols": {
    "elemento_formativo": "ert",
    "definicion_en": "Clay-rich soils that shrink and swell with changes in moisture",
    "fertilidad_en": null,
-   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026",
-   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+   "fuente": "formative element: Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026; definition: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), read on Nov 14, 2026",
+   "etiqueta": "[V] formative element; [P] definition and fertility (university outreach pages)"
   }
  },
  "usda_prefijos_gran_grupo": {
   "calc": {
    "significado_en": "A calcic horizon",
    "implicacion": "carbonatos: ver la regla «carbonatos» (NOM-021)",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "calci": {
    "significado_en": "A calcic horizon",
    "implicacion": "carbonatos: ver la regla «carbonatos» (NOM-021)",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "petro": {
    "significado_en": "Hardened calcic or gypsic horizon",
    "implicacion": "capa endurecida que limita raíces",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "gyps": {
    "significado_en": "Presence of gypsic horizon",
    "implicacion": "yeso: ver Gypsisols",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "sal": {
    "significado_en": "Presence of salic horizon",
    "implicacion": "salinidad: ver la regla «salinidad» (NOM-021)",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "natr": {
    "significado_en": "Presence of natric horizon",
    "implicacion": "sodio: ver Solonetz",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "dur": {
    "significado_en": "A duripan",
    "implicacion": "capa cementada: ver Durisols",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "argi": {
    "significado_en": "Presence of an argillic horizon",
    "implicacion": "subsuelo con arcilla acumulada",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "arg": {
    "significado_en": "Presence of argillic horizon (a horizon with illuvial clay)",
    "implicacion": "subsuelo con arcilla acumulada; elemento del suborden Argids (Haplargids, Calciargids) y raíz del prefijo «argi» (Argiustolls)",
-   "fuente": "Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4, Tabla 4.3 «Formative elements used to identify various suborders in Soil Taxonomy» (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4, Table 4.3 «Formative elements used to identify various suborders in Soil Taxonomy» (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "camb": {
    "significado_en": "A cambic horizon",
    "implicacion": "desarrollo incipiente: ver Cambisols",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "hapl": {
    "significado_en": "Minimum horizon",
    "implicacion": "perfil sencillo",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "torr": {
    "significado_en": "Torric moisture regime",
    "implicacion": "régimen de humedad muy seco",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "ust": {
    "significado_en": "Ustic moisture regime",
    "implicacion": "régimen de humedad con estación seca",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "xer": {
    "significado_en": "Xeric moisture regime",
    "implicacion": "régimen de humedad mediterráneo",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "ud": {
    "significado_en": "Udic moisture regime",
    "implicacion": "régimen de humedad húmedo",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "aqu": {
    "significado_en": "Aquic conditions",
    "implicacion": "exceso de agua: ver Gleysols",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "fluv": {
    "significado_en": "Floodplain",
    "implicacion": "depósitos aluviales: ver Fluvisols",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "psamm": {
    "significado_en": "Sandy textures",
    "implicacion": "arenoso: ver Arenosols",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "cry": {
    "significado_en": "Cold",
    "implicacion": "frío",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   },
   "pale": {
    "significado_en": "Old development",
    "implicacion": "suelo antiguo",
-   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
-   "etiqueta": "[V] significado; implicación propia [I]"
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Table A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf and https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), read on Nov 14, 2026",
+   "etiqueta": "[V] meaning; own implication [I]"
   }
  },
- "como_leer_un_gran_grupo": "nombre = prefijo(s) de gran grupo + nombre del suborden, que termina en el elemento formativo del orden (p. ej. Haplo + calc + ids → Aridisols, con horizonte cálcico); Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026",
+ "como_leer_un_gran_grupo": "name = great-group prefix(es) + suborder name, which ends in the formative element of the order (e.g. Haplo + calc + ids → Aridisols, with a calcic horizon); Moorberg, C.J. and Crouse, D.A. 2017 (updated 2021). Soils Laboratory Manual, ch. 4 «Soil Classification and Mapping», Table 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), read on Nov 14, 2026",
  "zona": {
   "municipio_delicias_pct": {
    "Cambisol": 29.25,
@@ -1272,7 +1272,7 @@
    "zona_urbana": 3.44,
    "cuerpo_de_agua": 0.03
   },
-  "fuente": "Plan Municipal de Desarrollo de Delicias 2024–2027, anexo del Periódico Oficial del Estado de Chihuahua (2025), que cita a INEGI, Diccionario de Datos Edafológicos escala 1:250 000 (versión 4), 2016 (https://chihuahua.gob.mx/sites/default/atach2/periodico-oficial/anexos/2025-01/ANEXO%2003-2025%20ACUERDO%20N%C2%B0%20203-2024%20PMD%20DELICIAS.pdf), leído el 14-nov-2026",
+  "fuente": "Municipal Development Plan of Delicias 2024–2027 («Plan Municipal de Desarrollo de Delicias 2024–2027»), annex of the Official Gazette of the State of Chihuahua (2025), citing INEGI, «Diccionario de Datos Edafológicos», scale 1:250 000 (version 4), 2016 (https://chihuahua.gob.mx/sites/default/atach2/periodico-oficial/anexos/2025-01/ANEXO%2003-2025%20ACUERDO%20N%C2%B0%20203-2024%20PMD%20DELICIAS.pdf), read on Nov 14, 2026",
   "etiqueta": "[V]",
   "nota": "Superficie del municipio (no de las zonas piloto). Otra cifra publicada (INEGI, Compendio municipal 2010: Cambisol 28.40, Calcisol 27.81, Kastañozem 24.18 %) no se pudo abrir: el sitio bloquea la lectura automática [P]"
  }

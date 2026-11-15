@@ -14,6 +14,27 @@ de una sola zona y los simulados sigan pasando:
 - cubo.json «localidades»: [{nombre, municipio, lat, lon, fuente}].
 - cubo.json parcelas.<id>.sin_opciones: motivo (código) de una parcela clasificada sin opciones.
 
+Revisión de dda5abb:
+- «sin_rotacion» exime del mínimo ACTUAL + 2 solo al nogal cuya rotación ACTUAL el catálogo de B3 declara
+  que no rota (opciones_catalogo.<rotación>.letra_maestro = LETRA_NO_ROTA), como hace motor/b4_cubo.py.
+- Una opción sin lámina neta (ET) lleva «gota» en null, y entonces también los dos goteos y tope_consumo.
+
+Auditoría de df97135 (kit §2.3 y B4, pasos 4 y 5):
+- La llave «gota» no puede faltar, y su null solo se acepta para la zona y la rotación que el motor declara sin
+  lámina neta en cubo.meta.notas (PATRON_SIN_NETA: el aviso de motor/b4_cubo.py). Una opción que no pide agua
+  (descanso) publica «gota» con sus flujos en cero, no en null.
+- plazo_restante va de 0 a plazo_anios (min y max); en nogal es igual a plazo_anios (no se descuenta la edad).
+- compromiso_millares_ha.<lluvia> = lámina P50 de esa lluvia × plazo_restante (min y max), con el redondeo a dos
+  decimales del motor.
+- dotaciones.marcas[].valor es el punto medio de su rango [min, max].
+
+Textos en inglés (15-nov): campos paralelos OPCIONALES que no se validan aquí y no cambian ningún campo del contrato:
+- cubo.json: dotaciones.marcas[].fuente_en y nota_en, dotaciones.equivalencia_en y punto_medicion_en,
+  distrito.boquilla.fuente_namo_en y fuente_almacenamiento_en, distrito.acuifero_<clave>.fuente_en,
+  localidades[].fuente_en (copias de data/params.json) y meta.idioma_fuentes (idioma de las citas del buzón).
+  La página prefiere la variante en inglés y, si falta, muestra el texto original marcado con su idioma.
+  tests/test_textos_en.py comprueba que cada par trae las mismas cifras.
+
 Opciones y filtros oficiales (decisión docs/decisiones/2026-11-14_opciones_b3.md), también opcional:
 - opciones[].filtros[]: además de «motivo» y «fuente» (kit §2.3), si trae «estado» es uno de
   ESTADOS_FILTRO; «pasa», si viene, concuerda con él (true = passes, false = warning, null = sin
@@ -40,9 +61,19 @@ CONTEOS = ("total", "libre", "por_vencer", "comprometida", "abstenida")
 # Parcela sin propiedad «zona» = zona sin sufijo (decisión 2026-11-14; igual que motor/b4_cubo.py).
 ZONA_SIN_SUFIJO = "delicias_saucillo"
 # Motivos (códigos) por los que una parcela clasificada puede quedar sin opciones (motor/b4_cubo.py).
-MOTIVOS_SIN_OPCIONES = {"sin_clima_zona"}
+# «sin_actual»: la opción ACTUAL no se pudo armar con los archivos de la zona.
+MOTIVOS_SIN_OPCIONES = {"sin_clima_zona", "sin_actual"}
+# Cultivo que no rota (maestro §5.2; decisión de opciones B3, §1): el único exento de ACTUAL + 2.
+CULTIVO_NO_ROTA, LETRA_NO_ROTA = "nogal", "nogal_no_rota"
 # Estados de un filtro de B3 (decisión del 14-nov) y el valor de «pasa» que corresponde a cada uno.
 ESTADOS_FILTRO = {"passes": True, "warning": False, "needs_local_check": None}
+# Aviso con que motor/b4_cubo.py declara en cubo.meta.notas que a una rotación de una zona le falta la lámina neta
+# (y por eso su «gota» va en null): «Zona <zona>: la opción <rotación> no trae lámina neta (neta_mm_p50) en …».
+# Si el motor cambia ese texto, tests/test_contrato.py lo detecta (arma el cubo con el motor y lo valida).
+PATRON_SIN_NETA = re.compile(r"^Zona (?P<zona>\S+): la opción (?P<rotacion>\S+) no trae lámina neta \(neta_mm_p50\)")
+# El motor redondea el compromiso a dos decimales: media unidad del último decimal más el error de coma flotante.
+TOL_COMPROMISO = 0.005 + 1e-6
+TOL_PUNTO_MEDIO = 1e-6
 
 
 def zonas_de_params(ruta):
@@ -115,6 +146,8 @@ class Validador:
             self.error(d, "no hay features")
         ids = set()
         self.abstenidas = set()
+        self.cultivo_de = {}  # cultivo_actual de cada parcela (para la exención de «sin_rotacion»)
+        self.zona_de = {}     # zona de cada parcela (para atar «gota» en null al aviso del motor)
         for i, f in enumerate(feats):
             p = f.get("properties") or {}
             w = f"{d}[{p.get('id', i)}]"
@@ -144,8 +177,11 @@ class Validador:
                 self.error(w, "abstencion debe ser bool")
             elif p["abstencion"]:
                 self.abstenidas.add(pid)
-            elif p["abstencion"] and p.get("estado_plazo") is not None:
-                self.error(w, "parcela abstenida debe tener estado_plazo null")
+                # Comprobación aparte (antes era un «elif» que nunca se alcanzaba).
+                if p.get("estado_plazo") is not None:
+                    self.error(w, "parcela abstenida debe tener estado_plazo null")
+            self.cultivo_de[pid] = p.get("cultivo_actual")
+            self.zona_de[pid] = p["zona"] if isinstance(p.get("zona"), str) and p["zona"] else ZONA_SIN_SUFIJO
             self.num(p.get("dias_suelo_desnudo_feb_abr"), f"{w}.dias_suelo_desnudo_feb_abr", 0, 90, nulo=True, entero=True)
             self.num(p.get("ndvi_ultimo_mes"), f"{w}.ndvi_ultimo_mes", -1, 1, nulo=True)
             mem = p.get("memoria")
@@ -325,6 +361,10 @@ class Validador:
             if okd and m.get("min") is not None and m.get("max") is not None and m.get("valor") is not None:
                 if not (m["min"] <= m["valor"] <= m["max"]):
                     self.error(w, "valor fuera de [min, max]")
+            if all(es_num(m.get(k)) for k in ("min", "max", "valor")):
+                medio = (m["min"] + m["max"]) / 2
+                if abs(m["valor"] - medio) > TOL_PUNTO_MEDIO:
+                    self.error(w, f"valor debe ser el punto medio del rango (kit §2.3): {m['valor']} ≠ {medio}")
             for k in ("nombre", "fuente", "etiqueta"):
                 if not m.get(k):
                     self.error(w, f"falta {k}")
@@ -337,6 +377,9 @@ class Validador:
         self.zonas(c)
         self.localidades(c)
 
+        # (zona, rotación) que el motor declara sin lámina neta: las únicas que pueden llevar «gota» en null.
+        sin_neta = {(m["zona"], m["rotacion"]) for m in (PATRON_SIN_NETA.match(n) for n in meta.get("notas") or []
+                                                         if isinstance(n, str)) if m}
         parcelas = c.get("parcelas") or {}
         faltan = ids - set(parcelas)
         sobran = set(parcelas) - ids
@@ -365,6 +408,10 @@ class Validador:
                     self.error(w0, "sin_rotacion debe traer motivo y fuente")
                 elif [o.get("id") for o in ops] != ["ACTUAL"]:
                     self.error(w0, "con sin_rotacion la parcela lleva solo la opción ACTUAL")
+                if not self.no_rota(pid, ops, c):
+                    self.error(w0, f"sin_rotacion es del nogal que no rota (cultivo_actual = {CULTIVO_NO_ROTA} y "
+                                   f"opciones_catalogo.<rotación ACTUAL>.letra_maestro = {LETRA_NO_ROTA}); "
+                                   f"esta parcela no la tiene y pide ACTUAL + 2 alternativas")
             elif len(ops) < 3:
                 self.error(w0, f"mínimo ACTUAL + 2 alternativas; hay {len(ops)}")
             for o in ops:
@@ -380,6 +427,7 @@ class Validador:
                     self.rango((ag.get("compromiso_millares_ha") or {}).get(r), f"{w}.agua.compromiso_millares_ha.{r}")
                 self.rango(ag.get("plazo_anios"), f"{w}.agua.plazo_anios")
                 self.rango(ag.get("plazo_restante"), f"{w}.agua.plazo_restante")
+                self.plazo_y_compromiso(o, ag, w)
                 su = o.get("suelo") or {}
                 if su.get("dias_desnudo_origen") not in ("medido", "estimado"):
                     self.error(w, "suelo.dias_desnudo_origen debe ser 'medido' o 'estimado'")
@@ -410,6 +458,21 @@ class Validador:
                 if not o.get("preguntas_ref"):
                     self.error(w, "falta preguntas_ref")
                 llaves.add(o.get("preguntas_ref"))
+                if "gota" not in o:
+                    self.error(w, "falta la llave gota (kit §2.3)")
+                    continue
+                if o["gota"] is None:
+                    # Sin lámina neta (ET) no hay La gota: sin ella tampoco hay goteo, y el null solo se acepta
+                    # para la zona y la rotación que el motor declara en cubo.meta.notas (PATRON_SIN_NETA).
+                    con_goteo = [b for b in ("gota_goteo_con_tope", "gota_goteo_sin_tope", "tope_consumo")
+                                 if o.get(b) is not None]
+                    if con_goteo:
+                        self.error(w, f"gota en null pide también en null {', '.join(con_goteo)}")
+                    zona = self.zona_de.get(pid, ZONA_SIN_SUFIJO)
+                    if (zona, o.get("rotacion")) not in sin_neta:
+                        self.error(w, f"gota en null sin el aviso del motor: cubo.meta.notas no declara que a la "
+                                      f"rotación {o.get('rotacion')!r} de la zona {zona} le falte la lámina neta")
+                    continue
                 for bloque in ("gota", "gota_goteo_con_tope", "gota_goteo_sin_tope"):
                     if bloque != "gota" and o.get(bloque) is None:
                         continue  # escenario de goteo no disponible (sin eficiencia de goteo con fuente)
@@ -429,6 +492,40 @@ class Validador:
                 if not isinstance(t.get("cumple_sin_tope"), bool):
                     self.error(w, "tope_consumo.cumple_sin_tope debe ser bool")
         return llaves
+
+    def plazo_y_compromiso(self, o, ag, w):
+        """Kit §2.3 y B4, pasos 4 y 5: plazo_restante no pasa de plazo_anios (que no baje de cero ya lo revisa
+        self.rango); en nogal es igual al plazo, porque no se descuenta la edad; y compromiso_millares_ha =
+        lámina P50 de cada lluvia × plazo restante, en min y en max."""
+        def con_numeros(r):
+            return isinstance(r, dict) and all(es_num(r.get(k)) for k in ("min", "max"))
+
+        plazo, rest = ag.get("plazo_anios"), ag.get("plazo_restante")
+        if not (con_numeros(plazo) and con_numeros(rest)):
+            return  # lo que falta ya lo reportó self.rango
+        for k in ("min", "max"):
+            if rest[k] > plazo[k]:
+                self.error(f"{w}.agua.plazo_restante.{k}", f"plazo_restante mayor que plazo_anios: {rest[k]} > {plazo[k]}")
+        sec = o.get("secuencia") if isinstance(o.get("secuencia"), list) else []
+        if CULTIVO_NO_ROTA in sec and any(rest[k] != plazo[k] for k in ("min", "max")):
+            self.error(f"{w}.agua.plazo_restante", f"en nogal no se descuenta la edad: debe ser igual a plazo_anios "
+                                                   f"({rest} ≠ {plazo})")
+        for r in LLUVIAS:
+            p50 = ((ag.get("lamina_bruta") or {}).get(r) or {}).get("p50")
+            comp = (ag.get("compromiso_millares_ha") or {}).get(r)
+            if not es_num(p50) or not con_numeros(comp):
+                continue  # ya reportado por self.banda o self.rango
+            for k in ("min", "max"):
+                if abs(comp[k] - p50 * rest[k]) > TOL_COMPROMISO:
+                    self.error(f"{w}.agua.compromiso_millares_ha.{r}.{k}",
+                               f"{comp[k]} no es lámina P50 × plazo restante ({p50} × {rest[k]} = {round(p50 * rest[k], 2)})")
+
+    def no_rota(self, pid, ops, c):
+        """True si la parcela es nogal y el catálogo de B3 declara que su rotación ACTUAL no rota."""
+        if self.cultivo_de.get(pid) != CULTIVO_NO_ROTA:
+            return False
+        rot = next((o.get("rotacion") for o in ops if o.get("id") == "ACTUAL"), None)
+        return ((c.get("opciones_catalogo") or {}).get(rot) or {}).get("letra_maestro") == LETRA_NO_ROTA
 
     # --- §2.5 explicaciones.json -------------------------------------------
     def explicaciones(self, e, llaves):

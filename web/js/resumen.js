@@ -18,14 +18,18 @@
 //                       web/reglas.js: { lamina, cobertura, hectareas: { p50 }, semaforo }
 //         D             dotación elegida, en millares/ha (miles de m³ por hectárea)
 //         formato       opcional: función (valor, clave) -> texto, con clave «d» (dotación), «ha»
-//                       (hectáreas que alcanzan) o «area» (superficie de la parcela). Por omisión, un
-//                       decimal para «d» y «ha» y hasta tres para «area», como la ficha.
+//                       (hectáreas que alcanzan), «area» (superficie de la parcela) o «anios» (años del
+//                       plazo). Por omisión, un decimal para «d», «ha» y «anios» y hasta tres para «area».
 //       Variantes (casoResumen dice cuál toca):
 //         parcial      «With {D} thousand m³/ha, the current rotation ({cultivo}) has enough water for
-//                      {X} of {N} hectares.»
-//         completa     «… has enough water for all {N} hectares.» Si el semáforo es ámbar (cubre la
-//                      mediana, no la estimación alta) lo dice: «… at the median estimate of its need,
+//                      {X} of {N} hectares. {plazo}»
+//         completa     «… has enough water for all {N} hectares. {plazo}» Si el semáforo es ámbar (cubre
+//                      la mediana, no la estimación alta) lo dice: «… at the median estimate of its need,
 //                      not at the high estimate.»
+//         {plazo}      el compromiso de la opción ACTUAL (agua.plazo_anios, agua.plazo_restante y
+//                      agua.nota_plazo): «Alfalfa ties up water for 3–4 years (0–1 years left).»; con
+//                      nota (huerta) «… for {N} years ({nota}).»; anual (plazo de un año) «… for one
+//                      season.»; sin plazo en los datos, lo dice. Las cifras salen del cubo.
 //         sin_riego    lámina cero: «The current rotation ({cultivo}) needs no irrigation, …»
 //         abstenida    «Not classified — check with a technician. …»
 //         sin_calculo  parcela clasificada sin opción ACTUAL, o sin dotación: lo dice, sin números.
@@ -34,7 +38,7 @@
 //   casoResumen({ parcela, opcionActual, evaluacion, D }) -> "parcial" | "completa" | "sin_riego" |
 //       "abstenida" | "sin_calculo"    (para un data-atributo o para las pruebas)
 //
-//   dibujarNDVI(contenedor, { serie, meses, umbrales, fuente, nivel }) -> controlador | null
+//   dibujarNDVI(contenedor, { serie, meses, umbrales, fuente, idiomaFuente, nivel }) -> controlador | null
 //       Gráfica SVG del NDVI mensual de UNA parcela. Reemplaza el contenido del contenedor.
 //         serie     lista de web/data/ndvi_mensual.json para la parcela (parcelas[id]): valores o null,
 //                   alineada a «meses». Si no es una lista (la parcela no está en el archivo), se dice
@@ -45,6 +49,8 @@
 //                   objeto con «valor» (el bloque de params tal cual). El que falte no se dibuja. También
 //                   se aceptan las llaves ndvi_verde, suelo_desnudo y ndvi_desnudo.
 //         fuente    opcional: texto de la fuente (ndvi_mensual.json → fuente); va bajo la gráfica.
+//         idiomaFuente  opcional: idioma de ese texto (ndvi_mensual.json → idioma_fuentes); sin él se toma por
+//                   español y va marcado lang="es".
 //         nivel     opcional: nivel del encabezado (por omisión, el de las secciones de la ficha).
 //       controlador: { elemento, fijarDatos({ serie, meses, umbrales, fuente }), elegir(i | null),
 //                      destruir() }. fijarDatos cambia solo lo que reciba; elegir marca un mes (null
@@ -178,7 +184,8 @@ function numero(v, opciones) {
   return conMenos(formatos.get(llave).format(v));
 }
 /** Valor del NDVI con la precisión del archivo (tres decimales como máximo). */
-const fmtNdvi = (v) => numero(v, { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+// Dos decimales siempre (I8 de la revisión total: «0.844» junto a «0.79»); el valor exacto va en la tabla oculta.
+const fmtNdvi = (v) => numero(v, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 /** Umbral o marca de la escala: sin ceros de relleno. */
 const fmtEscala = (v) => numero(v, { maximumFractionDigits: 3 });
 
@@ -209,9 +216,44 @@ function asegurarHoja() {
 // ---------------------------------------------------------------------------
 const PREFIJO_ACTUAL = /^\s*current rotation\s*:\s*/i;
 
-function formatoPorOmision(valor, clave) {
-  if (!esNumero(valor)) return "—";
-  return numero(valor, { maximumFractionDigits: clave === "area" ? 3 : 1 });
+/** Formato por omisión: un decimal para la dotación y los años; hectáreas y área con formatoHectareas (mismo formato). */
+function formatoPorOmision(areaHa) {
+  const ha = formatoHectareas(areaHa);
+  return (valor, clave) => {
+    if (clave === "ha" || clave === "area") return ha(valor);
+    if (!esNumero(valor)) return "—";
+    return numero(valor, { maximumFractionDigits: 1 });
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Hectáreas junto al área (revisión con Playwright, 2026-11-15, punto 6: «Enough for 20.7 of 20.66 hectares»)
+// ---------------------------------------------------------------------------
+const DECIMALES_MINIMOS_HA = 1; // lo que alcanza en una parcela de área entera se lee con un decimal
+const DECIMALES_MAXIMOS_HA = 3; // los de un dato leído de un archivo (fmtDato de app.js)
+const HOLGURA_REDONDEO = 1e-9; // 20.66 × 100 da 2065.9999…: sin holgura, el redondeo hacia abajo perdería un centésimo
+
+/**
+ * formatoHectareas(areaHa) -> función (valor) -> texto.
+ * Las hectáreas que alcanzan y el área de la parcela con el MISMO formato: los decimales del área tal como llega en
+ * los datos (de uno a tres, sin ceros de relleno). Lo que alcanza se redondea hacia abajo y nunca pasa del área: el
+ * texto no dice más de lo calculado ni más que la parcela. Sin área (dato ausente), un decimal y sin tope.
+ */
+export function formatoHectareas(areaHa) {
+  const conArea = esNumero(areaHa);
+  const decimalesArea = conArea ? (numero(areaHa, { maximumFractionDigits: DECIMALES_MAXIMOS_HA }).split(".")[1] ?? "").length : 0;
+  const decimales = Math.max(DECIMALES_MINIMOS_HA, decimalesArea);
+  const escala = 10 ** decimales;
+  return (valor) => {
+    if (!esNumero(valor)) return "—";
+    const abajo = Math.floor(valor * escala + HOLGURA_REDONDEO) / escala;
+    return numero(conArea ? Math.min(abajo, areaHa) : abajo, { maximumFractionDigits: decimales });
+  };
+}
+
+/** «hectare» o «hectares» según el número (reglas de plural del inglés). */
+export function hectareasTexto(n) {
+  return hectareas(n);
 }
 
 // Aclaración final entre paréntesis del nombre («Pecan orchard (does not rotate)»): la frase ya pone el nombre
@@ -236,7 +278,7 @@ export function casoResumen({ parcela, opcionActual, evaluacion, D } = {}) {
 }
 
 export function fraseResumen({ parcela, opcionActual, evaluacion, D, formato } = {}) {
-  const f = typeof formato === "function" ? formato : formatoPorOmision;
+  const f = typeof formato === "function" ? formato : formatoPorOmision(parcela?.area_ha);
   const caso = casoResumen({ parcela, opcionActual, evaluacion, D });
   if (caso === "abstenida") {
     return "Not classified — check with a technician. The crop map is not sure what grows on this field, so its water need is not computed.";
@@ -247,15 +289,59 @@ export function fraseResumen({ parcela, opcionActual, evaluacion, D, formato } =
   const cultivo = nombreRotacion(opcionActual, parcela);
   const area = f(parcela.area_ha, "area");
   if (caso === "sin_riego") {
-    return `The current rotation (${cultivo}) needs no irrigation, so the water allocation does not limit its ${area} hectares.`;
+    return `The current rotation (${cultivo}) needs no irrigation, so the water allocation does not limit its ${area} ${hectareas(parcela.area_ha)}.`;
   }
   const inicio = `With ${f(D, "d")} thousand m³/ha, the current rotation (${cultivo}) has enough water for`;
+  const plazo = frasePlazo(opcionActual, cultivo, f);
   if (caso === "completa") {
     return evaluacion.semaforo === "ambar"
-      ? `${inicio} all ${area} hectares at the median estimate of its need, not at the high estimate.`
-      : `${inicio} all ${area} hectares.`;
+      ? `${inicio} all ${area} ${hectareas(parcela.area_ha)} at the median estimate of its need, not at the high estimate. ${plazo}`
+      : `${inicio} all ${area} ${hectareas(parcela.area_ha)}. ${plazo}`;
   }
-  return `${inicio} ${f(evaluacion.hectareas.p50, "ha")} of ${area} hectares.`;
+  return `${inicio} ${f(evaluacion.hectareas.p50, "ha")} of ${area} ${hectareas(parcela.area_ha)}. ${plazo}`;
+}
+
+// ---------------------------------------------------------------------------
+// Plazo del agua en la frase (revisión con Playwright, 2026-11-15, punto 1): por cuántos años obliga la opción
+// ACTUAL, leído de agua.plazo_anios, agua.plazo_restante y agua.nota_plazo del cubo. Antes solo estaba en la
+// tarjeta («Commits water for …»), unas dos pantallas y media abajo en el teléfono.
+// ---------------------------------------------------------------------------
+const reglasPlural = new Intl.PluralRules(LOCALE);
+const singular = (n) => esNumero(n) && reglasPlural.select(n) === "one";
+const hectareas = (n) => (singular(n) ? "hectare" : "hectares");
+/** «year» solo para un valor único igual a uno; un rango («0–1 years») va en plural. */
+const anios = (r) => (r.min === r.max && singular(r.max) ? "year" : "years");
+const rangoValido = (r) => r && typeof r === "object" && esNumero(r.min) && esNumero(r.max);
+
+/** «3–4» o «10»: un rango del cubo con el formato de la app (clave «anios»). */
+function rangoAnios(r, f) {
+  return r.min === r.max ? f(r.min, "anios") : `${f(r.min, "anios")}–${f(r.max, "anios")}`;
+}
+
+/** Primera letra en mayúscula (el nombre abre la oración; si viene de la secuencia, llega en minúsculas). */
+const conMayuscula = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/**
+ * Oración del plazo para la frase resumen:
+ *   · anual (el plazo no pasa de un año): «{Cultivo} ties up water for one season.»
+ *   · varios años: «{Cultivo} ties up water for {min}–{max} years ({restante} years left).»; con nota_plazo
+ *     (la huerta: horizonte de cálculo) la nota va en el paréntesis; el restante se omite si es igual al plazo.
+ *   · sin plazo en los datos: lo dice (no se inventa ni se calla).
+ */
+function frasePlazo(opcion, cultivo, f) {
+  const agua = opcion?.agua ?? {};
+  const plazo = agua.plazo_anios;
+  if (!rangoValido(plazo)) return "The data do not give how many years it ties up water.";
+  const sujeto = conMayuscula(cultivo);
+  // Un año como máximo: el compromiso dura una temporada (comparación con la unidad del plazo, no un dato).
+  if (plazo.max <= 1) return `${sujeto} ties up water for one season.`;
+  const resto = agua.plazo_restante;
+  const igual = rangoValido(resto) && resto.min === plazo.min && resto.max === plazo.max;
+  const notas = [
+    agua.nota_plazo ? String(agua.nota_plazo) : "",
+    rangoValido(resto) && !igual ? `${rangoAnios(resto, f)} ${anios(resto)} left` : "",
+  ].filter(Boolean);
+  return `${sujeto} ties up water for ${rangoAnios(plazo, f)} ${anios(plazo)}${notas.length ? ` (${notas.join("; ")})` : ""}.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -509,10 +595,15 @@ function htmlTabla(modelo) {
   return `<div class="resumen-voz"><table class="resumen-ndvi-tabla"><caption>${esc(TITULO_NDVI)}</caption><thead><tr><th scope="col">Month</th><th scope="col">NDVI</th></tr></thead><tbody>${filas}</tbody></table></div>`;
 }
 
-function htmlFuente(fuente) {
+function htmlFuente(fuente, idioma) {
   const texto = String(fuente ?? "").trim();
-  // La fuente viene de los datos y está en español; la interfaz, en inglés.
-  return texto ? `<p class="resumen-ndvi-fuente">${esc(PREFIJO_FUENTE)}<span lang="es">${esc(texto)}</span></p>` : "";
+  // Solo se marca el idioma del texto si no es el de la página (inglés); sin idioma declarado se toma por español.
+  const lang = idioma === "en" ? "" : ` lang="${esc(typeof idioma === "string" && idioma ? idioma : "es")}"`;
+  // La fuente viene de los datos (la línea de LEEME de la entrega): queda plegada en «Source» (I5 de la
+  // revisión total: la cita traía el proyecto de Earth Engine y notas internas a la vista).
+  return texto
+    ? `<details class="resumen-ndvi-fuente"><summary>${esc(PREFIJO_FUENTE.replace(/:\s*$/, ""))}</summary><p${lang}>${esc(texto)}</p></details>`
+    : "";
 }
 
 function textoLectura(modelo, i, elegido) {
@@ -587,7 +678,7 @@ export function dibujarNDVI(contenedor, datos = {}) {
     const titulo = `<h${nivel} class="resumen-ndvi-titulo" id="${id}-titulo">${esc(TITULO_NDVI)}</h${nivel}>`;
     raiz.dataset.estado = m.conDatos ? "con_datos" : m.disponible ? "sin_datos" : "no_disponible";
     if (!m.conDatos) {
-      raiz.innerHTML = `${titulo}<p class="resumen-ndvi-aviso">${esc(m.disponible ? TEXTO_SIN_SERIE : TEXTO_NO_DISPONIBLE)}</p>${htmlFuente(estado.fuente)}`;
+      raiz.innerHTML = `${titulo}<p class="resumen-ndvi-aviso">${esc(m.disponible ? TEXTO_SIN_SERIE : TEXTO_NO_DISPONIBLE)}</p>${htmlFuente(estado.fuente, estado.idiomaFuente)}`;
       return;
     }
     if (estado.elegido != null && !m.puntos[estado.elegido]) estado.elegido = null;
@@ -598,7 +689,7 @@ export function dibujarNDVI(contenedor, datos = {}) {
       htmlClaves(m, id) +
       `<p class="resumen-ndvi-ayuda">${esc(TEXTO_AYUDA)}</p>` +
       htmlTabla(m) +
-      htmlFuente(estado.fuente);
+      htmlFuente(estado.fuente, estado.idiomaFuente);
     pintarGrafica();
   }
 
@@ -684,7 +775,7 @@ export function dibujarNDVI(contenedor, datos = {}) {
     elemento: raiz,
     fijarDatos(nuevos = {}) {
       if (!estado.vivo) return;
-      for (const k of ["serie", "meses", "umbrales", "fuente", "nivel"]) if (k in nuevos) estado[k] = nuevos[k];
+      for (const k of ["serie", "meses", "umbrales", "fuente", "idiomaFuente", "nivel"]) if (k in nuevos) estado[k] = nuevos[k];
       pintar();
     },
     elegir(i) {

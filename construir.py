@@ -12,12 +12,17 @@ Pasos (en este orden; si uno falla, se reporta y se sigue con los demás):
   (a) motor/ensamblar.py: valida las entregas del buzón (variable RAIZ_BUZON) y las
       copia a data/processed. Si el archivo aún no existe, queda «pendiente». Sin RAIZ_BUZON
       no se valida ninguna entrega: el paso queda OMITIDO (se usa la caché previa), no «OK».
+      Un archivo rechazado cuya copia validada anterior sigue en data/processed deja el paso en
+      ADVERTENCIA con la lista de esos archivos (la web sigue con la copia vieja); no cambia el
+      código de salida (no hay modo estricto).
   (b) motor/b4_cubo.py con datos reales o motor/simulados.py mientras no los haya. Si faltan
       entradas de B4 pero web/data ya tiene un cubo REAL (meta.mock = false), el paso FALLA y NO
       reemplaza la web con simulados (un archivo renombrado o rechazado no debe pasar en silencio).
   (b2) motor/relieve_web.py: relieve.json y relieve_rutas.geojson para la web.
   (b3) motor/gemelo_web.py, motor/contexto_web.py y motor/suelo_web.py: gemelo.json, ndvi_mensual.json,
-       contexto.json y suelo.json; motor/pwa.py: lista de precarga de la app sin conexión.
+       contexto.json y suelo.json (si uno falla, los demás se construyen igual y el paso FALLA);
+       motor/pwa.py: lista de precarga de la app sin conexión (otra vez al final, después del último
+       manifest, también con --rapido).
   (c) motor/manifest.py: genera web/data/manifest.json.
   (d) python validar_contrato.py: debe imprimir «CONTRATO OK».
   (d2) motor/verificador.py: cifras de las explicaciones (set dorado).
@@ -54,6 +59,9 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
 OK, FALLA, PENDIENTE, OMITIDO = "OK", "FALLA", "PENDIENTE", "OMITIDO"
+# Paso que terminó pero deja algo a la vista (p. ej. una entrega rechazada que conserva su copia anterior):
+# se ve en el reporte final y NO cambia el código de salida.
+ADVERTENCIA = "ADVERTENCIA"
 
 # Piezas de Earth Engine: las corre otra sesión (CLAUDE.md, «Operación»). Orden del kit §0.3.
 PIEZAS_EARTH_ENGINE = (
@@ -70,10 +78,17 @@ FUENTES_POR_BUZON = (
 
 
 class Paso:
-    """Resultado de un paso: estado (OK, FALLA, PENDIENTE u OMITIDO) y detalle de una línea."""
+    """Resultado de un paso: estado (OK, FALLA, PENDIENTE u OMITIDO) y detalle de una línea.
 
-    def __init__(self, nombre, estado, detalle=""):
+    detalle_en es el mismo detalle en inglés, armado con los MISMOS valores que el de español (ninguna cifra se
+    escribe dos veces a mano): va a docs/en/test_results.md y de ahí a web/data/pruebas.json, que «About & Data»
+    muestra. Si no se da (detalles que no tienen idioma: un mensaje de excepción, el resumen de pytest o de node,
+    «--rapido»), es el mismo texto. docs/pruebas.md y el reporte de la terminal siguen en español.
+    """
+
+    def __init__(self, nombre, estado, detalle="", detalle_en=None):
         self.nombre, self.estado, self.detalle = nombre, estado, detalle
+        self.detalle_en = detalle if detalle_en is None else detalle_en
 
     def __str__(self):
         return f"{self.estado} — {self.detalle}" if self.detalle else self.estado
@@ -153,9 +168,12 @@ def paso_origen():
     for e in errores:
         print("  ERROR", e)
     if errores:
-        return Paso("origen", FALLA, f"{len(errores)} diferencias en web/vendor (ver arriba)")
+        return Paso("origen", FALLA, f"{len(errores)} diferencias en web/vendor (ver arriba)",
+                    f"{len(errores)} differences in web/vendor (see above)")
     return Paso("origen", OK, f"npm: {revisados} archivos de web/vendor coinciden (sha384); "
-                              "POWER y FTW pendientes del buzón; Earth Engine listado")
+                              "POWER y FTW pendientes del buzón; Earth Engine listado",
+                f"npm: {revisados} files of web/vendor match (sha384); "
+                "POWER and FTW pending from the team deliveries; Earth Engine listed")
 
 
 # --- (a) ensamblado -----------------------------------------------------------
@@ -166,31 +184,56 @@ def paso_ensamblar():
     titulo("(a) Ensamblado del buzón (motor/ensamblar.py)")
     if not (RAIZ / "motor/ensamblar.py").exists():
         print("  motor/ensamblar.py aún no existe: se trabaja con los datos simulados.")
-        return Paso("ensamblar", PENDIENTE, "motor/ensamblar.py aún no existe"), None
+        return Paso("ensamblar", PENDIENTE, "motor/ensamblar.py aún no existe",
+                    "motor/ensamblar.py does not exist yet"), None
     try:
         ensamblar = importar("motor.ensamblar")
     except Exception as ex:  # noqa: BLE001 - cualquier error de importación se reporta
         print(f"  No se pudo importar motor/ensamblar.py: {type(ex).__name__}: {ex}")
-        return Paso("ensamblar", FALLA, f"no se pudo importar ({type(ex).__name__}: {ex})"), None
+        return Paso("ensamblar", FALLA, f"no se pudo importar ({type(ex).__name__}: {ex})",
+                    f"could not be imported ({type(ex).__name__}: {ex})"), None
     buzon = os.environ.get("RAIZ_BUZON") or None
     print(f"  Buzón: {buzon or 'sin RAIZ_BUZON (buzón vacío)'}")
     try:
         reporte = ensamblar.ensamblar(buzon=buzon)
     except Exception as ex:  # noqa: BLE001
         print(f"  ensamblar() falló: {type(ex).__name__}: {ex}")
-        return Paso("ensamblar", FALLA, f"ensamblar() falló ({type(ex).__name__}: {ex})"), None
+        return Paso("ensamblar", FALLA, f"ensamblar() falló ({type(ex).__name__}: {ex})",
+                    f"ensamblar() failed ({type(ex).__name__}: {ex})"), None
     if not isinstance(reporte, dict):
-        return Paso("ensamblar", FALLA, f"ensamblar() devolvió {type(reporte).__name__}, no un dict"), None
+        return Paso("ensamblar", FALLA, f"ensamblar() devolvió {type(reporte).__name__}, no un dict",
+                    f"ensamblar() returned {type(reporte).__name__}, not a dict"), None
     print("  " + json.dumps(reporte, ensure_ascii=False, indent=1, default=str).replace("\n", "\n  "))
     faltan = [k for k in LLAVES_REPORTE if k not in reporte]
     if faltan:
-        return Paso("ensamblar", FALLA, f"al reporte le faltan las llaves {faltan}"), reporte
+        return Paso("ensamblar", FALLA, f"al reporte le faltan las llaves {faltan}",
+                    f"the report is missing the keys {faltan}"), reporte
     if not buzon:
         # Sin buzón no se validó ninguna entrega: decir «OK — buzón validado» sería falso.
         return Paso("ensamblar", OMITIDO, "sin RAIZ_BUZON: no se validaron entregas en esta corrida "
-                                          "(se usa la caché previa de data/processed)"), reporte
-    return Paso("ensamblar", OK, f"buzón validado: entraron {contar(reporte.get('entraron'))}, "
-                                 f"rechazados {contar(reporte.get('rechazados'))}"), reporte
+                                          "(se usa la caché previa de data/processed)",
+                    "RAIZ_BUZON is not set: no deliveries were validated in this run "
+                    "(the earlier cache in data/processed is used)"), reporte
+    entraron, rechazados = contar(reporte.get('entraron')), contar(reporte.get('rechazados'))
+    detalle = f"buzón validado: entraron {entraron}, rechazados {rechazados}"
+    detalle_en = f"deliveries validated: {entraron} accepted, {rechazados} rejected"
+    conservan = rechazados_con_copia_anterior(reporte)
+    if conservan:
+        # La entrega nueva no entró y la web sigue con la copia anterior: no es «OK» (no cambia el código de salida).
+        print(f"  ADVERTENCIA: rechazados que conservan la copia anterior en data/processed: {', '.join(conservan)}")
+        return Paso("ensamblar", ADVERTENCIA, f"{detalle}; rechazados que conservan la copia anterior en "
+                                              f"data/processed (se sigue usando): {', '.join(conservan)}",
+                    f"{detalle_en}; rejected files that keep their earlier copy in "
+                    f"data/processed (still in use): {', '.join(conservan)}"), reporte
+    return Paso("ensamblar", OK, detalle, detalle_en), reporte
+
+
+def rechazados_con_copia_anterior(reporte):
+    """Archivos rechazados en esta corrida cuya copia validada anterior sigue en la carpeta de salida del
+    ensamblador (motor/ensamblar.py la conserva y el cubo la seguirá usando)."""
+    salida = Path(reporte.get("salida") or RAIZ / "data/processed")
+    nombres = [x.get("archivo") for x in reporte.get("rechazados") or [] if isinstance(x, dict)]
+    return sorted({n for n in nombres if n and (salida / n).is_file()})
 
 
 def contar(x):
@@ -208,18 +251,22 @@ def paso_simulados(reporte):
         faltan = [f for f in b4.OBLIGATORIAS if not (RAIZ / "data/processed" / f).exists()]
     except Exception as ex:  # noqa: BLE001
         print(f"  No se pudo importar motor/b4_cubo.py: {type(ex).__name__}: {ex}")
-        return Paso("simulados", FALLA, f"no se pudo importar B4 ({type(ex).__name__}: {ex})")
+        return Paso("simulados", FALLA, f"no se pudo importar B4 ({type(ex).__name__}: {ex})",
+                    f"B4 could not be imported ({type(ex).__name__}: {ex})")
     if not faltan:
         try:
             rep = b4.construir()
         except Exception as ex:  # noqa: BLE001
             print(f"  b4_cubo.construir() falló: {type(ex).__name__}: {ex}")
-            return Paso("simulados", FALLA, f"B4 falló ({type(ex).__name__}: {ex})")
+            return Paso("simulados", FALLA, f"B4 falló ({type(ex).__name__}: {ex})",
+                        f"B4 failed ({type(ex).__name__}: {ex})")
         for a in rep.get("avisos", []):
             print(f"  aviso: {a}")
         print(f"  DATOS REALES: {rep['parcelas']} parcelas ({rep['clasificadas']} clasificadas), {rep['opciones']} opciones")
         return Paso("simulados", OK, f"cubo REAL: {rep['parcelas']} parcelas, {rep['clasificadas']} clasificadas, "
-                                     f"{rep['opciones']} opciones")
+                                     f"{rep['opciones']} opciones",
+                    f"REAL cube: {rep['parcelas']} fields, {rep['clasificadas']} classified, "
+                    f"{rep['opciones']} options")
     lista = ", ".join(faltan)
     print(f"  Faltan entradas de B4 en data/processed ({lista}).")
     # Si la web ya publica un cubo REAL, faltar una entrada es una regresión (archivo renombrado o
@@ -228,7 +275,10 @@ def paso_simulados(reporte):
         print("  web/data/cubo.json es REAL (meta.mock = false): NO se reemplaza con datos simulados.")
         return Paso("simulados", FALLA, f"faltan entradas de B4 ({lista}) y web/data tiene un cubo REAL: no se "
                                         "reemplazó con simulados (restaure las entradas; para volver a los "
-                                        "simulados a propósito, borre web/data/cubo.json)")
+                                        "simulados a propósito, borre web/data/cubo.json)",
+                    f"B4 inputs are missing ({lista}) and web/data has a REAL cube: it was not replaced with "
+                    "simulated data (restore the inputs; to go back to simulated data on purpose, delete "
+                    "web/data/cubo.json)")
     print("  Se usan los datos SIMULADOS.")
     try:
         geo, cubo, expl = importar("motor.simulados").generar()
@@ -237,7 +287,8 @@ def paso_simulados(reporte):
         return Paso("simulados", FALLA, f"{type(ex).__name__}: {ex}")
     n_op = sum(len(p.get("opciones", [])) for p in cubo["parcelas"].values())
     print(f"  {len(geo['features'])} parcelas, {n_op} opciones, {len(expl['explicaciones'])} explicaciones")
-    return Paso("simulados", OK, f"SIMULADOS (faltan: {lista}): {len(geo['features'])} parcelas, {n_op} opciones")
+    return Paso("simulados", OK, f"SIMULADOS (faltan: {lista}): {len(geo['features'])} parcelas, {n_op} opciones",
+                f"SIMULATED (missing: {lista}): {len(geo['features'])} fields, {n_op} options")
 
 
 def cubo_publicado_es_real():
@@ -264,15 +315,18 @@ def paso_relieve():
         print(f"  aviso: {a}")
     if not rep.get("ejecutado"):
         print(f"  {rep.get('motivo')}: la web dirá «terrain layer: not run».")
-        return Paso("relieve", OMITIDO, rep.get("motivo", ""))
+        # motivo_en: el mismo motivo en inglés, si el módulo lo trae (motor/relieve_web.py).
+        return Paso("relieve", OMITIDO, rep.get("motivo", ""), rep.get("motivo_en"))
     zonas = rep.get("zonas") or []
     if not zonas:
         # relieve.json sin zonas: la web dice «Terrain layer: not run»; no se reporta OK.
         print("  relieve.json quedó sin zonas (ningún relieve_meta de una zona de params): la web dirá «not run».")
         return Paso("relieve", PENDIENTE, "relieve.json sin zonas: ningún relieve_meta*.json de una zona de "
-                                          "params.zona_piloto.zonas; la web dice «Terrain layer: not run»")
+                                          "params.zona_piloto.zonas; la web dice «Terrain layer: not run»",
+                    "relieve.json has no areas: no relieve_meta*.json belongs to an area of "
+                    "params.zona_piloto.zonas; the page says «Terrain layer: not run»")
     print(f"  zonas con relieve: {', '.join(zonas)}; rutas {rep.get('rutas_bytes')} bytes")
-    return Paso("relieve", OK, f"zonas: {', '.join(zonas)}")
+    return Paso("relieve", OK, f"zonas: {', '.join(zonas)}", f"areas: {', '.join(zonas)}")
 
 
 # --- (b3) gemelo digital, bases del reto y suelo ----------------------------------
@@ -283,23 +337,36 @@ def paso_gemelo():
     página lo dice; una excepción es FALLA. Las teselas de relieve no se regeneran aquí (necesitan rasterio:
     python motor/dem_teselas.py)."""
     titulo("(b3) Gemelo digital, bases del reto y suelo (gemelo_web, contexto_web, suelo_web)")
-    detalles = []
-    for modulo, etiqueta in (("motor.gemelo_web", "gemelo"), ("motor.contexto_web", "contexto"),
-                             ("motor.suelo_web", "suelo"), ("motor.dashboard_web", "dashboard"), ("motor.pronostico_web", "pronóstico")):
+    detalles, detalles_en, fallas = [], [], []
+    # Cada módulo con su nombre en el detalle en español y en el de inglés.
+    for modulo, etiqueta, etiqueta_en in (("motor.gemelo_web", "gemelo", "twin"),
+                                          ("motor.contexto_web", "contexto", "context"),
+                                          ("motor.suelo_web", "suelo", "soil"),
+                                          ("motor.dashboard_web", "dashboard", "dashboard"),
+                                          ("motor.pronostico_web", "pronóstico", "forecast")):
         try:
             rep = importar(modulo).construir()
         except Exception as ex:  # noqa: BLE001
+            # Se anota y se sigue con los demás módulos: si no, sus JSON quedarían de la corrida anterior.
             print(f"  {modulo}.construir() falló: {type(ex).__name__}: {ex}")
-            return Paso("gemelo", FALLA, f"{modulo}: {type(ex).__name__}: {ex}")
+            fallas.append(f"{modulo}: {type(ex).__name__}: {ex}")
+            detalles.append(f"{etiqueta}: FALLA")
+            detalles_en.append(f"{etiqueta_en}: FAILED")
+            continue
         for a in rep.get("avisos") or []:
             print(f"  aviso ({etiqueta}): {a}")
         if rep.get("ejecutado") is False:
             print(f"  {etiqueta}: no se generó ({rep.get('motivo')})")
             detalles.append(f"{etiqueta}: not run")
+            detalles_en.append(f"{etiqueta_en}: not run")
         else:
             detalles.append(f"{etiqueta}: OK")
+            detalles_en.append(f"{etiqueta_en}: OK")
     print("  " + " · ".join(detalles))
-    return Paso("gemelo", OK, " · ".join(detalles))
+    if fallas:
+        return Paso("gemelo", FALLA, " · ".join(detalles) + " — " + "; ".join(fallas),
+                    " · ".join(detalles_en) + " — " + "; ".join(fallas))
+    return Paso("gemelo", OK, " · ".join(detalles), " · ".join(detalles_en))
 
 
 def paso_pwa():
@@ -329,7 +396,9 @@ def paso_manifest(rotulo="(c) Manifest (motor/manifest.py)"):
     if len(man["avisos"]) > 5:
         print(f"  … y {len(man['avisos']) - 5} avisos más (lista completa en manifest.json → avisos)")
     return Paso("manifest", OK, f"{r['cifras']} cifras ({r['simuladas']} simuladas), "
-                                f"{r['fuentes_de_origen']} fuentes de origen, {r['avisos']} avisos")
+                                f"{r['fuentes_de_origen']} fuentes de origen, {r['avisos']} avisos",
+                f"{r['cifras']} figures ({r['simuladas']} simulated), "
+                f"{r['fuentes_de_origen']} source files, {r['avisos']} notices")
 
 
 # --- (d) contrato ----------------------------------------------------------------
@@ -346,8 +415,9 @@ def paso_contrato():
     print("  " + salida.strip().replace("\n", "\n  "))
     primera = salida.strip().splitlines()[0] if salida.strip() else "sin salida"
     if codigo == 0 and "CONTRATO OK" in salida:
-        return Paso("contrato", OK, "CONTRATO OK")
-    return Paso("contrato", FALLA, primera)
+        return Paso("contrato", OK, "CONTRATO OK", "CONTRACT OK")
+    # La primera línea de la salida del validador va tal cual (está en español).
+    return Paso("contrato", FALLA, primera, f"validar_contrato.py failed: {primera}")
 
 
 # --- (d2) verificador de cifras (kit C3 y K-TEST prueba 6) ----------------------------
@@ -356,8 +426,10 @@ def paso_verificador():
     codigo, salida = correr([sys.executable, "motor/verificador.py", "web/data/explicaciones.json", "--reporte"])
     print("  " + salida.strip().replace("\n", "\n  "))
     ok = codigo == 0 and "VERIFICADOR OK" in salida
-    return Paso("verificador", OK if ok else FALLA, "VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv"
-                if ok else f"código {codigo}: ver salida")
+    if ok:
+        return Paso("verificador", OK, "VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv",
+                    "CHECKER OK; golden set in docs/figuras/llm_eval.csv")
+    return Paso("verificador", FALLA, f"código {codigo}: ver salida", f"exit code {codigo}: see the output")
 
 
 def escribir_pruebas_md(pasos, total_s):
@@ -374,6 +446,36 @@ def escribir_pruebas_md(pasos, total_s):
         "a partir de ella: la sección «About & Data» de la web la muestra como «puerta automática».\n"
     )
     (RAIZ / "docs/pruebas.md").write_text(texto, encoding="utf-8")
+    escribir_pruebas_md_en(pasos, ahora, total_s)
+
+
+def escribir_pruebas_md_en(pasos, ahora, total_s):
+    """docs/en/test_results.md: la misma tabla en inglés, con los nombres de los pasos que muestra la web
+    (motor/pruebas_web.py, NOMBRES_PASOS). «About & Data» enlaza esta versión porque la guía de envío de
+    Space Apps pide que todo lo enlazado esté en inglés. El detalle de cada paso es su detalle en inglés
+    (Paso.detalle_en: los mismos valores que el de español; motor/pruebas_web.py lo lee de aquí para la página)."""
+    try:
+        pw = importlib.import_module("motor.pruebas_web")
+    except ImportError:  # sin el módulo, los nombres quedan como id del paso (no se pierde la tabla)
+        pw = None
+    nombres = getattr(pw, "NOMBRES_PASOS", {}) or {}
+    # Los mismos estados en inglés que usa la web (un solo mapa: motor/pruebas_web.py, ESTADOS_PASO).
+    estados = getattr(pw, "ESTADOS_PASO", None) or {"OK": "passed", "FALLA": "failed", "PENDIENTE": "pending",
+                                                    "OMITIDO": "skipped", "ADVERTENCIA": "warning"}
+    filas = "\n".join(f"| {nombres.get(p.nombre, p.nombre)} | {estados.get(p.estado, p.estado)} | {p.detalle_en} |"
+                      for p in pasos)
+    texto = (
+        "<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->\n"
+        "# Automated test results (written by `python construir.py`; not edited by hand)\n\n"
+        "English version of [docs/pruebas.md](../pruebas.md); if they differ, the Spanish original prevails.\n\n"
+        f"Run: {ahora} · duration {total_s:.1f} s\n\n"
+        "| Step | Status | Detail |\n|---|---|---|\n" + filas + "\n\n"
+        "The browser test (`node tests/e2e/web_smoke.mjs`) runs separately, before each publication.\n"
+        "After this table is written, step 5c (`motor/pruebas_web.py`) builds `web/data/pruebas.json` from it: "
+        "«About & Data» shows it as the automated gate.\n"
+    )
+    (RAIZ / "docs/en").mkdir(parents=True, exist_ok=True)
+    (RAIZ / "docs/en/test_results.md").write_text(texto, encoding="utf-8")
 
 
 # --- (5c) pruebas a la vista para la web ----------------------------------------------------
@@ -396,7 +498,8 @@ def paso_pruebas_web():
         cuenta[est] = cuenta.get(est, 0) + 1
     resumen = ", ".join(f"{n} {e}" for e, n in cuenta.items())
     return Paso("pruebas_web", OK, f"{rep.get('ruta')}: {len(estados)} pruebas ({resumen}); "
-                                   f"puerta {rep.get('puerta')}")
+                                   f"puerta {rep.get('puerta')}",
+                f"{rep.get('ruta')}: {len(estados)} tests ({resumen}); gate {rep.get('puerta')}")
 
 
 # --- (e) pytest --------------------------------------------------------------------
@@ -404,12 +507,14 @@ def paso_pytest():
     titulo("(e) Pruebas de Python (pytest -q tests/)")
     if importlib.util.find_spec("pytest") is None:
         print("  pytest no está instalado: python -m pip install -r requirements.txt")
-        return Paso("pytest", FALLA, "pytest no está instalado (pip install -r requirements.txt)")
+        return Paso("pytest", FALLA, "pytest no está instalado (pip install -r requirements.txt)",
+                    "pytest is not installed (pip install -r requirements.txt)")
     codigo, salida = correr([sys.executable, "-m", "pytest", "-q", "-rs", "-p", "no:cacheprovider", "tests/"])
     print("  " + salida.strip().replace("\n", "\n  "))
     lineas = [l for l in salida.strip().splitlines() if re.search(r"\d+ (passed|failed|error|skipped)", l)]
+    # El resumen de pytest ya está en inglés; sin él, el código de salida en los dos idiomas.
     resumen = lineas[-1].strip("= ") if lineas else f"código {codigo}"
-    return Paso("pytest", OK if codigo == 0 else FALLA, resumen)
+    return Paso("pytest", OK if codigo == 0 else FALLA, resumen, None if lineas else f"exit code {codigo}")
 
 
 # --- (f) node --test -------------------------------------------------------------------
@@ -417,11 +522,11 @@ def paso_node():
     titulo("(f) Pruebas de JavaScript (node --test)")
     if shutil.which("node") is None:
         print("  node no está instalado (se necesita Node 22).")
-        return Paso("node", FALLA, "node no está instalado")
+        return Paso("node", FALLA, "node no está instalado", "node is not installed")
     # Node 22 trata «tests/» como un archivo; se pasan los archivos de prueba explícitos.
     archivos = sorted(str(p.relative_to(RAIZ)) for p in (RAIZ / "tests").rglob("*.test.js"))
     if not archivos:
-        return Paso("node", FALLA, "no hay archivos tests/**/*.test.js")
+        return Paso("node", FALLA, "no hay archivos tests/**/*.test.js", "there are no tests/**/*.test.js files")
     codigo, salida = correr(["node", "--test", "--test-reporter=tap", *archivos])
     # Se muestran los nombres de las pruebas y el resumen. De cada prueba que falla se
     # muestra su bloque YAML de TAP (el mensaje de error), sin la pila de llamadas.
@@ -475,7 +580,8 @@ def main(argv=None):
     args = ap.parse_args(argv)
     inicio = time.time()
 
-    origen = paso_origen() if args.origen else Paso("origen", OMITIDO, "no solicitado (use --origen)")
+    origen = paso_origen() if args.origen else Paso("origen", OMITIDO, "no solicitado (use --origen)",
+                                                    "not requested (use --origen)")
     ens, reporte = paso_ensamblar()
     sim = paso_simulados(reporte)
     rel = paso_relieve()
@@ -499,18 +605,21 @@ def main(argv=None):
         titulo("(5c) Pruebas a la vista para la web (motor/pruebas_web.py)")
         print("  --rapido: no se regenera web/data/pruebas.json; queda el de la última corrida completa.")
         web = Paso("pruebas_web", OMITIDO, "--rapido: web/data/pruebas.json no se regeneró (puerta de la "
-                                           "última corrida completa, no de esta)")
+                                           "última corrida completa, no de esta)",
+                   "--rapido: web/data/pruebas.json was not rebuilt (gate of the last full run, not of this one)")
     else:
         escribir_pruebas_md(pasos, time.time() - inicio)
         web = paso_pruebas_web()
         # (c2) El manifest otra vez, ahora con las cifras de pruebas.json de esta corrida (regla 11).
         if web.estado == OK and man.estado == OK:
             man = paso_manifest("(c2) Manifest con las cifras de pruebas.json (motor/manifest.py)")
-    if not args.rapido:
-        pwa = paso_pwa()  # otra vez, con pruebas.json y manifest.json de esta corrida
+    # Otra vez al final, también con --rapido: la versión de la precarga es la huella de lo que carga la página,
+    # manifest.json (y, en la corrida completa, pruebas.json) incluido.
+    pwa = paso_pwa()
     todos = (origen, ens, sim, rel, gem, pwa, man, con, ver, py, js, web)
     fallas = [p.nombre for p in todos if p.estado == FALLA]
     pendientes = [p.nombre for p in todos if p.estado == PENDIENTE]
+    advertencias = [p.nombre for p in todos if p.estado == ADVERTENCIA]
     if reporte:
         entregas = (f"entraron {contar(reporte.get('entraron'))} · rechazados {contar(reporte.get('rechazados'))} · "
                     f"retenidos {contar(reporte.get('retenidos'))} · fuentes {contar(reporte.get('fuentes'))}")
@@ -524,7 +633,9 @@ def main(argv=None):
         final = "OK: todo pasa"
     if pendientes:
         final += f" · pendiente: {', '.join(pendientes)}"
-    codigo = 1 if fallas else 0
+    if advertencias:
+        final += f" · advertencia: {', '.join(advertencias)} (ver su renglón)"
+    codigo = 1 if fallas else 0  # una ADVERTENCIA no cambia el código de salida
 
     titulo("REPORTE")
     lineas = (

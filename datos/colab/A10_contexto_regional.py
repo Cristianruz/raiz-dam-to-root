@@ -113,7 +113,7 @@ def main():
         w.writerow(["zona", "fuente", "variable", "mes", "valor", "unidad", "resolucion_m", "n_celdas"])
         w.writerows(out)
     registrar_fuentes("A10", ["contexto_regional.csv"],
-                      "Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: "
+                      "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: "
                       "smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); "
                       "modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; "
                       "grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); "

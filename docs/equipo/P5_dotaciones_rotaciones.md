@@ -52,7 +52,7 @@ Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
 - /content/drive/MyDrive/Raiz_entregas/ = el buzón: UNA carpeta plana (sin subcarpetas) con LEEME.md, una línea por archivo. Ahí están los archivos que ya entregó la sesión de datos; los leo directo de ahí y NO los modifico. Ahí guardo mis entregas.
 - /content/drive/MyDrive/Raiz/entradas/ = datos de solo lectura;
 - /content/drive/MyDrive/Raiz/cuadernos/ = cuadernos y archivos de trabajo.
-Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome de Cristian).
+Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el navegador del integrador).
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
@@ -203,7 +203,7 @@ Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
 - /content/drive/MyDrive/Raiz_entregas/ = el buzón: UNA carpeta plana (sin subcarpetas) con LEEME.md, una línea por archivo. Ahí están los archivos que ya entregó la sesión de datos (rotaciones.json, demanda_cultivos.csv…) y heladas.json de P4; los leo directo de ahí y NO los modifico. Ahí guardo mis entregas.
 - /content/drive/MyDrive/Raiz/entradas/ = datos de solo lectura;
 - /content/drive/MyDrive/Raiz/cuadernos/ = cuadernos y archivos de trabajo.
-Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome de Cristian).
+Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el navegador del integrador).
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
@@ -408,7 +408,7 @@ Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
 - /content/drive/MyDrive/Raiz_entregas/ = el buzón: UNA carpeta plana (sin subcarpetas) con LEEME.md, una línea por archivo. Ahí están los archivos que ya entregó la sesión de datos y los del equipo; los leo directo de ahí y NO los modifico. Ahí guardo mis entregas.
 - /content/drive/MyDrive/Raiz/entradas/ = datos de solo lectura;
 - /content/drive/MyDrive/Raiz/cuadernos/ = cuadernos y archivos de trabajo.
-Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome de Cristian).
+Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el navegador del integrador).
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
@@ -490,7 +490,7 @@ Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
 - /content/drive/MyDrive/Raiz_entregas/ = el buzón: UNA carpeta plana (sin subcarpetas) con LEEME.md, una línea por archivo. Ahí están los archivos que ya entregó la sesión de datos; los leo directo de ahí y NO los modifico. Ahí guardo mis entregas.
 - /content/drive/MyDrive/Raiz/entradas/ = datos de solo lectura;
 - /content/drive/MyDrive/Raiz/cuadernos/ = cuadernos y archivos de trabajo.
-Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome de Cristian).
+Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el navegador del integrador).
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.

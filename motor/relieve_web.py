@@ -41,6 +41,7 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     if not rutas.exists() or not metas:
         quitar_capa(web)
         return {"ejecutado": False, "motivo": "sin relieve_rutas.geojson o relieve_meta*.json en data/processed",
+                "motivo_en": "no relieve_rutas.geojson or relieve_meta*.json in data/processed",
                 "avisos": []}
 
     zonas_ids = {z["id"] for z in leer_json(params_ruta)["zona_piloto"].get("zonas", {}).get("valor", [])}
@@ -69,11 +70,14 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     if not bloques:
         quitar_capa(web)
         return {"ejecutado": False, "avisos": avisos,
-                "motivo": "ningún relieve_meta*.json de data/processed es de una zona de params.zona_piloto.zonas"}
+                "motivo": "ningún relieve_meta*.json de data/processed es de una zona de params.zona_piloto.zonas",
+                "motivo_en": "no relieve_meta*.json in data/processed belongs to an area of params.zona_piloto.zonas"}
     web.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(rutas, web / "relieve_rutas.geojson")
     salida = {"_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
               "fuente": "data/processed/relieve_meta*.json (A9, NASADEM vía Earth Engine)",
+              # El mismo texto en inglés (campo paralelo; la leyenda de la página lo prefiere).
+              "fuente_en": "data/processed/relieve_meta*.json (A9, NASADEM via Earth Engine)",
               "zonas": bloques}
     (web / "relieve.json").write_text(json.dumps(salida, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return {"ejecutado": True, "zonas": sorted(bloques), "avisos": avisos,

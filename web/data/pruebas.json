@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T08:09:17+00:00",
+ "generado": "2026-11-15T09:29:58+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -25,7 +25,7 @@
      "id": "random_forest",
      "nombre": "Random Forest",
      "estado": "not run",
-     "nota": "Pending: every field reports a single method in acuerdo_metodos.",
+     "nota": "Pending: every field reports a single method (the phenological rules); the Random Forest has not been run.",
      "fuente": "web/data/parcelas.geojson"
     },
     {
@@ -71,11 +71,11 @@
   {
    "id": "backtest_h1",
    "numero": 2,
-   "titulo": "Back-test 2026 (H1, preregistered)",
+   "titulo": "Back-test 2026 (H1, criterion declared before the analysis)",
    "criterio": "With data up to March 14, the error at July 14 must be lower than that of baselines L1 and L1-s. Truth: outflow through the intake works of La Boquilla (SIH)",
    "criterio_fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
    "estado": "failed",
-   "resumen": "H1 does not meet the preregistered criterion (partial back-test; press-reported truth)",
+   "resumen": "H1 does not meet the criterion declared before the analysis (partial back-test; press-reported truth)",
    "partes": [],
    "metricas": [],
    "fuentes": [
@@ -131,7 +131,7 @@
   {
    "id": "experimento_h3",
    "numero": 3,
-   "titulo": "Natural experiment of 2025 (H3, preregistered)",
+   "titulo": "Natural experiment of 2025 (H3, criterion declared before the analysis)",
    "criterio": "In the year without dam water, the share of annual-crop fields with a summer crop falls 25 points or more below its 2019–2024 median, and the share of pecan orchards stays within 10 points of its median. The number of fields in each group is published",
    "criterio_fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
    "estado": "failed",
@@ -281,84 +281,95 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T08:09:16+00:00",
+  "corrida": "2026-11-15T09:29:58+00:00",
   "pasos": [
    {
     "id": "origen",
     "nombre": "Re-download of source data (optional)",
     "estado": "skipped",
     "estado_original": "OMITIDO",
-    "detalle": "no solicitado (use --origen)"
+    "detalle": "no solicitado (use --origen)",
+    "detalle_en": "not requested (use --origen)"
    },
    {
     "id": "ensamblar",
     "nombre": "Team deliveries validated against the data contract",
     "estado": "skipped",
     "estado_original": "OMITIDO",
-    "detalle": "sin RAIZ_BUZON: no se validaron entregas en esta corrida (se usa la caché previa de data/processed)"
+    "detalle": "sin RAIZ_BUZON: no se validaron entregas en esta corrida (se usa la caché previa de data/processed)",
+    "detalle_en": "RAIZ_BUZON is not set: no deliveries were validated in this run (the earlier cache in data/processed is used)"
    },
    {
     "id": "simulados",
     "nombre": "Cube engine",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "cubo REAL: 1239 parcelas, 458 clasificadas, 1282 opciones"
+    "detalle": "cubo REAL: 1239 parcelas, 458 clasificadas, 1267 opciones",
+    "detalle_en": "REAL cube: 1239 fields, 458 classified, 1267 options"
    },
    {
     "id": "relieve",
     "nombre": "Terrain & runoff layer",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "zonas: delicias_saucillo, lazaro_cardenas"
+    "detalle": "zonas: delicias_saucillo, lazaro_cardenas",
+    "detalle_en": "areas: delicias_saucillo, lazaro_cardenas"
    },
    {
     "id": "gemelo",
-    "nombre": "gemelo",
+    "nombre": "Digital twin, regional context and soil",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "gemelo: OK · contexto: OK · suelo: OK · dashboard: OK · pronóstico: OK"
+    "detalle": "gemelo: OK · contexto: OK · suelo: OK · dashboard: OK · pronóstico: OK",
+    "detalle_en": "twin: OK · context: OK · soil: OK · dashboard: OK · forecast: OK"
    },
    {
     "id": "pwa",
-    "nombre": "pwa",
+    "nombre": "Offline app (installable page)",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache 72338a926cd3bb59"
+    "detalle": "precache 9743fc8c78fe4ff5",
+    "detalle_en": "precache 9743fc8c78fe4ff5"
    },
    {
     "id": "manifest",
     "nombre": "Manifest of every figure",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "121113 cifras (0 simuladas), 35 fuentes de origen, 59 avisos"
+    "detalle": "141343 cifras (0 simuladas), 35 fuentes de origen, 59 avisos",
+    "detalle_en": "141343 figures (0 simulated), 35 source files, 59 notices"
    },
    {
     "id": "contrato",
     "nombre": "Data contract, including the water balance of “Follow the drop”",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "CONTRATO OK"
+    "detalle": "CONTRATO OK",
+    "detalle_en": "CONTRACT OK"
    },
    {
     "id": "verificador",
     "nombre": "Figure checker on the page's explanations",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv"
+    "detalle": "VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv",
+    "detalle_en": "CHECKER OK; golden set in docs/figuras/llm_eval.csv"
    },
    {
     "id": "pytest",
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1058 passed, 5 skipped in 57.78s"
+    "detalle": "1205 passed, 30 warnings in 57.29s",
+    "detalle_en": "1205 passed, 30 warnings in 57.29s"
    },
    {
     "id": "node",
     "nombre": "JavaScript tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "179 pass, 0 fail, 0 skipped"
+    "detalle": "255 pass, 0 fail, 0 skipped",
+    "detalle_en": "255 pass, 0 fail, 0 skipped"
    }
   ],
   "nota": "Last full run recorded by python construir.py. The browser smoke test (tests/e2e/web_smoke.mjs) runs separately, before each release."
@@ -366,14 +377,14 @@
  "enlaces": {
   "repositorio": "https://github.com/Cristianruz/raiz-dam-to-root",
   "readme_ia": "https://github.com/Cristianruz/raiz-dam-to-root#siai-tools-used",
-  "pruebas_md": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/pruebas.md"
+  "pruebas_md": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/en/test_results.md"
  },
  "documentos": [
   {
    "id": "modelo_vs_practica",
    "titulo": "The model against what is really irrigated in the district",
    "ruta": "docs/modelo_vs_practica.md",
-   "url": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/modelo_vs_practica.md",
+   "url": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/en/model_vs_practice.md",
    "existe": true,
    "nota": "Gathers the published local references (water applied in the district and INIFAP guidance) next to the model's water need; it changes no verdict."
   },
@@ -381,7 +392,7 @@
    "id": "revision_protagonistas",
    "titulo": "True-color review of the story fields",
    "ruta": "docs/revision_protagonistas.md",
-   "url": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/revision_protagonistas.md",
+   "url": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/en/story_fields_review.md",
    "existe": true,
    "nota": "Done by an AI session (the data session) looking at Sentinel-2 true-color images. The review by a person of the team who knows the area is still pending."
   }

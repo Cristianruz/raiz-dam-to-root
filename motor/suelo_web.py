@@ -59,6 +59,22 @@ Contenido de suelo.json (lo lee web/js/suelo.js; toda cifra de la página sale d
                    con rango publicado (n_sobre_optimo de n_con_ph; n_cultivos = cultivos con rango de pH), y si
                    son la mayoría de la zona (mayoria). La ficha da el mensaje de zona solo con mayoria = true.
                    null sin perfil o sin requisitos.
+  tipo_suelo       null + tipo_suelo_motivo (sin tipo_suelo_parcelas.csv, pieza B8), o {archivo, fuente, fecha,
+                   catalogo: {archivo, fuente, fecha} (suelo_tipos.json, B7) | null, explica_en, no_coinciden_en,
+                   ordenes: {orden: {definicion_en, fertilidad_en, fuente, etiqueta}}, elementos: {elemento:
+                   {significado_en, fuente, etiqueta}} (solo los que usan las parcelas), zonas: {zona: {texto_en,
+                   suelos: [{grupo, pct}], fuente, etiqueta}} (suelos del municipio según INEGI, de mayor a menor),
+                   grupos: {gran_grupo: {orden, elementos, descripcion_en, texto_en}}, parcelas: {id: {gran_grupo,
+                   zona}}}: la descripción depende solo del gran grupo y va una vez. Una parcela sin gran grupo no
+                   entra (la ficha dice que el mapa no la trae). Sin suelo_reglas.json, texto_en y los
+                   textos del bloque van en null; sin suelo_tipos.json, las descripciones van en null.
+  nutrientes       null + nutrientes_motivo (sin suelo_nutrientes_parcelas.csv o sin suelo_reglas.json), o
+                   {archivo, fuente, fecha, reglas: {archivo, fuente, fecha}, aviso_en, resolucion_m: {valor,
+                   archivo, fuente} | null, nombres_en: {símbolo: nombre}, fuentes: {llave: {fuente, etiqueta}},
+                   conjuntos: {llave: {notas: [{caso, estado, elementos, texto_en, fuente}], sin_dato_en?}},
+                   parcelas: {id: llave}}. Las parcelas con las mismas tres listas comparten su conjunto de notas
+                   (llave = las listas tal como llegan, «B;Cu;Fe;Mn;Ni;Zn|P|»; sin pH, «sin_dato»). «fuente» de
+                   cada nota es una llave de «fuentes» (así la cita larga no se repite).
 
 REGLAS DE APTITUD (cinco estados: fits, tolerated, near_limit, outside_range y no_published_range):
 - Por criterio:
@@ -88,12 +104,23 @@ REGLAS DE APTITUD (cinco estados: fits, tolerated, near_limit, outside_range y n
   los del resumen por zona (conteos, mínimo, máximo y mediana del pH; la mediana lleva a lo más un
   decimal más que la entrega). Este archivo no trae ningún rango, umbral ni corte: todos se LEEN de
   suelo_requisitos.json.
+
+NOTAS DE NUTRIENTES Y TIPO DE SUELO (entregas B7 y B8; textos de suelo_reglas.json → textos_ficha_en, tal cual,
+con sus {marcadores} llenos con los datos; nada se calcula: las listas por parcela ya vienen calculadas por la
+sesión de datos en suelo_nutrientes_parcelas.csv):
+- menos_disponibles no vacía → una nota «less_available» con su texto; si trae Fe, además la nota del hierro.
+- cerca_del_limite sin N, K, Ca, Mg ni S (la decisión del integrador que trae textos_ficha_en) → «near_limit».
+- toxicidad_posible no vacía → «possible_toxicity» ({ph_toxico} = disponibilidad_ph.toxicidad_ph_menor_que.valor).
+- las dos listas vacías con pH → «within_range» (sin_aviso_ph); sin pH → ninguna nota y sin_dato_en.
+- La resolución del mapa (resolucion_m) se lee de la línea de fuente de suelo_parcelas.csv (LEEME.md del buzón,
+  «ISRIC SoilGrids 2.0 (<n> m, …»): no se escribe a mano. Si esa línea no trae una sola, va en null y la ficha no la dice.
 """
 import argparse
 import csv
 import datetime
 import json
 import math
+import re
 import statistics
 import sys
 from collections import Counter
@@ -130,8 +157,9 @@ ROTULO_APTITUD = "General published range (FAO ECOCROP, worldwide), not a local 
 ARCHIVO_SUPUESTOS = "supuestos.json"
 SUPUESTO_MARGEN_PH = "suelo_margen_ph"
 SUPUESTO_COINCIDENCIA = "suelo_coincidencia_textura"
-# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) van en español.
-IDIOMA_FUENTES = "es"
+# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) llegan en inglés desde la reentrega
+# del 15-nov (buzón v11); antes iban en español.
+IDIOMA_FUENTES = "en"
 
 # Estados de aptitud, de mejor a peor (el peor manda), y el que no entra en esa escala.
 FITS, TOLERATED, NEAR, OUTSIDE = "fits", "tolerated", "near_limit", "outside_range"
@@ -144,6 +172,34 @@ ESTADOS = (*SEVERIDAD, SIN_RANGO)
 CRITERIO_PH, CRITERIO_TEXTURA, CRITERIO_SALINIDAD = "ph", "textura", "salinidad"
 # Bloque de suelo_requisitos.json de cada criterio (esquemas.BLOQUES_REQUISITO).
 BLOQUE_DE = {CRITERIO_PH: "ph", CRITERIO_TEXTURA: "textura", CRITERIO_SALINIDAD: "salinidad_umbral_ds_m"}
+
+# Tipo de suelo por parcela (B8) y notas de nutrientes (B7): un archivo para las dos zonas cada uno.
+ARCHIVO_TIPO = "tipo_suelo_parcelas.csv"
+ARCHIVO_CATALOGO = "suelo_tipos.json"
+ARCHIVO_NUTRIENTES = "suelo_nutrientes_parcelas.csv"
+ARCHIVO_REGLAS = "suelo_reglas.json"
+# Zona → llave de suelo_tipos.json → zona con los suelos del municipio (textos_ficha_en.tipo_suelo.zona.cuando:
+# «zona delicias_saucillo; {lista} = suelo_tipos.json → zona.municipio_delicias_pct»). Lázaro Cárdenas no la tiene.
+LISTA_MUNICIPIO_DE_ZONA = {"delicias_saucillo": E.ZONA_PCT}
+# Superficies del mismo cuadro del INEGI (Tabla 1 del Plan Municipal de Desarrollo de Delicias) que no son suelo: con
+# ellas la lista suma el 100 % de la superficie del municipio, como pide el validador (motor/esquemas.py). No van en la
+# lista de suelos y no avisan; cualquier otra llave que no sea un grupo WRB del catálogo sí avisa.
+NO_SUELO = ("zona_urbana", "cuerpo_de_agua")
+# Nutrientes que la ficha NO muestra como «near the limit» (textos_ficha_en.suelo.cerca_del_limite.cuando: «con
+# cerca_del_limite sin N, K, Ca, Mg ni S (decisión del integrador)»; docs/suelo_tipos_y_nutrientes.md §6 de la rama
+# datos-satelite: a pH 8.1 el grupo queda a 0.1 de su rango y en suelos calcáreos el Ca y el Mg dominan el complejo
+# de cambio). Son símbolos químicos, no cifras.
+NO_MOSTRAR_CERCA = ("N", "K", "Ca", "Mg", "S")
+HIERRO = "Fe"   # la nota del hierro va cuando Fe está en menos_disponibles (textos_ficha_en.suelo.hierro.cuando)
+# Estado de cada nota (la ficha lo dice con texto y símbolo) y llave de su fuente en nutrientes.fuentes.
+NOTA_MENOS, NOTA_CERCA, NOTA_TOXICIDAD, NOTA_EN_RANGO = "less_available", "near_limit", "possible_toxicity", "within_range"
+FUENTE_DISPONIBILIDAD = "disponibilidad_ph"
+# Llave del conjunto de notas de una parcela: sus tres listas tal como llegan, unidas por «|»; sin pH, «sin_dato».
+COLUMNAS_LISTAS = ("menos_disponibles", "cerca_del_limite", "toxicidad_posible")
+LLAVE_SIN_DATO = "sin_dato"
+# Resolución del mapa de suelo en la línea de fuente de su entrega («ISRIC SoilGrids 2.0 (<n> m, …»).
+RESOLUCION_EN_FUENTE = re.compile(r"(?<![\d.,])(\d+) m\b")
+MARCADOR = re.compile(r"\{[a-z_]+\}")
 
 # Columnas numéricas del perfil (las demás: clase_textura, profundidad_cm y n_celdas).
 COLUMNAS_NUMERICAS = ("arena_pct", "limo_pct", "arcilla_pct", "ph", "carbono_organico_g_kg",
@@ -558,6 +614,237 @@ def alcalinidad_por_zona(perfil, requisitos, zona_de, avisos):
 
 
 # ---------------------------------------------------------------------------------------
+# Tipo de suelo (tipo_suelo_parcelas.csv + suelo_tipos.json) y notas de nutrientes
+# (suelo_nutrientes_parcelas.csv + suelo_reglas.json); ver el encabezado
+# ---------------------------------------------------------------------------------------
+def lista_celda(texto):
+    """Celda «P;B;Zn» como lista, en el orden de la entrega; [] si está vacía."""
+    return [x.strip() for x in (texto or "").split(E.SEPARADOR_LISTA) if x.strip()]
+
+
+def lista_en(nombres):
+    """«boron», «boron and zinc», «boron, copper and zinc» (para el marcador {nutrientes} o {lista})."""
+    nombres = [str(n) for n in nombres]
+    return nombres[0] if len(nombres) == 1 else f"{', '.join(nombres[:-1])} and {nombres[-1]}"
+
+
+def llenar(plantilla, avisos, donde, **valores):
+    """La plantilla de textos_ficha_en con sus {marcadores} llenos; None (y un aviso) si no hay plantilla o si
+    queda algún marcador sin dato. No se completa nada a mano."""
+    if not texto_lleno(plantilla):
+        return None
+    texto = plantilla
+    for llave, valor in valores.items():
+        texto = texto.replace("{" + llave + "}", str(valor))
+    if MARCADOR.search(texto):
+        avisos.append(f"{ARCHIVO_REGLAS}: el texto de {donde} trae un marcador sin dato ({texto}); va en null")
+        return None
+    return texto
+
+
+def texto_de(textos, *ruta):
+    """textos_ficha_en → <ruta> → texto_en, o None si falta algún tramo."""
+    d = textos
+    for parte in ruta:
+        d = d.get(parte) if isinstance(d, dict) else None
+    return texto_lleno((d or {}).get("texto_en")) if isinstance(d, dict) else None
+
+
+def leer_reglas(processed, avisos):
+    """suelo_reglas.json, o None si no llegó o no se pudo leer (con aviso)."""
+    ruta = Path(processed) / ARCHIVO_REGLAS
+    if not ruta.is_file():
+        return None
+    try:
+        reglas = leer_json(ruta)
+    except (json.JSONDecodeError, UnicodeDecodeError) as ex:
+        avisos.append(f"{ARCHIVO_REGLAS}: no se pudo leer ({type(ex).__name__}: {ex})")
+        return None
+    return reglas if isinstance(reglas, dict) else None
+
+
+def resolucion_del_mapa(registradas, avisos):
+    """{valor, archivo, fuente} con la resolución del mapa de suelo (suelo_parcelas.csv, de donde salen las notas)
+    leída de su línea de fuente; None si la línea no está o no trae UNA sola resolución."""
+    fuente = (registradas.get(ARCHIVO_PERFIL) or {}).get("fuente") or ""
+    valores = {int(m) for m in RESOLUCION_EN_FUENTE.findall(fuente)}
+    if len(valores) != 1:
+        if fuente:
+            avisos.append(f"{ARCHIVO_PERFIL}: su línea de fuente no trae una sola resolución en metros; la ficha no la dice")
+        return None
+    return {"valor": valores.pop(), "archivo": ARCHIVO_PERFIL, "fuente": fuente}
+
+
+def nota(caso, estado, elementos, texto):
+    return {"caso": caso, "estado": estado, "elementos": list(elementos), "texto_en": texto, "fuente": FUENTE_DISPONIBILIDAD}
+
+
+def notas_de_fila(fila, textos, nombres, ph_toxico, avisos):
+    """Las notas de UNA parcela (reglas del encabezado), con los textos de textos_ficha_en."""
+    suelo = (textos or {}).get("suelo") or {}
+    nombrar = lambda simbolos: lista_en([nombres.get(s, s) for s in simbolos])  # noqa: E731
+    menos, cerca = lista_celda(fila.get("menos_disponibles")), lista_celda(fila.get("cerca_del_limite"))
+    toxicos = lista_celda(fila.get("toxicidad_posible"))
+    notas = []
+    if menos:
+        notas.append(nota("menos_disponibles", NOTA_MENOS, menos,
+                          llenar(texto_de(suelo, "menos_disponibles"), avisos, "menos_disponibles", nutrientes=nombrar(menos))))
+        if HIERRO in menos and texto_de(suelo, "hierro"):
+            notas.append(nota("hierro", NOTA_MENOS, [HIERRO], texto_de(suelo, "hierro")))
+    a_la_vista = [s for s in cerca if s not in NO_MOSTRAR_CERCA]
+    if a_la_vista:
+        notas.append(nota("cerca_del_limite", NOTA_CERCA, a_la_vista,
+                          llenar(texto_de(suelo, "cerca_del_limite"), avisos, "cerca_del_limite", nutrientes=nombrar(a_la_vista))))
+    if toxicos:
+        valores = {"ph_toxico": ph_toxico} if ph_toxico is not None else {}
+        notas.append(nota("toxicidad", NOTA_TOXICIDAD, toxicos, llenar(texto_de(suelo, "toxicidad"), avisos, "toxicidad", **valores)))
+    if not menos and not cerca:
+        notas.append(nota("sin_aviso_ph", NOTA_EN_RANGO, [], texto_de(suelo, "sin_aviso_ph")))
+    # Una nota sin texto (la entrega no trae ese caso) no se muestra: no se inventa ninguna frase.
+    return [n for n in notas if n["texto_en"]]
+
+
+def bloque_nutrientes(ruta, registro, reglas, registradas, avisos):
+    """El bloque «nutrientes»: las notas de cada fila de suelo_nutrientes_parcelas.csv."""
+    if reglas is None:
+        raise ValueError(f"falta {ARCHIVO_REGLAS}")
+    textos = reglas.get("textos_ficha_en") or {}
+    disponibilidad = reglas.get("disponibilidad_ph") or {}
+    nombres = {k: v for k, v in (textos.get("nombres_nutrientes_en") or {}).items() if texto_lleno(v)}
+    ph_toxico = finito((disponibilidad.get("toxicidad_ph_menor_que") or {}).get("valor"))
+    sin_dato = texto_de(textos.get("suelo") or {}, "sin_dato")
+    # Casi todas las parcelas comparten las mismas listas: cada combinación se escribe una vez en «conjuntos» y la
+    # parcela lleva su llave (las listas tal como llegan, «B;Cu;Fe;Mn;Ni;Zn|P|»). Así suelo.json no repite el mismo
+    # texto en cada parcela.
+    parcelas, conjuntos = {}, {}
+    for fila in leer_csv(ruta):
+        pid = fila["id"].strip()
+        if numero(fila.get("ph")) is None:
+            llave = LLAVE_SIN_DATO
+            conjuntos.setdefault(llave, {"notas": [], "sin_dato_en": sin_dato})
+        else:
+            llave = "|".join(E.SEPARADOR_LISTA.join(lista_celda(fila.get(c))) for c in COLUMNAS_LISTAS)
+            if llave not in conjuntos:
+                conjuntos[llave] = {"notas": notas_de_fila(fila, textos, nombres, ph_toxico, avisos)}
+        parcelas[pid] = llave
+    usados = sorted({s for c in conjuntos.values() for n in c["notas"] for s in n["elementos"]})
+    sin_nombre = [s for s in usados if s not in nombres]
+    if sin_nombre:
+        avisos.append(f"{ARCHIVO_REGLAS}: textos_ficha_en.nombres_nutrientes_en no nombra {', '.join(sin_nombre)}; "
+                      "va el símbolo")
+    return {
+        **registro,
+        "reglas": procedencia(ARCHIVO_REGLAS, registradas),
+        "aviso_en": texto_de(textos.get("suelo") or {}, "aviso") or texto_lleno(reglas.get("texto_aviso_en")),
+        "resolucion_m": resolucion_del_mapa(registradas, avisos),
+        "nombres_en": {s: nombres[s] for s in usados if s in nombres},
+        "fuentes": {FUENTE_DISPONIBILIDAD: {"fuente": texto_lleno(disponibilidad.get("fuente")),
+                                            "etiqueta": texto_lleno(disponibilidad.get("etiqueta"))}},
+        "conjuntos": conjuntos,
+        "parcelas": parcelas,
+    }
+
+
+def leer_catalogo(processed, avisos):
+    """suelo_tipos.json, o None si no llegó o no se pudo leer (con aviso)."""
+    ruta = Path(processed) / ARCHIVO_CATALOGO
+    if not ruta.is_file():
+        return None
+    try:
+        catalogo = leer_json(ruta)
+    except (json.JSONDecodeError, UnicodeDecodeError) as ex:
+        avisos.append(f"{ARCHIVO_CATALOGO}: no se pudo leer ({type(ex).__name__}: {ex})")
+        return None
+    return catalogo if isinstance(catalogo, dict) else None
+
+
+def suelos_del_municipio(catalogo, zona, plantilla, avisos):
+    """{texto_en, suelos: [{grupo, pct}], fuente, etiqueta} de la zona (INEGI, del catálogo), o None. Los nombres
+    son los grupos de la WRB del catálogo (por su nombre_es); lo que no es un grupo no entra a la lista: las superficies
+    que no son suelo (NO_SUELO: zona urbana, cuerpo de agua) sin aviso, y cualquier otra llave con aviso."""
+    llave = LISTA_MUNICIPIO_DE_ZONA.get(zona)
+    bloque = (catalogo or {}).get("zona") or {}
+    pct = bloque.get(llave) if llave else None
+    if not isinstance(pct, dict):
+        return None
+    grupo_de = {texto_lleno(g.get("nombre_es")): k for k, g in (catalogo.get("wrb") or {}).items() if isinstance(g, dict)}
+    suelos, fuera = [], []
+    for nombre, valor in pct.items():
+        if nombre in grupo_de and finito(valor) is not None:
+            suelos.append({"grupo": grupo_de[nombre], "pct": valor})
+        elif nombre not in NO_SUELO:
+            fuera.append(nombre)
+    if fuera:
+        avisos.append(f"{ARCHIVO_CATALOGO}: zona.{llave} trae {', '.join(fuera)}, que no son grupos de suelo de la WRB del "
+                      "catálogo; no van en la lista de suelos del municipio")
+    suelos.sort(key=lambda s: -s["pct"])
+    texto = llenar(plantilla, avisos, "tipo_suelo.zona", lista=", ".join(f"{s['grupo']} {s['pct']}%" for s in suelos)) \
+        if suelos else None
+    return {"texto_en": texto, "suelos": suelos, "fuente": texto_lleno(bloque.get("fuente")),
+            "etiqueta": texto_lleno(bloque.get("etiqueta"))}
+
+
+def bloque_tipo(ruta, registro, catalogo, reglas, registradas, avisos):
+    """El bloque «tipo_suelo»: el gran grupo USDA de cada fila de tipo_suelo_parcelas.csv con su descripción. Lo que
+    depende solo del gran grupo (orden, elementos, descripción y texto) va una vez en «grupos»; cada parcela lleva su
+    gran grupo y su zona."""
+    textos = ((reglas or {}).get("textos_ficha_en") or {}).get("tipo_suelo") or {}
+    ordenes_cat = (catalogo or {}).get("usda_ordenes") or {}
+    prefijos_cat = (catalogo or {}).get("usda_prefijos_gran_grupo") or {}
+    parcelas, grupos, ordenes, elementos, zonas, sin_grupo, desconocidos = {}, {}, {}, {}, set(), [], set()
+    for fila in leer_csv(ruta):
+        pid, grupo, orden = fila["id"].strip(), texto_lleno(fila.get("gran_grupo_usda")), texto_lleno(fila.get("orden_usda"))
+        if grupo is None:
+            sin_grupo.append(pid)
+            continue
+        zona = texto_lleno(fila.get("zona"))
+        zonas.add(zona)
+        parcelas[pid] = {"gran_grupo": grupo, "zona": zona}
+        celda = lista_celda(fila.get("elementos"))
+        if grupo in grupos:
+            if (grupos[grupo]["orden"], grupos[grupo]["elementos_entrega"]) != (orden, celda):
+                avisos.append(f"{ARCHIVO_TIPO}: {grupo} llega con otro orden o con otros elementos en {pid}; vale el primero")
+            continue
+        propios = []
+        for e in celda:
+            if isinstance(prefijos_cat.get(e), dict):
+                propios.append(e)
+                elementos[e] = prefijos_cat[e]
+            else:
+                desconocidos.add(e)
+        cat_orden = ordenes_cat.get(orden) if isinstance(ordenes_cat.get(orden), dict) else None
+        if cat_orden:
+            ordenes[orden] = cat_orden
+        grupos[grupo] = {
+            "orden": orden, "elementos": propios, "elementos_entrega": celda,
+            "descripcion_en": texto_lleno((cat_orden or {}).get("definicion_en")),
+            "texto_en": llenar(texto_de(textos, "parcela"), avisos, "tipo_suelo.parcela", gran_grupo=grupo, orden=orden)
+            if orden else None,
+        }
+    for g in grupos.values():
+        g.pop("elementos_entrega")
+    if sin_grupo:
+        avisos.append(f"{ARCHIVO_TIPO}: parcelas sin gran grupo (la ficha dice que el mapa no lo trae): {len(sin_grupo)}")
+    if desconocidos and catalogo is not None:
+        avisos.append(f"{ARCHIVO_TIPO}: elementos que el catálogo no describe: {', '.join(sorted(desconocidos))}")
+    con_lista = {z: suelos_del_municipio(catalogo, z, texto_de(textos, "zona"), avisos) for z in sorted(zonas, key=str)}
+    return {
+        **registro,
+        "catalogo": procedencia(ARCHIVO_CATALOGO, registradas) if catalogo is not None else None,
+        "explica_en": texto_de(textos, "explica") or texto_lleno((catalogo or {}).get("texto_explica_en")),
+        "no_coinciden_en": texto_de(textos, "no_coinciden"),
+        "ordenes": {o: {"definicion_en": texto_lleno(d.get("definicion_en")), "fertilidad_en": texto_lleno(d.get("fertilidad_en")),
+                        "fuente": texto_lleno(d.get("fuente")), "etiqueta": texto_lleno(d.get("etiqueta"))}
+                    for o, d in sorted(ordenes.items())},
+        "elementos": {e: {"significado_en": texto_lleno(d.get("significado_en")), "fuente": texto_lleno(d.get("fuente")),
+                          "etiqueta": texto_lleno(d.get("etiqueta"))} for e, d in sorted(elementos.items())},
+        "zonas": {z: b for z, b in con_lista.items() if b},
+        "grupos": dict(sorted(grupos.items())),
+        "parcelas": parcelas,
+    }
+
+
+# ---------------------------------------------------------------------------------------
 # Armado
 # ---------------------------------------------------------------------------------------
 ERRORES_DE_LECTURA = (KeyError, ValueError, TypeError, AttributeError, csv.Error, json.JSONDecodeError, UnicodeDecodeError)
@@ -620,6 +907,19 @@ def armar(processed, cubo, generado=None):
         except ERRORES_DE_LECTURA as ex:
             avisos.append(f"aptitud: no se pudo calcular ({type(ex).__name__}: {ex}); va en null")
             suelo["aptitud"], suelo["aptitud_motivo"] = None, MOTIVO_ILEGIBLE
+
+    # Tipo de suelo (B8) y notas de nutrientes (B7). Las notas necesitan los textos de suelo_reglas.json: sin él,
+    # el bloque va en null como pedido y no entregado.
+    # (aptitud_falta se queda con lo que le falta a la aptitud: lo que falte de aquí no entra.)
+    suelo["aptitud_falta"] = list(faltan)
+    reglas, catalogo = leer_reglas(processed, avisos), leer_catalogo(processed, avisos)
+    bloque_opcional("tipo_suelo", ARCHIVO_TIPO, lambda ruta, registro: bloque_tipo(
+        ruta, registro, catalogo, reglas, registradas, avisos))
+    if reglas is None:
+        suelo["nutrientes"], suelo["nutrientes_motivo"] = None, MOTIVO_PEDIDO
+    else:
+        bloque_opcional("nutrientes", ARCHIVO_NUTRIENTES, lambda ruta, registro: bloque_nutrientes(
+            ruta, registro, reglas, registradas, avisos))
     suelo["avisos"] = avisos
     return suelo, avisos
 

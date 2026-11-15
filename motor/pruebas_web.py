@@ -22,7 +22,10 @@ y su ESTADO REAL, leído del repo en el momento de construir:
      pruebas automáticas: FAO-56 contra los ejemplos del manual (tests/test_fao*56*.py) y cierre
      del balance de La gota (validar_contrato.py, renglón «contrato» de la puerta).
 Además, la PUERTA AUTOMÁTICA: la tabla de docs/pruebas.md, que escribe `python construir.py`
-al terminar una corrida completa (se lee la última corrida registrada, con su fecha), y los DOCUMENTOS que «About &
+al terminar una corrida completa (se lee la última corrida registrada, con su fecha). Cada paso lleva su «detalle»
+(el de docs/pruebas.md, en español) y «detalle_en»: el mismo detalle en inglés, leído de la tabla de
+docs/en/test_results.md que construir.py escribe en la MISMA corrida con los mismos valores; null si esa tabla no
+existe, es de otra corrida o no trae el paso (la página muestra entonces el de español). Y los DOCUMENTOS que «About &
 Data» enlaza (docs/modelo_vs_practica.md y docs/revision_protagonistas.md), cada uno con su nota; la de la revisión de
 las protagonistas dice, leyéndolo del documento, si la hizo una sesión de IA y si falta la de una persona.
 
@@ -30,7 +33,8 @@ Estados (en inglés: la web los muestra tal cual con su rótulo):
   "passed"  cumple su criterio        "failed"  no lo cumple
   "partial" una parte corrió y otra no "not run" no se ejecutó
   "run"     corrió, pero no tiene criterio propio de aprobación (p. ej., las reglas del mapa)
-Pasos de la puerta: "passed", "failed", "pending" (la pieza aún no existe) y "skipped" (omitido).
+Pasos de la puerta: "passed", "failed", "pending" (la pieza aún no existe), "skipped" (omitido) y
+"warning" (ADVERTENCIA de construir.py: terminó, pero deja algo a la vista; no hace fallar la puerta).
 Un resultado desfavorable o no ejecutado se publica con la misma visibilidad (S9 §6; kit C6).
 
 Cifras: los criterios son el texto de S9 §6 (y del Anexo B para H3) traducido al inglés; la prueba
@@ -56,16 +60,19 @@ REPOSITORIO = "https://github.com/Cristianruz/raiz-dam-to-root"
 ENLACES = {
     "repositorio": REPOSITORIO,
     "readme_ia": REPOSITORIO + "#siai-tools-used",  # sección «SI/AI tools used» del README
-    "pruebas_md": REPOSITORIO + "/blob/main/docs/pruebas.md",
+    # La tabla de la puerta en inglés (docs/en/test_results.md, la escribe construir.py junto a docs/pruebas.md):
+    # la guía de envío de Space Apps pide que todo lo que la página enlaza esté en inglés.
+    "pruebas_md": REPOSITORIO + "/blob/main/docs/en/test_results.md",
 }
 # Documentos que «About & Data» enlaza (ruta en el repo, título en inglés y nota). La nota de la revisión de las
 # protagonistas se decide leyendo el documento (revision_documentos).
 DOCUMENTOS = (
-    {"id": "modelo_vs_practica", "ruta": "docs/modelo_vs_practica.md",
+    {"id": "modelo_vs_practica", "ruta": "docs/modelo_vs_practica.md", "ruta_en": "docs/en/model_vs_practice.md",
      "titulo": "The model against what is really irrigated in the district",
      "nota": "Gathers the published local references (water applied in the district and INIFAP guidance) next to the "
              "model's water need; it changes no verdict."},
     {"id": "revision_protagonistas", "ruta": "docs/revision_protagonistas.md",
+     "ruta_en": "docs/en/story_fields_review.md",
      "titulo": "True-color review of the story fields"},
 )
 NOTA_REVISION_IA = ("Done by an AI session (the data session) looking at Sentinel-2 true-color images. The review by a "
@@ -78,7 +85,8 @@ MARCAS_FALTA_PERSONA = ("falta la de una persona", "sigue pendiente")
 # Vocabulario de estados (ver el docstring).
 PASSED, FAILED, PARTIAL, NOT_RUN, RUN = "passed", "failed", "partial", "not run", "run"
 ESTADOS = (PASSED, FAILED, PARTIAL, NOT_RUN, RUN)
-ESTADOS_PASO = {"OK": PASSED, "FALLA": FAILED, "PENDIENTE": "pending", "OMITIDO": "skipped"}
+# ADVERTENCIA (construir.py): el paso terminó pero deja algo a la vista; no es una falla de la puerta.
+ESTADOS_PASO = {"OK": PASSED, "FALLA": FAILED, "PENDIENTE": "pending", "OMITIDO": "skipped", "ADVERTENCIA": "warning"}
 
 # Nombres en inglés de los pasos de construir.py (la web los muestra); el id es el de docs/pruebas.md.
 NOMBRES_PASOS = {
@@ -86,6 +94,9 @@ NOMBRES_PASOS = {
     "ensamblar": "Team deliveries validated against the data contract",
     "simulados": "Cube engine",
     "relieve": "Terrain & runoff layer",
+    "gemelo": "Digital twin, regional context and soil",
+    "pwa": "Offline app (installable page)",
+    "pruebas_web": "Tests shown on the page",
     "manifest": "Manifest of every figure",
     "contrato": "Data contract, including the water balance of “Follow the drop”",
     "verificador": "Figure checker on the page's explanations",
@@ -100,10 +111,10 @@ FUENTE_CRITERIOS = "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before
 PRUEBAS_S9 = (
     {"id": "mapa_cultivos", "numero": 1, "titulo": "Crop map",
      "criterio": "Macro F1 with 5 km spatial blocks; areas with Olofsson; abstain if p < 0.6"},
-    {"id": "backtest_h1", "numero": 2, "titulo": "Back-test 2026 (H1, preregistered)",
+    {"id": "backtest_h1", "numero": 2, "titulo": "Back-test 2026 (H1, criterion declared before the analysis)",
      "criterio": ("With data up to March 14, the error at July 14 must be lower than that of baselines L1 and "
                   "L1-s. Truth: outflow through the intake works of La Boquilla (SIH)")},
-    {"id": "experimento_h3", "numero": 3, "titulo": "Natural experiment of 2025 (H3, preregistered)",
+    {"id": "experimento_h3", "numero": 3, "titulo": "Natural experiment of 2025 (H3, criterion declared before the analysis)",
      "criterio": ("In the year without dam water, the share of annual-crop fields with a summer crop falls 25 "
                   "points or more below its 2019–2024 median, and the share of pecan orchards stays within 10 "
                   "points of its median. The number of fields in each group is published")},
@@ -225,6 +236,32 @@ def estado_de_partes(partes):
 # ---------------------------------------------------------------------------
 # Puerta automática (docs/pruebas.md)
 # ---------------------------------------------------------------------------
+def filas_de_tabla(texto, encabezado):
+    """Renglones de una tabla de Markdown como listas de celdas, sin el encabezado ni la raya de separación."""
+    filas = []
+    for linea in (texto or "").splitlines():
+        celdas = [c.strip() for c in linea.strip().strip("|").split("|")] if linea.lstrip().startswith("|") else []
+        if len(celdas) < 2 or celdas[0] in (encabezado, "") or set(celdas[0]) <= set("-: "):
+            continue
+        filas.append(celdas)
+    return filas
+
+
+def detalles_en(raiz, corrida):
+    """{id del paso: detalle en inglés} de docs/en/test_results.md, la tabla que construir.py escribe junto a
+    docs/pruebas.md con los mismos valores. {} si no existe o si es de otra corrida (su «Run:» no es la «Corrida:»
+    de docs/pruebas.md): nunca se mezcla el detalle de una corrida con el de otra."""
+    texto = leer_texto(Path(raiz) / "docs/en/test_results.md")
+    if texto is None:
+        return {}
+    run = re.search(r"Run:\s*(\S+)", texto)
+    if (run.group(1) if run else None) != corrida:
+        return {}
+    id_de_nombre = {nombre: id_ for id_, nombre in NOMBRES_PASOS.items()}
+    return {id_de_nombre.get(celdas[0], celdas[0]): celdas[2]
+            for celdas in filas_de_tabla(texto, "Step") if len(celdas) > 2}
+
+
 def leer_puerta(raiz):
     ruta = Path(raiz) / "docs/pruebas.md"
     texto = leer_texto(ruta)
@@ -233,15 +270,15 @@ def leer_puerta(raiz):
         return {**base, "estado": NOT_RUN, "corrida": None, "pasos": [],
                 "nota": "docs/pruebas.md is not in the repo yet: python construir.py writes it after a full run."}
     corrida = re.search(r"Corrida:\s*(\S+)", texto)
+    en_ingles = detalles_en(raiz, corrida.group(1) if corrida else None)
     pasos = []
-    for linea in texto.splitlines():
-        celdas = [c.strip() for c in linea.strip().strip("|").split("|")] if linea.lstrip().startswith("|") else []
-        if len(celdas) < 2 or celdas[0] in ("Paso", "") or set(celdas[0]) <= set("-: "):
-            continue
+    for celdas in filas_de_tabla(texto, "Paso"):
         id_, original = celdas[0], celdas[1]
         pasos.append({"id": id_, "nombre": NOMBRES_PASOS.get(id_, id_),
                       "estado": ESTADOS_PASO.get(original, original.lower()),
-                      "estado_original": original, "detalle": celdas[2] if len(celdas) > 2 else ""})
+                      "estado_original": original, "detalle": celdas[2] if len(celdas) > 2 else "",
+                      # El mismo detalle en inglés (docs/en/test_results.md); null si esa tabla no lo trae.
+                      "detalle_en": en_ingles.get(id_)})
     estados = [p["estado"] for p in pasos]
     if not pasos:
         estado = NOT_RUN
@@ -303,10 +340,12 @@ def prueba_mapa(raiz):
                if (m := re.fullmatch(r"\s*\d+\s*/\s*(\d+)\s*", str(p.get("acuerdo_metodos") or "")))]
     if metodos and max(metodos) >= 2:
         partes.append(parte("random_forest", "Random Forest", RUN,
-                            "Fields report agreement between two methods (acuerdo_metodos).", fuente))
+                            "Fields report agreement between two methods.", fuente))
     elif props:
+        # Sin el nombre de la columna (acuerdo_metodos): la página dice qué método es el único y qué falta.
         partes.append(parte("random_forest", "Random Forest", NOT_RUN,
-                            "Pending: every field reports a single method in acuerdo_metodos.", fuente))
+                            "Pending: every field reports a single method (the phenological rules); "
+                            "the Random Forest has not been run.", fuente))
     else:
         partes.append(parte("random_forest", "Random Forest", NOT_RUN, "No fields to read yet."))
 
@@ -402,6 +441,27 @@ def veredicto_crudo(texto, pares):
     return None, None
 
 
+# Hallazgo I22 de la revisión total: no hay liga pública de un preregistro (OSF u otro registro), así que la
+# página no dice «preregistered». Los criterios sí se fijaron en commits anteriores al análisis (README,
+# «declared before the analysis»). Los documentos de resultado conservan la frase del kit A6, que es la que
+# reconoce el veredicto; aquí solo se cambia lo que la página muestra.
+def texto_publico(texto):
+    """Frase para la página: «preregistered criterion» → «criterion declared before the analysis».
+    No distingue mayúsculas y conserva la mayúscula inicial («Preregistered» → «Declared before the analysis»)."""
+    if not texto:
+        return texto
+
+    def con_mayuscula(nuevo):
+        def cambiar(m):
+            return nuevo[0].upper() + nuevo[1:] if m.group(0)[0].isupper() else nuevo
+        return cambiar
+
+    t = re.sub(r"\bthe preregistered criterion\b", con_mayuscula("the criterion declared before the analysis"),
+               texto, flags=re.I)
+    t = re.sub(r"\bpreregistered criterion\b", con_mayuscula("criterion declared before the analysis"), t, flags=re.I)
+    return re.sub(r"\bpreregistered\b", con_mayuscula("declared before the analysis"), t, flags=re.I)
+
+
 def prueba_hipotesis(raiz, hipotesis):
     rel = f"docs/resultado_{hipotesis}.md"
     texto = leer_texto(Path(raiz) / rel)
@@ -416,9 +476,9 @@ def prueba_hipotesis(raiz, hipotesis):
         # decirlo; si no, se publica «run» con una nota en inglés (no el texto del documento, en español).
         estado, _ = veredicto_crudo(rotulo, pares) if rotulo else (None, None)
         if estado is None:
-            return {"estado": RUN, "resumen": rotulo or f"Run: {rel} does not state a verdict yet.",
+            return {"estado": RUN, "resumen": texto_publico(rotulo) or f"Run: {rel} does not state a verdict yet.",
                     "fuentes": [rel], "partes": [], "metricas": []}
-    resumen = rotulo or frase_del_veredicto(linea, pares)
+    resumen = texto_publico(rotulo or frase_del_veredicto(linea, pares))
     return {"estado": estado, "resumen": resumen or None, "fuentes": [rel], "partes": [], "metricas": []}
 
 
@@ -486,8 +546,12 @@ def documentos(raiz):
             hecha_por_ia = any(x in baja for x in MARCAS_REVISION_IA)
             falta_persona = any(x in baja for x in MARCAS_FALTA_PERSONA)
             nota = NOTA_REVISION_IA if (hecha_por_ia and falta_persona) else NOTA_REVISION_VER
+        # La liga va a la traducción en inglés si existe (docs/en/); el contenido se lee del original.
+        ruta_liga = d["ruta"]
+        if d.get("ruta_en") and (Path(raiz) / d["ruta_en"]).exists():
+            ruta_liga = d["ruta_en"]
         salida.append({"id": d["id"], "titulo": d["titulo"], "ruta": d["ruta"],
-                       "url": f"{REPOSITORIO}/blob/main/{d['ruta']}", "existe": texto is not None, "nota": nota})
+                       "url": f"{REPOSITORIO}/blob/main/{ruta_liga}", "existe": texto is not None, "nota": nota})
     return salida
 
 
@@ -562,11 +626,17 @@ def fuentes_registradas(raiz):
     return {str(f.get("archivo")): str(f.get("fuente") or "") for f in filas or [] if isinstance(f, dict)}
 
 
+# El rectángulo del contraste de ET en la línea de LEEME de la entrega, en español o en inglés.
+RECTANGULO_ORIGINAL = re.compile(
+    r"(?:rect[áa]ngulo original|original\s+(?:pilot\s+)?rectangle)\s*(\[[^\]]+\])", re.I)
+
+
 def ambito_et(fuente, zona):
     """Área que cubre el contraste, tal como la dice la fuente registrada (no se supone):
-    «rectángulo original [o, s, e, n]» -> «original pilot rectangle [o, s, e, n]». Si la fuente no lo dice,
-    la zona del sufijo del archivo; si tampoco, «area of the delivered file»."""
-    m = re.search(r"rect[áa]ngulo original\s*(\[[^\]]+\])", fuente or "", re.I)
+    «rectángulo original [o, s, e, n]» (línea de LEEME en español) u «original rectangle [o, s, e, n]» (en
+    inglés, desde el buzón v11) -> «original pilot rectangle [o, s, e, n]». Si la fuente no lo dice, la zona
+    del sufijo del archivo; si tampoco, «area of the delivered file»."""
+    m = RECTANGULO_ORIGINAL.search(fuente or "")
     if m:
         return f"original pilot rectangle {m.group(1)}"
     if zona:

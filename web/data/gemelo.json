@@ -34,6 +34,7 @@
   },
   "exageracion": 6,
   "fuente": "NASADEM (NASA/NASADEM_HGT/001), 30 m, vía Google Earth Engine",
+  "fuente_en": "NASADEM (NASA/NASADEM_HGT/001), 30 m, via Google Earth Engine",
   "rotulo": "regional, 30 m (NASADEM); vertical exaggeration applied"
  },
  "columnas": {
@@ -55,13 +56,14 @@
    "2025": {
     "texto": "Year without dam water: the district received no dam allocation",
     "fuente": "S9 §2 (prensa con cifras de Conagua)",
+    "fuente_en": "Project synthesis S9 §2 (press reports with Conagua figures)",
     "etiqueta": "[P]"
    }
   }
  },
  "ndvi": {
   "archivo": "data/ndvi_mensual.json",
-  "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) vía Google Earth Engine, proyecto iondroplet; dos zonas",
+  "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) via Google Earth Engine; monthly median inside each field; two pilot areas",
   "meses": [
    "2025-10",
    "2025-11",

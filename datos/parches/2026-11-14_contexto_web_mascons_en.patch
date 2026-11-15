@@ -1,0 +1,49 @@
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
+# Parche para la integración (motor/contexto_web.py es del integrador): acepta la malla de GRACE en inglés.
+# Aplicar en claude/keen-mayer-sp0vvm con: git apply datos/parches/2026-11-14_contexto_web_mascons_en.patch
+diff --git a/motor/contexto_web.py b/motor/contexto_web.py
+index ec1a0cc..19fe088 100644
+--- a/motor/contexto_web.py
++++ b/motor/contexto_web.py
+@@ -405,8 +405,12 @@ def resumen_anual(meses, valores, aditiva):
+ 
+ 
+ # La línea de LEEME de contexto_regional.csv enumera sus productos como «<fuente> = <producto> (…)»; de GRACE dice
+-# además «malla de 0.5° sobre mascons de 3°» (la malla del producto es más fina que los mascons de los que sale).
+-MALLA_MASCON = re.compile(r"malla de\s*([0-9]+(?:[.,][0-9]+)?)\s*°\s*sobre mascons de\s*([0-9]+(?:[.,][0-9]+)?)\s*°", re.I)
++# además la malla del producto y la de sus mascons (la malla es más fina que los mascons de los que sale): en español,
++# «malla de 0.5° sobre mascons de 3°»; en inglés (LEEME de la sesión de datos desde el 14-nov, 22:14),
++# «0.5° grid on 3° mascons». Se aceptan las dos redacciones.
++_NUM = r"([0-9]+(?:[.,][0-9]+)?)"
++MALLA_MASCON = re.compile(rf"malla de\s*{_NUM}\s*°\s*sobre mascons de\s*{_NUM}\s*°"
++                          rf"|{_NUM}\s*°\s*grid on\s*{_NUM}\s*°\s*mascons", re.I)
+ 
+ 
+ def tramo_de_fuente(texto, fuente_id, fuentes=E.FUENTES_CONTEXTO):
+@@ -430,7 +434,8 @@ def malla_mascon(fuente_texto, fuente_id):
+     if not m:
+         return None
+     a_numero = lambda s: float(s.replace(",", "."))   # noqa: E731
+-    return {"malla_grados": a_numero(m.group(1)), "mascon_grados": a_numero(m.group(2)), "texto_fuente": m.group(0)}
++    malla, mascon = (m.group(1), m.group(2)) if m.group(1) is not None else (m.group(3), m.group(4))
++    return {"malla_grados": a_numero(malla), "mascon_grados": a_numero(mascon), "texto_fuente": m.group(0)}
+ 
+ 
+ def bloque_contexto(ruta, zonas, unidades, registro, avisos):
+diff --git a/tests/test_contexto_web.py b/tests/test_contexto_web.py
+index 9c5325d..d131468 100644
+--- a/tests/test_contexto_web.py
++++ b/tests/test_contexto_web.py
+@@ -848,6 +848,12 @@ def test_malla_mascon_se_lee_de_la_linea_de_leeme_de_su_fuente():
+     assert cw.malla_mascon(None, "grace") is None
+     assert cw.malla_mascon("malla de 0,5 ° sobre mascons de 3 °", "grace") is None, "sin «grace =» no es de GRACE"
+     assert cw.malla_mascon("grace = X (malla de 0,5 ° sobre mascons de 3 °)", "grace")["malla_grados"] == 0.5
++    # La misma información en el LEEME en inglés de la sesión de datos (14-nov, 22:14).
++    linea_en = ("smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8); grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons "
++                "with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin); gldas = OTRO")
++    assert cw.malla_mascon(linea_en, "grace") == {"malla_grados": 0.5, "mascon_grados": 3.0,
++                                                   "texto_fuente": "0.5° grid on 3° mascons"}
++    assert cw.malla_mascon(linea_en, "smap") is None and cw.malla_mascon(linea_en, "gldas") is None
+ 
+ 
+ def test_malla_de_grace_en_contexto_json_real_sale_de_su_fuente():

@@ -100,6 +100,13 @@
     "js/asesor.js"
    ],
    "motivo": "Clave del campo de mediana en la serie de validación; el gráfico obtiene todos sus valores del archivo de datos."
+  },
+  {
+   "patron": "\\bterreno2d\\b",
+   "archivos": [
+    "*.js"
+   ],
+   "motivo": "Nombre del módulo web/js/terreno2d.js (relieve del mapa plano) y prefijo de sus fuentes, capas, variables CSS e id; «2d» es parte del nombre, no una cifra de los datos"
   }
  ]
 }

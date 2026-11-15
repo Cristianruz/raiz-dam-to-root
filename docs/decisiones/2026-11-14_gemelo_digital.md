@@ -1,12 +1,12 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
-# Decisión: Raíz se presenta y se usa como gemelo digital (14-nov-2026, 14:50)
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
+# Decisión: ROOT (antes «Raíz») se presenta y se usa como gemelo digital (14-nov-2026, 14:50)
 
 **Quién decide:** Cristian (integrador): «que sea un gemelo digital, no una web».
 
-## Qué significa «gemelo digital» en Raíz
+## Qué significa «gemelo digital» en ROOT
 Es una réplica de las zonas piloto que se actualiza con datos y permite ensayar decisiones antes de sembrar. El rótulo no se usa para prometer más de lo que hay.
 
-| Parte de un gemelo | En Raíz | De dónde sale |
+| Parte de un gemelo | En ROOT | De dónde sale |
 |---|---|---|
 | **Réplica del terreno y de las parcelas** | Relieve en 3D y las 1,239 parcelas estimadas | NASADEM (30 m) y Fields of The World |
 | **Estado observado** | Verdor de cada parcela año por año (2016–2026), NDVI mensual de 2026 y suelo desnudo | HLS (Landsat + Sentinel-2) |

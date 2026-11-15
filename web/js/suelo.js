@@ -49,6 +49,13 @@
 //       un <details> «Why?» con los motivos, los avisos de nutrientes y sus fuentes. Si no hay aptitud, una
 //       línea que dice por qué (pedido y no entregado, sin suelo para la parcela…). La aptitud nunca descarta
 //       ni reordena opciones: es una evidencia más.
+//   htmlTipoDeSuelo({ suelo, id }) y htmlNotasDeNutrientes({ suelo, id }) -> string
+//       Dentro del perfil (htmlPerfilDeSuelo los llama): el tipo de suelo en una línea (suelo.tipo_suelo, entrega
+//       B8, con la descripción del catálogo y, plegados, los suelos del municipio según INEGI) y las notas de
+//       nutrientes en una lista plegable «Nutrient notes» (suelo.nutrientes, B7): estado en texto y símbolo
+//       (ESTADOS_NUTRIENTE), texto de la sesión de datos tal cual y, en cada nota, escalaDeNota (la resolución
+//       sale de suelo.json). Sin dato: TEXTO_SIN_TIPO o el texto «sin dato» de suelo.json. "" si suelo.json no
+//       trae el bloque. Modelos sin HTML: modeloTipoDeSuelo y modeloNotasDeNutrientes.
 //   asegurarHojaSuelo()
 //       Enlaza css/suelo.css si la página aún no lo hace (las funciones html… ya la llaman).
 //   Funciones puras (las mismas que usa la página; se prueban en tests/suelo.test.js):
@@ -470,17 +477,20 @@ const FORMATO_PCT = new Intl.NumberFormat(LOCALE, { style: "percent", maximumFra
  */
 function htmlTextura(m) {
   if (!m.grupo) return `<p class="suelo-textura">Texture: <strong>${esc(m.clase ?? "no data")}</strong></p>`;
+  // Las dos citas son textos de las entregas: van con el idioma que declara suelo.json (idioma_fuentes), como las
+  // demás fuentes de este módulo; si el archivo no lo declara, sin marca.
+  const lang = m.idioma ? ` lang="${esc(m.idioma)}"` : "";
   const etiqueta = m.grupoEtiqueta ? ` <span class="suelo-etiqueta">${esc(m.grupoEtiqueta)}</span>` : "";
   const c = m.coincidencia;
   const nota = c
     ? `<p class="suelo-coincidencia">The two global soil maps compared give the same exact class in ${esc(FORMATO_PCT.format(c.valor))} of the fields${c.etiqueta ? ` (${esc(c.etiqueta)})` : ""}; elsewhere they differ, so read the group, not the exact class.` +
-      (c.fuente ? ` <span class="suelo-fuente">Source: <span lang="es">${esc(c.fuente)}</span></span>` : "") + "</p>"
+      (c.fuente ? ` <span class="suelo-fuente">Source: <span${lang}>${esc(c.fuente)}</span></span>` : "") + "</p>"
     : "";
   return (
     `<p class="suelo-textura">Texture group: <strong>${esc(m.grupo)}</strong>${etiqueta}</p>` +
     '<details class="suelo-clase-exacta"><summary>Exact texture class</summary>' +
     `<p>${esc(m.clase ?? "no data")} (USDA class).</p>${nota}` +
-    (m.grupoFuente ? `<p class="suelo-fuente">Groups: <span lang="es">${esc(m.grupoFuente)}</span></p>` : "") +
+    (m.grupoFuente ? `<p class="suelo-fuente">Groups: <span${lang}>${esc(m.grupoFuente)}</span></p>` : "") +
     "</details>"
   );
 }
@@ -511,11 +521,244 @@ export function htmlNotaDeZona({ suelo, zonaId, nombreZona } = {}) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Tipo de suelo de la parcela y notas de nutrientes (suelo.json → tipo_suelo y nutrientes; entregas B8 y B7)
+// ---------------------------------------------------------------------------
+// Los textos de las notas, del tipo de suelo y de los suelos del municipio llegan ya escritos en suelo.json (son
+// los de suelo_reglas.json → textos_ficha_en, tal cual): aquí solo se acomodan. La resolución del mapa sale de
+// suelo.json (nutrientes.resolucion_m); sin ella, la escala se dice sin cifra.
+export const TEXTO_SIN_TIPO = "No soil type in the map for this field";
+const TITULO_TIPO = "Soil type";
+const TITULO_NOTAS = "Nutrient notes";
+const ESCALA_NOTA_INICIO = "Regional soil map";
+const ESCALA_NOTA_FIN = "not a lab test — needs a local check";
+const NOTA_NUTRIENTES =
+  "Notes from published rules applied to a regional soil map, to weigh with a soil test. " +
+  "They support and do not replace the judgment of the farmer or the technician.";
+// Estado de cada nota (lo escribe motor/suelo_web.py): texto y símbolo, nunca solo el color.
+export const ESTADOS_NUTRIENTE = {
+  less_available: { etiqueta: "Less available", icono: "▼" },
+  near_limit: { etiqueta: "Near the limit", icono: "◇" },
+  possible_toxicity: { etiqueta: "Possible toxicity", icono: "⚠" },
+  within_range: { etiqueta: "Within range", icono: "✓" },
+};
+
+/** «Regional soil map (<n> m), not a lab test — needs a local check», con la resolución de suelo.json; sin ella, sin cifra. */
+export function escalaDeNota(nutrientes) {
+  const m = num(nutrientes?.resolucion_m?.valor);
+  return m != null && m > 0
+    ? `${ESCALA_NOTA_INICIO} (${formatoNumero(m)} m), ${ESCALA_NOTA_FIN}`
+    : `${ESCALA_NOTA_INICIO}, ${ESCALA_NOTA_FIN}`;
+}
+
+/** Procedencia {archivo, fecha, fuente} de un bloque de suelo.json para citarla (lo que falte va en null). */
+function procedenciaDe(b) {
+  return b && typeof b === "object" ? { archivo: b.archivo || null, fecha: b.fecha || null, fuente: b.fuente || null } : null;
+}
+
+/**
+ * Tipo de suelo de UNA parcela, sin HTML:
+ *   null                         suelo.json no trae la llave «tipo_suelo» (anterior a esta pieza) o no hay suelo.json
+ *   {situacion: "pendiente", motivo}   el bloque está en null (pedido y no entregado)
+ *   {situacion: "sin_parcela"}   la parcela no tiene gran grupo en el mapa
+ *   {situacion: "ok", granGrupo, orden, descripcion, fertilidad, elementos: [{elemento, significado}], texto,
+ *    explica, municipio: {texto, fuente, etiqueta} | null, noCoinciden, entrega, catalogo, fuentesCatalogo}
+ */
+export function modeloTipoDeSuelo({ suelo, id } = {}) {
+  if (!suelo || typeof suelo !== "object" || !("tipo_suelo" in suelo)) return null;
+  const tipo = suelo.tipo_suelo;
+  if (!tipo || typeof tipo !== "object") {
+    return { situacion: "pendiente", motivo: minusculaInicial(suelo.tipo_suelo_motivo || suelo.motivo_pedido || TEXTO_PEDIDO) };
+  }
+  const p = tipo.parcelas?.[id];
+  const g = p && typeof p === "object" ? tipo.grupos?.[p.gran_grupo] : null;
+  if (!p || typeof p.gran_grupo !== "string" || !p.gran_grupo.trim()) return { situacion: "sin_parcela" };
+  const orden = g?.orden || null;
+  const cat = orden ? tipo.ordenes?.[orden] : null;
+  const elementos = (Array.isArray(g?.elementos) ? g.elementos : [])
+    .map((e) => ({ elemento: e, significado: tipo.elementos?.[e]?.significado_en || null, fuente: tipo.elementos?.[e]?.fuente || null }))
+    .filter((e) => e.significado);
+  const z = p.zona ? tipo.zonas?.[p.zona] : null;
+  const municipio = z && z.texto_en ? { texto: z.texto_en, fuente: z.fuente || null, etiqueta: z.etiqueta || null } : null;
+  return {
+    situacion: "ok",
+    granGrupo: p.gran_grupo,
+    orden,
+    descripcion: g?.descripcion_en || cat?.definicion_en || null,
+    fertilidad: cat?.fertilidad_en || null,
+    elementos,
+    texto: g?.texto_en || null,
+    explica: tipo.explica_en || null,
+    municipio,
+    noCoinciden: municipio ? tipo.no_coinciden_en || null : null,
+    entrega: procedenciaDe(tipo),
+    catalogo: procedenciaDe(tipo.catalogo),
+    fuentesCatalogo: [cat?.fuente, ...elementos.map((e) => e.fuente)].filter((f, i, a) => f && a.indexOf(f) === i),
+  };
+}
+
+/**
+ * Notas de nutrientes de UNA parcela, sin HTML:
+ *   null                              suelo.json no trae la llave «nutrientes» o no hay suelo.json
+ *   {situacion: "pendiente", motivo}  el bloque está en null (pedido y no entregado)
+ *   {situacion: "sin_parcela", motivo} · {situacion: "sin_dato", motivo}  (parcela sin pH: el texto de suelo.json)
+ *   {situacion: "ok", aviso, escala, notas: [{caso, estado, etiqueta, icono, elementos: [{simbolo, nombre}], texto,
+ *    fuente, etiquetaFuente}], fuentes: [{fuente, etiqueta}], entrega, reglas}
+ */
+export function modeloNotasDeNutrientes({ suelo, id } = {}) {
+  if (!suelo || typeof suelo !== "object" || !("nutrientes" in suelo)) return null;
+  const nut = suelo.nutrientes;
+  if (!nut || typeof nut !== "object") {
+    return { situacion: "pendiente", motivo: minusculaInicial(suelo.nutrientes_motivo || suelo.motivo_pedido || TEXTO_PEDIDO) };
+  }
+  const conjunto = nut.conjuntos?.[nut.parcelas?.[id]];
+  if (!conjunto || typeof conjunto !== "object") return { situacion: "sin_parcela", motivo: TEXTO_SIN_PARCELA };
+  const notas = (Array.isArray(conjunto.notas) ? conjunto.notas : [])
+    .filter((n) => n && typeof n === "object" && n.texto_en)
+    .map((n) => {
+      const e = ESTADOS_NUTRIENTE[n.estado];
+      const f = nut.fuentes?.[n.fuente] ?? null;
+      return {
+        caso: n.caso ?? null,
+        estado: n.estado ?? null,
+        etiqueta: e?.etiqueta ?? null,
+        icono: e?.icono ?? null,
+        elementos: (Array.isArray(n.elementos) ? n.elementos : []).map((s) => ({ simbolo: s, nombre: nut.nombres_en?.[s] || null })),
+        texto: n.texto_en,
+        fuente: f?.fuente || null,
+        etiquetaFuente: f?.etiqueta || null,
+      };
+    });
+  if (!notas.length) return { situacion: "sin_dato", motivo: minusculaInicial(conjunto.sin_dato_en || TEXTO_SIN_PARCELA) };
+  const fuentes = [];
+  for (const n of notas) {
+    if (n.fuente && !fuentes.some((f) => f.fuente === n.fuente)) fuentes.push({ fuente: n.fuente, etiqueta: n.etiquetaFuente });
+  }
+  return {
+    situacion: "ok",
+    aviso: nut.aviso_en || null,
+    escala: escalaDeNota(nut),
+    notas,
+    fuentes,
+    entrega: procedenciaDe(nut),
+    reglas: procedenciaDe(nut.reglas),
+  };
+}
+
+/** «archivo, fecha» de una procedencia, o "". */
+function citaDe(p) {
+  return p ? [p.archivo, p.fecha].filter(Boolean).join(", ") : "";
+}
+
+/** Línea de fuente en español (las de las entregas lo están), con la cita del archivo. */
+function htmlLineaFuente(rotulo, fuente, cita, idioma) {
+  if (!fuente && !cita) return "";
+  return (
+    `<p class="suelo-fuente">${esc(rotulo)}: ` +
+    (fuente ? `<span${idioma ? ` lang="${esc(idioma)}"` : ""}>${esc(fuente)}</span>` : "not stated in the delivery") +
+    (cita ? ` (${esc(cita)})` : "") +
+    "</p>"
+  );
+}
+
+/**
+ * HTML del tipo de suelo de una parcela: el gran grupo y su orden en una línea, con la descripción del orden y lo que
+ * dicen las partes del nombre; debajo, que es un mapa regional; plegados, el texto de la entrega, la fertilidad del
+ * orden, los suelos del municipio según INEGI (si el catálogo los trae para la zona) y las fuentes. "" si suelo.json
+ * no trae el bloque.
+ */
+export function htmlTipoDeSuelo({ suelo, id } = {}) {
+  const m = modeloTipoDeSuelo({ suelo, id });
+  if (!m) return "";
+  if (m.situacion === "pendiente") return htmlPendiente("suelo-tipo", TITULO_TIPO, m.motivo, m.situacion);
+  if (m.situacion !== "ok") {
+    return (
+      `<p class="suelo-tipo suelo-pendiente" data-situacion="${esc(m.situacion)}">` +
+      `<span class="suelo-icono" aria-hidden="true">${ICONO_PENDIENTE}</span> ${esc(TEXTO_SIN_TIPO)}.</p>`
+    );
+  }
+  const partes = [m.descripcion, m.elementos.map((e) => minusculaInicial(e.significado)).join(", ")].filter(Boolean).map(minusculaInicial);
+  const idioma = suelo.idioma_fuentes || null;
+  const detalle = [
+    m.texto ? `<p>${esc(m.texto)}</p>` : "",
+    m.orden && (m.descripcion || m.fertilidad)
+      ? `<p><strong>${esc(m.orden)}</strong>: ${esc([m.descripcion, m.fertilidad ? `fertility: ${minusculaInicial(m.fertilidad)}` : ""].filter(Boolean).join("; "))}.</p>`
+      : "",
+    m.elementos.length
+      ? `<p>Name parts: ${m.elementos.map((e) => `<strong>${esc(e.elemento)}</strong> (${esc(minusculaInicial(e.significado))})`).join(", ")}.</p>`
+      : "",
+    m.municipio ? `<p class="suelo-tipo-municipio">${esc(m.municipio.texto)}</p>` : "",
+    m.noCoinciden ? `<p>${esc(m.noCoinciden)}</p>` : "",
+    htmlLineaFuente("Source", m.entrega?.fuente, citaDe(m.entrega), idioma),
+    m.fuentesCatalogo.length ? htmlLineaFuente("Descriptions", m.fuentesCatalogo.join("; "), citaDe(m.catalogo), idioma) : "",
+    m.municipio ? htmlLineaFuente("Municipality soils", m.municipio.fuente, m.municipio.etiqueta || "", idioma) : "",
+  ].join("");
+  return (
+    '<div class="suelo-tipo" data-situacion="ok">' +
+    `<p class="suelo-tipo-linea"><span class="suelo-titulo">${TITULO_TIPO}:</span> <strong>${esc(m.granGrupo)}</strong>` +
+    (m.orden ? ` (${esc(m.orden)})` : "") +
+    (partes.length ? ` — ${esc(partes.join("; "))}` : "") +
+    "</p>" +
+    (m.explica ? `<p class="suelo-tipo-explica">${esc(m.explica)}</p>` : "") +
+    `<details class="suelo-tipo-detalle"><summary>About this soil type${m.municipio ? " and the soils of the municipality" : ""}</summary>${detalle}</details>` +
+    "</div>"
+  );
+}
+
+/**
+ * HTML de las notas de nutrientes de una parcela: una lista plegable «Nutrient notes» con el aviso de suelo.json y,
+ * por nota, su estado (símbolo y texto), sus elementos, su texto y la escala del mapa; las fuentes al final. Sin pH,
+ * pedido o sin parcela: una línea que lo dice. "" si suelo.json no trae el bloque.
+ */
+export function htmlNotasDeNutrientes({ suelo, id } = {}) {
+  const m = modeloNotasDeNutrientes({ suelo, id });
+  if (!m) return "";
+  if (m.situacion !== "ok") return htmlPendiente("suelo-nutrientes", TITULO_NOTAS, m.motivo, m.situacion);
+  const idioma = suelo.idioma_fuentes || null;
+  const items = m.notas
+    .map((n) => {
+      const simbolos = n.elementos.map((e) => `<abbr${e.nombre ? ` title="${esc(e.nombre)}"` : ""}>${esc(e.simbolo)}</abbr>`).join(" · ");
+      return (
+        `<li${n.estado ? ` data-estado="${esc(n.estado)}"` : ""}${n.caso ? ` data-caso="${esc(n.caso)}"` : ""}>` +
+        '<p class="suelo-nota-cabeza">' +
+        (n.etiqueta
+          ? `<span class="suelo-nota-estado"><span class="suelo-icono" aria-hidden="true">${n.icono}</span> ${esc(n.etiqueta)}</span>`
+          : "") +
+        (simbolos ? ` <span class="suelo-nota-elementos">${simbolos}</span>` : "") +
+        "</p>" +
+        `<p>${esc(n.texto)}</p>` +
+        `<p class="suelo-nota-escala">${esc(m.escala)}.</p>` +
+        "</li>"
+      );
+    })
+    .join("");
+  const fuentes = m.fuentes.map((f) => htmlLineaFuente("Rule", [f.fuente, f.etiqueta].filter(Boolean).join(" "), citaDe(m.reglas), idioma)).join("");
+  return (
+    '<details class="suelo-nutrientes" data-situacion="ok">' +
+    `<summary>${TITULO_NOTAS}<span class="suelo-solo-lector"> for this field</span></summary>` +
+    (m.aviso ? `<p class="suelo-nutrientes-aviso">${esc(m.aviso)}</p>` : "") +
+    `<ul class="suelo-nutrientes-lista">${items}</ul>` +
+    `<p class="suelo-evidencia">${NOTA_NUTRIENTES}</p>` +
+    // Las fuentes (largas) van plegadas, con los archivos a la vista en el resumen.
+    `<details class="suelo-fuente-detalle"><summary>Sources (${esc([m.reglas?.archivo, m.entrega?.archivo].filter(Boolean).join(", "))})</summary>` +
+    fuentes +
+    htmlLineaFuente("Field values", m.entrega?.fuente, citaDe(m.entrega), idioma) +
+    "</details>" +
+    "</details>"
+  );
+}
+
 /** HTML del perfil de suelo de una parcela (ver el encabezado del archivo). */
 export function htmlPerfilDeSuelo({ suelo, id, error } = {}) {
   asegurarHojaSuelo();
   const m = modeloPerfil({ suelo, id, error });
-  if (m.situacion !== "ok") return htmlPendiente("suelo-perfil", TITULO_PERFIL, m.motivo, m.situacion);
+  if (m.situacion !== "ok") {
+    // Sin perfil para la parcela, su tipo de suelo y sus notas se muestran igual si suelo.json trae los bloques.
+    const extra = suelo && !error
+      ? (suelo.tipo_suelo ? htmlTipoDeSuelo({ suelo, id }) : "") + (suelo.nutrientes ? htmlNotasDeNutrientes({ suelo, id }) : "")
+      : "";
+    return htmlPendiente("suelo-perfil", TITULO_PERFIL, m.motivo, m.situacion) + extra;
+  }
 
   const renglones = [];
   if (m.ph) {
@@ -544,6 +787,8 @@ export function htmlPerfilDeSuelo({ suelo, id, error } = {}) {
     htmlTextura(m) +
     (m.fracciones ? htmlBarra(m.fracciones) : `<p class="suelo-sin-dato">${TEXTO_SIN_FRACCIONES}</p>`) +
     (renglones.length ? `<dl class="suelo-datos">${renglones.join("")}</dl>` : "") +
+    htmlTipoDeSuelo({ suelo, id }) +
+    htmlNotasDeNutrientes({ suelo, id }) +
     `<p class="suelo-no-mapeado">${TEXTO_NO_MAPEADO}</p>` +
     `<p class="suelo-escala">${esc(m.rotulo)}.${celdas}</p>` +
     fuente +

@@ -13,9 +13,9 @@
 //       «not run»: el bloque dice «Terrain layer: could not be loaded (…)» y queda en la consola (console.error).
 //       Si MapLibre no puede agregar la capa: «Terrain layer: could not be drawn (…)».
 //   htmlRelieveParcela(p, opciones) -> string
-//       Línea para el renglón Soil de la ficha con properties.relieve (pendiente media, área que
-//       escurre hacia la parcela y fracción en depresión) y el rótulo de escala de relieve.json.
-//       Cadena vacía si la parcela no trae relieve.
+//       Bloque para el renglón Soil de la ficha con properties.relieve (pendiente ajustada, mínimo del área que
+//       escurre hacia la parcela y, plegada, la fracción en hoyos cerrados del modelo) y el rótulo de escala de
+//       relieve.json, cada uno con lo que el modelo de 30 m no sostiene. Cadena vacía si la parcela no trae relieve.
 //   cargarRelieve(url) -> Promise<objeto de relieve.json | null>
 //       Lee relieve.json una sola vez por URL; htmlRelieveParcela usa lo último leído. Una lectura fallida
 //       (que no sea 404) no se guarda: se reintenta la próxima vez.
@@ -521,9 +521,14 @@ function htmlLeyenda(relieve, bloques, nombreZona) {
     `<li><span class="relieve-muestra-gota" aria-hidden="true"></span><span>Rain drops in “Simulate a storm”</span></li>` +
     `</ul>` +
     htmlDepresiones(bloques, nombreZona) +
+    // Revisión I20: en el piso casi plano del valle, la dirección de casi todas las rutas sale del relleno de hoyos
+    // y planos del modelo, no de una pendiente medida. Vale para todas las rutas, con o sin tramos cortados.
+    `<p class="relieve-nota-rutas" data-parte="rutas-aproximadas">On the flat valley floor, most path directions come from ` +
+    `filling small pits and flats of the elevation model; read the lines as approximate.</p>` +
     `<p class="relieve-escala">Scale: ${escala}</p>` +
     `<p class="fuente">Thicker lines: more runoff paths have joined. Zone context, not a field measurement.` +
-    `${relieve?.fuente ? ` Source: ${esc(relieve.fuente)}` : ""}</p>`
+    // La cita en inglés del motor (relieve.fuente_en); si relieve.json no la trae, la de español.
+    `${relieve?.fuente_en || relieve?.fuente ? ` Source: ${esc(relieve.fuente_en || relieve.fuente)}` : ""}</p>`
   );
 }
 
@@ -595,7 +600,18 @@ function htmlTormenta(bloques, nombreZona) {
   );
 }
 
-/** Línea de la ficha (renglón Soil) con los tres indicadores de relieve y el rótulo de escala. */
+/**
+ * Línea de la ficha (renglón Soil) con los tres indicadores de relieve y el rótulo de escala. Cada uno dice
+ * solo lo que el modelo de elevación sostiene (revisión independiente, filas I17 a I19):
+ * - pendiente_media_pct es la pendiente del plano ajustado a las celdas de la parcela («fitted slope»); en
+ *   parcelas chicas es sobre todo ruido del modelo. Los datos no traen su error ni el número de celdas, y no hay
+ *   umbral en params.json ni en supuestos.json para ocultarla: se muestra con esa advertencia.
+ * - aportacion_externa_ha es la mayor entrada de una sola celda de fuera hacia la parcela: un mínimo del área que
+ *   le escurre («at least»), y solo dentro del rectángulo exportado.
+ * - frac_depresion cuenta celdas que el relleno del modelo levanta, casi todas menos que su ruido vertical
+ *   (prof_depresion_ruta_m de supuestos.json). El dato por celda no viene, así que no se puede filtrar con esa
+ *   profundidad como en las rutas: va plegada y dicha como hoyos cerrados del modelo.
+ */
 export function htmlRelieveParcela(p, opciones = {}) {
   const props = p?.properties ?? p;
   const r = props?.relieve;
@@ -606,17 +622,24 @@ export function htmlRelieveParcela(p, opciones = {}) {
   if (pendiente == null && aporte == null && depresion == null) return "";
   const rotulo = opciones.rotulo ?? rotuloDeZona(opciones.relieve ?? ultimoRelieve, props.zona);
   const partes = [
-    pendiente == null ? "mean slope: no data" : `mean slope <strong>${esc(fmt(pendiente, 1))}%</strong>`,
+    pendiente == null
+      ? "fitted slope: no data"
+      : `fitted slope <strong>${esc(fmt(pendiente, 1))}%</strong> (from the elevation model; small fields are within its noise)`,
     aporte == null
       ? "runoff from upslope: no data"
       : aporte > 0
-        ? `receives runoff from up to <strong>${esc(fmt(aporte, 1))} ha</strong> upslope`
-        : "receives no runoff from upslope",
-    depresion == null ? "terrain depressions: no data" : `<strong>${esc(fmtPct(depresion))}</strong> of the field in terrain depressions`,
+        ? `at least <strong>${esc(fmt(aporte, 1))} ha</strong> drain into this field (largest single inflow; nothing outside the mapped area is counted)`
+        : "no runoff drains into this field from upslope (nothing outside the mapped area is counted)",
   ];
+  const pozos =
+    depresion == null
+      ? "no data"
+      : `<strong>${esc(fmtPct(depresion))}</strong> of the field: closed pits in the elevation model, mostly within its noise`;
   return (
-    `<p class="relieve-parcela"><span class="relieve-parcela-titulo">Terrain (context):</span> ${partes.join(" · ")} ` +
-    `<span class="relieve-escala">(${esc(rotulo ?? "scale label not available")})</span></p>`
+    `<div class="relieve-parcela"><p><span class="relieve-parcela-titulo">Terrain (context):</span> ${partes.join(" · ")} ` +
+    `<span class="relieve-escala">(${esc(rotulo ?? "scale label not available")})</span></p>` +
+    // Plegado: se abre a pedido; no se lee como un hallazgo de la parcela.
+    `<details class="relieve-parcela-pozos"><summary>Closed pits in the elevation model</summary><p>${pozos}</p></details></div>`
   );
 }
 

@@ -22,7 +22,7 @@ from collections import defaultdict
 
 from comun import carpeta, registrar_fuentes
 
-PARAMS = {"corridas": {"valor": 2000, "etiqueta": "[S] número de corridas Monte Carlo"}, "periodo_clima": {"valor": [1991, 2025], "etiqueta": "assumption [S], propuesto en el preregistro"}}
+PARAMS = {"corridas": {"valor": 2000, "etiqueta": "[S] number of Monte Carlo runs"}, "periodo_clima": {"valor": [1991, 2025], "etiqueta": "assumption [S], proposed in the preregistration"}}
 PLAZOS = {}                  # años por tipo de plazo, desde supuestos.json (van en cada rotación como {min, max})
 REQUERIDOS = ("ea_gravedad", "sesgo_eto", "presiembra_mm", "presiembra_algodon_mm", "kc_nogal_tabla",
               "cobertura_dosel_nogal", "altura_nogal_m", "corte_verano_moderado", "plazo_alfalfa_anios", "plazo_nogal_horizonte")

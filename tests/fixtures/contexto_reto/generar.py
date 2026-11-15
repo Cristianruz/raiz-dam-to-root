@@ -46,6 +46,8 @@ SALIDA_JSON = AQUI / "contexto_lleno.json"
 ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
 ROTULO = "DE PRUEBA (tests/fixtures/contexto_reto/generar.py): no es un dato ni tiene fuente real"
 GENERADO_PRUEBA = "2026-11-14T00:00:00+00:00"
+# Rótulo DE PRUEBA de ECOSTRESS en su línea de fuente (la resolución no es la real: prueba que la página la lee).
+AVISO_ECOSTRESS_PRUEBA = "satellite ET at 99 m on clear days, not a field measurement"
 FECHA_PRUEBA = "2026-11-14"
 
 PARAMS = json.loads((RAIZ / "data/params.json").read_text(encoding="utf-8"))
@@ -257,6 +259,9 @@ def fuente_de_prueba(nombre):
     """Texto de «fuente» DE PRUEBA de una entrega (el de fuentes.json). El de contexto_regional.csv
     es largo a propósito: un producto de prueba por cada fuente del contrato, con sus variables."""
     base = f"{nombre}: {ROTULO}"
+    if nombre == "ecostress_parcelas.csv":
+        # Como la línea real de LEEME, termina con el rótulo que la ficha pone a la vista (la resolución es de prueba).
+        return f"{base}; {AVISO_ECOSTRESS_PRUEBA}"
     if nombre != "contexto_regional.csv":
         return base
     productos = "; ".join(

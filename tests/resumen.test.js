@@ -8,27 +8,30 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const RAIZ = new URL("..", import.meta.url).href.replace(/\/$/, "");
-const { fraseResumen, casoResumen, modeloNDVI, idDeHash, hashDe } = await import(`${RAIZ}/web/js/resumen.js`);
+const { fraseResumen, casoResumen, modeloNDVI, idDeHash, hashDe, formatoHectareas, hectareasTexto } = await import(`${RAIZ}/web/js/resumen.js`);
 const { modeloEstado, NOTA_GEMELO } = await import(`${RAIZ}/web/js/estado_gemelo.js`);
 const { evaluarOpcion } = await import(`${RAIZ}/web/reglas.js`);
 
 const parcela = { id: "T1", area_ha: 10, abstencion: false, cultivo_actual: "maiz_forrajero" };
+// Opción ACTUAL de un cultivo anual: su plazo (agua.plazo_anios, plazo_restante) es de un año, como en el contrato.
 const opcion = { id: "ACTUAL", nombre: "Current rotation: Forage maize", secuencia: ["maiz_forrajero"],
-  agua: { lamina_bruta: { 0: { p10: 4, p50: 5, p90: 6 }, "-20": { p10: 5, p50: 6, p90: 7 } } } };
+  agua: { lamina_bruta: { 0: { p10: 4, p50: 5, p90: 6 }, "-20": { p10: 5, p50: 6, p90: 7 } },
+    plazo_anios: { min: 1, max: 1 }, plazo_restante: { min: 1, max: 1 }, nota_plazo: null } };
+const ANUAL = " Forage maize ties up water for one season.";
 const con = (D, r = 0, p = parcela, o = opcion) => ({ parcela: p, opcionActual: o, evaluacion: evaluarOpcion(o, p.area_ha, D, r, Boolean(p.abstencion)), D });
 
 test("fraseResumen: parcial, con la plantilla del contrato", () => {
   assert.equal(casoResumen(con(2.5)), "parcial");
-  assert.equal(fraseResumen(con(2.5)), "With 2.5 thousand m³/ha, the current rotation (Forage maize) has enough water for 5 of 10 hectares.");
-  assert.equal(fraseResumen(con(3, -20)), "With 3 thousand m³/ha, the current rotation (Forage maize) has enough water for 5 of 10 hectares.");
-  assert.match(fraseResumen(con(0)), /^With 0 thousand m³\/ha, .* for 0 of 10 hectares\.$/);
+  assert.equal(fraseResumen(con(2.5)), `With 2.5 thousand m³/ha, the current rotation (Forage maize) has enough water for 5 of 10 hectares.${ANUAL}`);
+  assert.equal(fraseResumen(con(3, -20)), `With 3 thousand m³/ha, the current rotation (Forage maize) has enough water for 5 of 10 hectares.${ANUAL}`);
+  assert.match(fraseResumen(con(0)), /^With 0 thousand m³\/ha, .* for 0 of 10 hectares\. Forage maize ties up water for one season\.$/);
 });
 
 test("fraseResumen: completa (verde) y completa (ámbar, lo dice)", () => {
   assert.equal(casoResumen(con(6)), "completa");
-  assert.equal(fraseResumen(con(6)), "With 6 thousand m³/ha, the current rotation (Forage maize) has enough water for all 10 hectares.");
+  assert.equal(fraseResumen(con(6)), `With 6 thousand m³/ha, the current rotation (Forage maize) has enough water for all 10 hectares.${ANUAL}`);
   assert.equal(con(5.5).evaluacion.semaforo, "ambar");
-  assert.match(fraseResumen(con(5.5)), /for all 10 hectares at the median estimate of its need, not at the high estimate\.$/);
+  assert.match(fraseResumen(con(5.5)), /for all 10 hectares at the median estimate of its need, not at the high estimate\. Forage maize ties up water for one season\.$/);
 });
 
 test("fraseResumen: lámina cero y parcela abstenida", () => {
@@ -59,8 +62,9 @@ test("fraseResumen: nombre de la rotación y formato de la app", () => {
   assert.match(fraseResumen(con(2.5, 0, parcela, sinNombre)), /\(maiz forrajero → cereal invierno\)/);
   assert.match(fraseResumen(con(2.5, 0, parcela, { ...opcion, nombre: "", secuencia: [] })), /\(maiz forrajero\)/);
   assert.equal(fraseResumen({ ...con(2.5), formato: (v, k) => `<${k}:${v}>` }),
-    "With <d:2.5> thousand m³/ha, the current rotation (Forage maize) has enough water for <ha:5> of <area:10> hectares.");
-  assert.match(fraseResumen(con(1, 0, { ...parcela, area_ha: 7.953 })), /for 1\.6 of 7\.953 hectares\.$/, "un decimal para lo calculado; el área con su precisión");
+    `With <d:2.5> thousand m³/ha, the current rotation (Forage maize) has enough water for <ha:5> of <area:10> hectares.${ANUAL}`);
+  // Punto 6 de la revisión: lo que alcanza y el área con el mismo formato (los decimales del área), hacia abajo.
+  assert.match(fraseResumen(con(1, 0, { ...parcela, area_ha: 7.953 })), /for 1\.59 of 7\.953 hectares\. Forage maize/, "mismo formato para los dos números");
 });
 
 test("idDeHash y hashDe", () => {
@@ -141,9 +145,112 @@ test("modeloEstado: sin manifest, sin cubo y con datos incompletos no rompe ni i
   assert.equal(filas.precipitacion.fechas, null); assert.equal(filas.precipitacion.fuente, null, "fuente no reconocida: no se afirma ninguna");
   assert.equal(filas.terreno.fechas.desde.iso, "2026-01-02"); assert.equal(filas.terreno.fuente, "NASADEM");
   assert.equal(typeof NOTA_GEMELO, "string");
+  // Idioma de las citas registradas: el que declara el manifest (idioma_fuentes); null si no lo declara (la tarjeta
+  // las marca entonces como español, como antes de la reentrega en inglés del buzón).
+  assert.equal(raro.idiomaFuentes, null); assert.equal(vacio.idiomaFuentes, null);
+  assert.equal(modeloEstado({ manifest: { idioma_fuentes: "en", fuentes_de_origen: [] } }).idiomaFuentes, "en");
+  assert.equal(modeloEstado({ manifest: { idioma_fuentes: 7, fuentes_de_origen: [] } }).idiomaFuentes, null);
 });
 
 test("fraseResumen: la aclaración final del nombre no se anida entre paréntesis", () => {
   const nogal = { ...opcion, nombre: "Current rotation: Pecan orchard (does not rotate)" };
-  assert.equal(fraseResumen(con(6, 0, parcela, nogal)), "With 6 thousand m³/ha, the current rotation (Pecan orchard) has enough water for all 10 hectares.");
+  assert.equal(fraseResumen(con(6, 0, parcela, nogal)), "With 6 thousand m³/ha, the current rotation (Pecan orchard) has enough water for all 10 hectares. Pecan orchard ties up water for one season.");
+});
+
+// Punto 1 de la revisión con Playwright (2026-11-15): el plazo del agua va en la frase principal, no 2,5 pantallas abajo.
+// Lee agua.plazo_anios, agua.plazo_restante y agua.nota_plazo de la opción ACTUAL; ninguna cifra en el texto del módulo.
+const conAgua = (extra) => ({ ...opcion, agua: { ...opcion.agua, ...extra } });
+const alfalfa = { ...conAgua({ plazo_anios: { min: 3, max: 4 }, plazo_restante: { min: 0, max: 1 } }), nombre: "Current rotation: Alfalfa", secuencia: ["alfalfa"] };
+const huerta = {
+  ...conAgua({ plazo_anios: { min: 10, max: 10 }, plazo_restante: { min: 10, max: 10 }, nota_plazo: "calculation horizon; orchards live longer" }),
+  nombre: "Current rotation: Pecan orchard (does not rotate)", secuencia: ["nogal"],
+};
+
+test("fraseResumen: el plazo del agua de la opción actual va en la misma frase (perenne, huerta, anual)", () => {
+  assert.equal(fraseResumen(con(2.5, 0, parcela, alfalfa)),
+    "With 2.5 thousand m³/ha, the current rotation (Alfalfa) has enough water for 5 of 10 hectares. Alfalfa ties up water for 3–4 years (0–1 years left).");
+  assert.equal(fraseResumen(con(6, 0, parcela, huerta)),
+    "With 6 thousand m³/ha, the current rotation (Pecan orchard) has enough water for all 10 hectares. Pecan orchard ties up water for 10 years (calculation horizon; orchards live longer).",
+    "huerta: el horizonte con su nota; el restante igual al plazo no se repite");
+  assert.ok(fraseResumen(con(2.5)).endsWith(" Forage maize ties up water for one season."), "anual: una temporada, sin cifra");
+  const restante = (min, max) => fraseResumen(con(2.5, 0, parcela, { ...alfalfa, agua: { ...alfalfa.agua, plazo_restante: { min, max } } }));
+  assert.match(restante(2, 2), / ties up water for 3–4 years \(2 years left\)\.$/);
+  assert.match(restante(1, 1), / ties up water for 3–4 years \(1 year left\)\.$/, "singular");
+  assert.match(restante(0, 0), / ties up water for 3–4 years \(0 years left\)\.$/);
+  const sinRestante = { ...alfalfa, agua: { ...alfalfa.agua, plazo_restante: null } };
+  assert.match(fraseResumen(con(2.5, 0, parcela, sinRestante)), / Alfalfa ties up water for 3–4 years\.$/);
+  const fijo = { ...alfalfa, agua: { ...alfalfa.agua, plazo_anios: { min: 2, max: 2 }, plazo_restante: null } };
+  assert.match(fraseResumen(con(2.5, 0, parcela, fijo)), / ties up water for 2 years\.$/);
+});
+
+test("fraseResumen: sin plazo en los datos lo dice; sin riego, abstenida o sin cálculo no hablan de plazo", () => {
+  const sinPlazo = { ...alfalfa, agua: { ...alfalfa.agua, plazo_anios: null, plazo_restante: null } };
+  assert.match(fraseResumen(con(2.5, 0, parcela, sinPlazo)), /hectares\. The data do not give how many years it ties up water\.$/);
+  const roto = { ...alfalfa, agua: { ...alfalfa.agua, plazo_anios: { min: null, max: "x" } } };
+  assert.match(fraseResumen(con(2.5, 0, parcela, roto)), /The data do not give how many years it ties up water\.$/);
+  const descanso = { id: "ACTUAL", nombre: "Current rotation: Do not plant / standing stubble", secuencia: ["descanso"],
+    agua: { lamina_bruta: { 0: { p10: 0, p50: 0, p90: 0 } }, plazo_anios: { min: 1, max: 1 }, plazo_restante: { min: 1, max: 1 } } };
+  assert.doesNotMatch(fraseResumen(con(3, 0, parcela, descanso)), /ties up|water term/);
+  assert.doesNotMatch(fraseResumen({ parcela: { ...parcela, abstencion: true }, opcionActual: alfalfa, D: 3 }), /ties up/);
+  assert.doesNotMatch(fraseResumen({ parcela, opcionActual: null, D: 3 }), /ties up/);
+});
+
+test("fraseResumen: los años del plazo pasan por el formato de la app (clave «anios») y el nombre va con mayúscula", () => {
+  assert.equal(fraseResumen({ ...con(2.5, 0, parcela, alfalfa), formato: (v, k) => `<${k}:${v}>` }),
+    "With <d:2.5> thousand m³/ha, the current rotation (Alfalfa) has enough water for <ha:5> of <area:10> hectares. Alfalfa ties up water for <anios:3>–<anios:4> years (<anios:0>–<anios:1> years left).");
+  const sinNombre = { ...alfalfa, nombre: "", secuencia: ["alfalfa"] };
+  assert.match(fraseResumen(con(2.5, 0, parcela, sinNombre)), /\(alfalfa\) has enough .* Alfalfa ties up water for 3–4 years/);
+});
+
+test("fraseResumen con los datos publicados (web/data): el plazo de la opción ACTUAL sale del cubo", (t) => {
+  const ruta = new URL("../web/data/cubo.json", import.meta.url);
+  const rutaP = new URL("../web/data/parcelas.geojson", import.meta.url);
+  if (!fs.existsSync(ruta) || !fs.existsSync(rutaP)) return t.skip("web/data aún no se construye (python construir.py)");
+  const cubo = JSON.parse(fs.readFileSync(ruta, "utf8"));
+  const props = new Map(JSON.parse(fs.readFileSync(rutaP, "utf8")).features.map((f) => [f.properties.id, f.properties]));
+  let vistas = 0;
+  for (const [id, pc] of Object.entries(cubo.parcelas ?? {})) {
+    const p = props.get(id);
+    const actual = (pc.opciones ?? []).find((o) => o.id === "ACTUAL");
+    if (!p || p.abstencion || !actual || !(actual.agua?.lamina_bruta?.["0"]?.p50 > 0)) continue;
+    const D = cubo.dotaciones.marcas?.[0]?.valor ?? cubo.dotaciones.deslizador.min;
+    const frase = fraseResumen({ parcela: p, opcionActual: actual, evaluacion: evaluarOpcion(actual, p.area_ha, D, 0), D });
+    const { min, max } = actual.agua.plazo_anios;
+    if (max <= 1) assert.match(frase, /ties up water for one season\.$/, id);
+    else {
+      assert.ok(frase.includes(` ties up water for ${min === max ? min : `${min}–${max}`} years`), `${id}: ${frase}`);
+      if (actual.agua.nota_plazo) assert.ok(frase.includes(actual.agua.nota_plazo), `${id}: nota del plazo`);
+    }
+    vistas += 1;
+  }
+  if (!vistas) t.skip("ninguna parcela con opción ACTUAL que pida agua");
+});
+
+// Punto 6 de la revisión con Playwright (2026-11-15): «Enough for 20.7 of 20.66 hectares» (un decimal y tres).
+test("formatoHectareas: mismo formato para lo que alcanza y para el área; nunca más que el área", () => {
+  const f = formatoHectareas(20.66);
+  assert.equal(f(20.66), "20.66");
+  assert.equal(f(20.655), "20.65", "hacia abajo: no se escribe más de lo calculado");
+  assert.equal(f(20.6599999), "20.65");
+  assert.equal(f(20.7), "20.66", "nunca más que el área");
+  assert.equal(f(1), "1", "sin ceros de relleno");
+  assert.equal(f(12.3456), "12.34");
+  assert.equal(f(null), "—");
+  assert.equal(f(NaN), "—");
+  const g = formatoHectareas(20.7);
+  assert.equal(g(20.66), "20.6", "un área con un decimal: lo que alcanza, con uno");
+  assert.equal(formatoHectareas(10)(5.75), "5.7", "área entera: al menos un decimal para lo que alcanza");
+  assert.equal(formatoHectareas(7.9531)(1.59999), "1.599", "tres decimales como máximo (los de un dato)");
+  assert.equal(formatoHectareas(0.35)(0.35 * 0.999), "0.34");
+  assert.equal(formatoHectareas(null)(3.27), "3.2", "sin área: un decimal, hacia abajo");
+  // Para cualquier cobertura menor que uno, el texto de lo que alcanza no supera al del área.
+  for (const area of [0.35, 7.95, 10.76, 20.66, 20.7, 128.4]) {
+    const fa = formatoHectareas(area);
+    for (let c = 0; c < 1; c += 0.0137) assert.ok(Number(fa(area * c).replace(/,/g, "")) <= Number(fa(area).replace(/,/g, "")), `${area} × ${c}`);
+  }
+});
+
+test("hectareasTexto: singular solo para un valor de uno", () => {
+  assert.equal(hectareasTexto(1), "hectare");
+  for (const v of [0, 0.5, 1.5, 2, 20.66, null]) assert.equal(hectareasTexto(v), "hectares", String(v));
 });
