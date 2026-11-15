@@ -23,7 +23,7 @@ import {
   icono,
 } from "./interfaz.js";
 import { crearAsesor } from "./asesor.js";
-import { formatoHa } from "./recomendador.js";
+import { formatoHa, nombreOpcion } from "./recomendador.js";
 import { montarInstalacion } from "./instalar.js";
 import {
   aguaComprometida,
@@ -287,6 +287,115 @@ function stats() {
   $("#allocation-value").textContent = fmt(state.allocation);
   $("#scenario-label").textContent =
     `${t("tablero.escenario", { dotacion: fmt(state.allocation), unidad: t("tablero.unidad"), lluvia: fmt(state.rain, 0) })} ↗`;
+  ladoALado();
+}
+
+// Bloque del resumen «con la lluvia del registro y con menos lluvia»: las zonas piloto y las opciones de la
+// parcela elegida, lado a lado. No hay otro cálculo: usa aguaComprometida y evaluarOpcion (reglas.js) con cada
+// lluvia del cubo (cube.lluvia_pct) y la dotación del deslizador. La barra de la lluvia en uso va resaltada.
+const CIEN = 100;
+const DOS_DECIMALES = 2; // la lámina, como en «Comparar opciones»
+function ladoALado() {
+  const cajaZonas = $("#lado-zonas");
+  const cajaOpciones = $("#lado-opciones");
+  if (!cajaZonas || !cajaOpciones || !cube) return;
+  const lluvias = cube.lluvia_pct;
+  const rotulo = (r) =>
+    r < 0 ? t("tablero.lado.menos", { pct: fmt(r, 0) }) : t("tablero.lado.registro");
+  // Una barra: rótulo, pista con el relleno (fracción de «tope») y, si se pide, la marca de la dotación.
+  const barra = ({ r, texto, valor, tope, cifra, marca = null }) => {
+    const ancho =
+      Number.isFinite(valor) && tope > 0 ? Math.min(1, valor / tope) * CIEN : 0;
+    const clases = `lado-barra${r === state.rain ? " activa" : ""}`;
+    const excede = marca != null && valor > 1 ? " excede" : "";
+    const raya =
+      marca == null
+        ? ""
+        : `<span class="lado-marca" style="left:${marca * CIEN}%"></span>`;
+    return `<span class="${clases}"><span class="lado-rotulo">${esc(texto)}</span><span class="lado-pista"><span class="lado-relleno${excede}" style="width:${ancho}%"></span>${raya}</span><strong>${esc(cifra)}</strong></span>`;
+  };
+  // Zonas: agua que ya piden los perennes, como parte de la dotación elegida, con cada lluvia.
+  const zonas = Object.entries(cube.zonas).map(([id, z]) => ({
+    id,
+    z,
+    valores: lluvias.map((r) => aguaComprometida(z, state.allocation, r)),
+  }));
+  const tope = Math.max(
+    1,
+    ...zonas.flatMap((x) => x.valores.map((c) => c.p50 ?? 0)),
+  );
+  cajaZonas.innerHTML = zonas
+    .map(
+      ({ id, z, valores }) =>
+        `<button type="button" class="lado-fila" data-zona="${esc(id)}" aria-pressed="${id === state.zone}"><span class="lado-nombre">${esc(z.nombre_mostrar)}</span><span class="lado-meta">${T("tablero.lado.zona_meta", { parcelas: fmt(z.conteos.total, 0), ha: fmt(z.superficie_total_ha, 0) })}</span>${valores
+          .map((c, i) =>
+            barra({
+              r: lluvias[i],
+              texto: rotulo(lluvias[i]),
+              valor: c.p50,
+              tope,
+              // Kit §2.4: sin dotación no se divide (se dice «sin dotación»); con superficie sin clasificar la
+              // cifra es un mínimo («al menos»); siempre con su rango p10–p90.
+              cifra: c.sinDotacion
+                ? t("tablero.compromiso.sin_dotacion")
+                : t(c.alMenos ? "tablero.lado.al_menos" : "tablero.lado.pct", {
+                    pct: `${fmt(c.p50 * CIEN, 0)}%`,
+                    bajo: `${fmt(c.p10 * CIEN, 0)}%`,
+                    alto: `${fmt(c.p90 * CIEN, 0)}%`,
+                  }),
+              marca: c.sinDotacion ? null : 1 / tope,
+            }),
+          )
+          .join("")}</button>`,
+    )
+    .join("");
+  // Opciones de la parcela elegida: hectáreas que la dotación cubre con la necesidad mediana, con cada lluvia.
+  const p = selected()?.properties;
+  $("#lado-opciones-titulo").textContent = p
+    ? t("tablero.lado.opciones", { id: p.id })
+    : t("tablero.lado.opciones_sin");
+  const ops = p && !p.abstencion ? options() : [];
+  if (!ops.length) {
+    cajaOpciones.innerHTML = `<p class="micro">${T(p ? "tablero.lado.sin_opciones" : "tablero.ficha.sin_parcelas")}</p>`;
+    return;
+  }
+  const ha = haDe(p.area_ha);
+  cajaOpciones.innerHTML = ops
+    .map(
+      (op) =>
+        `<div class="lado-fila"><span class="lado-nombre">${esc(nombreOpcion(op))}</span>${lluvias
+          .map((r) => {
+            const e = evaluarOpcion(op, p.area_ha, state.allocation, r);
+            const pide =
+              e.lamina.p50 > 0
+                ? t("tablero.lado.pide", {
+                    rotulo: rotulo(r),
+                    lamina: fmt(e.lamina.p50, DOS_DECIMALES),
+                    unidad: t("tablero.unidad"),
+                  })
+                : t("tablero.lado.sin_riego", { rotulo: rotulo(r) });
+            // Kit §2.4: las hectáreas van con su rango (bajo con la estimación alta de la necesidad y al revés).
+            const bajo = ha(e.hectareas.bajo);
+            const alto = ha(e.hectareas.alto);
+            return barra({
+              r,
+              texto: pide,
+              valor: e.cobertura,
+              tope: 1,
+              cifra: t(
+                bajo === alto ? "tablero.lado.ha" : "tablero.lado.ha_rango",
+                {
+                  cubiertas: ha(e.hectareas.p50),
+                  area: ha(p.area_ha),
+                  bajo,
+                  alto,
+                },
+              ),
+            });
+          })
+          .join("")}</div>`,
+    )
+    .join("");
 }
 
 function fieldList() {
@@ -304,6 +413,28 @@ function fieldList() {
     : `<option value="">${T("tablero.ficha.sin_coincidencias")}</option>`;
   if (list.some((f) => f.properties.id === state.field))
     $("#field-select").value = state.field;
+}
+// Buscar una parcela: la lista se filtra y, si la parcela abierta ya no está en ella, se abre la primera
+// coincidencia, para que el selector y la ficha digan lo mismo. Si no hay coincidencias en esta zona y lo escrito
+// es el ID de una parcela de otra zona piloto, se abre esa zona con su parcela.
+function buscarParcela() {
+  fieldList();
+  const consulta = $("#field-search").value.trim().toLocaleLowerCase(idioma());
+  if (!consulta) return;
+  const ids = [...$("#field-select").options].map((o) => o.value).filter(Boolean);
+  if (ids.length) {
+    if (!ids.includes(state.field)) chooseField(ids[0]);
+    return;
+  }
+  const otra = geo.features.find(
+    (f) =>
+      f.properties.zona !== state.zone &&
+      String(f.properties.id).toLocaleLowerCase(idioma()) === consulta,
+  );
+  if (!otra) return;
+  $("#zona-dashboard").value = otra.properties.zona;
+  changeZone();
+  chooseField(otra.properties.id);
 }
 // Clase de textura del perfil regional (suelo.json la trae en inglés): con nombre en los cuatro idiomas si es
 // una de las conocidas; si no, como viene.
@@ -334,7 +465,11 @@ function fieldDetails() {
   const demand = evalOp
     ? `${fmt(evalOp.lamina.p50)} ${t("tablero.unidad")}`
     : sinCalculo;
-  const coverage = evalOp ? `${fmt(evalOp.cobertura * 100, 0)}%` : sinCalculo;
+  // Porcentaje entero HACIA ABAJO, igual que el explorador (web/app.js, fmtCobertura): una dotación que no
+  // alcanza no se lee con un punto de más, y las dos páginas dicen la misma cifra.
+  const coverage = evalOp
+    ? `${fmt(Math.floor(evalOp.cobertura * CIEN), 0)}%`
+    : sinCalculo;
   const title = p.abstencion
     ? t("tablero.ficha.sin_clasificar")
     : cropName(p.cultivo_actual);
@@ -354,12 +489,13 @@ function fieldDetails() {
     : T("tablero.ficha.sin_calculo_nota");
   $("#field-detail").innerHTML =
     `<div class="field-title"><span class="crop-symbol">${icons[p.cultivo_actual] ?? "♧"}</span><div><h4>${esc(title)}</h4><p>${T("tablero.ficha.parcela", { id: p.id, area: ha(p.area_ha) })}</p></div></div>
-        <dl class="field-metrics"><div><dt>${T("tablero.ficha.demanda")}</dt><dd>${esc(demand)}</dd></div><div><dt>${T("tablero.ficha.suelo")}</dt><dd>${esc(profile ? `pH ${fmt(profile.ph)}` : sinSuelo)}</dd></div><div><dt>${T("tablero.ficha.riego")}</dt><dd id="field-irrigation">${T("tablero.ficha.sin_registrar")}</dd></div><div><dt>${T("tablero.ficha.pendiente")}</dt><dd>${esc(pendiente)}</dd></div><div><dt>${T("tablero.ficha.textura")}</dt><dd>${esc(texture)}</dd></div><div><dt>${T("tablero.ficha.plazo")}</dt><dd>${esc(termLabel)}</dd></div></dl>
         <div class="coverage">${T("tablero.ficha.cobertura")} <strong>${esc(coverage)}</strong><div class="progress"><div style="width:${ancho}%"></div></div></div>
         <p class="micro">${nota}</p>
+        <dl class="field-metrics"><div><dt>${T("tablero.ficha.demanda")}</dt><dd>${esc(demand)}</dd></div><div><dt>${T("tablero.ficha.suelo")}</dt><dd>${esc(profile ? `pH ${fmt(profile.ph)}` : sinSuelo)}</dd></div><div><dt>${T("tablero.ficha.riego")}</dt><dd id="field-irrigation">${T("tablero.ficha.sin_registrar")}</dd></div><div><dt>${T("tablero.ficha.pendiente")}</dt><dd>${esc(pendiente)}</dd></div><div><dt>${T("tablero.ficha.textura")}</dt><dd>${esc(texture)}</dd></div><div><dt>${T("tablero.ficha.plazo")}</dt><dd>${esc(termLabel)}</dd></div></dl>
         <a class="field-link" href="${esc(explorerLink(p.id))}">${T("tablero.abrir_explorador")} <span>↗</span></a>`;
   asesor?.actualizar();
   updateHighlight();
+  ladoALado();
 }
 
 function crops() {
@@ -999,6 +1135,14 @@ async function init() {
   if (guardado.parcela) chooseField(guardado.parcela); // solo si sigue en la zona
   pintarDatos();
   $("#zona-dashboard").addEventListener("change", changeZone);
+  $("#lado-zonas")?.addEventListener("click", (e) => {
+    const boton = e.target.closest("[data-zona]");
+    if (!boton || boton.dataset.zona === state.zone) return;
+    $("#zona-dashboard").value = boton.dataset.zona;
+    changeZone();
+    // El bloque se vuelve a pintar: el foco regresa al botón de la zona elegida.
+    $('#lado-zonas [aria-pressed="true"]')?.focus();
+  });
   $("#allocation").addEventListener("input", (e) => {
     state.allocation = Number(e.target.value);
     recordarEstado();
@@ -1013,7 +1157,7 @@ async function init() {
     fieldDetails();
     crops();
   });
-  $("#field-search").addEventListener("input", fieldList);
+  $("#field-search").addEventListener("input", buscarParcela);
   $("#field-select").addEventListener("change", (e) =>
     chooseField(e.target.value),
   );

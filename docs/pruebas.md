@@ -1,7 +1,7 @@
 <!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Resultado de las pruebas (generado por `python construir.py`; no se edita a mano)
 
-Corrida: 2026-11-15T12:39:18+00:00 · duración 70.4 s
+Corrida: 2026-11-15T13:42:57+00:00 · duración 75.3 s
 
 | Paso | Estado | Detalle |
 |---|---|---|
@@ -10,11 +10,11 @@ Corrida: 2026-11-15T12:39:18+00:00 · duración 70.4 s
 | simulados | OK | cubo REAL: 1239 parcelas, 458 clasificadas, 1267 opciones |
 | relieve | OK | zonas: delicias_saucillo, lazaro_cardenas |
 | gemelo | OK | gemelo: OK · contexto: OK · suelo: OK · dashboard: OK · rango de lluvia: OK |
-| pwa | OK | precache 757e4a4235bf28d2 |
+| pwa | OK | precache aa97eb03c5704ca6 |
 | manifest | OK | 141424 cifras (0 simuladas), 35 fuentes de origen, 59 avisos |
 | contrato | OK | CONTRATO OK |
 | verificador | OK | VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv |
-| pytest | OK | 1252 passed, 30 warnings in 56.00s |
+| pytest | OK | 1256 passed, 30 warnings in 61.58s (0:01:01) |
 | node | OK | 278 pass, 0 fail, 0 skipped |
 
 La prueba con navegador (`node tests/e2e/web_smoke.mjs`) se corre aparte y antes de cada publicación.
