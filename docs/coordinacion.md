@@ -85,6 +85,10 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 00:20 | integrador | Reconstruido con los textos de ECOSTRESS y la fixture del contexto regenerada (el commit `165236d` falló en la CI por esa fixture). Integración en `64aff74` |
 | 00:36 | integrador | PR #5 fusionado en `main` (`d354010`, squash) con la CI en verde y los e2e sobre `f0dbf3b` (747/747, 39/39, 22/22). GitHub Pages publicó a las 00:38. `main` se fusionó de vuelta en la integración (`ab53a3b`) y se avisó a «Laptop», a diseño y a la sesión de datos |
 | 00:40 | integrador | En curso, cada uno en su copia: página en inglés dentro de los plegados y ECOSTRESS a la vista; «Why it's suggested», «Benefits», hectáreas del «Why?» y la gota (cierre de hallazgos C2, I10, I15, M4, M6) |
+| 01:27 | integrador | Buzón v13 de la sesión de datos: ECOSTRESS corregido (un sobrevuelo, un valor; sin pasos junto a la salida o la puesta del sol ni escenas nubladas) y fusión de `datos-satelite` (`a6f98cd`). Entraron 35, rechazados 0 (`75ceaac`). Cita textual de AppEEARS en README, DATA_LICENSE y textos de envío (`1235e3d`) |
+| 01:50 | integrador | Fusión de «Why it's suggested», «Benefits», hectáreas del «Why?» y la gota (`9b4b308`, en `2117a58`), con las correcciones del revisor de código |
+| 01:59 | integrador | Fusión de la página en inglés desde el origen, ECOSTRESS a la vista y el parche de GAEZ de la sesión de datos (`1984a5e`, en `0508a24`) |
+| 02:22 | integrador | Correcciones de cuatro revisores de contexto nuevo (código, cifras y lenguaje, contrato, código web) y decisiones de la ficha por escrito (`f13ec46`, `e380460`). 1182 pytest y 243 de Node; web_smoke 874/874, pwa 39/39 y sin conexión 22/22 sobre `f13ec46` |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 
