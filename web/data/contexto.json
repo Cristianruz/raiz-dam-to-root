@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/contexto_web.py con las entregas validadas de data/processed; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
- "generado": "2026-11-15T06:08:25+00:00",
+ "generado": "2026-11-15T06:19:35+00:00",
  "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
  "zonas": {
   "delicias_saucillo": {
@@ -43206,7 +43206,7 @@
    "id": "ecostress",
    "nombre": "ECOSTRESS",
    "organismo": "NASA",
-   "papel": "Field-scale contrast of evapotranspiration (the other contrasts are regional)",
+   "papel": "Satellite estimate of evapotranspiration per field on clear days; not a field measurement and not a validation of the model",
    "aplica": true,
    "estado": "in_use",
    "entregas_presentes": [
