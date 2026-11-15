@@ -1,21 +1,27 @@
 # AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
 """E1 · ECOSTRESS por parcela y mes, contra la ETc del modelo (FAO-56) en los mismos días.
 
-Entradas: data/raw/reto/ecostress_pasos_<zona>.csv — un renglón por parcela y paso de ECOSTRESS que devolvió AppEEARS
-          (solicitudes de E0; ECO_L3T_JET.002, 1-oct-2025 a 30-sep-2026), extraído en el navegador de la salida de AppEEARS:
-          id, zona, fecha, hora_utc, et_diaria, incertidumbre, nube, agua.
+Entradas: data/raw/reto/ecostress_pasos_<zona>.csv — la salida de AppEEARS tal cual (archivo
+          raiz-ecostress-<zona>-ECO-L3T-JET-002-results.csv de las solicitudes de E0, leído el 14-nov-2026 en el navegador de
+          Cristian con su sesión y subido sin cambios; sha256 igual al de la lista del paquete de AppEEARS): un renglón por
+          parcela y paso de ECOSTRESS, columnas Category, ID, Latitude, Longitude, Date («AAAA-MM-DD hh:mm:ss UTC»),
+          ECOSTRESS_Tile, ECO_L3T_JET_002_ETdaily, ECO_L3T_JET_002_ETinstUncertainty, ECO_L3T_JET_002_cloud,
+          ECO_L3T_JET_002_water.
           En --dir: cultivos_parcelas.csv (A4), eto_diaria.csv y eto_diaria_lazaro_cardenas.csv (A1), supuestos.json.
 Salida:   ecostress_parcelas.csv — contrato del integrador (mensaje del 14-nov, 21:00): id, mes, et_mm_dia, n_escenas;
           columnas adicionales: zona, etc_modelo_mm, razon. Los mismos 12 meses que hls_mensual_parcelas.csv (2025-10 a 2026-09).
 Uso:      python E1_ecostress_parcelas.py --dir data/reto --crudo data/raw/reto --unidad mm_dia
 
 Reglas:
-- Paso despejado = et_diaria finita, nube = 0 y agua = 0. et_mm_dia = mediana de los pasos despejados del mes (vacía si no
+- Fecha del paso: la del tiempo solar local (UTC + longitud / 15 h); los pasos de estas zonas son de 7 a 17 h locales.
+- Paso despejado = ETdaily finita, cloud = 0 y water = 0 (en estos archivos, todo paso con ETdaily tiene cloud = 0). et_mm_dia = mediana de los pasos despejados del mes (vacía si no
   hubo); n_escenas = número de pasos despejados del mes.
 - Unidades: la guía de usuario de ECOSTRESS colección 2 (ECO_L1C-4_Grid_Tile_User_Guide_V2) dice en el texto que la ET
   «is upscaled to a daily ET estimate in millimeters per day and recorded in the L3T JET product as ETdaily», mientras que su
   Tabla 10 y AppEEARS dicen W/m². --unidad es obligatorio y el script se detiene si los valores no cuadran con la unidad
-  declarada (mm/día: percentil 99 de los pasos despejados menor que 20; W/m²: mediana mayor que 30).
+  declarada (mm/día: percentil 99 de los pasos despejados menor que 20; W/m²: mediana mayor que 30). Con estos datos
+  (14-nov-2026): mediana 1.0–1.1 y percentil 99 3.7–4.0, máximo 5.8: cuadra con mm/día y no con W/m² (un flujo medio de
+  1 W/m² sería casi nada de ET). ETinstUncertainty sí está en W/m² (instantánea, 20–45).
 - etc_modelo_mm: mediana, en los mismos días de los pasos despejados, de la ETc del modelo = Kc del cultivo clasificado
   (A5: FAO-56, Tablas 11 y 12) × ETo de NASA POWER del día. Solo parcelas clasificadas y días dentro del ciclo del cultivo.
   razon = et_mm_dia / etc_modelo_mm. Es un contraste: ECOSTRESS mide la ET real de un día despejado a 70 m; la ETc de FAO-56
@@ -72,10 +78,17 @@ def main():
     A5.cargar_supuestos("supuestos.json")                 # Kc del nogal ajustado por cobertura (como en A5)
     pasos = []
     for ruta in sorted(glob.glob(os.path.join(a.crudo, "ecostress_pasos_*.csv"))):
-        pasos.extend(csv.DictReader(open(ruta)))
+        zona = os.path.basename(ruta)[len("ecostress_pasos_"):-4]
+        for r in csv.DictReader(open(ruta)):
+            utc = dt.datetime.strptime(r["Date"], "%Y-%m-%d %H:%M:%S UTC")
+            local = utc + dt.timedelta(hours=float(r["Longitude"]) / 15)
+            pasos.append({"id": r["ID"], "zona": zona, "fecha": local.date().isoformat(),
+                          "et_diaria": r["ECO_L3T_JET_002_ETdaily"], "nube": r["ECO_L3T_JET_002_cloud"],
+                          "agua": r["ECO_L3T_JET_002_water"]})
     if not pasos:
         raise SystemExit(f"Falta ecostress_pasos_<zona>.csv en {a.crudo}")
-    despejados = [p for p in pasos if flotante(p["et_diaria"]) is not None and p["nube"] == "0" and p["agua"] == "0"]
+    despejados = [p for p in pasos if flotante(p["et_diaria"]) is not None and flotante(p["nube"]) == 0
+                  and flotante(p["agua"]) == 0]
     vals = sorted(flotante(p["et_diaria"]) for p in despejados)
     p99 = vals[int(0.99 * (len(vals) - 1))]
     print(f"{len(pasos)} pasos; {len(despejados)} despejados; et_diaria despejada: mediana {statistics.median(vals):.2f}, p99 {p99:.2f}")

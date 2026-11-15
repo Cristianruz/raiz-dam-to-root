@@ -557,3 +557,22 @@ dentro de cada parcela (1,239: 940 y 299). Solicitudes guardadas en `data/raw/re
   ET between sunrise and sunset»). Probado con datos sintéticos; falta el dato real.
 - **Estado de AppEEARS:** Lázaro Cárdenas iba en 71 % y Delicias–Saucillo en cola. Para bajar el resultado necesito que
   Cristian me escriba desde el panel de Chrome (solo así puedo usar su navegador).
+
+## 14-nov 21:28 — ENTREGA: ecostress_parcelas.csv con tu contrato (la base 15 de 15)
+- **Archivo:** `ecostress_parcelas.csv` en Drive, con su renglón en LEEME: `id, mes, et_mm_dia, n_escenas` + adicionales
+  `zona, etc_modelo_mm, razon`; 1,239 parcelas × los 12 meses de `hls_mensual_parcelas.csv` = 14,868 filas; 6,167 con dato.
+  `et_mm_dia` vacío cuando `n_escenas` = 0 (tu regla `vacias_segun`).
+- **Crudo:** la salida de AppEEARS sin cambios en `data/raw/reto/ecostress_pasos_<zona>.csv` (sha256 igual al de la lista del
+  paquete de AppEEARS). La leí en el navegador de Cristian con su sesión y la subí al repo sin descargar nada a su compu.
+- **Unidades:** mm/día, confirmado con los valores: en los pasos despejados, mediana 1.1, percentil 99 3.7 y máximo 5.8. En W/m²
+  serían casi cero. La guía lo dice en el texto («daily ET estimate in millimeters per day»), aunque su Tabla 10 y AppEEARS dicen
+  W/m². `ETinstUncertainty` sí viene en W/m² (de 20 a 45). Todo va escrito en el LEEME y en `docs/ecostress.md`.
+- **Cobertura:** unos 31 pasos en el año por zona. Con dato despejado: oct, dic, ene, may, jul y ago. Ninguno en nov, feb, mar,
+  abr, jun y sep: esos meses van vacíos.
+- **Hallazgo (para mostrarlo como contraste, sin atribuir causa):** la ET de ECOSTRESS en días despejados es de un cuarto a la
+  mitad de la ETc de FAO-56 en los mismos días. Alfalfa: mediana 0.46 en oct, 0.30 en dic y 0.35 en ago (118 parcelas). Nogal:
+  0.35 en ago. Va en la misma dirección que SSEBop. Distingue cultivos: en agosto, alfalfa unos 2.7 mm/día y barbecho unos 1.0.
+  Protagonistas: P0757 2.11 mm/día en agosto (razón 0.28); L0175 2.75 (0.36). Tabla completa en `docs/ecostress.md`.
+- **Prueba con tu e560743 y el buzón completo:** `construir.py` OK, **entraron 35, rechazados 0** (los 4 de suelo ya con tu
+  esquema y ECOSTRESS), 1026 pytest y 162 node.
+- `correr_todo.py` ya corre E0 (comprueba que las solicitudes rehechas son las mismas que se subieron) y E1.

@@ -13,13 +13,14 @@ Etapas, cada una en su subcarpeta de --salida:
   2. zonas/ y entrega/  Las dos zonas piloto con correr_zonas.py (B1 → A1 → A9b → A3 → A4 → A5 → A9 → A7 → A8 → unir_zonas).
   3. reto/  Bases del reto y suelo: A2 (heladas), A10 (contexto regional), A11 (GEDI), A12 (nogal, referencia),
      A13 (suelo por parcela), B3 (opciones), B6 (requisitos de suelo por cultivo), B7 (tipos de suelo, reglas de
-     nutrientes y riesgo de nutrientes por parcela), B8 (tipo de suelo por parcela) y G1 (GAEZ por zona).
+     nutrientes y riesgo de nutrientes por parcela), B8 (tipo de suelo por parcela), G1 (GAEZ por zona), E0 (solicitudes de
+     AppEEARS para ECOSTRESS; se comparan con las guardadas en data/raw/reto/) y E1 (ECOSTRESS por parcela y mes).
 Al final copia a entrega/ lo que va al buzón y, si se da --comparar, compara cada archivo por sha256 (LEEME.md no se
 compara: el de Raiz_entregas lleva detalle escrito a mano). Sale con código 1 si algún archivo difiere o falta.
 
 Lo que este comando NO rehace, porque necesita a una persona, una cuenta o internet: las consultas de Earth Engine
-(datos/earthengine/*.js), la extracción de Fields of The World en el navegador (datos/navegador/ftw_extraer.js) y las
-descargas de NASA POWER, SIH y Conagua. Sus crudos están en data/raw/; los rásteres por zona, en la rama `ee-crudos`
+(datos/earthengine/*.js), la extracción de Fields of The World en el navegador (datos/navegador/ftw_extraer.js), las
+solicitudes de AppEEARS (ECOSTRESS; cuenta de Earthdata) y las descargas de NASA POWER, SIH y Conagua. Sus crudos están en data/raw/; los rásteres por zona, en la rama `ee-crudos`
 (se copian a data/raw/ee_zonas/). Paso a paso: docs/reproducir_datos.md.
 """
 import argparse
@@ -40,7 +41,7 @@ CONAGUA = R("data", "raw", "conagua")
 DEL_RECTANGULO = ("et_contraste.csv", "h3_series.csv")
 DEL_RETO = ("contexto_regional.csv", "gedi_parcelas.csv", "opciones_b3.json", "suelo_parcelas.csv",
             "suelo_requisitos.json", "suelo_tipos.json", "suelo_reglas.json", "suelo_nutrientes_parcelas.csv",
-            "tipo_suelo_parcelas.csv", "gaez_zona.csv")
+            "tipo_suelo_parcelas.csv", "gaez_zona.csv", "ecostress_parcelas.csv")
 
 
 def correr(script, carpeta, *args, cwd=None):
@@ -121,6 +122,14 @@ def reto(d, zonas_dir, entrega):
            "--requisitos", os.path.join(d, "suelo_requisitos.json"))
     correr("B8_tipo_suelo_parcelas.py", d, "--crudo", crudo)
     correr("G1_gaez_zona.py", d, "--crudo", crudo)
+    for n in ("cultivos_parcelas.csv", "eto_diaria.csv", "eto_diaria_lazaro_cardenas.csv"):
+        shutil.copyfile(os.path.join(entrega, n), os.path.join(d, n))
+    correr("E0_ecostress_solicitud.py", d)
+    for z in ("delicias_saucillo", "lazaro_cardenas"):          # las solicitudes que se subieron a AppEEARS
+        n = f"ecostress_solicitud_{z}.json"
+        if sha(os.path.join(d, n)) != sha(os.path.join(crudo, n)):
+            raise SystemExit(f"{n} rehecho no es igual al que se subió a AppEEARS (data/raw/reto/)")
+    correr("E1_ecostress_parcelas.py", d, "--crudo", crudo, "--unidad", "mm_dia")
 
 
 def comparar(entrega, referencia):
