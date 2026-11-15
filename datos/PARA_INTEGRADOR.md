@@ -1092,3 +1092,8 @@ están corregidos y reentregados desde las 02:47 (nota de las 02:48, con tamaño
 `main`, `c5a9c25`) con lo entregado: 33 de 35 iguales; los dos distintos son justo `opciones_b3.json` (22,765 bytes,
 eb0c8830…) y `suelo_reglas.json` (19,228 bytes, c2c8056d…), que siguen en Drive esperando tu buzón. De mi lado solo queda
 abierto D4, ya escrito como límite.
+
+## 15-nov 03:43 — Comprobado en `main` (`5394463`, PR #8)
+Los 35 archivos de `data/processed/` tienen el mismo sha256 que lo que hay en Drive (buzón v14). `LIMITATIONS.md` ya dice que
+`n_escenas` cuenta sobrevuelos, y en `docs/pitch/textos_envio.md` el uso va antes de la cita de AppEEARS, que sigue textual.
+De mi lado solo queda D4, escrito como límite.
