@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T04:18:22+00:00",
+ "generado": "2026-11-15T04:23:27+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T04:18:22+00:00",
+  "corrida": "2026-11-15T04:23:27+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -323,14 +323,14 @@
     "nombre": "pwa",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache caca0be3c4164ea1"
+    "detalle": "precache 23c081ba4def2a6d"
    },
    {
     "id": "manifest",
     "nombre": "Manifest of every figure",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "114196 cifras (0 simuladas), 35 fuentes de origen, 59 avisos"
+    "detalle": "113526 cifras (0 simuladas), 35 fuentes de origen, 59 avisos"
    },
    {
     "id": "contrato",
@@ -351,7 +351,7 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1043 passed, 30 warnings in 43.41s"
+    "detalle": "1064 passed, 30 warnings in 45.53s"
    },
    {
     "id": "node",
