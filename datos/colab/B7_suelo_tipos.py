@@ -52,6 +52,8 @@ SSSA = ("Soil Science Society of America, Glossary of Soil Science Terms, Append
         f"https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), {LEIDO}")
 KSU = ("Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», "
        f"Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), {LEIDO}")
+KSU43 = ("Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4, Tabla 4.3 «Formative elements used to "
+         f"identify various suborders in Soil Taxonomy» (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), {LEIDO}")
 UIDAHO = f"University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), {LEIDO}"
 LANC = ("Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) "
         f"(https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), {LEIDO}")
@@ -254,6 +256,10 @@ PREFIJOS = {  # prefijo de gran grupo: (significado SSSA, implicación propia [I
     "natr": ("Presence of natric horizon", "sodio: ver Solonetz"),
     "dur": ("A duripan", "capa cementada: ver Durisols"),
     "argi": ("Presence of an argillic horizon", "subsuelo con arcilla acumulada"),
+    # «arg» no es prefijo de gran grupo: es el elemento formativo del suborden Argids (Haplargids, Calciargids) y la raíz
+    # del prefijo «argi» (Argiustolls). tipo_suelo_parcelas.csv lo marca en los dos casos.
+    "arg": ("Presence of argillic horizon (a horizon with illuvial clay)", "subsuelo con arcilla acumulada; elemento del suborden "
+            "Argids (Haplargids, Calciargids) y raíz del prefijo «argi» (Argiustolls)", "KSU43"),
     "camb": ("A cambic horizon", "desarrollo incipiente: ver Cambisols"),
     "hapl": ("Minimum horizon", "perfil sencillo"),
     "torr": ("Torric moisture regime", "régimen de humedad muy seco"),
@@ -476,8 +482,9 @@ def main():
                              "fuente": f"elemento formativo: {KSU}; definición: {UIDAHO}" + (f"; fertilidad: {LANC}" if f else ""),
                              "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"}
                          for k, (e, d, f) in USDA.items()},
-        "usda_prefijos_gran_grupo": {k: {"significado_en": s, "implicacion": i, "fuente": SSSA,
-                                         "etiqueta": "[V] significado; implicación propia [I]"} for k, (s, i) in PREFIJOS.items()},
+        "usda_prefijos_gran_grupo": {k: {"significado_en": v[0], "implicacion": v[1],
+                                         "fuente": KSU43 if v[2:] == ("KSU43",) else SSSA,
+                                         "etiqueta": "[V] significado; implicación propia [I]"} for k, v in PREFIJOS.items()},
         "como_leer_un_gran_grupo": "nombre = prefijo(s) de gran grupo + nombre del suborden, que termina en el elemento formativo del orden "
                                    "(p. ej. Haplo + calc + ids → Aridisols, con horizonte cálcico); " + KSU,
         "zona": {"municipio_delicias_pct": {"Cambisol": 29.25, "Calcisol": 27.81, "Kastañozem": 25.72, "Chernozem": 10.47, "Luvisol": 2.38,

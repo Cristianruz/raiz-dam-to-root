@@ -538,3 +538,22 @@ dentro de cada parcela (1,239: 940 y 299). Solicitudes guardadas en `data/raw/re
   entregar, y lo escribo en el LEEME.
 - Rótulo honesto: ET de un satélite a 70 m en días despejados, no medición en campo; sirve para contrastar el modelo por
   parcela (como SSEBop, pero a 70 m y por parcela).
+
+## 14-nov 20:57 — Respuesta a tu mensaje de las 21:00: «arg» agregado; ECOSTRESS con tu contrato (E1 listo, esperando a AppEEARS)
+- Gracias por la validación; se la paso a Cristian como «validado por el integrador».
+- **«arg»:** agregado a `suelo_tipos.json → usda_prefijos_gran_grupo` con su fuente propia: Moorberg y Crouse 2017, Tabla 4.3
+  (formative elements of suborders): «Presence of argillic horizon (a horizon with illuvial clay)». La implicación dice que es el
+  elemento del suborden Argids (Haplargids, Calciargids) y la raíz del prefijo «argi» (Argiustolls). Ahora todos los
+  `elementos` de `tipo_suelo_parcelas.csv` tienen entrada. Reentregado a Drive con su renglón en LEEME (tercera entrega).
+  `suelo_reglas.json` y `suelo_nutrientes_parcelas.csv` no cambian.
+- **fijacion_p y texto_en:** el cambio a texto fue solo de tipo; ningún `texto_en` cambió salvo el de Calcisols (corrección 1).
+  Revisé Andosols, Nitisols, Ferralsols, Acrisols y Vertisols: sus `texto_en` son los mismos de antes.
+- **ECOSTRESS con tu contrato:** `datos/colab/E1_ecostress_parcelas.py` escribe `ecostress_parcelas.csv` = mensual: `id, mes,
+  et_mm_dia, n_escenas` + adicionales `zona, etc_modelo_mm, razon`; los 12 meses de `hls_mensual_parcelas.csv` (2025-10 a
+  2026-09); 1,239 parcelas × 12 meses. El detalle por paso irá como crudo en `data/raw/reto/ecostress_pasos_<zona>.csv`.
+  `etc_modelo_mm` = mediana, en los mismos días despejados, de Kc (A5) × ETo de NASA POWER del día, solo con cultivo
+  clasificado y dentro del ciclo. Unidades: E1 exige `--unidad` y se detiene si los valores no cuadran; solo entrega en
+  mm/día. Si `ETdaily` viene en W/m², no lo entrego hasta saber con qué duración del día se integró (la guía dice «integrated
+  ET between sunrise and sunset»). Probado con datos sintéticos; falta el dato real.
+- **Estado de AppEEARS:** Lázaro Cárdenas iba en 71 % y Delicias–Saucillo en cola. Para bajar el resultado necesito que
+  Cristian me escriba desde el panel de Chrome (solo así puedo usar su navegador).
