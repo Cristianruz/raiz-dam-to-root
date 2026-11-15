@@ -1,0 +1,430 @@
+{
+ "type": "FeatureCollection",
+ "_responsable": "Integrante 2 (polígonos y NDVI desde Earth Engine / HLS) e Integrante 1 (ID único)",
+ "_instrucciones": "Un Feature por parcela, geometría en WGS84 (EPSG:4326). Reemplazar polígonos y series de ejemplo; poner validado=true.",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "RAIZ-P01",
+    "nombre": "Parcela piloto 1",
+    "modulo": "Módulo (por confirmar)",
+    "superficie_ha": 18,
+    "cultivo_actual": "alfalfa",
+    "alternativas": [
+     "trigo",
+     "sorgo"
+    ],
+    "ndvi": [
+     {
+      "fecha": "2024-01",
+      "ndvi": 0.52
+     },
+     {
+      "fecha": "2024-02",
+      "ndvi": 0.56
+     },
+     {
+      "fecha": "2024-03",
+      "ndvi": 0.62
+     },
+     {
+      "fecha": "2024-04",
+      "ndvi": 0.68
+     },
+     {
+      "fecha": "2024-05",
+      "ndvi": 0.72
+     },
+     {
+      "fecha": "2024-06",
+      "ndvi": 0.74
+     },
+     {
+      "fecha": "2024-07",
+      "ndvi": 0.72
+     },
+     {
+      "fecha": "2024-08",
+      "ndvi": 0.68
+     },
+     {
+      "fecha": "2024-09",
+      "ndvi": 0.62
+     },
+     {
+      "fecha": "2024-10",
+      "ndvi": 0.56
+     },
+     {
+      "fecha": "2024-11",
+      "ndvi": 0.52
+     },
+     {
+      "fecha": "2024-12",
+      "ndvi": 0.5
+     },
+     {
+      "fecha": "2025-01",
+      "ndvi": 0.52
+     },
+     {
+      "fecha": "2025-02",
+      "ndvi": 0.56
+     },
+     {
+      "fecha": "2025-03",
+      "ndvi": 0.62
+     },
+     {
+      "fecha": "2025-04",
+      "ndvi": 0.68
+     },
+     {
+      "fecha": "2025-05",
+      "ndvi": 0.72
+     },
+     {
+      "fecha": "2025-06",
+      "ndvi": 0.74
+     },
+     {
+      "fecha": "2025-07",
+      "ndvi": 0.72
+     },
+     {
+      "fecha": "2025-08",
+      "ndvi": 0.68
+     },
+     {
+      "fecha": "2025-09",
+      "ndvi": 0.62
+     },
+     {
+      "fecha": "2025-10",
+      "ndvi": 0.56
+     },
+     {
+      "fecha": "2025-11",
+      "ndvi": 0.52
+     },
+     {
+      "fecha": "2025-12",
+      "ndvi": 0.5
+     }
+    ],
+    "fuente": "EJEMPLO — polígono y NDVI ficticios",
+    "validado": false
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.507324,
+       28.203137
+      ],
+      [
+       -105.502409,
+       28.203531
+      ],
+      [
+       -105.502676,
+       28.206863
+      ],
+      [
+       -105.507591,
+       28.206469
+      ],
+      [
+       -105.507324,
+       28.203137
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "RAIZ-P02",
+    "nombre": "Parcela piloto 2",
+    "modulo": "Módulo (por confirmar)",
+    "superficie_ha": 32,
+    "cultivo_actual": "algodon",
+    "alternativas": [
+     "cacahuate",
+     "sorgo"
+    ],
+    "ndvi": [
+     {
+      "fecha": "2024-01",
+      "ndvi": 0.18
+     },
+     {
+      "fecha": "2024-02",
+      "ndvi": 0.18
+     },
+     {
+      "fecha": "2024-03",
+      "ndvi": 0.18
+     },
+     {
+      "fecha": "2024-04",
+      "ndvi": 0.18
+     },
+     {
+      "fecha": "2024-05",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2024-06",
+      "ndvi": 0.3
+     },
+     {
+      "fecha": "2024-07",
+      "ndvi": 0.55
+     },
+     {
+      "fecha": "2024-08",
+      "ndvi": 0.73
+     },
+     {
+      "fecha": "2024-09",
+      "ndvi": 0.55
+     },
+     {
+      "fecha": "2024-10",
+      "ndvi": 0.3
+     },
+     {
+      "fecha": "2024-11",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2024-12",
+      "ndvi": 0.18
+     },
+     {
+      "fecha": "2025-01",
+      "ndvi": 0.18
+     },
+     {
+      "fecha": "2025-02",
+      "ndvi": 0.18
+     },
+     {
+      "fecha": "2025-03",
+      "ndvi": 0.18
+     },
+     {
+      "fecha": "2025-04",
+      "ndvi": 0.18
+     },
+     {
+      "fecha": "2025-05",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2025-06",
+      "ndvi": 0.3
+     },
+     {
+      "fecha": "2025-07",
+      "ndvi": 0.55
+     },
+     {
+      "fecha": "2025-08",
+      "ndvi": 0.73
+     },
+     {
+      "fecha": "2025-09",
+      "ndvi": 0.55
+     },
+     {
+      "fecha": "2025-10",
+      "ndvi": 0.3
+     },
+     {
+      "fecha": "2025-11",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2025-12",
+      "ndvi": 0.18
+     }
+    ],
+    "fuente": "EJEMPLO — polígono y NDVI ficticios",
+    "validado": false
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.435393,
+       28.155939
+      ],
+      [
+       -105.42883,
+       28.15561
+      ],
+      [
+       -105.428607,
+       28.160061
+      ],
+      [
+       -105.43517,
+       28.16039
+      ],
+      [
+       -105.435393,
+       28.155939
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "id": "RAIZ-P03",
+    "nombre": "Parcela piloto 3",
+    "modulo": "Módulo (por confirmar)",
+    "superficie_ha": 12,
+    "cultivo_actual": "chile",
+    "alternativas": [
+     "sorgo",
+     "avena"
+    ],
+    "ndvi": [
+     {
+      "fecha": "2024-01",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2024-02",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2024-03",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2024-04",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2024-05",
+      "ndvi": 0.23
+     },
+     {
+      "fecha": "2024-06",
+      "ndvi": 0.38
+     },
+     {
+      "fecha": "2024-07",
+      "ndvi": 0.65
+     },
+     {
+      "fecha": "2024-08",
+      "ndvi": 0.65
+     },
+     {
+      "fecha": "2024-09",
+      "ndvi": 0.38
+     },
+     {
+      "fecha": "2024-10",
+      "ndvi": 0.23
+     },
+     {
+      "fecha": "2024-11",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2024-12",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2025-01",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2025-02",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2025-03",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2025-04",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2025-05",
+      "ndvi": 0.23
+     },
+     {
+      "fecha": "2025-06",
+      "ndvi": 0.38
+     },
+     {
+      "fecha": "2025-07",
+      "ndvi": 0.65
+     },
+     {
+      "fecha": "2025-08",
+      "ndvi": 0.65
+     },
+     {
+      "fecha": "2025-09",
+      "ndvi": 0.38
+     },
+     {
+      "fecha": "2025-10",
+      "ndvi": 0.23
+     },
+     {
+      "fecha": "2025-11",
+      "ndvi": 0.2
+     },
+     {
+      "fecha": "2025-12",
+      "ndvi": 0.2
+     }
+    ],
+    "fuente": "EJEMPLO — polígono y NDVI ficticios",
+    "validado": false
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -105.463787,
+       28.24535
+      ],
+      [
+       -105.459805,
+       28.245952
+      ],
+      [
+       -105.460213,
+       28.24865
+      ],
+      [
+       -105.464195,
+       28.248048
+      ],
+      [
+       -105.463787,
+       28.24535
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

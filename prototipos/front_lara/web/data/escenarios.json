@@ -1,0 +1,35 @@
+{
+  "_responsable": "Integrante 3 — Presa y escenarios de riego",
+  "_instrucciones": "lamina_cm es la dotación que LLEGA A LA PARCELA (después de pérdidas de conducción), confirmada con el módulo de riego. Reemplazar los valores de ejemplo y poner validado=true.",
+  "presa": "La Boquilla (Lago Toronto), Río Conchos, Chihuahua",
+  "distrito": "DR-005 Delicias",
+  "escenarios": [
+    {
+      "id": "normal",
+      "nombre": "Normal",
+      "lamina_cm": 60,
+      "condicion": "Presa por arriba de ~60% al inicio del ciclo",
+      "fuente": "EJEMPLO — reemplazar con historial de La Boquilla y dato del módulo",
+      "supuestos": "Ciclo completo de riegos autorizado.",
+      "validado": false
+    },
+    {
+      "id": "restringido",
+      "nombre": "Restringido",
+      "lamina_cm": 30,
+      "condicion": "Presa entre ~30% y 60%",
+      "fuente": "EJEMPLO — reemplazar con historial de La Boquilla y dato del módulo",
+      "supuestos": "Se autoriza aproximadamente la mitad de los riegos.",
+      "validado": false
+    },
+    {
+      "id": "critico",
+      "nombre": "Crítico",
+      "lamina_cm": 12,
+      "condicion": "Presa por debajo de ~30% (año tipo sequía)",
+      "fuente": "EJEMPLO — reemplazar con historial de La Boquilla y dato del módulo",
+      "supuestos": "Sólo riego de auxilio.",
+      "validado": false
+    }
+  ]
+}

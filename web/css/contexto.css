@@ -1,0 +1,303 @@
+/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 */
+/* web/css/contexto.css — «Regional context», «Challenge data sources» y sus gráficas (web/js/contexto.js).
+   Colores de la identidad como variables; toma --agua, --tinta, --borde… de style.css. El valor tras la
+   coma es el respaldo si style.css no está cargado (mismos códigos de la identidad, kit C1 §10).
+   Series: cinco ranuras en orden fijo (a…e). Cada una lleva además su propio trazo (continuo, rayas,
+   puntos…) y su propio marcador, y cada estado su símbolo y su texto: nada depende solo del color.
+   Los tonos de las ranuras b, d y e son pasos más oscuros de ámbar, verde y rosa para llegar a 3:1
+   sobre el fondo blanco de la tarjeta. Texto oscuro sobre fondos claros (AA).
+   Los números de este archivo son medidas de diseño, no datos. */
+
+:root {
+  --contexto-tinta: var(--tinta, #1D2329);
+  --contexto-tinta-suave: var(--tinta-suave, #4A525A);
+  --contexto-fondo: var(--blanco, #FFFFFF);
+  --contexto-arena: var(--arena, #F5EFE6);
+  --contexto-arena-osc: var(--arena-osc, #E9DFD0);
+  --contexto-borde: var(--borde, #D8CFC2);
+  --contexto-agua: var(--agua, #1F6FB2);
+  --contexto-agua-osc: var(--agua-osc, #174F80);
+  --contexto-agua-clara: var(--agua-clara, #DCEAF6);
+  --contexto-rejilla: #E6E0D6;      /* un paso fuera del fondo: la rejilla no compite con el dato */
+  --contexto-rejilla-cero: #A9A398;
+
+  /* Series (orden fijo; el color sigue a la serie, no a su posición) */
+  --contexto-serie-a: var(--agua, #1F6FB2);
+  --contexto-serie-b: #C77700;
+  --contexto-serie-c: #7E57C2;
+  --contexto-serie-d: #3F8A22;
+  --contexto-serie-e: #B04A6B;
+
+  /* Estado de un recurso: borde y fondo de la insignia (el texto siempre es oscuro) */
+  --contexto-en-uso: var(--brote, #4C9A2A);
+  --contexto-en-uso-claro: var(--brote-claro, #E3F0DC);
+  --contexto-pedido: var(--tinta-suave, #4A525A);
+  --contexto-pedido-claro: var(--arena-osc, #E9DFD0);
+  --contexto-no-aplica: var(--gris, #8E9399);
+}
+
+/* ---------- Base ---------- */
+.contexto, .contexto-recursos {
+  display: grid; gap: 14px;
+  color: var(--contexto-tinta);
+  min-width: 0;
+  line-height: 1.4;
+}
+.contexto *, .contexto-recursos * { box-sizing: border-box; min-width: 0; }
+.contexto p, .contexto-recursos p { margin: 0; }
+.contexto-titulo { font-size: 1.15rem; margin: 0; }
+.contexto-subtitulo { font-size: 1rem; margin: 0; }
+.contexto-donde { color: var(--contexto-tinta-suave); font-weight: 700; }
+
+.contexto .solo-lector, .contexto-recursos .solo-lector {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.contexto-aviso, .contexto-pendiente {
+  padding: 10px 12px; border-radius: 8px;
+  border: 1px dashed var(--contexto-pedido);
+  background: var(--contexto-pedido-claro);
+  font-size: 0.92rem;
+}
+.contexto-pendiente-simbolo { font-weight: 700; }
+.contexto-pendiente-que { font-weight: 700; }
+/* El contraste es de otra zona piloto: aviso neutro, de borde continuo (no es una entrega pendiente). */
+.contexto-pendiente--otra-zona {
+  border-style: solid; border-color: var(--contexto-borde);
+  background: var(--contexto-arena);
+}
+
+.contexto-nota {
+  padding: 10px 12px;
+  border-left: 4px solid var(--contexto-agua);
+  background: var(--contexto-agua-clara);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.92rem;
+}
+
+/* ---------- «Climate of the year» ---------- */
+.contexto-clima {
+  display: grid; gap: 12px;
+  padding: 14px;
+  background: var(--contexto-fondo);
+  border: 1px solid var(--contexto-borde); border-radius: 12px;
+}
+/* Las cifras se acomodan al ancho del contenedor (no al de la ventana): en un panel angosto la
+   lluvia ocupa el renglón entero y las otras dos comparten el siguiente. */
+.contexto-cifras { display: flex; flex-wrap: wrap; gap: 10px; }
+.contexto-cifra {
+  flex: 1 1 150px;
+  display: grid; gap: 2px; align-content: start;
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--contexto-arena);
+}
+.contexto-cifra--par { flex: 2 1 300px; }
+.contexto-cifra-lado { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.contexto-cifra-lado .contexto-cifra { padding: 4px 0 0; background: none; }
+.contexto-cifra-rotulo { font-size: 0.85rem; color: var(--contexto-tinta-suave); font-weight: 700; }
+.contexto-cifra-valor { font-size: 1.5rem; font-weight: 700; line-height: 1.15; }
+.contexto-cifra-valor small { font-size: 0.85rem; font-weight: 400; }
+.contexto-cifra-valor--vacio { font-size: 1rem; font-weight: 400; font-style: italic; color: var(--contexto-tinta-suave); }
+.contexto-cifra-pie { font-size: 0.8rem; color: var(--contexto-tinta-suave); }
+.contexto-cifra-diferencia { font-size: 0.88rem; padding-top: 6px; border-top: 1px solid var(--contexto-borde); }
+
+.contexto-rejilla-figuras {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+}
+
+/* ---------- Tarjetas de las series regionales ---------- */
+.contexto-tarjetas {
+  display: grid; gap: 14px; align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+}
+.contexto-tarjeta {
+  display: grid; gap: 10px; align-content: start;
+  padding: 14px;
+  background: var(--contexto-fondo);
+  border: 1px solid var(--contexto-borde); border-radius: 12px;
+}
+.contexto-tarjeta--pendiente { border-style: dashed; }
+.contexto-tarjeta-titulo { font-size: 1rem; margin: 0; }
+.contexto-tarjeta-nota { font-size: 0.82rem; color: var(--contexto-tinta-suave); }
+/* Advertencias de la sesión de datos (integración, etapa 3): a la vista en la tarjeta, con símbolo y texto. */
+.contexto-advertencias { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.contexto-advertencia {
+  display: flex; gap: 6px; align-items: baseline;
+  padding: 6px 10px; border-radius: 6px;
+  border-left: 3px solid var(--contexto-serie-b);
+  background: var(--contexto-arena);
+  font-size: 0.82rem; color: var(--contexto-tinta);
+}
+.contexto-advertencia-simbolo { font-weight: 700; color: var(--contexto-tinta); }
+.contexto-meta {
+  display: flex; flex-wrap: wrap; gap: 2px 14px;
+  font-size: 0.8rem; color: var(--contexto-tinta-suave);
+}
+.contexto-meta > span { overflow-wrap: anywhere; }
+/* Series de un panel con mallas distintas: un renglón por serie, con su nombre delante. */
+.contexto-meta--series { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.contexto-meta--series > li { display: flex; flex-wrap: wrap; gap: 0 10px; }
+.contexto-meta--series > li > span { overflow-wrap: anywhere; }
+.contexto-meta-serie { font-weight: 700; color: var(--contexto-tinta); }
+.contexto-fuente { flex-basis: 100%; }
+
+/* ---------- Gráficas ---------- */
+.contexto-figura { margin: 0; display: grid; gap: 6px; align-content: start; }
+.contexto-figura-titulo { font-weight: 700; font-size: 0.92rem; }
+.contexto-unidad { font-weight: 400; font-size: 0.82rem; color: var(--contexto-tinta-suave); }
+/* La gráfica se dibuja al ancho en píxeles del lienzo (contexto.js la vuelve a dibujar si cambia). */
+.contexto-lienzo { touch-action: pan-y; cursor: crosshair; max-width: 560px; }
+.contexto-svg { display: block; max-width: 100%; height: auto; }
+.contexto-svg text { font-family: inherit; }
+.contexto-eje { font-size: 11px; fill: var(--contexto-tinta-suave); font-variant-numeric: tabular-nums; }
+.contexto-rejilla { stroke: var(--contexto-rejilla); stroke-width: 1; }
+.contexto-rejilla--cero { stroke: var(--contexto-rejilla-cero); }
+
+.contexto-linea { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.contexto-linea.contexto-serie--a { stroke: var(--contexto-serie-a); }
+.contexto-linea.contexto-serie--b { stroke: var(--contexto-serie-b); stroke-dasharray: 6 4; }
+.contexto-linea.contexto-serie--c { stroke: var(--contexto-serie-c); stroke-dasharray: 1 4; }
+.contexto-linea.contexto-serie--d { stroke: var(--contexto-serie-d); stroke-dasharray: 9 3 2 3; }
+.contexto-linea.contexto-serie--e { stroke: var(--contexto-serie-e); stroke-dasharray: 3 3; }
+/* Marcador del año elegido: relleno de la serie y anillo del color del fondo (legible donde se cruzan). */
+.contexto-marca, .contexto-punto { stroke: var(--contexto-fondo); }
+.contexto-marca { stroke-width: 2; }
+.contexto-punto { stroke-width: 1; }
+.contexto-marca.contexto-serie--a, .contexto-punto.contexto-serie--a { fill: var(--contexto-serie-a); }
+.contexto-marca.contexto-serie--b, .contexto-punto.contexto-serie--b { fill: var(--contexto-serie-b); }
+.contexto-marca.contexto-serie--c, .contexto-punto.contexto-serie--c { fill: var(--contexto-serie-c); }
+.contexto-marca.contexto-serie--d, .contexto-punto.contexto-serie--d { fill: var(--contexto-serie-d); }
+.contexto-marca.contexto-serie--e, .contexto-punto.contexto-serie--e { fill: var(--contexto-serie-e); }
+
+/* Año elegido: línea, rótulo con el año y marcadores (no solo color). */
+.contexto-elegido { stroke: var(--contexto-tinta); stroke-width: 1; }
+.contexto-elegido-texto { font-size: 12px; font-weight: 700; fill: var(--contexto-tinta); }
+.contexto-cursor line { stroke: var(--contexto-tinta-suave); stroke-width: 1; stroke-dasharray: 2 2; }
+
+/* Lectura bajo la gráfica: leyenda (clave + nombre) y valores del año elegido o del punto bajo el puntero. */
+.contexto-lectura {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px;
+  min-height: 1.4em;
+  font-size: 0.85rem; font-variant-numeric: tabular-nums;
+}
+.contexto-lectura b { font-weight: 700; }
+.contexto-lectura-serie { white-space: normal; }
+.contexto-lectura-ayuda { color: var(--contexto-tinta-suave); flex-basis: 100%; font-size: 0.8rem; }
+.contexto-figura--explorando .contexto-lectura-x { text-decoration: underline dotted; }
+/* Clave de la serie: un tramo de la misma línea (mismo trazo y mismo marcador que en la gráfica). */
+.contexto-clave { display: inline-block; vertical-align: middle; margin-right: 6px; }
+
+/* ---------- Tablas (equivalente de cada gráfica, GAEZ y recursos) ---------- */
+.contexto-datos summary {
+  width: fit-content; cursor: pointer;
+  padding: 4px 2px; border-radius: 4px;
+  font-size: 0.85rem; color: var(--contexto-agua-osc); text-decoration: underline;
+}
+.contexto-datos summary:hover { background: var(--contexto-arena); }
+.contexto summary:focus-visible, .contexto-tabla-caja:focus-visible, .contexto a:focus-visible, .contexto-recursos a:focus-visible {
+  outline: 3px solid var(--contexto-agua); outline-offset: 2px;
+}
+.contexto-definiciones ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: 0.85rem; overflow-wrap: anywhere; }
+/* Fuentes completas de la sección: UNA lista plegada al final (cada texto puede ser largo y lo
+   comparten varias tarjetas). En cada tarjeta queda a la vista solo el recurso y la fecha del archivo. */
+.contexto-fuentes ul { gap: 8px; }
+.contexto-fuentes li b { font-weight: 700; }
+.contexto-tabla-caja { overflow-x: auto; }
+.contexto-datos .contexto-tabla-caja { max-height: 17rem; overflow-y: auto; margin-top: 4px; border: 1px solid var(--contexto-borde); border-radius: 8px; }
+.contexto-tabla { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.contexto-tabla caption { text-align: left; padding: 6px 8px; font-size: 0.8rem; color: var(--contexto-tinta-suave); }
+.contexto-tabla th, .contexto-tabla td {
+  padding: 5px 8px; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--contexto-borde);
+}
+.contexto-tabla thead th { background: var(--contexto-arena); font-size: 0.8rem; }
+.contexto-datos .contexto-tabla thead th { position: sticky; top: 0; }
+.contexto-datos .contexto-tabla td { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.contexto-datos .contexto-tabla td.contexto-celda-vacia { white-space: normal; font-style: italic; color: var(--contexto-tinta-suave); }
+.contexto-fila-elegida th, .contexto-fila-elegida td { background: var(--contexto-agua-clara); font-weight: 700; }
+.contexto-fila-elegida th { box-shadow: inset 4px 0 0 var(--contexto-agua); }
+/* GAEZ: tabla angosta que parte sus textos antes que salirse de la tarjeta. */
+.contexto-tabla--gaez { table-layout: fixed; }
+.contexto-tabla--gaez th, .contexto-tabla--gaez td { overflow-wrap: anywhere; }
+
+/* ---------- «Challenge data sources» ---------- */
+.contexto-recursos-resumen { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.contexto-recursos-nota { font-size: 0.88rem; color: var(--contexto-tinta-suave); }
+.contexto-estado {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  padding: 2px 10px; border-radius: 999px;
+  border: 2px solid var(--contexto-borde); background: var(--contexto-fondo);
+  font-size: 0.82rem; font-weight: 700; color: var(--contexto-tinta);
+}
+.contexto-estado b { font-weight: 700; }
+.contexto-estado--in-use { border-color: var(--contexto-en-uso); background: var(--contexto-en-uso-claro); }
+.contexto-estado--requested { border-style: dashed; border-color: var(--contexto-pedido); background: var(--contexto-pedido-claro); }
+.contexto-estado--not-applicable { border-color: var(--contexto-no-aplica); }
+.contexto-tabla--recursos tbody th { min-width: 8em; }
+.contexto-tabla--recursos .contexto-estado { white-space: nowrap; }
+.contexto-tabla--recursos td:last-child { min-width: 15em; }
+.contexto-equivalente { display: block; margin-top: 2px; font-size: 0.82rem; color: var(--contexto-tinta-suave); }
+.contexto-archivos { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.contexto-archivos code, .contexto-definiciones code { font-size: 0.8rem; overflow-wrap: anywhere; }
+.contexto-archivo-falta { color: var(--contexto-tinta-suave); }
+.contexto-archivo-falta span { font-style: italic; font-size: 0.78rem; }
+.contexto-archivos-fecha { display: block; margin-top: 2px; font-size: 0.78rem; color: var(--contexto-tinta-suave); }
+
+/* Angosto: la tabla de recursos se apila (un bloque por recurso, cada dato con su rótulo). Se decide con
+   el ancho de SU contenedor (sirve igual en un panel lateral que en el teléfono); la regla @media es el
+   respaldo para navegadores sin consultas de contenedor. */
+.contexto-recursos { container-type: inline-size; container-name: contexto-recursos; }
+@container contexto-recursos (max-width: 760px) {
+  .contexto-tabla--recursos thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .contexto-tabla--recursos, .contexto-tabla--recursos tbody, .contexto-tabla--recursos tr,
+  .contexto-tabla--recursos th, .contexto-tabla--recursos td { display: block; width: 100%; }
+  .contexto-tabla--recursos tr { border: 1px solid var(--contexto-borde); border-radius: 10px; margin-bottom: 10px; padding: 6px 0; background: var(--contexto-fondo); }
+  .contexto-tabla--recursos th, .contexto-tabla--recursos td { border-bottom: none; padding: 3px 12px; }
+  .contexto-tabla--recursos tbody th { font-size: 0.98rem; }
+  .contexto-tabla--recursos .contexto-estado { white-space: normal; border-radius: 14px; }
+  .contexto-tabla--recursos td:last-child { min-width: 0; }
+  .contexto-tabla--recursos td::before {
+    content: attr(data-rotulo);
+    display: block;
+    font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--contexto-tinta-suave);
+  }
+}
+@media (max-width: 760px) {
+  .contexto-tabla--recursos thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .contexto-tabla--recursos, .contexto-tabla--recursos tbody, .contexto-tabla--recursos tr,
+  .contexto-tabla--recursos th, .contexto-tabla--recursos td { display: block; width: 100%; }
+  .contexto-tabla--recursos tr { border: 1px solid var(--contexto-borde); border-radius: 10px; margin-bottom: 10px; padding: 6px 0; background: var(--contexto-fondo); }
+  .contexto-tabla--recursos th, .contexto-tabla--recursos td { border-bottom: none; padding: 3px 12px; }
+  .contexto-tabla--recursos tbody th { font-size: 0.98rem; }
+  .contexto-tabla--recursos .contexto-estado { white-space: normal; border-radius: 14px; }
+  .contexto-tabla--recursos td:last-child { min-width: 0; }
+  .contexto-tabla--recursos td::before {
+    content: attr(data-rotulo);
+    display: block;
+    font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--contexto-tinta-suave);
+  }
+  .contexto-clima, .contexto-tarjeta { padding: 12px; }
+}
+
+/* Movimiento reducido: este módulo no anima nada; se asegura que nada herede una transición. */
+@media (prefers-reduced-motion: reduce) {
+  .contexto *, .contexto-recursos * { transition: none !important; animation: none !important; }
+}
+
+/* Alto contraste del sistema: los trazos y las claves toman el color del texto. */
+@media (forced-colors: active) {
+  .contexto-linea, .contexto-elegido { stroke: CanvasText; }
+  .contexto-marca, .contexto-punto { fill: CanvasText; stroke: Canvas; }
+}
+
+/* Impresión: las tablas se quedan cerradas y las tarjetas no se parten. */
+@media print {
+  .contexto-tarjeta, .contexto-clima, .contexto-figura { break-inside: avoid; }
+  .contexto-lienzo { cursor: auto; }
+}

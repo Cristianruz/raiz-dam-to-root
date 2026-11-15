@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Resultado de H1 · back-test del ciclo 2026 (DR-005, La Boquilla)
 
 **H1: does not meet the preregistered criterion.** En el punto principal (14-jul-2026) el error del modelo es mayor

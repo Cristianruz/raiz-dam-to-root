@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # H1-b · Prueba nueva de la forma estacional en ciclos anteriores (escrita y subida ANTES de correrla)
 
 **Fecha y hora:** 14-nov-2026, 16:30 (hora de Chihuahua). El commit que introduce este archivo es anterior al del

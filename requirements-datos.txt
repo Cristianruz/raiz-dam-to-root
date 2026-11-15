@@ -1,0 +1,10 @@
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
+# Solo hace falta para REGENERAR las teselas de relieve del gemelo digital:
+#   pip install -r requirements-datos.txt
+#   python motor/dem_teselas.py     (escribe web/data/dem/<zona>/{z}/{x}/{y}.png y origen.json)
+#   python motor/gemelo_web.py      (vuelve a leer las teselas y escribe web/data/gemelo.json)
+# No se instala en GitHub Actions ni lo usa `python construir.py`: las teselas ya generadas se
+# versionan como archivos estáticos y el comando único solo las lee con la biblioteca estándar.
+# Versión exacta con la que se generaron (también queda anotada en web/data/dem/<zona>/origen.json).
+# numpy llega como dependencia de rasterio.
+rasterio==1.4.3

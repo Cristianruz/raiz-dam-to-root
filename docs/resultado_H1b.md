@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Resultado de H1-b · forma estacional en ciclos anteriores (1999–2024)
 
 **H1-b does not hold.** La forma estacional del modelo de demanda **no** describe la salida de La Boquilla mejor que las

@@ -1,0 +1,81 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
+ "_nota": "Generado por motor/gemelo_web.py a partir de data/params.json (bloque gemelo), web/data/dem/, web/data/parcelas.geojson y web/data/ndvi_mensual.json; nunca se edita a mano (contrato: docs/decisiones/2026-11-14_gemelo_digital.md).",
+ "terreno": {
+  "encoding": "terrarium",
+  "tileSize": 256,
+  "minzoom": 7,
+  "maxzoom": 12,
+  "zonas": {
+   "delicias_saucillo": {
+    "teselas": "data/dem/delicias_saucillo/{z}/{x}/{y}.png",
+    "bounds": [
+     -105.56,
+     28.07,
+     -105.32,
+     28.19
+    ],
+    "elev_min_m": 1150.75,
+    "elev_max_m": 1331.0,
+    "exageracion": 6
+   },
+   "lazaro_cardenas": {
+    "teselas": "data/dem/lazaro_cardenas/{z}/{x}/{y}.png",
+    "bounds": [
+     -105.66,
+     28.35,
+     -105.56,
+     28.43
+    ],
+    "elev_min_m": 1140.75,
+    "elev_max_m": 1659.25,
+    "exageracion": 2
+   }
+  },
+  "exageracion": 6,
+  "fuente": "NASADEM (NASA/NASADEM_HGT/001), 30 m, vía Google Earth Engine",
+  "rotulo": "regional, 30 m (NASADEM); vertical exaggeration applied"
+ },
+ "columnas": {
+  "metros_por_millar": 60,
+  "nota": "Column height is a visual scale, not a measurement: every thousand m³ per hectare adds the same height.",
+  "etiqueta": "Diseño"
+ },
+ "camara": {
+  "pitch": 60,
+  "bearing": -20
+ },
+ "tiempo": {
+  "anios": [
+   2016,
+   2026
+  ],
+  "intervalo_ms": 1200,
+  "destacados": {
+   "2025": {
+    "texto": "Year without dam water: the district received no dam allocation",
+    "fuente": "S9 §2 (prensa con cifras de Conagua)",
+    "etiqueta": "[P]"
+   }
+  }
+ },
+ "ndvi": {
+  "archivo": "data/ndvi_mensual.json",
+  "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) vía Google Earth Engine, proyecto iondroplet; dos zonas",
+  "meses": [
+   "2025-10",
+   "2025-11",
+   "2025-12",
+   "2026-01",
+   "2026-02",
+   "2026-03",
+   "2026-04",
+   "2026-05",
+   "2026-06",
+   "2026-07",
+   "2026-08",
+   "2026-09"
+  ]
+ },
+ "zona_inicial": "delicias_saucillo"
+}

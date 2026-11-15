@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # A8 · Contraste regional de ET (oct-2025 a sep-2026)
 
 **Rótulo:** "regional comparison; not field-level validation". Script `datos/colab/A8_et_contraste.py`; datos `et_contraste.csv`.

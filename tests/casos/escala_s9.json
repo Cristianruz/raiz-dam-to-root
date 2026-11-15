@@ -1,0 +1,16 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
+ "_nota": "Caso del ejemplo de escala (kit v4 §2.4 y K-TEST 3). Cada número se copia de la cita de S9; tests/test_escala.py comprueba que la cita está en S9 y que los números del caso salen de ella. Las láminas son de INIFAP [V]; la herramienta usa su propio cálculo.",
+ "fuente": "S9 §5 (láminas INIFAP [V])",
+ "documento": "docs/sintesis/S9_proyecto_definitivo.md",
+ "cita": "10 ha con 3.5 millares/ha reciben 35 millares, que alcanzan para 2.0 ha de alfalfa (17.5), 5.1 ha de algodón (6.8) o 6.4 ha de maíz forrajero (5.5).",
+ "area_ha": 10,
+ "dotacion_millares_ha": 3.5,
+ "total_millares": 35,
+ "decimales_publicados": 1,
+ "casos": [
+  {"cultivo": "alfalfa", "lamina_millares_ha": 17.5, "hectareas_esperadas": 2.0},
+  {"cultivo": "algodon", "lamina_millares_ha": 6.8, "hectareas_esperadas": 5.1},
+  {"cultivo": "maiz_forrajero", "lamina_millares_ha": 5.5, "hectareas_esperadas": 6.4}
+ ]
+}

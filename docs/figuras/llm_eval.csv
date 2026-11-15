@@ -1,0 +1,36 @@
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
+# Set dorado del verificador de cifras (kit v4 C3 paso 5; K-TEST 6; S9 §6 prueba 4). Generado por motor/verificador.py (generar_reporte_eval); no se edita a mano.
+# casos correctos: 30 de 30 (100.0 %)
+# cifras alteradas: 0 de 71 números en los casos aprobados (0.0 %; meta 0 %)
+# uso de plantilla: 30 de 30 (100.0 %); no hay llave de API de LLM: todos los textos son plantillas escritas a mano
+caso,esperado,obtenido,correcto,motivo
+L01,pasa,pasa,sí,
+L02,pasa,pasa,sí,
+L03,pasa,pasa,sí,
+L04,pasa,pasa,sí,
+L05,pasa,pasa,sí,
+L06,pasa,pasa,sí,
+L07,pasa,pasa,sí,
+L08,pasa,pasa,sí,
+L09,pasa,pasa,sí,
+L10,pasa,pasa,sí,
+L11,pasa,pasa,sí,
+L12,pasa,pasa,sí,
+L13,pasa,pasa,sí,
+L14,pasa,pasa,sí,
+L15,pasa,pasa,sí,
+L16,pasa,pasa,sí,
+L17,pasa,pasa,sí,
+L18,pasa,pasa,sí,
+L19,pasa,pasa,sí,
+L20,pasa,pasa,sí,
+L21,pasa,pasa,sí,
+L22,pasa,pasa,sí,
+L23,pasa,pasa,sí,
+L24,pasa,pasa,sí,
+L25,pasa,pasa,sí,
+T01,falla,falla,sí,cifra_escrita · beneficios: número escrito fuera de los marcadores: «12»
+T02,falla,falla,sí,cifra_escrita · por_que: número escrito fuera de los marcadores: «3.5»
+T03,falla,falla,sí,marcador_inexistente · por_que: {{f9}} no está en «valores» ni en los dinámicos
+T04,falla,falla,sí,lenguaje_prohibido · por_que: palabra prohibida: «first» | lenguaje_prohibido · beneficios: palabra prohibida: «only» | lenguaje_prohibido · beneficios: promete ahorros: «saves»
+T05,falla,falla,sí,cita_no_permitida · evidencia: «AgroMarket Seeds catalog» no está en la lista de fuentes permitidas

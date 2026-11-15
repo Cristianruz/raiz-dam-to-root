@@ -1,0 +1,44 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
+ "fuente": "data/processed/relieve_meta*.json (A9, NASADEM vía Earth Engine)",
+ "zonas": {
+  "delicias_saucillo": {
+   "rotulo": "regional, 30 m (NASADEM); not field drainage design",
+   "umbral_ruta_ha": 50.0,
+   "umbral_ruta_etiqueta": "assumption [S]",
+   "tormenta": {
+    "mm": 20.2,
+    "definicion": "95th percentile of days with rain >= 1 mm",
+    "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), mean over the pilot area rectangle",
+    "periodo": "2001-01-01 to 2026-11-13"
+   },
+   "rutas_depresiones": {
+    "prof_min_m": 3.0,
+    "etiqueta": "assumption [S]",
+    "celdas_de_ruta_omitidas": 2931,
+    "retazos_omitidos": 339,
+    "retazo_min_celdas": 10,
+    "nota": "No runoff path is drawn inside closed depressions of the elevation model that are this deep or deeper, nor on the short stretches left between two of them: there the 30 m model cannot tell where water leaves."
+   }
+  },
+  "lazaro_cardenas": {
+   "rotulo": "regional, 30 m (NASADEM); not field drainage design",
+   "umbral_ruta_ha": 50.0,
+   "umbral_ruta_etiqueta": "assumption [S]",
+   "tormenta": {
+    "mm": 20.7,
+    "definicion": "95th percentile of days with rain >= 1 mm",
+    "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07), mean over the pilot area rectangle",
+    "periodo": "2001-01-01 to 2026-11-13"
+   },
+   "rutas_depresiones": {
+    "prof_min_m": 3.0,
+    "etiqueta": "assumption [S]",
+    "celdas_de_ruta_omitidas": 384,
+    "retazos_omitidos": 49,
+    "retazo_min_celdas": 10,
+    "nota": "No runoff path is drawn inside closed depressions of the elevation model that are this deep or deeper, nor on the short stretches left between two of them: there the 30 m model cannot tell where water leaves."
+   }
+  }
+ }
+}

@@ -1,0 +1,22 @@
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
+# Revisión semanal de las acciones de GitHub y de requirements.txt.
+# Cada ecosistema se agrupa en un solo pull request para no llenar el repo durante el evento.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      acciones:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      python:
+        patterns:
+          - "*"

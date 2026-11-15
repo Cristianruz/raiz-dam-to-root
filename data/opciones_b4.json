@@ -1,0 +1,39 @@
+{
+  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
+  "_nota": "Opciones por cultivo actual para el cubo (kit B4, paso 1). DISEÑO PROVISIONAL del integrador [S] mientras P5 entrega B3 (rotaciones del maestro §5.2 y filtros duros): ACTUAL + 2 alternativas; en alfalfa establecida se añade el corte de riego en verano. Las láminas NO están aquí: salen de rotaciones.json (A5) o, si la rotación no existe, de demanda_cultivos.csv.",
+  "etiqueta": "Diseño [S]",
+  "actual": {
+    "alfalfa": "alfalfa",
+    "nogal": "nogal",
+    "chile": "chile",
+    "algodon": "algodon",
+    "maiz_forrajero": "maiz_forrajero",
+    "sorgo": "sorgo",
+    "cereal_invierno": "cereal_invierno",
+    "barbecho": "descanso",
+    "forraje_verano": "maiz_forrajero"
+  },
+  "alternativas": {
+    "alfalfa": ["alfalfa_corte_verano", "algodon", "maiz_forrajero"],
+    "nogal": ["algodon", "descanso"],
+    "chile": ["algodon", "maiz_forrajero"],
+    "algodon": ["chile", "maiz_forrajero"],
+    "maiz_forrajero": ["sorgo", "algodon"],
+    "sorgo": ["maiz_forrajero", "algodon"],
+    "cereal_invierno": ["avena_maiz", "descanso"],
+    "barbecho": ["maiz_forrajero", "sorgo"],
+    "forraje_verano": ["sorgo", "algodon"]
+  },
+  "nombres_en": {
+    "alfalfa": "Alfalfa",
+    "alfalfa_corte_verano": "Alfalfa with a summer irrigation cut",
+    "nogal": "Pecan orchard",
+    "algodon": "Cotton",
+    "chile": "Chile pepper",
+    "maiz_forrajero": "Forage maize",
+    "sorgo": "Forage sorghum",
+    "avena_maiz": "Oats (winter) + forage maize (summer)",
+    "cereal_invierno": "Winter cereal",
+    "descanso": "Do not plant / standing stubble"
+  }
+}

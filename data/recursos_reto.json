@@ -1,0 +1,309 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
+ "_nota": "Bases de datos del reto y su papel en ROOT. Fuente: docs/decisiones/2026-11-14_recursos_del_reto.md (tabla «Papel de cada recurso», un renglón por entrada) y docs/referencias/recursos_reto.md (lista oficial). Lo lee motor/contexto_web.py para escribir web/data/contexto.json: el ESTADO de cada recurso (in_use, requested, not_applicable) no se escribe aquí, se calcula con lo que de verdad hay en data/processed. Textos en inglés porque son los que muestra la página; sin cifras de datos (los dígitos que hay son parte del nombre de un producto). «entregas»: nombres base de los archivos de data/processed que sustentan el recurso (los de un archivo por zona llevan además el sufijo «_<zona>», que el motor agrega). «fuente_contexto»: valor de la columna «fuente» de contexto_regional.csv que corresponde al recurso (el recurso cuenta como entregado solo si el archivo trae filas suyas con valor). «tarjetas»: cómo agrupa la página las series de contexto_regional.csv (clave «fuente.variable» del contrato). «contraste» (tarjeta de evapotranspiración): columnas de et_contraste.csv, series regionales que se dibujan junto a ellas en la zona del contraste, y «recurso», el id del recurso de esta lista que lo sustenta. «unidades»: cómo se muestra en inglés cada unidad del contrato. «advertencias» (opcional, en cada tarjeta): límites que la sesión de datos anotó en sus entregas (líneas de LEEME) y que la página escribe A LA VISTA en la tarjeta, cada uno con su id y, si es de una sola fuente, «fuente_id»; texto fijo en inglés, sin cifras de datos (las cifras, como la malla de GRACE, salen de contexto.json).",
+ "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
+ "recursos": [
+  {
+   "id": "hls",
+   "nombre": "Landsat and Sentinel-2 (HLS)",
+   "organismo": "NASA, USGS and ESA (Copernicus)",
+   "papel": "Monthly greenness of each field and the field memory, year by year",
+   "entregas": ["hls_mensual_parcelas.csv", "memoria_parcelas.csv"],
+   "aplica": true
+  },
+  {
+   "id": "power",
+   "nombre": "NASA POWER",
+   "organismo": "NASA",
+   "papel": "Daily weather and the water each crop asks for (FAO crop-coefficient method)",
+   "entregas": ["eto_diaria.csv"],
+   "aplica": true
+  },
+  {
+   "id": "power_heladas",
+   "nombre": "NASA POWER (frost dates)",
+   "organismo": "NASA",
+   "papel": "Frost risk by sowing date",
+   "entregas": ["heladas.json"],
+   "aplica": true
+  },
+  {
+   "id": "nasadem",
+   "nombre": "SRTM / NASADEM",
+   "organismo": "NASA",
+   "papel": "Terrain relief, runoff routes and the storm simulation",
+   "entregas": ["nasadem_zona_piloto.tif", "relieve_parcelas.csv", "relieve_rutas.geojson", "relieve_meta.json"],
+   "aplica": true
+  },
+  {
+   "id": "imerg",
+   "nombre": "GPM IMERG",
+   "organismo": "NASA and JAXA",
+   "papel": "Daily rainfall and the design storm",
+   "entregas": ["imerg_diaria.csv"],
+   "aplica": true
+  },
+  {
+   "id": "viirs_ssebop",
+   "nombre": "VIIRS (SSEBop)",
+   "organismo": "NASA and NOAA (VIIRS); USGS (SSEBop)",
+   "papel": "Regional contrast of evapotranspiration",
+   "entregas": ["et_contraste.csv"],
+   "aplica": true
+  },
+  {
+   "id": "smap",
+   "nombre": "SMAP",
+   "organismo": "NASA",
+   "papel": "Observed state: soil moisture of the region, month by month",
+   "entregas": ["contexto_regional.csv"],
+   "fuente_contexto": "smap",
+   "aplica": true
+  },
+  {
+   "id": "modis",
+   "nombre": "MODIS",
+   "organismo": "NASA",
+   "papel": "Greenness of the area before the field-scale record starts; a second evapotranspiration contrast; land surface temperature",
+   "entregas": ["contexto_regional.csv"],
+   "fuente_contexto": "modis",
+   "aplica": true
+  },
+  {
+   "id": "grace",
+   "nombre": "GRACE / GRACE-FO",
+   "organismo": "NASA with the German centers DLR and GFZ",
+   "papel": "Observed state: water stored in the basin (surface, soil and aquifer together), month by month",
+   "entregas": ["contexto_regional.csv"],
+   "fuente_contexto": "grace",
+   "aplica": true
+  },
+  {
+   "id": "gldas",
+   "nombre": "GLDAS",
+   "organismo": "NASA",
+   "papel": "A third evapotranspiration contrast and root-zone moisture from a land surface model",
+   "entregas": ["contexto_regional.csv"],
+   "fuente_contexto": "gldas",
+   "aplica": true
+  },
+  {
+   "id": "nldas",
+   "nombre": "NLDAS",
+   "organismo": "NASA and NOAA",
+   "papel": "A second climate source to bound the uncertainty of NASA POWER (rainfall and potential evaporation)",
+   "entregas": ["contexto_regional.csv"],
+   "fuente_contexto": "nldas",
+   "aplica": true
+  },
+  {
+   "id": "era5_land",
+   "nombre": "ERA5 (ERA5-Land)",
+   "organismo": "ECMWF, Copernicus Climate Change Service (listed under ESA on the challenge page)",
+   "papel": "A second source of minimum temperature and frost days",
+   "entregas": ["contexto_regional.csv"],
+   "fuente_contexto": "era5_land",
+   "aplica": true
+  },
+  {
+   "id": "gedi",
+   "nombre": "GEDI",
+   "organismo": "NASA",
+   "papel": "Evidence per field: laser height reading that tells an orchard from a low crop (not a measured crop height)",
+   "entregas": ["gedi_parcelas.csv"],
+   "aplica": true
+  },
+  {
+   "id": "ecostress",
+   "nombre": "ECOSTRESS",
+   "organismo": "NASA",
+   "papel": "Field-scale contrast of evapotranspiration (the other contrasts are regional)",
+   "entregas": ["ecostress_parcelas.csv"],
+   "aplica": true
+  },
+  {
+   "id": "gaez",
+   "nombre": "GAEZ (FAO)",
+   "organismo": "FAO and IIASA",
+   "papel": "Regional evidence: agro-climatic suitability by crop",
+   "entregas": ["gaez_zona.csv"],
+   "aplica": true
+  },
+  {
+   "id": "openet",
+   "nombre": "OpenET",
+   "organismo": "OpenET consortium (with NASA and USGS)",
+   "papel": null,
+   "entregas": [],
+   "aplica": false,
+   "motivo_no_aplica": "It does not cover Mexico",
+   "equivalente_local": "SSEBop on VIIRS, used here as the regional evapotranspiration contrast"
+  },
+  {
+   "id": "recursos_eeuu",
+   "nombre": "USDA, NRCS, CDL, NAIP, NLCD, PRISM, NWIS, CoCoRaHS, AMS, NASS, LANDFIRE",
+   "organismo": "United States agencies and networks",
+   "papel": null,
+   "entregas": [],
+   "aplica": false,
+   "motivo_no_aplica": "They cover the United States, not Mexico",
+   "equivalente_local": "SIAP (crop statistics), SIH/Conagua (dams) and SDR Chihuahua"
+  }
+ ],
+ "unidades": {
+  "m3/m3": {"en": "m³/m³"},
+  "adimensional": {"en": ""},
+  "mm/mes": {"en": "mm/month", "anual_en": "mm/year"},
+  "°C": {"en": "°C"},
+  "cm": {"en": "cm"},
+  "kg/m2": {"en": "kg/m²"},
+  "dias": {"en": "days/month", "anual_en": "days/year"}
+ },
+ "tarjetas": [
+  {
+   "id": "humedad_suelo",
+   "titulo": "Soil moisture",
+   "recursos": ["smap", "gldas"],
+   "nota": "A satellite radiometer (SMAP) and a land surface model (GLDAS). Regional grid cells, not field probes.",
+   "paneles": [
+    {
+     "titulo": "SMAP",
+     "series": [
+      {"clave": "smap.humedad_superficial", "etiqueta": "Surface layer"},
+      {"clave": "smap.humedad_raiz", "etiqueta": "Root zone"}
+     ]
+    },
+    {
+     "titulo": "GLDAS (model)",
+     "series": [
+      {"clave": "gldas.humedad_raiz", "etiqueta": "Root zone"}
+     ]
+    }
+   ]
+  },
+  {
+   "id": "agua_almacenada",
+   "titulo": "Water stored in the basin",
+   "recursos": ["grace"],
+   "nota": "GRACE measures all the water stored (surface, soil and aquifer together) at basin scale. It does not separate the aquifer or the irrigation district.",
+   "advertencias": [
+    {"id": "serie_de_cuenca", "fuente_id": "grace", "texto": "GRACE is a basin series: one series for both pilot areas, the same in each. Its product grid is finer than the mascons it is built on, so the real resolution is the mascon's."}
+   ],
+   "paneles": [
+    {
+     "titulo": "GRACE / GRACE-FO",
+     "series": [
+      {"clave": "grace.agua_almacenada_anomalia", "etiqueta": "Water storage anomaly"}
+     ]
+    }
+   ]
+  },
+  {
+   "id": "verdor",
+   "titulo": "Greenness of the area, long record",
+   "recursos": ["modis"],
+   "nota": "Mean greenness of the whole area. The field-by-field record comes from HLS.",
+   "paneles": [
+    {
+     "titulo": "MODIS",
+     "series": [
+      {"clave": "modis.ndvi", "etiqueta": "NDVI"}
+     ]
+    }
+   ]
+  },
+  {
+   "id": "evapotranspiracion",
+   "titulo": "Evapotranspiration",
+   "recursos": ["modis", "gldas", "viirs_ssebop"],
+   "nota": "Independent estimates of evapotranspiration at regional scale.",
+   "advertencias": [
+    {"id": "comparacion", "texto": "MODIS, GLDAS and SSEBop: a comparison, not validation. None of them measures the water of one field, and none changes the water need the page computes."}
+   ],
+   "paneles": [
+    {
+     "titulo": "MODIS and GLDAS",
+     "series": [
+      {"clave": "modis.et", "etiqueta": "MODIS"},
+      {"clave": "gldas.et", "etiqueta": "GLDAS (model)"}
+     ]
+    }
+   ],
+   "contraste": {
+    "titulo": "Monthly contrast with the modeled demand",
+    "nota": "Modeled crop demand and SSEBop cover the rectangle named in their source. MODIS and GLDAS are means over the whole pilot area. The two areas can differ.",
+    "recurso": "viirs_ssebop",
+    "unidad_en": "mm/month",
+    "columnas": {
+     "et_modelo_mm": "Modeled crop demand (FAO method with NASA POWER)",
+     "et_ssebop_mm": "SSEBop on VIIRS",
+     "et_wapor_mm": "WaPOR"
+    },
+    "series_regionales": [
+     {"clave": "modis.et", "etiqueta": "MODIS"},
+     {"clave": "gldas.et", "etiqueta": "GLDAS (model)"}
+    ]
+   }
+  },
+  {
+   "id": "segundo_clima",
+   "titulo": "Second climate source",
+   "recursos": ["nldas"],
+   "nota": "A second source next to NASA POWER, to bound its uncertainty.",
+   "advertencias": [
+    {"id": "no_es_eto", "fuente_id": "nldas", "texto": "NLDAS potential evaporation is not the FAO-56 reference evapotranspiration (ETo) of NASA POWER: it is another quantity, so the two are not compared value by value."}
+   ],
+   "paneles": [
+    {
+     "titulo": "NLDAS rainfall",
+     "series": [
+      {"clave": "nldas.lluvia", "etiqueta": "Rainfall"}
+     ]
+    },
+    {
+     "titulo": "NLDAS potential evaporation",
+     "series": [
+      {"clave": "nldas.evaporacion_potencial", "etiqueta": "Potential evaporation"}
+     ]
+    }
+   ]
+  },
+  {
+   "id": "temperatura_minima",
+   "titulo": "Minimum temperature and frost days",
+   "recursos": ["era5_land"],
+   "nota": "A second source next to NASA POWER, with the same definition of a frost day.",
+   "advertencias": [
+    {"id": "no_nasa", "fuente_id": "era5_land", "texto": "ERA5-Land is from ECMWF and the Copernicus Climate Change Service, not from NASA."}
+   ],
+   "paneles": [
+    {
+     "titulo": "ERA5-Land minimum temperature",
+     "series": [
+      {"clave": "era5_land.tmin_media", "etiqueta": "Mean daily minimum"}
+     ]
+    },
+    {
+     "titulo": "ERA5-Land frost days",
+     "series": [
+      {"clave": "era5_land.dias_helada", "etiqueta": "Frost days"}
+     ]
+    }
+   ]
+  },
+  {
+   "id": "temperatura_superficie",
+   "titulo": "Daytime land surface temperature",
+   "recursos": ["modis"],
+   "nota": "Temperature of the land surface seen from the satellite, not air temperature.",
+   "paneles": [
+    {
+     "titulo": "MODIS",
+     "series": [
+      {"clave": "modis.temp_superficie_dia", "etiqueta": "Land surface, daytime"}
+     ]
+    }
+   ]
+  }
+ ]
+}

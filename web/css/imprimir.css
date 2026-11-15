@@ -1,0 +1,220 @@
+/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 */
+/* web/css/imprimir.css — Ficha imprimible (kit C4, parte B; web/js/mensaje.js → imprimirFicha).
+   Una sola hoja (carta o A4): encabezado, memoria, tarjetas con sus tres renglones, La gota estática,
+   dotación y lluvia elegidas, fecha, fuentes y aviso de juicio local. Se ocultan controles y mapa.
+   Sin segundo documento: es la misma página con estilos de impresión.
+   Solo actúa con la ficha abierta (o con la clase .imprimir-ficha que pone el botón): si no hay ficha,
+   la página se imprime como siempre. :where() deja la regla en pie aunque el navegador no conozca :has().
+   Los números de este archivo son medidas de diseño, no datos. */
+
+/* En pantalla, lo que agrega imprimirFicha() (dotación, fecha, fuentes) no se ve. */
+@media screen {
+  .solo-impresion { display: none !important; }
+}
+
+@media print {
+  @page { margin: 10mm; }
+
+  :where(html.imprimir-ficha, html:has(#ficha:not([hidden]))) {
+    background: #FFFFFF !important;
+    font-size: 8pt;
+  }
+  :where(html.imprimir-ficha, html:has(#ficha:not([hidden]))) body {
+    background: #FFFFFF !important;
+    font-size: 8pt;
+    line-height: 1.25;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Fuera: controles, mapa, panel, enlaces de salto y todo lo que no sea la marca o la ficha */
+  :where(html.imprimir-ficha, html:has(#ficha:not([hidden]))) body > :not(#marca):not(#ficha) {
+    display: none !important;
+  }
+
+  /* Marca: una línea arriba (con el aviso de datos simulados, si lo hay) */
+  :where(html.imprimir-ficha, html:has(#ficha:not([hidden]))) #marca {
+    position: static !important;
+    padding: 0 0 1.5mm !important;
+    margin: 0 0 2mm !important;
+    border-bottom: 0.4mm solid var(--agua, #1F6FB2);
+    font-size: 8pt;
+    background: none !important;
+  }
+
+  /* La ficha deja de ser un panel flotante: fluye en la hoja */
+  #ficha {
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    animation: none !important;
+    background: #FFFFFF !important;
+    font-size: 8pt;
+    line-height: 1.25;
+  }
+  #ficha *, #ficha *::before, #ficha *::after {
+    animation: none !important;
+    transition: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #ficha .ficha-cabeza {
+    position: static !important;
+    padding: 0 0 1mm !important;
+    border: none !important;
+  }
+  #ficha .ficha-cabeza h2 { font-size: 12pt; }
+  /* Separación entre bloques: 0.9 mm deja sitio a la aptitud de suelo y a la lámina local en una carta. */
+  #ficha .ficha-cuerpo { padding: 0 !important; gap: 0.9mm !important; }
+  #ficha .ficha-cuerpo h3 { font-size: 9pt; margin-bottom: 1mm; }
+  #ficha p { margin: 0; }
+
+  /* Controles y partes de pantalla: fuera del papel */
+  #ficha button,
+  #ficha select,
+  #ficha input,
+  #ficha .boton-cerrar,
+  #ficha .gota-controles,
+  #ficha .porque,
+  #ficha .glosario,
+  #ficha .wa-maqueta,
+  #ficha .no-imprimir {
+    display: none !important;
+  }
+
+  /* Encabezado de la ficha */
+  #ficha .ficha-encabezado { gap: 0.6mm; }
+  #ficha .ficha-cultivo { font-size: 10pt; }
+  #ficha .chip { font-size: 7.5pt; padding: 0 2mm; border-width: 0.3mm; }
+
+  /* Lo que agrega imprimirFicha(): dotación, lluvia, fecha y zona */
+  #ficha .impresion-datos {
+    border: 0.3mm solid var(--borde, #D8CFC2);
+    border-radius: 1.5mm;
+    padding: 1.2mm 2mm;
+  }
+  #ficha .impresion-titulo { font-size: 8pt !important; margin: 0 0 0.6mm !important; }
+  #ficha .impresion-lista {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3mm 5mm;
+    font-size: 7.5pt;
+  }
+  #ficha .impresion-lista > div { display: flex; gap: 1.2mm; min-width: 0; }
+  #ficha .impresion-lista > div:first-child { flex-basis: 100%; }
+  #ficha .impresion-lista dt { font-weight: 700; white-space: nowrap; }
+  #ficha .impresion-lista dt::after { content: ":"; }
+  #ficha .impresion-lista dd { margin: 0; min-width: 0; }
+  #ficha .impresion-detalle { color: var(--tinta-suave, #4A525A); font-size: 6.5pt; }
+
+  /* Memoria de la parcela */
+  #ficha .memoria { break-inside: avoid; }
+  #ficha .franja { gap: 0.5mm; }
+  #ficha .celda .caja { height: 3.8mm; font-size: 6.5pt; border-radius: 0.8mm; }
+  #ficha .celda .anio { font-size: 6pt; }
+  #ficha .leyenda-memoria { margin-top: 1mm; gap: 0.5mm 3mm; font-size: 6.5pt; }
+  #ficha .leyenda-memoria .muestra { width: 3mm; height: 3mm; font-size: 5.5pt; }
+  #ficha .nota-fija { font-size: 6.5pt; margin-top: 0.5mm; }
+
+  /* Tarjetas: todas en una fila (actual + alternativas) */
+  #ficha .tarjetas {
+    display: flex !important;
+    gap: 2mm;
+    align-items: stretch;
+  }
+  #ficha .tarjeta {
+    flex: 1 1 0;
+    min-width: 0;
+    box-shadow: none !important;
+    border: 0.3mm solid var(--borde, #D8CFC2);
+    border-radius: 1.5mm;
+    break-inside: avoid;
+  }
+  #ficha .tarjeta-cabeza { padding: 1mm 1.5mm; }
+  #ficha .tarjeta-cabeza h4 { font-size: 8pt; }
+  #ficha .insignia-actual { font-size: 6pt; padding: 0 1mm; margin-bottom: 0.5mm; }
+  #ficha .renglon { padding: 0.8mm 1.4mm; gap: 1.2mm; }
+  /* Dinero: título y dato en una sola línea */
+  #ficha .renglon-dinero > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 1.5mm; }
+  #ficha .renglon h5 { font-size: 7.5pt; gap: 0.5mm 1.5mm; }
+  #ficha .renglon h5 .sem-texto { font-size: 7pt; }
+  #ficha .renglon p { font-size: 6.8pt; margin-top: 0.2mm; line-height: 1.2; }
+  #ficha .sem-circulo { width: 3.6mm; height: 3.6mm; font-size: 6pt; border-width: 0.3mm; }
+  #ficha .lamina strong { font-size: 8.5pt; }
+  #ficha .alcanza { padding: 0.5mm 1mm; margin-top: 0.6mm !important; }
+  #ficha .barra-banda { height: 2.6mm; margin: 0.8mm 0 0.6mm; }
+  #ficha .barra-banda .marca-d { top: -0.5mm; bottom: -0.5mm; } /* que no tape la leyenda de abajo */
+  #ficha .leyenda-banda { font-size: 5.5pt; gap: 0 2mm; line-height: 1.15; }
+  #ficha .meses { padding: 0.8mm 1.5mm; }
+  #ficha .meses-titulo { font-size: 6.5pt; margin-bottom: 0.4mm; }
+  #ficha .mes .caja { height: 2mm; }
+  #ficha .mes .ini { font-size: 5pt; }
+  #ficha .meses-leyenda { font-size: 6pt; margin-top: 0.4mm; gap: 2mm; }
+  /* La leyenda del calendario (cultivo / suelo desnudo) basta una vez: en la tarjeta de la izquierda. */
+  #ficha .tarjeta:not(:first-child) .meses-leyenda { display: none; }
+  #ficha .filtros { padding: 0.8mm 1.5mm; font-size: 6pt; gap: 0.2mm; line-height: 1.15; }
+  /* En papel cada filtro va con su estado y su texto; la fuente larga se lee en la ficha en línea. */
+  #ficha .filtros .fuente { display: none; }
+  /* En papel solo los filtros que piden atención (aviso o revisión local); los aprobados, en línea. */
+  /* En papel los filtros van como un resumen de una línea (cuántos piden revisión local, avisan o pasan);
+     el texto de cada uno se lee en la ficha en línea. */
+  #ficha .filtros li[data-estado] { display: none !important; }
+  #ficha .filtros li.filtros-resumen { display: block !important; }
+  #ficha .advertencia { margin: 0.6mm 1.2mm; padding: 0.5mm 1mm; font-size: 6pt; line-height: 1.15; }
+  #ficha .nota-abstenida { padding: 1mm 2mm; }
+
+  /* La gota, estática */
+  #ficha .gota {
+    break-inside: avoid;
+    padding: 1.5mm 2mm;
+    background: none !important;
+    border: 0.3mm solid var(--borde, #D8CFC2);
+    border-radius: 1.5mm;
+  }
+  #ficha .gota > p { font-size: 7pt; line-height: 1.2; }
+  #ficha .impresion-gota { font-size: 7pt; margin: 0 0 1mm; }
+  #ficha .gota-cifras { margin: 0.5mm 0; gap: 0.5mm 6mm; }
+  #ficha .gota-cifra { font-size: 10pt; }
+  #ficha .gota-cifra small { font-size: 6.5pt; }
+  #ficha .gota-filas { gap: 0.7mm; }
+  #ficha .gota-fila { grid-template-columns: 28mm minmax(0, 1fr) !important; gap: 1.5mm !important; }
+  #ficha .gota-fila .rotulo { font-size: 7pt; }
+  #ficha .gota-pista { height: 3mm; }
+  /* Si La gota llega como Sankey en SVG: que no pase de una franja (escala con su viewBox). */
+  #ficha .gota svg { max-width: 100%; max-height: 36mm; height: auto; }
+  #ficha .gota-leyenda {
+    margin-top: 1mm;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.3mm 4mm;
+    font-size: 6.5pt;
+  }
+  #ficha .gota-leyenda .muestra { width: 3mm; height: 3mm; }
+  #ficha .gota-nota, #ficha .gota-sin-goteo, #ficha .gota-alerta { font-size: 7pt; margin-top: 0.8mm; padding: 0.5mm 1.2mm; }
+  #ficha .gota .fuente { font-size: 6pt; line-height: 1.15; margin-top: 0.5mm; }
+  /* Rótulo de las eficiencias del goteo y nota de la cota superior: compactos en papel (solo con una variante de goteo). */
+  #ficha .gota-mod-etiqueta, #ficha .gota-mod-cota { font-size: 6pt; line-height: 1.15; margin: 0.4mm 0; padding: 0.3mm 1mm; }
+
+  /* Aviso de juicio local y fuentes, al pie */
+  #ficha .aviso-juicio { font-size: 8pt; padding: 1mm 2mm; break-inside: avoid; }
+  #ficha .impresion-fuentes { break-inside: avoid; }
+  #ficha .impresion-fuentes-lista {
+    margin: 0;
+    padding-left: 3.5mm;
+    columns: 4;
+    column-gap: 4mm;
+    font-size: 6pt;
+    line-height: 1.15;
+  }
+  #ficha .impresion-fuentes-lista li { break-inside: avoid; margin-bottom: 0.3mm; }
+  #ficha .impresion-fuentes .aviso-juicio { margin-top: 1.2mm; }
+  #ficha .fuente { font-size: 6.5pt; }
+
+  /* Enlaces: sin subrayado ni URL añadida */
+  #ficha a { color: inherit; text-decoration: none; }
+}

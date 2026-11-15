@@ -1,0 +1,100 @@
+{
+ "ultima_primavera": {
+  "p10": "01-30",
+  "p50": "02-22",
+  "p90": "03-10",
+  "dia_del_anio": {
+   "p10": 30.1,
+   "p50": 53.0,
+   "p90": 69.0
+  },
+  "anios_con_helada": 42,
+  "anios_sin_helada": 0
+ },
+ "primera_otono": {
+  "p10": "11-14",
+  "p50": "11-30",
+  "p90": "12-17",
+  "dia_del_anio": {
+   "p10": 318.5,
+   "p50": 334.0,
+   "p90": 351.0
+  },
+  "anios_con_helada": 36,
+  "anios_sin_helada": 6
+ },
+ "prob_helada_despues_de": {
+  "02-01": 0.857,
+  "02-08": 0.738,
+  "02-15": 0.548,
+  "02-22": 0.524,
+  "03-01": 0.381,
+  "03-08": 0.167,
+  "03-15": 0.095,
+  "03-22": 0.095,
+  "03-29": 0.095,
+  "04-05": 0.0,
+  "04-12": 0.0
+ },
+ "anios": {
+  "primero": 1984,
+  "ultimo": 2025,
+  "n": 42
+ },
+ "definicion": {
+  "helada": "Tmin <= 0 °C",
+  "ultima_primavera": "last frost day, Jan 1 – Jun 30",
+  "primera_otono": "first frost day, Jul 1 – Dec 31",
+  "prob_helada_despues_de": "share of complete years with at least one frost from that date (included) to Jun 30",
+  "percentiles": "of the day of year, over the years with frost in that half-year"
+ },
+ "estacion_smn": "not run: no station file in data/raw/smn/ (kit A2, step 3)",
+ "nota": "NASA POWER is a regional grid cell (MERRA-2, about 0.5° x 0.625°), not a weather station; local frost can be more frequent.",
+ "fuente": "NASA POWER Daily API (community=AG), T2M_MIN, 1984–2025 (42 complete years)",
+ "zonas": {
+  "lazaro_cardenas": {
+   "ultima_primavera": {
+    "p10": "01-28",
+    "p50": "02-22",
+    "p90": "03-20",
+    "dia_del_anio": {
+     "p10": 28.2,
+     "p50": 53.0,
+     "p90": 79.2
+    },
+    "anios_con_helada": 42,
+    "anios_sin_helada": 0
+   },
+   "primera_otono": {
+    "p10": "11-12",
+    "p50": "11-30",
+    "p90": "12-17",
+    "dia_del_anio": {
+     "p10": 316.1,
+     "p50": 333.5,
+     "p90": 351.3
+    },
+    "anios_con_helada": 38,
+    "anios_sin_helada": 4
+   },
+   "prob_helada_despues_de": {
+    "02-01": 0.833,
+    "02-08": 0.714,
+    "02-15": 0.595,
+    "02-22": 0.548,
+    "03-01": 0.429,
+    "03-08": 0.238,
+    "03-15": 0.119,
+    "03-22": 0.095,
+    "03-29": 0.095,
+    "04-05": 0.0,
+    "04-12": 0.0
+   },
+   "anios": {
+    "primero": 1984,
+    "ultimo": 2025,
+    "n": 42
+   }
+  }
+ }
+}

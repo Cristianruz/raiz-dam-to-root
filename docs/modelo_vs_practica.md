@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # El modelo frente a lo que de verdad se riega en el DR-005
 
 **Para qué es este documento.** H1 mostró que el modelo calcula cerca del doble del agua que salió de la presa. Aquí se

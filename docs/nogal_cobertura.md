@@ -1,3 +1,4 @@
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Nogal: cobertura del dosel estimada con NDVI y edad de las huertas
 
 > Análisis de referencia (A12, 14-nov-2026). No cambia el cálculo de la demanda ni ninguna cifra de la herramienta.

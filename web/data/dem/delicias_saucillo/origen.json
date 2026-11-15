@@ -1,0 +1,53 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
+ "_nota": "Lo escribe motor/dem_teselas.py; no se edita a mano. Dice de qué ráster salieron las teselas de esta carpeta; tests/test_gemelo_motor.py lo compara con el .tif y con las teselas.",
+ "zona": "delicias_saucillo",
+ "origen": {
+  "archivo": "data/processed/nasadem_zona_piloto.tif",
+  "sha256": "7ec898b86c90f6360876589af9ebdabdf3469c0c30691f88ecd572a788e8b31e"
+ },
+ "encoding": "terrarium",
+ "tileSize": 256,
+ "minzoom": 7,
+ "maxzoom": 12,
+ "bbox": [
+  -105.56,
+  28.07,
+  -105.32,
+  28.19
+ ],
+ "paso_vertical_m": 0.25,
+ "remuestreo": "bilinear (rasterio.warp.reproject a EPSG:3857); fuera del ráster se extiende el borde",
+ "generado_con": {
+  "rasterio": "1.4.3",
+  "gdal": "3.9.3",
+  "numpy": "2.5.3",
+  "zlib": "1.3"
+ },
+ "teselas": [
+  "7/26/53.png",
+  "8/52/107.png",
+  "8/53/107.png",
+  "9/105/214.png",
+  "9/106/214.png",
+  "10/211/428.png",
+  "10/212/428.png",
+  "11/423/856.png",
+  "11/423/857.png",
+  "11/424/856.png",
+  "11/424/857.png",
+  "12/846/1713.png",
+  "12/846/1714.png",
+  "12/846/1715.png",
+  "12/847/1713.png",
+  "12/847/1714.png",
+  "12/847/1715.png",
+  "12/848/1713.png",
+  "12/848/1714.png",
+  "12/848/1715.png",
+  "12/849/1713.png",
+  "12/849/1714.png",
+  "12/849/1715.png"
+ ],
+ "sha256_teselas": "e802d66711a6c1eba654f415a7840021dc753dcfea9d13601d1478642c893348"
+}

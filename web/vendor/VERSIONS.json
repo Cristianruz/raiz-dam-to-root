@@ -1,0 +1,64 @@
+{
+  "nota": "Librerías copiadas sin cambios del tarball de npm. tests/test_versiones verifica el sha384 de cada archivo; construir.py --origen vuelve a descargar el tarball y compara.",
+  "librerias": [
+    {
+      "nombre": "maplibre-gl",
+      "version": "5.24.0",
+      "registro": "https://registry.npmjs.org/",
+      "tarball_integrity": "sha512-ALyFxgtd5R+65UqZ/++lOqwWcC0SNho9c27fYSyLmG7AfnAul2o46F05aDJGPbFU57wos9dgcIySHs0Xe6ia3A==",
+      "archivos": [
+        {
+          "archivo": "vendor/maplibre-gl-5.24.0/LICENSE.txt",
+          "ruta_en_tarball": "package/LICENSE.txt",
+          "sha384": "sha384-3Zf/f+K0L6bn+JFiUedpEU79XsEmWDOSzj/+j17JomfRWmlkO60ByjZbpgZkeRiL"
+        },
+        {
+          "archivo": "vendor/maplibre-gl-5.24.0/maplibre-gl.css",
+          "ruta_en_tarball": "package/dist/maplibre-gl.css",
+          "sha384": "sha384-uTttxo/aOKbdE5RlD/SPzSDoDmNvGlUYPjONi2MN/b7c9HPSvW07OIuyP7uL6jxK"
+        },
+        {
+          "archivo": "vendor/maplibre-gl-5.24.0/maplibre-gl.js",
+          "ruta_en_tarball": "package/dist/maplibre-gl.js",
+          "sha384": "sha384-5+cfbwT0iiub6VsQAdn6yz16nr6sDiQoHx6tm4O8OVYXHYOxcffFmCJBL0dgdvGp"
+        }
+      ]
+    },
+    {
+      "nombre": "d3",
+      "version": "7.9.0",
+      "registro": "https://registry.npmjs.org/",
+      "tarball_integrity": "sha512-e1U46jVP+w7Iut8Jt8ri1YsPOvFpg46k+K8TpCb0P+zjCkjkPnV7WzfDJzMHy1LnA+wj5pLT1wjO901gLXeEhA==",
+      "archivos": [
+        {
+          "archivo": "vendor/d3-7.9.0/LICENSE",
+          "ruta_en_tarball": "package/LICENSE",
+          "sha384": "sha384-6QsUH+L+2kaa7NoepPCVtLjVJc0S0K7jCgShLqxgVjDRRumtkkWuGLPdypvyRVTl"
+        },
+        {
+          "archivo": "vendor/d3-7.9.0/d3.min.js",
+          "ruta_en_tarball": "package/dist/d3.min.js",
+          "sha384": "sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i"
+        }
+      ]
+    },
+    {
+      "nombre": "d3-sankey",
+      "version": "0.12.3",
+      "registro": "https://registry.npmjs.org/",
+      "tarball_integrity": "sha512-nQhsBRmM19Ax5xEIPLMY9ZmJ/cDvd1BG3UVvt5h3WRxKg5zGRbvnteTyWAbzeSvlh3tW7ZEmq4VwR5mB3tutmQ==",
+      "archivos": [
+        {
+          "archivo": "vendor/d3-sankey-0.12.3/LICENSE",
+          "ruta_en_tarball": "package/LICENSE",
+          "sha384": "sha384-lkcE/Pknb39DA4l6WzitI9g8UEhmiGS+xTG/3di9mEjs/lA7ylOY8sdaklGqAmNL"
+        },
+        {
+          "archivo": "vendor/d3-sankey-0.12.3/d3-sankey.min.js",
+          "ruta_en_tarball": "package/dist/d3-sankey.min.js",
+          "sha384": "sha384-SM54CE5h+qdDI046d2Y5ym7wq1kq4uxcQ1cqGq5/+5jrE5tPLeDJSq711Q8sIska"
+        }
+      ]
+    }
+  ]
+}

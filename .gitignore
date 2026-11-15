@@ -1,4 +1,21 @@
-data/processed/
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+node_modules/
+.DS_Store
+# Buzón local sincronizado desde Drive (las entregas validadas se copian a data/processed/)
+buzon/
+.env
+/dist/
+
+# Copias de trabajo de agentes (git worktree): nunca van al repositorio
+.claude/worktrees/
+
+# Sesión de datos: copias de trabajo locales que no van al repositorio (las entregas van por Drive, Raiz_entregas/)
 data/zonas/
 data/entrega_zonas/
 data/raw/ee_zonas/

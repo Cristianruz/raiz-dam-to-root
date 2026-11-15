@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Resultado de H3 · experimento natural de 2025
 
 **H3 not supported.** El criterio (a) no se cumple; el (b) sí. Resultado tal como se obtuvo, con el criterio

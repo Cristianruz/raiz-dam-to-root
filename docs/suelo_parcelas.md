@@ -1,3 +1,4 @@
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Suelo por parcela con mapas globales (SoilGrids y OpenLandMap)
 
 > Pieza A13 (14-nov-2026). Entrega: `suelo_parcelas.csv`. Script: `datos/colab/A13_suelo_parcelas.py`.
