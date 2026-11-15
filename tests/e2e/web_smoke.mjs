@@ -2538,12 +2538,14 @@ async function pruebasTelefono(page, peticiones) {
   check("teléfono: con el texto al 200 % la ficha sigue ocupando ≥ 60 % del alto", doble.fraccion >= 0.6, JSON.stringify(doble));
   await page.evaluate(() => { document.documentElement.style.fontSize = ""; });
   // Punto 7: ningún control de la página ni de la ficha mide menos de 44 px de alto en el teléfono (una casilla dentro
-  // de una etiqueta cuenta por su etiqueta).
+  // de una etiqueta cuenta por su etiqueta). Un control desactivado no es un objetivo táctil (no se puede pulsar):
+  // las prioridades sin dato de «What matters most to you?» van como botones `disabled` y se listan en pequeño;
+  // su propia prueba (pruebaPrioridades) ya exige 44 px solo a las que se pueden activar.
   const pequenos = await page.evaluate(() => {
     const sel = "a[href], button, input, select, summary, [role=button], [role=switch]";
     const out = [];
     for (const el of document.querySelectorAll(sel)) {
-      if (el.closest("[hidden], [inert]") || el.matches(".solo-lector, .saltar")) continue;
+      if (el.closest("[hidden], [inert]") || el.matches(".solo-lector, .saltar, :disabled")) continue;
       const objetivo = el.matches("input[type=checkbox]") && el.closest("label") ? el.closest("label") : el;
       const r = objetivo.getBoundingClientRect();
       if (!r.width || !r.height || getComputedStyle(el).visibility === "hidden") continue;
