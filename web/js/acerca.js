@@ -85,6 +85,7 @@ const ESTADOS_PASO = {
   passed: { texto: "Passed", simbolo: "✓" },
   failed: { texto: "Failed", simbolo: "✕" },
   pending: { texto: "Pending", simbolo: "…" },
+  warning: { texto: "Warning", simbolo: "⚠" }, // construir.py: ADVERTENCIA → «warning»
   skipped: { texto: "Skipped", simbolo: "–" },
   "not run": { texto: "Not run", simbolo: "○" },
 };
@@ -331,7 +332,8 @@ function usoDe(f, familia, zonasIds, tormentas) {
   const uso = USOS[base];
   if (typeof uso === "string") return uso;
   if (uso && typeof uso === "object") return uso[familia.id] ?? uso["*"];
-  return f?.pieza ? `Input of kit piece ${f.pieza}` : nombreArchivo(f?.archivo);
+  // Sin uso registrado: no se muestra la pieza interna del kit («Input of kit piece A7», I9 de la revisión total).
+  return f?.pieza ? "Input to the build (no use recorded)" : nombreArchivo(f?.archivo);
 }
 
 /** Quita los productos que son el principio de otro («NASA HLS v…» dentro de «NASA HLS v… (…)»). */
@@ -416,9 +418,10 @@ function htmlDatosNasa(manifest, cubo, relieve, id, error) {
   const otrasHtml = otras.length
     ? `<details class="acerca-otras"><summary>Other sources in the build</summary><ul class="acerca-archivos">${otras
         .map(
-          (f) => `<li><details><summary><code>${esc(nombreArchivo(f.archivo))}</code> <span lang="es">${esc(productoCorto(f.fuente))}</span></summary>` +
-            `<p class="acerca-fuente-registrada" lang="es">${esc(f.fuente)}</p>` +
-            (f.fecha ? `<p class="acerca-pie">Date: ${esc(f.fecha)}</p>` : "") + `</details></li>`,
+          // Solo el archivo, el producto corto y la fecha: la fuente registrada completa es el registro de entregas del
+          // equipo (en español, con notas de proceso) y no va a la página (I6 de la revisión total). Está en manifest.json.
+          (f) => `<li><code>${esc(nombreArchivo(f.archivo))}</code> <span lang="es">${esc(productoCorto(f.fuente))}</span>` +
+            (f.fecha ? ` <span class="acerca-pie">· ${esc(f.fecha)}</span>` : "") + `</li>`,
         )
         .join("")}</ul></details>`
     : "";
