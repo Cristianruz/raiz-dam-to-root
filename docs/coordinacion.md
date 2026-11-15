@@ -106,6 +106,8 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 05:44 | «Laptop» | Revisión cruzada de la rama con el tablero como portada, en una copia limpia: todo en verde; el explorador es idéntico a la página publicada salvo el enlace «Dashboard» |
 | 06:09 | integrador | Corrida final con navegador: tablero 301/301, plan 279/279, aplicación instalada 50/50, sin conexión 23/23 y explorador 878/878. 1252 pytest y 278 de Node |
 | 06:20 | integrador | Video diseñado y regrabado sobre la página final (29 s; 53 comprobaciones), recorrido de 87 s (71 comprobaciones) y diapositivas regeneradas (16 comprobaciones) |
+| 06:28 | integrador | Revisor final de contexto nuevo (contrato, motor, datos, pruebas comunes y documentos): «se puede publicar», contrato v4 intacto. Su corrección de hoy (la fuente de los supuestos del tablero citaba un rol equivocado) entró en `dfbf35e`. CI en verde y las cinco pruebas con navegador repetidas sobre ese commit: tablero 301/301, plan 279/279, aplicación 50/50, sin conexión 23/23 y explorador 878/878 |
+| 06:36 | integrador | PR #9 fusionado en `main` (`084bb30`): el tablero es la portada, en cuatro idiomas y como aplicación; el explorador queda en `explorer.html`. `main` fusionado de vuelta en la integración (`63ccfb7`) |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 
@@ -129,6 +131,6 @@ Revisión pedida por Cristian: cada chat, cada rama y la conversación del integ
 | `revision/web-dos-zonas` | Un commit (`ad42dc3`) que no es ancestro de la integración, pero su contenido ya está: el clic con tolerancia (`web/app.js`) y la hoja impresa en una carta (la comprueba `web_smoke`). Se borra después del evento |
 | `dependabot/…` (PR #2 y #3) | Sin fusionar a propósito hasta después del envío; el #3 rompe la prueba que fija la versión con que se generaron las teselas |
 | `Milo`, `Milo2` | Siguen en `e819b52` (el `main` de hace dos PR), sin commits propios. Hay que actualizarlas desde `main` antes de trabajar en ellas |
-| `Tena` | `351bbf5`: un commit con un tablero nuevo en `web/index.html`, un asesor y un recomendador, hecho sobre `e819b52`. Revisado en `docs/revisiones/2026-11-15_rama_tena.md`. Cristian decidió corregirlo y publicarlo como página secundaria (04:05); en curso |
+| `Tena` | `351bbf5`: un commit con un tablero nuevo en `web/index.html`, un asesor y un recomendador, hecho sobre `e819b52`. Revisado en `docs/revisiones/2026-11-15_rama_tena.md`. Cristian decidió corregirlo y publicarlo como página principal, en cuatro idiomas y como aplicación (04:12). Corregido en la integración y publicado con el PR #9 (`084bb30`); la rama `Tena` queda como estaba y debe actualizarse desde `main` antes de seguir en ella |
 
 Hallazgos de las revisiones de anoche, uno por uno: `docs/revisiones/2026-11-15_cierre_hallazgos.md` (146 renglones: 73 resueltos, 31 parciales, 25 abiertos, 11 de persona y 6 para después del evento, comprobados contra `f0dbf3b`).
