@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T11:01:54+00:00",
+ "generado": "2026-11-15T11:04:37+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T11:01:54+00:00",
+  "corrida": "2026-11-15T11:04:37+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -328,8 +328,8 @@
     "nombre": "Offline app (installable page)",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache e81e796899c5b077",
-    "detalle_en": "precache e81e796899c5b077"
+    "detalle": "precache 69fb10ec8e68b1d2",
+    "detalle_en": "precache 69fb10ec8e68b1d2"
    },
    {
     "id": "manifest",
@@ -360,8 +360,8 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1252 passed, 30 warnings in 55.73s",
-    "detalle_en": "1252 passed, 30 warnings in 55.73s"
+    "detalle": "1252 passed, 30 warnings in 85.49s (0:01:25)",
+    "detalle_en": "1252 passed, 30 warnings in 85.49s (0:01:25)"
    },
    {
     "id": "node",
