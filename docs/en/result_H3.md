@@ -31,7 +31,7 @@ data in the summer window in 2019–2026.
 **Declared deviation:** on 14-Nov at 12:50 the team changed the pilot zone to two rectangles, **after**
 knowing the result above. According to the preregistration's deviation policy, the registered analysis (original
 rectangle, 338 fields) stays as the main result and that of the new zones is reported alongside, with the same
-criterion and the same thresholds. Script and criterion identical; only the fields change. Figures recalculated on 14-Nov at 14:20, after correcting the overlap of 6 pairs of fields in the output geometry (the verdicts do not change).
+criterion and the same thresholds. Script and criterion identical; just the fields change. Figures recalculated on 14-Nov at 14:20, after correcting the overlap of 6 pairs of fields in the output geometry (the verdicts do not change).
 
 | Zone | Annual fields | Median 2019–2024 | 2025 | (a) difference | Pecan (n) | (b) difference | H3 | Sensitivity 0.35 / 0.45 (a) |
 |---|---|---|---|---|---|---|---|---|

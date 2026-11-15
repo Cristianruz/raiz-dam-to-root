@@ -166,6 +166,8 @@
   #ficha .filtros { padding: 0.8mm 1.5mm; font-size: 6pt; gap: 0.2mm; line-height: 1.15; }
   /* En papel cada filtro va con su estado y su texto; la fuente larga se lee en la ficha en línea. */
   #ficha .filtros .fuente { display: none; }
+  /* La nota larga del plazo (p. ej. la secuencia de la tabla oficial frente a la que cuenta el agua) se lee en línea. */
+  #ficha .nota-plazo { display: none; }
   /* En papel solo los filtros que piden atención (aviso o revisión local); los aprobados, en línea. */
   /* En papel los filtros van como un resumen de una línea (cuántos piden revisión local, avisan o pasan);
      el texto de cada uno se lee en la ficha en línea. */
@@ -192,7 +194,7 @@
   #ficha .gota-fila .rotulo { font-size: 7pt; }
   #ficha .gota-pista { height: 3mm; }
   /* Si La gota llega como Sankey en SVG: que no pase de una franja (escala con su viewBox). */
-  #ficha .gota svg { max-width: 100%; max-height: 36mm; height: auto; }
+  #ficha .gota svg { max-width: 100%; max-height: 30mm; height: auto; }
   #ficha .gota-leyenda {
     margin-top: 1mm;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -211,8 +213,8 @@
   #ficha .impresion-fuentes-lista {
     margin: 0;
     padding-left: 3.5mm;
-    columns: 4;
-    column-gap: 4mm;
+    columns: 5; /* con las entregas del 15-nov la lista creció: en cinco columnas la hoja sigue siendo una */
+    column-gap: 3mm;
     font-size: 6pt;
     line-height: 1.15;
   }

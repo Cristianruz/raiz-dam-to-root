@@ -31,7 +31,7 @@
    **[ALTERNATIVA]** «Pilot area» en «All areas» y capa «Field memory: 2025».
 5. Respaldo sin red: **[SI ESTÁ CONECTADO]** la app instalada («Install app»). **[ALTERNATIVA]** `dist/raiz-offline.html`, que se genera con `python motor/demo_offline.py` (`README.md`, «How to run»).
 6. Las tres protagonistas son P0757, P0632 y L0175 (`web/data/parcelas.geojson` → `protagonista`). Aparecen arriba en la lista «Fields» con la etiqueta «story field».
-7. Liga pública, por si alguien la pide: https://cristianruz.github.io/raiz-dam-to-root/ (muestra la versión completa cuando se fusione el PR #4 a `main`).
+7. Liga pública, por si alguien la pide: https://cristianruz.github.io/raiz-dam-to-root/ (publica `main`, con el PR #4 ya fusionado).
 
 ## 4. El guion
 
@@ -76,9 +76,9 @@ Los tiempos de inicio están calculados a 135 palabras por minuto con la versió
 | Tiempo | Qué se dice | Qué se ve en pantalla | Cifra y fuente |
 |---|---|---|---|
 | 2:16 | Lo que no salió bien también se publica. | «Close». Botón «About & Data», sección «Tests in sight». | — |
-| 2:20 | Declaramos cinco pruebas antes de ver resultados. Comparamos el modelo con el agua que salió de La Boquilla en 2026 y no cumplió: calculó novecientos cinco millones de metros cúbicos; la referencia fue cuatrocientos cuarenta y ocho. Una cuenta sencilla quedó más cerca. | «Back-test 2026 (H1, preregistered)» con su estado y el resumen «H1 does not meet the preregistered criterion (partial back-test; press-reported truth)». | Al 14-jul-2026: modelo P50 904.6 hm³ (P10–P90 de 727.2 a 1,131.4); referencia de prensa 447.65 hm³; líneas base L1-s 404.5 y L1 367.2 (`docs/resultado_H1.md`). Criterios declarados antes: S9 §6 |
+| 2:20 | Declaramos cinco pruebas antes de ver resultados. Comparamos el modelo con el agua que salió de La Boquilla en 2026 y no cumplió: calculó novecientos cinco millones de metros cúbicos; la referencia fue cuatrocientos cuarenta y ocho. Una cuenta sencilla quedó más cerca. | «Back-test 2026 (H1, criterion declared before the analysis)» con su estado y el resumen «H1 does not meet the criterion declared before the analysis (partial back-test; press-reported truth)». | Al 14-jul-2026: modelo P50 904.6 hm³ (P10–P90 de 727.2 a 1,131.4); referencia de prensa 447.65 hm³; líneas base L1-s 404.5 y L1 367.2 (`docs/resultado_H1.md`). Criterios declarados antes: S9 §6 |
 | 2:40 | El modelo calcula toda el agua que pide el cultivo; el distrito riega con menos. | Misma sección. | Demanda del ciclo 1,185.7 hm³ frente a 600 hm³ autorizados (`docs/resultado_H1.md`, «Por qué falla»). No se lee |
-| 2:47 | En 2025 esperábamos ver mucha menos siembra de verano. Bajó menos de dos puntos; pedíamos veinticinco. No se sostiene. | «Natural experiment of 2025 (H3, preregistered)» con el resumen «H3 not supported (2025 natural experiment; pilot area, HLS v2)». | 82.6 % en 2025 frente a una mediana de 84.2 %: −1.6 puntos; el criterio pedía −25 o más; 184 parcelas anuales del rectángulo original (`docs/resultado_H3.md`) |
+| 2:47 | En 2025 esperábamos ver mucha menos siembra de verano. Bajó menos de dos puntos; pedíamos veinticinco. No se sostiene. | «Natural experiment of 2025 (H3, criterion declared before the analysis)» con el resumen «H3 not supported (2025 natural experiment; pilot area, HLS v2)». | 82.6 % en 2025 frente a una mediana de 84.2 %: −1.6 puntos; el criterio pedía −25 o más; 184 parcelas anuales del rectángulo original (`docs/resultado_H3.md`) |
 | 2:56 | Seis de cada diez parcelas salen en gris: el mapa no distingue su cultivo y prefiere no opinar. | «Crop map»: «Fields where the crop map abstains». O cerrar y señalar las parcelas grises del mapa. | 781 de 1,239 parcelas, 63.0 % (`web/data/pruebas.json` → prueba 1; `LIMITATIONS.md`) |
 | 3:04 | ¿Por qué confiar? Porque una herramienta que enseña dónde falla le dice cuánto creerle. Cada número trae fuente y rango, y nada se publica si las pruebas no pasan. | «Automated gate», con los pasos de la última corrida de `python construir.py`. | Fuente de cada cifra en `web/data/manifest.json`. Publicación condicionada a las pruebas (`.github/workflows/publicar.yml`; `README.md`, «Automated gate»). Rango P10–P90: S9 §5 |
 | 3:17 | **[SI ESTÁ CONECTADO]** Esta tarjeta separa lo observado, lo calculado y lo supuesto. | Tarjeta «Twin status»: grupos «Observed», «Modeled» y «Your scenario», con «Last rebuilt». | Fechas de `web/data/manifest.json` (`web/js/estado_gemelo.js`) |
@@ -90,7 +90,7 @@ Los tiempos de inicio están calculados a 135 palabras por minuto con la versió
 |---|---|---|---|
 | 3:21 | ROOT no reparte ni vende agua, no pronostica la presa y no decide por nadie: apoya al agricultor y al técnico. | «Close». Ficha P0757 → «Preview WhatsApp message»: mensaje en español con los avisos «Es una simulación; la asignación oficial la decide Conagua.» y «Esta herramienta apoya y no sustituye el juicio del agricultor ni del técnico.» | Límites declarados (S9 §11; `CLAUDE.md`, regla 10; avisos en `web/js/mensaje.js`) |
 | 3:31 | Pedimos tres cosas. Un técnico de módulo que nos diga cuánta agua se pierde en la parcela. Agricultores que revisen su parcela y nos corrijan. Y que ustedes la abran y muevan la dotación. | Misma pantalla. | Eficiencia parcelaria: rango supuesto de 0.45 a 0.70 [S], sin valor medido (`README.md`, «Open question»; `LIMITATIONS.md`). Revisión manual de las protagonistas, pendiente (`docs/reparto_faltantes.md`, D3) |
-| 3:46 | Antes de sembrar, vea el agua que compromete. Gracias. | Cabecera «ROOT – From Dam to Root». Liga de la página: https://cristianruz.github.io/raiz-dam-to-root/ (versión completa cuando se fusione el PR #4 a `main`). | Frase de S9 §1 |
+| 3:46 | Antes de sembrar, vea el agua que compromete. Gracias. | Cabecera «ROOT – From Dam to Root». Liga de la página: https://cristianruz.github.io/raiz-dam-to-root/. | Frase de S9 §1 |
 
 Después vienen los 3 minutos de preguntas: `docs/pitch/preguntas_dificiles.md`.
 

@@ -1089,8 +1089,12 @@ function htmlFigura(modelo) {
 // ---------------------------------------------------------------------------
 // «Regional context»
 // ---------------------------------------------------------------------------
+// Decimales por unidad (I8 de la revisión total): los milímetros de lluvia y ETo van sin decimales; el exacto, en el title.
+const DECIMALES_UNIDAD = { mm: 0 };
 function htmlCifra(rotulo, valor, unidad, pie) {
-  const cuerpo = valor != null ? `<span class="contexto-cifra-valor">${esc(formatoNumero(valor))} <small>${esc(unidad)}</small></span>` : `<span class="contexto-cifra-valor contexto-cifra-valor--vacio">${esc(TEXTO_SIN_DATO)}</span>`;
+  const dec = DECIMALES_UNIDAD[unidad];
+  const corto = formatoNumero(valor, dec != null ? { decimales: dec } : {});
+  const cuerpo = valor != null ? `<span class="contexto-cifra-valor" title="${esc(`${formatoNumero(valor)} ${unidad}`)}">${esc(corto)} <small>${esc(unidad)}</small></span>` : `<span class="contexto-cifra-valor contexto-cifra-valor--vacio">${esc(TEXTO_SIN_DATO)}</span>`;
   return `<div class="contexto-cifra"><span class="contexto-cifra-rotulo">${esc(rotulo)}</span>${cuerpo}${pie ? `<span class="contexto-cifra-pie">${esc(pie)}</span>` : ""}</div>`;
 }
 
@@ -1104,7 +1108,7 @@ function htmlCifras(contexto, zonaId, anio) {
     valor != null ? (incompleto(dias) ? `${fuente}: ${incompleto(dias)}` : fuente) : `${fuente}: ${motivoDeDias(dias, a.diasDelAnio)}`;
   const diferencia =
     a.diferencia != null
-      ? `Difference: <b>${esc(formatoNumero(a.diferencia, { signo: true }))} mm</b> (GPM IMERG minus NASA POWER)`
+      ? `Difference: <b>${esc(formatoNumero(a.diferencia, { signo: true, decimales: DECIMALES_UNIDAD.mm }))} mm</b> (GPM IMERG minus NASA POWER)`
       : "Difference: not computed, one of the two sources has no total for this year";
   return `<div class="contexto-cifras" role="group" aria-label="${esc(`${TITULO_CLIMA}: agricultural year ${a.anio}`)}">
       <div class="contexto-cifra contexto-cifra--par">

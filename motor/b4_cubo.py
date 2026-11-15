@@ -1128,16 +1128,18 @@ def explicacion(rot_id, plazo_clave, dz, params, nombre):
     plazo = plazo_params(params, plazo_clave)
     # Plazo en palabras sin dígitos: una temporada, N años o de N a M años. La explicación es una por zona y
     # rotación y la comparten la opción ACTUAL (su tarjeta muestra el plazo RESTANTE de esta parcela) y la
-    # alternativa nueva: un plazo de varios años se dice como el compromiso típico del cultivo desde la siembra.
+    # alternativa nueva: un plazo de varios años se dice como el compromiso típico del CULTIVO desde la siembra
+    # (también vale para la variante que conserva el rodal, como el corte de verano, que no siembra nada) y se
+    # remite a la tarjeta para los años que le quedan a esta parcela.
     if plazo["min"] == plazo["max"] == params["plazo"]["anual"]["valor"]:
         compromete = " and commits water for one season"
     elif plazo_clave == "nogal":
         # El del nogal es un horizonte de cálculo, no la vida de la huerta (kit §2.3; la tarjeta lleva la misma nota).
         compromete = "; this option commits water over a calculation horizon of {{f2}} years, and orchards live longer"
     elif plazo["min"] == plazo["max"]:
-        compromete = "; from planting, this option typically commits water for {{f2}} years"
+        compromete = "; from planting, this crop typically commits water for {{f2}} years (the card shows the term left for this field)"
     else:
-        compromete = "; from planting, this option typically commits water for {{f2}} to {{f3}} years"
+        compromete = "; from planting, this crop typically commits water for {{f2}} to {{f3}} years (the card shows the term left for this field)"
     return {
         "textos": {
             "por_que": f"{nombre} asks for {{{{f1}}}} thousand m³ per hectare per year{compromete}. With your allocation of {{{{d}}}} thousand m³/ha it covers {{{{cobertura}}}} of the need: enough for {{{{ha}}}} hectares.",

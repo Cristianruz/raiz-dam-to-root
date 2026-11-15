@@ -21,6 +21,8 @@ in `gedi_parcelas.csv`.
 
 ![Story fields in Sentinel-2](../figuras/protagonistas_sentinel2_2026.jpg)
 
+*Contains modified Copernicus Sentinel data 2026.*
+
 | Field | What the system says | What is seen | Does it match? |
 |---|---|---|---|
 | **P0757** (7.95 ha, next to Km 92) | 3-year-old alfalfa, "about to expire" | A single rectangular, well-delimited field. Dark green in February, pale green in May (looks freshly cut) and irregular green in August. NDVI between 0.49 and 0.84 in all 12 months. GEDI: 11 shots, median 2.9 m (no trees) | **Yes.** Crop green all year, no tall canopy: compatible with alfalfa. The outline matches the field |
@@ -33,7 +35,7 @@ P0244 is "free", but its current option is fallow: depth 0 and La gota (the drop
 
 | Field | Area | FTW confidence | Distance | What is seen | Recommendation |
 |---|---|---|---|---|---|
-| **P0632** | 20.66 ha | 54 | 3.2 km from Km 92 | Strip of 5 contiguous plots with the same management: sprouts in February (NDVI 0.46), full green in March and April (0.86–0.90, quartiles 0.81–0.90: homogeneous), harvested in May and uncropped in summer. Record: summer crop from 2019 to 2025 and winter crop in 2026. GEDI: 20 shots, no tall canopy | **First choice.** It is the most homogeneous |
+| **P0632** | 20.66 ha | 54 | 3.2 km from Km 92 | Strip of 5 contiguous plots with the same management: sprouts in February (NDVI 0.46), full green in March and April (0.86–0.90, quartiles 0.81–0.90: homogeneous), harvested in May and uncropped in summer. Record: summer crop from 2019 to 2025 and winter crop in 2026. GEDI: 20 shots, no tall canopy | **Preferred choice.** It is the most homogeneous |
 | P0605 | 31.91 ha | 55 | 3.0 km from Km 92 | Combines two managements: two thirds with late-winter cereal (green from March to May) and one third with a summer crop (green in August) | Second choice: mixed polygon |
 | P0742, P0683 | 169 and 178 ha | 56 and 55 | 1.6 and 1.9 km from Km 92 | Fields of The World polygons that group many fields | No: they are not a single field |
 

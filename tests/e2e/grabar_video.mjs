@@ -691,6 +691,24 @@ function extraerFotogramas(cues) {
   return rutas;
 }
 
+// Regla 3: si un subtítulo dice en palabra cuántas pruebas hay («Five tests…»), debe coincidir con las que
+// publica web/data/pruebas.json. Así el video no queda desactualizado en silencio si cambia ese número.
+const NUMEROS_EN_PALABRA = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+async function revisarCantidadDePruebas(page, cues) {
+  const total = await page.evaluate(async () => {
+    const r = await fetch("data/pruebas.json");
+    const d = await r.json();
+    return Array.isArray(d?.pruebas) ? d.pruebas.length : null;
+  });
+  for (const c of cues) {
+    const m = /^(\w+) tests\b/i.exec(c.texto);
+    if (!m) continue;
+    const dicho = NUMEROS_EN_PALABRA.indexOf(m[1].toLowerCase());
+    check(`subtítulo ${c.n}: la cantidad de pruebas dicha coincide con pruebas.json`, dicho === total,
+      `dice «${m[1]}» y pruebas.json trae ${total}`);
+  }
+}
+
 // ---------------------------------------------------------------- principal
 async function main() {
   const { cues, alterno } = leerGuion();
@@ -707,11 +725,13 @@ async function main() {
   const srv = process.env.RAIZ_URL ? null : await servidor();
   const url = process.env.RAIZ_URL ?? `http://127.0.0.1:${srv.address().port}/index.html`;
   console.log(`Página: ${url}`);
-  const navegador = await chromium.launch();
+  // El navegador se lanza dentro del try: si falla el arranque, el finally cierra el servidor y el proceso termina.
+  let navegador = null;
   let webm = null;
   const tramos = [];
   let ctxDatos = null;
   try {
+    navegador = await chromium.launch();
     const ctx = await navegador.newContext({
       viewport: VIEWPORT,
       deviceScaleFactor: 1,
@@ -739,6 +759,10 @@ async function main() {
 
     const variantes = await leerVariantes(page);
     const libre = elegirLibre(variantes, cues, alterno);
+    // El subtítulo alterno de la toma 4 entra aquí: se vuelve a revisar todo (sin dígitos, largo y regla 10)
+    // y que la cantidad de pruebas dicha en palabra sea la de la página (regla 3: la cifra sale de los datos).
+    revisarSubtitulos(cues);
+    await revisarCantidadDePruebas(page, cues);
     ctxDatos = { variantes, libre };
     const lista = tomas(ctxDatos);
     console.log(`Variantes: ${ctxDatos.conectado ? "gemelo conectado (vista 3D y línea de tiempo)" : "sin el gemelo (sección 7)"} · toma 4 con ${libre} · story fields: ${variantes.historia.join(", ")}`);
@@ -785,11 +809,11 @@ async function main() {
     for (const t of tramos) t.inicio = Math.max(0, t.inicio - desfase);
     console.log(`Grabación: ${webm} (${real.toFixed(2)} s; reloj ${cierre.toFixed(2)} s; desfase ${desfase.toFixed(2)} s)`);
   } finally {
-    await navegador.close();
+    await navegador?.close();
     srv?.close();
   }
 
-  // Exportar: si pasa de 10 MB, se comprime más (dos intentos).
+  // Exportar: si pasa de 10 MB, se comprime más (hasta tres intentos).
   let tam = null;
   for (const crf of [22, 26, 30]) {
     tam = exportar(webm, tramos, cues, crf);

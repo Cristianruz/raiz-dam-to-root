@@ -69,6 +69,8 @@
   flex: none; width: 22px; height: 0; margin-top: 0.55em;
   border-top: 3px dashed var(--relieve-ruta, var(--agua, #1F6FB2));
 }
+/* Advertencia de las rutas en el piso plano del valle (revisión I20): lectura aproximada. */
+.relieve-nota-rutas { font-size: var(--fs-2); color: var(--tinta-suave, #4A525A); margin: 4px 0; }
 
 /* Tarjeta de la tormenta */
 .relieve-tormenta {
@@ -104,10 +106,18 @@
   box-shadow: 0 2px 10px rgba(29, 35, 41, 0.18);
 }
 
-/* Línea de la ficha (renglón Soil) */
+/* Línea de la ficha (renglón Soil). La raíz es un <div>: lleva la línea (<p>) y, plegados, los hoyos del modelo. */
 .relieve-parcela { font-size: var(--fs-2); margin-top: 4px; }
+.relieve-parcela > p { margin: 0; }
 .relieve-parcela-titulo { font-weight: 700; }
 .relieve-parcela .relieve-escala { white-space: normal; }
+.relieve-parcela-pozos { margin-top: 2px; }
+.relieve-parcela-pozos > summary { cursor: pointer; font-size: 0.95em; color: var(--agua-osc, #174F80); width: fit-content; }
+.relieve-parcela-pozos > p { margin: 2px 0 0; font-size: 0.95em; }
+/* En papel lo plegado no se puede abrir: los hoyos del modelo no se imprimen (la hoja cabe en una página). */
+@media print {
+  .relieve-parcela-pozos { display: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .relieve-boton-tormenta { transition: none; }

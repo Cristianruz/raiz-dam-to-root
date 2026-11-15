@@ -8,10 +8,10 @@
 ## Lo que falta de verdad
 | # | Qué | Quién |
 |---|---|---|
-| I4 / H7 | Video de 30 s o menos, sin voz, con subtítulos en inglés, grabado de la web real (`docs/pitch/guion_video_30s.md`), y su liga probada en incógnito | Responsable de video (P6) |
-| H7 | PDF de las diapositivas (`docs/pitch/diapositivas.md`), formulario de envío en inglés (`docs/pitch/textos_envio.md`) con la captura de la confirmación, y ensayo de la exposición | Equipo |
+| I4 / H7 | Video: hay un borrador (`docs/pitch/video_30s.mp4`, 30 s o menos, con `docs/pitch/video_30s.srt`). Falta volver a grabarlo sobre la página final (`node tests/e2e/grabar_video.mjs`), subirlo y probar su liga en incógnito | Responsable de video (P6) |
+| H7 | Diapositivas: hay un borrador (`docs/pitch/diapositivas.pdf`, de `docs/pitch/diapositivas.html`). Faltan los nombres de los integrantes en la portada y su liga pública. Formulario de envío en inglés (`docs/pitch/textos_envio.md`, con la lista «Antes de pegar (Cristian)») con la captura de la confirmación, y ensayo de la exposición | Equipo; Cristian |
 | H7 | Descripción del repositorio en GitHub, con la declaración de uso de IA que pide el kit Q2 | Cristian |
-| H3 | Liga del preregistro en OSF con su fecha. Si no existe, los textos dicen «declared before the analysis» con la fecha y el commit de cada criterio (`README.md`, «Status»); la página aún titula H1 y H3 «preregistered» (`motor/pruebas_web.py`) | Cristian; integrador para el título de la página |
+| H3 | Liga del preregistro en OSF con su fecha. Si no existe, los textos dicen «declared before the analysis» con la fecha y el commit de cada criterio (`README.md`, «Status»), y la página titula H1 y H3 «criterion declared before the analysis» (`web/data/pruebas.json`) | Cristian |
 | I7 | `cifras.csv` generado de `manifest.json`, `params.json`, S9 y S8, para la revisión de cifras de las 12:30 | Integrador |
 | — | Las líneas de cada integrante en `AI_USAGE.md` | Cada integrante |
 | D3 | Revisión humana, en color verdadero, de las tres protagonistas (P0757, P0632 y L0175). Una sesión de IA ya las comparó con Sentinel-2 (`docs/revision_protagonistas.md`); falta que una persona lo confirme | Una persona del equipo |
@@ -30,6 +30,8 @@
 - **H6 / D8.** ECOSTRESS (`ecostress_parcelas.csv`) y GAEZ (`gaez_zona.csv`), entregados con el buzón v10 y en la página.
 - **D3, parte de datos.** Protagonista «libre» cambiada de P0244 a P0632.
 - **I3, I5, I6.** README, LIMITATIONS, DATA_LICENSE, guion, preguntas difíciles, diapositivas y textos de envío al día con la página del 15-nov.
+- **I24.** Prioridades del productor en la ficha: «What matters most to you?» resalta las opciones según la prioridad elegida y no las ordena (`web/js/prioridades.js`).
+- **Traducciones.** Los documentos que la página enlaza están en inglés en `docs/en/`.
 
 ## Lo que no se hace antes del congelamiento
 - Historial de superficie, memoria desde 2013 y calibración: el kit los da como «solo si sobra tiempo».

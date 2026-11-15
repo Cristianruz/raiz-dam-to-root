@@ -3,7 +3,7 @@
 
 English version of [docs/pruebas.md](../pruebas.md); if they differ, the Spanish original prevails.
 
-Run: 2026-11-15T04:36:26+00:00 · duration 55.6 s
+Run: 2026-11-15T05:26:31+00:00 · duration 54.6 s
 
 | Step | Status | Detail |
 |---|---|---|
@@ -11,13 +11,13 @@ Run: 2026-11-15T04:36:26+00:00 · duration 55.6 s
 | Team deliveries validated against the data contract | skipped | sin RAIZ_BUZON: no se validaron entregas en esta corrida (se usa la caché previa de data/processed) |
 | Cube engine | passed | cubo REAL: 1239 parcelas, 458 clasificadas, 1282 opciones |
 | Terrain & runoff layer | passed | zonas: delicias_saucillo, lazaro_cardenas |
-| gemelo | passed | gemelo: OK · contexto: OK · suelo: OK |
-| pwa | passed | precache 9490a45fb8e3536c |
-| Manifest of every figure | passed | 113526 cifras (0 simuladas), 35 fuentes de origen, 59 avisos |
+| Digital twin, regional context and soil | passed | gemelo: OK · contexto: OK · suelo: OK |
+| Offline app (installable page) | passed | precache 54681c90a3aa0352 |
+| Manifest of every figure | passed | 113541 cifras (0 simuladas), 35 fuentes de origen, 59 avisos |
 | Data contract, including the water balance of “Follow the drop” | passed | CONTRATO OK |
 | Figure checker on the page's explanations | passed | VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv |
-| Python tests | passed | 1065 passed, 30 warnings in 49.59s |
-| JavaScript tests | passed | 167 pass, 0 fail, 0 skipped |
+| Python tests | passed | 1102 passed, 30 warnings in 48.73s |
+| JavaScript tests | passed | 200 pass, 0 fail, 0 skipped |
 
 The browser test (`node tests/e2e/web_smoke.mjs`) runs separately, before each publication.
 After this table is written, step 5c (`motor/pruebas_web.py`) builds `web/data/pruebas.json` from it: «About & Data» shows it as the automated gate.

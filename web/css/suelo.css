@@ -197,6 +197,38 @@ div.suelo-aptitud { display: grid; gap: 2px; }
 .suelo-avisos-titulo { margin-top: 8px !important; font-weight: 700; }
 .suelo-evidencia { margin-top: 8px !important; }
 
+/* ---------- Tipo de suelo y notas de nutrientes (dentro del perfil) ---------- */
+/* El tipo de suelo en una línea; la explicación a la vista, en chico; el detalle plegado. */
+.suelo-tipo-linea { overflow-wrap: anywhere; }
+.suelo-tipo-explica { font-size: var(--fs-2); color: var(--suelo-tinta-suave); font-style: italic; }
+p.suelo-tipo.suelo-pendiente, p.suelo-nutrientes.suelo-pendiente { font-size: var(--fs-2); color: var(--suelo-tinta-suave); }
+.suelo-tipo-detalle > summary, .suelo-nutrientes > summary {
+  width: fit-content; max-width: 100%; cursor: pointer;
+  font-size: var(--fs-2); font-weight: 700; color: var(--suelo-enlace);
+}
+.suelo-nutrientes > summary { font-size: var(--fs-2); }
+.suelo-tipo-detalle > summary:focus-visible, .suelo-nutrientes > summary:focus-visible {
+  outline: 3px solid var(--suelo-foco); outline-offset: 2px;
+}
+.suelo-tipo-detalle[open], .suelo-nutrientes[open] { display: grid; gap: 4px; }
+.suelo-tipo-detalle p { font-size: var(--fs-2); }
+.suelo-tipo-detalle > summary + p, .suelo-nutrientes > summary + p { margin-top: 4px !important; }
+.suelo-nutrientes-aviso { font-size: var(--fs-2); font-weight: 700; }
+.suelo-nutrientes-lista {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 8px;
+}
+/* Cada nota con su borde por estado; el símbolo y el texto del estado van siempre (nada depende solo del color). */
+.suelo-nutrientes-lista li { padding-left: 10px; border-left: 3px solid var(--suelo-borde); }
+.suelo-nutrientes-lista li[data-estado="less_available"] { border-left-color: var(--suelo-tolerated); }
+.suelo-nutrientes-lista li[data-estado="near_limit"] { border-left-color: var(--suelo-tolerated); border-left-style: dashed; }
+.suelo-nutrientes-lista li[data-estado="possible_toxicity"] { border-left-color: var(--suelo-outside); border-left-width: 5px; }
+.suelo-nutrientes-lista li[data-estado="within_range"] { border-left-color: var(--suelo-fits); }
+.suelo-nota-cabeza { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.suelo-nota-estado { font-weight: 700; }
+.suelo-nota-elementos abbr { text-decoration: none; font-weight: 700; }
+.suelo-nota-escala { font-size: var(--fs-2); color: var(--suelo-tinta-suave); }
+
 @media print {
   .suelo-porque > summary { color: var(--suelo-tinta); }
   /* En papel, la aptitud va en una línea por tarjeta (estado y rótulo); el «Why?» se lee en la ficha en línea. */
