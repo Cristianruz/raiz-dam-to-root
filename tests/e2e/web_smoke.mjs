@@ -1825,7 +1825,7 @@ async function pruebaPorQueYBeneficios(page, prefijo, telefono) {
         const cob = evaluarOpcion(og, area, m.valor, 0).cobertura;
         const nota = await page.locator("#gota-cobertura").evaluate((n) => ({ oculta: n.hidden, texto: n.textContent.replace(/\s+/g, " ").trim() }));
         const esperada = `With ${nfFicha(m.valor)} thousand m³/ha, the allocation covers ${cobFicha(cob)} of this need: about ${nfFicha(cob * necesita, 0)} of the ` +
-          `${nfFicha(necesita, 0)} m³ this option needs with the current irrigation, counted from La Boquilla. The rest comes from wells or stays unmet.`;
+          `${nfFicha(necesita, 0)} m³ this option needs with the current irrigation, counted from La Boquilla (canal losses included). The rest comes from wells or stays unmet.`;
         if (cob < 1 ? nota.oculta || nota.texto !== esperada : !nota.oculta) malasNota.push(`${m.id}: ${nota.oculta ? "(oculta) " : ""}«${nota.texto}»`);
       }
       check(`${prefijo}${id}: la nota de La gota dice cuánto cubre la dotación de los ${nfFicha(necesita, 0)} m³ que la opción necesita (I15)`, malasNota.length === 0, malasNota.slice(0, 2).join(" | "));
@@ -1880,6 +1880,25 @@ async function pruebaPorQueYBeneficios(page, prefijo, telefono) {
     await page.locator("#lluvia").uncheck();
   } else {
     omitir(`${prefijo}«Benefits» con la lluvia seca`, "el cubo no trae otro escenario de lluvia o ninguna de las fichas tiene alternativas");
+  }
+
+  // --- H1 del revisor de cifras: la tarjeta ACTUAL de una parcela que hoy está en un estado que la tabla ofrece como
+  // alternativa (el descanso) no toma prestado el motivo de esa alternativa ---
+  const ESTADOS_ACTUALES = ["ACTUAL", "nogal_no_rota"];
+  const enEstadoAlterno = [...porId.keys()].find((pid) => {
+    const actual = opcionesDe(pid).find((o) => o.id === "ACTUAL");
+    const d = actual && (cubo.opciones_catalogo ?? {})[actual.rotacion];
+    return d && !ESTADOS_ACTUALES.includes(d.letra_maestro) && !porId.get(pid).abstencion;
+  });
+  if (enEstadoAlterno) {
+    await abrirDesdeLista(page, enEstadoAlterno);
+    const v = await leerPorQue(page, "ACTUAL");
+    const prestado = (cubo.opciones_catalogo ?? {})[opcionesDe(enEstadoAlterno).find((o) => o.id === "ACTUAL").rotacion]?.por_que_en ?? "";
+    check(`${prefijo}${enEstadoAlterno}: la tarjeta ACTUAL de una parcela en descanso no toma el motivo de la alternativa de la tabla`,
+      /^This is the field's current state\./.test(v.motivo) && (!prestado || !v.porQue.includes(prestado)) && !/\d/.test(v.motivo), v.motivo);
+    await cerrarFicha(page);
+  } else {
+    omitir(`${prefijo}motivo de la tarjeta ACTUAL en un estado que la tabla ofrece como alternativa`, "ninguna parcela con ficha está en ese caso");
   }
 
   // --- M6: el pie del panel, en una línea ---

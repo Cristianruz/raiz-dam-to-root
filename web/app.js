@@ -2717,6 +2717,11 @@ function htmlLaminaLocal(o, L, areaHa, D) {
 const TEXTO_SIN_MOTIVO = "The official rotation table gives no reason for this option.";
 // Final de la frase del agua de explicaciones.json («… enough for {{ha}} hectares.»): se escribe como en la tarjeta.
 const MARCADOR_ALCANZA = /enough for \{\{ha\}\} hectares/;
+// Valores de opciones_catalogo[rotación].letra_maestro con que la tabla oficial describe lo que la parcela YA tiene
+// (su rotación actual o una huerta que no rota). Con cualquier otro, la tabla habla de una alternativa.
+const LETRAS_DE_ESTADO_ACTUAL = ["ACTUAL", "nogal_no_rota"];
+const TEXTO_ESTADO_ACTUAL =
+  "This is the field's current state. The official rotation table describes it as an alternative for a cropped field, so it gives no reason for a field that is already in it.";
 
 /**
  * Motivo oficial de una opción (I10): cubo.opciones_catalogo[rotación].por_que_en, con su etiqueta de evidencia y su
@@ -2726,10 +2731,16 @@ const MARCADOR_ALCANZA = /enough for \{\{ha\}\} hectares/;
  */
 function htmlMotivo(o) {
   const d = estado.cubo.opciones_catalogo?.[o.rotacion];
+  // La tarjeta ACTUAL de una parcela que hoy está en un estado que la tabla ofrece como ALTERNATIVA (el descanso: 219
+  // parcelas) no toma prestado ese motivo: «the field rests with standing stubble…» describe la alternativa, no una
+  // parcela que ya descansa y cuyo suelo desnudo se midió (hallazgo H1 del revisor de cifras, 15-nov).
+  if (o.id === "ACTUAL" && d && !LETRAS_DE_ESTADO_ACTUAL.includes(d.letra_maestro)) {
+    return `<p data-parte="motivo" data-motivo="estado">${esc(TEXTO_ESTADO_ACTUAL)}</p>`;
+  }
   if (o.origen_opcion !== "team_proposal" && d?.por_que_en) {
     return (
       `<p data-parte="motivo">${esc(d.por_que_en)}</p>` +
-      `<div class="fuente">${htmlFuente(d.fuente, { en: d.fuente_en, etiqueta: d.etiqueta || undefined })}</div>`
+      `<div class="fuente">${htmlFuente(d.fuente, { en: d.fuente_en, etiqueta: d.etiqueta || undefined, idioma: idiomaBuzon() })}</div>`
     );
   }
   const etiqueta = o.etiqueta_opcion || d?.etiqueta;
@@ -2748,11 +2759,17 @@ function htmlRespuestas(o, ev, areaHa, ops = []) {
   const bloque = estado.explicaciones?.explicaciones?.[o.preguntas_ref];
   if (!bloque?.textos) return "<dt>Explanation</dt><dd>Not available yet for this option.</dd>";
   const dinamicos = { d: estado.D, ha: ev.hectareas.p50, cobertura: ev.cobertura };
+  // La lámina de la frase es la del escenario de lluvia elegido y con el formato de la tarjeta: antes decía «asks for
+  // 25.49» junto a «25.5» y, con la lluvia seca, la lámina de la lluvia base (hallazgo H3 del revisor de cifras).
+  // f1, f4 y f5 son la mediana, la baja y la alta de explicaciones.json; si la opción no trae esa lámina, quedan esas.
+  const LAMINA = { f1: ev.lamina?.p50, f4: ev.lamina?.p10, f5: ev.lamina?.p90 };
+  for (const [k, v] of Object.entries(LAMINA)) if (Number.isFinite(v)) dinamicos[k] = v;
   const fh = formatoHectareas(areaHa);
   const formatear = (v, k) => {
     if (k === "cobertura") return fmtCobertura(v);
     if (k === "ha") return fh(v);
     if (k === "d") return fmt(v);
+    if (k in LAMINA) return fmtMillares(v);
     return fmtDato(v);
   };
   const alcanza = ev.cobertura >= 1
@@ -2873,7 +2890,7 @@ function pintarCoberturaGota() {
   const lluviaBase = estado.r === estado.rBase;
   const necesita = o.gota?.m3_salen_presa;
   const cuanto = lluviaBase && Number.isFinite(necesita) && necesita > 0
-    ? `: about ${fmt(ev.cobertura * necesita, 0)} of the ${fmt(necesita, 0)} m³ this option needs with the current irrigation, counted from La Boquilla`
+    ? `: about ${fmt(ev.cobertura * necesita, 0)} of the ${fmt(necesita, 0)} m³ this option needs with the current irrigation, counted from La Boquilla (canal losses included)`
     : "";
   const seca = lluviaBase ? "" : " in the drier-rain scenario; the amounts in the diagram are for the base rainfall";
   nodo.textContent = `With ${fmt(estado.D)} thousand m³/ha, the allocation covers ${fmtCobertura(ev.cobertura)} of this need${cuanto}${seca}. The rest comes from wells or stays unmet.`;

@@ -177,6 +177,9 @@ function textoDesnudo(o, a, f) {
   if (!to && !ta) return "no data.";
   if (!to) return `no data for this option; the current rotation has ${ta}.`;
   if (!ta) return `${to}; no data for the current rotation.`;
+  // Un dato medido con el satélite y otro estimado con el calendario del cultivo no se ordenan entre sí: se dan los
+  // dos, cada uno con su origen, sin «fewer» ni «more» (revisor de cifras, 15-nov).
+  if (o.suelo.dias_desnudo_origen !== a.suelo.dias_desnudo_origen) return `${to}; the current rotation has ${ta}.`;
   const vo = o.suelo.dias_desnudo;
   const va = a.suelo.dias_desnudo;
   const comparacion = vo === va ? "the same as" : vo < va ? "fewer than" : "more than";

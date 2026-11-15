@@ -3,21 +3,21 @@
 
 English version of [docs/pruebas.md](../pruebas.md); if they differ, the Spanish original prevails.
 
-Run: 2026-11-15T07:52:05+00:00 · duration 53.3 s
+Run: 2026-11-15T08:05:38+00:00 · duration 54.1 s
 
 | Step | Status | Detail |
 |---|---|---|
-| Re-download of source data (optional) | skipped | no solicitado (use --origen) |
-| Team deliveries validated against the data contract | skipped | sin RAIZ_BUZON: no se validaron entregas en esta corrida (se usa la caché previa de data/processed) |
-| Cube engine | passed | cubo REAL: 1239 parcelas, 458 clasificadas, 1267 opciones |
-| Terrain & runoff layer | passed | zonas: delicias_saucillo, lazaro_cardenas |
-| Digital twin, regional context and soil | passed | gemelo: OK · contexto: OK · suelo: OK |
-| Offline app (installable page) | passed | precache b2ec5f066dce2cfa |
-| Manifest of every figure | passed | 111032 cifras (0 simuladas), 35 fuentes de origen, 59 avisos |
-| Data contract, including the water balance of “Follow the drop” | passed | CONTRATO OK |
-| Figure checker on the page's explanations | passed | VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv |
-| Python tests | passed | 1137 passed, 30 warnings in 48.76s |
-| JavaScript tests | passed | 237 pass, 0 fail, 0 skipped |
+| Re-download of source data (optional) | skipped | not requested (use --origen) |
+| Team deliveries validated against the data contract | skipped | RAIZ_BUZON is not set: no deliveries were validated in this run (the earlier cache in data/processed is used) |
+| Cube engine | passed | REAL cube: 1239 fields, 458 classified, 1267 options |
+| Terrain & runoff layer | passed | areas: delicias_saucillo, lazaro_cardenas |
+| Digital twin, regional context and soil | passed | twin: OK · context: OK · soil: OK |
+| Offline app (installable page) | passed | precache 7c945097b40af5cc |
+| Manifest of every figure | passed | 134418 figures (0 simulated), 35 source files, 59 notices |
+| Data contract, including the water balance of “Follow the drop” | passed | CONTRACT OK |
+| Figure checker on the page's explanations | passed | CHECKER OK; golden set in docs/figuras/llm_eval.csv |
+| Python tests | passed | 1174 passed, 30 warnings in 49.17s |
+| JavaScript tests | passed | 243 pass, 0 fail, 0 skipped |
 
 The browser test (`node tests/e2e/web_smoke.mjs`) runs separately, before each publication.
 After this table is written, step 5c (`motor/pruebas_web.py`) builds `web/data/pruebas.json` from it: «About & Data» shows it as the automated gate.

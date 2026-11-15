@@ -57,7 +57,7 @@ test("alfalfa contra el corte de verano: menos agua, el mismo plazo, la misma co
     "Compared with the current rotation of this field (Alfalfa):",
     "Water per year: 25.5 thousand m³/ha (median need), less than the current rotation's 28.4.",
     "Water term: 3–4 years (0–1 years left on this field), the same as the current rotation.",
-    "Bare soil in the windy season: 0 days (estimated), the same as the current rotation's 0 days (measured).",
+    "Bare soil in the windy season: 0 days (estimated); the current rotation has 0 days (measured).",
     "Legume (adds nitrogen): yes, like the current rotation.",
     "Breaks the pest cycle and deep roots: no data in the rotation table for this option.",
   ]);
@@ -69,7 +69,7 @@ test("alfalfa contra cereal y maíz: menos agua, un año, más días de suelo de
     "Water per year: 18.9 thousand m³/ha (median need), less than the current rotation's 28.4.",
     // El alfalfar tiene un rodal a medio plazo (le quedan 0–1 años; resembrado serían 3–4): las dos cifras, sin «shorter».
     "Water term: 1 year; the current rotation's is 3–4 years (0–1 years left on this field).",
-    "Bare soil in the windy season: 20 days (estimated), more than the current rotation's 0 days (measured).",
+    "Bare soil in the windy season: 20 days (estimated); the current rotation has 0 days (measured).",
     "Legume (adds nitrogen): no; the current rotation is a legume.",
     "Breaks the pest cycle and deep roots: no data in the rotation table for this option.",
   ]);
@@ -119,7 +119,7 @@ test("si la opción pide más agua o más años que la actual, se dice igual de 
     "Compared with the current rotation of this field (Winter cereal):",
     "Water per year: 18.9 thousand m³/ha (median need), more than the current rotation's 7.8.",
     "Water term: 1 year, the same as the current rotation.",
-    "Bare soil in the windy season: 20 days (estimated), fewer than the current rotation's 26 days (measured).",
+    "Bare soil in the windy season: 20 days (estimated); the current rotation has 26 days (measured).",
     "Legume (adds nitrogen): no, like the current rotation.",
     "Breaks the pest cycle and deep roots: no data in the rotation table for this option.",
   ]);
@@ -127,7 +127,7 @@ test("si la opción pide más agua o más años que la actual, se dice igual de 
     "Compared with the current rotation of this field (Winter cereal):",
     "Water per year: 28.4 thousand m³/ha (median need), more than the current rotation's 7.8.",
     "Water term: 3–4 years, longer than the current rotation's 1 year.",
-    "Bare soil in the windy season: 0 days (estimated), fewer than the current rotation's 26 days (measured).",
+    "Bare soil in the windy season: 0 days (estimated); the current rotation has 26 days (measured).",
     "Legume (adds nitrogen): yes; the current rotation is not a legume.",
     // Un indicador con dato se dice con su valor; el de la actual, si lo trae.
     "Breaks the pest cycle: yes; the current rotation: no.",
@@ -196,7 +196,7 @@ test("la lámina igual, o igual con los decimales de la tarjeta, no se dice «le
   const ops = [ALFALFA, igual, casi];
   assert.equal(lineas(igual, { ops })[1], "Water per year: 28.4 thousand m³/ha (median need), the same as the current rotation.");
   assert.equal(lineas(casi, { ops })[1], "Water per year: 28.4 thousand m³/ha (median need), about the same as the current rotation.");
-  assert.match(lineas(casi, { ops })[3], /^Bare soil in the windy season: 1 day \(estimated\), more than/, "un día va en singular");
+  assert.match(lineas(casi, { ops })[3], /^Bare soil in the windy season: 1 day \(estimated\); the current rotation has/, "un día va en singular");
 });
 
 test("el formato lo pone quien llama (app.js pasa el de las tarjetas); por omisión, un decimal en la lámina", () => {
@@ -204,7 +204,7 @@ test("el formato lo pone quien llama (app.js pasa el de las tarjetas); por omisi
   const r = lineas(CEREAL_MAIZ, { formato });
   assert.equal(r[1], "Water per year: <18.94> thousand m³/ha (median need), less than the current rotation's <28.4>.");
   assert.equal(r[2], "Water term: [1] year; the current rotation's is [3]–[4] years ([0]–[1] years left on this field).");
-  assert.equal(r[3], "Bare soil in the windy season: [20] days (estimated), more than the current rotation's [0] days (measured).");
+  assert.equal(r[3], "Bare soil in the windy season: [20] days (estimated); the current rotation has [0] days (measured).");
   // Un formato parcial se completa con el de omisión.
   assert.match(lineas(CEREAL_MAIZ, { formato: { millares: (v) => `<${v}>` } })[3], /: 20 days/);
 });
@@ -278,3 +278,19 @@ test("TODAS las opciones de web/data/cubo.json: texto sin NaN, undefined ni null
   assert.ok(opciones > 0 && comparadas > 0 && base > 0, `se recorrió el cubo: ${opciones} opciones, ${comparadas} comparadas, ${base} de base`);
   assert.equal(comparadas + base + sinAlternativas, opciones * llaves.length);
 });
+
+test("suelo desnudo: con el mismo origen se compara; con un dato medido y otro estimado se dan los dos sin ordenarlos", async () => {
+  const { beneficiosDeOpcion, textoRenglon } = await import("../web/js/beneficios.js");
+  const opcion = (id, dias, origen) => ({
+    id, rotacion: id, nombre: id, agua: { lamina_bruta: { 0: { p50: 10 } }, plazo_anios: { min: 1, max: 1 } },
+    suelo: { dias_desnudo: dias, dias_desnudo_origen: origen, leguminosa: false, ruptura_plagas: null, raiz_profunda: null },
+  });
+  const renglonDesnudo = (o, a) => beneficiosDeOpcion({ opcion: o, opciones: [a, o], llave: "0" }).renglones.map(textoRenglon)
+    .find((x) => x.startsWith("Bare soil"));
+  const actual = { ...opcion("ACTUAL", 26, "medido"), id: "ACTUAL" };
+  assert.match(renglonDesnudo(opcion("b", 20, "medido"), actual), /20 days \(measured\), fewer than the current rotation's 26 days \(measured\)\.$/);
+  const mixto = renglonDesnudo(opcion("c", 20, "estimado"), actual);
+  assert.match(mixto, /20 days \(estimated\); the current rotation has 26 days \(measured\)\.$/);
+  assert.doesNotMatch(mixto, /fewer|more than|the same as/);
+});
+
