@@ -43,8 +43,8 @@ CLASES = {1: "Very high", 2: "High", 3: "Good", 4: "Medium", 5: "Moderate", 6: "
           8: "Not suitable", 9: "No cultivation", 10: "Water"}
 RESOLUCION_M = round(0.08333333 * 111320)          # 5 minutos de arco en el ecuador (tamaño de celda del servicio)
 UNIDAD = {"Index": "Index (0–10000)", "Class": "Class"}
-NOTA_MAIZ = ("Maize de GAEZ = maíz de grano (mze): el tema res05 no tiene capa de maíz para ensilaje (mzs) con insumos altos y "
-             "riego por gravedad; el valor es de grano, no de forraje")
+NOTA_MAIZ = ("GAEZ Maize = grain maize (mze): theme res05 has no silage-maize (mzs) layer with high inputs and gravity "
+             "irrigation; the value is for grain, not forage")
 
 
 def main():
