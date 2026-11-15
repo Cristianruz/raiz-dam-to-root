@@ -42,6 +42,15 @@
 //   cambian con el deslizador, el rótulo de la propuesta del equipo, la advertencia de advertir_si_rojo con el
 //   plazo del dato y el filtro dotacion_minima evaluado EN VIVO contra el deslizador; el nogal sin rotación dice
 //   su motivo y su fuente en lugar de las alternativas.
+// Paneles, «About & Data» y registro (etapa 3 de la integración):
+// - contexto.js: «Regional context» (montarContextoRegional) en un bloque plegable del panel, ligado a la zona elegida
+//   y al año de la línea de tiempo, con la nota de que las series regionales no describen una parcela y las
+//   advertencias de la sesión de datos a la vista; «Challenge data sources» (montarRecursosReto) en «About & Data»;
+// - acerca.js: H1-b junto a H1 y los documentos enlazados (pruebas.json);
+// - pendientes de la auditoría del motor: etiquetas [P]/[V] y fuente de La Boquilla y del acuífero (cubo.distrito),
+//   la nota de cada marca y la equivalencia y el punto de medición en inglés (nota_en, equivalencia_en,
+//   punto_medicion_en), la ventana de suelo desnudo de cubo.meta.ventana_desnudo, y en La gota el rótulo y la
+//   fuente de las eficiencias del goteo (cubo.meta.goteo) junto a sus cifras y «upper bound» en el retorno sin tope.
 
 import * as reglas from "./reglas.js";
 import {
@@ -62,7 +71,7 @@ import { montarEstadoGemelo } from "./js/estado_gemelo.js";
 import { montarInstalacion } from "./js/instalar.js";
 import { fraseResumen, casoResumen, dibujarNDVI, idDeHash, hashDe } from "./js/resumen.js";
 import { leerSuelo, htmlPerfilDeSuelo, htmlAptitud, htmlNotaDeZona } from "./js/suelo.js";
-import { evidenciaDeParcela, riesgoDeHelada } from "./js/contexto.js";
+import { evidenciaDeParcela, riesgoDeHelada, montarContextoRegional, montarRecursosReto } from "./js/contexto.js";
 
 const LOCALE = "en-US";
 
@@ -239,6 +248,8 @@ const estado = {
   ndvi: null, // web/data/ndvi_mensual.json (meses, series por parcela, umbrales y fuente)
   ndviApi: null, // gráfica del NDVI de la ficha abierta (web/js/resumen.js)
   lecturas: { contexto: null, ndvi: null }, // detalle del error si contexto.json o ndvi_mensual.json no se pudieron leer
+  // Paneles (etapa 3)
+  contextoRegional: null, // controlador de «Regional context» (web/js/contexto.js); se monta al abrir su bloque
 };
 
 // ---------------------------------------------------------------------------
@@ -443,6 +454,7 @@ async function iniciar() {
   iniciarColoreado();
   iniciarLineaDeTiempo();
   iniciarEstadoGemelo();
+  iniciarContextoRegional();
   pintarDistrito();
   pintarPie();
   conectarEventos();
@@ -645,6 +657,7 @@ function cambiarZona(valor) {
   // encuadre conserva la inclinación solo si la vista sigue activa.
   estado.linea?.fijarDatos({ features: estado.visibles, rotulo: rotuloZona() });
   estado.estadoGemelo?.fijarZona(estado.zonaSel);
+  estado.contextoRegional?.fijarZona(zonaGemelo());
   estado.vista3d?.actualizar({ zonaId: zonaGemelo() });
   sincronizar3D();
   actualizarTodo();
@@ -690,10 +703,14 @@ function iniciarControles() {
     contenedor.append(b);
   }
 
-  // Equivalencia y punto de medición: texto del cubo (de params.json), en español: lang="es" para el
-  // lector de pantalla (el deslizador lo usa como descripción).
-  enEspanol($("#equivalencia"), equivalencia);
-  enEspanol($("#punto-medicion"), punto_medicion);
+  // Equivalencia y punto de medición: texto del cubo (de params.json). La interfaz es inglés: se usa la versión en
+  // inglés (equivalencia_en, punto_medicion_en); si el cubo no la trae, la de español con lang="es" para el lector de
+  // pantalla (el deslizador lo usa como descripción).
+  const { equivalencia_en: equivalenciaEn, punto_medicion_en: puntoEn } = estado.cubo.dotaciones;
+  if (equivalenciaEn) $("#equivalencia").textContent = equivalenciaEn;
+  else enEspanol($("#equivalencia"), equivalencia);
+  if (puntoEn) $("#punto-medicion").textContent = puntoEn;
+  else enEspanol($("#punto-medicion"), punto_medicion);
   if (esAncho()) $("#unidades").open = true;
 
   // Lluvia: la variante base es 0 y la seca es la otra llave del cubo (kit §2.3).
@@ -755,7 +772,8 @@ function actualizarValorDeslizador() {
     `Source: ${m.fuente ? textoEs(m.fuente) : "not available"}`,
     m.etiqueta ? `Label: ${textoEs(m.etiqueta)}` : "",
     m.fecha_consulta ? `Accessed: ${esc(fmtFecha(m.fecha_consulta))}` : "",
-    m.nota ? `Note: ${textoEs(m.nota)}` : "",
+    // La nota en inglés (nota_en, copia de params); la de español solo si no hay traducción.
+    m.nota_en ? `Note: ${esc(m.nota_en)}` : m.nota ? `Note: ${textoEs(m.nota)}` : "",
   ]
     .filter(Boolean)
     .join(" · ");
@@ -959,9 +977,15 @@ function capaCultivos() {
   };
 }
 
+/** «(Feb 1 – Apr 30)» de cubo.meta.ventana_desnudo (copia de params.suelo.ventana_desnudo); "" si el cubo no la trae. */
+function textoVentanaDesnudo() {
+  const v = estado.cubo.meta?.ventana_desnudo;
+  return v?.inicio && v?.fin ? ` (${fmtMesDia(v.inicio)} – ${fmtMesDia(v.fin)})` : "";
+}
+
 function capaSueloDesnudo() {
   return {
-    titulo: "Bare soil in the windy season",
+    titulo: `Bare soil in the windy season${textoVentanaDesnudo()}`,
     continua: true,
     unidad: "days",
     fuente: "NASA HLS: days with very low greenness in the windy season; median of the years with data (current season if missing).",
@@ -1682,6 +1706,45 @@ function alCambiarAnio(anio) {
   estado.anioTiempo = anio == null || anio === estado.anioNormal ? null : anio;
   document.body.dataset.anioTiempo = estado.anioTiempo == null ? "" : String(estado.anioTiempo);
   pintarColoreado();
+  // «Regional context» resalta el mismo año agrícola (también el actual: ahí el mapa vuelve a la vista normal).
+  estado.contextoRegional?.fijarAnio(anio);
+}
+
+// ---------------------------------------------------------------------------
+// «Regional context» (web/js/contexto.js; decisión de los recursos del reto, «Dónde se ve», punto 1): bloque plegable
+// del panel con el clima del año y las series regionales de la zona elegida; resalta el año de la línea de tiempo.
+// Se dibuja la primera vez que se abre (son más de una docena de gráficas) y después sigue a la zona y al año.
+// ---------------------------------------------------------------------------
+function iniciarContextoRegional() {
+  const bloque = $("#bloque-contexto");
+  const cont = $("#contexto-regional");
+  if (!bloque || !cont) return;
+  const montar = () => {
+    if (!bloque.open || estado.contextoRegional || cont.dataset.montado) return;
+    cont.dataset.montado = "si";
+    if (estado.lecturas.contexto) {
+      // contexto.json existe y no se pudo leer: no es «not available yet».
+      cont.innerHTML = `<p class="contexto-aviso" role="status">Regional context: could not be read (${esc(estado.lecturas.contexto)})</p>`;
+      document.body.dataset.contexto = "error";
+      return;
+    }
+    try {
+      estado.contextoRegional = montarContextoRegional(cont, {
+        contexto: estado.contexto,
+        zonaId: zonaGemelo(),
+        anio: estado.linea?.disponible() ? estado.linea.anio() : null,
+        nombresCultivo: CULTIVOS,
+        nivel: 3,
+      });
+      document.body.dataset.contexto = estado.contexto ? "listo" : "ausente";
+    } catch (err) {
+      console.error("ROOT: the regional context could not be built", err);
+      cont.innerHTML = `<p class="contexto-aviso" role="status">Regional context: could not be shown (${esc(err?.message ?? err)})</p>`;
+      document.body.dataset.contexto = "error";
+    }
+  };
+  bloque.addEventListener("toggle", montar);
+  montar();
 }
 
 // ---------------------------------------------------------------------------
@@ -1740,7 +1803,9 @@ function pintarDistrito() {
         ? `<div class="barra-presa" role="img" aria-label="Storage ${esc(fmtDato(b.almacenamiento_hm3))} hm³ of ${esc(fmtDato(b.namo_hm3))} hm³ at NAMO"><span style="width: ${fraccion * 100}%"></span></div>`
         : "") +
       `<p>Capacity at <abbr title="Normal maximum operating level">NAMO</abbr>: <strong>${esc(fmtDato(b.namo_hm3))} hm³</strong></p>` +
-      `<p class="fuente">Storage: ${b.fuente_almacenamiento ? textoEs(b.fuente_almacenamiento) : "no source"}. Capacity: ${b.fuente_namo ? textoEs(b.fuente_namo) : "no source"}.</p>`;
+      // Fuente y etiqueta de cada cifra ([P] prensa, [V] verificado; cubo.distrito, copia de params.json).
+      `<p class="fuente" data-dato="almacenamiento">Storage: ${b.fuente_almacenamiento ? textoEs(b.fuente_almacenamiento) : "no source"}${etiquetaDato(b.etiqueta_almacenamiento)}.</p>` +
+      `<p class="fuente" data-dato="namo">Capacity: ${b.fuente_namo ? textoEs(b.fuente_namo) : "no source"}${etiquetaDato(b.etiqueta_namo)}.</p>`;
   } else {
     $("#boquilla").innerHTML = "<p>No data.</p>";
   }
@@ -1755,10 +1820,17 @@ function pintarDistrito() {
       "<p>Availability</p>" +
       `<p class="dato-grande">${v == null ? "no data" : `${esc(fmtSigno(v))} hm³ per year`}</p>` +
       (v != null && v < 0 ? "<p>A negative availability is the official deficit published by Conagua, not a measured loss.</p>" : "") +
-      `<p class="fuente">Source: ${a.fuente ? textoEs(a.fuente) : "no source"}</p>`;
+      `<p class="fuente" data-dato="acuifero">Source: ${a.fuente ? textoEs(a.fuente) : "no source"}${etiquetaDato(a.etiqueta)}</p>`;
   } else {
     $("#acuifero").innerHTML = "<p>No data.</p>";
   }
+}
+
+/** Etiqueta de un dato del distrito ([P], [V]…) junto a su fuente; con «label not stated» si el cubo no la trae. */
+function etiquetaDato(etiqueta) {
+  return etiqueta
+    ? ` <span class="etiqueta-dato" title="Evidence label">${esc(etiqueta)}</span>`
+    : ' <span class="etiqueta-dato etiqueta-dato--falta">label not stated</span>';
 }
 
 function pintarPie() {
@@ -2090,8 +2162,8 @@ function htmlSuelo(o, relieve = "", p = {}) {
     `<h5>Soil <span class="sem-texto">${esc(SEMAFORO_OTROS[sem]?.texto ?? "no data")}</span></h5>` +
     aptitud +
     (su.dias_desnudo != null
-      ? `<p>Bare soil in the windy season: <strong>${esc(fmtDato(su.dias_desnudo))} days</strong>${origen ? ` <span class="etiqueta-origen">${origen}</span>` : ""}</p>`
-      : "<p>Bare soil in the windy season: no data</p>") +
+      ? `<p>Bare soil in the windy season<span class="ventana-desnudo">${esc(textoVentanaDesnudo())}</span>: <strong>${esc(fmtDato(su.dias_desnudo))} days</strong>${origen ? ` <span class="etiqueta-origen">${origen}</span>` : ""}</p>`
+      : `<p>Bare soil in the windy season<span class="ventana-desnudo">${esc(textoVentanaDesnudo())}</span>: no data</p>`) +
     `<p>Legume (adds nitrogen): ${siNo(su.leguminosa)}</p>` +
     `<p>Breaks the pest cycle: ${siNo(su.ruptura_plagas)}</p>` +
     (su.riesgo_salinidad != null ? `<p>Salinity risk (regional): ${esc(su.riesgo_salinidad)}</p>` : "") +
@@ -2447,6 +2519,8 @@ function pintarGota() {
   if (!cont || !estado.fichaId) return;
   estado.gotaApi = dibujarGota(cont, opcionGota() ?? null, {
     locale: LOCALE,
+    // Eficiencias del goteo con su etiqueta y su fuente, y si el retorno sin tope es una cota superior (cubo.meta.goteo).
+    metaGoteo: estado.cubo.meta?.goteo ?? null,
     goteo: estado.gota.goteo,
     tope: estado.gota.tope,
     alCambiar: (e) => {
@@ -2582,6 +2656,21 @@ function abrirAcerca() {
     });
     // Si algo no se pudo leer, la próxima apertura lo vuelve a intentar (no se guarda el error).
     if (errores.manifest?.estado === "error" || errores.pruebas?.estado === "error") estado.acerca = null;
+    // «Challenge data sources» (web/js/contexto.js) en su hueco, después de los datos NASA: la tabla de recursos del reto
+    // con sus tres estados, calculada de contexto.json (no escrita a mano).
+    const hueco = montado?.elemento.querySelector('[data-bloque="recursos"]');
+    if (hueco) {
+      if (estado.lecturas.contexto) {
+        hueco.innerHTML = `<p class="acerca-vacio">Challenge data sources: contexto.json could not be read (${esc(estado.lecturas.contexto)}).</p>`;
+      } else {
+        try {
+          montarRecursosReto(hueco, { contexto: estado.contexto, nivel: 3 });
+        } catch (err) {
+          console.error("ROOT: the challenge data sources could not be built", err);
+          hueco.innerHTML = '<p class="acerca-vacio">Challenge data sources could not be shown here.</p>';
+        }
+      }
+    }
     // Título del diálogo: el encabezado principal de la sección (el primero con id).
     const titulo = montado?.elemento.querySelector(".acerca-titulo[id]");
     if (titulo) {

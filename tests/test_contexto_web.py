@@ -796,3 +796,66 @@ def test_web_data_contexto_json_generado_y_valido():
         assert (contexto[bloque] is None) == bool(contexto[f"{bloque}_motivo"]), bloque
     assert [r["id"] for r in contexto["recursos"]] == [r["id"] for r in CATALOGO["recursos"]]
     assert "DE PRUEBA" not in json.dumps(contexto, ensure_ascii=False), "la página no lleva datos de prueba"
+
+
+# ---------------------------------------------------------------------------------------
+# (f) Advertencias de la sesión de datos a la vista (integración, etapa 3) y malla de GRACE
+# ---------------------------------------------------------------------------------------
+# Lo que cada advertencia debe decir (decisión de recursos del reto y líneas de LEEME de la sesión de datos).
+ADVERTENCIAS_PEDIDAS = {
+    "evapotranspiracion": "comparison, not validation",
+    "segundo_clima": "not the FAO-56 reference evapotranspiration",
+    "agua_almacenada": "basin series",
+    "temperatura_minima": "not from NASA",
+}
+
+
+def test_catalogo_trae_las_advertencias_sin_cifras_ni_palabras_prohibidas():
+    import re
+    por_id = {t["id"]: t for t in CATALOGO["tarjetas"]}
+    for tarjeta, frase in ADVERTENCIAS_PEDIDAS.items():
+        textos = [a["texto"] for a in por_id[tarjeta].get("advertencias") or []]
+        assert any(frase in x for x in textos), f"{tarjeta}: falta «{frase}»"
+    fuentes = set(esquemas.FUENTES_CONTEXTO)
+    for t in CATALOGO["tarjetas"]:
+        for a in t.get("advertencias") or []:
+            assert set(a) <= {"id", "texto", "fuente_id"} and a["id"] and a["texto"], a
+            assert a.get("fuente_id") is None or a["fuente_id"] in fuentes, a
+            # Sin cifras de datos: los dígitos que quedan son parte del nombre de un producto o de un método.
+            sin_nombres = re.sub(r"FAO-56|ERA5(-Land)?", "", a["texto"])
+            assert not re.search(r"\d", sin_nombres), a["texto"]
+            assert not re.search(r"\b(first|only|save|saves|savings|best|recommended)\b", a["texto"], re.I), a["texto"]
+
+
+def test_advertencias_llegan_a_contexto_json_real():
+    ruta = RAIZ / "web/data/contexto.json"
+    if not ruta.is_file():
+        pytest.skip("web/data/contexto.json aún no se genera")
+    contexto = json.loads(ruta.read_text(encoding="utf-8"))
+    por_id = {t["id"]: t for t in contexto["tarjetas"]}
+    for tarjeta, frase in ADVERTENCIAS_PEDIDAS.items():
+        assert any(frase in a["texto"] for a in por_id[tarjeta].get("advertencias") or []), tarjeta
+
+
+def test_malla_mascon_se_lee_de_la_linea_de_leeme_de_su_fuente():
+    linea = ("Earth Engine: smap = PRODUCTO (malla de 9 km); grace = OTRO (mascons de JPL; malla de 0.5° sobre mascons "
+             "de 3°; una sola serie); gldas = TERCERO (malla de 0.25°)")
+    assert cw.malla_mascon(linea, "grace") == {"malla_grados": 0.5, "mascon_grados": 3.0,
+                                                "texto_fuente": "malla de 0.5° sobre mascons de 3°"}
+    # Otra fuente de la misma línea no hereda la frase de GRACE; sin la frase, nada se supone.
+    assert cw.malla_mascon(linea, "gldas") is None and cw.malla_mascon(linea, "smap") is None
+    assert cw.malla_mascon("grace = PRODUCTO sin malla declarada", "grace") is None
+    assert cw.malla_mascon(None, "grace") is None
+    assert cw.malla_mascon("malla de 0,5 ° sobre mascons de 3 °", "grace") is None, "sin «grace =» no es de GRACE"
+    assert cw.malla_mascon("grace = X (malla de 0,5 ° sobre mascons de 3 °)", "grace")["malla_grados"] == 0.5
+
+
+def test_malla_de_grace_en_contexto_json_real_sale_de_su_fuente():
+    ruta = RAIZ / "web/data/contexto.json"
+    if not ruta.is_file():
+        pytest.skip("web/data/contexto.json aún no se genera")
+    regional = json.loads(ruta.read_text(encoding="utf-8")).get("contexto_regional") or {}
+    for zona, series in regional.items():
+        for clave, serie in series.items():
+            esperado = cw.malla_mascon(serie.get("fuente"), serie["fuente_id"])
+            assert serie.get("malla_mascon") == esperado, f"{zona} {clave}"

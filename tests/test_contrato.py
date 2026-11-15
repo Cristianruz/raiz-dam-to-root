@@ -16,6 +16,7 @@
    la fuente de la entrega relieve_meta y la etiqueta de su bloque.
 """
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -599,3 +600,107 @@ def test_manifest_cubre_la_ficha_completa(man):
         ctx = json.loads((ruta / "contexto.json").read_text(encoding="utf-8"))
         if (ctx.get("gedi") or {}).get("parcelas"):
             assert "gedi.parcelas.*.altura_mediana_m" in por_archivo["web/data/contexto.json"]
+
+
+# --- Regla 11 en la integración (etapa 3): cada cifra de gemelo, contexto, suelo y NDVI registrada -----------------
+ARCHIVOS_NUEVOS = {
+    "gemelo.json": lambda r: r,
+    "contexto.json": manifest.renombrar_contexto,
+    "suelo.json": manifest.renombrar_suelo,
+    "ndvi_mensual.json": lambda r: r,
+}
+
+
+def _rutas_a_registrar(nombre, datos):
+    """(ruta del manifest, valor) de cada hoja numérica y cada texto con cifras que la página puede mostrar."""
+    renombrar = ARCHIVOS_NUEVOS[nombre]
+    salida = []
+    for ruta, v in manifest.hojas_numericas(datos, ""):
+        if not ruta.startswith("_"):
+            salida.append((renombrar(ruta), v))
+    for ruta, v in manifest.textos_con_digitos(datos, ""):
+        ruta = ruta.lstrip(".")
+        if ruta.startswith("_") or ruta.split(".")[0] in ("generado", "decision"):
+            continue
+        if nombre == "contexto.json" and re.search(r"\.meses\[\d+\]$", ruta):
+            # Los meses de una serie se registran como su periodo (una entrada por lista).
+            salida.append((renombrar(re.sub(r"\[\d+\]$", "", ruta)) + ".periodo", None))
+            continue
+        salida.append((renombrar(ruta), v))
+    return salida
+
+
+def test_manifest_registra_cada_cifra_de_gemelo_contexto_suelo_y_ndvi(man):
+    """Toda hoja numérica y todo texto con cifras de los cuatro archivos tiene su entrada (por patrón), con fuente y
+    script; los números caen en el rango de su patrón. Con los datos de hoy, ninguno queda «sin regla propia»."""
+    revisados = 0
+    for nombre in ARCHIVOS_NUEVOS:
+        ruta = RAIZ / "web/data" / nombre
+        if not ruta.exists():
+            continue
+        datos = json.loads(ruta.read_text(encoding="utf-8"))
+        faltan = []
+        for clave, v in _rutas_a_registrar(nombre, datos):
+            e = man["cifras"].get(f"{nombre}:{patron(clave)}")
+            if e is None:
+                faltan.append(clave)
+                continue
+            assert e["script"], f"{nombre}:{clave} sin script"
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                assert e["min"] <= v <= e["max"], f"{nombre}:{clave} = {v} fuera de [{e['min']}, {e['max']}]"
+            elif isinstance(v, str):
+                assert v in (e.get("textos") or []), f"{nombre}:{clave}: texto sin registrar"
+            revisados += 1
+        assert not faltan, f"{nombre}: cifras sin entrada en el manifest: {faltan[:8]}"
+        sin_regla = [a for a in man["avisos"] if a.startswith(f"{nombre}:") and "sin regla propia" in a]
+        assert not sin_regla, sin_regla
+    assert revisados > 0
+
+
+def test_manifest_contexto_cada_serie_con_su_producto_y_su_periodo(man):
+    ruta = RAIZ / "web/data/contexto.json"
+    if not ruta.exists():
+        pytest.skip("sin web/data/contexto.json")
+    ctx = json.loads(ruta.read_text(encoding="utf-8"))
+    for zona, series in (ctx.get("contexto_regional") or {}).items():
+        for clave, s in series.items():
+            e = man["cifras"][f"contexto.json:contexto_regional.zonas.*.{clave}.valores[*]"]
+            # La fuente cita el producto de ESA serie (su tramo de la línea de LEEME), no la de otra.
+            assert any(f"{s['fuente_id']} = " in f for f in (e["fuente"] if isinstance(e["fuente"], list) else [e["fuente"]]))
+            p = man["cifras"][f"contexto.json:contexto_regional.zonas.*.{clave}.meses.periodo"]
+            assert f"{s['meses'][0]} … {s['meses'][-1]}" in p["textos"]
+            if s.get("malla_mascon"):
+                m = man["cifras"][f"contexto.json:contexto_regional.zonas.*.{clave}.malla_mascon.mascon_grados"]
+                assert m["min"] == s["malla_mascon"]["mascon_grados"] and m["etiqueta"]
+    # El clima del año: lluvia de IMERG con la fuente de imerg_diaria; ETo con la de eto_diaria.
+    for zona, b in (ctx.get("clima_anual") or {}).items():
+        imerg = man["cifras"]["contexto.json:clima_anual.zonas.*.anios[*].lluvia_imerg_mm"]
+        eto = man["cifras"]["contexto.json:clima_anual.zonas.*.anios[*].eto_mm"]
+        assert contiene(imerg["fuente"], b["fuentes"]["imerg"]["fuente"])
+        assert contiene(eto["fuente"], b["fuentes"]["power"]["fuente"])
+
+
+def test_barrido_registra_y_avisa_lo_que_no_tiene_regla():
+    """Una cifra nueva sin regla propia no se salta: se registra con la fuente del archivo y se avisa una vez."""
+    m = manifest.Manifest("2026-11-15")
+    datos = {"_encabezado": "AI-assisted 2026", "generado": "2026-11-15", "bloque_nuevo": {"a": [1, 2], "texto": "en 2026"}}
+    manifest.barrer(m, "web/data/suelo.json", datos, lambda r: r, ("fuente del archivo", None, "motor/suelo_web.py", "x"))
+    claves = sorted(c["clave"] for c in m.cifras.values())
+    assert claves == ["bloque_nuevo.a[0]", "bloque_nuevo.a[1]", "bloque_nuevo.texto"]
+    avisos = [a for a in m.avisos if "sin regla propia" in a]
+    assert len(avisos) == 2 and any("bloque_nuevo.a[*]" in a for a in avisos)
+    # Lo ya registrado no se repite.
+    manifest.barrer(m, "web/data/suelo.json", datos, lambda r: r, ("fuente del archivo", None, "motor/suelo_web.py", "x"))
+    assert len(m.cifras) == 3 and not [a for a in m.avisos if "clave repetida" in a]
+
+
+def test_manifest_registra_h1b_junto_a_h1(man):
+    ruta = RAIZ / "web/data/pruebas.json"
+    if not ruta.exists():
+        pytest.skip("sin web/data/pruebas.json")
+    pruebas = json.loads(ruta.read_text(encoding="utf-8"))
+    for i, p in enumerate(pruebas["pruebas"]):
+        for j, c in enumerate(p.get("complementos") or []):
+            for k, met in enumerate(c.get("metricas") or []):
+                e = man["cifras"][f"pruebas.json:pruebas[*].complementos[*].metricas[*].valor"]
+                assert e["min"] <= met["valor"] <= e["max"] and contiene(e["fuente"], met["fuente"])

@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/contexto_web.py con las entregas validadas de data/processed; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
- "generado": "2026-11-15T03:30:58+00:00",
+ "generado": "2026-11-15T03:34:57+00:00",
  "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
  "zonas": {
   "delicias_saucillo": {
@@ -1664,7 +1664,12 @@
       "suma": null,
       "completo": false
      }
-    ]
+    ],
+    "malla_mascon": {
+     "malla_grados": 0.5,
+     "mascon_grados": 3.0,
+     "texto_fuente": "malla de 0.5° sobre mascons de 3°"
+    }
    }
   },
   "delicias_saucillo": {
@@ -25717,6 +25722,13 @@
     "grace"
    ],
    "nota": "GRACE measures all the water stored (surface, soil and aquifer together) at basin scale. It does not separate the aquifer or the irrigation district.",
+   "advertencias": [
+    {
+     "id": "serie_de_cuenca",
+     "fuente_id": "grace",
+     "texto": "GRACE is a basin series: one series for both pilot areas, the same in each. Its product grid is finer than the mascons it is built on, so the real resolution is the mascon's."
+    }
+   ],
    "paneles": [
     {
      "titulo": "GRACE / GRACE-FO",
@@ -25756,7 +25768,13 @@
     "gldas",
     "viirs_ssebop"
    ],
-   "nota": "Independent estimates of evapotranspiration at regional scale: a regional comparison, not a field-level validation.",
+   "nota": "Independent estimates of evapotranspiration at regional scale.",
+   "advertencias": [
+    {
+     "id": "comparacion",
+     "texto": "MODIS, GLDAS and SSEBop: a comparison, not validation. None of them measures the water of one field, and none changes the water need the page computes."
+    }
+   ],
    "paneles": [
     {
      "titulo": "MODIS and GLDAS",
@@ -25801,6 +25819,13 @@
     "nldas"
    ],
    "nota": "A second source next to NASA POWER, to bound its uncertainty.",
+   "advertencias": [
+    {
+     "id": "no_es_eto",
+     "fuente_id": "nldas",
+     "texto": "NLDAS potential evaporation is not the FAO-56 reference evapotranspiration (ETo) of NASA POWER: it is another quantity, so the two are not compared value by value."
+    }
+   ],
    "paneles": [
     {
      "titulo": "NLDAS rainfall",
@@ -25829,6 +25854,13 @@
     "era5_land"
    ],
    "nota": "A second source next to NASA POWER, with the same definition of a frost day.",
+   "advertencias": [
+    {
+     "id": "no_nasa",
+     "fuente_id": "era5_land",
+     "texto": "ERA5-Land is from ECMWF and the Copernicus Climate Change Service, not from NASA."
+    }
+   ],
    "paneles": [
     {
      "titulo": "ERA5-Land minimum temperature",

@@ -65,6 +65,16 @@
 //   deslizador y «no local reference» donde toca; propuesta del equipo rotulada; nogal sin rotación con su motivo;
 //   dotacion_minima que cambia de estado con el deslizador; GEDI con su nota junto al valor; riesgo de helada junto a
 //   la siembra; la hoja de P0757 en una carta y una A4; suelo.json y contexto.json en HTTP 500 se dicen;
+// - paneles y registro (etapa 3 de la integración): «Regional context» plegable en el panel (cerrado al abrir la
+//   página; al abrirlo, la zona y el año de la línea de tiempo, el clima del año, una tarjeta por grupo de series y la
+//   nota de que no describen una parcela; las advertencias de la sesión de datos a la vista; la malla de GRACE con sus
+//   mascons; un año con días faltantes lo dice; cambiar el año de la línea de tiempo cambia el valor mostrado; cambiar
+//   de zona y «All areas»); «Challenge data sources» en «About & Data» con los conteos de contexto.json; H1-b junto a
+//   H1 (su veredicto, cifras y fuente, sin cambiar el de H1) y los documentos enlazados; etiquetas [P]/[V] y fuente de
+//   La Boquilla y del acuífero; nota de cada marca, equivalencia y punto de medición en inglés; ventana de suelo
+//   desnudo de cubo.meta en la capa y en la ficha; leyenda del relieve con las rutas cortadas (rutas_depresiones);
+//   La gota con el rótulo y la fuente de las eficiencias del goteo a la vista y «upper bound» sin tope; contexto.json
+//   en HTTP 500 lo dicen «Regional context» y «Challenge data sources»;
 // - guarda capturas en tests/e2e/capturas/ (o en RAIZ_CAPTURAS).
 // No supone un juego de datos: los valores esperados y las parcelas de cada prueba se leen de los datos.
 // Las comprobaciones que cuentan TODAS las parcelas (las de antes del gemelo) pasan primero a «All areas».
@@ -79,7 +89,7 @@ import { createRequire } from "node:module";
 import { aguaComprometida, conteosZona, cobertura, evaluarOpcion } from "../../web/reglas.js";
 import { fraseResumen } from "../../web/js/resumen.js";
 import { ESTADOS_APTITUD, ROTULO_APTITUD, grupoDeTextura } from "../../web/js/suelo.js";
-import { NOTA_GEDI, riesgoDeHelada } from "../../web/js/contexto.js";
+import { NOTA_GEDI, NOTA_REGIONAL, riesgoDeHelada, climaDelAnio, contarEstados, diasIncompletos, formatoNumero, textoMascon } from "../../web/js/contexto.js";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
 
 const require = createRequire(import.meta.url);
@@ -491,6 +501,20 @@ async function pruebaGota(page, id, c, prefijo, reducida, capturas = null) {
     (await boton.getAttribute("aria-pressed")) === "true" && cifras.includes("Dam water") && cifras.includes(esperadaPresa) && cifras.includes("Back to aquifer") && cifras.includes(esperadaAcuifero),
     cifras.replace(/\n/g, " "),
   );
+  // Rótulo de las eficiencias del goteo (cubo.meta.goteo) A LA VISTA junto a las cifras, sin abrir ningún desplegable.
+  const mg = c.meta?.goteo?.disponible ? c.meta.goteo : null;
+  if (mg?.ea_goteo && Number.isFinite(mg.ea_goteo.valor)) {
+    const rot = page.locator("#gota-etiqueta-goteo");
+    const textoRot = (await rot.isVisible()) ? await rot.innerText() : "";
+    const pct = (f) => nf({ style: "percent", maximumFractionDigits: 0 }).format(f);
+    const corta = String(mg.ea_goteo.fuente ?? "").split(": ")[0];
+    check(
+      `${prefijo}el goteo muestra junto a sus cifras las eficiencias (${pct(mg.ea_goteo.valor)}), su rótulo «${mg.ea_goteo.etiqueta}» y la fuente FAO`,
+      textoRot.includes(pct(mg.ea_goteo.valor)) && textoRot.includes(mg.ea_goteo.etiqueta) && textoRot.includes(corta) && /FAO/.test(textoRot) &&
+        (!mg.ea_superficial_referencia || textoRot.includes(pct(mg.ea_superficial_referencia.valor))),
+      textoRot.replace(/\n/g, " ").slice(0, 200),
+    );
+  }
   const goteo = await revisarSankey(page, g, variante, `${prefijo}La gota de ${id}, goteo`);
   const proporcion = goteo.presa.alto / actual.presa.alto;
   const esperada = g.m3_salen_presa / op.gota.m3_salen_presa;
@@ -524,9 +548,18 @@ async function pruebaGota(page, id, c, prefijo, reducida, capturas = null) {
     check(`${prefijo}sin tope: «Crop consumption (ET) ${et} vs. historical»`, sinTope.includes("Crop consumption (ET)") && sinTope.includes(et) && sinTope.includes("vs. historical"), sinTope.replace(/\n/g, " "));
     const alerta = page.locator("#gota-alerta");
     check(`${prefijo}sin tope: aviso «Not recommended» solo si cumple_sin_tope = false`, (await alerta.isVisible()) === (op.tope_consumo.cumple_sin_tope === false));
+    // El retorno al acuífero sin tope es una cota superior (cubo.meta.goteo.retorno_sin_tope_es_cota_superior).
+    if (c.meta?.goteo?.retorno_sin_tope_es_cota_superior === true) {
+      const acu = await page.locator('#gota-cifras [data-cifra="acuifero"]').innerText();
+      check(`${prefijo}sin tope: «Back to aquifer» rotulado «upper bound», con su nota a la vista`, acu.includes("upper bound") && (await page.locator("#gota-cota").isVisible()), acu.replace(/\n/g, " "));
+    }
     await revisarSankey(page, sin, "sin_tope", `${prefijo}La gota de ${id}, goteo sin tope`);
     await capturar(capturas?.sin);
     await page.locator("#gota-tope").click();
+  }
+  if (c.meta?.goteo?.retorno_sin_tope_es_cota_superior === true && con) {
+    const acuCon = await page.locator('#gota-cifras [data-cifra="acuifero"]').innerText().catch(() => "");
+    check(`${prefijo}con tope: el retorno no lleva «upper bound»`, !acuCon.includes("upper bound") && (await page.locator("#gota-cota").isHidden()), acuCon.replace(/\n/g, " "));
   }
   await boton.click();
   check(`${prefijo}al quitar el goteo vuelve el riego actual y desaparecen las cifras`, (await svg.getAttribute("data-variante")) === "actual" && (await texto(page, "#gota-cifras")).trim() === "");
@@ -571,6 +604,19 @@ async function pruebaRelieve(page, prefijo, reducida, captura = null) {
     zonasRel.every((z) => ley.includes(`${fmt3(z.umbral_ruta_ha)} ha`) && ley.includes(z.rotulo)) && ley.includes(relieve.fuente),
     ley.replace(/\n/g, " ").slice(0, 160),
   );
+
+  // Rutas cortadas (relieve.json → rutas_depresiones): profundidad mínima, su etiqueta y su nota, de los datos.
+  const conCorte = zonasRel.filter((z) => z.rutas_depresiones);
+  if (conCorte.length) {
+    const corte = (await page.locator("#capa-relieve .relieve-depresiones").count()) ? await texto(page, "#capa-relieve .relieve-depresiones") : "";
+    check(
+      `${prefijo}leyenda del relieve: rutas cortadas en depresiones de al menos ${conCorte.map((z) => `${fmt3(z.rutas_depresiones.prof_min_m)} m`).join(", ")}, con su etiqueta y su nota`,
+      corte.startsWith("Cut paths:") && conCorte.every((z) => corte.includes(`${fmt3(z.rutas_depresiones.prof_min_m)} m`) && corte.includes(z.rutas_depresiones.etiqueta) && corte.includes(z.rutas_depresiones.nota)),
+      corte.slice(0, 200),
+    );
+  } else {
+    omitir(`${prefijo}leyenda de rutas cortadas`, "relieve.json sin rutas_depresiones");
+  }
 
   // Tormenta: lámina con su definición, periodo y fuente.
   await page.locator(".relieve-boton-tormenta").click();
@@ -832,6 +878,8 @@ async function pruebaAcerca(page, peticiones, prefijo, telefono, captura) {
   if (existe("manifest.json")) {
     check(`${prefijo}About & Data: tabla de datos NASA leída de manifest.json`, (await page.locator("#acerca .acerca-tabla tbody tr[data-familia]").count()) > 0);
   }
+  await pruebaRecursosReto(page, prefijo, telefono);
+  await pruebaH1b(page, prefijo, telefono);
   if (telefono) {
     const cabe = await dlg.evaluate((d) => d.getBoundingClientRect().right <= window.innerWidth + 1 && d.scrollWidth <= d.clientWidth + 1);
     check(`${prefijo}About & Data cabe en el teléfono sin desplazamiento horizontal`, cabe);
@@ -1587,6 +1635,221 @@ async function pruebaNDVIHuecos(navegador, base) {
   await ctxN.ctx.close();
 }
 
+// ---------------------------------------------------------------- paneles y registro (etapa 3 de la integración)
+const zonaContexto = zonaInicial ?? (zonasCubo.length === 1 ? zonasCubo[0] : null);
+// Frases que las advertencias de la sesión de datos deben poner a la vista (data/recursos_reto.json → tarjetas).
+const ADVERTENCIAS = { evapotranspiracion: "comparison, not validation", segundo_clima: "not the FAO-56 reference evapotranspiration", agua_almacenada: "basin series", temperatura_minima: "not from NASA" };
+
+/** Abre «Regional context» (plegable) y espera a que se dibuje. */
+async function abrirContexto(page) {
+  const bloque = page.locator("#bloque-contexto");
+  if (!(await bloque.evaluate((d) => d.open))) await page.locator("#bloque-contexto > summary").click();
+  await page.waitForFunction(() => Boolean(document.body.dataset.contexto), null, { timeout: 10000 }).catch(() => null);
+}
+
+/** Año agrícola con lluvia de IMERG en dos años de la línea de tiempo con valores distintos (para el cambio de año). */
+function aniosDistintos(zona) {
+  const [a0, a1] = gemelo?.tiempo?.anios ?? [];
+  if (!contexto || !zona || a0 == null) return null;
+  const valor = (a) => climaDelAnio(contexto, zona, a)?.lluviaImerg;
+  const otro = [...Array(a1 - a0).keys()].map((k) => a1 - 1 - k).find((a) => valor(a) != null && valor(a) !== valor(a1));
+  return valor(a1) != null && otro != null ? [a1, otro] : null;
+}
+
+async function pruebaContextoRegional(page, prefijo, telefono) {
+  const bloque = page.locator("#bloque-contexto");
+  check(`${prefijo}Regional context: bloque plegable en el panel, cerrado al abrir la página`, (await page.locator(".panel #bloque-contexto").count()) === 1 && !(await bloque.evaluate((d) => d.open)) && (await texto(page, "#bloque-contexto > summary")).includes("Regional context"));
+  await abrirContexto(page);
+  if (!contexto) {
+    check(`${prefijo}sin contexto.json: «Regional context: not available yet.»`, (await texto(page, "#contexto-regional")).includes("not available yet"));
+    return;
+  }
+  if (!zonaContexto) {
+    omitir(`${prefijo}Regional context por zona`, "el cubo no trae zonas");
+    return;
+  }
+  const raiz = page.locator("#contexto-regional .contexto");
+  const anio = Number(await page.locator("#linea-tiempo .tiempo-rango").inputValue().catch(() => "NaN"));
+  const donde = await texto(page, "#contexto-regional .contexto-donde");
+  const nombre = contexto.zonas?.[zonaContexto]?.nombre ?? zonaContexto;
+  check(`${prefijo}Regional context ligado a la zona (${nombre}) y al año de la línea de tiempo (${anio})`, donde.includes(nombre) && donde.includes(`agricultural year ${anio}`), donde);
+  const nota = await raiz.locator("p.contexto-nota").last().innerText();
+  check(`${prefijo}Regional context: nota de que las series regionales no describen una parcela`, nota === NOTA_REGIONAL && /not a single field/.test(nota) && (await texto(page, "#bloque-contexto > summary")).includes("not a single field"));
+  // Una tarjeta por grupo de series de contexto.json, con gráfica si la serie llegó.
+  const tarjetas = await raiz.locator(".contexto-tarjeta[data-tarjeta]").evaluateAll((xs) => xs.map((x) => ({ id: x.dataset.tarjeta, figuras: x.querySelectorAll(".contexto-figura svg").length })));
+  const ids = (contexto.tarjetas ?? []).map((t) => t.id);
+  check(`${prefijo}Regional context: una tarjeta por grupo de series (${ids.length}) más GAEZ, con gráficas`, ids.every((id) => tarjetas.some((x) => x.id === id)) && tarjetas.filter((x) => x.figuras > 0).length >= Math.min(ids.length, 5), tarjetas.map((x) => `${x.id}:${x.figuras}`).join(" "));
+  // Advertencias de la sesión de datos, a la vista (no plegadas).
+  for (const [tarjeta, frase] of Object.entries(ADVERTENCIAS)) {
+    const t = contexto.tarjetas?.find((x) => x.id === tarjeta);
+    if (!t?.advertencias?.length) {
+      check(`${prefijo}Regional context: la tarjeta ${tarjeta} trae su advertencia en contexto.json`, false, "sin advertencias en los datos");
+      continue;
+    }
+    const li = raiz.locator(`[data-tarjeta="${tarjeta}"] .contexto-advertencia`);
+    const textos = (await li.count()) ? await li.allInnerTexts() : [];
+    check(`${prefijo}Regional context: a la vista en «${t.titulo}»: «${frase}»`, textos.some((x) => x.includes(frase)) && (await li.first().isVisible()), textos.join(" | ").slice(0, 160));
+  }
+  // GRACE: serie de cuenca con su malla y la de sus mascons (cifras de la entrega).
+  const grace = Object.values(contexto.contexto_regional?.cuenca ?? {})[0];
+  if (grace?.malla_mascon) {
+    const meta = await raiz.locator('[data-tarjeta="agua_almacenada"] .contexto-meta').first().innerText();
+    check(`${prefijo}Regional context: GRACE dice «Basin scale» y ${formatoNumero(grace.malla_mascon.mascon_grados)}° mascons (de la línea de LEEME)`, meta.includes("Basin scale") && meta.includes(textoMascon(grace)), meta.replace(/\n/g, " "));
+  }
+  // Cambiar el año de la línea de tiempo cambia el valor mostrado.
+  const par = aniosDistintos(zonaContexto);
+  const rango = page.locator("#linea-tiempo .tiempo-rango");
+  const fijarAnio = (a) => rango.evaluate((el, v) => { el.value = String(v); el.dispatchEvent(new Event("input", { bubbles: true })); }, a);
+  const lluviaImerg = () => raiz.locator(".contexto-cifra-lado .contexto-cifra").first().innerText();
+  if (par) {
+    const [a1, a2] = par;
+    await fijarAnio(a1);
+    const v1 = await lluviaImerg();
+    await fijarAnio(a2);
+    const v2 = await lluviaImerg();
+    const d2 = await texto(page, "#contexto-regional .contexto-donde");
+    const e1 = formatoNumero(climaDelAnio(contexto, zonaContexto, a1).lluviaImerg);
+    const e2 = formatoNumero(climaDelAnio(contexto, zonaContexto, a2).lluviaImerg);
+    check(`${prefijo}Regional context: mover la línea de tiempo de ${a1} a ${a2} cambia la lluvia mostrada (${e1} → ${e2} mm)`, v1.includes(e1) && v2.includes(e2) && v1 !== v2 && d2.includes(`agricultural year ${a2}`), `${v1.replace(/\n/g, " ")} → ${v2.replace(/\n/g, " ")}`);
+    const resaltado = await raiz.locator('.contexto-figura[data-grafica="clima-lluvia"] .contexto-elegido-texto').textContent().catch(() => "");
+    check(`${prefijo}Regional context: la gráfica de lluvia resalta ${a2}`, resaltado === String(a2), resaltado);
+    await fijarAnio(a1);
+  } else {
+    omitir(`${prefijo}Regional context: cambio de año`, "ningún par de años con lluvia distinta en la línea de tiempo");
+  }
+  // Un año con días faltantes que sí tiene total lo dice junto a su cifra.
+  const [t0, t1] = gemelo?.tiempo?.anios ?? [];
+  const incompleto = t0 == null ? null : [...Array(t1 - t0 + 1).keys()].map((k) => t1 - k).find((a) => {
+    const c = climaDelAnio(contexto, zonaContexto, a);
+    return c && c.lluviaPower != null && diasIncompletos(c.diasConDato, c.diasDelAnio);
+  });
+  if (incompleto != null) {
+    await fijarAnio(incompleto);
+    const c = climaDelAnio(contexto, zonaContexto, incompleto);
+    const cifras = await raiz.locator(".contexto-clima-cifras").innerText();
+    check(`${prefijo}Regional context: ${incompleto} con días faltantes dice «${diasIncompletos(c.diasConDato, c.diasDelAnio)}»`, cifras.includes(diasIncompletos(c.diasConDato, c.diasDelAnio)), cifras.replace(/\n/g, " ").slice(0, 200));
+    await fijarAnio(t1);
+  } else {
+    omitir(`${prefijo}Regional context: año con días faltantes`, "ningún año de la línea de tiempo tiene total con días faltantes");
+  }
+  const cuerpo = await raiz.evaluate((el) => el.textContent);
+  check(`${prefijo}Regional context: sin «undefined», «NaN» ni «null»`, !/undefined|NaN|\bnull\b/.test(cuerpo));
+  if (telefono) check(`${prefijo}Regional context: sin desplazamiento horizontal en el teléfono`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  await page.locator("#bloque-contexto").evaluate((el) => el.scrollIntoView({ block: "start" }));
+  await page.screenshot({ path: path.join(CAPTURAS, `${telefono ? "telefono" : "escritorio"}_contexto_regional.png`) });
+  await raiz.locator('[data-tarjeta="evapotranspiracion"] .contexto-tarjeta-titulo').evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await page.screenshot({ path: path.join(CAPTURAS, `${telefono ? "telefono" : "escritorio"}_contexto_advertencias.png`) });
+  // Otra zona y «All areas».
+  const otra = zonasCubo.find((z) => z !== zonaContexto && contexto.zonas?.[z]);
+  if (otra && zonaInicial) {
+    await elegirZona(page, otra);
+    const d = await texto(page, "#contexto-regional .contexto-donde");
+    check(`${prefijo}Regional context sigue al cambio de zona (${contexto.zonas[otra].nombre})`, d.includes(contexto.zonas[otra].nombre), d);
+    await page.locator("#zona-sel").selectOption("");
+    await page.evaluate(() => window.raizDepuracion.esperarMapa());
+    check(`${prefijo}Regional context con «All areas»: pide elegir una zona y conserva la nota`, (await texto(page, "#contexto-regional")).includes("Choose one pilot area") && (await texto(page, "#contexto-regional")).includes("not a single field"));
+    await elegirZona(page, zonaInicial);
+  }
+  await page.locator("#bloque-contexto > summary").click(); // se pliega de nuevo (no estorba a las pruebas que siguen)
+}
+
+/** «Challenge data sources» en «About & Data» (diálogo ya abierto): tres estados y conteos de contexto.json. */
+async function pruebaRecursosReto(page, prefijo, telefono) {
+  const hueco = page.locator('#acerca [data-bloque="recursos"]');
+  if (!contexto) {
+    check(`${prefijo}sin contexto.json: «Challenge data sources: not available yet.»`, (await hueco.innerText()).includes("not available yet"));
+    return;
+  }
+  const filas = await hueco.locator("tbody tr[data-recurso]").evaluateAll((xs) => xs.map((x) => ({ id: x.dataset.recurso, estado: x.dataset.estado, texto: x.textContent })));
+  const titulo = await hueco.locator(".contexto-titulo").innerText().catch(() => "");
+  check(`${prefijo}About & Data: tabla «Challenge data sources» con un renglón por recurso de contexto.json (${contexto.recursos.length})`, titulo === "Challenge data sources" && filas.length === contexto.recursos.length && contexto.recursos.every((r) => filas.some((f) => f.id === r.id && f.estado === r.estado)), `${filas.length} renglones`);
+  const cuenta = contarEstados(contexto.recursos);
+  const resumen = (await hueco.locator(".contexto-recursos-resumen").innerText()).replace(/\s+/g, " ");
+  const esperado = [["in_use", "in use"], ["requested", "requested, not delivered yet"], ["not_applicable", "not applicable"]];
+  check(`${prefijo}Challenge data sources: conteos que cuadran con contexto.json (${esperado.map(([k]) => `${k} ${cuenta[k]}`).join(", ")})`,
+    resumen.includes(`${formatoNumero(cuenta.total)} entries`) && esperado.every(([k, t]) => resumen.includes(`${formatoNumero(cuenta[k])} ${t}`)) && cuenta.in_use + cuenta.requested + cuenta.not_applicable === cuenta.total, resumen);
+  const estados = await hueco.locator("tbody .contexto-estado").allInnerTexts();
+  for (const [k, texto] of [["in_use", "In use"], ["requested", "Requested, not delivered yet"], ["not_applicable", "Not applicable"]]) {
+    if (cuenta[k]) check(`${prefijo}Challenge data sources: estado «${texto}» con símbolo y texto`, estados.filter((x) => x.includes(texto)).length === cuenta[k]);
+  }
+  const era5 = contexto.recursos.find((r) => r.id === "era5_land");
+  if (era5) check(`${prefijo}Challenge data sources: ERA5-Land rotulado con su organismo (ECMWF/Copernicus, no NASA)`, filas.find((f) => f.id === "era5_land")?.texto.includes("ECMWF") && !/^NASA/.test(era5.organismo));
+  await hueco.locator(".contexto-titulo").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(CAPTURAS, `${telefono ? "telefono" : "escritorio"}_recursos_reto.png`) });
+}
+
+/** H1-b junto a H1 en «About & Data» (diálogo abierto) y los documentos enlazados. */
+async function pruebaH1b(page, prefijo, telefono) {
+  const h1 = pruebasWeb?.pruebas?.find((p) => p.id === "backtest_h1");
+  const h1b = h1?.complementos?.find((c) => c.id === "h1b");
+  if (!h1b) {
+    omitir(`${prefijo}H1-b`, "pruebas.json no trae el complemento de H1");
+    return;
+  }
+  const tarjetaH1 = page.locator('#acerca .acerca-prueba[data-prueba="backtest_h1"]');
+  const bloque = tarjetaH1.locator('.acerca-complemento[data-complemento="h1b"]');
+  const t = (await bloque.count()) ? await bloque.innerText() : "";
+  const valores = (h1b.metricas ?? []).map((m) => nf({ maximumFractionDigits: 2 }).format(m.valor));
+  check(`${prefijo}About & Data: H1-b junto a H1, «${h1b.resumen}», con sus cifras (${valores.join(", ")}) y su fuente`,
+    t.includes(h1b.resumen) && valores.every((v) => t.includes(v)) && (h1b.fuentes ?? []).every((f) => t.includes(f)) && (!h1b.nota || t.includes(h1b.nota)), t.replace(/\n/g, " ").slice(0, 240));
+  check(`${prefijo}About & Data: H1 conserva su veredicto (${h1.estado}) con H1-b al lado`, (await tarjetaH1.getAttribute("data-estado")) === h1.estado && (await bloque.getAttribute("data-estado")) === h1b.estado);
+  for (const d of (pruebasWeb.documentos ?? []).filter((x) => x.existe)) {
+    const a = page.locator(`#acerca .acerca-documentos a[href="${d.url}"]`);
+    const li = page.locator(`#acerca .acerca-documentos li[data-documento="${d.id}"]`);
+    check(`${prefijo}About & Data: enlace a ${d.ruta}${d.nota ? " con su nota" : ""}`, (await a.count()) === 1 && (!d.nota || (await li.innerText()).includes(d.nota)));
+  }
+  const rev = (pruebasWeb.documentos ?? []).find((d) => d.id === "revision_protagonistas" && d.existe);
+  if (rev) check(`${prefijo}About & Data: la revisión de las protagonistas dice que la hizo una sesión de IA y que falta la de una persona`, /AI session/.test(rev.nota) && /person/.test(rev.nota));
+  await bloque.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(CAPTURAS, `${telefono ? "telefono" : "escritorio"}_acerca_h1b.png`) });
+}
+
+/** Pendientes de la auditoría del motor en el panel y en los controles: distrito, textos en inglés, ventana de suelo. */
+async function pruebaAuditoriaMotor(page, prefijo, telefono) {
+  const d = cubo.distrito ?? {};
+  const b = d.boquilla;
+  if (b) {
+    const alm = await texto(page, '#boquilla [data-dato="almacenamiento"]');
+    const namo = await texto(page, '#boquilla [data-dato="namo"]');
+    check(`${prefijo}La Boquilla: almacenamiento con su fuente y su etiqueta ${b.etiqueta_almacenamiento}`, alm.includes(b.fuente_almacenamiento) && alm.includes(b.etiqueta_almacenamiento), alm);
+    check(`${prefijo}La Boquilla: capacidad (NAMO) con su fuente y su etiqueta ${b.etiqueta_namo}`, namo.includes(b.fuente_namo) && namo.includes(b.etiqueta_namo), namo);
+  }
+  const llave = Object.keys(d).find((k) => k.startsWith("acuifero_"));
+  if (llave) {
+    const a = await texto(page, '#acuifero [data-dato="acuifero"]');
+    check(`${prefijo}acuífero: fuente y etiqueta ${d[llave].etiqueta}`, a.includes(d[llave].fuente) && a.includes(d[llave].etiqueta), a);
+  }
+  // Textos de las marcas, la equivalencia y el punto de medición en inglés (los del cubo, copia de params). En el
+  // teléfono «Units and measuring point» está plegado: se lee el contenido del nodo (textContent), no lo pintado.
+  const { equivalencia_en: eqEn, punto_medicion_en: pmEn } = cubo.dotaciones;
+  const contenido = (sel) => page.locator(sel).evaluate((el) => el.textContent);
+  if (eqEn) check(`${prefijo}equivalencia en inglés (equivalencia_en), sin lang="es"`, (await contenido("#equivalencia")) === eqEn && (await page.locator("#equivalencia").getAttribute("lang")) === null, await contenido("#equivalencia"));
+  if (pmEn) check(`${prefijo}punto de medición en inglés (punto_medicion_en), sin lang="es"`, (await contenido("#punto-medicion")) === pmEn && (await page.locator("#punto-medicion").getAttribute("lang")) === null, await contenido("#punto-medicion"));
+  for (const m of marcas.filter((x) => x.nota_en)) {
+    await page.locator(`.boton-marca[data-marca="${m.id}"]`).click();
+    const info = await page.locator("#info-marca-fuente").textContent();
+    check(`${prefijo}marca ${m.id}: nota en inglés «${m.nota_en}» (no la de español)`, info.includes(`Note: ${m.nota_en}`) && (m.nota === m.nota_en || !info.includes(m.nota)), info.slice(-120));
+  }
+  // Ventana de suelo desnudo (cubo.meta.ventana_desnudo) en la capa del mapa.
+  const v = cubo.meta?.ventana_desnudo;
+  if (v && (await page.locator('input[name="colorear"][value="suelo_desnudo"]').count())) {
+    const md = (x) => new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(0, Number(x.slice(0, 2)) - 1, Number(x.slice(3, 5)))));
+    const ventana = `(${md(v.inicio)} – ${md(v.fin)})`;
+    await page.locator('input[name="colorear"][value="suelo_desnudo"]').check();
+    const ley = await texto(page, "#leyenda");
+    check(`${prefijo}capa de suelo desnudo con la ventana de cubo.meta.ventana_desnudo ${ventana}`, ley.includes(`Bare soil in the windy season ${ventana}`), ley.split("\n")[0]);
+    await page.locator('input[name="colorear"][value="semaforo"]').check();
+    if (P0757) {
+      await abrirDesdeLista(page, P0757);
+      const vs = await page.locator("#ficha .ventana-desnudo").allInnerTexts();
+      check(`${prefijo}ficha de ${P0757}: renglón Soil con la ventana de suelo desnudo ${ventana}`, vs.length === opcionesDe(P0757).length && vs.every((x) => x.trim() === ventana), vs.slice(0, 2).join(" | "));
+      await cerrarFicha(page);
+    }
+  }
+  await page.locator("#boquilla").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(CAPTURAS, `${telefono ? "telefono" : "escritorio"}_distrito_etiquetas.png`) });
+}
+
 // ---------------------------------------------------------------- pruebas de escritorio
 async function pruebasEscritorio(page, peticiones) {
   // Gemelo digital (en la zona inicial); después, «All areas» para las comprobaciones de todas las parcelas.
@@ -1597,8 +1860,10 @@ async function pruebasEscritorio(page, peticiones) {
   await page.locator("#estado-gemelo").scrollIntoViewIfNeeded();
   await page.screenshot({ path: path.join(CAPTURAS, "escritorio_estado_gemelo.png") });
   await pruebaLineaDeTiempo(page, "", false);
+  await pruebaContextoRegional(page, "", false);
   await pruebaGemelo3D(page, "", false);
   await verTodas(page);
+  await pruebaAuditoriaMotor(page, "", false);
 
   // Aviso de datos simulados: visible si y solo si algún archivo trae meta.mock = true
   const visibleMock = await page.locator("#aviso-simulado").isVisible();
@@ -1986,7 +2251,9 @@ async function pruebasTelefono(page, peticiones) {
   await pruebaEstadoGemelo(page, "teléfono: ");
   await page.locator("#estado-gemelo").scrollIntoViewIfNeeded();
   await page.screenshot({ path: path.join(CAPTURAS, "telefono_estado_gemelo.png") });
+  await pruebaContextoRegional(page, "teléfono: ", true);
   await pruebaGemelo3D(page, "teléfono: ", true);
+  await pruebaAuditoriaMotor(page, "teléfono: ", true);
   check("teléfono: con el gemelo conectado, sin desplazamiento horizontal", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   await page.evaluate(() => window.scrollTo(0, 0));
   await verTodas(page);
@@ -2470,7 +2737,12 @@ async function main() {
     check("pruebas.json en HTTP 500: About & Data dice «could not be read (HTTP 500)», no «was not built»",
       acerca.includes("pruebas.json could not be read (HTTP 500)") && !acerca.includes("pruebas.json was not built"));
     check("manifest.json roto: About & Data dice «could not be read (invalid JSON…)»", acerca.includes("manifest.json could not be read (invalid JSON"));
+    check("contexto.json en HTTP 500: «Challenge data sources: contexto.json could not be read (…HTTP 500)»", acerca.includes("Challenge data sources: contexto.json could not be read") && acerca.includes("HTTP 500"));
     await fal.page.keyboard.press("Escape");
+    await abrirContexto(fal.page);
+    const ctxFal = await texto(fal.page, "#contexto-regional");
+    check("contexto.json en HTTP 500: «Regional context: could not be read (…HTTP 500)», no «not available yet»", ctxFal.includes("Regional context: could not be read") && ctxFal.includes("HTTP 500") && !ctxFal.includes("not available yet"), ctxFal);
+    await fal.page.locator("#bloque-contexto > summary").click();
     const idImp = candidatos.find((x) => !porId.get(x).abstencion && opcionesDe(x).length);
     if (idImp) {
       await abrirDesdeLista(fal.page, idImp);

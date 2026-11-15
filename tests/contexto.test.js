@@ -28,6 +28,7 @@ import {
   climaDelAnio,
   contarEstados,
   criteriosGedi,
+  diasIncompletos,
   diferenciaLluvia,
   escalaY,
   etiquetaMes,
@@ -49,6 +50,7 @@ import {
   referenciaGedi,
   riesgoDeHelada,
   seriesDeZona,
+  textoMascon,
   ultimoMesConDato,
   valorAnual,
 } from "../web/js/contexto.js";
@@ -868,4 +870,66 @@ test("el módulo se importa sin navegador y las funciones «montar…» no hacen
   assert.equal(NOTA_REGIONAL,
     "Regional series describe the area or the basin, not a single field. They do not forecast the dam and do not change the water light.");
   assert.ok(ZONA_B, "la fixture trae dos zonas");
+});
+
+
+// ---------------------------------------------------------------------------------------------
+// Integración (etapa 3): advertencias a la vista, malla de GRACE, días faltantes y años fuera del eje
+// ---------------------------------------------------------------------------------------------
+test("modeloTarjetas: las advertencias del catálogo llegan a la tarjeta, sin cifras escritas aquí", () => {
+  const catalogo = leer("../data/recursos_reto.json");
+  const conAdvertencias = catalogo.tarjetas.filter((t) => (t.advertencias || []).length);
+  assert.ok(conAdvertencias.length >= 4, "ET, NLDAS, GRACE y ERA5-Land");
+  const contexto = { ...LLENO, tarjetas: catalogo.tarjetas };
+  for (const t of modeloTarjetas(contexto, ZONA_A)) {
+    const deCatalogo = catalogo.tarjetas.find((x) => x.id === t.id).advertencias || [];
+    assert.deepEqual(t.advertencias.map((a) => a.texto), deCatalogo.map((a) => a.texto), t.id);
+  }
+  // Sin advertencias en el JSON (un contexto.json viejo): lista vacía, nada inventado.
+  assert.ok(modeloTarjetas(LLENO, ZONA_A).every((t) => Array.isArray(t.advertencias)));
+});
+
+test("textoMascon: la malla del producto y la del mascon salen de serie.malla_mascon; sin el campo, nada", () => {
+  assert.equal(textoMascon({ malla_mascon: { malla_grados: 0.5, mascon_grados: 3 } }), "0.5° product grid built on 3° mascons: the real resolution is the mascon's");
+  assert.equal(textoMascon({ malla_mascon: { mascon_grados: 3 } }), "Built on 3° mascons: the real resolution is the mascon's");
+  for (const s of [{}, null, undefined, { malla_mascon: null }, { malla_mascon: { malla_grados: 0.5 } }]) assert.equal(textoMascon(s), null);
+  // En el panel de GRACE, el renglón de la malla lo dice junto a su resolución.
+  const tarjeta = modeloTarjetas(LLENO, ZONA_A).find((t) => t.id === "agua_almacenada");
+  const panel = tarjeta.paneles[0];
+  const conMascon = { ...panel, series: panel.series.map((s) => ({ ...s, serie: { ...s.serie, malla_mascon: { malla_grados: 0.5, mascon_grados: 3 } } })) };
+  const meta = metaDePanel(conMascon);
+  assert.ok(meta[0].partes.includes(textoMascon(conMascon.series[0].serie)), meta[0].texto);
+});
+
+test("mascon de hoy (web/data/contexto.json): GRACE dice su malla y la de sus mascons con las cifras de la entrega", { skip: !(REAL && REAL.contexto_regional && REAL.contexto_regional[CUENCA]) && "sin GRACE en web/data/contexto.json" }, () => {
+  const grace = Object.values(REAL.contexto_regional[CUENCA])[0];
+  if (!grace.malla_mascon) return; // la entrega no lo dice: la página tampoco
+  const zona = Object.keys(REAL.zonas)[0];
+  const panel = modeloTarjetas(REAL, zona).find((t) => t.id === "agua_almacenada").paneles[0];
+  const texto = metaDePanel(panel)[0].texto;
+  assert.ok(texto.includes(`${formatoNumero(grace.malla_mascon.mascon_grados)}° mascons`) && texto.includes("Basin scale"), texto);
+});
+
+test("diasIncompletos: un total con días faltantes lo dice; un año completo, no", () => {
+  assert.equal(diasIncompletos(364, 365), `${formatoNumero(364)} of ${formatoNumero(365)} days with data`);
+  for (const [c, d] of [[365, 365], [366, 366], [null, 365], [364, null], ["", 365]]) assert.equal(diasIncompletos(c, d), null, `${c}/${d}`);
+});
+
+test("años fuera del eje: la serie guarda el motivo de cada año sin valor (no «no data» si hay meses)", () => {
+  // GRACE de la fixture: algún año parcial; su motivo queda en «fuera» aunque el recorte lo saque del eje.
+  for (const t of modeloTarjetas(LLENO, ZONA_A)) {
+    for (const p of t.paneles) {
+      if (!p.grafica) continue;
+      for (const s of p.grafica.series) {
+        const serie = p.series.find((x) => x.etiqueta === s.nombre).serie;
+        for (const punto of puntosAnuales(serie)) {
+          if (punto.valor != null) assert.equal(s.fuera[String(punto.anio)], undefined);
+          else if (punto.parcial) assert.match(s.fuera[String(punto.anio)], /^partial year: /);
+        }
+      }
+    }
+  }
+  for (const g of graficasDeClima(LLENO, ZONA_A)) {
+    for (const s of g.series) assert.ok(s.fuera && typeof s.fuera === "object", g.id);
+  }
 });

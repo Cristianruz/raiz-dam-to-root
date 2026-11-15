@@ -20,7 +20,11 @@
 // - con goteo, las cifras grandes «Dam water» y «Back to aquifer» (y, sin tope, «Crop consumption (ET)»
 //   contra la base histórica y el aviso según tope_consumo.cumple_sin_tope), calculadas de los bloques;
 // - la frase fija de X3.2 (reescrita sin «only»), la fuente del coeficiente de retorno (de gota.supuestos),
-//   los supuestos de la variante y una tabla oculta a la vista con los mismos números (lectores de pantalla).
+//   los supuestos de la variante y una tabla oculta a la vista con los mismos números (lectores de pantalla);
+// - con goteo, A LA VISTA junto a sus cifras (no solo en el desplegable): las eficiencias de campo del goteo y del
+//   riego superficial con su etiqueta («[V] indicative, not local») y su fuente (FAO), de ctx.metaGoteo
+//   (= cubo.meta.goteo); sin tope, «upper bound» junto al retorno al acuífero si
+//   metaGoteo.retorno_sin_tope_es_cota_superior es true (decisión docs/decisiones/2026-11-14_opciones_b3.md §3).
 // Plan B (kit X3.2): si d3-sankey no está o falla, barras horizontales apiladas con los mismos números.
 //
 // Reglas de este archivo:
@@ -56,6 +60,12 @@ const TEXTOS = {
     "We count consumption (ET), not just withdrawals. " +
     "Drip is recommended when district ET stays at or below its historical level; if it would rise above that level, it is not.",
   fuenteRetorno: "Return-flow coefficient:",
+  // Eficiencias del goteo (cubo.meta.goteo): rótulo y fuente a la vista junto a las cifras.
+  eficiencias: "Field efficiencies used: drip",
+  superficial: "surface",
+  fuenteEficiencias: "Source:",
+  cotaSuperior: "upper bound",
+  cotaSuperiorNota: "Without the cap, the aquifer return keeps its coefficient: an upper bound, not a measurement.",
   fuenteFalta: "source not stated in the data for this option.",
   supuestos: "Assumptions behind these flows",
   baseHistorica: "Historical base:",
@@ -181,6 +191,8 @@ const instancias = new WeakMap();
  *   prefijo            prefijo de los id (por omisión "gota": #gota-goteo, #gota-tope, #gota-cifras…);
  *   goteo, tope        estado inicial (por omisión: riego actual; tope encendido);
  *   alCambiar          función que recibe estado() cada vez que el usuario cambia la variante;
+ *   metaGoteo          cubo.meta.goteo: { ea_goteo, ea_superficial_referencia: { valor, etiqueta, fuente },
+ *                      retorno_sin_tope_es_cota_superior } (opcional; sin él, no hay rótulo de eficiencias);
  *   planB              true = fuerza las barras apiladas (pruebas).
  * @returns {{estado: Function, mostrar: Function, destruir: Function}}
  */
@@ -215,12 +227,21 @@ function formatos(locale) {
   const entero = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
   const compacto = new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 });
   const pct = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0, signDisplay: "exceptZero" });
+  const pctLlano = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 0 });
   const conMenos = (s) => s.replace("-", MENOS);
   return {
     m3: (v) => (esNumero(v) ? `${conMenos(entero.format(v))} m³` : TEXTOS.sinDato),
     m3Corto: (v) => (esNumero(v) ? `${conMenos(compacto.format(v))} m³` : TEXTOS.sinDato),
     cambio: (f) => (esNumero(f) ? conMenos(pct.format(f)) : "—"),
+    pct: (f) => (esNumero(f) ? pctLlano.format(f) : "—"),
   };
+}
+
+/** Fuente en corto: hasta el primer «: » (lo que sigue son los valores de la tabla citada); el texto entero si no hay. */
+function fuenteCorta(texto) {
+  const s = String(texto ?? "").trim();
+  const i = s.indexOf(": ");
+  return i > 0 ? s.slice(0, i) : s;
 }
 
 /** Lo que va dentro del primer paréntesis (con paréntesis anidados); si no hay, el texto entero. */
@@ -384,6 +405,11 @@ function crearGota(contenedor, opcion, ctx) {
   const cifras = el("div", { class: "gota-mod-cifras", id: `${pre}-cifras` });
   const alerta = el("p", { class: "gota-mod-alerta", id: `${pre}-alerta`, hidden: true });
   raiz.append(el("div", { class: "gota-mod-vivo", "aria-live": "polite" }, [cifras, alerta]));
+  // Rótulo de las eficiencias del goteo (cubo.meta.goteo): a la vista junto a las cifras, solo con una variante de goteo.
+  const meta = ctx.metaGoteo && typeof ctx.metaGoteo === "object" ? ctx.metaGoteo : null;
+  const rotuloGoteo = el("p", { class: "gota-mod-etiqueta", id: `${pre}-etiqueta-goteo`, hidden: true });
+  const notaCota = el("p", { class: "gota-mod-cota", id: `${pre}-cota`, hidden: true }, TEXTOS.cotaSuperiorNota);
+  raiz.append(rotuloGoteo, notaCota);
 
   const mostrando = el("p", { class: "gota-mod-mostrando", id: `${pre}-mostrando` });
   caja = el("div", { class: "gota-mod-diagrama", id: `${pre}-diagrama` });
@@ -443,15 +469,40 @@ function crearGota(contenedor, opcion, ctx) {
     ]);
   }
 
+  /** Rótulo de las eficiencias: «Field efficiencies used: drip 90%, surface 60% · [V] indicative, not local · Source: FAO…». */
+  function pintarRotuloGoteo(v) {
+    const ea = meta?.ea_goteo;
+    const sup = meta?.ea_superficial_referencia;
+    const hay = v.id !== "actual" && ea && esNumero(ea.valor);
+    rotuloGoteo.hidden = !hay;
+    if (!hay) {
+      rotuloGoteo.replaceChildren();
+      return;
+    }
+    const valores = [`${TEXTOS.eficiencias} ${fmt.pct(ea.valor)}`];
+    if (sup && esNumero(sup.valor)) valores.push(`${TEXTOS.superficial} ${fmt.pct(sup.valor)}`);
+    rotuloGoteo.replaceChildren(
+      el("span", {}, valores.join(", ")),
+      " ",
+      ea.etiqueta ? el("strong", { class: "gota-mod-etiqueta-texto" }, ea.etiqueta) : null,
+      ea.fuente ? el("span", { class: "gota-mod-etiqueta-fuente" }, [` ${TEXTOS.fuenteEficiencias} `, el("span", { lang: "es" }, fuenteCorta(ea.fuente))]) : null,
+    );
+  }
+
   // Cifras grandes del goteo (X3.2 §3), calculadas de los bloques del cubo.
   function pintarCifras(v) {
     const partes = [];
     alerta.hidden = true;
     alerta.textContent = "";
+    pintarRotuloGoteo(v);
+    // Sin tope, el retorno al acuífero conserva su coeficiente: es una cota superior (lo dice cubo.meta.goteo).
+    const cota = v.id === "sin_tope" && meta?.retorno_sin_tope_es_cota_superior === true;
+    notaCota.hidden = !cota;
     if (v.id !== "actual") {
       const b = v.bloque;
       partes.push(cifra(TEXTOS.presa, fmt.cambio(cambio(b.m3_salen_presa, base.m3_salen_presa)), TEXTOS.vsActual, "presa"));
-      partes.push(cifra(TEXTOS.acuifero, fmt.cambio(cambio(b.m3_regresan_acuifero, base.m3_regresan_acuifero)), TEXTOS.vsActual, "acuifero"));
+      partes.push(cifra(TEXTOS.acuifero, fmt.cambio(cambio(b.m3_regresan_acuifero, base.m3_regresan_acuifero)),
+        cota ? `${TEXTOS.vsActual} · ${TEXTOS.cotaSuperior}` : TEXTOS.vsActual, "acuifero"));
       if (v.id === "sin_tope") {
         const t = opcion.tope_consumo;
         const conBase = Boolean(t) && esNumero(t.et_goteo_sin_tope_m3) && esNumero(t.et_historica_m3);

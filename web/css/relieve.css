@@ -63,6 +63,12 @@
   border: 1px solid var(--borde, #D8CFC2); border-radius: 999px; padding: 0 6px; white-space: nowrap;
 }
 .relieve-escala { font-size: 0.85rem; font-style: italic; color: var(--tinta-suave, #4A525A); }
+/* Rutas cortadas en depresiones cerradas (relieve.json → rutas_depresiones): muestra de línea interrumpida. */
+.relieve-depresiones { display: flex; gap: 8px; align-items: baseline; font-size: 0.85rem; margin: 4px 0; }
+.relieve-muestra-corte {
+  flex: none; width: 22px; height: 0; margin-top: 0.55em;
+  border-top: 3px dashed var(--relieve-ruta, var(--agua, #1F6FB2));
+}
 
 /* Tarjeta de la tormenta */
 .relieve-tormenta {
