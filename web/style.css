@@ -197,6 +197,8 @@ button, input, select { font: inherit; color: inherit; }
 .boton-cabecera:hover { background: var(--superficie); box-shadow: var(--sombra); }
 /* «Dashboard» es un enlace con la misma forma de botón: centrado y sin subrayado; así también toma el alto mínimo. */
 a.boton-cabecera { display: inline-flex; align-items: center; text-decoration: none; }
+/* Selector de idioma (English / Español) con la misma forma de botón. */
+.selector-idioma { appearance: auto; }
 
 .controles {
   position: sticky; top: var(--sp-2); z-index: 30;

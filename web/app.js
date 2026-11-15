@@ -75,6 +75,8 @@ import { montarInstalacion } from "./js/instalar.js";
 import { fraseResumen, casoResumen, dibujarNDVI, idDeHash, hashDe, formatoHectareas, hectareasTexto } from "./js/resumen.js";
 import { leerSuelo, htmlPerfilDeSuelo, htmlAptitud, htmlNotaDeZona } from "./js/suelo.js";
 import { evidenciaDeParcela, riesgoDeHelada, montarContextoRegional, montarRecursosReto } from "./js/contexto.js";
+// Español opcional: traduce lo que esta página escribe en inglés (js/explorador_es.js); el inglés va por omisión.
+import { montarIdiomaExplorador } from "./js/explorador_es.js";
 import { montarPrioridades } from "./js/prioridades.js";
 
 const LOCALE = "en-US";
@@ -450,6 +452,7 @@ const datosDe = (r) => (r?.estado === "ok" ? r.datos : null);
 // Arranque
 // ---------------------------------------------------------------------------
 async function iniciar() {
+  montarIdiomaExplorador(document.getElementById("idioma"));
   observarCabecera();
   // Antes de los datos: si la página abre desde una copia a medias y los datos no llegan, el rótulo lo dice.
   iniciarInstalacion();
@@ -1451,7 +1454,8 @@ function crearMapa() {
     },
     layers: [
       { id: "fondo", type: "background", paint: { "background-color": colorCSS("arena-mapa") } },
-      { id: "osm", type: "raster", source: "osm" },
+      // Atenuado como en el tablero (js/dashboard.js), para el fondo oscuro; los polígonos llevan el color.
+      { id: "osm", type: "raster", source: "osm", paint: { "raster-saturation": -0.6, "raster-brightness-max": 0.6, "raster-opacity": 0.8 } },
     ],
   };
   let mapa;
