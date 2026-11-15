@@ -5,7 +5,14 @@
      Las tres tarjetas son animadas: cada animación CSS nace en pausa y el grabador la lleva al instante de cada
      cuadro con window.__tarjetaIr(ms), así el video sale igual en cualquier máquina. Con ?animar=si corre sola,
      para verla en el navegador. La banda de las tomas no se anima aquí: la mueve ffmpeg al montarla.
-     Una sola página con tres vistas, según ?vista=
+     Una sola página con varias vistas, según ?vista=. Siguen la estructura que pide la guía de Space Apps para el
+     video de 30 s: quién (equipo), qué reto y por qué (reto), nombre y lema (apertura y aparte), cómo funciona
+     (como, y las tomas de la página) y mirada al futuro (futuro y cierre).
+       equipo     «We are Orbital Farming»: el equipo y su sede; ?integrantes= agrega los nombres (los pone quien
+                  graba, con RAIZ_INTEGRANTES; el repo no los trae);
+       reto       el reto elegido y lo que llevó al equipo a elegirlo;
+       futuro     «Looking ahead»: tres frases de lo que podría ser, rotuladas «Next phase / vision» y en
+                  condicional (no son promesas);
        apertura   título, lema (?lema=, que el grabador lee del guion), equipo y reto;
        como       «How it works»: tres pasos en una línea, con iconos dibujados aquí (sin logotipos). Los nombres
                   de productos de NASA llevan data-producto: el grabador comprueba que cada uno aparezca en
@@ -168,6 +175,26 @@
   .sena h2 { font-size: 39px; line-height: 1.1; font-weight: 700; color: var(--arena); text-wrap: balance; }
   .sena p { margin-top: 10px; font-size: 27px; line-height: 1.24; color: var(--agua-clara); text-wrap: balance; }
 
+  /* ---------- Equipo y reto (los dos primeros tiempos de la guía) ---------- */
+  .equipo-lugar { margin-top: 40px; color: var(--agua-clara); }
+  .equipo-integrantes { margin-top: 22px; font-size: 40px; color: var(--arena); }
+  .equipo-integrantes.anim { animation-delay: 620ms; }
+  .reto-nombre { margin-top: 26px; }
+  .reto-porque { margin-top: 64px; }
+  .reto-porque.anim { animation-delay: 950ms; }
+  .reto-texto { margin-top: 20px; max-width: 1480px; font-size: 56px; line-height: 1.22; color: var(--arena); }
+  .reto-texto.anim { animation-delay: 1100ms; }
+
+  /* ---------- «Looking ahead»: tres frases de visión, una tras otra ---------- */
+  .vision { position: absolute; left: var(--margen); right: var(--margen); top: 236px; list-style: none; display: grid; gap: 40px; }
+  .vision li { display: grid; grid-template-columns: 104px 1fr; column-gap: 34px; align-items: center; font-size: 62px; line-height: 1.14; font-weight: 700; color: var(--arena); text-wrap: balance; }
+  .vision li.anim { animation-name: sube; animation-duration: 540ms; animation-delay: calc(320ms + var(--n) * 1250ms); }
+  .vision svg { width: 104px; height: 104px; fill: none; stroke: var(--ambar); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+  .vision svg .agua { stroke: #6FB1E6; }
+  .vision svg .agua-llena { fill: #6FB1E6; stroke: none; }
+  [data-vista="futuro"] .cauce { bottom: 96px; }
+  .socio { display: inline-block; margin-top: 6px; color: var(--ambar); }
+
   /* Cierre: la frase, una línea de agua que la subraya, el aviso y el pie */
   .subraya { display: block; margin-top: 26px; width: 620px; height: 26px; overflow: visible; fill: none; stroke: #6FB1E6; stroke-width: 8; stroke-linecap: round; }
   .subraya path { stroke-dasharray: 1; }
@@ -190,6 +217,52 @@
 </style>
 </head>
 <body>
+  <section class="tarjeta" data-vista="equipo" hidden>
+    <div class="tarjeta-cuerpo">
+      <p class="marca anim">We are</p>
+      <h1 class="frase" data-palabras style="--antes: 140ms">Orbital Farming</h1>
+      <p class="aviso anim equipo-lugar">A team from Chihuahua, Mexico · NASA Space Apps Challenge</p>
+      <p class="aviso anim equipo-integrantes" data-campo="integrantes"></p>
+    </div>
+  </section>
+
+  <section class="tarjeta" data-vista="reto" hidden>
+    <div class="tarjeta-cuerpo">
+      <p class="marca anim">Our challenge</p>
+      <h1 class="lema reto-nombre" data-palabras style="--antes: 160ms">Field Shift: Adapting Farms with NASA Data</h1>
+      <p class="marca anim reto-porque">What inspired us</p>
+      <p class="aviso anim reto-texto">In the Delicias irrigation district, a planting decision can commit dam water for years.</p>
+    </div>
+  </section>
+
+  <section class="tarjeta" data-vista="futuro" hidden>
+    <p class="como-titulo anim">Looking ahead</p>
+    <p class="aparte-sub anim">Next phase / vision</p>
+    <ol class="vision">
+      <li class="anim" style="--n: 0">
+        <svg viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="38"/><path d="M14 52 H90"/><path d="M52 14 C34 30 34 74 52 90 C70 74 70 30 52 14 Z"/></svg>
+        <span>The same open data could serve any irrigation district.</span>
+      </li>
+      <li class="anim" style="--n: 1">
+        <svg viewBox="0 0 104 104" aria-hidden="true"><circle cx="30" cy="36" r="11"/><circle cx="74" cy="36" r="11"/><circle cx="52" cy="28" r="12"/><path d="M10 84 C10 66 20 58 30 58 M94 84 C94 66 84 58 74 58 M28 88 C28 64 40 52 52 52 C64 52 76 64 76 88"/></svg>
+        <span>Farmers, technicians and water managers could read the same figures.</span>
+      </li>
+      <li class="anim" style="--n: 2">
+        <svg viewBox="0 0 104 104" aria-hidden="true"><path d="M52 94 V52"/><path d="M52 72 C32 72 22 60 22 46 C40 46 52 56 52 72 Z"/><path d="M52 60 C52 42 64 30 82 30 C82 48 72 60 52 60 Z"/><path class="agua-llena" d="M52 6 C59 16 63 22 63 28 A11 11 0 0 1 41 28 C41 22 45 16 52 6 Z"/></svg>
+        <span>Every planting decision could be made with its water in sight.</span>
+      </li>
+    </ol>
+    <div class="cauce" aria-hidden="true">
+      <svg viewBox="0 0 1584 120" preserveAspectRatio="none">
+        <path class="trazo presa anim" pathLength="1" d="M8 104 L26 22 H62 L80 104 Z M-6 104 H96"/>
+        <path class="riel" d="M96 76 H1470"/>
+        <g class="descubre anim"><path class="agua-corre" d="M96 76 H1470"/></g>
+        <path class="trazo planta anim" pathLength="1" d="M1516 76 V30 M1516 54 C1494 54 1484 42 1484 28 C1504 28 1516 38 1516 54 Z M1516 44 C1516 26 1528 14 1546 14 C1546 32 1536 44 1516 44 Z"/>
+        <path class="trazo raiz anim" pathLength="1" d="M1516 76 V112 M1516 86 L1496 106 M1516 86 L1538 108 M1516 98 L1506 116"/>
+      </svg>
+    </div>
+  </section>
+
   <section class="tarjeta" data-vista="apertura" hidden>
     <div class="tarjeta-cuerpo">
       <p class="marca anim"><b>ROOT</b> – From Dam to Root</p>
@@ -221,7 +294,7 @@
           <path class="agua senal anim" style="--k: 0" d="M46 76 Q60 66 74 76"/><path class="agua senal anim" style="--k: 1" d="M38 90 Q60 74 82 90"/><path class="agua senal anim" style="--k: 2" d="M30 104 Q60 82 90 104"/>
         </svg>
         <h2>NASA data</h2>
-        <p>Satellite and climate records:<br><span data-producto="HLS">HLS</span> · <span data-producto="NASA POWER">POWER</span> · <span data-producto="IMERG">IMERG</span></p>
+        <p>Satellite and climate records:<br><span data-producto="HLS">HLS</span> · <span data-producto="NASA POWER">POWER</span> · <span data-producto="IMERG">IMERG</span><br><span class="socio" data-socio="Sentinel-2">with Copernicus Sentinel imagery (ESA)</span></p>
       </div>
       <div class="flecha"><svg viewBox="0 0 84 64" aria-hidden="true"><path class="anim" style="--n: 0" pathLength="1" d="M8 32 H72"/><path class="anim" style="--n: 0" pathLength="1" d="M50 12 L74 32 L50 52"/></svg></div>
       <div class="paso anim" style="--n: 1">

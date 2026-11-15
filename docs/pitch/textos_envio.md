@@ -7,7 +7,7 @@
 
 Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que se pegan: los bloques están completos y en inglés. Los únicos textos «to be confirmed» que llevan son los de las licencias de «References» (punto 11).
 
-1. **Liga del video.** El archivo es `docs/pitch/video_30s.mp4` (30 s o menos; se vuelve a grabar sobre la página final con `node tests/e2e/grabar_video.mjs`). Súbalo, pruebe la liga en incógnito y póngala en la sección 2.
+1. **Liga del video.** El archivo es `docs/pitch/video_30s.mp4` (30 s o menos; se vuelve a grabar sobre la página final con `node tests/e2e/grabar_video.mjs`). Sigue los cinco tiempos de la guía de Space Apps: el equipo, el reto y qué lo inspiró, el nombre y el lema, cómo funciona con el prototipo y los datos, y la mirada al futuro. **Dos cosas suyas:** (a) la guía pide presentarse con nombre: la primera tarjeta dice «Orbital Farming» y no lleva nombres de personas, porque el repo no los trae; para agregarlos, `RAIZ_INTEGRANTES="Nombre · Nombre" node tests/e2e/grabar_video.mjs`; (b) confirme que la frase de «What inspired us» y las tres de «Looking ahead» dicen lo que el equipo quiere decir (las redactó el integrador a partir del problema que documenta el proyecto). Súbalo, pruebe la liga en incógnito y póngala en la sección 2.
 2. **Liga del PDF de las diapositivas.** El archivo es `docs/pitch/diapositivas.pdf` (lo genera `node tests/e2e/diapositivas_pdf.mjs` de `docs/pitch/diapositivas.html`). Antes de exportarlo, cambie el marcador «[INTEGRANTES]» de la portada por los nombres.
 3. **Nombres de los integrantes** en el formulario, tal como están inscritos.
 4. **Liga de OSF**, si el preregistro se publicó. Si no existe, se deja la frase de la sección 2.
