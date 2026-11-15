@@ -91,6 +91,9 @@ NOMBRES_PASOS = {
     "ensamblar": "Team deliveries validated against the data contract",
     "simulados": "Cube engine",
     "relieve": "Terrain & runoff layer",
+    "gemelo": "Digital twin, regional context and soil",
+    "pwa": "Offline app (installable page)",
+    "pruebas_web": "Tests shown on the page",
     "manifest": "Manifest of every figure",
     "contrato": "Data contract, including the water balance of “Follow the drop”",
     "verificador": "Figure checker on the page's explanations",
@@ -412,12 +415,20 @@ def veredicto_crudo(texto, pares):
 # «declared before the analysis»). Los documentos de resultado conservan la frase del kit A6, que es la que
 # reconoce el veredicto; aquí solo se cambia lo que la página muestra.
 def texto_publico(texto):
-    """Frase para la página: «preregistered criterion» → «criterion declared before the analysis»."""
+    """Frase para la página: «preregistered criterion» → «criterion declared before the analysis».
+    No distingue mayúsculas y conserva la mayúscula inicial («Preregistered» → «Declared before the analysis»)."""
     if not texto:
         return texto
-    t = re.sub(r"\bthe preregistered criterion\b", "the criterion declared before the analysis", texto)
-    t = re.sub(r"\bpreregistered criterion\b", "criterion declared before the analysis", t)
-    return re.sub(r"\bpreregistered\b", "declared before the analysis", t)
+
+    def con_mayuscula(nuevo):
+        def cambiar(m):
+            return nuevo[0].upper() + nuevo[1:] if m.group(0)[0].isupper() else nuevo
+        return cambiar
+
+    t = re.sub(r"\bthe preregistered criterion\b", con_mayuscula("the criterion declared before the analysis"),
+               texto, flags=re.I)
+    t = re.sub(r"\bpreregistered criterion\b", con_mayuscula("criterion declared before the analysis"), t, flags=re.I)
+    return re.sub(r"\bpreregistered\b", con_mayuscula("declared before the analysis"), t, flags=re.I)
 
 
 def prueba_hipotesis(raiz, hipotesis):
@@ -584,11 +595,17 @@ def fuentes_registradas(raiz):
     return {str(f.get("archivo")): str(f.get("fuente") or "") for f in filas or [] if isinstance(f, dict)}
 
 
+# El rectángulo del contraste de ET en la línea de LEEME de la entrega, en español o en inglés.
+RECTANGULO_ORIGINAL = re.compile(
+    r"(?:rect[áa]ngulo original|original\s+(?:pilot\s+)?rectangle)\s*(\[[^\]]+\])", re.I)
+
+
 def ambito_et(fuente, zona):
     """Área que cubre el contraste, tal como la dice la fuente registrada (no se supone):
-    «rectángulo original [o, s, e, n]» -> «original pilot rectangle [o, s, e, n]». Si la fuente no lo dice,
-    la zona del sufijo del archivo; si tampoco, «area of the delivered file»."""
-    m = re.search(r"rect[áa]ngulo original\s*(\[[^\]]+\])", fuente or "", re.I)
+    «rectángulo original [o, s, e, n]» (línea de LEEME en español) u «original rectangle [o, s, e, n]» (en
+    inglés, desde el buzón v11) -> «original pilot rectangle [o, s, e, n]». Si la fuente no lo dice, la zona
+    del sufijo del archivo; si tampoco, «area of the delivered file»."""
+    m = RECTANGULO_ORIGINAL.search(fuente or "")
     if m:
         return f"original pilot rectangle {m.group(1)}"
     if zona:

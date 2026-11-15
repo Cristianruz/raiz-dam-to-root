@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pwa.py recorriendo web/ (todo menos sw.js y lo oculto); nunca se edita a mano. «version» es la huella del contenido de esos archivos: web/sw.js guarda la copia sin conexión en la caché raiz-<version> y la renueva cuando cambia.",
- "version": "8882e4fb423512d9",
+ "version": "3aa051599253fc07",
  "archivos": [
   "app.js",
   "css/acerca.css",
@@ -11,6 +11,7 @@
   "css/imprimir.css",
   "css/instalar.css",
   "css/mensaje.css",
+  "css/prioridades.css",
   "css/relieve.css",
   "css/resumen.css",
   "css/suelo.css",
@@ -73,6 +74,7 @@
   "js/gota.js",
   "js/instalar.js",
   "js/mensaje.js",
+  "js/prioridades.js",
   "js/relieve.js",
   "js/resumen.js",
   "js/suelo.js",

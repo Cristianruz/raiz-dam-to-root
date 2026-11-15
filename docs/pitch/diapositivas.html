@@ -122,6 +122,12 @@
     .insignia[data-estado="not run"] { color: var(--suave); border-style: dashed; }
     .pruebas .detalle { color: var(--tinta); margin-top: 2px; }
     .pruebas .no-corrio { color: var(--suave); font-size: 15px; }
+    /* Diapositiva 6: los títulos de las pruebas son largos («criterion declared before the analysis») y ocupan dos
+       líneas; la lista va más compacta para que las cinco quepan sin tapar el pie. Medidas de diseño, no datos. */
+    #d6 .pruebas { gap: 6px; }
+    #d6 .pruebas li { font-size: 15px; padding: 6px 12px; line-height: 1.25; }
+    #d6 .pruebas .cabeza { font-size: 16px; }
+    #d6 .pruebas .no-corrio { font-size: 13px; }
 
     /* Cierre */
     .vision { border: 2px dashed var(--azul); border-radius: 10px; padding: 10px 14px; font-size: 20px; }

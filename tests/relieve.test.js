@@ -74,20 +74,32 @@ test("htmlRelieveParcela: sin relieve, relieve null o sin ningún indicador => c
 test("htmlRelieveParcela: indicadores de los datos, aporte cero y rótulo de la zona", () => {
   const p = { id: "X", zona: "z1", relieve: { pendiente_media_pct: 2.25, aportacion_externa_ha: 0, frac_depresion: 0.5 } };
   const html = htmlRelieveParcela(p, { relieve: relieveDatos });
-  assert.match(html, /mean slope <strong>2\.3%<\/strong>/);
-  assert.match(html, /receives no runoff from upslope/, "aporte 0: sin escurrimiento desde arriba");
-  assert.match(html, /<strong>50%<\/strong> of the field in terrain depressions/);
+  // Revisión I18: es la pendiente del plano ajustado al modelo de elevación, no una media medida, y en
+  // parcelas chicas queda dentro de su ruido (los datos no traen el error ni el número de celdas).
+  assert.match(html, /fitted slope <strong>2\.3%<\/strong> \(from the elevation model; small fields are within its noise\)/);
+  assert.doesNotMatch(html, /mean slope/);
+  assert.match(html, /no runoff drains into this field from upslope \(nothing outside the mapped area is counted\)/, "aporte 0: sin escurrimiento desde arriba");
+  // Revisión I19: las depresiones se dicen como hoyos cerrados del modelo, casi todos dentro de su ruido, y
+  // van plegadas (<details> cerrado) para no leerse como un hallazgo de la parcela.
+  assert.match(html, /<details class="relieve-parcela-pozos">/);
+  assert.doesNotMatch(html, /<details[^>]*\bopen\b/);
+  assert.match(html, /<strong>50%<\/strong> of the field: closed pits in the elevation model, mostly within its noise/);
+  assert.doesNotMatch(html, /terrain depressions/);
   assert.match(html, /\(rótulo de prueba\)/);
+  // Raíz con <details>: un <div> (un <p> no puede contener <details>).
+  assert.match(html, /^<div class="relieve-parcela">/);
   const conAporte = htmlRelieveParcela({ ...p, relieve: { ...p.relieve, aportacion_externa_ha: 12.34 } }, { relieve: relieveDatos });
-  assert.match(conAporte, /receives runoff from up to <strong>12\.3 ha<\/strong> upslope/);
+  // Revisión I17: la mayor entrada de una sola celda es un mínimo del total, y solo dentro del área exportada.
+  assert.match(conAporte, /at least <strong>12\.3 ha<\/strong> drain into this field \(largest single inflow; nothing outside the mapped area is counted\)/);
+  assert.doesNotMatch(conAporte, /up to/);
 });
 
 test("htmlRelieveParcela: zona sin rótulo en relieve.json y datos faltantes se dicen, no se inventan", () => {
   const p = { id: "X", zona: "z2", relieve: { pendiente_media_pct: null, aportacion_externa_ha: 3, frac_depresion: null } };
   // z2 no trae rótulo y las otras zonas traen rótulos distintos: no se elige uno.
   const html = htmlRelieveParcela(p, { relieve: { zonas: { z1: { rotulo: "r1" }, z3: { rotulo: "r2" }, z2: {} } } });
-  assert.match(html, /mean slope: no data/);
-  assert.match(html, /terrain depressions: no data/);
+  assert.match(html, /fitted slope: no data/);
+  assert.match(html, /<summary>Closed pits in the elevation model<\/summary><p>no data<\/p>/);
   assert.match(html, /scale label not available/);
   // Si todas las zonas con rótulo dicen lo mismo, ese rótulo común vale para la parcela.
   assert.match(htmlRelieveParcela(p, { relieve: relieveDatos }), /\(rótulo de prueba\)/);

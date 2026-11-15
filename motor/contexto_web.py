@@ -39,7 +39,8 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                    decisión): va bajo la llave «cuenca» (esquemas.ZONA_CUENCA) con ambito «cuenca», y
                    la página la muestra igual en las dos zonas; las demás series llevan ambito «zona».
                    «malla_mascon» (solo si la línea de LEEME de la entrega lo dice, p. ej. GRACE: «malla de
-                   0.5° sobre mascons de 3°»): {malla_grados, mascon_grados, texto_fuente}. Son cifras de la
+                   0.5° sobre mascons de 3°» o, en inglés, «0.5° grid on 3° mascons»): {malla_grados,
+                   mascon_grados, texto_fuente}. Son cifras de la
                    entrega, no de este archivo: la página las escribe para decir que la resolución real es la
                    del mascon y no la de la malla del producto (resolucion_m).
   gedi             null + gedi_motivo, o {archivo, fuente, fecha, parcelas: {id: {n_disparos,
@@ -126,10 +127,10 @@ DEFINICION_HELADA = (f"Frost day: daily minimum temperature at or below {UMBRAL_
 # Texto de data/params.json (memoria.anio_actual.unidad) que confirma la definición del año.
 MARCAS_PARAMS_ANIO = ("1-oct", "30-sep")
 
-# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) se escriben en español,
-# como el resto de la operación del equipo (CLAUDE.md, OPERACIÓN). La interfaz va en inglés: la
-# página marca esos textos con este idioma para los lectores de pantalla.
-IDIOMA_FUENTES = "es"
+# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) llegan en inglés desde la
+# reentrega del 15-nov (buzón v11); antes iban en español. La página marca esos textos con este
+# idioma para los lectores de pantalla.
+IDIOMA_FUENTES = "en"
 
 # Redondeos de presentación (no cambian el dato de origen).
 DECIMALES_MM = 1
@@ -405,8 +406,15 @@ def resumen_anual(meses, valores, aditiva):
 
 
 # La línea de LEEME de contexto_regional.csv enumera sus productos como «<fuente> = <producto> (…)»; de GRACE dice
-# además «malla de 0.5° sobre mascons de 3°» (la malla del producto es más fina que los mascons de los que sale).
-MALLA_MASCON = re.compile(r"malla de\s*([0-9]+(?:[.,][0-9]+)?)\s*°\s*sobre mascons de\s*([0-9]+(?:[.,][0-9]+)?)\s*°", re.I)
+# además la malla del producto y la de los mascons de los que sale (la primera es más fina). La frase llega en
+# español («malla de 0.5° sobre mascons de 3°», hasta el buzón v10) o en inglés («0.5° grid on 3° mascons», desde
+# el v11; también «grid over», «grid built on» y «product grid»). En las dos, el primer grupo es la malla y el
+# segundo, el mascon.
+_GRADOS = r"([0-9]+(?:[.,][0-9]+)?)\s*°"
+MALLAS_MASCON = (
+    re.compile(rf"malla de\s*{_GRADOS}\s*sobre mascons de\s*{_GRADOS}", re.I),
+    re.compile(rf"{_GRADOS}\s*(?:product\s+)?grid\s+(?:built\s+)?(?:on|over)\s+{_GRADOS}\s*mascons", re.I),
+)
 
 
 def tramo_de_fuente(texto, fuente_id, fuentes=E.FUENTES_CONTEXTO):
@@ -424,9 +432,9 @@ def tramo_de_fuente(texto, fuente_id, fuentes=E.FUENTES_CONTEXTO):
 
 def malla_mascon(fuente_texto, fuente_id):
     """{malla_grados, mascon_grados, texto_fuente} si la línea de LEEME dice, para esa fuente, «malla de X° sobre
-    mascons de Y°»; None si no lo dice (no se supone nada)."""
-    tramo = tramo_de_fuente(fuente_texto, fuente_id)
-    m = MALLA_MASCON.search(tramo or "")
+    mascons de Y°» o «X° grid on Y° mascons»; None si no lo dice (no se supone nada)."""
+    tramo = tramo_de_fuente(fuente_texto, fuente_id) or ""
+    m = next((m for m in (patron.search(tramo) for patron in MALLAS_MASCON) if m), None)
     if not m:
         return None
     a_numero = lambda s: float(s.replace(",", "."))   # noqa: E731

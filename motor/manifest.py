@@ -488,8 +488,19 @@ def cifras_de_suelo(m, suelo, fuentes_origen):
         for oid, a in (ops or {}).items():
             for ruta, v in hojas_numericas(a, f"aptitud.parcelas.{pid}.{oid}"):
                 m.agregar(ARCHIVO_SUELO, ruta, v, *de("suelo_requisitos.json", None), False)
+    # Tipo de suelo (B8) y notas de nutrientes (B7): los porcentajes de los suelos del municipio (INEGI, del catálogo
+    # suelo_tipos.json, con su fuente) y la resolución del mapa, leída de la línea de fuente de suelo_parcelas.csv.
+    tipo, nut = suelo.get("tipo_suelo") or {}, suelo.get("nutrientes") or {}
+    for zona, z in (tipo.get("zonas") or {}).items():
+        for ruta, v in hojas_numericas(z.get("suelos") or [], f"tipo_suelo.zonas.{zona}.suelos"):
+            m.agregar(ARCHIVO_SUELO, ruta, v, *de("suelo_tipos.json", z.get("fuente"), z.get("etiqueta")), False)
+    res = nut.get("resolucion_m")
+    if isinstance(res, dict) and es_numero(res.get("valor")):
+        m.agregar(ARCHIVO_SUELO, "nutrientes.resolucion_m.valor", res["valor"], *de("suelo_parcelas.csv", res.get("fuente")),
+                  False)
     # Textos con cifras que la ficha escribe: avisos de nutrientes y notas de los requisitos (suelo_requisitos.json),
-    # la capa del perfil (suelo_parcelas.csv) y las fechas de las dos entregas.
+    # la capa del perfil (suelo_parcelas.csv), las fechas de las entregas y, del tipo de suelo y de las notas de
+    # nutrientes, la lista de suelos del municipio (suelo_tipos.json) y los textos de suelo_reglas.json.
     for ruta, texto in textos_con_digitos(suelo, ""):
         ruta = ruta.lstrip(".")
         if ruta.startswith("_") or ruta in ("generado", "decision"):
@@ -499,6 +510,17 @@ def cifras_de_suelo(m, suelo, fuentes_origen):
             origen = de("suelo_requisitos.json", req.get("fuente"))
         elif ruta.startswith("perfil."):
             origen = origen_perfil
+        elif ruta.startswith("tipo_suelo.zonas."):
+            z = (tipo.get("zonas") or {}).get(ruta.split(".")[2]) or {}
+            origen = de("suelo_tipos.json", z.get("fuente"), z.get("etiqueta"))
+        elif ruta.startswith("tipo_suelo.catalogo."):
+            origen = de("suelo_tipos.json")
+        elif ruta.startswith("tipo_suelo."):
+            origen = de("tipo_suelo_parcelas.csv", tipo.get("fuente"))
+        elif ruta.startswith(("nutrientes.reglas.", "nutrientes.conjuntos.")):
+            origen = de("suelo_reglas.json")
+        elif ruta.startswith("nutrientes."):
+            origen = de("suelo_nutrientes_parcelas.csv", nut.get("fuente"))
         else:
             continue  # lo deja al barrido (se registra y se avisa)
         m.agregar(ARCHIVO_SUELO, clave, texto, *origen, False)

@@ -27,6 +27,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
 import { aguaComprometida, evaluarOpcion } from "../../web/reglas.js";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
+import { formatoHectareas } from "../../web/js/resumen.js";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -63,9 +64,12 @@ const pruebas = leer("pruebas.json");
 const LOCALE = "en-US";
 const MENOS = "−";
 const conMenos = (s) => s.replace("-", MENOS);
-const fmt = (v, d = 1) => conMenos(new Intl.NumberFormat(LOCALE, { maximumFractionDigits: d }).format(v)); // calculado
+// Un dato que falta nunca se escribe como 0 (CLAUDE.md, regla 2): Intl.NumberFormat.format(null) da «0».
+const SIN_DATO = "—";
+const esNumero = (v) => typeof v === "number" && Number.isFinite(v);
+const fmt = (v, d = 1) => (esNumero(v) ? conMenos(new Intl.NumberFormat(LOCALE, { maximumFractionDigits: d }).format(v)) : SIN_DATO); // calculado
 const fmtDato = (v) => fmt(v, 3); // leído de un archivo
-const fmtPct = (f) => conMenos(new Intl.NumberFormat(LOCALE, { style: "percent", maximumFractionDigits: 0 }).format(f));
+const fmtPct = (f) => (esNumero(f) ? conMenos(new Intl.NumberFormat(LOCALE, { style: "percent", maximumFractionDigits: 0 }).format(f)) : SIN_DATO);
 const fmtRango = (a, b, f = fmtDato) => (a === b ? f(a) : `${f(a)}–${f(b)}`);
 const fmtM3 = (v) => `${fmt(v, 0)} m³`; // como la etiqueta de La gota
 const PALABRAS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
@@ -115,7 +119,9 @@ function calcular() {
   c["s3.dotacion"] = fmt(mFicha.valor);
   c["s3.lamina"] = fmtDato(ev.lamina.p50);
   c["s3.plazo"] = fmtRango(actual.agua.plazo_anios.min, actual.agua.plazo_anios.max);
-  c["s3.hectareas"] = fmt(ev.hectareas.p50);
+  // Las hectáreas se escriben como en la ficha (web/js/resumen.js): con los decimales del área, hacia abajo
+  // y nunca más que el área. Así la diapositiva y la captura dicen lo mismo.
+  c["s3.hectareas"] = formatoHectareas(p.area_ha)(ev.hectareas.p50);
   c["s3.area"] = fmtDato(p.area_ha);
 
   // 4 · La gota de la opción actual de la alfalfa.
@@ -158,7 +164,7 @@ function htmlPruebas() {
     } else {
       // Las métricas que pide docs/pitch/diapositivas.md van primero (p. ej. «0 numbers altered»); después, las demás.
       const preferidas = ["abstenidas", "casos_correctos", "cifras_alteradas"];
-      const conTotal = (prueba.metricas ?? []).filter((x) => x.total != null && !x.zona);
+      const conTotal = (prueba.metricas ?? []).filter((x) => x.total != null && x.valor != null && !x.zona);
       const orden = [...conTotal.filter((x) => preferidas.includes(x.id)), ...conTotal.filter((x) => !preferidas.includes(x.id))];
       for (const x of orden.slice(0, 2)) {
         partes.push(`${esc(x.etiqueta)}: <b>${esc(fmt(x.valor, 3))} of ${esc(fmt(x.total, 3))}</b>`);
@@ -329,7 +335,7 @@ async function capturas(navegador, url, datos) {
     await page.locator("#ficha").screenshot({ path: ruta("ficha_alfalfa_tarjetas.png") });
     const tarjeta = await page.locator('.tarjeta[data-opcion="ACTUAL"]').innerText();
     const alcanza = `Enough for ${datos.cifras["s3.hectareas"]} of ${datos.cifras["s3.area"]} hectares`;
-    check(`diapositiva 3: la tarjeta actual dice «${alcanza}» y la lámina ${datos.cifras["s3.lamina"]}`, tarjeta.includes(alcanza) && tarjeta.includes(datos.cifras["s3.lamina"]) && tarjeta.includes(`Commits water for ${datos.cifras["s3.plazo"]}`), `${fmt(ev.hectareas.p50)} ha`);
+    check(`diapositiva 3: la tarjeta actual dice «${alcanza}» y la lámina ${datos.cifras["s3.lamina"]}`, tarjeta.includes(alcanza) && tarjeta.includes(datos.cifras["s3.lamina"]) && tarjeta.includes(`Commits water for ${datos.cifras["s3.plazo"]}`), `${datos.cifras["s3.hectareas"]} ha`);
 
     // 4 · La gota de la misma ficha, completa (ventana más alta solo para esta captura).
     await page.setViewportSize({ width: 1366, height: 1180 });
@@ -485,12 +491,14 @@ async function main() {
   const srv = process.env.RAIZ_URL ? null : await servidor();
   const url = process.env.RAIZ_URL ?? `http://127.0.0.1:${srv.address().port}/index.html`;
   console.log(`Página: ${url}`);
-  const navegador = await chromium.launch();
+  // El navegador se lanza dentro del try: si falla el arranque, el finally cierra el servidor.
+  let navegador = null;
   try {
+    navegador = await chromium.launch();
     await capturas(navegador, url, datos);
     await pdf(navegador, datos);
   } finally {
-    await navegador.close();
+    await navegador?.close();
     srv?.close();
   }
   pngPorPagina();

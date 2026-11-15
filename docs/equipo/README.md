@@ -30,7 +30,6 @@
 | 18:00 | Prueba de usabilidad | P6 |
 | **20:30** | **HITO: una parcela completa con datos reales, publicada.** Si no se logra, se aplica R3 (orden de corte) | Todos |
 | 21:00 | Cierre de puertas de la sede | — |
-| 1:00–5:30 | Descanso del integrador | — |
 
 **Domingo 15:**
 
