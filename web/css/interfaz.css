@@ -1263,9 +1263,6 @@ footer a {
   border-radius: 25px;
   background: #142018;
 }
-.decision-card.blocked {
-  border-left: 4px solid #de9b76;
-}
 .decision-card h3 {
   font-size: 24px;
   line-height: 1.2;
@@ -1274,25 +1271,12 @@ footer a {
   font-size: 10px;
   padding: 8px 12px;
 }
-.decision-card[data-state="plan_calculado"] .pill {
-  background: #b9ed871b;
-  border-color: #b9ed8750;
-  color: #d1f6b3;
-}
-.decision-card[data-state="bloqueado"] .pill {
-  background: #e0a47718;
-  border-color: #e0a47755;
-  color: #f5c5a3;
-}
 .decision-action {
   font-size: 18px;
   line-height: 1.6;
   color: #cbe9b7;
   font-weight: 400;
   max-width: 80ch;
-}
-.decision-card.blocked .decision-action {
-  color: #f0c3a3;
 }
 .decision-values {
   border-color: #ffffff1b;

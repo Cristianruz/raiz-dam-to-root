@@ -928,7 +928,9 @@ async function init() {
   $("#export-timeline").addEventListener("click", exportTimeline);
   $("#app-content").hidden = false;
   $("#load-status").hidden = true;
+  // El asesor recibe el cubo ya leído (no lo vuelve a pedir) y el estado vigente en cada llamada.
   asesor = await crearAsesor(() => ({
+    cubo: cube,
     zona: state.zone,
     parcela: selected()?.properties,
     suelo: soil,

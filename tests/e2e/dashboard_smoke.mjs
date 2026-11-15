@@ -26,9 +26,12 @@
 // - sin la biblioteca del mapa: modo local con los polígonos dibujados; sin suelo.json y sin cubo.json: lo dice;
 // - un dato con marcado HTML no entra a la página como marcado.
 //
-// Lo que NO es de este frente y la prueba tolera, diciéndolo (líneas AVISO): lo que dibuja js/asesor.js
-// (#decision-inputs, #decision-summary, #recommendations, #decision-checks, #forecast-analysis y
-// #field-irrigation) y los textos que vienen de web/data/dashboard.json (eventos, fuente de la historia).
+// Lo que dibuja js/asesor.js (#decision-inputs, #decision-summary, #recommendations, #decision-checks,
+// #forecast-analysis y #field-irrigation) se revisa igual que lo demás: ni claves sin traducir («asesor.…»), ni
+// palabras vetadas, ni español en la interfaz en inglés.
+// Lo que NO es de este frente y la prueba tolera, diciéndolo (líneas AVISO): los textos que vienen escritos en
+// web/data/dashboard.json (eventos y fuente de la historia). Los nombres de lugar y las citas de las dotaciones
+// del cubo se muestran como vienen.
 
 import http from "node:http";
 import fs from "node:fs";
@@ -53,9 +56,11 @@ fs.mkdirSync(CAPTURAS, { recursive: true });
 const HOST_TESELAS = "tile.openstreetmap.org";
 const PRODUCTO = "ROOT – From Dam to Root";
 const VISTAS = ["resumen", "terreno", "cultivos", "recomendaciones", "predicciones"];
-// Lo que dibuja js/asesor.js (otro frente) y lo que viene escrito en los datos.
+// Lo que dibuja js/asesor.js (para decir de dónde es un hallazgo) y lo que viene escrito en los datos.
 const DE_ASESOR = "#decision-inputs, #decision-summary, #recommendations, #decision-checks, #forecast-analysis, #field-irrigation";
-const DE_DATOS = "#timeline, #history-chart details, #zona-dashboard, #allocation-presets";
+const DE_DATOS = "#timeline, #history-chart details";
+// Nombres de lugar y citas de las dotaciones del cubo (traen el nombre de un periódico): se muestran como vienen.
+const DE_NOMBRES = "#zona-dashboard, #allocation-presets";
 const AVISO_EXACTO = {
   en: "This tool supports, never replaces, the judgment of farmers and local experts.",
   es: "Esta herramienta apoya, y no sustituye, el juicio del agricultor ni del técnico.",
@@ -159,14 +164,14 @@ async function irA(page, vista) {
 }
 const sinDesplazamiento = (page) => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1);
 /**
- * Textos a la vista (y los que se anuncian: aria-label, title, placeholder, alt), separados en tres grupos:
- * los de este frente, los que dibuja el asesor y los que vienen de los datos.
+ * Textos a la vista (y los que se anuncian: aria-label, title, placeholder, alt), separados en cuatro grupos:
+ * los del tablero, los que dibuja el asesor, los que vienen escritos en dashboard.json y los nombres y citas.
  */
 function textosVisibles(page) {
   return page.evaluate(
-    ([deAsesor, deDatos]) => {
-      const grupos = { propios: [], asesor: [], datos: [] };
-      const grupoDe = (el) => (el.closest(deAsesor) ? "asesor" : el.closest(deDatos) ? "datos" : "propios");
+    ([deAsesor, deDatos, deNombres]) => {
+      const grupos = { propios: [], asesor: [], datos: [], nombres: [] };
+      const grupoDe = (el) => (el.closest(deAsesor) ? "asesor" : el.closest(deDatos) ? "datos" : el.closest(deNombres) ? "nombres" : "propios");
       const visible = (el) => el.checkVisibility() && !el.closest("script, style, template");
       const andador = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       for (let nodo = andador.nextNode(); nodo; nodo = andador.nextNode()) {
@@ -183,7 +188,7 @@ function textosVisibles(page) {
       }
       return grupos;
     },
-    [DE_ASESOR, DE_DATOS],
+    [DE_ASESOR, DE_DATOS, DE_NOMBRES],
   );
 }
 
@@ -230,26 +235,26 @@ async function revisarIdioma(browser, base, codigo, geo) {
   for (const vista of VISTAS) {
     await irA(page, vista);
     const grupos = await textosVisibles(page);
-    for (const texto of [...grupos.propios, ...grupos.asesor, ...grupos.datos]) {
-      if (/tablero\.[a-z_]/.test(texto)) sinTraducir.push(`${vista}: ${texto}`);
+    for (const texto of [...grupos.propios, ...grupos.asesor, ...grupos.datos, ...grupos.nombres]) {
+      if (/(?:tablero|asesor)\.[a-z_]/.test(texto)) sinTraducir.push(`${vista}: ${texto}`);
     }
-    for (const texto of grupos.propios) {
-      if (VETADAS[codigo].test(texto)) vetadas.push(`${vista}: ${texto}`);
-      if (codigo === "en" && ESPANOL.test(texto)) enEspanol.push(`${vista}: ${texto}`);
+    for (const [origen, textos] of [["tablero", grupos.propios], ["asesor", grupos.asesor]]) {
+      for (const texto of textos) {
+        if (VETADAS[codigo].test(texto)) vetadas.push(`${vista} (${origen}): ${texto}`);
+        if (codigo === "en" && ESPANOL.test(texto)) enEspanol.push(`${vista} (${origen}): ${texto}`);
+      }
     }
     if (codigo === "en") {
-      const ajenos = grupos.asesor.filter((s) => ESPANOL.test(s) || VETADAS.en.test(s));
-      if (ajenos.length) aviso(`[en] vista «${vista}»: ${ajenos.length} textos de js/asesor.js siguen en español o con palabras vetadas (otro frente): ${corto(ajenos, 2)}`);
       const deDatos = grupos.datos.filter((s) => ESPANOL.test(s));
-      if (deDatos.length) aviso(`[en] vista «${vista}»: ${deDatos.length} textos de los datos están en español (dashboard.json o citas del cubo): ${corto(deDatos, 2)}`);
+      if (deDatos.length) aviso(`[en] vista «${vista}»: ${deDatos.length} textos de web/data/dashboard.json están en español (eventos, fuente de la historia): ${corto(deDatos, 2)}`);
     }
     check(`[${codigo}] vista «${vista}» sin desplazamiento horizontal`, await sinDesplazamiento(page));
     const [ceja] = [await page.locator("#breadcrumb").innerText()];
     check(`[${codigo}] vista «${vista}» con su nombre en la ruta`, ceja.trim().length > 0 && !ceja.includes("tablero."), ceja);
   }
   check(`[${codigo}] ninguna clave sin traducir a la vista`, sinTraducir.length === 0, corto(sinTraducir));
-  check(`[${codigo}] ninguna palabra vetada en los textos del tablero`, vetadas.length === 0, corto(vetadas));
-  if (codigo === "en") check("[en] ningún texto del tablero en español", enEspanol.length === 0, corto(enEspanol));
+  check(`[${codigo}] ninguna palabra vetada en los textos del tablero ni del asesor`, vetadas.length === 0, corto(vetadas));
+  if (codigo === "en") check("[en] ningún texto del tablero ni del asesor en español", enEspanol.length === 0, corto(enEspanol, 6));
 
   // Sin PDF ni carpeta de investigación; nombres de vistas retirados.
   const enlacesPdf = await page.evaluate((deAsesor) => [...document.querySelectorAll('a[href*="research/"], a[href$=".pdf"]')].filter((a) => !a.closest(deAsesor)).map((a) => a.getAttribute("href")), DE_ASESOR);
