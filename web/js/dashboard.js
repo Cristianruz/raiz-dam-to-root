@@ -275,9 +275,9 @@ function fieldDetails() {
         <dl class="field-metrics"><div><dt>Demanda anual · mediana</dt><dd>${demand}</dd></div><div><dt>Suelo · mapa regional</dt><dd>${profile ? `pH ${fmt(profile.ph)}` : soilError ? "No se pudo cargar" : "Sin dato"}</dd></div><div><dt>Sistema de riego real</dt><dd id="field-irrigation">Sin registrar</dd></div><div><dt>Pendiente media</dt><dd>${Number.isFinite(p.relieve?.pendiente_media_pct) ? `${fmt(p.relieve.pendiente_media_pct)}%` : "Sin dato"}</dd></div><div><dt>Textura estimada · mapa</dt><dd>${esc(texture)}</dd></div><div><dt>Compromiso del modelo</dt><dd>${termLabel}</dd></div></dl>
         <div class="coverage">Área cubierta por el escenario <strong>${coverage}</strong><div class="progress"><div style="width:${evalOp ? evalOp.cobertura * 100 : 0}%"></div></div></div>
         <p class="micro">${evalOp ? `${fmt(evalOp.hectareas.p50)} de ${fmt(p.area_ha)} ha con agua a demanda mediana. Banda: ${fmt(evalOp.hectareas.bajo)}–${fmt(evalOp.hectareas.alto)} ha.` : "No se infiere una recomendación sin clasificación. Confirma el cultivo con tu técnico."}</p>
-        <a class="field-link" href="explorador.html#${encodeURIComponent(p.id)}">Ver ficha y opciones de parcela <span>↗</span></a>`;
+        <a class="field-link" href="index.html#${encodeURIComponent(p.id)}">Ver ficha y opciones de parcela <span>↗</span></a>`;
   $("#recommendation-link").href =
-    `explorador.html#${encodeURIComponent(p.id)}`;
+    `index.html#${encodeURIComponent(p.id)}`;
   recommendations(p, evalOp);
   updateHighlight();
 }

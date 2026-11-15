@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pwa.py recorriendo web/ (todo menos sw.js y lo oculto); nunca se edita a mano. «version» es la huella del contenido de esos archivos: web/sw.js guarda la copia sin conexión en la caché raiz-<version> y la renueva cuando cambia.",
- "version": "b55bfda5f5991b53",
+ "version": "3cb12862c7df3f59",
  "archivos": [
   "app.js",
   "css/acerca.css",
@@ -20,6 +20,7 @@
   "css/suelo.css",
   "css/terreno2d.css",
   "css/tiempo.css",
+  "dashboard.html",
   "data/contexto.json",
   "data/cubo.json",
   "data/dashboard.json",
@@ -69,7 +70,6 @@
   "data/relieve.json",
   "data/relieve_rutas.geojson",
   "data/suelo.json",
-  "explorador.html",
   "fonts/OFL.txt",
   "fonts/ORIGEN.json",
   "fonts/atkinson-bold.woff2",

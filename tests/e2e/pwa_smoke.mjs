@@ -111,13 +111,12 @@ function recorrer(carpeta) {
  */
 function piezasQueFaltan() {
   const html = fs.readFileSync(path.join(COPIA, "index.html"), "utf-8");
-  const entrada = html.includes("js/dashboard.js") ? "js/dashboard.js" : "app.js";
-  const app = fs.existsSync(path.join(COPIA, entrada)) ? fs.readFileSync(path.join(COPIA, entrada), "utf-8") : "";
+  const app = fs.existsSync(path.join(COPIA, "app.js")) ? fs.readFileSync(path.join(COPIA, "app.js"), "utf-8") : "";
   const faltan = [];
   if (!/<link\b[^>]*rel=["']?manifest\b[^>]*href=["']?manifest\.webmanifest/i.test(html)) faltan.push('<link rel="manifest">');
   if (!html.includes("css/instalar.css")) faltan.push("css/instalar.css");
   if (!/<meta\b[^>]*name=["']?theme-color/i.test(html)) faltan.push('<meta name="theme-color">');
-  if (!/from\s+["']\.\/(?:js\/)?instalar\.js["']/.test(app)) faltan.push("import de js/instalar.js en app.js");
+  if (!/from\s+["']\.\/js\/instalar\.js["']/.test(app)) faltan.push("import de js/instalar.js en app.js");
   if (!/montarInstalacion\(/.test(app)) faltan.push("montarInstalacion() en app.js");
   return faltan;
 }
@@ -183,20 +182,20 @@ function servidor(retener = () => false) {
 /** Texto del indicador: la cifra grande y todo el bloque (rango y mensajes incluidos). */
 const indicador = (page) =>
   page.evaluate(() => ({
-    cifra: document.querySelector("#indicador-cifra, #stats .stat:nth-child(3) .stat-value").innerText.replace(/\s+/g, " ").trim(),
-    todo: document.querySelector("#indicador, #stats").innerText,
+    cifra: document.querySelector("#indicador-cifra").innerText.replace(/\s+/g, " ").trim(),
+    todo: document.querySelector("#indicador").innerText,
   }));
 async function fijarDeslizador(page, valor) {
   await page.evaluate((v) => {
-    const s = document.querySelector("#dotacion, #allocation");
+    const s = document.querySelector("#dotacion");
     s.value = String(v);
     s.dispatchEvent(new Event("input", { bubbles: true }));
   }, valor);
 }
 async function esperarArranque(page) {
-  await page.waitForSelector("body[data-listo='si'], body[data-dashboard='listo']", { timeout: ESPERA_ARRANQUE_MS });
-  await page.waitForFunction(() => ["listo", "sin-mapa", "local"].includes(document.body.dataset.mapa || document.body.dataset.dashboardMap), null, { timeout: ESPERA_ARRANQUE_MS });
-  return page.evaluate(() => document.body.dataset.mapa || document.body.dataset.dashboardMap);
+  await page.waitForSelector("body[data-listo='si']", { timeout: ESPERA_ARRANQUE_MS });
+  await page.waitForFunction(() => ["listo", "sin-mapa"].includes(document.body.dataset.mapa), null, { timeout: ESPERA_ARRANQUE_MS });
+  return page.evaluate(() => document.body.dataset.mapa);
 }
 /** Oyentes de errores de una página: solo cuentan los de la propia aplicación (no las teselas de otro origen). */
 function vigilar(page, base, errores) {
@@ -736,9 +735,9 @@ async function main() {
     }
     check("sin red, la página recarga y arranca desde la copia", true, `mapa: ${estadoMapa}`);
 
-    const lienzos = await page.locator("#mapa canvas, #map canvas").count();
+    const lienzos = await page.locator("#mapa canvas").count();
     const dibujadas = estadoMapa === "listo" ? await page.evaluate(() => window.raizDepuracion?.parcelasDibujadas?.() ?? 0) : 0;
-    const listadas = await page.locator(".boton-parcela[data-id], #field-select option").count();
+    const listadas = await page.locator(".boton-parcela[data-id]").count();
     check("sin red: el mapa tiene su lienzo", lienzos > 0 && estadoMapa === "listo", `${lienzos} lienzo(s) · mapa: ${estadoMapa}`);
     check("sin red: las parcelas están dibujadas en el mapa o listadas", dibujadas > 0 || listadas > 0, `${dibujadas} dibujadas · ${listadas} en la lista`);
 
@@ -755,8 +754,6 @@ async function main() {
 
     const cajaSinRed = page.locator(".instalar");
     await page.waitForSelector(".instalar[data-red='offline']", { timeout: 5000 }).catch(() => {});
-    // El estado y el botón de instalación se montan de forma asíncrona; esperar el indicador concreto.
-    await cajaSinRed.locator(".instalar-red").waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
     const textoRecargada = (await cajaSinRed.count()) ? (await cajaSinRed.innerText()).replace(/\s+/g, " ").trim() : "(sin .instalar)";
     check(
       `sin red: el indicador «${TEXTOS.sinConexion}» está a la vista`,
@@ -792,7 +789,7 @@ async function main() {
     const ajenas = await page.evaluate(async (sonda) => {
       const otroOrigen = await fetch("https://example.invalid/otra/cosa.json").then(() => "respondió", () => "falló");
       const noGuardado = await fetch(sonda).then((r) => `estado ${r.status}`, () => "falló");
-      return { otroOrigen, noGuardado, viva: document.body.dataset.listo || (document.body.dataset.dashboard === "listo" ? "si" : "no") };
+      return { otroOrigen, noGuardado, viva: document.body.dataset.listo };
     }, SONDA);
     check(
       "sin red: una petición a otro origen y una a un archivo que no está en la copia fallan sin romper la página",
