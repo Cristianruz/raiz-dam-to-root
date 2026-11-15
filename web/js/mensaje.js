@@ -941,11 +941,12 @@ function htmlDatosImpresion(ctx, doc) {
   const marca = D == null ? null : (dot.marcas ?? []).find((m) => num(m.valor) === D);
   let dotacion = D == null ? "not available" : `${esc(fmtUi(D))} thousand m³/ha`;
   if (marca) {
-    // La fuente, en su forma corta (la nota en español sobre cómo se leyó queda en manifest.json y en pantalla);
-    // la etiqueta, con su parte en español leída en inglés, como en la pantalla (app.js, etiquetaEn).
+    // La fuente en inglés (fuente_en, la que trae el cubo para la interfaz; si falta, la de español), en su forma
+    // corta (el detalle queda en manifest.json y en pantalla); la etiqueta, con su parte en español leída en inglés,
+    // como en la pantalla (app.js, etiquetaEn). La hoja impresa va en inglés, como la interfaz.
     const detalle = [
       `range ${fmtRango(marca.min, marca.max, fmtDatoUi)}`,
-      marca.fuente ? `source: ${fuenteCorta(marca.fuente)}` : "",
+      marca.fuente_en || marca.fuente ? `source: ${fuenteCorta(marca.fuente_en || marca.fuente)}` : "",
       etiquetaUi(marca.etiqueta),
     ].filter(Boolean);
     dotacion += ` · <strong>${esc(marca.nombre)}</strong> <span class="impresion-detalle">(${esc(detalle.join("; "))})</span>`;

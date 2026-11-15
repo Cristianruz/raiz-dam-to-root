@@ -956,6 +956,16 @@ async function pruebaImpresion(page, id) {
   const datos = await texto(page, "#ficha .impresion-datos");
   const D = Number(await page.locator("#dotacion").inputValue());
   check("impresión: la dotación elegida en la hoja es la del deslizador", datos.includes(`${nf({ maximumFractionDigits: 1 }).format(D)} thousand m³/ha`), datos.split("\n")[1] ?? "");
+  // La fuente de la marca va en inglés (fuente_en del cubo) y en su forma corta: hasta el primer «;» o « (».
+  const marcaImpresa = (cubo.dotaciones?.marcas ?? []).find((m) => Number(m.valor) === D);
+  if (marcaImpresa?.fuente_en) {
+    const corta = (t) => { const s = String(t).trim(); const i = [s.indexOf(";"), s.indexOf(" (")].filter((x) => x > 0); return i.length ? s.slice(0, Math.min(...i)).trim() : s; };
+    const en = corta(marcaImpresa.fuente_en);
+    const es = marcaImpresa.fuente ? corta(marcaImpresa.fuente) : null;
+    check(`impresión: la fuente de la marca «${marcaImpresa.nombre}» en inglés («${en}»)`, datos.includes(`source: ${en}`) && (!es || es === en || !datos.includes(es)), datos.split("\n").find((l) => l.includes("source:")) ?? "");
+  } else {
+    omitir("impresión: fuente de la marca en inglés", "la dotación del deslizador no es una marca con fuente_en");
+  }
   for (const format of ["Letter", "A4"]) {
     const pdf = await page.pdf({ format, printBackground: true });
     const paginas = (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
