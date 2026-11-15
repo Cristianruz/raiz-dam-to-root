@@ -412,3 +412,35 @@ Cristian ya vio) y la pieza B7. **Necesito que la valides tú**: esquema en tu v
     gran grupo USDA, 250 m; y HWSD v2, ~1 km) y GAEZ. Cristian ya dio el sí para GAEZ. GAEZ v4 cubre alfalfa, algodón, maíz,
     sorgo, avena, trigo y cebada; **no cubre chile ni nogal**, y la FAO no recomienda usarlo por debajo del primer nivel
     subnacional: irá como contexto regional (`gaez_zona.csv`), nunca por parcela.
+
+## 14-nov 19:34 — GAEZ entregado (con el sí de Cristian) y tipo de suelo por parcela
+La compu de Cristian volvió a responder y corrí lo pendiente.
+
+- **ENTREGA: gaez_zona.csv — prueba OK contra tu 3f938ad (entra, con aviso de columnas adicionales).** Tu contrato:
+  `zona, cultivo, variable, valor, unidad, resolucion_m`; adicionales: `cultivo_gaez, agua, insumos, periodo, n_celdas,
+  valor_min, valor_max, clase_nombre, url_fao`. Fuente: servicio de imágenes de GAEZ v4 (tema res05), riego por gravedad,
+  insumos altos, 1981–2010, tierra cultivada actual; centros de las celdas de 5' que tocan cada zona (12 y 4). Tres variables
+  por cultivo, con el nombre tal como lo publica FAO (ojo: «Suitability index  range» lleva doble espacio en FAO):
+  | cultivo | índice (0–10000) | clase | rendimiento alcanzable |
+  |---|---|---|---|
+  | alfalfa | 7778 | 2 High | 1678.5 «10kg DW/ha» (16.8 t/ha) |
+  | algodon | 7778 | 2 High | 913 kg lint/ha |
+  | sorgo | 7778 | 2 High | 7540 kg DW/ha |
+  | maiz_forrajero (Maize de grano, sustituto) | 5556 | 3 Good | 9341 kg DW/ha |
+  | cereal_invierno (Oat) | 5556 | 3 Good | 2938.5 kg DW/ha |
+  (Delicias–Saucillo; Lázaro Cárdenas casi igual.) **chile y nogal no tienen filas: GAEZ v4 no los evalúa**; muéstralo como
+  «not assessed by GAEZ». Clase: nombre por el orden de la leyenda del servicio; los umbrales que imprime esa leyenda no
+  cuadran con los índices, así que si muestras algo, mejor el índice. Rótulo: «regional (≈9 km), FAO GAEZ v4; not field-level».
+  FAQ de GAEZ (v2.0): tratar los resultados «in a conservative manner at appropriate aggregation levels».
+  Con esto quedan 14 de 15 bases del reto en uso (falta ECOSTRESS, que necesita la cuenta de Earthdata de Cristian).
+- **ENTREGA: tipo_suelo_parcelas.csv** (archivo NUEVO, espera esquema). `id, zona, gran_grupo_usda, orden_usda, elementos,
+  fraccion_celdas, n_celdas, distancia_celda_m, clase_valor`. OpenLandMap (gran grupo USDA, 250 m, CC-BY-SA 4.0). Delicias–Saucillo:
+  Torrifluvents en 783 de 940 parcelas (suelos aluviales de zona seca); Lázaro Cárdenas: Paleustalfs 78, Torrifluvents 71,
+  Paleustolls 67. Las tres protagonistas: Torrifluvents. `elementos` (p. ej. `torr;fluv`) se explica con
+  `suelo_tipos.json → usda_prefijos_gran_grupo`. **No coincide con la carta del INEGI del municipio** (Cambisol, Calcisol,
+  Kastañozem): productos, sistemas y superficies distintos. Muestra los dos con su fuente, sin elegir. HWSD v2 no se entrega
+  (sus códigos no se pueden traducir sin la base de HWSD).
+- `correr_todo.py` ya incluye B8 y G1: **34 de 34 archivos idénticos** desde los crudos. Los crudos nuevos están en
+  `data/raw/reto/` (`gaez_celdas.csv`, `suelo_clases_<zona>.csv`) y el código del navegador en `datos/navegador/gaez_leer.js`.
+- Sigue en pie lo de las 19:22: esquema y revisión independiente de `suelo_tipos.json`, `suelo_reglas.json`,
+  `suelo_nutrientes_parcelas.csv` y ahora `tipo_suelo_parcelas.csv`.

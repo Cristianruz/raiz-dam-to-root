@@ -109,10 +109,45 @@ Resumen del catálogo (lo que la fuente nombra; cada grupo trae más en el archi
 2. `A13_suelo_parcelas.py` → propiedades por parcela; `B7_suelo_tipos.py` → reglas aplicadas y catálogo.
 3. Las reglas de MSU y los requisitos de FAO (ECOCROP, FAO-29) son generales. Las clases de la NOM-021 son la norma mexicana:
    en otro país se usa su norma, y el archivo dice de dónde sale cada clase.
-4. **Tipo de suelo por parcela (pendiente):** el gran grupo USDA de OpenLandMap (`OpenLandMap/SOL/SOL_GRTGROUP_USDA-SOILTAX_C/v01`,
-   250 m, CC-BY-SA 4.0) y la unidad de HWSD v2 (`projects/sat-io/open-datasets/FAO/HWSD_V2_SMU`, ~1 km). Necesita correr Earth
-   Engine en la computadora de Cristian, que no estaba conectada a las 18:50. Con el gran grupo, el orden y los prefijos se
-   leen con las tablas del catálogo.
+4. **Tipo de suelo por parcela (hecho el 14-nov por la noche, pieza B8):** gran grupo USDA de OpenLandMap
+   (`OpenLandMap/SOL/SOL_GRTGROUP_USDA-SOILTAX_C/v01`, 250 m, CC-BY-SA 4.0) → `tipo_suelo_parcelas.csv`. El orden y los
+   elementos formativos se leen del nombre con las tablas del catálogo. Ver §5-bis.
+
+## 5-bis. Tipo de suelo por parcela (`tipo_suelo_parcelas.csv`) y aptitud regional (`gaez_zona.csv`)
+**Tipo de suelo (OpenLandMap, predicción de 250 m):**
+
+| | Delicias–Saucillo (940) | Lázaro Cárdenas (299) |
+|---|---|---|
+| Orden USDA | Entisols 783, Aridisols 90, Mollisols 42, Alfisols 23, Inceptisols 2 | Mollisols 111, Alfisols 78, Entisols 71, Aridisols 35, Inceptisols 4 |
+| Gran grupo más frecuente | Torrifluvents 783 | Paleustalfs 78, Torrifluvents 71, Paleustolls 67 |
+| Con elemento «calc» (horizonte cálcico) | 30 | 38 |
+
+- *Torrifluvents* = Entisols (suelos de origen reciente) con *fluv* (planicie de inundación) y *torr* (régimen de humedad
+  muy seco): suelos aluviales de zona seca, lo esperable en el valle regado del Conchos. Las tres protagonistas salen
+  Torrifluvents.
+- **No coincide con la carta del INEGI del municipio** (Cambisol, Calcisol y Kastañozem dominantes): son productos distintos
+  (un modelo mundial de 250 m frente a una carta 1:250 000), clasificaciones distintas (USDA frente a WRB) y superficies
+  distintas (las parcelas frente a todo el municipio). Ninguno es un levantamiento de la parcela. Se muestran los dos con su
+  fuente y sin elegir uno.
+- HWSD v2 (FAO, ~1 km) también se consultó, pero sus códigos de clase no se pueden traducir sin la base de HWSD (descarga
+  aparte): no se entrega.
+
+**GAEZ v4 (FAO e IIASA), riego por gravedad, insumos altos, clima 1981–2010, tierra cultivada actual, celdas de ~9 km:**
+
+| Cultivo (GAEZ) | Índice de aptitud (0–100) | Clase | Rendimiento alcanzable (Delicias–Saucillo / Lázaro Cárdenas) |
+|---|---|---|---|
+| Alfalfa | 77.8 | High | 16.8 / 16.7 t de materia seca/ha |
+| Algodón (Cotton) | 77.8 | High | 913 / 910 kg de fibra/ha |
+| Sorgo (Sorghum) | 77.8 | High | 7.5 / 7.5 t de materia seca/ha |
+| Maíz (Maize, de grano; sustituto del forrajero) | 55.6 | Good | 9.3 / 9.3 t de materia seca/ha |
+| Avena (Oat) | 55.6 | Good | 2.9 / 2.9 t de materia seca/ha |
+| Chile, nogal | GAEZ v4 no los evalúa | — | — |
+
+- Índice: la variable de FAO va de 0 a 10000 (7778 = 77.8). Clase: código del servicio leído por el orden de su leyenda; los
+  umbrales que imprime esa leyenda no cuadran con los índices (77.78 llega como clase 2), por eso se entrega también el índice.
+- FAO pide tratar los resultados «in a conservative manner at appropriate aggregation levels» y no calcular estadísticas por
+  debajo del primer nivel subnacional (GAEZ v4, FAQ 2.0): es contexto de la región, nunca de la parcela. Los suelos de GAEZ v4
+  son de HWSD v1.21.
 
 ## 6. Límites (deben ir a la vista)
 - **Riesgo por regla, no diagnóstico.** P, K, Zn, Fe, Mn, Cu y B disponibles, carbonatos y salinidad de una parcela solo se
@@ -123,7 +158,6 @@ Resumen del catálogo (lo que la fuente nombra; cada grupo trae más en el archi
   el Ca y el Mg dominan el complejo de cambio (Driessen et al. 2001, Calcisols): no conviene mostrar ese grupo en la ficha.
 - Las fichas del catálogo son resúmenes propios de una obra de 2001 (WRB de 1998); las cifras se transcribieron como están.
 - Chile, algodón y sorgo no tienen avisos de micronutrientes con fuente.
-- GAEZ (aptitud de cultivos por clima y suelo, FAO) queda pendiente por la misma razón que el tipo de suelo por parcela.
 - «Proteínas y vitaminas» son de la planta, no del suelo: el suelo aporta nutrientes minerales (N, P, K, Ca, Mg, S y
   micronutrientes), que es lo que cubre esta pieza.
 
@@ -145,3 +179,6 @@ Resumen del catálogo (lo que la fuente nombra; cada grupo trae más en el archi
 - Lancaster University, *The Twelve Soil Orders of the World*. https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/
 - OpenLandMap, catálogo de Earth Engine. https://developers.google.com/earth-engine/datasets/catalog/OpenLandMap_SOL_SOL_GRTGROUP_USDA-SOILTAX_C_v01
 - HWSD v2 en el catálogo comunitario de Earth Engine. https://gee-community-catalog.org/projects/hwsd/
+- FAO e IIASA, GAEZ v4: servicio https://gaez-services.fao.org/server/rest/services/res05/ImageServer; FAQ v2.0 (nov-2022),
+  https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf; guía del repositorio,
+  https://gaez-v4-data.fao.org/data/GAEZ%20v4%20data%20repository%20user%20guide.pdf

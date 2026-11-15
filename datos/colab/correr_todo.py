@@ -12,8 +12,8 @@ Etapas, cada una en su subcarpeta de --salida:
      y h3_series.csv de la entrega y los resultados de H1 y H1-b (docs/resultado_H1.md, docs/resultado_H1b.md).
   2. zonas/ y entrega/  Las dos zonas piloto con correr_zonas.py (B1 → A1 → A9b → A3 → A4 → A5 → A9 → A7 → A8 → unir_zonas).
   3. reto/  Bases del reto y suelo: A2 (heladas), A10 (contexto regional), A11 (GEDI), A12 (nogal, referencia),
-     A13 (suelo por parcela), B3 (opciones), B6 (requisitos de suelo por cultivo) y B7 (tipos de suelo, reglas de
-     nutrientes y riesgo de nutrientes por parcela).
+     A13 (suelo por parcela), B3 (opciones), B6 (requisitos de suelo por cultivo), B7 (tipos de suelo, reglas de
+     nutrientes y riesgo de nutrientes por parcela), B8 (tipo de suelo por parcela) y G1 (GAEZ por zona).
 Al final copia a entrega/ lo que va al buzón y, si se da --comparar, compara cada archivo por sha256 (LEEME.md no se
 compara: el de Raiz_entregas lleva detalle escrito a mano). Sale con código 1 si algún archivo difiere o falta.
 
@@ -39,7 +39,8 @@ CONAGUA = R("data", "raw", "conagua")
 # Lo que va al buzón desde cada etapa (lo demás de la entrega lo arma unir_zonas.py).
 DEL_RECTANGULO = ("et_contraste.csv", "h3_series.csv")
 DEL_RETO = ("contexto_regional.csv", "gedi_parcelas.csv", "opciones_b3.json", "suelo_parcelas.csv",
-            "suelo_requisitos.json", "suelo_tipos.json", "suelo_reglas.json", "suelo_nutrientes_parcelas.csv")
+            "suelo_requisitos.json", "suelo_tipos.json", "suelo_reglas.json", "suelo_nutrientes_parcelas.csv",
+            "tipo_suelo_parcelas.csv", "gaez_zona.csv")
 
 
 def correr(script, carpeta, *args, cwd=None):
@@ -118,6 +119,8 @@ def reto(d, zonas_dir, entrega):
     correr("B6_suelo_requisitos.py", d, "--opciones", os.path.join(d, "opciones_b3.json"))
     correr("B7_suelo_tipos.py", d, "--suelo", os.path.join(d, "suelo_parcelas.csv"), "--supuestos", R("datos", "supuestos.json"),
            "--requisitos", os.path.join(d, "suelo_requisitos.json"))
+    correr("B8_tipo_suelo_parcelas.py", d, "--crudo", crudo)
+    correr("G1_gaez_zona.py", d, "--crudo", crudo)
 
 
 def comparar(entrega, referencia):
