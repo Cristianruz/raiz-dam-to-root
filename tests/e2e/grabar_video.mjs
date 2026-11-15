@@ -7,7 +7,8 @@
 //                                     tomas con más calma y siete golpes más: el idioma, menos lluvia, las zonas piloto
 //                                     y el registro de lluvia en la portada; el suelo, las otras dos parcelas y la
 //                                     vista 3D; guion docs/pitch/guion_video_recorrido.md → video_recorrido.mp4 y .srt)
-//        RAIZ_LIGA_PAGINA=<liga>      liga pública que se escribe en la tarjeta de cierre (por omisión, la del proyecto)
+//        RAIZ_LIGA_PAGINA=<liga>      liga pública que se escribe en la tarjeta de cierre (por omisión, ninguna: la
+//                                     dirección trae el usuario de la cuenta; la liga va aparte, en el formulario)
 //        RAIZ_FOTOGRAMAS=<carpeta>    dónde dejar un fotograma de cada tramo para revisarlo (por omisión, una temporal)
 //        FFMPEG=<ruta> FFPROBE=<ruta> si ffmpeg y ffprobe no están en el PATH
 // No forma parte de `node --test tests/` (necesita Chromium y ffmpeg). Termina con 0 si todo pasa y 1 si algo falla.
@@ -90,8 +91,8 @@ const TEMPORAL = fs.mkdtempSync(path.join(os.tmpdir(), "raiz-video-"));
 const FOTOGRAMAS = process.env.RAIZ_FOTOGRAMAS ? path.resolve(process.env.RAIZ_FOTOGRAMAS) : path.join(TEMPORAL, "fotogramas");
 const FFMPEG = process.env.FFMPEG ?? "ffmpeg";
 const FFPROBE = process.env.FFPROBE ?? "ffprobe";
-// La liga del proyecto no es una cifra: se escribe tal cual en la tarjeta de cierre.
-const LIGA = process.env.RAIZ_LIGA_PAGINA || "https://cristianruz.github.io/raiz-dam-to-root/";
+// La liga del proyecto se escribe en la tarjeta de cierre solo si se pide con RAIZ_LIGA_PAGINA.
+const LIGA = process.env.RAIZ_LIGA_PAGINA || "";
 
 // Protagonista de los golpes de la ficha y opción cuyo «Why?» se abre (por su data-opcion; si la parcela no la trae,
 // se usa su primera alternativa).
@@ -1467,7 +1468,10 @@ async function capturarTarjetas(navegador, baseLocal, cues) {
       if (toma.vista === "apertura") parametros.lema = c.texto;
       // Los nombres de los integrantes no están en el repo: quien graba los da con RAIZ_INTEGRANTES.
       if (toma.vista === "equipo" && process.env.RAIZ_INTEGRANTES) parametros.integrantes = process.env.RAIZ_INTEGRANTES;
-      if (toma.vista === "cierre") Object.assign(parametros, { frase: c.texto, liga: LIGA.replace(/^https?:\/\//, "").replace(/\/$/, ""), app: esAplicacionInstalable() ? "si" : "no" });
+      if (toma.vista === "cierre") {
+        Object.assign(parametros, { frase: c.texto, app: esAplicacionInstalable() ? "si" : "no" });
+        if (LIGA) parametros.liga = LIGA.replace(/^https?:\/\//, "").replace(/\/$/, "");
+      }
       await abrir(parametros, LIENZO.alto);
       // Para leer el texto y medir si cabe: el estado final de la animación.
       await page.evaluate(() => window.__tarjetaIr(600000));
@@ -1505,8 +1509,11 @@ async function capturarTarjetas(navegador, baseLocal, cues) {
         check("tarjeta «aparte»: el aprendizaje automático se atribuye a los límites de parcela, no al mapa de cultivos", /Machine-learning field map/.test(t) && /Boundaries from a neural network/.test(t));
       }
       if (toma.vista === "cierre") {
-        const liga = await page.locator('[data-vista="cierre"] [data-campo="liga"]').innerText();
-        check("tarjeta «cierre»: frase del guion, aviso de juicio y liga pública", t.includes(c.texto) && t.includes(AVISO_JUICIO) && LIGA.includes(liga.trim()), liga.trim());
+        // La liga pública no se escribe por omisión (su dirección trae el usuario de la cuenta); con RAIZ_LIGA_PAGINA, sí.
+        const campoLiga = page.locator('[data-vista="cierre"] [data-campo="liga"]');
+        const liga = LIGA ? (await campoLiga.innerText()).trim() : "";
+        const ligaBien = LIGA ? liga.length > 0 && LIGA.includes(liga) : !(await campoLiga.isVisible()) && !/github/i.test(t);
+        check("tarjeta «cierre»: frase del guion y aviso de juicio; la liga, solo si se pidió", t.includes(c.texto) && t.includes(AVISO_JUICIO) && ligaBien, LIGA ? liga : "sin liga");
       }
       // La tarjeta es animada: se captura cuadro por cuadro, llevando sus animaciones al instante de cada cuadro.
       const cuadros = Math.round(c.fin * FPS) - Math.round(c.ini * FPS) + ANTICIPO_CUADROS;
