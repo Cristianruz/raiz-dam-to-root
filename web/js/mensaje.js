@@ -136,8 +136,6 @@ const IDIOMAS = {
       lluvia_menos: "{{pct}} menos lluvia",
       lluvia_mas: "{{pct}} más lluvia",
       rango_ha: " (entre {{bajo}} y {{alto}})",
-      menos_de: "menos de {{x}}",
-      casi: "casi {{x}}",
       motivos: {
         sin_clima_zona: "falta el clima de su zona",
         sin_actual: "no se pudo armar su rotación actual con los datos de su zona",
@@ -206,8 +204,6 @@ const IDIOMAS = {
       lluvia_menos: "{{pct}} less rain",
       lluvia_mas: "{{pct}} more rain",
       rango_ha: " (between {{bajo}} and {{alto}})",
-      menos_de: "less than {{x}}",
-      casi: "almost {{x}}",
       motivos: {
         sin_clima_zona: "the climate data for your area is missing",
         sin_actual: "your current rotation could not be built with the data for your area",
@@ -276,8 +272,6 @@ const IDIOMAS = {
       lluvia_menos: "{{pct}} menos chuva",
       lluvia_mas: "{{pct}} mais chuva",
       rango_ha: " (entre {{bajo}} e {{alto}})",
-      menos_de: "menos de {{x}}",
-      casi: "quase {{x}}",
       motivos: {
         sin_clima_zona: "falta o clima da sua zona",
         sin_actual: "não foi possível montar a sua rotação atual com os dados da sua zona",
@@ -348,8 +342,6 @@ const IDIOMAS = {
       lluvia_menos: "{{pct}} de pluie en moins",
       lluvia_mas: "{{pct}} de pluie en plus",
       rango_ha: " (entre {{bajo}} et {{alto}})",
-      menos_de: "moins de {{x}}",
-      casi: "presque {{x}}",
       motivos: {
         sin_clima_zona: "le climat de votre zone manque",
         sin_actual: "votre rotation actuelle n'a pas pu être construite avec les données de votre zone",
@@ -500,21 +492,24 @@ const fmtDatoUi = (v) => fmtNum(v, 3, LOCALE_UI);
 function fmtRango(a, b, f) {
   return num(a) === num(b) ? f(a) : `${f(a)}–${f(b)}`;
 }
-/**
- * Hectáreas que alcanzan, en el idioma L, con la misma regla que la tarjeta (web/js/resumen.js,
- * hectareasQueAlcanzanTexto): nunca se leen más que la superficie («8 de 7,95») ni «0» si alcanza algo.
- * Con x ≥ superficie va la superficie; si x redondeada a un decimal llega a ella, x con su precisión (o «casi»);
- * si redondeada se lee cero, «menos de» el paso del formato.
- */
-function haQueAlcanzan(x, area, L) {
-  const v = num(x);
-  const a = num(area);
-  if (v == null || a == null) return fmtMsg(x, L);
-  const r1 = Math.round(v * 10) / 10;
-  if (v >= a) return fmtDatoMsg(a, L);
-  if (v > 0 && r1 === 0) return rellenar(L.palabras.menos_de, { x: fmtMsg(1 / 10, L) });
-  if (r1 >= a) return Math.round(v * 1000) / 1000 < a ? fmtDatoMsg(v, L) : rellenar(L.palabras.casi, { x: fmtDatoMsg(a, L) });
-  return fmtMsg(v, L);
+// Hectáreas que alcanzan, con la MISMA regla que la tarjeta y la frase de la ficha (formatoHectareas de
+// web/js/resumen.js): los decimales del área tal como llega (de uno a tres), redondeo hacia abajo y nunca más que
+// el área; aquí, con el separador decimal del idioma. Los números son reglas de formato, no datos.
+const DECIMALES_MINIMOS_HA = 1;
+const DECIMALES_MAXIMOS_HA = 3;
+const HOLGURA_REDONDEO = 1e-9; // 20.66 × 100 da 2065.9999…: sin holgura, el redondeo hacia abajo perdería un centésimo
+function formatoHectareasMsg(areaHa, L) {
+  const area = num(areaHa);
+  const decimalesArea =
+    area == null ? 0 : (formateador("en-US", { maximumFractionDigits: DECIMALES_MAXIMOS_HA, useGrouping: false }).format(area).split(".")[1] ?? "").length;
+  const decimales = Math.max(DECIMALES_MINIMOS_HA, decimalesArea);
+  const escala = 10 ** decimales;
+  return (x) => {
+    const v = num(x);
+    if (v == null) return "—";
+    const abajo = Math.floor(v * escala + HOLGURA_REDONDEO) / escala;
+    return fmtNum(area == null ? abajo : Math.min(abajo, area), decimales, L.locale);
+  };
 }
 function fmtPct(fraccion, L) {
   const n = num(fraccion);
@@ -741,15 +736,16 @@ function armarOpcion(o, i, p, ctx, t, L, codigo) {
     agua = rellenar(t.agua_sin_riego, { estado, plazo });
   } else {
     const h = ev.hectareas;
-    const bajo = haQueAlcanzan(h.bajo, p.area_ha, L);
-    const alto = haQueAlcanzan(h.alto, p.area_ha, L);
+    const fh = formatoHectareasMsg(p.area_ha, L);
+    const bajo = fh(h.bajo);
+    const alto = fh(h.alto);
     const rango = bajo === alto ? "" : rellenar(L.palabras.rango_ha, { bajo, alto });
     agua = rellenar(t.agua, {
       estado,
       lamina: fmtDatoMsg(ev.lamina.p50, L),
       plazo,
       d: fmtMsg(D, L),
-      ha: haQueAlcanzan(h.p50, p.area_ha, L),
+      ha: fh(h.p50),
       area,
       rango_ha: rango,
     });

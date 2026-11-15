@@ -410,10 +410,12 @@ def escribir_pruebas_md_en(pasos, ahora, total_s):
     Space Apps pide que todo lo enlazado esté en inglés. El detalle de cada paso se copia tal cual."""
     try:
         pw = importlib.import_module("motor.pruebas_web")
-    except Exception:  # sin el módulo, los nombres quedan como id del paso (no se pierde la tabla)
+    except ImportError:  # sin el módulo, los nombres quedan como id del paso (no se pierde la tabla)
         pw = None
     nombres = getattr(pw, "NOMBRES_PASOS", {}) or {}
-    estados = {"OK": "passed", "FALLA": "failed", "PENDIENTE": "pending", "OMITIDO": "skipped"}
+    # Los mismos estados en inglés que usa la web (un solo mapa: motor/pruebas_web.py, ESTADOS_PASO).
+    estados = getattr(pw, "ESTADOS_PASO", None) or {"OK": "passed", "FALLA": "failed", "PENDIENTE": "pending",
+                                                    "OMITIDO": "skipped", "ADVERTENCIA": "warning"}
     filas = "\n".join(f"| {nombres.get(p.nombre, p.nombre)} | {estados.get(p.estado, p.estado)} | {p.detalle} |"
                       for p in pasos)
     texto = (

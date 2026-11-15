@@ -18,25 +18,23 @@
 //                       web/reglas.js: { lamina, cobertura, hectareas: { p50 }, semaforo }
 //         D             dotación elegida, en millares/ha (miles de m³ por hectárea)
 //         formato       opcional: función (valor, clave) -> texto, con clave «d» (dotación), «ha»
-//                       (hectáreas que alcanzan) o «area» (superficie de la parcela). Por omisión, un
-//                       decimal para «d» y «ha» y hasta tres para «area», como la ficha.
-//         formatoDecimales  opcional: función (valor, decimales) -> texto (en app.js, fmt), para el caso
-//                       parcial: X se escribe con hectareasQueAlcanzanTexto (nunca más que N, nunca «0»
-//                       si alcanza algo). Sin ella se usa «formato» con «ha» y «area».
+//                       (hectáreas que alcanzan), «area» (superficie de la parcela) o «anios» (años del
+//                       plazo). Por omisión, un decimal para «d», «ha» y «anios» y hasta tres para «area».
 //       Variantes (casoResumen dice cuál toca):
 //         parcial      «With {D} thousand m³/ha, the current rotation ({cultivo}) has enough water for
-//                      {X} of {N} hectares.»
-//         completa     «… has enough water for all {N} hectares.» Si el semáforo es ámbar (cubre la
-//                      mediana, no la estimación alta) lo dice: «… at the median estimate of its need,
+//                      {X} of {N} hectares. {plazo}»
+//         completa     «… has enough water for all {N} hectares. {plazo}» Si el semáforo es ámbar (cubre
+//                      la mediana, no la estimación alta) lo dice: «… at the median estimate of its need,
 //                      not at the high estimate.»
+//         {plazo}      el compromiso de la opción ACTUAL (agua.plazo_anios, agua.plazo_restante y
+//                      agua.nota_plazo): «Alfalfa ties up water for 3–4 years (0–1 years left).»; con
+//                      nota (huerta) «… for {N} years ({nota}).»; anual (plazo de un año) «… for one
+//                      season.»; sin plazo en los datos, lo dice. Las cifras salen del cubo.
 //         sin_riego    lámina cero: «The current rotation ({cultivo}) needs no irrigation, …»
 //         abstenida    «Not classified — check with a technician. …»
 //         sin_calculo  parcela clasificada sin opción ACTUAL, o sin dotación: lo dice, sin números.
 //       {cultivo} sale de opcionActual.nombre (sin el prefijo «Current rotation:»); si falta, de su
 //       secuencia o de parcela.cultivo_actual.
-//   hectareasQueAlcanzanTexto(x, area, formato(v, decimales)) -> { caso, cifra, texto }
-//       «all N hectares», «X of N hectares» (X nunca se lee mayor que N: con la precisión de N o «almost
-//       all»), «less than 0.1 of N hectares» (el paso sale de DECIMALES_HA). La usan la tarjeta y la frase.
 //   casoResumen({ parcela, opcionActual, evaluacion, D }) -> "parcial" | "completa" | "sin_riego" |
 //       "abstenida" | "sin_calculo"    (para un data-atributo o para las pruebas)
 //
@@ -184,7 +182,8 @@ function numero(v, opciones) {
   return conMenos(formatos.get(llave).format(v));
 }
 /** Valor del NDVI con la precisión del archivo (tres decimales como máximo). */
-const fmtNdvi = (v) => numero(v, { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+// Dos decimales siempre (I8 de la revisión total: «0.844» junto a «0.79»); el valor exacto va en la tabla oculta.
+const fmtNdvi = (v) => numero(v, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 /** Umbral o marca de la escala: sin ceros de relleno. */
 const fmtEscala = (v) => numero(v, { maximumFractionDigits: 3 });
 
@@ -215,9 +214,44 @@ function asegurarHoja() {
 // ---------------------------------------------------------------------------
 const PREFIJO_ACTUAL = /^\s*current rotation\s*:\s*/i;
 
-function formatoPorOmision(valor, clave) {
-  if (!esNumero(valor)) return "—";
-  return numero(valor, { maximumFractionDigits: clave === "area" ? 3 : 1 });
+/** Formato por omisión: un decimal para la dotación y los años; hectáreas y área con formatoHectareas (mismo formato). */
+function formatoPorOmision(areaHa) {
+  const ha = formatoHectareas(areaHa);
+  return (valor, clave) => {
+    if (clave === "ha" || clave === "area") return ha(valor);
+    if (!esNumero(valor)) return "—";
+    return numero(valor, { maximumFractionDigits: 1 });
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Hectáreas junto al área (revisión con Playwright, 2026-11-15, punto 6: «Enough for 20.7 of 20.66 hectares»)
+// ---------------------------------------------------------------------------
+const DECIMALES_MINIMOS_HA = 1; // lo que alcanza en una parcela de área entera se lee con un decimal
+const DECIMALES_MAXIMOS_HA = 3; // los de un dato leído de un archivo (fmtDato de app.js)
+const HOLGURA_REDONDEO = 1e-9; // 20.66 × 100 da 2065.9999…: sin holgura, el redondeo hacia abajo perdería un centésimo
+
+/**
+ * formatoHectareas(areaHa) -> función (valor) -> texto.
+ * Las hectáreas que alcanzan y el área de la parcela con el MISMO formato: los decimales del área tal como llega en
+ * los datos (de uno a tres, sin ceros de relleno). Lo que alcanza se redondea hacia abajo y nunca pasa del área: el
+ * texto no dice más de lo calculado ni más que la parcela. Sin área (dato ausente), un decimal y sin tope.
+ */
+export function formatoHectareas(areaHa) {
+  const conArea = esNumero(areaHa);
+  const decimalesArea = conArea ? (numero(areaHa, { maximumFractionDigits: DECIMALES_MAXIMOS_HA }).split(".")[1] ?? "").length : 0;
+  const decimales = Math.max(DECIMALES_MINIMOS_HA, decimalesArea);
+  const escala = 10 ** decimales;
+  return (valor) => {
+    if (!esNumero(valor)) return "—";
+    const abajo = Math.floor(valor * escala + HOLGURA_REDONDEO) / escala;
+    return numero(conArea ? Math.min(abajo, areaHa) : abajo, { maximumFractionDigits: decimales });
+  };
+}
+
+/** «hectare» o «hectares» según el número (reglas de plural del inglés). */
+export function hectareasTexto(n) {
+  return hectareas(n);
 }
 
 // Aclaración final entre paréntesis del nombre («Pecan orchard (does not rotate)»): la frase ya pone el nombre
@@ -232,45 +266,6 @@ function nombreRotacion(opcion, parcela) {
   return secuencia.filter(Boolean).map((s) => String(s).replace(/_/g, " ")).join(" → ") || "crop not named";
 }
 
-// Precisión con que se escriben las hectáreas: un decimal las que calcula la web (como fmt de app.js) y hasta
-// tres la superficie leída del archivo (como fmtDato). Son decimales de pantalla, no datos del proyecto.
-export const DECIMALES_HA = 1;
-export const DECIMALES_AREA = 3;
-const redondear = (v, d) => Math.round(v * 10 ** d) / 10 ** d;
-const formatoDecimalesPorOmision = (v, d) => (esNumero(v) ? numero(v, { maximumFractionDigits: d }) : "—");
-
-/**
- * Hectáreas que alcanzan, escritas sin pasar de la superficie de la parcela ni redondear a cero lo que no es
- * cero (la tarjeta, la lámina local y la frase resumen usan la misma regla):
- *   «todas»     x ≥ N                              → «all N hectares»
- *   «casi»      x < N, pero redondeada se lee ≥ N    → con la precisión de N («1.169 of 1.17») o, si aun así se
- *                                                   lee igual, «almost all N hectares»
- *   «menos_de»  0 < x y redondeada se lee 0          → «less than <el paso del formato> of N hectares»
- *   «valor»     el resto                            → «X of N hectares»
- * formato(v, decimales) -> texto (en app.js, fmt). Devuelve { caso, cifra, texto }: cifra es lo que va en
- * lugar de X en un rango («all», «almost all», «less than …» o X); texto, la frase completa sin «Enough for».
- */
-export function hectareasQueAlcanzanTexto(x, area, formato = formatoDecimalesPorOmision) {
-  const f = typeof formato === "function" ? formato : formatoDecimalesPorOmision;
-  const nArea = f(area, DECIMALES_AREA);
-  const unidad = esNumero(area) && redondear(area, DECIMALES_AREA) === 1 ? "hectare" : "hectares";
-  if (!esNumero(x) || !esNumero(area)) return { caso: "valor", cifra: f(x, DECIMALES_HA), texto: `${f(x, DECIMALES_HA)} of ${nArea} ${unidad}` };
-  if (x >= area) return { caso: "todas", cifra: "all", texto: `all ${nArea} ${unidad}` };
-  if (x > 0 && redondear(x, DECIMALES_HA) === 0) {
-    const menos = `less than ${f(10 ** -DECIMALES_HA, DECIMALES_HA)}`;
-    return { caso: "menos_de", cifra: menos, texto: `${menos} of ${nArea} ${unidad}` };
-  }
-  if (redondear(x, DECIMALES_HA) >= area) {
-    if (redondear(x, DECIMALES_AREA) < area) {
-      const fino = f(x, DECIMALES_AREA);
-      return { caso: "casi", cifra: fino, texto: `${fino} of ${nArea} ${unidad}` };
-    }
-    return { caso: "casi", cifra: "almost all", texto: `almost all ${nArea} ${unidad}` };
-  }
-  const cifra = f(x, DECIMALES_HA);
-  return { caso: "valor", cifra, texto: `${cifra} of ${nArea} ${unidad}` };
-}
-
 export function casoResumen({ parcela, opcionActual, evaluacion, D } = {}) {
   if (parcela?.abstencion || evaluacion?.semaforo === "gris") return "abstenida";
   const lamina = evaluacion?.lamina;
@@ -280,8 +275,8 @@ export function casoResumen({ parcela, opcionActual, evaluacion, D } = {}) {
   return evaluacion.cobertura >= 1 ? "completa" : "parcial";
 }
 
-export function fraseResumen({ parcela, opcionActual, evaluacion, D, formato, formatoDecimales } = {}) {
-  const f = typeof formato === "function" ? formato : formatoPorOmision;
+export function fraseResumen({ parcela, opcionActual, evaluacion, D, formato } = {}) {
+  const f = typeof formato === "function" ? formato : formatoPorOmision(parcela?.area_ha);
   const caso = casoResumen({ parcela, opcionActual, evaluacion, D });
   if (caso === "abstenida") {
     return "Not classified — check with a technician. The crop map is not sure what grows on this field, so its water need is not computed.";
@@ -292,19 +287,59 @@ export function fraseResumen({ parcela, opcionActual, evaluacion, D, formato, fo
   const cultivo = nombreRotacion(opcionActual, parcela);
   const area = f(parcela.area_ha, "area");
   if (caso === "sin_riego") {
-    return `The current rotation (${cultivo}) needs no irrigation, so the water allocation does not limit its ${area} hectares.`;
+    return `The current rotation (${cultivo}) needs no irrigation, so the water allocation does not limit its ${area} ${hectareas(parcela.area_ha)}.`;
   }
   const inicio = `With ${f(D, "d")} thousand m³/ha, the current rotation (${cultivo}) has enough water for`;
+  const plazo = frasePlazo(opcionActual, cultivo, f);
   if (caso === "completa") {
     return evaluacion.semaforo === "ambar"
-      ? `${inicio} all ${area} hectares at the median estimate of its need, not at the high estimate.`
-      : `${inicio} all ${area} hectares.`;
+      ? `${inicio} all ${area} ${hectareas(parcela.area_ha)} at the median estimate of its need, not at the high estimate. ${plazo}`
+      : `${inicio} all ${area} ${hectareas(parcela.area_ha)}. ${plazo}`;
   }
-  // Parcial: la misma regla que la tarjeta (nunca «1.2 of 1.17» ni «0 of 1.64» con agua que sí alcanza algo).
-  const fd = typeof formatoDecimales === "function"
-    ? formatoDecimales
-    : (v, d) => (d === DECIMALES_HA ? f(v, "ha") : d === DECIMALES_AREA ? f(v, "area") : formatoDecimalesPorOmision(v, d));
-  return `${inicio} ${hectareasQueAlcanzanTexto(evaluacion.hectareas.p50, parcela.area_ha, fd).texto}.`;
+  return `${inicio} ${f(evaluacion.hectareas.p50, "ha")} of ${area} ${hectareas(parcela.area_ha)}. ${plazo}`;
+}
+
+// ---------------------------------------------------------------------------
+// Plazo del agua en la frase (revisión con Playwright, 2026-11-15, punto 1): por cuántos años obliga la opción
+// ACTUAL, leído de agua.plazo_anios, agua.plazo_restante y agua.nota_plazo del cubo. Antes solo estaba en la
+// tarjeta («Commits water for …»), unas dos pantallas y media abajo en el teléfono.
+// ---------------------------------------------------------------------------
+const reglasPlural = new Intl.PluralRules(LOCALE);
+const singular = (n) => esNumero(n) && reglasPlural.select(n) === "one";
+const hectareas = (n) => (singular(n) ? "hectare" : "hectares");
+/** «year» solo para un valor único igual a uno; un rango («0–1 years») va en plural. */
+const anios = (r) => (r.min === r.max && singular(r.max) ? "year" : "years");
+const rangoValido = (r) => r && typeof r === "object" && esNumero(r.min) && esNumero(r.max);
+
+/** «3–4» o «10»: un rango del cubo con el formato de la app (clave «anios»). */
+function rangoAnios(r, f) {
+  return r.min === r.max ? f(r.min, "anios") : `${f(r.min, "anios")}–${f(r.max, "anios")}`;
+}
+
+/** Primera letra en mayúscula (el nombre abre la oración; si viene de la secuencia, llega en minúsculas). */
+const conMayuscula = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/**
+ * Oración del plazo para la frase resumen:
+ *   · anual (el plazo no pasa de un año): «{Cultivo} ties up water for one season.»
+ *   · varios años: «{Cultivo} ties up water for {min}–{max} years ({restante} years left).»; con nota_plazo
+ *     (la huerta: horizonte de cálculo) la nota va en el paréntesis; el restante se omite si es igual al plazo.
+ *   · sin plazo en los datos: lo dice (no se inventa ni se calla).
+ */
+function frasePlazo(opcion, cultivo, f) {
+  const agua = opcion?.agua ?? {};
+  const plazo = agua.plazo_anios;
+  if (!rangoValido(plazo)) return "The data do not give how many years it ties up water.";
+  const sujeto = conMayuscula(cultivo);
+  // Un año como máximo: el compromiso dura una temporada (comparación con la unidad del plazo, no un dato).
+  if (plazo.max <= 1) return `${sujeto} ties up water for one season.`;
+  const resto = agua.plazo_restante;
+  const igual = rangoValido(resto) && resto.min === plazo.min && resto.max === plazo.max;
+  const notas = [
+    agua.nota_plazo ? String(agua.nota_plazo) : "",
+    rangoValido(resto) && !igual ? `${rangoAnios(resto, f)} ${anios(resto)} left` : "",
+  ].filter(Boolean);
+  return `${sujeto} ties up water for ${rangoAnios(plazo, f)} ${anios(plazo)}${notas.length ? ` (${notas.join("; ")})` : ""}.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -560,8 +595,11 @@ function htmlTabla(modelo) {
 
 function htmlFuente(fuente) {
   const texto = String(fuente ?? "").trim();
-  // La fuente viene de los datos y está en español; la interfaz, en inglés.
-  return texto ? `<p class="resumen-ndvi-fuente">${esc(PREFIJO_FUENTE)}<span lang="es">${esc(texto)}</span></p>` : "";
+  // La fuente viene de los datos y está en español; la interfaz, en inglés: queda plegada en «Source» (I5 de la
+  // revisión total: la cita traía el proyecto de Earth Engine y notas internas a la vista).
+  return texto
+    ? `<details class="resumen-ndvi-fuente"><summary>${esc(PREFIJO_FUENTE.replace(/:\s*$/, ""))}</summary><p lang="es">${esc(texto)}</p></details>`
+    : "";
 }
 
 function textoLectura(modelo, i, elegido) {

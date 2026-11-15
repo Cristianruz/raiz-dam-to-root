@@ -19,7 +19,7 @@
 //   cubo trae los bloques de goteo; si vienen en null, la nota «Drip scenario not available yet…»;
 // - con goteo, las cifras grandes «Dam water» y «Back to aquifer» (y, sin tope, «Crop consumption (ET)»
 //   contra la base histórica y el aviso según tope_consumo.cumple_sin_tope), calculadas de los bloques;
-// - la frase fija de X3.2 (reescrita sin «only» ni «recommended»), la fuente del coeficiente de retorno (de gota.supuestos),
+// - la frase fija de X3.2 (reescrita sin «only»), la fuente del coeficiente de retorno (de gota.supuestos),
 //   los supuestos de la variante y una tabla oculta a la vista con los mismos números (lectores de pantalla);
 // - con goteo, A LA VISTA junto a sus cifras (no solo en el desplegable): las eficiencias de campo del goteo y del
 //   riego superficial con su etiqueta («[V] indicative, not local») y su fuente (FAO), de ctx.metaGoteo
@@ -52,14 +52,15 @@ const TEXTOS = {
   consumo: "Crop consumption (ET):",
   vsActual: "vs. current irrigation",
   vsHistorico: "vs. historical",
-  noRecomendado: "Above the cap: district consumption would exceed the historical level.",
-  // Frase fija de X3.2 §4. El kit dice «recommended only if…»; aquí va sin «only» ni «recommended» (reglas de
-  // la entrega: la herramienta no recomienda), con el mismo sentido: el goteo cabe en el tope de consumo si la
-  // ET del distrito no pasa de su nivel histórico.
+  // Aviso del escenario sin tope (kit X3.2 §3). Decisión de Cristian del 15-nov-2026: la página marca el
+  // escenario y no aconseja (CLAUDE.md, regla 10); ver docs/decisiones/2026-11-15_correcciones_motor.md §5.
+  noRecomendado: "Flagged: district consumption (ET) would exceed its historical level.",
+  // Frase fija de X3.2 §4, con la misma decisión: en lugar de decir cuándo conviene el goteo, dice cuándo la
+  // página muestra el escenario sin aviso y cuándo lo marca. La cita y «consumo, no solo extracción» no cambian.
   frase:
     "Efficiency reduces dam withdrawals but can reduce aquifer recharge (Grafton et al., Science 2018). " +
     "We count consumption (ET), not just withdrawals. " +
-    "Drip fits the consumption cap while district ET stays at or below its historical level.",
+    "The drip scenario is shown without a warning when district ET stays at or below its historical level; if ET would rise above it, the page flags the scenario.",
   fuenteRetorno: "Return-flow coefficient:",
   // Eficiencias del goteo (cubo.meta.goteo): rótulo y fuente a la vista junto a las cifras.
   eficiencias: "Field efficiencies used: drip",

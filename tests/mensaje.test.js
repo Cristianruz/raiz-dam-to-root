@@ -13,6 +13,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import * as reglas from "../web/reglas.js";
+import { formatoHectareas } from "../web/js/resumen.js";
 import {
   IDIOMAS_WHATSAPP,
   NOTA_TRADUCCION,
@@ -80,6 +81,26 @@ test("el mensaje sale completo en cada idioma, con sus avisos y los números en 
   }
   // Cuatro textos distintos (no se cayó a español en silencio).
   assert.equal(new Set(Object.values(textos)).size, CODIGOS.length);
+});
+
+test("las hectáreas que alcanzan, con la misma regla que la tarjeta (formatoHectareas: hacia abajo, nunca más que el área)", { skip: !conOpciones && "sin parcela clasificada con opciones" }, () => {
+  const opciones = cubo.parcelas[conOpciones.id].opciones;
+  const area = conOpciones.area_ha;
+  const fh = formatoHectareas(area);
+  const dotaciones = [...new Set([...(cubo.dotaciones?.marcas ?? []).map((m) => m.valor), cubo.dotaciones?.deslizador?.max])].filter(Number.isFinite);
+  let revisadas = 0;
+  for (const D of dotaciones) {
+    const t = textoWhatsApp(conOpciones, opciones, { reglas, D, r: 0, idioma: "en" });
+    for (const o of opciones) {
+      const ev = reglas.evaluarOpcion(o, area, D, 0);
+      if (!(ev.lamina.p50 > 0)) continue;
+      const esperado = `it is enough for ${fh(ev.hectareas.p50)} of ${fh(area)} ha`;
+      assert.ok(t.includes(esperado), `${o.id} con ${D}: falta «${esperado}»`);
+      assert.ok(Number(fh(ev.hectareas.p50).replace(/,/g, "")) <= area, `${o.id} con ${D}: más que el área`);
+      revisadas += 1;
+    }
+  }
+  assert.ok(revisadas > 0, "ninguna opción con riego revisada");
 });
 
 test("parcela abstenida: pide revisarla con el técnico en cada idioma, sin pedir respuesta", { skip: !abstenida && "sin parcela abstenida" }, () => {

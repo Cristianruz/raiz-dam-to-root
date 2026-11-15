@@ -269,6 +269,7 @@
 .resumen-ndvi-claves li { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .resumen-ndvi-clave { flex: none; display: block; }
 .resumen-ndvi-ayuda, .resumen-ndvi-fuente { font-size: 0.8rem; color: var(--resumen-tinta-suave); overflow-wrap: anywhere; }
+.resumen-ndvi-fuente > summary { cursor: pointer; font-weight: 700; width: fit-content; }
 
 /* Contraste forzado del sistema: las tintas siguen al texto del sistema. */
 @media (forced-colors: active) {

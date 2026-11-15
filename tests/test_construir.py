@@ -190,3 +190,19 @@ def test_gemelo_sigue_con_los_demas_modulos_si_uno_falla(falsos, monkeypatch):
     assert llamadas == ["gemelo", "contexto", "suelo"]
     assert paso.estado == construir.FALLA
     assert "motor.gemelo_web" in paso.detalle and "motor.suelo_web" in paso.detalle and "contexto: OK" in paso.detalle
+
+
+def test_tabla_en_ingles_traduce_advertencia_y_todos_los_pasos(tmp_path, monkeypatch):
+    """Auditoría del 15-nov: un rechazo que conserva su copia deja el paso en ADVERTENCIA; la tabla en inglés
+    dice «warning», y los pasos del gemelo y de la app sin conexión salen con su nombre en inglés."""
+    (tmp_path / "docs").mkdir()
+    monkeypatch.setattr(construir, "RAIZ", tmp_path)
+    construir.escribir_pruebas_md([construir.Paso("ensamblar", "ADVERTENCIA", "rechazados 1"),
+                                   construir.Paso("gemelo", "OK", "gemelo: OK"),
+                                   construir.Paso("pwa", "OK", "precache")], 1.0)
+    en = (tmp_path / "docs/en/test_results.md").read_text(encoding="utf-8")
+    assert "| Team deliveries validated against the data contract | warning | rechazados 1 |" in en
+    assert "ADVERTENCIA" not in en
+    assert "| gemelo |" not in en and "| pwa |" not in en
+    assert "| Digital twin, regional context and soil | passed |" in en
+    assert "| Offline app (installable page) | passed |" in en

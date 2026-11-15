@@ -736,6 +736,9 @@ def test_explicacion_dice_el_compromiso_tipico_desde_la_siembra(dos_zonas):
             vistos.add("nogal")
         elif plazo["max"] > anual:
             assert "from planting" in t and "typically" in t, (op["preguntas_ref"], t)
+            # Auditoría del 15-nov: la variante que conserva el rodal (corte de verano) no siembra nada; el texto
+            # habla del cultivo y remite a la tarjeta, que es la que muestra los años que le quedan a la parcela.
+            assert "this crop typically commits" in t and "the card shows the term left for this field" in t, t
             assert "per year and commits water for {{f2}}" not in t, "la redacción anterior parecía el plazo de la parcela"
             restante = op["agua"]["plazo_restante"]
             vistos.add("restante_menor" if op["id"] == "ACTUAL" and restante["max"] < plazo["max"] else "varios_anios")
