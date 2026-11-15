@@ -274,7 +274,16 @@ async function abrir(navegador, base, opciones, etiqueta, alterados = {}, { inic
   });
   page.on("pageerror", (e) => errores.push(`pageerror: ${e.message}`));
   page.on("requestfailed", (r) => {
-    if (!esOpcional(r.url())) errores.push(`requestfailed: ${r.url()}`);
+    if (esOpcional(r.url())) return;
+    const motivo = r.failure()?.errorText ?? "";
+    // Una tesela de relieve que el propio mapa cancela (net::ERR_ABORTED) porque dejó de hacer falta al mover la cámara
+    // o al retirar la vista 3D no es un error de la página: con la máquina cargada ocurre a veces. Se anuncia y no
+    // cuenta; las teselas que de verdad fallan las cuenta la vista 3D (teselasFallidas, que se exige en cero).
+    if (/\/data\/dem\//.test(r.url()) && /ERR_ABORTED/.test(motivo)) {
+      omitir(`${etiqueta}: tesela de relieve cancelada por el mapa`, `${r.url().replace(/^.*\/data\//, "data/")} (${motivo})`);
+      return;
+    }
+    errores.push(`requestfailed: ${r.url()}${motivo ? ` (${motivo})` : ""}`);
   });
   // Sin red para las teselas (como en esta máquina): se abortan de inmediato.
   await page.route((url) => esOpcional(url.href), (route) => route.abort());
@@ -2723,7 +2732,8 @@ async function pruebasTelefono(page, peticiones) {
     const sel = "a[href], button, input, select, summary, [role=button], [role=switch]";
     const out = [];
     for (const el of document.querySelectorAll(sel)) {
-      if (el.closest("[hidden], [inert]") || el.matches(".solo-lector, .saltar")) continue;
+      // Un control desactivado no es un objetivo táctil (las prioridades sin dato, prioridades.css).
+      if (el.closest("[hidden], [inert]") || el.disabled || el.matches(".solo-lector, .saltar")) continue;
       const objetivo = el.matches("input[type=checkbox]") && el.closest("label") ? el.closest("label") : el;
       const r = objetivo.getBoundingClientRect();
       if (!r.width || !r.height || getComputedStyle(el).visibility === "hidden") continue;

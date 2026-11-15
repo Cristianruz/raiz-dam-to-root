@@ -207,15 +207,17 @@
   /* Aviso de juicio local y fuentes, al pie */
   #ficha .aviso-juicio { font-size: 8pt; padding: 1mm 2mm; break-inside: avoid; }
   #ficha .impresion-fuentes { break-inside: avoid; }
+  /* Fuentes en un solo párrafo («A · B · C»): con todas las bases del reto, la lista en columnas (aun en cinco)
+     pasaba a una segunda hoja carta. Sigue siendo una lista para los lectores de pantalla. */
   #ficha .impresion-fuentes-lista {
     margin: 0;
-    padding-left: 3.5mm;
-    columns: 5; /* con las entregas del 15-nov la lista creció: en cinco columnas la hoja sigue siendo una */
-    column-gap: 3mm;
+    padding-left: 0;
+    list-style: none;
     font-size: 6pt;
-    line-height: 1.15;
+    line-height: 1.2;
   }
-  #ficha .impresion-fuentes-lista li { break-inside: avoid; margin-bottom: 0.3mm; }
+  #ficha .impresion-fuentes-lista li { display: inline; margin: 0; }
+  #ficha .impresion-fuentes-lista li:not(:last-child)::after { content: " · "; }
   #ficha .impresion-fuentes .aviso-juicio { margin-top: 1.2mm; }
   #ficha .fuente { font-size: 6.5pt; }
 
