@@ -5,7 +5,7 @@
 
 ## Antes de pegar (Cristian)
 
-Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que se pegan: los bloques están completos y en inglés. Los únicos textos «to be confirmed» que llevan son los de «References» (puntos 9 y 10).
+Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que se pegan: los bloques están completos y en inglés. Los únicos textos «to be confirmed» que llevan son los de las licencias de «References» (punto 10).
 
 1. **Liga del video.** El archivo es `docs/pitch/video_30s.mp4` (30 s o menos; se vuelve a grabar sobre la página final con `node tests/e2e/grabar_video.mjs`). Súbalo, pruebe la liga en incógnito y póngala en la sección 2.
 2. **Liga del PDF de las diapositivas.** El archivo es `docs/pitch/diapositivas.pdf` (lo genera `node tests/e2e/diapositivas_pdf.mjs` de `docs/pitch/diapositivas.html`). Antes de exportarlo, cambie el marcador «[INTEGRANTES]» de la portada por los nombres.
@@ -15,7 +15,7 @@ Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que s
 6. **Cómo surgió la idea (hallazgo C2 de `docs/revisiones/2026-11-14_2300_revision_vs_guia_spaceapps.md`).** La guía 2026 indica que la SI no debe usarse para concebir la idea. Lo que el repo registra es esto: del 10 al 13 de noviembre, Cristian usó a Claude, en el chat del proyecto, para redactar la documentación previa (proyecto definitivo S9, enfoque, kit, plan del evento y anteproyecto), sin código, y el equipo la revisó (`AI_USAGE.md`, primera fila). El bloque de SI (sección 9) dice ese hecho y nada más: no afirma que la idea sea del equipo ni lo contrario. **Falta una frase suya, con sus palabras, sobre cómo surgió la idea**, para ponerla al final del primer apartado del bloque. La revisión propone esta; úsela solo si puede sostener cada parte, porque el repo respalda la del medio (Claude ayudó a estructurar y a escribir) y no dice de dónde salió la idea ni quién tomó cada decisión de diseño: `The problem, the district, the data and the goal of showing each crop as a multi-year water commitment came from the team's research and the challenge; Claude helped us structure and write the concept, and the team chose and owns every design decision.` No borre la fila de `AI_USAGE.md`.
 7. **Investigación previa con otras herramientas.** `README.md` («SI/AI tools used») nombra a ChatGPT, Gemini, DeepSeek y NotebookLM para la búsqueda y la síntesis previas; `AI_USAGE.md` no lo registra, y por eso el bloque de SI no lo dice. Si se usaron, agregue una línea a `AI_USAGE.md` y esta frase al bloque: `Prior research: Claude, ChatGPT, Gemini, DeepSeek and NotebookLM for search and synthesis; each figure was checked in its original source.`
 8. **Líneas de cada integrante en `AI_USAGE.md`.** El renglón de P2 a P6 (Gemini en Colab o Claude en el navegador) sigue «por llenar». Si nadie usó esas herramientas, quite del bloque de SI el renglón «Notebooks».
-9. **Cita de software de AppEEARS.** AppEEARS pide que se cite la herramienta. El repo registra la versión (3.137) y los identificadores de las dos solicitudes (`docs/ecostress.md`; `data/processed/fuentes.json`), pero no el texto de la cita. En «References» va como «software citation to be confirmed»: cópielo de la página de AppEEARS, con la fecha de acceso, antes de pegar.
+9. **Cita de software de AppEEARS.** AppEEARS pide que se cite la herramienta. El repo registra la versión (3.137) y los identificadores de las dos solicitudes (`docs/ecostress.md`; `data/processed/fuentes.json`), y, desde el 15-nov, el texto de la cita: está en el README que AppEEARS genera con cada solicitud (`data/raw/reto/ecostress_readme_*.md`) y ya va copiado, textual, en «References». **Resuelto: no hay nada que hacer.**
 10. **Licencias sin confirmar en «References».** El bloque lleva cinco «terms to be confirmed», de licencias o términos de uso: SIH/Conagua; INIFAP, FIRA e IMTA; ERA5-Land; el catálogo de suelo y las reglas de nutrientes; y ECOCROP. Se dejan a propósito, porque el repo no tiene el texto de esos términos: no los complete de memoria.
 
 ## 1. Qué piden el plan, el kit y la guía de envío 2026
@@ -38,7 +38,7 @@ Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que s
 - Lo que va dentro de los bloques `text` se pega en el formulario. Lo de fuera son notas internas: no se pegan.
 - **Nombres de los campos por confirmar.** Los títulos de las secciones 3 a 9 siguen la guía de envío 2026 que trajo Cristian. Antes de pegar, confirme en el formulario real el texto exacto de cada campo y su límite de caracteres; si un campo es más corto, recorte desde el final de cada bloque.
 - **Idioma de las ligas.** Los bloques solo enlazan `README.md`, `LIMITATIONS.md`, `DATA_LICENSE.md` y las traducciones de `docs/en/` (índice en `docs/en/README.md`: `result_H1.md`, `result_H1b.md`, `H1b_specification.md`, `result_H3.md`, `model_vs_practice.md`, `story_fields_review.md`). Nunca enlace un `docs/*.md` en español desde el formulario.
-- «[LINK: pendiente — quién la da]» marca una liga que falta. Los pendientes que solo resuelve Cristian están arriba, en «Antes de pegar (Cristian)»; fuera de «References» (puntos 9 y 10), ningún bloque lleva marcadores.
+- «[LINK: pendiente — quién la da]» marca una liga que falta. Los pendientes que solo resuelve Cristian están arriba, en «Antes de pegar (Cristian)»; fuera de las licencias de «References» (punto 10), ningún bloque lleva marcadores.
 - Si el `README.md` o los datos cambian después de la última corrida, vuelva a leer las cifras contra la sección 12.
 
 ## 2. Ligas
@@ -168,7 +168,7 @@ In use (the page or a published test reads it):
 - GLDAS-2.1 Noah (NASA/GLDAS/V021/NOAH/G025/T3H). 27,830 m. 2000-01 to 2026-09. Accessed through Google Earth Engine. Used for: ET and root-zone soil moisture from a land surface model, as regional context.
 - NLDAS-2 forcing (NASA/NLDAS/FORA0125_H002). 13,915 m. 2000-01 to 2026-10. Accessed through Google Earth Engine. Used for: a second source of rain and potential evaporation, as regional context.
 - GEDI L2A v2, monthly raster (LARSE/GEDI/GEDI02_A_002_MONTHLY). Rasterized at 25 m; shots from 2019-04 to 2025-04, filtered by quality and sensitivity. Accessed through Google Earth Engine. Used for: canopy height (rh98) per field, to tell an orchard from a low crop; 1,072 of 1,239 fields have at least one shot.
-- ECOSTRESS ECO_L3T_JET.002 (collection 2). 70 m. October 1, 2025 to September 30, 2026. Accessed through AppEEARS, version 3.137 (LP DAAC), one sample point per field. Used for: daily ET on clear days per field (monthly median of the clear scenes), shown in the field sheet as a satellite estimate, not a field measurement and not a validation of the model; some months have no clear scene.
+- ECOSTRESS ECO_L3T_JET.002 (collection 2). 70 m. October 1, 2025 to September 30, 2026. Accessed through AppEEARS, version 3.137 (LP DAAC), one sample point per field. Used for: daily ET on clear days per field (monthly median of the clear overpasses, leaving out passes near sunrise or sunset and scenes with the area under cloud), shown in the field sheet as a satellite estimate, not a field measurement and not a validation of the model; some months have no clear scene.
 
 Challenge resources that do not cover Mexico: OpenET does not cover Mexico, so the ET contrast uses SSEBop on VIIRS. USDA, NRCS, CDL, NAIP, NLCD, PRISM, NWIS, CoCoRaHS, AMS, NASS and LANDFIRE cover the United States; the local equivalents are SIAP (crop statistics), SIH/Conagua (dams) and SDR Chihuahua.
 ```
@@ -263,7 +263,7 @@ Data
 
 Tools and libraries
 - Google Earth Engine: access platform for HLS, NASADEM, GPM IMERG, SSEBop, the regional context series, GEDI, SoilGrids and OpenLandMap (non-commercial project of the Community tier).
-- AppEEARS (NASA LP DAAC), version 3.137: used to request the ECOSTRESS point samples. Software citation to be confirmed.
+- AppEEARS Team. (2026). Application for Extracting and Exploring Analysis Ready Samples (AppEEARS). Ver. 3.137. NASA EOSDIS Land Processes Distributed Active Archive Center (LP DAAC), USGS/Earth Resources Observation and Science (EROS) Center, Sioux Falls, South Dakota, USA. Accessed November 15, 2026. https://appeears.earthdatacloud.nasa.gov Used to request the ECOSTRESS point samples.
 - MapLibre GL JS 5.24.0 (BSD 3-clause), d3 7.9.0 (ISC) and d3-sankey 0.12.3 (BSD 3-clause), copied unchanged from npm and verified by hash; their license files are next to each library.
 - pytest 9.1.0 (Python tests) and Playwright with Chromium (browser smoke tests, run locally).
 
