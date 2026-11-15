@@ -963,3 +963,36 @@ AppEEARS, textual):
 `docs/ecostress.md` ya las trae (§1) y la línea de LEEME de `ecostress_parcelas.csv` nombra el software. **Reentrega:** solo
 `LEEME.md` (17,183 bytes, sha256 eabf3a324c206c210f78a149e50d420a03901ac9b102805bda93b18ccf6976d8); los datos no cambian. Lo
 único que sigue pendiente de la revisión es D4 (la marca de ubicación de las escenas), escrito como límite.
+
+## 15-nov 01:05 — Para «Revisión multiagente»: respuesta sobre el aviso de suelo_tipos y cómo leer GAEZ
+**1. `suelo_tipos.json` → `zona.municipio_delicias_pct`: mejor que el validador acepte esas dos llaves como «no suelo»; el
+archivo no cambia.**
+- Las 11 llaves son la Tabla 1 del Plan Municipal de Desarrollo de Delicias 2024–2027 (INEGI 2016) tal cual: 9 grupos de
+  suelo más `zona_urbana` 3.44 y `cuerpo_de_agua` 0.03; suman 100.00. Son porcentajes de la superficie del municipio, no de
+  los suelos: los 9 grupos suman 96.53.
+- Probé sacarlas a una llave aparte (`municipio_delicias_otras_superficies_pct`) contra tu 85a8939 y tu esquema rechaza las
+  dos llaves: «zona.municipio_delicias_pct: … (suman 96.53)» y «zona.municipio_delicias_otras_superficies_pct: … (suman
+  3.47)». Corregirlo en el archivo obligaría a cambiar `motor/esquemas.py`, así que lo regresé: `suelo_tipos.json` sigue
+  siendo el entregado (61,875 bytes, sha256 537756d3d800d919d2cd24b0604313822223c8822f0de3df074e51cf9a5b0a7e, el mismo de
+  Drive). No hay reentrega. Con 85a8939 y mi buzón completo: entraron 35, rechazados 0; CONTRATO y VERIFICADOR OK; 1133
+  pytest y 223 node.
+- Tu `suelos_del_municipio` (`motor/suelo_web.py`) ya las deja fuera de la lista, que es lo correcto. Propuesta: una tupla
+  `NO_SUELO = ("zona_urbana", "cuerpo_de_agua")` (superficies del mismo cuadro del INEGI que no son suelo) que no genere
+  aviso; cualquier otra llave fuera del catálogo WRB, que siga avisando. Si la ficha quiere decir que el resto del municipio es
+  zona urbana y cuerpo de agua, las dos cifras ya están en el archivo con la misma fuente.
+
+**2. GAEZ (`gaez_zona.csv`): la columna `unidad` es la cadena que publica FAO, sin cambios.** `bloque_gaez`
+(`motor/contexto_web.py`) pasa `valor` y `unidad`, y deja fuera `clase_nombre`, `cultivo_gaez` y `nota`, que vienen en la
+entrega justo para esto. Lo que dibuja hoy la tarjeta (leído en la página de 85a8939, zona Delicias–Saucillo) y cómo se lee:
+
+| La página dice | Se lee | Propuesta |
+|---|---|---|
+| «Alfalfa … 1,678.5 10kg DW/ha» | decenas de kg de materia seca (DW, *dry weight*) por ha: 1,678.5 × 10 kg = 16,785 kg/ha, unas 16.8 t (Lázaro Cárdenas: 1,665.5 → 16,655 kg) | «1,678.5 × 10 kg DW/ha»; el factor sale de la propia cadena de la unidad, y una nota «DW: dry weight» |
+| «2 Class», «3 Class» | número de clase de aptitud de FAO (1 es la mejor); el nombre viene en `clase_nombre`: 2 = High, 3 = Good | «High», «Good»; sin los umbrales que imprime la leyenda del servicio, que no cuadran con los índices (77.78 llega como clase 2 y 55.56 como clase 3) |
+| «7,778 Index (0–10000)» | índice de aptitud en la escala de FAO de 0 a 10000: 7,778 equivale a 77.78 de 100 | puede quedarse así |
+| «Cotton … 913 kg lint/ha» | kg de fibra (algodón pluma) por ha | sin cambio |
+| «Forage maize … 9,341 kg DW/ha» y su clase | **es maíz de grano** (GAEZ «Maize», mze): el tema res05 no trae capa de maíz para ensilaje con insumos altos y riego por gravedad (columna `nota`) | mostrar `cultivo_gaez` junto al nombre («Forage maize · GAEZ: Maize») y la `nota`; si no, la fila atribuye al maíz forrajero un rendimiento de grano |
+| «Winter cereal …» | es la avena de GAEZ («Oat») | «Winter cereal · GAEZ: Oat» |
+
+Ninguna de estas lecturas necesita reentrega: todo está en `gaez_zona.csv` (9,049 bytes, sha256
+9a4a04678ac5b04409ac6a924bde53ddbb4769965c9406126d8c3b847372f5e0, el de Drive).
