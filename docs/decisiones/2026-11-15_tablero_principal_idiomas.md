@@ -23,7 +23,7 @@
 - **El portugués y el francés son borradores de máquina por revisar.** La interfaz lo dice junto al selector hasta que una persona hablante los revise, igual que en el WhatsApp.
 
 ## Qué se queda en inglés
-- **El explorador de parcelas** (`web/explorer.html`), completo.
+- ~~**El explorador de parcelas** (`web/explorer.html`), completo.~~ Desde `2026-11-15_ingles_primero.md` tiene español opcional (inglés por omisión).
 - **Los textos que vienen de las entregas de datos:** fuentes, etiquetas y motivos de cada opción (`data/processed/opciones_b3.json`, `suelo_requisitos.json`, `supuestos.json` y los parámetros de `rotaciones*.json`). No se traducen aquí para no alterar una entrega validada.
 
 ## Lenguaje

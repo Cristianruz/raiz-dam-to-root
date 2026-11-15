@@ -62,6 +62,11 @@
       <button type="button" class="boton-cabecera" id="boton-acerca" aria-haspopup="dialog" aria-controls="acerca">About &amp; Data</button>
       <!-- La portada es el tablero (web/index.html). Es un enlace, no un botón: lleva a otra página. -->
       <a class="boton-cabecera" id="enlace-tablero" href="index.html">Dashboard</a>
+      <!-- Idioma: inglés por omisión; español opcional (js/explorador_es.js, la misma elección que el tablero). -->
+      <select class="boton-cabecera selector-idioma" id="idioma" aria-label="Language / Idioma">
+        <option value="en" lang="en">English</option>
+        <option value="es" lang="es">Español</option>
+      </select>
     </nav>
     <!-- «Install app» y el indicador Online/Offline: los dibuja web/js/instalar.js (solo con https o localhost). -->
     <div class="marca-instalar" id="marca-instalar"></div>

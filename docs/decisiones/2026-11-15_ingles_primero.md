@@ -7,8 +7,20 @@
 
 **Qué no cambia:**
 - El mensaje de WhatsApp sigue la regla 9 de `CLAUDE.md` y `docs/decisiones/2026-11-14_whatsapp_idiomas.md`: el idioma elegido en su selector o, si no hay, el del teléfono; si ninguno tiene plantilla, español.
-- El explorador de parcelas (`web/explorer.html`) sigue solo en inglés, como dice `docs/decisiones/2026-11-15_tablero_principal_idiomas.md`.
+- ~~El explorador de parcelas sigue en inglés.~~ Desde el mismo día (segunda parte, abajo) el explorador también tiene español opcional.
 
 **Dónde vive:** `web/js/i18n.js` (función `elegir`). Prueba: `tests/i18n.test.js` (un navegador en español abre en inglés; el selector, la liga y la elección guardada lo cambian al español).
 
 Reemplaza el punto «El tablero abre en el idioma del navegador…» de `docs/decisiones/2026-11-15_tablero_principal_idiomas.md`.
+
+## Segunda parte: español opcional en el explorador de parcelas (15-nov-2026)
+
+**Quién lo pide:** Oscar Milo, el mismo día («Yes, add Spanish»).
+
+**Qué cambia:** `web/explorer.html` tiene un selector *English / Español* en la cabecera. Abre en inglés; el español usa la misma elección que el tablero (`web/js/i18n.js`, `?lang=es` o lo guardado en el navegador), así que lo elegido en una página vale en la otra. Con portugués o francés elegidos en el tablero, el explorador se queda en inglés.
+
+**Cómo:** `web/js/explorador_es.js` traduce lo que `app.js` escribe en inglés, sin tocar sus cálculos: un diccionario de formas (cada número como «#») y un `MutationObserver` para lo que se dibuja después. Una traducción nunca cambia un número: se devuelven los mismos, en el mismo orden. Parte del traductor de la rama `Milo` (commit `9b5c331`, `web/js/idioma.js`), ampliado y corregido.
+
+**Qué queda en inglés:** lo que no está en el diccionario. Sobre todo las fuentes y citas, los nombres de archivo, las descripciones técnicas de «About & Data» y los textos que llegan de las entregas de datos (como en el tablero). El español es una traducción hecha con IA: conviene que la revise una persona hablante.
+
+**Prueba:** `tests/explorador_es.test.js` (cifras iguales y en el mismo orden, frases con cultivo, lo desconocido queda igual, mismo número de «#» en cada forma, sin palabras vetadas).

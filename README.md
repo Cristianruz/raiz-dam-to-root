@@ -69,7 +69,7 @@ In a non-exhaustive search (Nov 10, 2026) we did not find a tool that shows the 
 **Two pages** ([`docs/decisiones/2026-11-15_tablero_principal_idiomas.md`](docs/decisiones/2026-11-15_tablero_principal_idiomas.md)).
 
 - **Dashboard** (`index.html`, the home page). A summary per pilot area; the pilot areas and the options of the chosen field side by side, with the recorded rain and with less rain; the map and one field at a time; crop cards under the chosen allocation, computed with the same slider rules as the field sheet (`web/reglas.js`); a context timeline from press notes [P]; and the historical rainfall range of NASA POWER with its back-test, favorable or not (see [Limitations](#limitations)). It is offered in English, Spanish, Portuguese and French: it always opens in English, and the language selector switches it to Spanish (or Portuguese or French); `?lang=es` in the link opens it in Spanish. The Portuguese and French texts are machine drafts awaiting review by a speaker. Its initial version was written by a teammate with OpenAI Codex and corrected after an independent review ([`docs/revisiones/2026-11-15_rama_tena.md`](docs/revisiones/2026-11-15_rama_tena.md)).
-- **Field explorer** (`explorer.html`, in English, with a "Dashboard" link in its header). It holds the three screens below.
+- **Field explorer** (`explorer.html`, in English with an optional Spanish switch in its header that shares the dashboard's choice; sources and data-delivery texts stay in English; a "Dashboard" link in its header). It holds the three screens below.
 
 **Three screens** (S9 §3). All three are in the field explorer today.
 
