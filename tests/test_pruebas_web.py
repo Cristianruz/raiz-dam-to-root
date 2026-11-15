@@ -139,7 +139,7 @@ def test_resumen_usa_el_rotulo_para_la_pagina(tmp_path):
              "es mayor.\n\nRótulo para la página: \"H1 does not meet the preregistered criterion (partial back-test)\".\n")
     h1 = por_id(pruebas_web.calcular(tmp_path))["backtest_h1"]
     assert h1["estado"] == "failed"
-    assert h1["resumen"] == "H1 does not meet the preregistered criterion (partial back-test)"
+    assert h1["resumen"] == "H1 does not meet the criterion declared before the analysis (partial back-test)"
 
 
 def test_resumen_sin_rotulo_toma_solo_la_frase_en_negrita(tmp_path):
@@ -448,3 +448,14 @@ def test_traducciones_del_repo_real_existen():
     for d in pruebas_web.DOCUMENTOS:
         if d.get("ruta_en"):
             assert (RAIZ / d["ruta_en"]).exists(), d["ruta_en"]
+
+
+def test_la_pagina_no_dice_preregistered_sin_registro_publico():
+    """Hallazgo I22: no hay liga pública del preregistro; la página dice «declared before the analysis»
+    (los commits que fijan el criterio son anteriores al análisis). Los documentos conservan su frase, que
+    es la que reconoce el veredicto."""
+    d = pruebas_web.calcular(RAIZ)
+    texto = json.dumps(d, ensure_ascii=False)
+    assert "preregist" not in texto.lower()
+    assert pruebas_web.texto_publico("H1 meets the preregistered criterion") == \
+        "H1 meets the criterion declared before the analysis"

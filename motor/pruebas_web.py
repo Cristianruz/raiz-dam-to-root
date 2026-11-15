@@ -105,10 +105,10 @@ FUENTE_CRITERIOS = "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before
 PRUEBAS_S9 = (
     {"id": "mapa_cultivos", "numero": 1, "titulo": "Crop map",
      "criterio": "Macro F1 with 5 km spatial blocks; areas with Olofsson; abstain if p < 0.6"},
-    {"id": "backtest_h1", "numero": 2, "titulo": "Back-test 2026 (H1, preregistered)",
+    {"id": "backtest_h1", "numero": 2, "titulo": "Back-test 2026 (H1, criterion declared before the analysis)",
      "criterio": ("With data up to March 14, the error at July 14 must be lower than that of baselines L1 and "
                   "L1-s. Truth: outflow through the intake works of La Boquilla (SIH)")},
-    {"id": "experimento_h3", "numero": 3, "titulo": "Natural experiment of 2025 (H3, preregistered)",
+    {"id": "experimento_h3", "numero": 3, "titulo": "Natural experiment of 2025 (H3, criterion declared before the analysis)",
      "criterio": ("In the year without dam water, the share of annual-crop fields with a summer crop falls 25 "
                   "points or more below its 2019–2024 median, and the share of pecan orchards stays within 10 "
                   "points of its median. The number of fields in each group is published")},
@@ -407,6 +407,19 @@ def veredicto_crudo(texto, pares):
     return None, None
 
 
+# Hallazgo I22 de la revisión total: no hay liga pública de un preregistro (OSF u otro registro), así que la
+# página no dice «preregistered». Los criterios sí se fijaron en commits anteriores al análisis (README,
+# «declared before the analysis»). Los documentos de resultado conservan la frase del kit A6, que es la que
+# reconoce el veredicto; aquí solo se cambia lo que la página muestra.
+def texto_publico(texto):
+    """Frase para la página: «preregistered criterion» → «criterion declared before the analysis»."""
+    if not texto:
+        return texto
+    t = re.sub(r"\bthe preregistered criterion\b", "the criterion declared before the analysis", texto)
+    t = re.sub(r"\bpreregistered criterion\b", "criterion declared before the analysis", t)
+    return re.sub(r"\bpreregistered\b", "declared before the analysis", t)
+
+
 def prueba_hipotesis(raiz, hipotesis):
     rel = f"docs/resultado_{hipotesis}.md"
     texto = leer_texto(Path(raiz) / rel)
@@ -421,9 +434,9 @@ def prueba_hipotesis(raiz, hipotesis):
         # decirlo; si no, se publica «run» con una nota en inglés (no el texto del documento, en español).
         estado, _ = veredicto_crudo(rotulo, pares) if rotulo else (None, None)
         if estado is None:
-            return {"estado": RUN, "resumen": rotulo or f"Run: {rel} does not state a verdict yet.",
+            return {"estado": RUN, "resumen": texto_publico(rotulo) or f"Run: {rel} does not state a verdict yet.",
                     "fuentes": [rel], "partes": [], "metricas": []}
-    resumen = rotulo or frase_del_veredicto(linea, pares)
+    resumen = texto_publico(rotulo or frase_del_veredicto(linea, pares))
     return {"estado": estado, "resumen": resumen or None, "fuentes": [rel], "partes": [], "metricas": []}
 
 

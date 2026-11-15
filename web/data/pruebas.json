@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T04:23:27+00:00",
+ "generado": "2026-11-15T04:36:26+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -71,11 +71,11 @@
   {
    "id": "backtest_h1",
    "numero": 2,
-   "titulo": "Back-test 2026 (H1, preregistered)",
+   "titulo": "Back-test 2026 (H1, criterion declared before the analysis)",
    "criterio": "With data up to March 14, the error at July 14 must be lower than that of baselines L1 and L1-s. Truth: outflow through the intake works of La Boquilla (SIH)",
    "criterio_fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
    "estado": "failed",
-   "resumen": "H1 does not meet the preregistered criterion (partial back-test; press-reported truth)",
+   "resumen": "H1 does not meet the criterion declared before the analysis (partial back-test; press-reported truth)",
    "partes": [],
    "metricas": [],
    "fuentes": [
@@ -131,7 +131,7 @@
   {
    "id": "experimento_h3",
    "numero": 3,
-   "titulo": "Natural experiment of 2025 (H3, preregistered)",
+   "titulo": "Natural experiment of 2025 (H3, criterion declared before the analysis)",
    "criterio": "In the year without dam water, the share of annual-crop fields with a summer crop falls 25 points or more below its 2019–2024 median, and the share of pecan orchards stays within 10 points of its median. The number of fields in each group is published",
    "criterio_fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
    "estado": "failed",
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T04:23:27+00:00",
+  "corrida": "2026-11-15T04:36:26+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -323,7 +323,7 @@
     "nombre": "pwa",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache 23c081ba4def2a6d"
+    "detalle": "precache 9490a45fb8e3536c"
    },
    {
     "id": "manifest",
@@ -351,7 +351,7 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1064 passed, 30 warnings in 45.53s"
+    "detalle": "1065 passed, 30 warnings in 49.59s"
    },
    {
     "id": "node",
