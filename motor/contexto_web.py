@@ -38,6 +38,10 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                    suma, completo}]}}}. GRACE llega como UNA serie de cuenca (nota de GRACE de la
                    decisión): va bajo la llave «cuenca» (esquemas.ZONA_CUENCA) con ambito «cuenca», y
                    la página la muestra igual en las dos zonas; las demás series llevan ambito «zona».
+                   «malla_mascon» (solo si la línea de LEEME de la entrega lo dice, p. ej. GRACE: «malla de
+                   0.5° sobre mascons de 3°»): {malla_grados, mascon_grados, texto_fuente}. Son cifras de la
+                   entrega, no de este archivo: la página las escribe para decir que la resolución real es la
+                   del mascon y no la de la malla del producto (resolucion_m).
   gedi             null + gedi_motivo, o {archivo, fuente, fecha, parcelas: {id: {n_disparos,
                    altura_mediana_m, altura_p90_m, dosel_alto}} (solo n_disparos > 0), n_con_dato,
                    n_total, referencia, criterios, n_dosel_alto, n_sin_dosel_alto, n_pocos_disparos}.
@@ -86,6 +90,7 @@ import csv
 import datetime
 import json
 import math
+import re
 import statistics
 import sys
 from collections import Counter
@@ -399,6 +404,35 @@ def resumen_anual(meses, valores, aditiva):
     return salida
 
 
+# La línea de LEEME de contexto_regional.csv enumera sus productos como «<fuente> = <producto> (…)»; de GRACE dice
+# además «malla de 0.5° sobre mascons de 3°» (la malla del producto es más fina que los mascons de los que sale).
+MALLA_MASCON = re.compile(r"malla de\s*([0-9]+(?:[.,][0-9]+)?)\s*°\s*sobre mascons de\s*([0-9]+(?:[.,][0-9]+)?)\s*°", re.I)
+
+
+def tramo_de_fuente(texto, fuente_id, fuentes=E.FUENTES_CONTEXTO):
+    """Parte de la línea de LEEME que describe a `fuente_id` («grace = …» hasta la siguiente «<otra> =»); None si
+    la línea no la nombra así."""
+    texto = texto or ""
+    inicio = re.search(rf"(?<![\w]){re.escape(fuente_id)}\s*=", texto)
+    if not inicio:
+        return None
+    resto = texto[inicio.end():]
+    fines = [m.start() for o in fuentes if o != fuente_id
+             for m in [re.search(rf"(?<![\w]){re.escape(o)}\s*=", resto)] if m]
+    return resto[:min(fines)] if fines else resto
+
+
+def malla_mascon(fuente_texto, fuente_id):
+    """{malla_grados, mascon_grados, texto_fuente} si la línea de LEEME dice, para esa fuente, «malla de X° sobre
+    mascons de Y°»; None si no lo dice (no se supone nada)."""
+    tramo = tramo_de_fuente(fuente_texto, fuente_id)
+    m = MALLA_MASCON.search(tramo or "")
+    if not m:
+        return None
+    a_numero = lambda s: float(s.replace(",", "."))   # noqa: E731
+    return {"malla_grados": a_numero(m.group(1)), "mascon_grados": a_numero(m.group(2)), "texto_fuente": m.group(0)}
+
+
 def bloque_contexto(ruta, zonas, unidades, registro, avisos):
     """(bloque por zona, fuentes con al menos un valor) de contexto_regional.csv."""
     series, ajenas = {}, set()   # (zona, fuente, variable) → filas; zonas que params no conoce
@@ -450,6 +484,9 @@ def bloque_contexto(ruta, zonas, unidades, registro, avisos):
             "valores": valores,
             "anual": resumen_anual(meses, valores, aditiva),
         }
+        mascon = malla_mascon(registro.get("fuente"), fuente)
+        if mascon:
+            serie["malla_mascon"] = mascon   # la resolución real es la del mascon, no la de la malla
         if serie["n_celdas"] is None and any(c is not None for c in celdas):
             presentes = [c for c in celdas if c is not None]
             serie["n_celdas_rango"] = [min(presentes), max(presentes)]   # varía de un mes a otro

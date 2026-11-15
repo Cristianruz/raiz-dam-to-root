@@ -26,7 +26,12 @@
 //       (3) las fuentes: en cada tarjeta, a la vista, el nombre del recurso y la fecha del archivo; el
 //           texto completo de cada fuente (la línea de LEEME, que puede ser larga) va UNA sola vez,
 //           plegado, en «Sources and product versions» al final de la sección;
-//       (4) la nota fija de límites (NOTA_REGIONAL).
+//       (4) la nota fija de límites (NOTA_REGIONAL) y, en cada tarjeta, a la vista, las advertencias de la sesión de
+//           datos que trae contexto.tarjetas[].advertencias (comparación, no validación; la evaporación potencial de
+//           NLDAS no es la ETo de FAO-56; GRACE es una serie de cuenca; ERA5-Land no es de NASA). La malla de GRACE
+//           dice la del producto Y la del mascon cuando la serie trae «malla_mascon» (cifras de la entrega). Un año
+//           con días faltantes que sí tiene total lo dice junto a su cifra («N of M days with data»); un año que la
+//           gráfica no dibuja (parcial) dice por qué, no «no data».
 //         contexto        contenido de contexto.json (null: la sección lo dice)
 //         zonaId          id de la zona piloto (contexto.zonas); otra cosa: «choose a pilot area»
 //         anio            año agrícola elegido en la línea de tiempo (por omisión, el último con dato)
@@ -61,7 +66,8 @@
 //       num, climaDelAnio, diferenciaLluvia, anioPorOmision, graficasDeClima, seriesDeZona,
 //       puntosAnuales, valorAnual, modeloTarjetas, modeloContraste, metaDePanel, citasDeTarjeta,
 //       fuentesDeSeccion, escalaY, formatoResolucion, formatoNumero, etiquetaMes, ordenarRecursos,
-//       contarEstados, ultimoMesConDato, lecturaDeGedi, criteriosGedi, referenciaGedi, mesDia.
+//       contarEstados, ultimoMesConDato, lecturaDeGedi, criteriosGedi, referenciaGedi, mesDia, diasIncompletos,
+//       textoMascon.
 //       Textos fijos exportados: NOTA_REGIONAL, NOTA_GEDI, NOTA_GEDI_SIN_DISPAROS.
 //   Las funciones «montar…» insertan css/contexto.css en la página si aún no está enlazada.
 //
@@ -116,6 +122,7 @@ const TEXTO_CONTRASTE_OTRA_ZONA = "Not run for this pilot area";
 const AYUDA_MESES = "Point at a month to read its values, or open the data table.";
 const TEXTO_SIN_MALLA = "grid not stated in the delivery";
 const ROTULO_MALLAS = "Grid of each series";
+const ROTULO_ADVERTENCIAS = "Limits of these series";
 
 // Estado de un recurso (contexto.recursos[].estado). El símbolo acompaña al texto y al color.
 const ESTADOS_RECURSO = {
@@ -287,6 +294,26 @@ function motivoDeDias(conDato, delAnio) {
   return `incomplete year: ${formatoNumero(c)} of ${formatoNumero(t)} days with data`;
 }
 
+/** {año: motivo} de los años sin valor (los demás no entran). */
+function motivosPorAnio(anios, detalles) {
+  const salida = {};
+  anios.forEach((a, i) => {
+    if (detalles[i]) salida[String(a)] = detalles[i];
+  });
+  return salida;
+}
+
+/**
+ * Días con dato de un año que SÍ tiene total pero le faltan días (bajo el umbral de faltantes, el total se calcula
+ * con los días que hay): «N of M days with data». null si el año está completo o no se sabe.
+ */
+export function diasIncompletos(conDato, delAnio) {
+  const c = num(conDato);
+  const t = num(delAnio);
+  if (c == null || t == null || c >= t) return null;
+  return `${formatoNumero(c)} of ${formatoNumero(t)} days with data`;
+}
+
 /** Quita del principio y del final las posiciones donde ninguna serie tiene valor. */
 function recortar(x, series) {
   const hay = (i) => series.some((s) => s.valores[i] != null);
@@ -313,12 +340,10 @@ export function graficasDeClima(contexto, zonaId) {
   if (!bloque || !(bloque.anios || []).length) return [];
   const anios = bloque.anios;
   const x = anios.map((a) => ({ clave: a.anio, etiqueta: String(a.anio) }));
-  const serie = (nombre, ranura, campo, campoDias) => ({
-    nombre,
-    ranura,
-    valores: anios.map((a) => num(a[campo])),
-    detalles: anios.map((a) => (num(a[campo]) == null ? motivoDeDias(a[campoDias], a.dias_del_anio) : null)),
-  });
+  const serie = (nombre, ranura, campo, campoDias) => {
+    const detalles = anios.map((a) => (num(a[campo]) == null ? motivoDeDias(a[campoDias], a.dias_del_anio) : null));
+    return { nombre, ranura, valores: anios.map((a) => num(a[campo])), detalles, fuera: motivosPorAnio(anios.map((a) => a.anio), detalles) };
+  };
   const definiciones = [
     {
       id: "clima-lluvia",
@@ -416,6 +441,8 @@ function modeloAnualDePanel(tarjeta, indice, panel, seriesZona) {
       ranura: s.ranura,
       valores: anios.map((a) => (puntos.get(a) ? puntos.get(a).valor : null)),
       detalles: anios.map((a) => (puntos.get(a) && puntos.get(a).valor != null ? null : motivoDeMeses(puntos.get(a)))),
+      // Motivo de cada año sin valor, aunque el recorte del eje lo deje fuera (p. ej. un año con un solo mes).
+      fuera: motivosPorAnio(anios, anios.map((a) => (puntos.get(a) && puntos.get(a).valor != null ? null : motivoDeMeses(puntos.get(a))))),
     };
   });
   const base = presentes[0].serie;
@@ -466,6 +493,8 @@ export function modeloTarjetas(contexto, zonaId) {
       id: tarjeta.id,
       titulo: tarjeta.titulo,
       nota: tarjeta.nota || null,
+      // Límites de la sesión de datos que van a la vista (data/recursos_reto.json → tarjetas[].advertencias).
+      advertencias: (tarjeta.advertencias || []).filter((a) => a && a.texto),
       paneles,
       contraste,
       disponible,
@@ -486,11 +515,26 @@ function textoCeldas(serie) {
 function partesDeMalla(serie) {
   const resolucion = formatoResolucion(serie.resolucion_m);
   const deCuenca = serie.ambito === LLAVE_CUENCA;
+  const mascon = textoMascon(serie);
   return [
     resolucion ? `${deCuenca ? "Basin scale" : "Regional"}, ${resolucion} grid` : null,
+    mascon,
     deCuenca ? "One series for the whole basin, the same in every pilot area" : null,
     textoCeldas(serie),
   ].filter(Boolean);
+}
+
+/**
+ * Malla real de una serie hecha de mascons (GRACE): «0.5° product grid built on 3° mascons: the real resolution is
+ * the mascon's». Las dos cifras salen de serie.malla_mascon (la línea de LEEME de la entrega); sin ese campo, null.
+ */
+export function textoMascon(serie) {
+  const m = serie && serie.malla_mascon;
+  const mascon = m && num(m.mascon_grados);
+  if (mascon == null) return null;
+  const malla = num(m.malla_grados);
+  const deMalla = malla != null ? `${formatoNumero(malla)}° product grid built on` : "Built on";
+  return `${deMalla} ${formatoNumero(mascon)}° mascons: the real resolution is the mascon's`;
 }
 
 /**
@@ -1002,7 +1046,8 @@ function htmlLectura(modelo, i, elegidoFuera) {
   const cabeza = i >= 0 ? `<strong class="contexto-lectura-x">${esc(modelo.x[i].etiqueta)}</strong>` : elegidoFuera ? `<strong class="contexto-lectura-x">${esc(elegidoFuera)}</strong>` : "";
   const partes = modelo.series
     .map((s) => {
-      const valor = i >= 0 ? `<b>${esc(textoValor(modelo, s, i))}</b>` : elegidoFuera ? `<b>${esc(TEXTO_SIN_DATO)}</b>` : "";
+      const motivoFuera = elegidoFuera ? (s.fuera && s.fuera[elegidoFuera]) || TEXTO_SIN_DATO : null;
+      const valor = i >= 0 ? `<b>${esc(textoValor(modelo, s, i))}</b>` : elegidoFuera ? `<b>${esc(motivoFuera)}</b>` : "";
       return `<span class="contexto-lectura-serie">${claveSerie(s.ranura)}${esc(s.nombre)} ${valor}</span>`;
     })
     .join("");
@@ -1052,8 +1097,11 @@ function htmlCifra(rotulo, valor, unidad, pie) {
 function htmlCifras(contexto, zonaId, anio) {
   const a = climaDelAnio(contexto, zonaId, anio);
   if (!a) return `<p class="contexto-aviso">${esc(anio == null ? "No climate record for this pilot area." : `No climate record for agricultural year ${anio}.`)}</p>`;
-  // El pie de una cifra dice su fuente; si no hay total, además por qué (días con dato del año).
-  const pie = (fuente, valor, dias) => (valor != null ? fuente : `${fuente}: ${motivoDeDias(dias, a.diasDelAnio)}`);
+  // El pie de una cifra dice su fuente; si no hay total, además por qué (días con dato del año); si hay total pero le
+  // faltan días (bajo el umbral), cuántos tiene: el año no se presenta como completo.
+  const incompleto = (dias) => diasIncompletos(dias, a.diasDelAnio);
+  const pie = (fuente, valor, dias) =>
+    valor != null ? (incompleto(dias) ? `${fuente}: ${incompleto(dias)}` : fuente) : `${fuente}: ${motivoDeDias(dias, a.diasDelAnio)}`;
   const diferencia =
     a.diferencia != null
       ? `Difference: <b>${esc(formatoNumero(a.diferencia, { signo: true }))} mm</b> (GPM IMERG minus NASA POWER)`
@@ -1062,8 +1110,8 @@ function htmlCifras(contexto, zonaId, anio) {
       <div class="contexto-cifra contexto-cifra--par">
         <span class="contexto-cifra-rotulo">Rainfall of the year, two sources side by side</span>
         <div class="contexto-cifra-lado">
-          ${htmlCifra("GPM IMERG", a.lluviaImerg, "mm", a.lluviaImerg != null ? null : motivoDeDias(a.diasConDatoImerg, a.diasDelAnio))}
-          ${htmlCifra("NASA POWER", a.lluviaPower, "mm", a.lluviaPower != null ? null : motivoDeDias(a.diasConDato, a.diasDelAnio))}
+          ${htmlCifra("GPM IMERG", a.lluviaImerg, "mm", a.lluviaImerg != null ? incompleto(a.diasConDatoImerg) : motivoDeDias(a.diasConDatoImerg, a.diasDelAnio))}
+          ${htmlCifra("NASA POWER", a.lluviaPower, "mm", a.lluviaPower != null ? incompleto(a.diasConDato) : motivoDeDias(a.diasConDato, a.diasDelAnio))}
         </div>
         <p class="contexto-cifra-diferencia">${diferencia}</p>
       </div>
@@ -1174,10 +1222,20 @@ function htmlTarjeta(t, nivel, contexto) {
   const clase = t.disponible ? "contexto-tarjeta" : "contexto-tarjeta contexto-tarjeta--pendiente";
   return `<article class="${clase}" data-tarjeta="${esc(t.id)}">
       <h${nivel} class="contexto-tarjeta-titulo">${esc(t.titulo)}</h${nivel}>
+      ${htmlAdvertencias(t.advertencias)}
       ${cuerpo}${contraste}
       ${htmlFuenteCorta(citasDeTarjeta(contexto, t))}
       ${t.nota ? `<p class="contexto-tarjeta-nota">${esc(t.nota)}</p>` : ""}
     </article>`;
+}
+
+/** Advertencias de la sesión de datos, a la vista (símbolo y texto; nada depende solo del color). */
+function htmlAdvertencias(advertencias) {
+  if (!advertencias || !advertencias.length) return "";
+  const items = advertencias
+    .map((a) => `<li class="contexto-advertencia" data-advertencia="${esc(a.id || "")}"><span class="contexto-advertencia-simbolo" aria-hidden="true">!</span> ${esc(a.texto)}</li>`)
+    .join("");
+  return `<ul class="contexto-advertencias" aria-label="${esc(ROTULO_ADVERTENCIAS)}">${items}</ul>`;
 }
 
 function nombreCultivo(id, nombres) {

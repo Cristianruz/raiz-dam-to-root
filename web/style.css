@@ -498,6 +498,13 @@ button, input, select { font: inherit; color: inherit; }
 .lamina strong { font-size: 1.15rem; }
 .alcanza { background: var(--agua-clara); border-radius: 6px; padding: 4px 8px; margin-top: 6px !important; }
 .alcanza strong { color: var(--agua-osc); }
+/* Etiqueta de un dato del distrito ([P], [V]) junto a su fuente (cubo.distrito). */
+.etiqueta-dato {
+  display: inline-block; padding: 0 6px; border-radius: 4px;
+  border: 1px solid var(--borde); background: var(--arena); color: var(--tinta);
+  font-size: 0.78rem; font-weight: 700; white-space: nowrap;
+}
+.etiqueta-dato--falta { font-weight: 400; border-style: dashed; }
 .etiqueta-origen {
   font-size: 0.75rem; font-weight: 700; border: 1px solid var(--tinta-suave);
   border-radius: 4px; padding: 0 4px; margin-left: 4px; color: var(--tinta-suave);
@@ -632,6 +639,26 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
 /* Leyenda de la vista 3D: primer bloque del panel, solo con la vista activa. */
 .bloque-gemelo3d { border-top: 6px solid var(--agua); }
 .bloque-gemelo3d[hidden] { display: none; }
+/* «Regional context» (web/js/contexto.js): bloque plegable del panel. El título del bloque está en el <summary>; el del
+   módulo queda para los lectores de pantalla (la sección lo usa como nombre). */
+.bloque-plegable { cursor: pointer; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; align-items: center; }
+.bloque-plegable::-webkit-details-marker { display: none; }
+.bloque-plegable h2 { margin: 0; }
+.bloque-plegable::after {
+  content: "+"; grid-row: 1; grid-column: 2;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--agua); color: var(--agua-osc); font-weight: 700;
+}
+details[open] > .bloque-plegable::after { content: "−"; background: var(--agua); color: var(--blanco); }
+.bloque-plegable-ayuda { grid-column: 1 / -1; font-size: 0.85rem; color: var(--tinta-suave); }
+.bloque-plegable:focus-visible { outline: 3px solid var(--agua-osc); outline-offset: 2px; border-radius: 6px; }
+.bloque-contexto[open] > .bloque-plegable { margin-bottom: 10px; }
+.bloque-contexto .contexto { gap: 12px; }
+.bloque-contexto .contexto-titulo {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
 /* «Install app» e indicador Online/Offline (web/js/instalar.js) en la barra de la marca. */
 .marca-instalar { display: flex; min-width: 0; max-width: 100%; }
 .marca-instalar:empty { display: none; }

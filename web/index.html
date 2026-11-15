@@ -11,7 +11,9 @@
      línea de tiempo (js/tiempo.js, css/tiempo.css), tarjeta «Twin status» (js/estado_gemelo.js, css/resumen.css)
      y aplicación instalable y sin conexión (manifest.webmanifest, js/instalar.js, css/instalar.css, sw.js).
      Ficha completa: frase resumen, NDVI mensual y enlace «#id» (js/resumen.js, css/resumen.css), perfil y aptitud de
-     suelo (js/suelo.js, css/suelo.css) y evidencia de las bases del reto (js/contexto.js, css/contexto.css). -->
+     suelo (js/suelo.js, css/suelo.css) y evidencia de las bases del reto (js/contexto.js, css/contexto.css).
+     Paneles (etapa 3): «Regional context» plegable en el panel y «Challenge data sources» en «About & Data»
+     (js/contexto.js), H1-b junto a H1 y los documentos enlazados (js/acerca.js con pruebas.json). -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -162,6 +164,16 @@
 
       <!-- Tarjeta «Twin status» (web/js/estado_gemelo.js): observado, modelado y escenario, con la fecha de cada fuente. -->
       <div class="bloque" id="estado-gemelo"></div>
+
+      <!-- «Regional context» (web/js/contexto.js, montarContextoRegional): series de la zona elegida, con el año de la línea
+           de tiempo resaltado. Plegable: se dibuja la primera vez que se abre. -->
+      <details class="bloque bloque-contexto" id="bloque-contexto">
+        <summary class="bloque-plegable">
+          <h2 id="t-contexto">Regional context</h2>
+          <span class="bloque-plegable-ayuda">Climate, soil moisture, basin water and frost of the pilot area, year by year. They describe the area or the basin, not a single field.</span>
+        </summary>
+        <div id="contexto-regional"></div>
+      </details>
 
       <!-- Localidades del equipo (cubo.localidades): puntos de referencia del mapa, no parcelas. -->
       <section class="bloque" id="bloque-localidades" aria-labelledby="t-localidades" hidden>

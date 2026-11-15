@@ -123,6 +123,16 @@
 .contexto-tarjeta--pendiente { border-style: dashed; }
 .contexto-tarjeta-titulo { font-size: 1rem; margin: 0; }
 .contexto-tarjeta-nota { font-size: 0.82rem; color: var(--contexto-tinta-suave); }
+/* Advertencias de la sesión de datos (integración, etapa 3): a la vista en la tarjeta, con símbolo y texto. */
+.contexto-advertencias { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.contexto-advertencia {
+  display: flex; gap: 6px; align-items: baseline;
+  padding: 6px 10px; border-radius: 6px;
+  border-left: 3px solid var(--contexto-serie-b);
+  background: var(--contexto-arena);
+  font-size: 0.82rem; color: var(--contexto-tinta);
+}
+.contexto-advertencia-simbolo { font-weight: 700; color: var(--contexto-tinta); }
 .contexto-meta {
   display: flex; flex-wrap: wrap; gap: 2px 14px;
   font-size: 0.8rem; color: var(--contexto-tinta-suave);

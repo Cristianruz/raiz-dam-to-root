@@ -1,6 +1,6 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
- "_nota": "Bases de datos del reto y su papel en Raíz. Fuente: docs/decisiones/2026-11-14_recursos_del_reto.md (tabla «Papel de cada recurso», un renglón por entrada) y docs/referencias/recursos_reto.md (lista oficial). Lo lee motor/contexto_web.py para escribir web/data/contexto.json: el ESTADO de cada recurso (in_use, requested, not_applicable) no se escribe aquí, se calcula con lo que de verdad hay en data/processed. Textos en inglés porque son los que muestra la página; sin cifras de datos (los dígitos que hay son parte del nombre de un producto). «entregas»: nombres base de los archivos de data/processed que sustentan el recurso (los de un archivo por zona llevan además el sufijo «_<zona>», que el motor agrega). «fuente_contexto»: valor de la columna «fuente» de contexto_regional.csv que corresponde al recurso (el recurso cuenta como entregado solo si el archivo trae filas suyas con valor). «tarjetas»: cómo agrupa la página las series de contexto_regional.csv (clave «fuente.variable» del contrato). «contraste» (tarjeta de evapotranspiración): columnas de et_contraste.csv, series regionales que se dibujan junto a ellas en la zona del contraste, y «recurso», el id del recurso de esta lista que lo sustenta. «unidades»: cómo se muestra en inglés cada unidad del contrato.",
+ "_nota": "Bases de datos del reto y su papel en Raíz. Fuente: docs/decisiones/2026-11-14_recursos_del_reto.md (tabla «Papel de cada recurso», un renglón por entrada) y docs/referencias/recursos_reto.md (lista oficial). Lo lee motor/contexto_web.py para escribir web/data/contexto.json: el ESTADO de cada recurso (in_use, requested, not_applicable) no se escribe aquí, se calcula con lo que de verdad hay en data/processed. Textos en inglés porque son los que muestra la página; sin cifras de datos (los dígitos que hay son parte del nombre de un producto). «entregas»: nombres base de los archivos de data/processed que sustentan el recurso (los de un archivo por zona llevan además el sufijo «_<zona>», que el motor agrega). «fuente_contexto»: valor de la columna «fuente» de contexto_regional.csv que corresponde al recurso (el recurso cuenta como entregado solo si el archivo trae filas suyas con valor). «tarjetas»: cómo agrupa la página las series de contexto_regional.csv (clave «fuente.variable» del contrato). «contraste» (tarjeta de evapotranspiración): columnas de et_contraste.csv, series regionales que se dibujan junto a ellas en la zona del contraste, y «recurso», el id del recurso de esta lista que lo sustenta. «unidades»: cómo se muestra en inglés cada unidad del contrato. «advertencias» (opcional, en cada tarjeta): límites que la sesión de datos anotó en sus entregas (líneas de LEEME) y que la página escribe A LA VISTA en la tarjeta, cada uno con su id y, si es de una sola fuente, «fuente_id»; texto fijo en inglés, sin cifras de datos (las cifras, como la malla de GRACE, salen de contexto.json).",
  "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
  "recursos": [
   {
@@ -186,6 +186,9 @@
    "titulo": "Water stored in the basin",
    "recursos": ["grace"],
    "nota": "GRACE measures all the water stored (surface, soil and aquifer together) at basin scale. It does not separate the aquifer or the irrigation district.",
+   "advertencias": [
+    {"id": "serie_de_cuenca", "fuente_id": "grace", "texto": "GRACE is a basin series: one series for both pilot areas, the same in each. Its product grid is finer than the mascons it is built on, so the real resolution is the mascon's."}
+   ],
    "paneles": [
     {
      "titulo": "GRACE / GRACE-FO",
@@ -213,7 +216,10 @@
    "id": "evapotranspiracion",
    "titulo": "Evapotranspiration",
    "recursos": ["modis", "gldas", "viirs_ssebop"],
-   "nota": "Independent estimates of evapotranspiration at regional scale: a regional comparison, not a field-level validation.",
+   "nota": "Independent estimates of evapotranspiration at regional scale.",
+   "advertencias": [
+    {"id": "comparacion", "texto": "MODIS, GLDAS and SSEBop: a comparison, not validation. None of them measures the water of one field, and none changes the water need the page computes."}
+   ],
    "paneles": [
     {
      "titulo": "MODIS and GLDAS",
@@ -244,6 +250,9 @@
    "titulo": "Second climate source",
    "recursos": ["nldas"],
    "nota": "A second source next to NASA POWER, to bound its uncertainty.",
+   "advertencias": [
+    {"id": "no_es_eto", "fuente_id": "nldas", "texto": "NLDAS potential evaporation is not the FAO-56 reference evapotranspiration (ETo) of NASA POWER: it is another quantity, so the two are not compared value by value."}
+   ],
    "paneles": [
     {
      "titulo": "NLDAS rainfall",
@@ -264,6 +273,9 @@
    "titulo": "Minimum temperature and frost days",
    "recursos": ["era5_land"],
    "nota": "A second source next to NASA POWER, with the same definition of a frost day.",
+   "advertencias": [
+    {"id": "no_nasa", "fuente_id": "era5_land", "texto": "ERA5-Land is from ECMWF and the Copernicus Climate Change Service, not from NASA."}
+   ],
    "paneles": [
     {
      "titulo": "ERA5-Land minimum temperature",

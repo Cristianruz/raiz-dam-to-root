@@ -191,6 +191,25 @@
 .acerca-parte-nombre { font-weight: 700; }
 .acerca-parte-nota { flex-basis: 100%; color: var(--acerca-tinta-suave); font-size: 0.86rem; }
 
+/* Complemento de una prueba (H1-b junto a H1): misma insignia, dentro de la tarjeta de la prueba principal. */
+.acerca-complemento {
+  border-left: 4px solid var(--acerca-borde); background: var(--acerca-arena);
+  border-radius: 0 8px 8px 0; padding: 8px 10px;
+}
+.acerca-complemento > * + * { margin-top: 4px; }
+.acerca-complemento-titulo { font-size: 0.98rem; }
+.acerca-complemento[data-estado="failed"] { border-left-color: var(--acerca-falla); }
+.acerca-complemento[data-estado="passed"] { border-left-color: var(--acerca-ok); }
+.acerca-complemento-nota { font-weight: 700; }
+
+/* Documentos enlazados (modelo frente a la práctica, revisión de las protagonistas). */
+.acerca-documentos { margin-top: 10px; }
+.acerca-lista-documentos { display: grid; gap: 6px; font-size: 0.92rem; }
+.acerca-lista-documentos code { font-size: 0.8rem; color: var(--acerca-tinta-suave); overflow-wrap: anywhere; }
+.acerca-documento-nota { display: block; color: var(--acerca-tinta-suave); font-size: 0.86rem; }
+/* Hueco de «Challenge data sources» (web/js/contexto.js la dibuja con su propia hoja). */
+.acerca-recursos:empty { display: none; }
+
 /* Insignia de estado: misma forma y tamaño para todos los estados; cambia el borde, el fondo y el símbolo. */
 .acerca-estado {
   display: inline-flex; align-items: center; gap: 4px; flex: none;
