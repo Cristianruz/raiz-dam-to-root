@@ -1,9 +1,9 @@
 <!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Textos para el formulario de envío (en inglés)
 
-**BORRADOR para que el equipo lo ajuste (responsable de presentación y pitch, con el integrador).** Cada texto sale del `README.md` del 14-nov, incluidos los cambios de las 22:53 (commit `b73e8b3`: H1-b y «Model against local practice»); no agrega cifras nuevas. Una sola frase se aparta del README: la del goteo (sección 5), porque en ese punto el README quedó atrasado. Además, estos textos no copian una frase del README que otro documento del repo contradice (nota al final de la sección 5).
+**BORRADOR para que el equipo lo ajuste (responsable de presentación y pitch, con el integrador).** Versión del 15-nov. Los textos salen del `README.md`, de `LIMITATIONS.md`, de `DATA_LICENSE.md` y de los datos de la página (`web/data/*.json`); cada cifra lleva su fuente en la sección 12. Todas las piezas del gemelo están en la página (`web/app.js` importa y monta la vista 3D, la línea de tiempo, la tarjeta de estado, la app instalable, el contexto regional y el suelo), y el escenario de goteo también (`web/data/cubo.json` → `meta.goteo.disponible`: true). Por eso ya no hay variantes «[SI ESTÁ CONECTADO]».
 
-## 1. Qué piden el plan y el kit
+## 1. Qué piden el plan, el kit y la guía de envío 2026
 
 | Punto | Lo que dice | Dónde |
 |---|---|---|
@@ -11,30 +11,34 @@
 | Idioma | Todo el formulario en inglés | Kit Q2 |
 | Demo | Video de 30 segundos o menos con subtítulos en inglés, o diapositivas (máximo 7) | Kit Q2 |
 | Ligas | Web, repositorio, video y diapositivas, sin inicio de sesión y probadas en incógnito | Kit Q2 |
-| NASA Data | La sección enumera cada dataset utilizado | Kit Q2 |
-| IA | La sección «SI/AI tools used» va completa, y la declaración figura también en el README, en los encabezados de archivo y en la descripción del repositorio | Kit Q2 |
-| Referencias | Bibliotecas, datos, artículos y prensa | Kit Q2 |
+| NASA Data | Cada producto con nombre, versión, resolución, periodo, acceso y uso | Kit Q2; guía de envío 2026 (la trajo Cristian) |
+| IA | Campo «Use of Super Intelligence (SI)» | Guía de envío 2026 |
+| Referencias | Bibliotecas, datos, artículos y prensa, con licencia | Kit Q2; `DATA_LICENSE.md` |
 | Pruebas | Las cinco pruebas con su resultado o con «not run» | Kit Q2 |
 | Prohibido | Logotipos, banderas o identificadores de misión de la NASA | Kit Q2; `CLAUDE.md`, regla 9 |
+| Socios | La Agencia Espacial Mexicana no es Space Agency Partner en 2026: no se menciona como tal. ERA5-Land es de ECMWF, no de la NASA | Indicación del coordinador (15-nov) |
 | Categorías | En el formulario se mantienen Local Impact y Best Use of Data | `docs/sintesis/S9_proyecto_definitivo.md` §7 |
 
 **Cómo usar este archivo**
-- Los nombres de los campos son los habituales del formulario. Las guías 2026 de entrega no están en el repo: ajuste los nombres y los límites de caracteres al formulario real.
-- «[SI ESTÁ CONECTADO]» marca una frase que se agrega si esa pieza del gemelo ya está en la página el domingo. Si no lo está, se omite.
-- «[LINK: pendiente — quién la da]» marca una liga que falta.
-- Si el `README.md` cambia después de la última corrida, vuelva a leer las cifras de estos textos contra él.
+- Lo que va dentro de los bloques `text` se pega en el formulario. Lo de fuera son notas internas: no se pegan.
+- **Nombres de los campos por confirmar.** Los títulos de las secciones 3 a 9 siguen la guía de envío 2026 que trajo Cristian. Antes de pegar, confirme en el formulario real el texto exacto de cada campo y su límite de caracteres; si un campo es más corto, recorte desde el final de cada bloque.
+- **Idioma de las ligas.** Los bloques solo enlazan `README.md`, `LIMITATIONS.md`, `DATA_LICENSE.md` y las traducciones de `docs/en/` (índice en `docs/en/README.md`: `result_H1.md`, `result_H1b.md`, `H1b_specification.md`, `result_H3.md`, `model_vs_practice.md`, `story_fields_review.md`). Nunca enlace un `docs/*.md` en español desde el formulario.
+- «[LINK: pendiente — quién la da]» marca una liga que falta; «[CONFIRMAR CRISTIAN: …]» marca una afirmación que el repo no sostiene y que Cristian debe confirmar o borrar.
+- Si el `README.md` o los datos cambian después de la última corrida, vuelva a leer las cifras contra la sección 12.
 
 ## 2. Ligas
 
 | Campo | Liga |
 |---|---|
-| Live project (web) | [LINK: pendiente — integrador; se activa al publicar el repositorio y encender GitHub Pages, `docs/reparto_faltantes.md`, H1] |
-| Repository | [LINK: pendiente — integrador; el repositorio debe quedar público] |
+| Live project (web) | https://cristianruz.github.io/raiz-dam-to-root/ (GitHub Pages publica `main`, origen GitHub Actions; el PR #4 ya está fusionado) |
+| Repository | https://github.com/Cristianruz/raiz-dam-to-root (público; la misma liga está en `motor/pruebas_web.py` → `REPOSITORIO`) |
 | Demo video (30 s or less) | [LINK: pendiente — responsable de video (P6)] |
 | Backup slides (PDF, 7 or fewer) | [LINK: pendiente — responsable de presentación y pitch] |
-| Preregistration (OSF) | [LINK: pendiente — integrador; `docs/reparto_faltantes.md`, H3] |
+| Preregistration (OSF) | No hay liga de OSF en el repo (`docs/reparto_faltantes.md`, H3). Si el formulario la pide, escriba: `Criteria declared before the analysis; documents and commits listed in README.md → Status → Preregistration.` |
 
-## 3. Project name
+Antes de pegar la liga de la web, ábrala en incógnito y compruebe que muestra la versión completa (por ejemplo, el botón «3D twin view»).
+
+## 3. Project Name
 
 ```text
 ROOT – From Dam to Root
@@ -42,10 +46,10 @@ ROOT – From Dam to Root
 
 Team: Orbital Farming · Local event: Chihuahua · Challenge: Field Shift: Adapting Farms with NASA Data
 
-## 4. High-level summary (short)
+## 4. High-Level Project Summary
 
 ```text
-ROOT is a digital twin of two pilot areas of the DR-005 Delicias irrigation district in Chihuahua, Mexico. Before you plant, it shows the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover. The user picks the dam allocation with a slider. For each estimated field, ROOT compares the current rotation with alternatives, using open NASA data (HLS, NASA POWER, NASADEM and GPM IMERG). Every test result is published with the same visibility, favorable or not. The tool supports, never replaces, the judgment of farmers and local experts.
+In the DR-005 Delicias irrigation district of Chihuahua, Mexico, farmers choose their crops before they know how much water the dam will deliver, and the Meoqui-Delicias aquifer (0831) already has an official availability of −167.12 hm³ per year (Conagua 2024). ROOT is a digital twin of two pilot areas that shows, field by field and before planting, how much water each crop option needs per year, for how many years it commits that water, and how many hectares the dam allocation chosen by the user can cover. It runs on open NASA data: HLS greenness for the field memory and the crop map, NASA POWER climate with FAO-56 for crop water need, NASADEM terrain and GPM IMERG rain, with SMAP, MODIS, GRACE/GRACE-FO, GLDAS, NLDAS and GEDI as regional context and field evidence. It is meant for farmers and irrigation-module technicians, who keep the decision. It matters because an annual crop can be skipped in a dry year but a perennial cannot: its water stays committed for years and, when the dam falls short, it comes from the aquifer.
 ```
 
 Versión de una línea, por si el campo es muy corto:
@@ -54,39 +58,72 @@ Versión de una línea, por si el campo es muy corto:
 Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover.
 ```
 
-## 5. Project details (long description)
+## 5. Detailed Project Description
+
+Los subtítulos repiten el vocabulario del reto Field Shift. Si el campo tiene límite de caracteres, recorte primero «PLAIN-LANGUAGE GLOSSARY» y «COMMON ANALYSIS GRID»: los dos están completos en el `README.md`.
 
 ```text
 THE PROBLEM
-In the DR-005 Delicias irrigation district (73,002 ha; 8,113 producers), farmers decide what to plant before they know how much water the dam will deliver. Alfalfa and pecan, both perennial crops, covered 39,421 of the 62,219 ha planted in 2016-17 (63 %). In 2025 the district received no dam water: between 12,000 and 15,000 ha were planted with wells and 87.4 hm³ of groundwater were authorized for survival irrigation, mostly pecan (press figures). The Meoqui-Delicias aquifer has an official availability of −167.12 hm³ per year, and 83.3 % of its recharge comes from irrigation return flows.
+In the DR-005 Delicias irrigation district (73,002 ha; 8,113 producers), farmers decide what to plant before they know how much water the dam will deliver. Alfalfa and pecan, both perennial crops, covered 39,421 of the 62,219 ha planted in 2016-17 (63 %). In 2025 the district received no dam water: between 12,000 and 15,000 ha were planted with wells and 87.4 hm³ of groundwater were authorized for survival irrigation, mostly pecan (press figures). The Meoqui-Delicias aquifer has an official availability of −167.12 hm³ per year, and 83.3 % of its recharge comes from irrigation return flows. An annual crop can be skipped in a dry year; a perennial crop cannot. Its water stays committed for years and, when the dam falls short, it comes from the aquifer.
 
-The mechanism behind the project: an annual crop can be skipped in a dry year; a perennial crop cannot. Its water stays committed for years and, when the dam falls short, it comes from the aquifer.
-
-WHAT RAÍZ DOES
-ROOT is a digital twin of two pilot areas: a replica that is updated with data and lets a farmer or a technician try out decisions before planting. It has three screens.
-
-1. Control center. A map of 1,239 estimated fields, an allocation slider in thousand cubic meters per hectare with three reference marks taken from the press, and a "Rain −20 %" switch. The main indicator is the water already committed: the share of the allocation that perennial fields ask for before a single hectare of annual crops is planted. A "Terrain & runoff" overlay with "Simulate a storm" shows runoff routes at area scale.
-2. Field sheet. The field memory since 2016, the current rotation and two or three alternatives with Water, Soil and Money rows, a "Follow the drop" diagram (dam, canal, field, crop, aquifer), and a "Why?" section with the five answers the challenge asks for.
+WHAT ROOT DOES
+ROOT is a digital twin of two pilot areas, 1,239 estimated fields: a replica that is updated with data and lets a farmer or a technician try out decisions before planting. It has no field sensors and no real-time data; it is rebuilt from satellite and climate data on each run.
+1. Control center. A map of the fields, an allocation slider in thousand cubic meters per hectare with three reference marks taken from the press, and a "Rain −20 %" switch. The main indicator is the water already committed: the share of the allocation that perennial fields ask for before a single hectare of annual crops is planted. A 3D view draws the terrain from NASADEM and a water column on each field: blue up to the chosen allocation, red for what is missing. A timeline replays the agricultural years 2016–2026 and highlights 2025, the year without dam water. A "Terrain & runoff" overlay with "Simulate a storm" shows runoff routes at area scale. A "Twin status" card separates what is observed, what is modeled and what is the user's scenario, with the date of each source. A "Regional context" panel shows monthly series per area.
+2. Field sheet. The field memory since 2016 and its monthly greenness, soil and satellite evidence, the current rotation and its alternatives with Water, Soil and Money rows, a "Follow the drop" diagram (dam, canal, field, crop, aquifer) with a drip scenario labeled "indicative, not local", and a "Why?" section with the five answers the challenge asks for: why it is suggested, evidence, benefits, what we don't know and risks needing local review.
 3. Message to the farmer. A WhatsApp preview in Spanish and a printable field sheet, generated from the same data.
+The app installs on a phone or a laptop and keeps working without a network, with the last synced copy.
 
-HOW IT WORKS
-- Field memory: monthly greenness from HLS (Harmonized Landsat Sentinel-2) classifies each agricultural year of each field with declared rules and no labels.
-- Water need: FAO-56 with NASA POWER daily climate gives the gross field depth of each option as a P10–P50–P90 band (Monte Carlo).
-- Coverage: hectares covered = area × min(1, allocation ÷ median depth), always shown with its range. A traffic light is green if the allocation covers the high estimate, amber if it covers the median, red if it does not, and gray if the crop map abstains.
-- Water term: an annual crop commits water for 1 year; alfalfa for 3–4 years (press source); pecan is computed over a 10-year horizon (a declared assumption).
-- Follow the drop: counts consumption (ET) and aquifer recharge, not just dam withdrawals.
-- One command, python construir.py, rebuilds everything from the validated data cache and runs every check. The page reads its figures from data files; no figure is written by hand in the HTML or the JavaScript, and an automated test checks it. Publishing happens when, and just when, every check passes.
+ROTATION COMPARISON
+Each classified field compares its current rotation with alternatives from the project's rotation table, side by side, and none is marked as the best. Each option shows how much water it asks for per year (median and P10–P90 range), how many years it commits that water, and how many of the field's hectares the chosen allocation covers. An established alfalfa stand is compared with keeping it while skipping two to three summer irrigations, breaking it with a winter cereal followed by forage maize, and leaving the field to rest with standing stubble. Where the table gives fewer than two alternatives (fallow and winter cereal), ROOT completes them with team proposals and labels them "[S] team proposal, not from the agronomic guide". Pecan is a documented exception: an orchard does not rotate, so ROOT compares no alternative crops there. It shows the water the orchard commits over a 10-year calculation horizon, the depth typically applied in the district as a local reference, and a drip scenario with a consumption cap.
+
+BARE-FIELD PERIODS & VULNERABLE SEASONS
+The field memory counts bare-soil days each year: days with NDVI below 0.2 from February 1 to April 30, the windy season, from monthly HLS greenness; the sheet shows the median over the years. Each option shows the months it keeps a crop on the field and its estimated bare-soil days. Next to each planting window the sheet shows the probability of a frost after that date, from NASA POWER minimum temperatures (1984–2025). The frost probability informs; it does not discard an option.
+
+PATTERNS FROM NASA DATA
+HLS greenness gives each field a year-by-year state since 2016 (summer crop, winter crop, double crop, rest or perennial), with declared rules and no labels. In 2025, the year without dam water, the share of annual-crop fields with an active summer crop barely moved (82.6 % against a 2019–2024 median of 84.2 %), while pecan orchards stayed green; satellite greenness does not tell where the water came from. The model's crop water demand is above what satellites see: modeled crop ET of 1,139.5 mm against 746.3 mm from SSEBop VIIRS over October 2025 to September 2026 (+53 %), as a regional comparison. Regional series from SMAP, MODIS, GRACE/GRACE-FO, GLDAS, NLDAS and ERA5-Land show soil moisture, long-term greenness, ET, stored water in the basin and frost days, as context for the area, never for a single field.
+
+FARMER PRIORITIES
+The tool answers the farmer's planting question in the farmer's units: thousand cubic meters per hectare ("millares"), years of commitment and hectares covered. Each option carries Water, Soil and Money rows; the Money row says "No verified data" because we have no verified margins, and a number without a source does not enter. The message to the farmer is in Spanish and can be printed. The page asks for no name or phone number and sends nothing. The decision stays with the farmer and the technician.
+
+UNCERTAINTY & HUMAN JUDGMENT
+- Every water depth is a P10–P50–P90 band from a Monte Carlo run of FAO-56 (2,000 runs over the 1991–2025 climate, with the uncertain field efficiency and reference-ET bias), and hectares covered are always shown with their range.
+- The crop map abstains instead of guessing: 781 of 1,239 fields (63.0 %) are not classified and are shown in gray, with no options. Committed water is therefore shown as "at least".
+- Rotation filters that need field data the tool does not have, or whose source sets no threshold, are shown as "needs a local check", never as passed; most filters are in that state.
+- Labels on every figure: [V] verified in a primary source, [P] press, [S] declared assumption.
+- Fixed notice on every sheet: this tool supports, never replaces, the judgment of farmers and local experts.
+
+PLAIN-LANGUAGE GLOSSARY
+- Millar: a thousand cubic meters of water per hectare, the unit used in the district.
+- Water term: how many years a crop ties up water: one season for annual crops, several years for alfalfa, a long horizon for orchards.
+- ET (evapotranspiration): the water the crop transpires plus what evaporates from the soil; the water actually consumed.
+- NDVI ("greenness"): a satellite index of how green a field is, read from NASA HLS images.
+- Bare soil: days with almost no green cover; bare soil in the windy season can blow away.
+- Frost risk: chance of a freezing night in the planting window, from NASA POWER temperatures.
+- Water balance: every cubic meter that leaves the dam ends up as crop consumption, aquifer recharge or other losses.
+- Consumption cap: a rule that drip irrigation may not raise the crop's water consumption above its historical level.
+
+COMMON ANALYSIS GRID
+The field is the unit of analysis. Each source is brought to it, or to its pilot area, without creating detail the data do not have:
+- HLS (30 m): for each month, the median of the pixels whose centers fall inside the field.
+- NASADEM (30 m): an area-scale relief layer and three context indicators per field (mean slope, contributing area from outside the field, share inside closed depressions); never field drainage design.
+- NASA POWER: one grid cell per pilot area (MERRA-2, 0.5° × 0.625°); every field of an area shares its daily climate and its crop water depths.
+- GPM IMERG: daily rain averaged over each pilot area.
+- SoilGrids 2.0 (250 m): the mean of the cells whose centers fall inside the field. GEDI: the shots whose cells fall inside the field.
+- Regional series: averages over each area rectangle; GRACE/GRACE-FO is one series for the whole basin.
+
+SCALABILITY
+The method uses open global data (HLS, NASA POWER, NASADEM, GPM IMERG and Fields of The World boundaries) and keeps every district constant, with its source and label, in one parameters file. One command rebuilds the whole site from the validated data and runs every check. It has not been tried in another district: there, the field efficiencies, the water terms and the allocations would have to be checked with local technicians.
 
 VALIDATION: FIVE TESTS IN SIGHT
-Each criterion was declared before seeing the result.
+Each criterion was declared before the analysis. Details in README.md and, in English, in docs/en/ (result_H1.md, result_H1b.md, result_H3.md, model_vs_practice.md).
 1. Crop map: partial. Phenological rules on HLS classify 458 of 1,239 fields; 781 abstain (63.0 %). Random Forest, spatial validation and accuracy assessment: not run.
-2. Back-test 2026 (H1): does not meet the preregistered criterion (partial back-test; press-reported truth). At July 14, 2026 the model's median is 904.6 hm³ against 447.65 hm³; the simple baselines were closer (404.5 and 367.2 hm³). The model computes the full crop demand and overestimates the level. A follow-up test of the seasonal shape over the 1999–2024 cycles (H1-b, specified before running; it does not change H1) does not hold either: the model beats the two simple shapes in 6 of 26 years and places demand earlier than the dam releases it.
+2. Back-test 2026 (H1): does not meet its criterion (partial back-test; press-reported truth). At July 14, 2026 the model's median is 904.6 hm³ against 447.65 hm³; the simple baselines were closer (404.5 and 367.2 hm³). The model computes the full crop demand and overestimates the level. A follow-up test of the seasonal shape over the 1999–2024 cycles (H1-b, declared before running; it does not change H1) does not hold either: the model beats the two simple shapes in 6 of 26 years.
 3. 2025 natural experiment (H3): not supported. Among 184 annual-crop fields, the share with an active summer crop was 82.6 % in 2025 against a 2019–2024 median of 84.2 % (−1.6 points; the criterion asked for −25 or more). Among 44 pecan orchards the share stayed at 100 %.
 4. Figure checker: partial. Golden set passed: 30 of 30 cases correct, 5 of 5 traps caught, 0 of 71 numbers altered. Texts written by an LLM: not run; all texts are templates filled from the data.
-5. Regional ET contrast and automated checks: partial. Modeled crop ET of 1,139.3 mm against SSEBop VIIRS v6 of 746.3 mm over October 2025 to September 2026 (+53 %), as a regional comparison, not a field-level validation. WaPOR v3 and the FAO-56 worked examples: not run. Water balance of the drop: passed.
+5. Regional ET contrast and automated checks: partial. Modeled crop ET of 1,139.5 mm against SSEBop VIIRS v6 of 746.3 mm over October 2025 to September 2026 (+53 %), as a regional comparison, not a field-level validation. WaPOR v3: not run. FAO-56 worked examples: passed for the reference ET (Examples 8 and 18 of the manual); crop coefficients and net depth are not covered by that test. Water balance of the drop: passed.
 
 LIMITATIONS
-The tool does not allocate, sell or trade water. It does not forecast the dam. It does not promise that any water will be freed. The twin has no field sensors and no real-time data: it is refreshed on each run, from satellite and climate data. 63 % of the fields are not classified and have no options. Field boundaries are estimated by a model outside its training domain. Crop options are provisional. The field-efficiency range is an assumption. The model computes the full crop requirement: it is higher than the depths recommended by INIFAP and those applied in the district for alfalfa, pecan, cotton and forage maize, and lower for chile; for alfalfa, 28.4 thousand m³/ha against INIFAP's 17.5. The drip scenario uses indicative FAO efficiencies that were not measured in the district. The Money row has no data. The full list is in LIMITATIONS.md.
+ROOT does not allocate, sell or trade water: under article 22 of Mexico's National Water Law, allocations are decided by Conagua and the irrigation modules. It does not forecast the dam. It does not promise that any water will be freed: "Follow the drop" counts consumption, and drip irrigation can reduce dam withdrawals and aquifer recharge at the same time. The twin has no field sensors and no real-time data. 63 % of the fields are not classified and have no options. Field boundaries are estimated by a model outside its training domain. The field-efficiency range is an assumption. The model computes the full crop requirement: it is higher than the depths recommended by INIFAP and those applied in the district for alfalfa, pecan, cotton and forage maize, and lower for chile; for alfalfa, 28.4 thousand m³/ha against INIFAP's 17.5. The gap does not come from the efficiency alone: the model's crop ET is also above the district estimate. The drip scenario uses indicative FAO efficiencies that were not measured in the district. Soil values come from SoilGrids 2.0, a global model, not from samples; no soil nutrient, iron included, was measured in these fields. GRACE/GRACE-FO is one series for the whole basin, built on 3° mascons, far larger than a field. ECOSTRESS sees few clear days per month. Most rotation filters need a local check. The tool does not combine the farmer's priorities: it sets the options side by side and the farmer weighs them, with no weights and no "best" option. The Money row has no verified data. The full list is in LIMITATIONS.md.
 
 WHAT COMES NEXT
 Ask a district technician which on-farm efficiency is realistic for gravity irrigation and under which conditions the INIFAP depths apply; classify the remaining fields with the team's blind labels and assess the accuracy of the crop map; review fields and options with farmers of the two pilot areas.
@@ -94,102 +131,99 @@ Ask a district technician which on-farm efficiency is realistic for gravity irri
 This tool supports, never replaces, the judgment of farmers and local experts.
 ```
 
-Frases que se agregan si la pieza ya está en la página:
+**Por qué el bloque de arriba ya no trae variantes.** La vista 3D, la línea de tiempo, la tarjeta «Twin status», la app instalable y el contexto regional están en la página (`web/app.js`, líneas de importación de `gemelo3d.js`, `tiempo.js`, `estado_gemelo.js`, `instalar.js` y `contexto.js`), y el goteo también. Si el domingo alguna pieza falla en la sede, quite su frase del punto 1 o 2 de «WHAT ROOT DOES»; no agregue otra.
 
-| Marca | Frase en inglés | Dónde va |
-|---|---|---|
-| [SI ESTÁ CONECTADO] vista 3D | `A 3D view draws the terrain from NASADEM and a water column on each field: blue up to the chosen allocation, red for what is missing.` | En «WHAT RAÍZ DOES», punto 1 |
-| [SI ESTÁ CONECTADO] línea de tiempo | `A timeline replays the agricultural years 2016–2026 and highlights 2025, the year without dam water.` | En «WHAT RAÍZ DOES», punto 1 |
-| [SI ESTÁ CONECTADO] tarjeta de estado | `A status card separates what is observed, what is modeled and what is a scenario, with the date of each source.` | En «WHAT RAÍZ DOES», después del punto 3 |
-| [SI ESTÁ CONECTADO] app instalable | `The app installs on a phone or a laptop and keeps working without a network, with the last synced copy.` | En «WHAT RAÍZ DOES», después del punto 3 |
-| [SI ESTÁ CONECTADO] contexto regional | `A regional context panel shows monthly series per area from SMAP, MODIS, GRACE/GRACE-FO, GLDAS and NLDAS, and GEDI canopy height per field.` | En «WHAT RAÍZ DOES», después del punto 3 |
+**Palabra «preregistered».** No hay liga de OSF en el repo, así que estos textos dicen «declared before the analysis». Dónde se fijó cada criterio: S9 §6 (fechado el 10-nov; en el repo desde el commit `fa49050`, 12-nov) y el Anexo B para H3; `docs/h1_especificacion_operativa.md` para los puntos abiertos de H1 (commit `b9baced` de la rama `datos-satelite`, 14-nov a las 14:11, antes de correr el modelo); `docs/h1b_especificacion.md` para H1-b (commit `695caf8`, 14-nov a las 16:20). La página todavía titula H1 y H3 «preregistered» (`web/data/pruebas.json`, que escribe `motor/pruebas_web.py`): si el jurado lo nota, la respuesta está en `docs/pitch/preguntas_dificiles.md`, pregunta 23.
 
-Si ninguna queda conectada, agregue esta frase al final de «LIMITATIONS»: `A 3D view, a timeline, a status card, an installable app and a regional context panel are being built; the page does not have them yet.`
-
-**La frase del goteo en «LIMITATIONS» tiene dos variantes.** El bloque de arriba trae la del goteo conectado: desde la corrida de las 22:46 del 14-nov, `web/data/cubo.json` ya trae el escenario de goteo (`meta.goteo`), con el motor todavía en revisión.
-
-| Marca | Frase en inglés |
-|---|---|
-| [SI EL GOTEO ESTÁ CONECTADO] (la del bloque) | `The drip scenario uses indicative FAO efficiencies that were not measured in the district.` |
-| [SI EL GOTEO NO ESTÁ] (respaldo, si la revisión lo retira) | `The drip scenario is not on the page yet: the drip efficiency in the data is an indicative FAO value that was not measured in the district.` |
-
-Con el goteo conectado, agregue además al punto 2 de «WHAT RAÍZ DOES»: `"Follow the drop" also shows a drip scenario, labeled "indicative, not local".`
-
-Por qué esta frase no copia al README: `README.md` («No drip scenario») y `LIMITATIONS.md` («There is no sourced drip efficiency») quedaron atrasados. La eficiencia tiene fuente en `data/processed/supuestos.json` → `ea_goteo` (un valor indicativo de la FAO, no local) y la decisión `docs/decisiones/2026-11-14_opciones_b3.md` §3 ordena conectar el escenario. El integrador corrige esos dos archivos; antes del envío, compruebe que el formulario y el README digan lo mismo.
-
-Nota sobre la palabra «preregistered»: el `README.md` la usa para H1 y H3, y la liga pública de OSF todavía no está en el repo. Si la liga no llega antes del envío, el integrador decide si se conserva la palabra o se cambia por «declared beforehand in the project documents».
-
-Nota sobre H1-b y la lámina del modelo: la prueba 2 ya incluye H1-b (prueba posterior, especificada antes de correr; no cambia H1) y «LIMITATIONS» dice que el modelo queda por encima de lo recomendado y de lo aplicado en el distrito. Las dos cosas salen del `README.md`, «Open question: model against INIFAP depth», puntos «H1-b» y «Model against local practice». Estos textos **no** copian la frase del README «So most of the gap comes from dividing by the field (on-farm) efficiency»: `docs/modelo_vs_practica.md` (§2, punto 3) dice que en alfalfa la diferencia viene de la ET y no solo de la eficiencia. El integrador corrige esa frase en `README.md` y en `LIMITATIONS.md` («Water demand»); antes del envío, compruebe que el formulario y el README digan lo mismo. La sección «Tests in sight» de la página todavía no menciona H1-b.
+**Lámina de alfalfa.** «LIMITATIONS» dice que la diferencia no viene solo de la eficiencia (`docs/modelo_vs_practica.md` §2, punto 3). Es lo mismo que dicen ahora `README.md` («Open question») y `LIMITATIONS.md` («Water demand»).
 
 ## 6. NASA Data
 
 ```text
 In use (the page or a published test reads it):
-- HLS v2, Harmonized Landsat Sentinel-2 (HLSL30 and HLSS30 v002, 30 m, via Google Earth Engine): monthly greenness per field for the 2026 crop map, the field memory 2016–2026, bare-soil days and test H3.
-- NASA POWER, Daily API, community AG: daily climate for FAO-56 reference ET and crop water need, one grid cell per pilot area; climatology of test H1.
-- NASADEM (30 m): slope, runoff routes and "Simulate a storm" at area scale; three context indicators in the Soil row.
-- GPM IMERG V07: daily rain per area and the reference storm of "Simulate a storm".
-- VIIRS, through SSEBop VIIRS v6 monthly (a USGS product, 1 km): regional contrast of the modeled ET, never per field.
-
-Delivered and validated on Nov 14, 2026; not on the page yet:
-- NASA POWER minimum temperature: frost dates.
-- SMAP L4: surface and root-zone soil moisture, monthly, as regional context.
-- MODIS collection 6.1 (MOD13Q1, MOD16A2GF, MOD11A2): greenness of the area before the HLS record, a second ET series and daytime land surface temperature.
-- GRACE / GRACE-FO: anomaly of the water stored in the basin, as one basin series.
-- GLDAS-2.1 Noah: ET and root-zone moisture from a land surface model.
-- NLDAS-2 forcing: a second source of rain and potential evaporation.
-- GEDI L2A: canopy height per field, to tell an orchard from a low crop; 1,072 of 1,239 fields have at least one shot.
-
-Requested, not delivered yet:
-- ECOSTRESS: field-scale ET contrast.
+- HLS v2, Harmonized Landsat Sentinel-2: HLSL30 v002 and HLSS30 v002. 30 m. Monthly composites for the agricultural years 2016–2026. Accessed through Google Earth Engine (NASA/HLS/HLSL30/v002, NASA/HLS/HLSS30/v002). Used for: monthly NDVI per field, which gives the field memory, the 2026 crop map (phenological rules), bare-soil days and test H3.
+- NASA POWER, Daily API, community AG. One MERRA-2 grid cell of 0.5° × 0.625° per pilot area. 1984-01-01 to 2026-11-09. Accessed through the POWER Daily API. Used for: daily maximum and minimum temperature, rain, wind, solar radiation and relative humidity, which give the FAO-56 reference ET and each crop's water need; daily minimum temperature (T2M_MIN, 1984–2025) for frost dates and the frost probability by planting date; climatology of test H1.
+- NASADEM, NASADEM_HGT v001. 30 m, each pilot area plus 2 km. Accessed through Google Earth Engine (NASA/NASADEM_HGT/001). Used for: elevation, which gives the slope, the runoff routes and "Simulate a storm" at area scale, three context indicators per field and the relief of the 3D view.
+- GPM IMERG V07. Half-hourly values averaged per day and over each pilot area. 2001-01-01 to 2026-11-13. Accessed through Google Earth Engine (NASA/GPM_L3/IMERG_V07). Used for: daily rain per area and the reference storm of "Simulate a storm" (95th percentile of the days with 1 mm or more).
+- VIIRS, through SSEBop VIIRS v6 monthly, a USGS product. 1 km. October 2025 to September 2026. Accessed through the Earth Engine community catalog (projects/usgs-ssebop/viirs_et_v6_monthly). Used for: actual ET as a regional contrast of the modeled ET (test 5), never per field.
+- SMAP L4 v8 (SPL4SMGP, version 8). 9 km. 2015-04 to 2026-10. Accessed through Google Earth Engine (NASA/SMAP/SPL4SMGP/008). Used for: monthly surface and root-zone soil moisture per area, in the regional context panel.
+- MODIS collection 6.1: MOD13Q1 (NDVI, 250 m, 2000-02 to 2026-10), MOD16A2GF (ET, 500 m, 2000-01 to 2025-12) and MOD11A2 (daytime land surface temperature, 1 km, 2000-02 to 2026-10). Accessed through Google Earth Engine. Used for: the area's greenness before the HLS record, a second ET series and surface temperature, in the regional context panel.
+- GRACE / GRACE-FO, JPL mascons with CRI (NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI). A 0.5° grid built on 3° mascons; one series for the whole basin. 2002-04 to 2024-10. Accessed through Google Earth Engine. Used for: the anomaly of the water stored in the basin (surface, soil and aquifer together), as regional context, never as a value of a field.
+- GLDAS-2.1 Noah (NASA/GLDAS/V021/NOAH/G025/T3H). 27,830 m. 2000-01 to 2026-09. Accessed through Google Earth Engine. Used for: ET and root-zone soil moisture from a land surface model, as regional context.
+- NLDAS-2 forcing (NASA/NLDAS/FORA0125_H002). 13,915 m. 2000-01 to 2026-10. Accessed through Google Earth Engine. Used for: a second source of rain and potential evaporation, as regional context.
+- GEDI L2A v2, monthly raster (LARSE/GEDI/GEDI02_A_002_MONTHLY). Rasterized at 25 m; shots from 2019-04 to 2025-04, filtered by quality and sensitivity. Accessed through Google Earth Engine. Used for: canopy height (rh98) per field, to tell an orchard from a low crop; 1,072 of 1,239 fields have at least one shot.
+- ECOSTRESS ECO_L3T_JET.002 (collection 2). 70 m. October 1, 2025 to September 30, 2026. Accessed through AppEEARS (LP DAAC), one sample point per field. Used for: daily ET on clear days per field (monthly median of the clear scenes), shown in the field sheet as a field-scale contrast of the modeled ET; some months have no clear scene.
 
 Challenge resources that do not cover Mexico: OpenET does not cover Mexico, so the ET contrast uses SSEBop on VIIRS. USDA, NRCS, CDL, NAIP, NLCD, PRISM, NWIS, CoCoRaHS, AMS, NASS and LANDFIRE cover the United States; the local equivalents are SIAP (crop statistics), SIH/Conagua (dams) and SDR Chihuahua.
 ```
 
-**[SI ESTÁ CONECTADO]** Si el panel de contexto regional ya está en la página, cambie el segundo encabezado por: `Delivered and validated on Nov 14, 2026; shown in the regional context panel:`
+Nota: las resoluciones de las series regionales son las de `data/processed/contexto_regional.csv` (`resolucion_m`), como en `README.md` («NASA Data»). La fila de ECOSTRESS sale de `docs/ecostress.md` de la rama `datos-satelite` y de `web/data/contexto.json` → `ecostress` (entró con el buzón v10).
 
-## 7. Space agency partner and other data
+## 7. Space Agency Partner Data
 
 ```text
-- Copernicus Sentinel-2 (ESA), through the NASA HLS product that harmonizes it with Landsat.
-- ERA5-Land (ECMWF and Copernicus; not a NASA product): monthly mean of the daily minimum temperature and frost days. Delivered, not on the page yet.
+- Copernicus Sentinel-2 (ESA), through the NASA HLS v2 product (HLSS30), which harmonizes it with Landsat. It is part of the monthly greenness of every field.
+```
+
+Nota: la Agencia Espacial Mexicana no es Space Agency Partner en 2026 y no se nombra aquí. ERA5-Land no es de una agencia espacial: va en la sección 8.
+
+## 8. Other data
+
+```text
+- ERA5-Land (ECMWF/ERA5_LAND/DAILY_AGGR; ECMWF and the Copernicus Climate Change Service; not a NASA product): monthly mean of the daily minimum temperature and frost days, about 11 km, 2000-01 to 2026-10, in the regional context panel.
 - Fields of The World 2025 global field-boundary predictions (Source Cooperative, CC-BY-4.0): field polygons and a confidence layer. Field boundaries are neural-network predictions outside the model's training domain, filtered by confidence.
-- Conagua: technical report of aquifer 0831 (return-flow coefficients) and the SIH daily series of La Boquilla dam, used as the truth of the H1 back-test.
-- INIFAP crop water depths, FIRA alfalfa stand life and IMTA canal conveyance efficiency, as cited in the project documents.
-- GAEZ (FAO): requested, not delivered yet. WaPOR v3 (FAO): second regional ET contrast, not run.
-- OpenStreetMap base map.
+- ISRIC SoilGrids 2.0 (250 m, 0–30 cm; CC-BY 4.0): texture, pH, organic carbon and cation exchange capacity per field. It is a global model, not a soil sample.
+- OpenLandMap soil texture class (CC-BY-SA 4.0): used to report how often its class agrees with SoilGrids'.
+- FAO ECOCROP: published pH and texture ranges by crop, for the suitability reading of the Soil row; FAO Irrigation and Drainage Paper 29, Table 4, for salinity thresholds.
+- FAO Irrigation Water Management Training Manual No. 4, Annex I, Table 8: indicative field application efficiencies of the drip scenario.
+- GAEZ v4 (FAO and IIASA; CC BY-NC-SA; cells of about 9 km): agro-climatic suitability of each pilot area by crop, in the regional context panel; never a value of a field.
+- Conagua: technical report of aquifer 0831 (return-flow coefficients), agricultural statistics of DR-005, and the SIH daily series of La Boquilla dam, used as the truth of the H1 back-test.
+- INIFAP crop water depths, FIRA alfalfa stand life and IMTA canal conveyance efficiency, as cited in the project documents; depths applied in DR-005 from Villalobos-Cano et al. (2024), shown as a local reference.
+- WaPOR v3 (FAO): second regional ET contrast, not run.
+- OpenStreetMap base map (© OpenStreetMap contributors).
 Licenses and terms of use of every source are listed in DATA_LICENSE.md.
 ```
 
-## 8. SI/AI tools used
+## 9. Use of Super Intelligence (SI)
+
+**Nota interna:** la guía 2026 llama así al campo: «Use of Super Intelligence (SI)», con la pregunta «Did you utilize any Super Intelligence (SI) tools and software in preparing your solution? If yes, how did you use them?». **Confirme el texto exacto en el formulario.** El bloque sigue `AI_USAGE.md` y `README.md` → «SI/AI tools used», sin agregar nada que no esté ahí. El marcador «[CONFIRMAR CRISTIAN: …]» va dentro del bloque a propósito: Cristian lo confirma y lo reescribe, o lo borra, antes de pegar.
 
 ```text
-We used AI where its work can be checked.
-- Code and documents: Claude Code wrote the integration code, tests and documents from our specifications and the data contract, with implementer agents and independent reviewer agents with fresh context. A separate Claude session wrote and ran the data scripts and the Earth Engine runs. Teammates used Gemini in Google Colab or Claude in the browser for scoped notebooks.
-- Field boundaries: Fields of The World neural network (third-party data), filtered by confidence.
-- Crop map 2026: phenological rules, with no AI in the current map. Random Forest: not run.
-- Field memory: no AI; rules on monthly greenness with declared thresholds.
-- Explanations: no LLM in the app. They are template texts with placeholders, drafted with Claude Code; the numbers are filled from the data.
+Yes. We used SI tools where their work can be checked, and we say where they are not used.
+
+Where and how we used them
+- Code, tests and reviews: Claude Code wrote the integration code (data engine, contract validator, web page, tests and the build-and-publish workflow) from our specifications and the data contract. It worked with implementer agents and independent reviewer agents with fresh context; reviewers report findings and do not edit. A team member merges every change.
+- Data scripts and Earth Engine runs: a separate Claude session in the browser wrote and ran the Google Earth Engine extractions (HLS, NASADEM, GPM IMERG, SSEBop, the regional context series, GEDI, SoilGrids), the NASA POWER and FAO-56 scripts, the rules crop map and the H1, H3 and ET analyses. Its work was reviewed by independent agents and checked by the mailbox validator, with a checksum for each delivered file.
+- Notebooks: teammates used Gemini in Google Colab, or Claude in the browser, for scoped notebooks and data-verification cells.
+- Writing: Claude Code drafted the page texts, the pitch scripts and these submission texts in English, and translated project documents into English. The team reviews them before submission.
 - Prior research: Claude, ChatGPT, Gemini, DeepSeek and NotebookLM for search and synthesis; each figure was checked in its original source.
-- Page texts, pitch scripts and these submission texts: drafted with Claude Code from the repository files; the team reviews them before submission.
-- Images or video: none generated with AI. The video is a screen capture of the real app.
+- [CONFIRMAR CRISTIAN: la idea del plazo del agua la definió el equipo]
 
-How it is verified: one command rebuilds everything and stops publishing if a check fails; no figure is written by hand on the page; a figure checker passed its golden set (30 of 30 cases, 0 numbers altered); every file carries an "AI-assisted" header and AI_USAGE.md logs each task.
+Machine-learning and statistical components of the tool
+- Field boundaries: the Fields of The World neural network (third-party global predictions), filtered by its confidence.
+- Crop map 2026: phenological rules on HLS greenness with declared thresholds; no machine learning in the current map. A Random Forest classifier is planned and marked "not run".
+- Water need: FAO-56 with a Monte Carlo of 2,000 runs, which gives each depth its P10–P50–P90 band.
+- Field memory: rules on monthly greenness, no machine learning.
 
-Where AI is not used: the dam volume is not forecast; the planting decision is not made by the tool; water is computed with FAO-56 and explicit rules, not by an LLM; no numbers are generated by AI.
-
-AI never generates the numbers or makes the decision; farmers and technicians decide.
+Where SI is not used
+- No LLM writes a figure on the page. Every number is read from the data files; the explanations are templates with placeholders. A figure checker runs on every build and passed its golden set (30 of 30 cases, 0 numbers altered); an automated test stops publication if a hand-written figure appears in the page code.
+- The dam volume is not forecast, and the planting decision is not made by the tool.
+- Images and video: none generated with SI; the video is a screen capture of the real app.
+Every code and document file carries an "AI-assisted" header, and AI_USAGE.md (in Spanish) logs each task. SI never generates the numbers or makes the decision; farmers and technicians decide.
 ```
 
-## 9. References
+## 10. References
 
 ```text
-Articles and reports
+Articles, reports and manuals
 - Allen et al. (1998). Crop evapotranspiration — Guidelines for computing crop water requirements. FAO Irrigation and Drainage Paper 56.
+- Brouwer, Prins and Heibloem (1989). Irrigation Water Management Training Manual No. 4, "Irrigation Scheduling". FAO. Annex I, Table 8. https://www.fao.org/3/t7202e/t7202e08.htm
+- FAO Irrigation and Drainage Paper 29 (water quality), Table 4: salinity thresholds.
 - Conagua (2024). Actualización de la disponibilidad media anual de agua en el acuífero Meoqui-Delicias (0831), technical report DR_0831. https://sigagis.conagua.gob.mx/gas1/Edos_Acuiferos_18/chihuahua/DR_0831.pdf
-- Conagua, Sistema de Información Hidrológica (SIH): daily series of La Boquilla, downloaded Nov 14, 2026.
-- IMTA, COMEII 2021: canal conveyance efficiency. FIRA AGROCOSTOS 2025: alfalfa stand life. INIFAP: crop water depths.
-- Grafton et al. (2018), Science: irrigation efficiency and return flows. Mall and Herman (2019): shortage risk from perennial-crop expansion in California. Olofsson et al. (2014): area and accuracy assessment. Villalobos-Cano et al. (2024).
+- Conagua: agricultural statistics of DR-005; Sistema de Información Hidrológica (SIH), daily series of La Boquilla, downloaded Nov 14, 2026. Terms of use to be confirmed.
+- INIFAP: crop water depths (Agenda Técnica Agrícola de Chihuahua 2017; Folleto Técnico 53). FIRA AGROCOSTOS 2025: alfalfa stand life. IMTA, COMEII 2021: canal conveyance efficiency. Cited figures; terms to be confirmed.
+- Villalobos-Cano et al. (2024). Sustainability 16(5): 1851. https://doi.org/10.3390/su16051851
+- Grafton et al. (2018), Science: irrigation efficiency and return flows. Mall and Herman (2019): shortage risk from perennial-crop expansion in California. Olofsson et al. (2014): area and accuracy assessment.
 
 Data
 - Masek, J., et al. (2021). HLS Operational Land Imager Surface Reflectance and TOA Brightness Daily Global 30m v2.0. NASA EOSDIS LP DAAC. https://doi.org/10.5067/HLS/HLSL30.002
@@ -197,9 +231,21 @@ Data
 - NASA JPL (2020). NASADEM Merged DEM Global 1 arc second V001. NASA EOSDIS LP DAAC. https://doi.org/10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001
 - NASA POWER (NASA Langley Research Center), Daily API, community AG. https://power.larc.nasa.gov/api/temporal/daily/point
 - NASA GPM IMERG V07, Earth Engine collection NASA/GPM_L3/IMERG_V07.
-- Senay, G. B., Kagone, S. and Velpuri, N. M. (2020). Operational Global Actual Evapotranspiration using the SSEBop model. U.S. Geological Survey data release. https://doi.org/10.5066/P9OUVUUI
-- Fields of The World global predictions (CC-BY-4.0), Source Cooperative, source.coop/ftw/global-data.
-- Regional context and GEDI, by Earth Engine identifier: NASA/SMAP/SPL4SMGP/008; MODIS/061/MOD13Q1, MOD16A2GF and MOD11A2; NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI; NASA/GLDAS/V021/NOAH/G025/T3H; NASA/NLDAS/FORA0125_H002; ECMWF/ERA5_LAND/DAILY_AGGR; LARSE/GEDI/GEDI02_A_002_MONTHLY.
+- Regional context and GEDI, by Earth Engine identifier: NASA/SMAP/SPL4SMGP/008; MODIS/061/MOD13Q1, MOD16A2GF and MOD11A2; NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI; NASA/GLDAS/V021/NOAH/G025/T3H; NASA/NLDAS/FORA0125_H002; LARSE/GEDI/GEDI02_A_002_MONTHLY. NASA Earth science data: free and open; cite the product.
+- Hook, S. and Halverson, G. (2024). ECOSTRESS ECO_L3T_JET.002. NASA LP DAAC. https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002
+- Senay, G. B., Kagone, S. and Velpuri, N. M. (2020). Operational Global Actual Evapotranspiration using the SSEBop model. U.S. Geological Survey data release. https://doi.org/10.5066/P9OUVUUI (U.S. Public Domain).
+- ERA5-Land, ECMWF and Copernicus Climate Change Service (ECMWF/ERA5_LAND/DAILY_AGGR). Terms to be confirmed.
+- Fields of The World global predictions, Source Cooperative, source.coop/ftw/global-data. CC-BY-4.0.
+- Poggio, L., et al. (2021). SoilGrids 2.0: producing soil information for the globe with quantified spatial uncertainty. SOIL 7, 217–240. https://doi.org/10.5194/soil-7-217-2021 (ISRIC – World Soil Information). CC-BY 4.0.
+- Hengl, T. (2018). Soil texture classes (USDA system) for 6 soil depths at 250 m (v02). Zenodo. https://doi.org/10.5281/zenodo.1475451 (OpenLandMap). CC-BY-SA 4.0.
+- FAO ECOCROP, crop sheets by species, ecocrop.apps.fao.org, read Nov 14, 2026. Just cited ranges were transcribed; terms to be confirmed.
+- FAO and IIASA, GAEZ v4, http://www.fao.org/gaez/; Fischer et al. (2021), https://doi.org/10.4060/cb4744en. CC BY-NC-SA.
+- OpenStreetMap base map tiles, © OpenStreetMap contributors (attribution shown on the map).
+
+Tools and libraries
+- Google Earth Engine: access platform for HLS, NASADEM, GPM IMERG, SSEBop, the regional context series, GEDI, SoilGrids and OpenLandMap (non-commercial project of the Community tier).
+- MapLibre GL JS 5.24.0 (BSD 3-clause), d3 7.9.0 (ISC) and d3-sankey 0.12.3 (BSD 3-clause), copied unchanged from npm and verified by hash; their license files are next to each library.
+- pytest 9.1.0 (Python tests) and Playwright with Chromium (browser smoke tests, run locally).
 
 Press (figures labeled as press)
 - El Diario de Chihuahua, Oct 28, 2024 and Jul 27, 2026 (allocation marks).
@@ -207,50 +253,57 @@ Press (figures labeled as press)
 - El Diario de Delicias, Jan 31, 2025 (groundwater authorized in 2025).
 - Local press of December 2025 (hectares planted with wells in 2025).
 
-Challenge and libraries
-- Challenge: https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/
-- MapLibre GL JS 5.24.0, d3 7.9.0 and d3-sankey 0.12.3, copied unchanged and verified by hash. pytest 9.1.0.
+Challenge
+- https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/
+
+Licenses and terms of every source: DATA_LICENSE.md.
 ```
 
-Nota: el `README.md` avisa que las fichas bibliográficas completas de varios artículos no están en el repositorio. Si el formulario las exige completas, complételas antes del envío final.
+Notas:
+- **Licencias que el repo no registra:** pytest, Playwright (tampoco su versión), FAO ECOCROP, ERA5-Land, Conagua, INIFAP, FIRA, IMTA y la versión exacta de CC BY-NC-SA de GAEZ (4.0 o 3.0 IGO). En el bloque van como «terms to be confirmed» o sin licencia; `DATA_LICENSE.md` las lista en «Open items». No las complete de memoria.
+- Las fichas completas de Grafton, Mall y Herman y Olofsson no están en el repo (`README.md`, «References»). Si el formulario las exige completas, complételas antes del envío final con la fuente a la vista.
+- Las licencias de MapLibre GL JS, d3 y d3-sankey salen de los archivos de licencia copiados en `web/vendor/` (`DATA_LICENSE.md`, «Libraries and development tools»).
 
-**[SI EL GOTEO ESTÁ CONECTADO]** agregue esta referencia a «Articles and reports». Sale de `data/processed/supuestos.json` → `ea_goteo`; el `README.md` todavía no la trae:
+## 11. Lista de envío (kit Q2 y guía 2026)
 
-```text
-- Brouwer, Prins and Heibloem (1989). Irrigation Water Management Training Manual No. 4, "Irrigation Scheduling". FAO. Annex I, Table 8, "Indicative values of the field application efficiency (ea)". https://www.fao.org/3/t7202e/t7202e08.htm
-```
-
-## 10. Lista de envío (kit Q2)
-
-- [ ] Todo el formulario en inglés.
+- [ ] Todo el formulario en inglés; ninguna liga a un documento en español.
+- [ ] Nombres de los campos y límites de caracteres confirmados en el formulario real, incluido «Use of Super Intelligence (SI)».
+- [ ] El marcador «[CONFIRMAR CRISTIAN: …]» de la sección 9 se resolvió.
 - [ ] Video de 30 segundos o menos con subtítulos en inglés, o diapositivas (máximo 7).
 - [ ] Ligas sin inicio de sesión, probadas en incógnito: web, repositorio, video y diapositivas.
-- [ ] La sección «NASA Data» enumera cada dataset utilizado.
-- [ ] La sección «SI/AI tools used» está completa, y la declaración figura también en el README, en los encabezados de archivo y en la descripción del repositorio.
-- [ ] Ningún logotipo, bandera o identificador de misión de la NASA.
-- [ ] «References» completas: bibliotecas, datos, artículos y prensa.
+- [ ] La sección «NASA Data» enumera cada producto con versión, resolución, periodo, acceso y uso.
+- [ ] Ningún logotipo, bandera o identificador de misión de la NASA; la Agencia Espacial Mexicana no aparece como socio.
+- [ ] «References» completas: bibliotecas, datos, artículos y prensa, con su licencia o «to be confirmed».
 - [ ] Las cinco pruebas con su resultado o con «not run».
 - [ ] Revisión de cifras de las 12:30: página, video, póster y ficha impresa coinciden con `cifras.csv` y `manifest.json`.
 - [ ] Los 6 integrantes confirmados en la sede de Chihuahua.
 - [ ] Captura de pantalla de la confirmación del envío.
 
-## 11. Cifras de estos textos y su origen
+## 12. Cifras de estos textos y su origen
 
-Todas están en el `README.md` del 14-nov, que las cita con su archivo.
-
-| Cifra | Sección del `README.md` |
+| Cifra | Origen |
 |---|---|
-| 73,002 ha; 8,113 productores; 39,421 de 62,219 ha (63 %) | «Summary», «Why it matters» (S9 §2) |
-| 12,000 a 15,000 ha con pozos; 87.4 hm³ de agua subterránea [P] | «Summary» (S9 §2 y Anexo A) |
-| −167.12 hm³ al año; 83.3 % de la recarga | «Summary» (S9 §2) |
-| 1,239 parcelas; 458 clasificadas; 781 sin clasificar (63.0 %) | «Pilot areas»; «Validation», prueba 1 |
-| Plazos: 1 año; 3 a 4 años; horizonte de 10 años | «How it works», «Calculation» |
-| H1: 904.6, 447.65, 404.5 y 367.2 hm³ | «Validation», prueba 2 (`docs/resultado_H1.md`) |
-| H1-b: ciclos de 1999 a 2024; 6 de 26 años | «Open question: model against INIFAP depth», punto «H1-b» (`docs/resultado_H1b.md`; especificación en `docs/h1b_especificacion.md`) |
-| H3: 184 parcelas; 82.6 % y 84.2 %; −1.6 puntos; 44 huertas; 100 % | «Validation», prueba 3 (`docs/resultado_H3.md`) |
-| Verificador: 30 de 30; 5 de 5; 0 de 71 | «Validation», prueba 4 (`docs/figuras/llm_eval.csv`) |
-| ET: 1,139.3 mm y 746.3 mm; +53 % | «Validation», prueba 5 (`docs/resultado_A8.md`) |
-| Alfalfa: 28.4 frente a 17.5 millares/ha | «Open question: model against INIFAP depth» (la lista de cultivos por encima y por debajo, sin cifras, sale del punto «Model against local practice»; detalle en `docs/modelo_vs_practica.md`) |
-| GEDI: 1,072 de 1,239 parcelas | «NASA Data» |
-| Goteo: ninguna cifra en el texto | No viene del README. La eficiencia indicativa está en `data/processed/supuestos.json` → `ea_goteo` |
-| Versiones de bibliotecas | «References» |
+| −167.12 hm³ al año (acuífero 0831; Conagua 2024); 83.3 % de la recarga | S9 §2; `README.md`, «Summary» |
+| 73,002 ha; 8,113 productores; 39,421 de 62,219 ha (63 %) | S9 §2; `README.md`, «Summary» |
+| 12,000 a 15,000 ha con pozos; 87.4 hm³ de agua subterránea [P] | S9 §2 y Anexo A |
+| 1,239 parcelas; 458 clasificadas; 781 sin clasificar (63.0 %) | `web/data/cubo.json` → `zona.conteos`; `web/data/pruebas.json`, prueba 1 |
+| Años agrícolas 2016–2026; resaltado de 2025 | `web/data/gemelo.json` → `tiempo` |
+| Banda P10–P50–P90; 2,000 corridas; clima 1991–2025 | S9 §5; `data/processed/rotaciones.json` → `params.corridas`, `params.periodo_clima` |
+| Suelo desnudo: NDVI < 0.2 del 1-feb al 30-abr | S9 §5 |
+| Heladas: NASA POWER, 1984–2025 | `data/processed/heladas.json` (`fuentes.json`, entrada `heladas.json`) |
+| Plazos: 1 año; 3 a 4 años; horizonte de 10 años | S9 §5 |
+| Nogal: sin alternativas; 105 huertas | `web/data/cubo.json` → `opciones_catalogo.nogal`, `parcelas.<id>.sin_rotacion`; `web/data/parcelas.geojson`; `docs/decisiones/2026-11-15_nogal_sin_alternativas.md` |
+| H1: 904.6, 447.65, 404.5 y 367.2 hm³ | `docs/resultado_H1.md`; `README.md`, prueba 2 |
+| H1-b: ciclos de 1999 a 2024; 6 de 26 años | `docs/resultado_H1b.md`; `web/data/pruebas.json` |
+| H3: 184 parcelas; 82.6 % y 84.2 %; −1.6 puntos; 44 huertas; 100 % | `docs/resultado_H3.md`; `README.md`, prueba 3 |
+| Verificador: 30 de 30; 5 de 5; 0 de 71 | `docs/figuras/llm_eval.csv`; `web/data/pruebas.json`, prueba 4 |
+| ET: 1,139.5 mm y 746.3 mm; +53 % | Suma de `data/processed/et_contraste.csv` (buzón v10, con el cereal sembrado el 1-dic [S]); antes 1,139.3 mm y la diferencia no cambia (`datos/PARA_INTEGRADOR.md` de la rama `datos-satelite`) |
+| FAO-56: Ejemplos 8 y 18 | `tests/test_fao56_manual.py`; `web/data/pruebas.json`, prueba 5 |
+| Alfalfa: 28.4 frente a 17.5 millares/ha | `data/processed/rotaciones.json`; S9 §5; `README.md`, «Open question» |
+| GEDI: 1,072 de 1,239 parcelas | `data/processed/fuentes.json`, entrada `gedi_parcelas.csv` |
+| Resoluciones y periodos de la sección 6 | `data/processed/fuentes.json`; `data/processed/contexto_regional.csv` (`resolucion_m`, `mes`); `README.md`, «NASA Data» |
+| ECOSTRESS: 70 m; 1-oct-2025 a 30-sep-2026 | `docs/ecostress.md` de la rama `datos-satelite`; `web/data/contexto.json` → `ecostress` |
+| GRACE: malla de 0.5° sobre mascons de 3° | `data/processed/fuentes.json`, entrada `contexto_regional.csv` |
+| ERA5-Land: unos 11 km | `data/processed/contexto_regional.csv` (`resolucion_m` = 11,132) |
+| Goteo y riego superficial (no van en el texto) | `data/processed/supuestos.json` → `ea_goteo`, `ea_superficial_referencia` |
+| Versiones de bibliotecas | `web/vendor/VERSIONS.json`; `requirements.txt` |
