@@ -1,7 +1,7 @@
 <!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Resultado de las pruebas (generado por `python construir.py`; no se edita a mano)
 
-Corrida: 2026-11-15T11:19:17+00:00 · duración 71.0 s
+Corrida: 2026-11-15T12:00:17+00:00 · duración 71.3 s
 
 | Paso | Estado | Detalle |
 |---|---|---|
@@ -10,12 +10,12 @@ Corrida: 2026-11-15T11:19:17+00:00 · duración 71.0 s
 | simulados | OK | cubo REAL: 1239 parcelas, 458 clasificadas, 1267 opciones |
 | relieve | OK | zonas: delicias_saucillo, lazaro_cardenas |
 | gemelo | OK | gemelo: OK · contexto: OK · suelo: OK · dashboard: OK · rango de lluvia: OK |
-| pwa | OK | precache 216603b225701ff5 |
+| pwa | OK | precache 3bf1faafa2519316 |
 | manifest | OK | 141424 cifras (0 simuladas), 35 fuentes de origen, 59 avisos |
 | contrato | OK | CONTRATO OK |
 | verificador | OK | VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv |
-| pytest | OK | 1252 passed, 30 warnings in 58.28s |
-| node | OK | 275 pass, 0 fail, 0 skipped |
+| pytest | OK | 1252 passed, 30 warnings in 57.85s |
+| node | OK | 278 pass, 0 fail, 0 skipped |
 
 La prueba con navegador (`node tests/e2e/web_smoke.mjs`) se corre aparte y antes de cada publicación.
 Después de escribir esta tabla, el paso 5c (`motor/pruebas_web.py`) genera `web/data/pruebas.json` a partir de ella: la sección «About & Data» de la web la muestra como «puerta automática».

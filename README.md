@@ -202,7 +202,7 @@ Licenses and terms of use of every source: [DATA_LICENSE.md](DATA_LICENSE.md).
 | Team deliveries validated against the contract schemas before entering `data/processed/` | `motor/ensamblar.py`, `motor/esquemas.py`, `tests/test_ensamblar.py`, `tests/test_esquemas_reto.py` |
 | Data contract v4 (P10 ≤ P50 ≤ P90, abstained fields without options, closed water balance); altered cubes are rejected | `validar_contrato.py`, `tests/test_contrato.py` |
 | Cube engine with one and two areas; each field uses the depths of its own area | `tests/test_b4.py` |
-| `manifest.json` lists every figure the page reads, with source, script and label, and its date where one is recorded: 134,418 figures in this build, none simulated; 59 notices mark the values without a date (`web/data/manifest.json` → `resumen` and `avisos`) | `tests/test_contrato.py` |
+| `manifest.json` lists every figure the page reads, with source, script and label, and its date where one is recorded: 141,424 figures in this build, none simulated; 59 notices mark the values without a date (`web/data/manifest.json` → `resumen` and `avisos`) | `tests/test_contrato.py` |
 | Units, and the S9 scale example (INIFAP depths [V]) computed with the page's own function | `tests/test_unidades.py`, `tests/test_escala.py` |
 | Slider rules: zero allocation, traffic light, committed water above 100 %, "at least" | `tests/reglas.test.js` |
 | No hand-written figures in `index.html` or in the strings of the page's JavaScript | `tests/test_sin_cifras.py` |
