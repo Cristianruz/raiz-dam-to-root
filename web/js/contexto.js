@@ -1530,7 +1530,7 @@ export function montarRecursosReto(contenedor, opciones = {}) {
       .join("");
     raiz.innerHTML = `${cabeza}
       ${htmlResumenRecursos(contarEstados(recursos))}
-      <p class="contexto-recursos-nota">The status is computed from the files that passed validation, not written by hand. None of these sources changes the water calculation of a field.</p>
+      <p class="contexto-recursos-nota">The status is computed from the files that passed validation, not written by hand. The water need of each field comes from NASA POWER, with the crop map from HLS; NASADEM and GPM IMERG drive the terrain and the storm simulation. The other sources are context, contrast or evidence: they do not change the water calculation of a field.</p>
       <div class="contexto-tabla-caja"><table class="contexto-tabla contexto-tabla--recursos">
         <caption class="solo-lector">${TITULO_RECURSOS}: resource, agency, role in ROOT, status and files</caption>
         <thead><tr><th scope="col">Resource</th><th scope="col">Agency</th><th scope="col">Role in ROOT</th><th scope="col">Status</th><th scope="col">Files</th></tr></thead>

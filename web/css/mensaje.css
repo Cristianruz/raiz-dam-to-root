@@ -31,6 +31,32 @@
   max-width: 380px;
 }
 
+/* Selector del idioma del mensaje (rótulo en inglés, como la interfaz; cada idioma con su nombre propio) y la
+   nota de las traducciones que redactó la IA (web/js/mensaje.js, NOTA_TRADUCCION). */
+.wa-idioma {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 8px;
+  font-size: 0.85rem;
+  color: var(--wa-tinta-suave);
+}
+.wa-idioma label { font-weight: 600; color: var(--wa-tinta); }
+.wa-idioma select {
+  font: inherit;
+  min-height: 36px;
+  max-width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--wa-borde);
+  border-radius: 6px;
+  background: var(--wa-burbuja);
+  color: var(--wa-tinta);
+}
+.wa-traduccion { flex-basis: 100%; margin: 0; text-align: center; font-style: italic; }
+
 .wa-telefono {
   width: 100%;
   max-width: 380px;
