@@ -15,7 +15,7 @@
 }
 
 /* Bloque de controles (dentro del contenedor que elige app.js) */
-.relieve { display: grid; gap: 8px; font-size: 0.9rem; }
+.relieve { display: grid; gap: 8px; font-size: var(--fs-2); }
 
 .relieve-controles {
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
@@ -44,7 +44,7 @@
     radial-gradient(circle at 45% 75%, currentColor 0 2px, transparent 2.5px);
 }
 
-.relieve-ayuda { font-size: 0.85rem; color: var(--tinta-suave, #4A525A); }
+.relieve-ayuda { font-size: var(--fs-2); color: var(--tinta-suave, #4A525A); }
 
 /* Leyenda */
 .relieve-leyenda ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
@@ -59,12 +59,12 @@
   background: var(--relieve-gota); box-shadow: 0 0 0 1px var(--relieve-gota-borde), 0 0 0 2px rgba(0, 0, 0, 0.2);
 }
 .relieve-etiqueta {
-  display: inline-block; font-size: 0.75rem; font-weight: 700; color: var(--tinta-suave, #4A525A);
+  display: inline-block; font-size: var(--fs-1); font-weight: 700; color: var(--tinta-suave, #4A525A);
   border: 1px solid var(--borde, #D8CFC2); border-radius: 999px; padding: 0 6px; white-space: nowrap;
 }
-.relieve-escala { font-size: 0.85rem; font-style: italic; color: var(--tinta-suave, #4A525A); }
+.relieve-escala { font-size: var(--fs-2); font-style: italic; color: var(--tinta-suave, #4A525A); }
 /* Rutas cortadas en depresiones cerradas (relieve.json → rutas_depresiones): muestra de línea interrumpida. */
-.relieve-depresiones { display: flex; gap: 8px; align-items: baseline; font-size: 0.85rem; margin: 4px 0; }
+.relieve-depresiones { display: flex; gap: 8px; align-items: baseline; font-size: var(--fs-2); margin: 4px 0; }
 .relieve-muestra-corte {
   flex: none; width: 22px; height: 0; margin-top: 0.55em;
   border-top: 3px dashed var(--relieve-ruta, var(--agua, #1F6FB2));
@@ -77,12 +77,12 @@
 }
 .relieve-tormenta-zona { display: grid; gap: 2px; }
 .relieve-tormenta-titulo { font-weight: 700; }
-.relieve-tormenta-cifra strong { font-size: 1.3rem; color: var(--relieve-ruta-fuerte); }
+.relieve-tormenta-cifra strong { font-size: var(--fs-5); color: var(--relieve-ruta-fuerte); }
 .relieve-tormenta-def, .relieve-tormenta-periodo { color: var(--tinta-suave, #4A525A); }
-.relieve-nota { font-size: 0.85rem; }
+.relieve-nota { font-size: var(--fs-2); }
 
 .relieve-aviso, .relieve-no-corrido {
-  font-size: 0.9rem; color: var(--tinta-suave, #4A525A);
+  font-size: var(--fs-2); color: var(--tinta-suave, #4A525A);
   background: var(--arena, #F5EFE6); border: 1px dashed var(--borde, #D8CFC2);
   border-radius: 6px; padding: 6px 10px;
 }
@@ -105,7 +105,7 @@
 }
 
 /* Línea de la ficha (renglón Soil) */
-.relieve-parcela { font-size: 0.9rem; margin-top: 4px; }
+.relieve-parcela { font-size: var(--fs-2); margin-top: 4px; }
 .relieve-parcela-titulo { font-weight: 700; }
 .relieve-parcela .relieve-escala { white-space: normal; }
 

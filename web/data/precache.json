@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pwa.py recorriendo web/ (todo menos sw.js y lo oculto); nunca se edita a mano. «version» es la huella del contenido de esos archivos: web/sw.js guarda la copia sin conexión en la caché raiz-<version> y la renueva cuando cambia.",
- "version": "8882e4fb423512d9",
+ "version": "e138b34d62971902",
  "archivos": [
   "app.js",
   "css/acerca.css",
@@ -81,6 +81,9 @@
   "reglas.js",
   "style.css",
   "vendor/VERSIONS.json",
+  "vendor/atkinson-hyperlegible-5.3.0/LICENSE",
+  "vendor/atkinson-hyperlegible-5.3.0/atkinson-hyperlegible-latin-400-normal.woff2",
+  "vendor/atkinson-hyperlegible-5.3.0/atkinson-hyperlegible-latin-700-normal.woff2",
   "vendor/d3-7.9.0/LICENSE",
   "vendor/d3-7.9.0/d3.min.js",
   "vendor/d3-sankey-0.12.3/LICENSE",

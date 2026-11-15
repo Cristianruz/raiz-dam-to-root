@@ -65,7 +65,7 @@
   border-radius: var(--resumen-radio);
   box-shadow: var(--resumen-sombra);
   padding: 14px 16px 16px;
-  font-size: 1rem;
+  font-size: var(--fs-3);
   overflow-wrap: anywhere; /* las fuentes registradas son largas: se parten, no desbordan */
 }
 /* Dentro de un bloque del panel (que ya es una caja), la tarjeta no repite la caja. */
@@ -74,8 +74,8 @@
 .estado-gemelo-cabeza {
   display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px;
 }
-.estado-gemelo-titulo { margin: 0; font-size: 1.15rem; line-height: 1.2; }
-.estado-gemelo-reconstruido { font-size: 0.9rem; color: var(--resumen-tinta-suave); }
+.estado-gemelo-titulo { margin: 0; font-size: var(--fs-4); line-height: 1.2; }
+.estado-gemelo-reconstruido { font-size: var(--fs-2); color: var(--resumen-tinta-suave); }
 .estado-gemelo-reconstruido time { color: var(--resumen-tinta); font-weight: 700; font-variant-numeric: tabular-nums; }
 .estado-gemelo-falta { color: var(--resumen-tinta-suave); font-style: italic; }
 
@@ -83,11 +83,11 @@
   background: var(--resumen-ambar-claro);
   border: 2px solid var(--resumen-tinta);
   border-radius: 6px; padding: 6px 10px;
-  font-weight: 700; font-size: 0.9rem;
+  font-weight: 700; font-size: var(--fs-2);
 }
 
 .estado-gemelo-subtitulo,
-.estado-gemelo-grupo-titulo { margin: 0; font-size: 1rem; line-height: 1.25; }
+.estado-gemelo-grupo-titulo { margin: 0; font-size: var(--fs-3); line-height: 1.25; }
 
 /* «Fields mirrored»: una fila por zona */
 .estado-gemelo-espejo { display: grid; gap: 6px; }
@@ -104,11 +104,11 @@
 .estado-gemelo-zona--total { background: var(--resumen-arena); }
 .estado-gemelo-zona-nombre { font-weight: 700; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
 .estado-gemelo-en-vista {
-  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: var(--fs-1); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
   color: var(--resumen-papel); background: var(--resumen-agua-osc);
   border-radius: 4px; padding: 1px 6px;
 }
-.estado-gemelo-conteo { font-size: 0.95rem; color: var(--resumen-tinta-suave); font-variant-numeric: tabular-nums; }
+.estado-gemelo-conteo { font-size: var(--fs-3); color: var(--resumen-tinta-suave); font-variant-numeric: tabular-nums; }
 .estado-gemelo-conteo strong { color: var(--resumen-tinta); }
 .estado-gemelo-barra {
   display: block; height: 6px; margin-top: 4px;
@@ -137,12 +137,12 @@
   flex: none; display: inline-flex; align-items: center; justify-content: center;
   width: 24px; height: 24px; border-radius: 50%;
   background: var(--resumen-papel); border: 2px solid var(--resumen-tinta);
-  font-size: 0.9rem; font-weight: 700; line-height: 1;
+  font-size: var(--fs-2); font-weight: 700; line-height: 1;
 }
-.estado-gemelo-grupo-nota { font-size: 0.85rem; color: var(--resumen-tinta-suave); }
+.estado-gemelo-grupo-nota { font-size: var(--fs-2); color: var(--resumen-tinta-suave); }
 .estado-gemelo-sin-fuentes {
   background: var(--resumen-papel); border: 1px dashed var(--resumen-tinta-suave); border-radius: 6px;
-  padding: 6px 8px; font-size: 0.85rem; margin-top: 4px !important;
+  padding: 6px 8px; font-size: var(--fs-2); margin-top: 4px !important;
 }
 .estado-gemelo-sin-fuentes strong { display: block; }
 
@@ -151,15 +151,15 @@
   display: grid; gap: 1px; min-width: 0;
   padding: 7px 0;
   border-top: 1px solid var(--resumen-borde);
-  font-size: 0.9rem;
+  font-size: var(--fs-2);
 }
 .estado-gemelo-fila-cabeza {
   display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 10px;
 }
-.estado-gemelo-etiqueta { font-weight: 700; font-size: 0.95rem; }
+.estado-gemelo-etiqueta { font-weight: 700; font-size: var(--fs-3); }
 .estado-gemelo-fuente { color: var(--resumen-tinta); }
 .estado-gemelo-detalle { color: var(--resumen-tinta-suave); }
-.estado-gemelo-fecha { color: var(--resumen-tinta-suave); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+.estado-gemelo-fecha { color: var(--resumen-tinta-suave); font-size: var(--fs-2); font-variant-numeric: tabular-nums; }
 .estado-gemelo-fecha time { color: var(--resumen-tinta); font-weight: 700; }
 .estado-gemelo-fecha--falta { font-style: italic; }
 .estado-gemelo-valor { color: var(--resumen-tinta-suave); }
@@ -168,7 +168,7 @@
 .estado-gemelo-archivos { margin-top: 2px; }
 .estado-gemelo-archivos summary {
   cursor: pointer; width: fit-content; max-width: 100%;
-  color: var(--resumen-agua-osc); font-weight: 700; font-size: 0.85rem;
+  color: var(--resumen-agua-osc); font-weight: 700; font-size: var(--fs-2);
   min-height: 24px; padding: 2px 0;
 }
 .estado-gemelo-archivos summary:focus-visible,
@@ -179,11 +179,11 @@
 .estado-gemelo-archivos ul { list-style: none; margin: 4px 0 2px; padding: 0; display: grid; gap: 6px; }
 .estado-gemelo-archivos li {
   background: var(--resumen-papel); border-radius: 6px; padding: 6px 8px;
-  font-size: 0.82rem; color: var(--resumen-tinta-suave);
+  font-size: var(--fs-2); color: var(--resumen-tinta-suave);
 }
 .estado-gemelo-archivo {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.8rem; color: var(--resumen-tinta); font-weight: 700;
+  font-size: var(--fs-2); color: var(--resumen-tinta); font-weight: 700;
 }
 .estado-gemelo-registrada { display: block; margin-top: 2px; }
 
@@ -191,7 +191,7 @@
   border-left: 4px solid var(--resumen-tierra);
   background: var(--resumen-arena);
   border-radius: 4px; padding: 8px 10px;
-  font-size: 0.9rem;
+  font-size: var(--fs-2);
 }
 
 /* ---------------------------------------------------------------------------
@@ -202,7 +202,7 @@
   background: var(--resumen-agua-clara);
   border-left: 4px solid var(--resumen-agua);
   border-radius: 4px; padding: 10px 12px;
-  font-size: 1.08rem; line-height: 1.45; font-weight: 400;
+  font-size: var(--fs-3); line-height: 1.45; font-weight: 400;
   overflow-wrap: anywhere;
 }
 .resumen-frase[data-caso="sin_riego"] { background: var(--resumen-brote-claro); border-left-color: var(--resumen-brote); }
@@ -214,8 +214,8 @@
 /* ---------------------------------------------------------------------------
    NDVI mensual de la parcela
    --------------------------------------------------------------------------- */
-.resumen-ndvi { display: grid; gap: 6px; font-size: 1rem; }
-.resumen-ndvi-titulo { margin: 0; font-size: 1.1rem; line-height: 1.2; }
+.resumen-ndvi { display: grid; gap: 6px; font-size: var(--fs-3); }
+.resumen-ndvi-titulo { margin: 0; font-size: var(--fs-4); line-height: 1.2; }
 .resumen-ndvi-aviso { color: var(--resumen-tinta-suave); font-style: italic; }
 
 .resumen-ndvi-lienzo {
@@ -233,11 +233,11 @@
 .resumen-ndvi-base { stroke: var(--resumen-tinta-suave); stroke-width: 1; }
 .resumen-ndvi-corte { stroke: var(--resumen-borde); stroke-width: 1; }
 .resumen-ndvi-eje, .resumen-ndvi-anio {
-  fill: var(--resumen-tinta-suave); font-size: 11px; font-variant-numeric: tabular-nums;
+  fill: var(--resumen-tinta-suave); font-size: var(--fs-1); font-variant-numeric: tabular-nums;
 }
-.resumen-ndvi-mes { fill: var(--resumen-tinta); font-size: 12px; font-weight: 700; }
+.resumen-ndvi-mes { fill: var(--resumen-tinta); font-size: var(--fs-1); font-weight: 700; }
 .resumen-ndvi-mes--sin { fill: var(--resumen-tinta-suave); font-weight: 400; }
-.resumen-ndvi-rotulo { fill: var(--resumen-tinta-suave); font-size: 12px; }
+.resumen-ndvi-rotulo { fill: var(--resumen-tinta-suave); font-size: var(--fs-1); }
 
 /* Serie: la única tinta de color de la gráfica. El punto lleva un aro del color del papel. */
 .resumen-ndvi-linea {
@@ -259,16 +259,16 @@
 .resumen-ndvi-cursor line { stroke: var(--resumen-tinta); stroke-width: 1; }
 .resumen-ndvi-cursor circle { fill: none; stroke: var(--resumen-tinta); stroke-width: 2; }
 
-.resumen-ndvi-lectura { font-size: 1rem; font-variant-numeric: tabular-nums; }
-.resumen-ndvi-lectura-nota { display: block; font-size: 0.8rem; color: var(--resumen-tinta-suave); }
+.resumen-ndvi-lectura { font-size: var(--fs-3); font-variant-numeric: tabular-nums; }
+.resumen-ndvi-lectura-nota { display: block; font-size: var(--fs-2); color: var(--resumen-tinta-suave); }
 .resumen-ndvi-claves {
   list-style: none; margin: 0; padding: 0;
   display: flex; flex-wrap: wrap; gap: 4px 16px;
-  font-size: 0.85rem; color: var(--resumen-tinta-suave);
+  font-size: var(--fs-2); color: var(--resumen-tinta-suave);
 }
 .resumen-ndvi-claves li { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .resumen-ndvi-clave { flex: none; display: block; }
-.resumen-ndvi-ayuda, .resumen-ndvi-fuente { font-size: 0.8rem; color: var(--resumen-tinta-suave); overflow-wrap: anywhere; }
+.resumen-ndvi-ayuda, .resumen-ndvi-fuente { font-size: var(--fs-2); color: var(--resumen-tinta-suave); overflow-wrap: anywhere; }
 
 /* Contraste forzado del sistema: las tintas siguen al texto del sistema. */
 @media (forced-colors: active) {
