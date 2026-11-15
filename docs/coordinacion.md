@@ -76,5 +76,34 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 23:42 | integrador | Fusión de la auditoría del contrato: filtros de la secuencia publicada y rodal joven sin corte de verano (`272fa71`, en `9e5e386`) |
 | 23:43 | integrador | Reconstruido con el buzón v11 (fuentes en inglés): 1,267 opciones, 1129 pytest y 200 de Node (`2148e81`); fusiones de `claude/revision-spaceapps-guia` (`837155d`) y de `datos-satelite` (`743d302`) |
 | 23:45 | integrador | Reconstruido tras fusionar `datos-satelite` y la revisión contra la guía de Space Apps. Integración en `d5de13f` |
+| 23:50 | integrador | Fusiones de «Laptop» (gemelo y WhatsApp en cuatro idiomas, `19d245a`), del terreno 2D (`1cef7d9`) y del rediseño (`7368b33`). Reconstruido: 1134 pytest y 223 de Node; web_smoke 747/747, pwa 39/39 y sin conexión 22/22. Integración en `2346788` |
+| 00:02 | «Laptop» | Revisión cruzada de `2346788` en una copia limpia: todo en verde (mismos conteos). Por su parte, el PR #5 puede ir a `main` |
+| 00:01 | integrador | Fusión de la tercera ronda de textos: conteos, crudos nuevos, suelo en la ficha, SI y esta bitácora (`d267952`, en `7f594e9`) |
+| 00:03 | integrador | Fusiones de `datos-satelite` (`252efd8`, en `38bb06f`) y del prompt de Claude Design (`9ef46ba`, en `6041f51`) |
+| 00:09 | integrador | Buzón v12 de la sesión de datos, solo textos (fuentes de suelo en inglés, sin «only»): entraron 35, rechazados 0, sha256 comprobados (`db8d16f`). web_smoke 747/747, pwa 39/39 y sin conexión 22/22 sobre ese commit |
+| 00:12 | integrador | Revisión independiente de ECOSTRESS, «validado con correcciones» (`docs/revisiones/2026-11-15_ecostress.md`, `165236d`), y correcciones del revisor de cifras sobre la tercera ronda de textos (`45c411a`). Las correcciones del dato se le pasaron a la sesión de datos |
+| 00:20 | integrador | Reconstruido con los textos de ECOSTRESS y la fixture del contexto regenerada (el commit `165236d` falló en la CI por esa fixture). Integración en `64aff74` |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
+
+## Estado de cada chat y de cada rama (15-nov, 00:20, hora de Chihuahua)
+
+Revisión pedida por Cristian: cada chat, cada rama y la conversación del integrador. Cada fila se comprobó contra `git` y contra la transcripción del chat.
+
+| Chat | Rama | Último commit | Frente a la integración | Lo que falta |
+|---|---|---|---|---|
+| «Revisión multiagente» (integrador) | `claude/keen-mayer-sp0vvm` | `64aff74` | Es la integración; PR #5 hacia `main` | Fusionar el PR #5; página en inglés también dentro de los plegados de fuentes y ECOSTRESS con su aviso a la vista (en curso); video y diapositivas sobre la página final |
+| «Laptop» | `claude/sleepy-heisenberg-pxyhtx` | `2346788` | Todo fusionado | Repetir su revisión cruzada sobre el commit que llegue a `main`. De sus tres observaciones: el texto del sorgo quedó resuelto con el buzón v12; el aviso de `suelo_tipos.json` (zona urbana y cuerpos de agua) es de la sesión de datos; `docs/pruebas.md` registra la versión del precache de la corrida anterior (menor, abierto) |
+| «Diseño de aplicación con agentes» | `claude/gallant-franklin-41s0vq` | `9ef46ba` | Todo fusionado (rediseño y prompt de Claude Design) | El pulido que sigue (mapa primero en teléfono, jerarquía de la ficha, tokens en cuatro hojas de estilo) no tiene dueño hasta que Cristian diga en qué conversación sigue el diseño |
+| Sesión de datos | `datos-satelite` y Drive `Raiz_entregas/` | `252efd8` | Todo fusionado; buzón v12 dentro | Correcciones de ECOSTRESS (`docs/revisiones/2026-11-15_ecostress.md`), el README de las solicitudes de AppEEARS con sus citas y su revisión programada de las 6:40 |
+| «Extracción del sitio Spaceapps» | `claude/revision-spaceapps-guia` | `5daf315` | Fusionada | Nada |
+
+| Otras ramas | Estado |
+|---|---|
+| `main` | `e819b52` (PR #4), publicado en GitHub Pages. No trae nada de lo de esta noche hasta que entre el PR #5 |
+| `ee-crudos` | Rásteres crudos por zona (31 archivos, 192 MiB). No se fusiona ni se borra: es el respaldo de `datos/colab/correr_todo.py` |
+| `revision/web-dos-zonas` | Un commit (`ad42dc3`) que no es ancestro de la integración, pero su contenido ya está: el clic con tolerancia (`web/app.js`) y la hoja impresa en una carta (la comprueba `web_smoke`). Se borra después del evento |
+| `dependabot/…` (PR #2 y #3) | Sin fusionar a propósito hasta después del envío; el #3 rompe la prueba que fija la versión con que se generaron las teselas |
+| `Milo`, `Milo2`, `Tena` | Iguales a `main` (`e819b52`), sin commits propios. Cuando entre el PR #5 hay que actualizarlas desde `main` antes de trabajar en ellas |
+
+Hallazgos de las revisiones de anoche, uno por uno: `docs/revisiones/2026-11-15_cierre_hallazgos.md` (cuando el revisor lo entregue).
