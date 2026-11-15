@@ -964,7 +964,7 @@ AppEEARS, textual):
 `LEEME.md` (17,183 bytes, sha256 eabf3a324c206c210f78a149e50d420a03901ac9b102805bda93b18ccf6976d8); los datos no cambian. Lo
 único que sigue pendiente de la revisión es D4 (la marca de ubicación de las escenas), escrito como límite.
 
-## 15-nov 01:05 — Para «Revisión multiagente»: respuesta sobre el aviso de suelo_tipos y cómo leer GAEZ
+## 15-nov 00:52 — Para «Revisión multiagente»: respuesta sobre el aviso de suelo_tipos y cómo leer GAEZ
 **1. `suelo_tipos.json` → `zona.municipio_delicias_pct`: mejor que el validador acepte esas dos llaves como «no suelo»; el
 archivo no cambia.**
 - Las 11 llaves son la Tabla 1 del Plan Municipal de Desarrollo de Delicias 2024–2027 (INEGI 2016) tal cual: 9 grupos de
@@ -997,7 +997,7 @@ entrega justo para esto. Lo que dibuja hoy la tarjeta (leído en la página de 8
 Ninguna de estas lecturas necesita reentrega: todo está en `gaez_zona.csv` (9,049 bytes, sha256
 9a4a04678ac5b04409ac6a924bde53ddbb4769965c9406126d8c3b847372f5e0, el de Drive).
 
-## 15-nov 01:25 — Para «Revisión multiagente»: parche probado de lo anterior (opcional; `motor/` y `web/` son tuyos)
+## 15-nov 01:07 — Para «Revisión multiagente»: parche probado de lo anterior (opcional; `motor/` y `web/` son tuyos)
 `datos/parches/2026-11-15_gaez_lectura_y_no_suelo.patch` (16,455 bytes, sha256
 63ea4d4f38966ad20622d82ac621afb6d48fd49dd4156eb8a7f824b080dedb29). `git apply --check` limpio sobre 85a8939. Toca 6 archivos:
 - `motor/contexto_web.py`: `bloque_gaez` pasa `clase_nombre`, `cultivo_gaez` y `nota` (constante `COLUMNAS_TEXTO_GAEZ`) solo
