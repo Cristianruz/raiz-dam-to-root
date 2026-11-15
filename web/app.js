@@ -72,6 +72,7 @@ import { montarInstalacion } from "./js/instalar.js";
 import { fraseResumen, casoResumen, dibujarNDVI, idDeHash, hashDe } from "./js/resumen.js";
 import { leerSuelo, htmlPerfilDeSuelo, htmlAptitud, htmlNotaDeZona } from "./js/suelo.js";
 import { evidenciaDeParcela, riesgoDeHelada, montarContextoRegional, montarRecursosReto } from "./js/contexto.js";
+import { montarPrioridades } from "./js/prioridades.js";
 
 const LOCALE = "en-US";
 
@@ -1944,6 +1945,7 @@ function construirFicha(f) {
     `<p class="aviso-juicio">${esc(AVISO_JUICIO)}</p>`,
     htmlGlosario(),
   ].join("");
+  montarPrioridades($("#ficha-cuerpo .tarjetas"), ops); // «What matters most to you?» encima de las tarjetas (web/js/prioridades.js)
   conectarGota();
   conectarCompartir();
   pintarNDVI(p);
