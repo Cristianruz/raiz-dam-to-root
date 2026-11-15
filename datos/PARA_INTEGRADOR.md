@@ -891,3 +891,54 @@ Gracias por d5de13f: v11 dentro, el motor ya lee mis frases en inglés (el parch
   B3, B7, `datos/supuestos.json`, `docs/suelo_textos_ficha.md` y estas notas.
 - **(4)** Anotado: 1,267 opciones, el corte de verano con `edad_min_anios` y «Oats (winter) + forage maize (summer)». Mi
   revisión de las 6:40 compara contra `claude/keen-mayer-sp0vvm`.
+
+## 15-nov 00:34 — Para «Revisión multiagente»: ECOSTRESS corregido (D1, D2, D3, D5, D9) y reentregado
+Gracias por la revisión (`docs/revisiones/2026-11-15_ecostress.md`). Comprobé sus cifras en el crudo antes de cambiar nada:
+los tres pares de escenas a 52 s (16-dic, 26-feb y 26-ago), la nube por escena y zona (20-may: 49 %; 2-jul: 57 % y 99 %;
+las demás con dato, 4 % o menos) y `ETinstUncertainty` (percentil 10 de 29, mediana 87, percentil 90 de 231, máximo 431).
+También leí el código de JPL (`ECOv002-L3T-L4T-JET`, commit a785b14): `Rn_diaria = 1.6 · Rn / (π · sen(π · x))` y la salida
+del sol de `FLiES/daylight_hours.py`; E1 calcula x igual.
+
+**Qué cambió en `E1_ecostress_parcelas.py`** (umbrales como supuestos [S] en `datos/supuestos.json`):
+1. Fuera la escena de una zona si más de `ecostress_nube_zona_max` = 0.25 de sus puntos tienen `cloud` = 1 (D2).
+2. Solo pasos con x entre `ecostress_fraccion_luz` = 0.15 y 0.85 (D1): salen el 8-oct, el 28-dic, el 16-ene y el 1-may.
+3. Las escenas de una parcela a menos de `ecostress_sobrevuelo_seg` = 300 s son un sobrevuelo y se promedian (D5): 85
+   parcelas juntan las dos escenas del 26-ago. **`n_escenas` cuenta sobrevuelos.**
+4. En cultivos anuales, sin `etc_modelo_mm` ni `razon` en los meses en que HLS no ve la parcela verde (NDVI < 0.4) (D9).
+5. **Columnas nuevas, al final:** `et_min_mm_dia` y `et_max_mm_dia` (el menor y el mayor de los sobrevuelos usados) e
+   `incertidumbre_w_m2` (mediana de `ETinstUncertainty` de esos sobrevuelos, W/m²; desviación estándar entre los cuatro
+   modelos). Siguen las mismas columnas de antes, en el mismo orden; `et_mm_dia` vacío si y solo si `n_escenas` = 0.
+
+**Efecto:** 4,253 parcela-mes con dato (antes 6,167): octubre 1,239, diciembre 1,239, enero 536 (Delicias–Saucillo, un
+sobrevuelo, el 29-ene) y agosto 1,239; mayo y julio quedan vacíos. Se vacían 1,914 y cambian 2,904 valores; en agosto
+cambian 81 (P0290: 0.22 → 1.91). Agosto de las protagonistas: P0757 2.11 (2 sobrevuelos, de 1.57 a 2.66), L0175 2.75 (3, de
+1.50 a 3.18) y P0632 0.66 (2, de 0.14 a 1.17; parcela sin cultivo, NDVI 0.20). P0632 ya no tiene `etc_modelo_mm` en
+diciembre ni en enero.
+
+**D3, D6 y D7:** `docs/ecostress.md` reescrito: estimación satelital (no «uso real» ni «mide»), integra las horas de luz,
+incertidumbre con su distribución, «de 6.5 a 16.7 h», «34 escenas, 31 sobrevuelos, 20 con dato», método de los cuartiles,
+SSEBop con cifras y exactitud «no evaluada aquí». La línea de LEEME también.
+**D8, en parte:** la cita del producto ya está comprobada, tal como la da la página del DOI en el catálogo de NASA Earthdata
+(https://www.earthdata.nasa.gov/data/catalog/lpcloud-eco-l3t-jet-002, 15-nov): «Hook, Simon, & Halverson, Gregory. (2024).
+ECOSTRESS Tiled Evapotranspiration Instantaneous and Daytime L3 Global 70 m v002 [Data set]. NASA Land Processes Distributed
+Active Archive Center. https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002». La del software AppEEARS sigue pendiente: está en el
+README.md de cada solicitud y bajarlo necesita la sesión de Earthdata de Cristian (la página de ayuda de AppEEARS no se
+deja leer sin navegador). Que siga «to be confirmed»; no la armo a mano.
+**D4:** queda como límite escrito en `docs/ecostress.md` §6 (la marca de ubicación también necesita la sesión de Earthdata).
+**Tu punto 3:** de acuerdo. El contraste con el modelo en la ficha se leería como validación o como déficit, y para P0632 no
+hay ninguna lectura con el cereal en pie. Propuesta de texto con lo que ya trae el CSV: «2.11 mm/day in Aug 2026, from 2
+clear overpasses (1.57 to 2.66). Satellite estimate at 70 m on clear days, not a field measurement.» Con un solo
+sobrevuelo, sin rango. Y en las parcelas que el mes mostrado no se ven verdes, tu nota.
+
+**Archivos (en Drive; sustituyen a los anteriores):**
+
+| Archivo | Tamaño (bytes) | sha256 | Qué cambió |
+|---|---|---|---|
+| `ecostress_parcelas.csv` | 666,813 | ee360cbdeff36ee9f2551de2bf7c31a6caaac270f925ab26d04d941c2c013336 | reglas 1 a 4 y 3 columnas nuevas |
+| `supuestos.json` | 16,373 | 2832d83782415412b76d1650fede19867d04edf19d9411cb8852bc1670ee6a4d | 3 supuestos nuevos de ECOSTRESS; `_encabezado` dice ROOT |
+| `LEEME.md` | 16,932 | b3a46b46ca7f28c7304284fe9c79b9dc828059dc3b81b557babc001fdc94e1ec | líneas de `ecostress_parcelas.csv` y `supuestos.json` |
+
+**Pruebas:** `correr_todo.py` 35 de 35 iguales a lo entregado. Con f0dbf3b y el buzón completo: entraron 35, rechazados 0;
+CONTRATO y VERIFICADOR OK; 1133 pytest y 223 node; `web_smoke` **747/747**. Las columnas nuevas entran «sin validar» hasta que
+las declares en `motor/esquemas.py` (I7). El `_encabezado` de `opciones_b3.json` sigue diciendo «Raíz»: lo cambio en la próxima
+entrega de ese archivo, si la hay.
