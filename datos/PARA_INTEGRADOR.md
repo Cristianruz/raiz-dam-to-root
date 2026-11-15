@@ -1040,3 +1040,48 @@ Dos detalles de redacción, menores:
 2. `docs/pitch/textos_envio.md:266`: después de la URL sigue «Used to request the ECOSTRESS point samples.» sin separador, y
    se lee como parte de la cita. Propuesta: poner el uso antes («Used to request the ECOSTRESS point samples: AppEEARS Team.
    (2026). …») y dejar la cita intacta.
+
+## 15-nov 02:48 — Para «Revisión multiagente»: reentrega de `opciones_b3.json` y `suelo_reglas.json` (sin «Worst-case» ni «best») y revisión cruzada de 1edfe6e
+Atiendo tus dos avisos (02:19 y 02:23). **Archivos en Drive** (sustituyen a los anteriores; el `opciones_b3.json` que
+subí a las 02:25 ya también quedó sustituido):
+
+| Archivo | Tamaño (bytes) | sha256 | Qué cambió |
+|---|---|---|---|
+| `opciones_b3.json` | 22,765 | eb0c8830b86f5e372fdac4be543835134e6f23201303bbeaa306763684217c95 | `descanso`: `por_que_en` y `fuente`; ventanas de siembra de alfalfa y algodón sin «best»; `_encabezado` dice ROOT |
+| `suelo_reglas.json` | 19,228 | c2c8056d6030a66c54f5457f489fe923696dbae0e2174a60438f1f3fbbec1c2e | `textos_ficha_en.suelo`: `cerca_del_limite` y `sin_aviso_ph` sin «best» |
+| `LEEME.md` | 17,183 | 6aba6acd28d1172f1867b27dd11bdfc32277639b372b4a4351db19bdf8241926 | fecha de esas dos líneas: 2026-11-15 |
+
+**El motivo del descanso.** La fuente es la tabla del maestro, §5.2, renglón «E. Peor escenario»: «Sorgo con 1–2 auxilios; el
+resto descansa con rastrojo en pie» | «Menos demanda; protege contra la erosión» | «Ingreso bajo». «Peor escenario» es el
+escenario de agua, no un orden entre opciones. Texto nuevo:
+> Intended for the worst water-supply scenario (option E of the master document): the field rests with standing stubble, which
+> needs no irrigation and protects the soil against erosion. The master document lists low income as the risk of this option
+> and gives no figure for it.
+
+Corregí además «protects the soil from wind»: el maestro dice «contra la erosión», sin decir de qué tipo. «Needs no
+irrigation» corresponde a la lámina cero del descanso en `rotaciones.json` (A5), y la `fuente` ya lo cita. El ingreso queda
+como el riesgo que anota el maestro, sin cifra, y eso cuadra con Money «No verified data».
+
+**Sin «best»:**
+- Nutrientes (rangos de MSU, `disponibilidad_ph.grupos[].mas_disponible_entre`): «Near the edge of the pH range where they are
+  more available: {nutrientes}.» y «At this estimated pH, no nutrient falls outside the pH range where it is more available.»
+  (`docs/suelo_textos_ficha.md` al día).
+- Ventanas de siembra, como las da el maestro: alfalfa «planting from Sep 15 to Oct 31» (el maestro dice «siembra del 15-sep
+  al 31-oct», sin «best») y algodón «(optimal from Apr 20 to 30)» (el maestro: «óptima del 20 al 30-abr»). Busqué «best» en
+  las 35 entregas y no queda ninguno.
+
+**Pruebas:** `correr_todo.py` da 35 de 35 iguales a lo que hay hoy en Drive. Con 1edfe6e y mi buzón completo: entraron 35,
+rechazados 0; CONTRATO y VERIFICADOR OK; 1181 pytest y 243 de Node; `web_smoke` 874/874. En `web/data/suelo.json` y en
+`cubo.json` ya no queda ningún «best», y `cubo.json` → `opciones_catalogo.descanso.por_que_en` trae el texto nuevo.
+
+**Revisión cruzada de la ficha (1edfe6e):**
+- ECOSTRESS: en `contexto.json` → `ecostress` hay 14,868 celdas por cada una de las cuatro columnas (valor, sobrevuelos,
+  mínimo y máximo), con 0 diferencias frente al CSV de v13. Coinciden P0757 «2.11 mm/day in Aug 2026, from 2 clear overpasses
+  (1.57 to 2.66)», P0632 «0.66 … (0.14 to 1.17)» con su nota y L0175 2.75 (3 sobrevuelos, de 1.5 a 3.18).
+- Nota «sin cultivo»: agosto es el último mes con dato de las 1,239 parcelas. La nota sale en los 16 `cereal_invierno` (el
+  calendario del modelo siembra el 1-dic y dura 115 días) y en los 219 `barbecho` (su ACTUAL es el descanso), y no en las 118
+  alfalfas ni en los 105 nogales. Cuadra con `cultivos_parcelas.csv`.
+- El aviso a la vista es el tramo de mi línea de LEEME («satellite estimate at 70 m on clear days, not a field measurement»).
+- GAEZ: como en el parche; `contexto.json` trae `clase_nombre`, `cultivo_gaez` y `nota`.
+
+No hay más reentregas de mi lado antes del congelamiento.
