@@ -3,6 +3,8 @@
 
 **BORRADOR para que el equipo lo ajuste (responsable de presentación y pitch).** El texto de cada diapositiva va en inglés; la nota del orador, en español.
 
+**Estado (15-nov).** Las diapositivas ya se generan: `docs/pitch/diapositivas.html` es una plantilla sin cifras que `node tests/e2e/diapositivas_pdf.mjs` llena con `web/data/*.json` y exporta a `docs/pitch/diapositivas.pdf`, con las capturas de `docs/pitch/capturas/` (`tests/test_pitch.py` revisa la plantilla). Este archivo queda como guía del contenido y de las notas del orador: si una cifra de aquí difiere del PDF generado, manda el PDF. Falta cambiar el marcador «[INTEGRANTES]» de la portada y publicar la liga.
+
 ## 1. Qué fija el kit (pieza C8)
 
 | Punto | Lo que dice | Dónde |
@@ -53,7 +55,7 @@
 | One idea | Three answers per option, field by field |
 | Text on slide | How much water per year · For how many years · How many hectares the allocation covers |
 | Capture | `tests/e2e/capturas/escritorio_ficha_tarjetas.png` (Field P0757, alfalfa, marca «Normal year») |
-| Cifra y fuente | Las de la captura: lámina de 28.4 millares/ha y «Enough for 2.7 of 7.95 hectares» con 9.5 millares/ha (`web/data/cubo.json` → `parcelas.P0757`; cálculo de `web/reglas.js`) |
+| Cifra y fuente | Las de la captura: lámina de 28.4 millares/ha y «Enough for 2.65 of 7.95 hectares» con 9.5 millares/ha (`web/data/cubo.json` → `parcelas.P0757`; cálculo de `web/reglas.js`) |
 | Nota del orador | La alfalfa obliga de 3 a 4 años [P]; el nogal se calcula a 10 años [S]. Esta parcela tiene tres años: su plazo está por vencer y es el momento de comparar. ROOT no marca una opción como la mejor. Las alternativas salen de la tabla oficial de rotaciones (`data/processed/opciones_b3.json`, maestro §5.2); donde faltan, van propuestas del equipo rotuladas [S]. |
 
 ### Slide 4 · Follow the drop
@@ -114,7 +116,7 @@
 ## 5. Pendientes
 
 - Tomar las capturas nuevas: vista 3D, línea de tiempo en 2025 y «Tests in sight».
-- Decidir si las capturas de la ficha se quedan con la marca «Normal year» o se vuelven a tomar con «Like 2026», como en la exposición. Con «Like 2026» la página mostraría «Enough for 1 of 7.95 hectares» (`web/reglas.js` con `cubo.json`).
+- Decidir si las capturas de la ficha se quedan con la marca «Normal year» o se vuelven a tomar con «Like 2026», como en la exposición. Con «Like 2026» la página muestra «Enough for 0.97 of 7.95 hectares» (`web/reglas.js` con `cubo.json`; formato de `web/js/resumen.js`).
 - **Goteo (diapositiva 4).** La captura actual (`escritorio_ficha_gota.png`, de las 21:09 del 14-nov) es anterior al escenario de goteo: muestra la nota «Drip scenario not available yet». Vuelva a tomarla de la página final. Si se toma con el botón «What if this field switches to drip?» pulsado, las cifras del texto deben ser las de esa captura.
 - Las diapositivas usan a P0757. Si se agrega una captura de la parcela «libre», debe ser de P0632 (`web/data/parcelas.geojson` → `protagonista`).
 - Poner las ligas cuando existan.

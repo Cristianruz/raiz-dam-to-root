@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # ECOSTRESS por parcela: la ET que ve el satélite contra la ETc del modelo
 
 > Base 15 de 15 de las que propone el reto. Archivo entregado: `ecostress_parcelas.csv` (contrato del integrador: `id, mes,
@@ -8,8 +8,8 @@
 ## 1. De dónde sale
 - **Producto:** NASA ECOSTRESS **ECO_L3T_JET.002**, ET diaria (`ETdaily`, integrada de la salida a la puesta del sol) a 70 m,
   colección 2. Hook, S. y Halverson, G. 2024, LP DAAC, https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002
-- **Cómo:** AppEEARS v3.137 (LP DAAC), muestra por puntos. Dos solicitudes del 14-nov-2026 con la cuenta de Earthdata de
-  Cristian (él inició la sesión): `raiz_ecostress_delicias_saucillo` (ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, 940 puntos) y
+- **Cómo:** AppEEARS v3.137 (LP DAAC), muestra por puntos. Dos solicitudes del 14-nov-2026 con una cuenta de Earthdata del
+  equipo: `raiz_ecostress_delicias_saucillo` (ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, 940 puntos) y
   `raiz_ecostress_lazaro_cardenas` (ID 520f1233-5eb1-4c4e-b243-2c43940f784b, 299 puntos). Un punto dentro de cada parcela
   (`datos/colab/E0_ecostress_solicitud.py`), del 1-oct-2025 al 30-sep-2026, capas `ETdaily`, `ETinstUncertainty`, `cloud` y `water`.
 - **Crudo:** la salida de AppEEARS sin cambios en `data/raw/reto/ecostress_pasos_<zona>.csv` (sha256 igual al de la lista del

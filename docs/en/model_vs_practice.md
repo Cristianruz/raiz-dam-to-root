@@ -48,6 +48,29 @@ Depth in millares per hectare (1 millar/ha = 10 cm). Delicias–Saucillo zone, r
   what is applied (17.4), because that gap comes mostly from ET. Changing the range moves every figure in the
   tool and is a team decision.
 
+## 3-bis. Sowing date of the winter cereal (change of 14-Nov)
+The model used to sow the winter cereal (oats or triticale) on 15 October [S]. The master document (§5.2) gives the
+window "Nov–Dec" and the labelling manual recommends mid-October for oats: the project's two sources do not agree
+and neither is verified for winter irrigation in Delicias. The HLS phenology of the 16 fields classified as winter
+cereal in 2026 was reviewed (all in Delicias–Saucillo): 14 have their maximum NDVI from February to April (6 in
+February, 2 in March, 6 in April) and 2 in October–November. A maximum from February to April fits a late sowing
+better than one on 15 October with a cut at ~115 days (early February).
+
+Decision: the model now sows on 1 December, the midpoint of the master document's window [S]. It is still an assumption:
+the HLS review covers 16 fields and a single year, and the crop map is rule-based. Effect on the gross depth
+(millares/ha, Delicias–Saucillo, P10 / P50 / P90):
+
+| Rotation | Sowing 15-Oct | Sowing 1-Dec |
+|---|---|---|
+| cereal_invierno | 5.07 / 6.28 / 7.54 | 6.34 / 7.82 / 9.44 |
+| avena_maiz | 14.81 / 17.44 / 20.69 | 16.06 / 18.94 / 22.54 |
+| cereal_algodon | 17.23 / 20.88 / 25.38 | 18.45 / 22.42 / 27.27 |
+| cereal_sorgo | 14.72 / 17.65 / 21.35 | 16.00 / 19.19 / 23.19 |
+
+The other rotations do not change. The depth rises because the cycle shifts towards spring, with more ETo. In the
+ET contrast (`docs/resultado_A8.md`), the Delicias–Saucillo area goes from 830 to 837 mm modelled (+27 % to +28 % over
+SSEBop); Lázaro Cárdenas does not change (it has no cereal fields).
+
 ## 4. What CANNOT be claimed
 - That the model "gets the level right": it does not in alfalfa, pecan, cotton or forage maize.
 - That the ET ÷ applied water ratio (65.6 % in alfalfa) is a measured field efficiency: the project's own file

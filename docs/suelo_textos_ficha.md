@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Textos de la ficha para el suelo, el tipo de suelo y GAEZ (inglés)
 
 > Lista para el integrador: un texto por caso. Viven en `suelo_reglas.json → textos_ficha_en` (la web los lee; no se
