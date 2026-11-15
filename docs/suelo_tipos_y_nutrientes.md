@@ -30,8 +30,8 @@ recomendación del informe de investigación del 14-nov-2026.
   eso, el nombre de un gran grupo se lee solo: *Haplocalcids* = prefijos *haplo* + *calc* + suborden *Calcids*, del orden
   Aridisols por su terminación *-ids*; *calc* remite a la regla de carbonatos.
 - **Zona:** suelos del municipio de Delicias según el Plan Municipal de Desarrollo 2024–2027, que cita la carta edafológica del
-  INEGI (2016): Cambisol 29.25 %, Calcisol 27.81 %, Kastañozem 25.72 %, Chernozem 10.47 %, Luvisol 2.38 % y el resto menos del
-  1 % cada uno.
+  INEGI (2016): Cambisol 29.25 %, Calcisol 27.81 %, Kastañozem 25.72 %, Chernozem 10.47 %, Luvisol 2.38 % y los demás suelos
+  menos del 1 % cada uno (la zona urbana ocupa 3.44 %).
 
 Resumen del catálogo (lo que la fuente nombra; cada grupo trae más en el archivo):
 
