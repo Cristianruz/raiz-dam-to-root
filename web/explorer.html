@@ -42,6 +42,8 @@
   <link rel="stylesheet" href="css/suelo.css">
   <link rel="stylesheet" href="css/contexto.css">
   <link rel="stylesheet" href="css/prioridades.css">
+  <!-- Diseño del tablero (fondo oscuro y acento lima), solo en pantalla: va después de los módulos. -->
+  <link rel="stylesheet" href="css/tema_tablero.css">
   <link rel="stylesheet" href="css/imprimir.css">
   <script defer src="vendor/maplibre-gl-5.24.0/maplibre-gl.js"></script>
   <script defer src="vendor/d3-7.9.0/d3.min.js"></script>
@@ -62,6 +64,11 @@
       <button type="button" class="boton-cabecera" id="boton-acerca" aria-haspopup="dialog" aria-controls="acerca">About &amp; Data</button>
       <!-- La portada es el tablero (web/index.html). Es un enlace, no un botón: lleva a otra página. -->
       <a class="boton-cabecera" id="enlace-tablero" href="index.html">Dashboard</a>
+      <!-- Idioma: inglés por omisión; español opcional (js/explorador_es.js, la misma elección que el tablero). -->
+      <select class="boton-cabecera selector-idioma" id="idioma" aria-label="Language / Idioma">
+        <option value="en" lang="en">English</option>
+        <option value="es" lang="es">Español</option>
+      </select>
     </nav>
     <!-- «Install app» y el indicador Online/Offline: los dibuja web/js/instalar.js (solo con https o localhost). -->
     <div class="marca-instalar" id="marca-instalar"></div>

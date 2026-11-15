@@ -4,8 +4,9 @@
 //
 // Qué hace:
 // - guarda los textos de cada módulo por idioma (registrar) y los entrega con t(clave, valores);
-// - elige el idioma en este orden: «?lang=xx» en la liga, el último elegido (localStorage, solo comodidad), el del
-//   navegador (navigator.languages) y, si ninguno es de los cuatro, inglés;
+// - elige el idioma en este orden: «?lang=xx» en la liga, el último elegido (localStorage, solo comodidad) y, si no
+//   hay ninguno, inglés. El idioma del navegador ya no cuenta: la página abre siempre en inglés y el selector la
+//   cambia al español (o al portugués o al francés). Decisión del 15-nov-2026 (docs/decisiones/2026-11-15_ingles_primero.md);
 // - avisa a quien se suscriba cuando cambia (alCambiarIdioma) y pone <html lang="…">;
 // - da formato a números y fechas con el idioma elegido (fmtNumero, fmtFecha): ninguna cifra se escribe a mano.
 // Sin dependencias y sin tocar la red. Un texto que falte en un idioma se toma del inglés; si tampoco está, queda la
@@ -46,10 +47,7 @@ function elegir() {
   if (deLaLiga) return deLaLiga;
   const guardado = leerGuardado();
   if (guardado) return guardado;
-  for (const c of globalThis.navigator?.languages ?? []) {
-    const v = valido(c);
-    if (v) return v;
-  }
+  // Sin liga ni elección previa: inglés, aunque el navegador esté en otro idioma.
   return IDIOMA_BASE;
 }
 

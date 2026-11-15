@@ -1,0 +1,127 @@
+/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 */
+/* web/css/tema_tablero.css — El explorador de parcelas (web/explorer.html) con el diseño del tablero
+   (web/index.html, css/interfaz.css): fondo oscuro, tarjetas verde noche, acento lima y la misma letra.
+   Pedido de Oscar Milo, 15-nov-2026 (docs/decisiones/2026-11-15_ingles_primero.md, tercera parte).
+
+   Cómo: style.css y los módulos de web/css/ pintan con variables (--tinta, --blanco, --superficie…); aquí
+   se les dan los valores del tablero. Los pares «fondo --tinta + texto --blanco» se invierten juntos, así que
+   conservan el contraste. app.js, relieve.js, terreno2d.js y gemelo3d.js leen estas mismas variables para el
+   mapa: el mapa cambia con ellas.
+   Solo en pantalla: la ficha impresa (css/imprimir.css) sigue en papel blanco.
+   Los números de este archivo son medidas y colores de diseño, no datos. */
+@media screen {
+  :root {
+    color-scheme: dark;
+    /* Fondo y superficies (los del tablero: --bg, --white y .card de css/interfaz.css) */
+    --arena: #0b100e;
+    --arena-osc: #1a261e;
+    --arena-mapa: #0f1712;
+    --fondo-pagina: radial-gradient(ellipse at 75% 0, #1a2b20 0, transparent 50%), #0b100e;
+    --fondo-renglon: #172219;
+    --superficie: #141e17;
+    --superficie-vidrio: rgba(20, 30, 23, 0.92);
+    --blanco: #152019;
+    --segmento-fondo: rgba(255, 255, 255, 0.06);
+    /* Texto */
+    --tinta: #edf3ed;
+    --tinta-suave: #a7b4aa;
+    /* Líneas */
+    --borde: #2b3a2f;
+    --linea: rgba(255, 255, 255, 0.09);
+    --linea-fuerte: rgba(255, 255, 255, 0.17);
+    /* Acento: el lima del tablero ocupa el lugar del azul de la marca */
+    --agua: #b9ed87;
+    --agua-osc: #d5f7bd;
+    --agua-clara: rgba(185, 237, 135, 0.12);
+    /* Fondos claros de apoyo, ahora oscuros del mismo tono */
+    --brote-claro: #1f3320;
+    --ambar-claro: #3a2c10;
+    --rojo-claro: #3d1a17;
+    /* Píldoras de estado: fondo oscuro + texto claro del mismo tono */
+    --pildora-verde-fondo: #1f3320;  --pildora-verde-texto: #c6efa3;
+    --pildora-ambar-fondo: #3a2c10;  --pildora-ambar-texto: #f3c86b;
+    --pildora-rojo-fondo: #3d1a17;   --pildora-rojo-texto: #f4a9a2;
+    --pildora-gris-fondo: #232c26;   --pildora-gris-texto: #a7b4aa;
+    /* Semáforo sobre el mapa oscuro: el rojo y el gris, más claros para que se vean */
+    /* #e2625a y no #d9534a: el símbolo oscuro sobre el círculo rojo llega a 4.5:1 (lo mide tests/e2e/web_smoke.mjs) */
+    --sem-rojo: #e2625a;
+    --sem-gris: #7d8781;
+    --sem-sin_calculo: #3a443e;
+    /* El plazo «comprometida» conserva un azul: el lima ya es el acento */
+    --plazo-comprometida: #6fa8dc;
+    --mem-sin_dato: #4a534d;
+    --suelo-bajo: #2a2a20;
+    /* Sombras para fondo oscuro */
+    --sombra: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --sombra-flotante: 0 2px 6px rgba(0, 0, 0, 0.35), 0 18px 44px rgba(0, 0, 0, 0.5);
+    --radio: 20px;
+    --radio-l: 24px;
+    /* Velo y sombra de los diálogos («How it works», «About & Data»; css/acerca.css) */
+    --acerca-velo: rgba(0, 0, 0, 0.72);
+    --acerca-sombra: 0 18px 48px rgba(0, 0, 0, 0.6);
+    background: var(--arena);
+  }
+  .dialogo-acerca::backdrop { background: rgba(0, 0, 0, 0.72); }
+  /* La tarjeta de bienvenida y los diálogos: superficie de tarjeta con borde, para separarse del fondo */
+  .acerca-inicio-tarjeta, .dialogo-acerca {
+    background: var(--superficie);
+    border: 1px solid var(--linea-fuerte);
+  }
+
+  body {
+    background: var(--fondo-pagina);
+    background-attachment: fixed;
+    color: var(--tinta);
+  }
+
+  a { color: var(--agua); }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+    outline: 3px solid #d0fba9;
+    outline-offset: 3px;
+  }
+
+  /* Cabecera como la barra superior del tablero: vidrio oscuro y la marca en lima */
+  .marca {
+    background: rgba(10, 15, 13, 0.86);
+    border-bottom: 1px solid var(--linea);
+    backdrop-filter: blur(20px);
+  }
+  .marca-nombre { color: var(--tinta); letter-spacing: 1.6px; }
+  .marca-sub, .marca-lema { color: var(--tinta-suave); }
+  .boton-cabecera {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--linea-fuerte);
+    color: var(--tinta);
+    box-shadow: none;
+  }
+  .boton-cabecera:hover { background: rgba(185, 237, 135, 0.1); box-shadow: none; }
+  #enlace-tablero { background: var(--agua); border-color: var(--agua); color: #0b100e; }
+  #enlace-tablero:hover { background: var(--agua-osc); }
+
+  /* Tarjetas, paneles, ficha y diálogos: la tarjeta del tablero */
+  .controles, .panel, #ficha, dialog {
+    border-color: var(--linea);
+  }
+
+  /* Deslizador y controles con el lima */
+  input[type="range"] { accent-color: var(--agua); }
+  input[type="checkbox"], input[type="radio"] { accent-color: var(--agua); }
+  input[type="search"], input[type="text"], select {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--tinta);
+    border-color: var(--linea-fuerte);
+  }
+
+  /* Controles de MapLibre como en el tablero */
+  .maplibregl-ctrl-group { background: #152019; border: 1px solid var(--linea); box-shadow: none; }
+  .maplibregl-ctrl-group button + button { border-top-color: var(--linea); }
+  .maplibregl-ctrl-icon { filter: invert(1); }
+  .maplibregl-ctrl-attrib { background: rgba(10, 15, 13, 0.75) !important; color: var(--tinta-suave); }
+  .maplibregl-ctrl-attrib a { color: var(--tinta-suave); }
+  .maplibregl-ctrl-attrib-button { filter: invert(1); }
+  .maplibregl-popup-content { background: var(--superficie); color: var(--tinta); }
+  .maplibregl-ctrl-attrib-inner, .maplibregl-ctrl-attrib-inner a { color: var(--tinta-suave); }
+
+  /* Localidades del equipo: la etiqueta usa fondo blanco fijo en style.css; aquí, la superficie oscura */
+  .etiqueta-localidad:not(.activa) { background: rgba(20, 30, 23, 0.92); }
+}
