@@ -24,7 +24,7 @@
 //   arranca desde la copia, el mapa tiene su lienzo y las parcelas están DIBUJADAS (con el mapa listo no basta
 //   que estén en una lista: «0 dibujadas» es una falla; solo sin mapa cuenta la lista), el deslizador
 //   cambia los indicadores; el EXPLORADOR también abre sin red, con su lienzo, sus parcelas dibujadas (o
-//   listadas si no hay mapa) y su deslizador; cada archivo del listado sale de la copia con los mismos octetos que en disco
+//   listadas si no hay mapa) y su deslizador; la portada abre sin red en los cuatro idiomas (?lang=en, es, pt, fr); cada archivo del listado sale de la copia con los mismos octetos que en disco
 //   (incluidas las teselas de relieve y el archivo renovado con red primero), una petición a otro origen
 //   falla sin romper nada y no hay errores de página; lo mismo en un teléfono de 390 × 844 sin
 //   desplazamiento horizontal;
@@ -52,6 +52,7 @@ import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
 import { AVISO_COPIA, PEDIR_SINCRONIZAR, TEXTOS, textosDe } from "../../web/js/instalar.js";
+import { IDIOMAS } from "../../web/js/i18n.js";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -895,6 +896,37 @@ async function main() {
       await explorador.screenshot({ path: path.join(CAPTURAS, "pwa_explorador_offline.png") });
     }
     await explorador.close();
+
+    // ---------------------------------------------------------- sin red: la portada en los cuatro idiomas
+    // La aplicación instalada debe abrir sin red en cualquiera de sus idiomas: «?lang=xx» no puede pedir nada a la
+    // red (el worker ignora la búsqueda de la liga) y los diccionarios (js/textos_*.js) salen de la copia.
+    const diccionarios = precache.archivos.filter((r) => /^js\/textos_[^/]+\.js$/.test(r));
+    check("la copia guarda el módulo de idiomas y los diccionarios del tablero (js/i18n.js y js/textos_*.js)",
+      precache.archivos.includes("js/i18n.js") && diccionarios.length > 0, diccionarios.join(", ") || "sin diccionarios");
+    for (const codigo of IDIOMAS) {
+      const enIdioma = await ctx.newPage();
+      vigilar(enIdioma, base, errores);
+      let estado = null;
+      try {
+        await enIdioma.goto(`${base}?lang=${codigo}`, { waitUntil: "load" });
+        await esperarArranque(enIdioma);
+        estado = await enIdioma.evaluate(() => ({
+          lang: document.documentElement.lang,
+          titulo: document.title,
+          // Una clave de texto a la vista («tablero.…» o «asesor.…») delata un diccionario que no cargó.
+          claves: (document.body.innerText.match(/\b(?:tablero|asesor)\.[a-z_]+(?:\.[a-z_0-9]+)+/g) ?? []).slice(0, 5),
+          parcelas: document.querySelectorAll("#field-select option").length,
+        }));
+      } catch (err) {
+        estado = { error: String(err.message).split("\n")[0] };
+      }
+      check(
+        `sin red: la portada abre en «${codigo}» desde la copia (<html lang>, sin claves de texto a la vista, con sus parcelas)`,
+        estado && !estado.error && estado.lang === codigo && estado.claves.length === 0 && estado.parcelas > 0,
+        JSON.stringify(estado),
+      );
+      await enIdioma.close();
+    }
 
     // ---------------------------------------------------------- sin red, en el teléfono
     const telefono = await ctx.newPage();
