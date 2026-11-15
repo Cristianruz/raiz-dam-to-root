@@ -1,6 +1,7 @@
 # AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Copia SIN RED de la web en un solo archivo HTML (respaldo para el Open House).
 
+Conserva el explorador técnico: lee explorer.html si existe; en otras carpetas usa index.html.
 Lee la web/ ACTUAL y escribe UNA página que abre con doble clic (file://), sin servidor y sin red:
   - cada hoja de estilos que enlaza index.html queda dentro de <style>;
   - las bibliotecas locales (web/vendor/) quedan como <script> clásico;
@@ -606,7 +607,7 @@ def construir(web=WEB, salida=SALIDA, commit=None):
     Lanza ErrorOffline si algo no se puede incrustar (un import sin resolver, un archivo que falta…).
     """
     web, salida = Path(web).resolve(), Path(salida)
-    indice = web / "index.html"
+    indice = web / ("explorer.html" if (web / "explorer.html").is_file() else "index.html")
     if not indice.is_file():
         raise ErrorOffline(f"no existe {indice}")
     texto = indice.read_text(encoding="utf-8-sig")
