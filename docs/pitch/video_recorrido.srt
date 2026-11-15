@@ -7,49 +7,65 @@ Before you plant, see the water you are committing.
 NASA data, a crop-water model, an answer per field.
 
 3
-00:00:10,000 --> 00:00:16,000
-Set the water allocation. The map and the indicator respond.
+00:00:10,000 --> 00:00:17,000
+Beyond crop selection: water, soil, seasons and evidence.
 
 4
-00:00:16,000 --> 00:00:21,000
-The app speaks the farmer's language.
+00:00:17,000 --> 00:00:23,000
+Set the water allocation. The map and the indicator respond.
 
 5
-00:00:21,000 --> 00:00:30,000
-Each option: water asked, hectares covered, years committed.
+00:00:23,000 --> 00:00:28,000
+The application is available in the farmer's language.
 
 6
-00:00:30,000 --> 00:00:40,000
-Every option says why, and what changes from today.
+00:00:28,000 --> 00:00:34,000
+A drier scenario: each option requires more irrigation water.
 
 7
-00:00:40,000 --> 00:00:46,000
-From the dam to the crop and the aquifer.
+00:00:34,000 --> 00:00:39,000
+The pilot areas, compared side by side. Select either one.
 
 8
-00:00:46,000 --> 00:00:52,000
-What satellites saw on this field, year by year.
+00:00:39,000 --> 00:00:44,400
+The rainfall record from NASA POWER, verified year by year.
 
 9
-00:00:52,000 --> 00:00:57,000
-Soil and satellite evidence, each with its source.
+00:00:44,400 --> 00:00:53,400
+Each option: water required, hectares covered, years committed.
 
 10
-00:00:57,000 --> 00:01:05,000
-A free field can choose. An orchard stays committed.
+00:00:53,400 --> 00:01:03,400
+Each option states its rationale and what changes from today.
 
 11
-00:01:05,000 --> 00:01:11,000
-The year the dam delivered no water.
+00:01:03,400 --> 00:01:09,400
+From the dam to the crop and the aquifer.
 
 12
-00:01:11,000 --> 00:01:17,000
-A message for the farmer, in their language.
+00:01:09,400 --> 00:01:15,400
+Satellite observations of this field, year by year.
 
 13
-00:01:17,000 --> 00:01:23,000
-Five tests, published whatever the result.
+00:01:15,400 --> 00:01:20,400
+Soil and satellite evidence, each with its source.
 
 14
-00:01:23,000 --> 00:01:27,000
+00:01:20,400 --> 00:01:28,400
+An uncommitted field has options. An orchard remains committed.
+
+15
+00:01:28,400 --> 00:01:34,400
+The year the dam delivered no water.
+
+16
+00:01:34,400 --> 00:01:40,400
+A message for the farmer, in their language.
+
+17
+00:01:40,400 --> 00:01:46,400
+Five tests, published regardless of the result.
+
+18
+00:01:46,400 --> 00:01:50,400
 The farmer decides.
