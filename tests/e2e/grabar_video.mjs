@@ -15,7 +15,7 @@
 // El video (guion: docs/pitch/guion_video_30s.md) tiene cuatro partes:
 //   qué es            tarjeta de apertura animada (docs/pitch/video/tarjetas.html, vista «apertura»);
 //   cómo funciona     tarjeta «How it works» animada (vista «como»): tres pasos y cuatro señas de cómo está hecha;
-//   qué la distingue  tarjeta «Beyond what to plant» animada (vista «aparte»): nueve señas de lo que reúne;
+//   qué la distingue  tarjeta «Beyond crop selection» animada (vista «aparte»): nueve señas de lo que reúne;
 //   se ve que funciona siete golpes cortos sobre la página REAL, cada uno con su acción y su consecuencia;
 //   cierre            tarjeta de cierre (vista «cierre») con el aviso de juicio y la liga pública.
 //
@@ -141,20 +141,20 @@ const COMO = { tipo: "tarjeta", vista: "como" };
 const APARTE = { tipo: "tarjeta", vista: "aparte" }; // lo que la aplicación reúne además de la rotación
 const CIERRE = { tipo: "tarjeta", vista: "cierre" };
 const GOLPES = {
-  dotacion: { tipo: "pagina", clave: "dotacion", rotulo: "Set the water" },
-  idioma: { tipo: "pagina", clave: "idioma", rotulo: "Your language" },
-  lluvia: { tipo: "pagina", clave: "lluvia", rotulo: "Less rain" },
+  dotacion: { tipo: "pagina", clave: "dotacion", rotulo: "Water allocation" },
+  idioma: { tipo: "pagina", clave: "idioma", rotulo: "Language" },
+  lluvia: { tipo: "pagina", clave: "lluvia", rotulo: "Drier scenario" },
   zonas: { tipo: "pagina", clave: "zonas", rotulo: "Pilot areas" },
   historia: { tipo: "pagina", clave: "historia", rotulo: "Rainfall record" },
-  parcela: { tipo: "pagina", clave: "parcela", rotulo: "Pick a field" },
-  porque: { tipo: "pagina", clave: "porque", rotulo: "Ask why" },
+  parcela: { tipo: "pagina", clave: "parcela", rotulo: "Select a field" },
+  porque: { tipo: "pagina", clave: "porque", rotulo: "Rationale" },
   gota: { tipo: "pagina", clave: "gota", rotulo: "Follow the drop" },
   evidencia: { tipo: "pagina", clave: "evidencia", rotulo: "Satellite evidence" },
   suelo: { tipo: "pagina", clave: "suelo", rotulo: "Soil and evidence" },
   otras: { tipo: "pagina", clave: "otras", rotulo: "Other fields" },
-  anios: { tipo: "pagina", clave: "anios", rotulo: "Look back" },
+  anios: { tipo: "pagina", clave: "anios", rotulo: "Past cycles" },
   compartir: { tipo: "pagina", clave: "compartir", rotulo: "Share" },
-  pruebas: { tipo: "pagina", clave: "pruebas", rotulo: "Check the tests" },
+  pruebas: { tipo: "pagina", clave: "pruebas", rotulo: "Published tests" },
 };
 const G = GOLPES;
 const TOMAS = RECORRIDO
@@ -1476,10 +1476,10 @@ async function capturarTarjetas(navegador, baseLocal, cues) {
       if (toma.vista === "aparte") {
         // Cada seña de la tarjeta describe algo que la página ya hace: el README debe seguir diciéndolo.
         const leeme = fs.readFileSync(path.join(RAIZ, "README.md"), "utf-8");
-        const sostenes = ["Fields of The World neural network", "Nutrient notes", "Simulate a storm", "Follow the drop", "SoilGrids", "Tests in sight", "Random Forest (machine learning): not run"];
+        const sostenes = ["Fields of The World neural network", "Nutrient notes", "Follow the drop", "SoilGrids", "planting window", "frost dates", "runoff routes per area", "One MERRA-2 cell", "Random Forest (machine learning): not run"];
         const faltan = sostenes.filter((x) => !leeme.includes(x));
         const senas = await page.locator('[data-vista="aparte"] .sena').count();
-        check("tarjeta «aparte»: nueve señas, y el README sostiene lo que dicen (suelo, suministro, tormenta, red neuronal, pruebas)", senas === 9 && !faltan.length, faltan.length ? `el README ya no dice: ${faltan.join(" · ")}` : `${senas} señas`);
+        check("tarjeta «aparte»: nueve señas, y el README sostiene lo que dicen (suelo, suministro, siembra y heladas, clima por zona, red neuronal)", senas === 9 && !faltan.length, faltan.length ? `el README ya no dice: ${faltan.join(" · ")}` : `${senas} señas`);
         // La seña de aprendizaje automático habla de los límites de parcela (red neuronal de terceros), no del mapa de cultivos.
         check("tarjeta «aparte»: el aprendizaje automático se atribuye a los límites de parcela, no al mapa de cultivos", /Machine-learning field map/.test(t) && /Boundaries from a neural network/.test(t));
       }

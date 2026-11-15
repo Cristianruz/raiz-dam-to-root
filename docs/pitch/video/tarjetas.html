@@ -10,9 +10,9 @@
        como       «How it works»: tres pasos en una línea, con iconos dibujados aquí (sin logotipos). Los nombres
                   de productos de NASA llevan data-producto: el grabador comprueba que cada uno aparezca en
                   web/data/manifest.json antes de usar la tarjeta;
-       aparte     «Beyond what to plant»: nueve señas de lo que la aplicación reúne además de la rotación (agua,
-                  suministro, suelo y nutrientes, lluvia, memoria satelital, límites por red neuronal, terreno,
-                  aplicación y apoyo de IA). Cada una describe algo que la página ya hace (README, «How it works»
+       aparte     «Beyond crop selection»: nueve señas de lo que la aplicación reúne además de la rotación (demanda de
+                  agua, suministro, suelo y nutrientes, estaciones y clima, opciones por zona piloto, registro
+                  satelital, límites por red neuronal, terreno y aplicación), en lenguaje formal. Cada una describe algo que la página ya hace (README, «How it works»
                   y «SI/AI tools used»); el grabador comprueba que el README siga diciéndolo;
        cierre     frase de cierre (?frase=, del guion), aviso de juicio y liga pública (?liga=);
                   ?app=si agrega la línea de la aplicación instalable (el grabador la pide solo si existen
@@ -150,7 +150,7 @@
   }
   .hecho span.anim { animation-name: brota; animation-duration: 400ms; animation-delay: calc(2050ms + var(--n) * 100ms); }
 
-  /* ---------- «Beyond what to plant»: nueve señas en una cuadrícula ---------- */
+  /* ---------- «Beyond crop selection»: nueve señas en una cuadrícula ---------- */
   .aparte-titulo { position: absolute; left: 96px; top: 70px; font-size: 44px; font-weight: 700; color: var(--ambar); letter-spacing: 0.01em; }
   .aparte-titulo.anim { animation-name: sube; animation-duration: 420ms; animation-delay: 40ms; }
   .aparte-sub { position: absolute; right: 96px; top: 82px; font-size: 32px; color: var(--agua-clara); }
@@ -254,44 +254,46 @@
   </section>
 
   <section class="tarjeta" data-vista="aparte" hidden>
-    <p class="aparte-titulo anim">Beyond what to plant</p>
-    <p class="aparte-sub anim">What ROOT brings together for each field</p>
+    <p class="aparte-titulo anim">Beyond crop selection</p>
+    <p class="aparte-sub anim">What ROOT integrates for each field</p>
     <div class="senas">
       <div class="sena anim" style="--n: 0">
         <svg viewBox="0 0 96 96" aria-hidden="true"><path class="agua-llena" d="M48 10 C62 30 72 42 72 56 A24 24 0 0 1 24 56 C24 42 34 30 48 10 Z"/></svg>
-        <div><h2>Water per crop</h2><p>What each option asks for per year, and for how long</p></div>
+        <div><h2>Water demand per crop</h2><p>Annual requirement of each option and the years it commits</p></div>
       </div>
       <div class="sena anim" style="--n: 1">
         <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M10 78 L22 22 H40 L52 78 Z"/><path class="agua" d="M56 44 Q64 36 72 44 T88 44"/><path class="agua" d="M56 60 Q64 52 72 60 T88 60"/><path class="agua" d="M56 76 Q64 68 72 76 T88 76"/></svg>
-        <div><h2>Water supply</h2><p>From the dam to the field and back to the aquifer</p></div>
+        <div><h2>Water supply</h2><p>From the dam to the field, with conveyance losses and aquifer return</p></div>
       </div>
       <div class="sena anim" style="--n: 2">
         <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M10 34 H86"/><path class="lima" d="M10 54 H86"/><path d="M10 74 H86"/><path class="lima" d="M48 34 V16 M48 24 C40 24 36 20 36 14 C44 14 48 18 48 24 Z"/><circle cx="26" cy="64" r="3"/><circle cx="62" cy="44" r="3"/><circle cx="72" cy="64" r="3"/></svg>
-        <div><h2>Soil and nutrients</h2><p>Soil type, texture, pH and nutrient notes per field</p></div>
+        <div><h2>Soil and nutrients</h2><p>Soil type, texture, pH and nutrient notes for each field</p></div>
       </div>
       <div class="sena anim" style="--n: 3">
-        <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M26 54 A16 16 0 0 1 30 22 A20 20 0 0 1 68 26 A14 14 0 0 1 70 54 Z"/><path class="agua" d="M32 66 L28 80"/><path class="agua" d="M48 66 L44 80"/><path class="agua" d="M64 66 L60 80"/></svg>
-        <div><h2>Rain and weather</h2><p>The rainfall record, a drier year, a reference storm</p></div>
+        <!-- sol y nube con lluvia: las estaciones del ciclo agrícola -->
+        <svg viewBox="0 0 96 96" aria-hidden="true"><circle class="lima" cx="30" cy="28" r="10"/><path class="lima" d="M30 8 V12 M10 28 H14 M16 14 L19 17 M44 14 L41 17"/><path d="M38 62 A14 14 0 0 1 42 34 A18 18 0 0 1 76 38 A12 12 0 0 1 78 62 Z"/><path class="agua" d="M44 72 L41 84"/><path class="agua" d="M58 72 L55 84"/><path class="agua" d="M72 72 L69 84"/></svg>
+        <div><h2>Seasons and climate</h2><p>Winter and summer cycles, planting windows, frost dates, rainfall record</p></div>
       </div>
       <div class="sena anim" style="--n: 4">
-        <svg viewBox="0 0 96 96" aria-hidden="true"><rect x="38" y="22" width="20" height="26" rx="4"/><rect x="8" y="26" width="24" height="18" rx="3"/><rect x="64" y="26" width="24" height="18" rx="3"/><line x1="32" y1="35" x2="38" y2="35"/><line x1="58" y1="35" x2="64" y2="35"/><path class="agua" d="M36 62 Q48 52 60 62"/><path class="agua" d="M28 76 Q48 60 68 76"/></svg>
-        <div><h2>Satellite memory</h2><p>What satellites saw on each field, year by year</p></div>
+        <!-- dos zonas vecinas con su marca: las opciones dependen de la zona -->
+        <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M8 40 L40 30 L44 80 L12 84 Z"/><path d="M48 32 L86 44 L82 84 L50 80 Z"/><path class="lima" d="M26 46 C19 36 16 32 16 27 A10 10 0 0 1 36 27 C36 32 33 36 26 46 Z"/><path class="lima" d="M67 50 C60 40 57 36 57 31 A10 10 0 0 1 77 31 C77 36 74 40 67 50 Z"/></svg>
+        <div><h2>Options by pilot area</h2><p>Each area has its own climate, water demand and rotation options</p></div>
       </div>
       <div class="sena anim" style="--n: 5">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><rect x="38" y="22" width="20" height="26" rx="4"/><rect x="8" y="26" width="24" height="18" rx="3"/><rect x="64" y="26" width="24" height="18" rx="3"/><line x1="32" y1="35" x2="38" y2="35"/><line x1="58" y1="35" x2="64" y2="35"/><path class="agua" d="M36 62 Q48 52 60 62"/><path class="agua" d="M28 76 Q48 60 68 76"/></svg>
+        <div><h2>Satellite record</h2><p>Observations of each field, year by year</p></div>
+      </div>
+      <div class="sena anim" style="--n: 6">
         <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M14 30 L44 14 L82 26 L78 66 L40 82 L12 62 Z"/><path class="lima" d="M44 14 L40 82 M14 30 L78 66"/><circle class="lima" cx="44" cy="14" r="4"/><circle class="lima" cx="82" cy="26" r="4"/><circle class="lima" cx="78" cy="66" r="4"/><circle class="lima" cx="40" cy="82" r="4"/><circle class="lima" cx="12" cy="62" r="4"/><circle class="lima" cx="14" cy="30" r="4"/></svg>
         <div><h2>Machine-learning field map</h2><p>Boundaries from a neural network, filtered by confidence</p></div>
       </div>
-      <div class="sena anim" style="--n: 6">
-        <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M8 76 L34 30 L50 56 L62 40 L88 76 Z"/><path class="agua" d="M34 30 Q40 52 30 62 T36 76"/></svg>
-        <div><h2>Terrain twin</h2><p>Relief, slope and where the runoff goes</p></div>
-      </div>
       <div class="sena anim" style="--n: 7">
-        <svg viewBox="0 0 96 96" aria-hidden="true"><rect x="28" y="10" width="40" height="76" rx="8"/><line x1="42" y1="74" x2="54" y2="74"/><path class="lima" d="M38 44 L45 52 L58 34"/></svg>
-        <div><h2>A friendly app</h2><p>Works offline, in four languages, with a message to share</p></div>
+        <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M8 76 L34 30 L50 56 L62 40 L88 76 Z"/><path class="agua" d="M34 30 Q40 52 30 62 T36 76"/></svg>
+        <div><h2>Terrain model</h2><p>Relief, slope and runoff routes of each area</p></div>
       </div>
       <div class="sena anim" style="--n: 8">
-        <svg viewBox="0 0 96 96" aria-hidden="true"><path class="lima" d="M48 12 L55 38 L82 46 L55 54 L48 82 L41 54 L14 46 L41 38 Z"/><path d="M74 14 V26 M68 20 H80"/></svg>
-        <div><h2>Built with AI support</h2><p>Every figure with its source, tests published in sight</p></div>
+        <svg viewBox="0 0 96 96" aria-hidden="true"><rect x="28" y="10" width="40" height="76" rx="8"/><line x1="42" y1="74" x2="54" y2="74"/><path class="lima" d="M38 44 L45 52 L58 34"/></svg>
+        <div><h2>Accessible application</h2><p>Works offline in four languages; developed with AI assistance</p></div>
       </div>
     </div>
   </section>

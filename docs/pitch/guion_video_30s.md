@@ -17,7 +17,7 @@
 | Imágenes con IA | Ninguna | Kit C7 |
 | Dirección (Cristian, 15-nov) | «Que sea un buen video, que se vea que funciona, y que se exprese todo lo que se puede hacer en el sistema, pero que vean qué es y cómo funciona» | Encargo del video |
 
-El video tiene cinco partes: **qué es** (tarjeta de apertura), **cómo funciona** (tarjeta de tres pasos), **qué la distingue** (tarjeta «Beyond what to plant», con nueve señas de lo que reúne además de la rotación), **se ve que funciona** (siete golpes cortos sobre la página real, cada uno con su acción y su consecuencia) y **cierre** (tarjeta con el aviso de juicio y la liga).
+El video tiene cinco partes: **qué es** (tarjeta de apertura), **cómo funciona** (tarjeta de tres pasos), **qué la distingue** (tarjeta «Beyond crop selection», con nueve señas de lo que reúne además de la rotación), **se ve que funciona** (siete golpes cortos sobre la página real, cada uno con su acción y su consecuencia) y **cierre** (tarjeta con el aviso de juicio y la liga).
 
 ## 2. Reglas de lo que se agrega
 
@@ -37,19 +37,19 @@ Duración total: **29.0 segundos**. Once tomas: cuatro tarjetas y siete golpes d
 |---|---|---|---|---|---|---|---|
 | 1 · Qué es | 0.0 | 2.2 | Tarjeta de apertura: «ROOT – From Dam to Root», el lema de la página, «Orbital Farming» y «Field Shift: Adapting Farms with NASA Data» | Cuadro completo | — | — | Before you plant, see the water you are committing. |
 | 2 · Cómo funciona | 2.2 | 5.4 | Tarjeta «How it works»: tres pasos en una línea, con iconos dibujados: «NASA data» (HLS · POWER · IMERG) → «A crop-water model» → «An answer per field» | Cuadro completo | — | — | NASA data, a crop-water model, an answer per field. |
-| 3 · Qué la distingue | 5.4 | 8.4 | Tarjeta animada «Beyond what to plant»: nueve señas en una cuadrícula que entran una tras otra (agua por cultivo, suministro, suelo y nutrientes, lluvia y clima, memoria satelital, límites de parcela por red neuronal, gemelo del terreno, aplicación sin conexión en cuatro idiomas, apoyo de IA con pruebas a la vista) | Cuadro completo | — | — | Beyond what to plant: water, soil, rain and evidence. |
-| 4 · La dotación | 8.4 | 10.8 | **En la portada (el tablero), en inglés.** El puntero pulsa una marca de la tarjeta «Water allocation» (la primera sin pulsar: hoy «Like 2025»): el deslizador baja, la cifra y el indicador de la tarjeta cambian y el mapa cambia de color. Si la portada no llega a lista, se graba en el explorador (sección 7) | La tarjeta de la dotación entera y, a su derecha, el mapa | Primero el control (el deslizador y sus marcas); después, lo que cambió (la cifra de la dotación y el indicador de agua comprometida) | Set the water | Set the water allocation. The map and the indicator respond. |
-| 5 · La parcela | 10.8 | 13.8 | En el explorador, tres tramos: (a) clic en **P0757** en la lista «Fields» (corta en el clic); (b) la ficha abierta con su frase principal: agua, hectáreas y años; (c) las tarjetas de las opciones, lado a lado | La ficha entera | (a) el renglón de P0757 en la lista; (b) la frase principal (`#ficha-resumen`); (c) en cada tarjeta, el agua por año y las hectáreas para las que alcanza (`.lamina`, `.alcanza`) | Pick a field | Each option: water asked, hectares covered, years committed. |
-| 6 · El porqué | 13.8 | 16.8 | Tres tramos sobre la alternativa «Break the old alfalfa: winter cereal, then forage maize» (`data-opcion="avena_maiz"`): (a) clic en «Why?» (corta en el clic); (b) «Why it's suggested»; (c) «Benefits»: la opción frente a la rotación actual de la parcela | La columna de esa tarjeta, de cerca | (a) el botón «Why?»; (b) y (c) el título y el texto de la respuesta (`dd[data-respuesta]`) | Ask why | Every option says why, and what changes from today. |
+| 3 · Qué la distingue | 5.4 | 8.4 | Tarjeta animada «Beyond crop selection»: nueve señas en una cuadrícula que entran una tras otra, en lenguaje formal (demanda de agua por cultivo, suministro, suelo y nutrientes, estaciones y clima, opciones por zona piloto, registro satelital, límites de parcela por red neuronal, modelo del terreno, aplicación sin conexión en cuatro idiomas hecha con apoyo de IA) | Cuadro completo | — | — | Beyond crop selection: water, soil, seasons and evidence. |
+| 4 · La dotación | 8.4 | 10.8 | **En la portada (el tablero), en inglés.** El puntero pulsa una marca de la tarjeta «Water allocation» (la primera sin pulsar: hoy «Like 2025»): el deslizador baja, la cifra y el indicador de la tarjeta cambian y el mapa cambia de color. Si la portada no llega a lista, se graba en el explorador (sección 7) | La tarjeta de la dotación entera y, a su derecha, el mapa | Primero el control (el deslizador y sus marcas); después, lo que cambió (la cifra de la dotación y el indicador de agua comprometida) | Water allocation | Set the water allocation. The map and the indicator respond. |
+| 5 · La parcela | 10.8 | 13.8 | En el explorador, tres tramos: (a) clic en **P0757** en la lista «Fields» (corta en el clic); (b) la ficha abierta con su frase principal: agua, hectáreas y años; (c) las tarjetas de las opciones, lado a lado | La ficha entera | (a) el renglón de P0757 en la lista; (b) la frase principal (`#ficha-resumen`); (c) en cada tarjeta, el agua por año y las hectáreas para las que alcanza (`.lamina`, `.alcanza`) | Select a field | Each option: water required, hectares covered, years committed. |
+| 6 · El porqué | 13.8 | 16.8 | Tres tramos sobre la alternativa «Break the old alfalfa: winter cereal, then forage maize» (`data-opcion="avena_maiz"`): (a) clic en «Why?» (corta en el clic); (b) «Why it's suggested»; (c) «Benefits»: la opción frente a la rotación actual de la parcela | La columna de esa tarjeta, de cerca | (a) el botón «Why?»; (b) y (c) el título y el texto de la respuesta (`dd[data-respuesta]`) | Rationale | Each option states its rationale and what changes from today. |
 | 7 · La gota | 16.8 | 19.2 | En la misma ficha, baja a «Follow the drop»: el diagrama entra en pantalla y las gotas lo recorren una vez | El diagrama | El primer nodo (la presa) con su etiqueta | Follow the drop | From the dam to the crop and the aquifer. |
-| 8 · La evidencia | 19.2 | 21.6 | En la misma ficha, sube a «Field memory (NASA HLS)»: la tira de años con su leyenda y, debajo, la curva de verdor por mes | La ficha entera | Primero la tira de la memoria (`section.memoria`); después, la curva de verdor (`.resumen-ndvi`), si cabe entera a la vista | Satellite evidence | What satellites saw on this field, year by year. |
+| 8 · La evidencia | 19.2 | 21.6 | En la misma ficha, sube a «Field memory (NASA HLS)»: la tira de años con su leyenda y, debajo, la curva de verdor por mes | La ficha entera | Primero la tira de la memoria (`section.memoria`); después, la curva de verdor (`.resumen-ndvi`), si cabe entera a la vista | Satellite evidence | Satellite observations of this field, year by year. |
 | 9 · Compartir | 21.6 | 24.0 | En la ficha, «Share with the farmer»: la vista previa del mensaje de WhatsApp cambia de idioma con el selector «Message language» (del inglés al español) | El selector y el teléfono de la vista previa | El saludo del mensaje (`.wa-saludo`) | Share | A message for the farmer, in their language. |
-| 10 · Las pruebas | 24.0 | 26.4 | «About & Data» → «Tests in sight»: la lista baja despacio; cada prueba con su estado, también las que no cumplen su criterio | El diálogo, a lo ancho | El estado de cada prueba (`.acerca-estado`) | Check the tests | Five tests, published whatever the result. |
+| 10 · Las pruebas | 24.0 | 26.4 | «About & Data» → «Tests in sight»: la lista baja despacio; cada prueba con su estado, también las que no cumplen su criterio | El diálogo, a lo ancho | El estado de cada prueba (`.acerca-estado`) | Published tests | Five tests, published regardless of the result. |
 | 11 · Cierre | 26.4 | 29.0 | Tarjeta de cierre: «The farmer decides.», el aviso de juicio, la liga pública y «Installs as an app · opens offline» | Cuadro completo | — | — | The farmer decides. |
 
 Notas de la tabla:
 - **Tarjetas (tomas 1, 2, 3 y 11).** Son `docs/pitch/video/tarjetas.html`, **animadas** y capturadas con Playwright cuadro por cuadro a 1920 × 1080, con los tonos del tablero (la portada: verde muy oscuro, texto claro y lima de acento) y la tipografía de `web/vendor/`. En la apertura el lema entra palabra por palabra y una línea de agua corre de la presa a la planta; en «How it works» los tres pasos llegan uno tras otro, la flecha se traza hacia el siguiente y al final entran cuatro señas de cómo está hecha («Open source», «Static web app», «Works offline», «Every figure with its source»); en el cierre la frase entra palabra por palabra y una línea de agua la subraya. El lema de la apertura y la frase del cierre salen de los subtítulos 1 y 11 de la sección 5. El subtítulo de las tarjetas va solo en el `.srt` (la tarjeta ya lo dice). La línea «Installs as an app · opens offline» sale solo si existen `web/manifest.webmanifest` (con `display: standalone`) y `web/sw.js`. La liga se lee de `RAIZ_LIGA_PAGINA`; si no viene, es la del proyecto.
-- **Toma 3.** «Beyond what to plant» dice lo que la aplicación reúne además de la rotación. Cada seña describe algo que la página ya hace; el grabador comprueba que el README lo siga diciendo. El aprendizaje automático se atribuye a los límites de parcela (red neuronal de Fields of The World, datos de terceros), no al mapa de cultivos, que es de reglas (el Random Forest no se corrió). La tarjeta no promete ahorros ni califica nutrientes: dice «nutrient notes».
+- **Toma 3.** «Beyond crop selection» dice lo que la aplicación reúne además de la rotación. Cada seña describe algo que la página ya hace; el grabador comprueba que el README lo siga diciendo. El aprendizaje automático se atribuye a los límites de parcela (red neuronal de Fields of The World, datos de terceros), no al mapa de cultivos, que es de reglas (el Random Forest no se corrió). La tarjeta no promete ahorros ni califica nutrientes: dice «nutrient notes». «Seasons and climate» nombra lo que la ficha ya muestra (ciclos de invierno y de verano, ventanas de siembra, fechas de helada y el registro de lluvia) y «Options by pilot area» dice que cada zona tiene su clima, su demanda de agua y sus opciones: son opciones, no recomendaciones (regla 10; el cierre dice «The farmer decides»).
 - **Toma 2.** Los tres productos que nombra («HLS», «POWER», «IMERG») se comprueban contra `web/data/manifest.json` antes de usar la tarjeta.
 - **Tomas 5 y 6: corte en el clic.** Abrir la ficha y abrir «Why?» tardan en dibujarse; por eso el tramo del clic termina en el clic y el siguiente empieza con el resultado ya dibujado. Al abrir «Why?» la página conserva en su sitio las otras tarjetas y la vista salta al final del texto abierto: el tramo siguiente se coloca en «Why it's suggested».
 - **Toma 5.** «Break the old alfalfa…» es una de las alternativas de P0757 en la tabla oficial. Si la parcela dejara de traerla, el grabador abre el «Why?» de su primera alternativa y lo avisa.
@@ -88,7 +88,7 @@ NASA data, a crop-water model, an answer per field.
 
 3
 00:00:05,400 --> 00:00:08,400
-Beyond what to plant: water, soil, rain and evidence.
+Beyond crop selection: water, soil, seasons and evidence.
 
 4
 00:00:08,400 --> 00:00:10,800
@@ -96,11 +96,11 @@ Set the water allocation. The map and the indicator respond.
 
 5
 00:00:10,800 --> 00:00:13,800
-Each option: water asked, hectares covered, years committed.
+Each option: water required, hectares covered, years committed.
 
 6
 00:00:13,800 --> 00:00:16,800
-Every option says why, and what changes from today.
+Each option states its rationale and what changes from today.
 
 7
 00:00:16,800 --> 00:00:19,200
@@ -108,7 +108,7 @@ From the dam to the crop and the aquifer.
 
 8
 00:00:19,200 --> 00:00:21,600
-What satellites saw on this field, year by year.
+Satellite observations of this field, year by year.
 
 9
 00:00:21,600 --> 00:00:24,000
@@ -116,7 +116,7 @@ A message for the farmer, in their language.
 
 10
 00:00:24,000 --> 00:00:26,400
-Five tests, published whatever the result.
+Five tests, published regardless of the result.
 
 11
 00:00:26,400 --> 00:00:29,000
