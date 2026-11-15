@@ -3,7 +3,7 @@
 
 **Quién decide:** Cristian, el 15 de noviembre de 2026, después de leer la revisión de la rama `Tena` (`docs/revisiones/2026-11-15_rama_tena.md`).
 
-**Qué se decide:** el tablero que hizo P4 (Tena) con OpenAI Codex, ya corregido, es la página principal (`web/index.html`) y es una aplicación: instalable, sin conexión y pensada primero para el teléfono. La página que estaba publicada se conserva completa como **explorador de parcelas** en `web/explorer.html`.
+**Qué se decide:** el tablero que hizo Tena con OpenAI Codex, ya corregido, es la página principal (`web/index.html`) y es una aplicación: instalable, sin conexión y pensada primero para el teléfono. La página que estaba publicada se conserva completa como **explorador de parcelas** en `web/explorer.html`.
 
 **Qué cambia respecto de `CLAUDE.md`, regla 9:** la interfaz del tablero deja de ser solo en inglés. El inglés sigue siendo el idioma por omisión.
 
@@ -19,7 +19,7 @@
 - Las cifras salen siempre de los datos y se formatean con `Intl` en el idioma elegido. Una traducción no puede cambiar un número: `tests/test_tablero_idiomas.py` exige las cuatro variantes de cada texto mostrado y los mismos números en las cuatro.
 
 ## Calidad de las traducciones
-- El español es la redacción original de P4, corregida donde ordenaba o prometía. El inglés, el portugués y el francés los escribió la IA a partir de ella.
+- El español es la redacción original de Tena, corregida donde ordenaba o prometía. El inglés, el portugués y el francés los escribió la IA a partir de ella.
 - **El portugués y el francés son borradores de máquina por revisar.** La interfaz lo dice junto al selector hasta que una persona hablante los revise, igual que en el WhatsApp.
 
 ## Qué se queda en inglés
