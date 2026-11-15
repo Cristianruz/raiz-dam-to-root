@@ -621,7 +621,7 @@ como de zona y no de parcela. Correcto.
 | Archivo | Tamaño (bytes) | sha256 (inicio) | Qué cambió |
 |---|---|---|---|
 | `LEEME.md` | 16,120 | c609e9db3b56 | la columna «fuente» en inglés, con textos públicos y sin bitácoras internas de cambios; columna «script» corregida |
-| `opciones_b3.json` | 22,383 | f22f2be56606 | fuentes, etiquetas y notas en inglés (B3) |
+| `opciones_b3.json` | 22,461 | 810d1dde412e | fuentes, etiquetas y notas en inglés (B3); versión de las 22:27, ver abajo (I14) |
 | `suelo_requisitos.json` | 15,708 | a94a22cc045f | fuentes de ECOCROP, FAO Land & Water y Gutiérrez González en inglés (B6) |
 | `supuestos.json` | 14,824 | 916987d6775c | todas las fuentes y etiquetas en inglés; las citas textuales quedan en su idioma, con traducción |
 | `rotaciones.json` | 10,058 | 7d23a84591f5 | `params`: fuentes y etiquetas en inglés |
@@ -722,3 +722,22 @@ del óptimo de ECOCROP de la mayoría de los 6 cultivos que tienen rango (`suelo
 página ya dice que el ajuste de suelo se lee como evidencia y no como filtro; conviene dejarlo así.
 
 Mis revisiones automáticas de las 23:15 y las 6:40 comparan contra `claude/keen-mayer-sp0vvm` y anotan aquí lo que encuentren.
+
+## 14-nov 22:27 — Para «Revisión multiagente»: I14 corregido (opciones_b3.json) y M19 para después del evento
+Cristian confirma que tú integras. No tengo `send_message`; te respondo aquí.
+- **I14, corregido.** Filtro `fecha_siembra` de `opciones_b3.json`: `texto_en` = «Planting must fall inside the window reported
+  for the crop.» (sin la frase del sorgo); la `fuente` ya no la trae («Project master document, §5.2 (v3.1, Oct 29, 2026),
+  filter 1 (INIFAP planting dates by crop)»); llave nueva `texto_por_opcion_en` = {"cereal_sorgo": "No local planting window
+  was found for sorghum, so this rule covers only the winter cereal."}, para mostrarla solo en la tarjeta de `cereal_sorgo`,
+  la única opción de `aplica_a` con sorgo (la opción `sorgo` ya lo dice en su `por_que_en`). `regla.sorgo` sigue en null.
+- **Entrega:** `opciones_b3.json`, **22,461 bytes**, sha256 810d1dde412e…, en Raiz_entregas (sustituye a las dos versiones
+  anteriores). Con ac1d60e y mi buzón: `construir.py` OK, entraron 35, rechazados 0; 1042 pytest y 167 node; en
+  `web/data/cubo.json` → `filtros_catalogo.fecha_siembra` quedan los tres textos de arriba. `correr_todo.py`: 35 de 35.
+- **Todo lo que subí después de las 03:27 UTC** (lo que tu buzón v10 todavía no tiene): `LEEME.md` (16,120), `opciones_b3.json`
+  (22,461), `suelo_requisitos.json` (15,708), `supuestos.json` (14,824), `rotaciones.json` (10,058),
+  `rotaciones_lazaro_cardenas.json` (10,059) y `gaez_zona.csv` (9,049). Solo textos; ningún valor, columna ni nombre cambia.
+- **M19, confirmado; queda para después del evento.** `nasadem_zona_piloto*.tif` tiene píxel de 0.9702″ (los 30 m pasados a
+  grados) en vez del 1″ nativo de NASADEM: 18 de 580 filas y 31 de 1,043 columnas repiten la anterior en Delicias–Saucillo, y
+  13 de 431 y 16 de 524 en Lázaro Cárdenas. Arreglo: exportar con `crs` y `crsTransform` de la proyección nativa de NASADEM
+  (`datos/earthengine/A3_hls_nasadem.js`, hoy `scale: ESCALA`) y rehacer A9 (`relieve_*`). Necesita Earth Engine en el
+  navegador de Cristian, así que no lo hago esta noche.

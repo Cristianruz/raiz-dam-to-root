@@ -145,7 +145,10 @@ FILTROS = [
      "regla": {"ventana_por_cultivo": "the one in «secuencia.siembra» of each option (MM-DD)", "sorgo": None},
      "necesita": [],
      "texto_en": "Planting must fall inside the window reported for the crop.",
-     "fuente": f"{MAESTRO}, filter 1 (INIFAP planting dates by crop); no local window was found for sorghum, so the rule does not cover it", "etiqueta": "[V]"},
+     # Solo en la tarjeta donde aplica (revisión total del integrador, I14): la única opción de aplica_a con sorgo.
+     "texto_por_opcion_en": {"cereal_sorgo": "No local planting window was found for sorghum, so this rule covers only "
+                                             "the winter cereal."},
+     "fuente": f"{MAESTRO}, filter 1 (INIFAP planting dates by crop)", "etiqueta": "[V]"},
     {"id": "helada_siembra", "tipo": "helada", "aplica_a": ["chile"],
      "regla": {"helada": "Tmin <= 0 °C", "umbral_de_probabilidad": None,
                "nota": "the master document sets no threshold: the frost probability of heladas.json for the planting date is shown and nothing is decided"},
