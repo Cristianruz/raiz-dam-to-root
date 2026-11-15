@@ -4,7 +4,7 @@
 **Cómo usarlo:**
 1. Abra Claude Design y pegue el texto del bloque de abajo.
 2. Adjunte las imágenes de referencia que compartió el equipo, en este orden: primero las dos preferidas (la app móvil de tres pantallas del campo de chile y el tablero de escritorio del campo de golf con paneles de vidrio); después los tableros agrícolas (EarthEye, Pangalengan Farm, Stanfield Land, Kestrel) y las láminas de análisis del terreno (elevación, microcuencas, drenaje, pendiente).
-3. Las cifras del prompt son reales: salen de `web/data/cubo.json` y `web/data/parcelas.geojson` (15-nov-2026) con la dotación «Like 2026» (3.5 millares/ha). No las cambie por otras.
+3. Las cifras del prompt son reales: salen de `web/data/cubo.json` y `web/data/parcelas.geojson`, y los textos de las fichas se leyeron tal como los muestra la app en la integración `2346788` (rama `claude/keen-mayer-sp0vvm`, 15-nov-2026, 06:00 UTC) con la dotación «Like 2026» (3.5 millares/ha). No las cambie por otras. **Si la app cambia sus datos o su redondeo, estas cifras quedan viejas:** vuelva a leerlas de la app antes de usarlas.
 
 ```text
 Diseña ROOT, una APLICACIÓN (no una página web) para teléfono, tableta y escritorio. Es una app instalable que funciona sin conexión con la última copia de los datos. Entrega un prototipo navegable de alta fidelidad, su sistema de diseño y notas de implementación.
@@ -70,17 +70,18 @@ Unidad: 1 millar/ha = 1 thousand m³/ha = 10 cm de lámina. Dotación elegida: 3
 - La Boquilla: 825.577 hm³ el 9-nov-2026 frente a 2,846.78 hm³ al NAMO [P].
 - Acuífero 0831 Meoqui–Delicias: −167.12 hm³/año, déficit oficial de Conagua, no una pérdida medida [V].
 - Todas las zonas, con 3.5: at least 108% (likely 88%–134%); 239 of 458 fields short; Enough water 219 · Tight 0 · Not enough water 239 · Not classified 781. Water term: free 235 · ending soon 74 · committed 149. 1,239 fields en total.
-- Delicias–Saucillo, con 3.5: at least 125% (likely 101%–155%); 202 of 357 fields short; 63% of the area not classified.
-- P0757 · Alfalfa · 7.95 ha · Water term: ending soon · stand age 3 years · memoria 2016→2026: P P P D D S S D P P P · NDVI sept-2026 0.59. Opciones con 3.5:
-  · Current rotation: Alfalfa — pide 28.4 (likely 23.1–35.2) thousand m³/ha/año · Not enough water · enough for 1.0 of 7.95 ha (likely 0.8–1.2) · commits water for 3–4 years, 0–1 left · bare soil 0 days (measured).
-  · Keep the alfalfa and skip two to three summer irrigations — 25.5 (likely 21.0–31.6) · Not enough · 1.1 of 7.95 ha (likely 0.9–1.3) · 3–4 years, 0–1 left.
-  · Break the old alfalfa: winter cereal, then forage maize — 18.9 (likely 16.1–22.5) · Not enough · 1.5 of 7.95 ha (likely 1.2–1.7) · 1 year · bare soil 20 days (estimated).
-  · Do not plant / standing stubble — no irrigation needed · Enough · 7.95 of 7.95 ha · 1 year.
-- P0632 · Winter cereal · 20.66 ha · Water term: free · memoria: S D S S S S S D S S W · bare soil 26 days (measured). Opciones con 3.5:
-  · Current rotation: Winter cereal — 7.8 (likely 6.3–9.4) · Not enough · 9.2 of 20.66 ha (likely 7.7–11.4) · 1 year.
-  · Do not plant / standing stubble — no irrigation needed · Enough · 20.66 of 20.66 ha.
-  · Winter cereal, then forage maize — 18.9 (likely 16.1–22.5) · Not enough · 3.8 of 20.66 ha.
-- L0175 · Pecan orchard · 10.76 ha · Water term: committed · 11 years observed · memoria: S P P P P P P P P S S. Única opción: Current rotation: Pecan orchard (does not rotate) — 18.8 (likely 15.3–23.2) · Not enough · 2.0 of 10.76 ha (likely 1.6–2.5) · horizonte de cálculo de 10 años [S]. Nota: «An orchard does not rotate. Minimum-irrigation scenarios are the ones that apply, and kernel filling (August–September) should not be put at risk.»
+- Delicias–Saucillo (zona con la que abre la app), con 3.5, textos tal como los muestra la app: «at least 125% of the allocation» · «Likely range for the classified area: 101% to 155%; unclassified fields can raise it, not lower it» · «63% of the area is not classified, so this is a minimum.» · «With 3.5 thousand m³/ha, 202 of 357 classified fields don't have enough water for their current rotation.»
+- Hectáreas: la app las muestra con los decimales del área, redondeadas hacia abajo y nunca mayores que el área; los rangos van como «range A to B»; la lámina, como «X thousand m³/ha per year (median)» con «likely range A–B».
+- P0757 · Alfalfa · 7.95 ha · Water term: ending soon · stand age 3 years · memoria 2016→2026: P P P D D S S D P P P · NDVI sept-2026 0.59. Frase principal: «With 3.5 thousand m³/ha, the current rotation (Alfalfa) has enough water for 0.97 of 7.95 hectares. Alfalfa ties up water for 3–4 years (0–1 years left).» Opciones con 3.5:
+  · Current rotation: Alfalfa — 28.4 thousand m³/ha per year (median), likely range 23.1–35.2 · ✕ Not enough water · Enough for 0.97 of 7.95 hectares (range 0.79 to 1.2) · Commits water for 3–4 years · Remaining term: 0–1 years · Water committed over the remaining term: 0–28.4 thousand m³/ha · Typically applied in this district (2009–2016 records; measurement point not confirmed): 17.4 thousand m³/ha · enough for 1.59 of 7.95 hectares — district average, not this field [V] · bare soil 0 days (measured).
+  · Keep the alfalfa and skip two to three summer irrigations — 25.5 (likely range 21–31.6) · ✕ Not enough water · Enough for 1.09 of 7.95 hectares (range 0.88 to 1.32) · Commits water for 3–4 years · Remaining term: 0–1 years.
+  · Break the old alfalfa: winter cereal, then forage maize — 18.9 (likely range 16.1–22.5) · ✕ Not enough water · Enough for 1.46 of 7.95 hectares (range 1.23 to 1.73) · Commits water for 1 year · bare soil 20 days (estimated).
+  · Do not plant / standing stubble — ✓ Enough water · No irrigation needed · Enough for the whole field (7.95 ha) · Commits water for 1 year.
+- P0632 · Winter cereal · 20.66 ha · Water term: free · memoria: S D S S S S S D S S W · bare soil 26 days (measured). Frase: «… has enough water for 9.24 of 20.66 hectares. Winter cereal ties up water for one season.» Opciones con 3.5:
+  · Current rotation: Winter cereal — 7.8 (likely range 6.3–9.4) · ✕ Not enough water · Enough for 9.24 of 20.66 hectares (range 7.65 to 11.4) · Commits water for 1 year.
+  · Do not plant / standing stubble — ✓ Enough water · No irrigation needed · Enough for the whole field (20.66 ha).
+  · Oats (winter) + forage maize (summer) — 18.9 (likely range 16.1–22.5) · ✕ Not enough water · Enough for 3.81 of 20.66 hectares (range 3.2 to 4.5) · Commits water for 1 year.
+- L0175 · Pecan orchard · 10.76 ha · Water term: committed · memoria: S P P P P P P P P S S. Frase: «… has enough water for 1.99 of 10.76 hectares. Pecan orchard ties up water for 10 years (calculation horizon; orchards live longer).» Única opción: Current rotation: Pecan orchard (does not rotate) — 18.8 (likely range 15.3–23.2) · ✕ Not enough water · Enough for 1.99 of 10.76 hectares (range 1.62 to 2.45) · Commits water for 10 years (calculation horizon; orchards live longer) · Water committed over the remaining term: 188.4 thousand m³/ha · Typically applied in this district: 13.7 thousand m³/ha · enough for 2.74 of 10.76 hectares — district average, not this field [V]. Nota: «An orchard does not rotate. Minimum-irrigation scenarios are the ones that apply, and kernel filling (August–September) should not be put at risk.»
 - Money: en todas las opciones «no verified data».
 
 ## 7. Reglas que el diseño debe respetar
