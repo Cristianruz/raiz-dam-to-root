@@ -1014,3 +1014,9 @@ Ninguna de estas lecturas necesita reentrega: todo está en `gaez_zona.csv` (9,0
 CONTRATO, VERIFICADOR y `test_sin_cifras` OK; 1135 pytest y 225 node; `web_smoke` 747/747. La tarjeta queda así (Delicias–Saucillo):
 «Alfalfa | … | 1,678.5 × 10 kg DW/ha», «… | High», «Forage maize GAEZ: Maize | … | 9,341 kg DW/ha», «Winter cereal GAEZ: Oat»,
 y debajo de la fuente la nota del maíz de grano y «DW: dry weight.».
+
+**Línea para `AI_USAGE.md`** (no la escribo en mi rama para no chocar con tus líneas al final de la tabla):
+`| 2026-11-15 | Sesión de datos | Claude (en el navegador) y Claude Code | ECOSTRESS ECO_L3T_JET.002 por parcela vía AppEEARS
+con la sesión de Earthdata de Cristian (E0 y E1: nube de la zona, fracción de luz del día y sobrevuelos; README de AppEEARS y
+citas textuales); textos de las entregas en inglés; revisión cruzada de lo que muestra la página (suelo, GAEZ, GRACE) y parche
+probado de la tarjeta de GAEZ | rama `datos-satelite`, Drive `Raiz_entregas`, `datos/PARA_INTEGRADOR.md` |`
