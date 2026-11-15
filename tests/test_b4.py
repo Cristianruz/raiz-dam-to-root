@@ -153,7 +153,15 @@ def test_una_zona_compatibilidad(una_zona):
         for op in pc["opciones"]:
             ref = rot_ref(op, props[pid]["cultivo_actual"])
             assert op["agua"]["lamina_bruta"] == lam[ref], (pid, op["id"])
-            assert op["preguntas_ref"] == f"EXP_ZONA_{ref}"
+            # Una opción que agrega el equipo con un nombre distinto del de la tabla oficial lleva su propia
+            # explicación (misma llave más el sufijo); las demás, la llave de siempre.
+            del_equipo = op["preguntas_ref"].endswith(b4_cubo.SUFIJO_EXPL_PROPUESTA)
+            assert op["preguntas_ref"] == f"EXP_ZONA_{ref}" + (b4_cubo.SUFIJO_EXPL_PROPUESTA if del_equipo else "")
+            if del_equipo:
+                assert op["origen_opcion"] == b4_cubo.ORIGEN_OPCION_PROPUESTA and op["id"] != "ACTUAL", (pid, op["id"])
+                assert expl["explicaciones"][op["preguntas_ref"]]["textos"]["por_que"].startswith(op["nombre"])
+                oficial = expl["explicaciones"].get(f"EXP_ZONA_{ref}")   # solo si alguna parcela lleva la oficial
+                assert oficial is None or expl["explicaciones"][op["preguntas_ref"]]["valores"] == oficial["valores"]
 
 
 def test_localidades_de_params(una_zona):
@@ -777,7 +785,7 @@ def test_params_eficiencia_goteo_apunta_a_supuestos():
 
 
 def test_corte_de_verano_sobre_la_alfalfa_actual_descuenta_la_edad(tmp_path):
-    """Punto 13 (integrador): S9 §2 («En alfalfa, plazo restante = plazo − edad observada, con mínimo cero») y el
+    """Punto 13 (integrador): S9 §5 («En alfalfa, plazo restante = plazo − edad observada, con mínimo cero») y el
     contrato (kit §2.3, plazo_restante = plazo − edad observada). Una alternativa que sigue con el MISMO rodal de
     alfalfa (el corte de riego en verano: su único cultivo es el cultivo actual) descuenta la edad como la ACTUAL;
     las que siembran algo nuevo llevan el plazo completo y el nogal nunca descuenta (horizonte de cálculo). Con
