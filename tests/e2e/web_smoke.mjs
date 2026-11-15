@@ -1755,8 +1755,9 @@ async function pruebaContextoRegional(page, prefijo, telefono) {
     await fijarAnio(a2);
     const v2 = await lluviaImerg();
     const d2 = await texto(page, "#contexto-regional .contexto-donde");
-    const e1 = formatoNumero(climaDelAnio(contexto, zonaContexto, a1).lluviaImerg);
-    const e2 = formatoNumero(climaDelAnio(contexto, zonaContexto, a2).lluviaImerg);
+    // I8: los mm van sin decimales en las cifras del año.
+    const e1 = formatoNumero(climaDelAnio(contexto, zonaContexto, a1).lluviaImerg, { decimales: 0 });
+    const e2 = formatoNumero(climaDelAnio(contexto, zonaContexto, a2).lluviaImerg, { decimales: 0 });
     check(`${prefijo}Regional context: mover la línea de tiempo de ${a1} a ${a2} cambia la lluvia mostrada (${e1} → ${e2} mm)`, v1.includes(e1) && v2.includes(e2) && v1 !== v2 && d2.includes(`agricultural year ${a2}`), `${v1.replace(/\n/g, " ")} → ${v2.replace(/\n/g, " ")}`);
     const resaltado = await raiz.locator('.contexto-figura[data-grafica="clima-lluvia"] .contexto-elegido-texto').textContent().catch(() => "");
     check(`${prefijo}Regional context: la gráfica de lluvia resalta ${a2}`, resaltado === String(a2), resaltado);
