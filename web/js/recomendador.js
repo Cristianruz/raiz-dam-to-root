@@ -1,501 +1,375 @@
-// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; Codex.
-// Motor puro: clima histórico, balance FAO A5, restricciones con fuente y entradas explícitas.
-export function cuantil(valores, q) {
-  if (!valores.length) return null;
-  const v = [...valores].sort((a, b) => a - b),
-    pos = (v.length - 1) * q;
-  const lo = Math.floor(pos),
-    hi = Math.min(lo + 1, v.length - 1);
-  return v[lo] + (v[hi] - v[lo]) * (pos - lo);
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex
+// Plan de la vista «Planificar» del tablero. NO es un modelo de demanda: cada lámina, cobertura y hectárea
+// sale de web/data/cubo.json (parcelas[id].opciones[].agua.lamina_bruta[lluvia], con p10/p50/p90) y de las
+// reglas de web/reglas.js, las MISMAS que usa la ficha de la parcela (web/explorer.html). Por eso el plan y la
+// ficha dan las mismas hectáreas para la misma parcela, dotación y lluvia (tests/recomendador.test.js).
+// El módulo es puro (sin DOM): describe lo que cubre la dotación y las restricciones encontradas, con su
+// fuente. No ordena, no puntúa y no nombra una opción por encima de otra (regla 10 de CLAUDE.md).
+// Ninguna cifra ni texto visible vive aquí: las cifras entran por parámetro desde los datos o las captura la
+// persona, y los textos salen de web/js/textos_asesor.js en el idioma en uso (t de web/js/i18n.js).
+import {
+  evaluarOpcion,
+  hectareasQueAlcanzan,
+  cobertura,
+  llaveLluvia,
+} from "../reglas.js";
+import { formatoHectareas } from "./resumen.js";
+import { t, tiene, fmtNumero, fmtFecha, deDato, idioma, IDIOMA_BASE } from "./i18n.js";
+import "./textos_asesor.js"; // registra los textos «asesor.…» en los cuatro idiomas
+
+/** Aviso de juicio, en el idioma en uso. En inglés es la misma frase de la ficha (web/app.js). */
+export const avisoJuicio = () => t("asesor.aviso_juicio");
+/** Lo que el plan declara de sí mismo (va en la tarjeta y en el archivo que se descarga). */
+export const alcance = () => t("asesor.alcance");
+/** Rótulo de una tarjeta: describe el resultado, nunca califica la opción. */
+export const rotuloDeEstado = (estado) => t(`asesor.estado.${estado}`);
+/** Estados posibles de una tarjeta. */
+export const ESTADOS = ["restriccion", "revisar", "calculado", "sin_datos"];
+
+/** Nombre de un cultivo del contrato (ids de cubo.json y parcelas.geojson) en el idioma en uso. */
+export function nombreCultivo(id) {
+  const clave = `asesor.cultivo.${id}`;
+  return tiene(clave, IDIOMA_BASE) ? t(clave) : String(id ?? "");
 }
-export function demandaHistorica(
-  rotacion,
-  { lluvia = 0, eficiencia = null, rangoEficiencia, nivel = 0.9 } = {},
-) {
-  if (!rotacion?.serie?.length) return null;
-  const ea = eficiencia == null ? rangoEficiencia : [eficiencia, eficiencia];
-  if (
-    !ea ||
-    !(ea[0] > 0) ||
-    ea[1] > 1 ||
-    ea[1] < ea[0] ||
-    nivel < 0 ||
-    nivel > 1
-  )
-    return null;
-  const [pmin, pmax] = rotacion.presiembra_mm;
-  const filas = rotacion.serie.map((s) => {
-    const dato = s.lluvia[String(lluvia)];
-    if (!dato || !Number.isFinite(dato.neta_mm) || dato.neta_mm < 0)
-      return null;
-    return {
-      anio: s.anio,
-      neta_mm: dato.neta_mm,
-      etc_mm: dato.etc_mm,
-      bajo: (dato.neta_mm / ea[1] + pmin) / 100,
-      central: (dato.neta_mm / ((ea[0] + ea[1]) / 2) + (pmin + pmax) / 2) / 100,
-      alto: (dato.neta_mm / ea[0] + pmax) / 100,
-    };
-  });
-  if (filas.some((f) => !f)) return null;
-  return {
-    filas,
-    n: filas.length,
-    p10: cuantil(
-      filas.map((f) => f.bajo),
-      0.1,
-    ),
-    p50: cuantil(
-      filas.map((f) => f.central),
-      0.5,
-    ),
-    p90: cuantil(
-      filas.map((f) => f.alto),
-      0.9,
-    ),
-    plan: cuantil(
-      filas.map((f) => f.alto),
-      nivel,
-    ),
-    nivel,
-    eficiencia: ea,
-    fuente:
-      "FAO-56; datos/colab/A5_demanda_plazo.py; clima NASA POWER de la zona. Sin corrección de sesgo ETo; fechas base del modelo.",
+
+const esNumero = (v) => typeof v === "number" && Number.isFinite(v);
+const UN_DECIMAL = 1; // decimales del pH en el texto
+const DOS_DECIMALES = 2; // decimales de la salinidad en el texto
+const numero = (v, decimales) => fmtNumero(v, { maximumFractionDigits: decimales });
+
+/**
+ * Hectáreas con el MISMO redondeo de la ficha (formatoHectareas de web/js/resumen.js: los decimales del área,
+ * hacia abajo) y los separadores del idioma en uso. No se copia la regla: se toma su resultado y se le da formato.
+ */
+export function formatoHa(areaHa) {
+  const comoLaFicha = formatoHectareas(areaHa);
+  return (valor) => {
+    const canonico = comoLaFicha(valor);
+    const n = Number(canonico.replaceAll(",", ""));
+    if (!Number.isFinite(n)) return t("asesor.sin_dato");
+    const decimales = (canonico.split(".")[1] ?? "").length;
+    return fmtNumero(n, { minimumFractionDigits: decimales, maximumFractionDigits: decimales });
   };
 }
-function ventana(mmdd, desde, hasta) {
+
+/** «MM-DD» dentro de una ventana que puede cruzar el fin de año. null si la ventana no está completa. */
+function dentroDeVentana(mmdd, desde, hasta) {
   if (!desde || !hasta) return null;
-  return desde <= hasta
-    ? mmdd >= desde && mmdd <= hasta
-    : mmdd >= desde || mmdd <= hasta;
+  return desde <= hasta ? mmdd >= desde && mmdd <= hasta : mmdd >= desde || mmdd <= hasta;
 }
-export function evaluarPlan({
-  datos,
-  zona,
-  parcela,
-  entrada = {},
-  perfil = null,
-}) {
-  const z = datos.zonas[zona],
-    cat = datos.catalogo;
-  const warnings = [],
-    errors = [];
-  if (parcela.zona && parcela.zona !== zona)
-    errors.push("La parcela no pertenece a la zona climática seleccionada.");
-  const area = Object.hasOwn(entrada, "area") ? entrada.area : parcela.area_ha;
-  if (!Number.isFinite(area) || area <= 0)
-    errors.push("La superficie debe ser positiva.");
-  const volumen = entrada.volumenDisponible;
-  const D =
-    volumen == null
-      ? entrada.dotacion
-      : volumen / (area * datos.metodo.m3_por_millar);
-  if (!Number.isFinite(D) || D < 0)
-    errors.push(
-      "La dotación o el volumen disponible deben ser válidos y no negativos.",
-    );
-  if (
-    entrada.eficiencia != null &&
-    (!(entrada.eficiencia > 0) || entrada.eficiencia > 1)
-  )
-    errors.push(
-      "La eficiencia medida debe ser mayor que cero y no superar el total aplicado.",
-    );
-  if (
-    entrada.ph != null &&
-    (!Number.isFinite(entrada.ph) || entrada.ph < 0 || entrada.ph > 14)
-  )
-    errors.push("El pH capturado no es válido.");
-  if (
-    entrada.salinidad != null &&
-    (!Number.isFinite(entrada.salinidad) || entrada.salinidad < 0)
-  )
-    errors.push("La salinidad capturada no es válida.");
-  if (
-    entrada.nivel != null &&
-    (!Number.isFinite(entrada.nivel) ||
-      entrada.nivel <= 0 ||
-      entrada.nivel >= 1)
-  )
-    errors.push(
-      "El nivel de planificación debe estar entre los extremos de la distribución.",
-    );
-  if (
-    entrada.fecha &&
-    (!/^\d{4}-\d{2}-\d{2}$/.test(entrada.fecha) ||
-      !Number.isFinite(Date.parse(entrada.fecha)) ||
-      new Date(entrada.fecha).toISOString().slice(0, 10) !== entrada.fecha)
-  )
-    errors.push("La fecha de siembra no es válida.");
-  if ((entrada.anioObservado == null) !== (entrada.riegoObservado == null))
-    errors.push(
-      "Para contrastar un riego necesitas tanto su ciclo como su volumen aplicado.",
-    );
-  if (
-    entrada.riegoObservado != null &&
-    (!Number.isFinite(entrada.riegoObservado) || entrada.riegoObservado < 0)
-  )
-    errors.push("El volumen aplicado observado no es válido.");
-  if (!z?.anios?.length)
-    errors.push("No hay ciclos climáticos completos para la zona.");
-  if (errors.length) return { errores: errors, resultados: [], entrada };
-  const cultivo =
-    entrada.cultivo || (!parcela.abstencion ? parcela.cultivo_actual : null);
-  const confirmado = Boolean(entrada.cultivo);
-  let ids = cultivo
-    ? [
-        cultivo === "barbecho" ? "descanso" : cultivo,
-        ...(cat.por_cultivo_actual[cultivo] ?? []),
-      ]
-    : [];
-  if (entrada.objetivo) ids.push(entrada.objetivo);
-  ids = [...new Set(ids)].filter((id) => z.rotaciones[id]);
-  if (!confirmado)
-    warnings.push(
-      "Confirma el cultivo previo; la clasificación satelital no es una identificación de campo.",
-    );
-  if (!entrada.dotacionConfirmada)
-    warnings.push(
-      "La dotación es un escenario: confirma la disponibilidad con el módulo.",
-    );
-  let rango = z.parametros.ea_gravedad.valor,
-    eficiencia = entrada.eficiencia ?? null;
-  let fuenteEa = z.parametros.ea_gravedad.fuente;
-  if (eficiencia != null)
-    fuenteEa =
-      "Eficiencia capturada por el usuario como medida; requiere respaldo del aforo.";
-  else if (entrada.sistema && entrada.sistema !== "sin_confirmar") {
-    const clave = { gravedad: "ea_superficial_referencia", goteo: "ea_goteo" }[
-      entrada.sistema
-    ];
-    if (clave && datos.supuestos[clave]) {
-      rango = [datos.supuestos[clave].valor, datos.supuestos[clave].valor];
-      fuenteEa = datos.supuestos[clave].fuente;
+
+/** Fecha «AAAA-MM-DD» real (no un 31 de febrero). */
+function fechaValida(texto) {
+  if (typeof texto !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(texto)) return false;
+  const ms = Date.parse(texto);
+  return Number.isFinite(ms) && new Date(ms).toISOString().slice(0, texto.length) === texto;
+}
+
+const ANIO_BISIESTO = 2024; // solo para dar nombre al mes y al día de un «MM-DD»; el año no se muestra
+/** «MM-DD» como día y mes en el idioma en uso («Apr 15», «15 abr»). Si no se puede leer, el texto tal cual. */
+function mesDia(mmdd) {
+  const [mes, dia] = String(mmdd ?? "").split("-").map(Number);
+  if (!Number.isInteger(mes) || !Number.isInteger(dia)) return String(mmdd ?? "");
+  return fmtFecha(new Date(Date.UTC(ANIO_BISIESTO, mes - 1, dia)), { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+/**
+ * Dotación (millares/ha) con la que se evalúa el plan: la del escenario del tablero o, si la persona capturó
+ * un volumen total, ese volumen repartido en la superficie evaluada (m3PorMillar llega de los datos).
+ * Devuelve null si no se puede calcular.
+ */
+export function dotacionDeEntrada({ dotacion, volumen = null, area, m3PorMillar = null }) {
+  if (volumen == null) return esNumero(dotacion) && dotacion >= 0 ? dotacion : null;
+  if (!esNumero(volumen) || volumen < 0 || !esNumero(area) || !(area > 0)) return null;
+  if (!esNumero(m3PorMillar) || !(m3PorMillar > 0)) return null;
+  return volumen / (area * m3PorMillar);
+}
+
+/**
+ * Frase de la tarjeta: lo que cubre la dotación, con las hectáreas de la ficha.
+ * La lectura «prudente» es el extremo bajo de hectareasQueAlcanzan (con la lámina alta), rotulada como tal.
+ */
+export function textoCobertura(tarjeta) {
+  if (!tarjeta || tarjeta.estado === "sin_datos") return t("asesor.cobertura.sin_datos");
+  const fh = formatoHa(tarjeta.area);
+  const area = fh(tarjeta.area);
+  if (tarjeta.sinRiego) return t("asesor.cobertura.sin_riego", { area });
+  const { p50, bajo, alto } = tarjeta.hectareas;
+  if (tarjeta.cobertura >= 1) {
+    const toda = t("asesor.cobertura.toda", { area });
+    return bajo < tarjeta.area ? `${toda} ${t("asesor.cobertura.prudente", { bajo: fh(bajo) })}` : toda;
+  }
+  return t("asesor.cobertura.parte", { ha: fh(p50), area, bajo: fh(bajo), alto: fh(alto) });
+}
+
+/** Texto visible de una restricción encontrada; el cierre deja la decisión en manos de la persona y su técnico. */
+export function textoRestriccion(r) {
+  return t("asesor.restriccion.frase", { texto: r.texto });
+}
+
+// Estado de un filtro del cubo, igual que en la ficha (web/app.js, estadoDeFiltro).
+function estadoDeFiltro(f) {
+  if (f.estado) return f.estado;
+  if (f.pasa === true) return "passes";
+  if (f.pasa === false) return "warning";
+  return "needs_local_check";
+}
+
+/**
+ * Reparte los filtros de la opción (cubo.json) y lo que la persona capturó en tres listas con fuente:
+ * restricciones encontradas, puntos que piden revisión local y comprobaciones que pasan.
+ * Los textos de los datos (motivo, fuente) se muestran como vienen; deDato toma su variante por idioma si existe.
+ */
+function revisarOpcion({ opcion, cubo, entrada, requisitos, perfil }) {
+  const restricciones = [];
+  const pendientes = [];
+  const cumplidas = [];
+  const item = (lista, id, texto, fuente, etiqueta, origen) =>
+    lista.push({ id, texto, fuente: fuente ?? null, etiqueta: etiqueta ?? null, origen });
+  const cultivos = Array.isArray(opcion.secuencia) ? opcion.secuencia : [];
+  const requisito = (c) => requisitos?.cultivos?.[c] ?? null;
+
+  // ¿La salinidad capturada alcanza para evaluar el filtro del cubo en todos los cultivos de la opción?
+  const ece = entrada.salinidad;
+  const eceEvaluable =
+    esNumero(ece) && cultivos.length > 0 && cultivos.every((c) => esNumero(requisito(c)?.salinidad_umbral_ds_m?.valor));
+
+  // Ventana de siembra del cultivo que abre la secuencia (catálogo del cubo), contra la fecha capturada.
+  const secuencia = cubo.opciones_catalogo?.[opcion.rotacion]?.secuencia;
+  const apertura = Array.isArray(secuencia) ? secuencia[0] : null;
+  const mmdd = entrada.fecha ? entrada.fecha.slice(entrada.fecha.indexOf("-") + 1) : null;
+  const enVentana = mmdd && apertura ? dentroDeVentana(mmdd, apertura.siembra?.desde, apertura.siembra?.hasta) : null;
+
+  for (const f of Array.isArray(opcion.filtros) ? opcion.filtros : []) {
+    const estado = estadoDeFiltro(f);
+    const texto = deDato(f, "motivo") ?? deDato(f, "filtro") ?? String(f.id ?? "");
+    const fuente = deDato(f, "fuente");
+    if (f.id === "fecha_siembra" && enVentana != null) {
+      const valores = {
+        fecha: mesDia(mmdd),
+        cultivo: nombreCultivo(apertura.cultivo),
+        desde: mesDia(apertura.siembra.desde),
+        hasta: mesDia(apertura.siembra.hasta),
+      };
+      const fuenteVentana = deDato(apertura, "fuente") ?? fuente;
+      if (enVentana) item(cumplidas, f.id, t("asesor.fecha.dentro", valores), fuenteVentana, f.etiqueta, "captura");
+      else item(restricciones, f.id, t("asesor.fecha.fuera", valores), fuenteVentana, f.etiqueta, "captura");
+      if (secuencia.length > 1) item(pendientes, f.id, t("asesor.fecha.siguientes"), fuente, f.etiqueta, "cubo");
+      continue;
+    }
+    if (f.id === "salinidad" && eceEvaluable) continue; // se evalúa abajo con la medición capturada
+    if (estado === "warning") item(restricciones, f.id, texto, fuente, f.etiqueta, "cubo");
+    else if (estado === "passes") item(cumplidas, f.id, texto, fuente, f.etiqueta, "cubo");
+    else item(pendientes, f.id, texto, fuente, f.etiqueta, "cubo");
+  }
+
+  // Suelo capturado o del mapa regional contra los intervalos generales publicados. La fuente de esos
+  // intervalos pide no usarlos para descartar opciones: se describen como puntos de revisión local.
+  const phCapturado = esNumero(entrada.ph);
+  const ph = phCapturado ? entrada.ph : perfil?.ph;
+  for (const c of cultivos) {
+    const req = requisito(c);
+    const tolerado = req?.ph?.tolerado;
+    if (esNumero(ph) && Array.isArray(tolerado) && tolerado.every(esNumero)) {
+      const [min, max] = tolerado;
+      const valores = {
+        ph: numero(ph, UN_DECIMAL),
+        origen: t(phCapturado ? "asesor.ph.origen_laboratorio" : "asesor.ph.origen_mapa"),
+        cultivo: nombreCultivo(c),
+        min: numero(min, UN_DECIMAL),
+        max: numero(max, UN_DECIMAL),
+      };
+      const origen = phCapturado ? "captura" : "mapa_de_suelo";
+      if (ph < min || ph > max) item(pendientes, `ph_${c}`, t("asesor.ph.fuera", valores), deDato(req.ph, "fuente"), null, origen);
+      else item(cumplidas, `ph_${c}`, t("asesor.ph.dentro", valores), deDato(req.ph, "fuente"), null, origen);
+    }
+    if (eceEvaluable) {
+      const u = req.salinidad_umbral_ds_m;
+      const valores = { ece: numero(ece, DOS_DECIMALES), cultivo: nombreCultivo(c), umbral: numero(u.valor, DOS_DECIMALES) };
+      if (ece > u.valor) item(pendientes, `ece_${c}`, t("asesor.ece.arriba", valores), deDato(u, "fuente"), null, "captura");
+      else item(cumplidas, `ece_${c}`, t("asesor.ece.abajo", valores), deDato(u, "fuente"), null, "captura");
     }
   }
-  if (eficiencia == null)
-    warnings.push(
-      "La eficiencia no está medida. La superficie calculada depende de la referencia o rango declarado.",
-    );
-  const nivel = entrada.nivel ?? datos.metodo.nivel_plan;
-  const resultados = ids.map((id) => {
-    const rot = z.rotaciones[id],
-      opcion = cat.opciones[id],
-      cultivos = rot.cultivos;
-    const d = demandaHistorica(rot, {
-      lluvia: entrada.lluvia ?? 0,
-      eficiencia,
-      rangoEficiencia: rango,
-      nivel,
+  return { restricciones, pendientes, cumplidas };
+}
+
+/**
+ * Plan de una parcela: una tarjeta por cada opción que el cubo trae para ella, en el orden del cubo.
+ * Las cifras de agua salen de evaluarOpcion (web/reglas.js) con las láminas del cubo.
+ *
+ * @param {object} a
+ * @param {object} a.cubo      web/data/cubo.json
+ * @param {object} a.parcela   properties de la parcela (parcelas.geojson)
+ * @param {number} a.dotacion  dotación del escenario, millares/ha
+ * @param {number} a.lluvia    lluvia del escenario (un valor de cubo.lluvia_pct)
+ * @param {object} [a.entrada] lo que capturó la persona: cultivo, area, volumenDisponible, fecha, ph, salinidad,
+ *                             dotacionConfirmada, sistema (el sistema solo se anota; no cambia ninguna cifra)
+ * @param {object} [a.requisitos] intervalos generales de suelo por cultivo (pronostico.json → requisitos)
+ * @param {object} [a.perfil]  perfil del mapa regional de suelo para la parcela
+ * @param {number} [a.m3PorMillar] constante de conversión, de los datos; solo hace falta si se captura volumen
+ * @returns {{estado: "sin_plan"|"entradas_invalidas"|"calculado", motivo: string|null, errores: string[],
+ *            avisos: object[], tarjetas: object[]}}  Los textos van en el idioma en uso al momento de llamar.
+ */
+export function planDeParcela({
+  cubo,
+  parcela,
+  dotacion,
+  lluvia,
+  entrada = {},
+  requisitos = null,
+  perfil = null,
+  m3PorMillar = null,
+}) {
+  const base = {
+    estado: "sin_plan",
+    motivo: null,
+    errores: [],
+    avisos: [],
+    tarjetas: [],
+    alcance: alcance(),
+    aviso_juicio: avisoJuicio(),
+    idioma: idioma(),
+  };
+  if (!parcela) return { ...base, motivo: t("asesor.plan.sin_parcela") };
+  const resumenParcela = {
+    id: parcela.id ?? null,
+    zona: parcela.zona ?? null,
+    cultivo_detectado: parcela.cultivo_actual ?? null,
+    clasificacion_no_confiable: Boolean(parcela.abstencion),
+    area_del_poligono_ha: parcela.area_ha ?? null,
+  };
+  // Parcela sin clasificar: sin plan, con el motivo. No se inventa una opción para un cultivo desconocido.
+  if (parcela.abstencion || parcela.cultivo_actual === "sin_clasificar")
+    return { ...base, parcela: resumenParcela, motivo: t("asesor.plan.sin_clasificar") };
+  const opciones = cubo?.parcelas?.[parcela.id]?.opciones;
+  if (!Array.isArray(opciones) || !opciones.length)
+    return { ...base, parcela: resumenParcela, motivo: t("asesor.plan.sin_opciones") };
+
+  // --- Entradas ---------------------------------------------------------------------------------
+  const errores = [];
+  const area = entrada.area == null ? parcela.area_ha : entrada.area;
+  if (!esNumero(area) || !(area > 0)) errores.push(t("asesor.error.area"));
+  const volumen = entrada.volumenDisponible ?? null;
+  const D = dotacionDeEntrada({ dotacion, volumen, area, m3PorMillar });
+  if (D == null && !errores.length) errores.push(t(volumen == null ? "asesor.error.dotacion" : "asesor.error.volumen"));
+  const r = Number(lluvia);
+  if (lluvia == null || lluvia === "" || !Number.isFinite(r)) errores.push(t("asesor.error.lluvia"));
+  const PH_MAXIMO = 14; // tope de la escala de pH, por definición; no es una cifra de los datos
+  if (entrada.ph != null && (!esNumero(entrada.ph) || entrada.ph < 0 || entrada.ph > PH_MAXIMO)) errores.push(t("asesor.error.ph"));
+  if (entrada.salinidad != null && (!esNumero(entrada.salinidad) || entrada.salinidad < 0)) errores.push(t("asesor.error.salinidad"));
+  if (entrada.fecha && !fechaValida(entrada.fecha)) errores.push(t("asesor.error.fecha"));
+  if (errores.length)
+    return { ...base, estado: "entradas_invalidas", parcela: resumenParcela, errores, motivo: t("asesor.plan.entradas_invalidas") };
+
+  // --- Avisos generales (no cambian ninguna cifra) -------------------------------------------------
+  const avisos = [];
+  const detectado = parcela.cultivo_actual;
+  const confirmado = entrada.cultivo ?? null;
+  const cultivoDistinto = confirmado != null && confirmado !== detectado;
+  if (confirmado == null)
+    avisos.push({ id: "cultivo_sin_confirmar", texto: t("asesor.nota.cultivo_sin_confirmar", { cultivo: nombreCultivo(detectado) }), fuente: null, etiqueta: null });
+  else if (cultivoDistinto)
+    avisos.push({
+      id: "cultivo_distinto",
+      texto: t("asesor.nota.cultivo_distinto", { reportado: nombreCultivo(confirmado), detectado: nombreCultivo(detectado) }),
+      fuente: null,
+      etiqueta: null,
     });
-    const bloqueos = [],
-      pendientes = [...warnings],
-      evidencias = [];
-    let riesgoHelada = null;
-    const evidencia = (criterio, estado, valor, fuente) =>
-      evidencias.push({ criterio, estado, valor, fuente });
-    if (!d)
-      return {
-        id,
-        nombre: rot.nombre,
-        estado: "sin_datos",
-        bloqueos: [],
-        pendientes: ["Demanda histórica no disponible."],
-        evidencias: [],
-      };
-    if (cultivo === "nogal" && id !== "nogal")
-      bloqueos.push(
-        "Una huerta establecida no se reemplaza por una rotación anual dentro de este modelo.",
-      );
-    const reglas = cat.filtros.filter((f) => f.aplica_a.includes(id));
-    for (const f of reglas) {
-      const reg = f.regla;
-      if (f.id === "helada_siembra") {
-        riesgoHelada = entrada.fecha
-          ? (z.heladas_primavera?.[entrada.fecha.slice(5)] ?? null)
-          : null;
-        pendientes.push(
-          riesgoHelada
-            ? "Revisa la frecuencia histórica de helada. La fuente no define un umbral para aprobar o rechazar la siembra."
-            : "Falta una fecha de primavera con histórico para evaluar la helada; no se supone riesgo nulo.",
-        );
-        evidencia(
-          "Helada desde siembra hasta fin de primavera",
-          "frecuencia_historica",
-          riesgoHelada,
-          `${z.fuente_clima}; Tmin no positiva; ${f.fuente}. Dato regional, no estación de la parcela.`,
-        );
-      }
-      if (f.id === "chile_sin_solanaceas") {
-        if (confirmado && cultivo === "chile")
-          bloqueos.push(
-            "No establecer chile después de chile: riesgo de continuidad de patógenos.",
-          );
-        if (entrada.phytophthora === "si")
-          bloqueos.push(
-            "Antecedente declarado de Phytophthora: requiere un historial de rotación y revisión fitosanitaria antes de reintroducir chile.",
-          );
-        if (!entrada.phytophthora || entrada.phytophthora === "desconocido")
-          pendientes.push(
-            "Falta historial de Phytophthora y de cultivos hospedantes.",
-          );
-        evidencia(
-          "Sucesión y sanidad",
-          bloqueos.length ? "revisar" : "condicional",
-          cultivo,
-          f.fuente,
-        );
-      }
-      if (f.id === "alfalfa_no_en_anio_seco") {
-        const minimo = reg.lamina_minima_cm / datos.metodo.cm_por_millar;
-        if (D < minimo)
-          bloqueos.push(
-            "La dotación no cubre siquiera el establecimiento de alfalfa previsto en esta rotación.",
-          );
-        evidencia(
-          "Establecimiento de alfalfa",
-          D < minimo ? "bloqueado" : "comparado",
-          { dotacion: D, minimo_millares_ha: minimo },
-          f.fuente,
-        );
-      }
-      if (f.id === "corte_verano_alfalfa_establecida") {
-        if (entrada.edadAlfalfa == null)
-          pendientes.push(
-            "Falta edad confirmada de la alfalfa para evaluar el corte de riego.",
-          );
-        else if (entrada.edadAlfalfa < reg.edad_min_anios)
-          bloqueos.push(
-            "La alfalfa no tiene la edad mínima para el escenario de corte de riego.",
-          );
-        evidencia(
-          "Edad de alfalfa",
-          "comparado",
-          entrada.edadAlfalfa,
-          f.fuente,
-        );
-      }
-      if (f.id === "atrazina" && entrada.atrazina !== "no") {
-        pendientes.push(
-          "Verifica el producto de atrazina usado y su intervalo de seguridad; no se aprueba automáticamente.",
-        );
-        evidencia(
-          "Residuo de herbicida",
-          "pendiente",
-          entrada.atrazina ?? null,
-          f.fuente,
-        );
-      }
-      if (
-        ["soca_algodon", "alfalfa_tras_alfalfa", "corte_verano_suelo"].includes(
-          f.id,
-        )
-      ) {
-        pendientes.push(
-          f.id === "soca_algodon"
-            ? "Confirma el calendario de cosecha y destrucción de soca."
-            : f.id === "alfalfa_tras_alfalfa"
-              ? "Confirma el intervalo entre la alfalfa previa y su reestablecimiento."
-              : "El corte de verano necesita profundidad y salinidad de suelo medidas; no se deducen del mapa.",
-        );
-        evidencia(f.id, "pendiente", null, f.fuente);
-      }
-    }
-    const mantener =
-      confirmado && cultivo === id && ["alfalfa", "nogal"].includes(cultivo);
-    const sec = opcion?.secuencia?.[0];
-    if (cultivos.length && !mantener) {
-      if (!entrada.fecha || !/^\d{4}-\d{2}-\d{2}$/.test(entrada.fecha))
-        pendientes.push("Falta la fecha de siembra prevista.");
-      else {
-        const dentro = ventana(
-          entrada.fecha.slice(5),
-          sec?.siembra?.desde,
-          sec?.siembra?.hasta,
-        );
-        if (dentro === false)
-          bloqueos.push(
-            "La fecha prevista está fuera de la ventana publicada para el primer cultivo.",
-          );
-        if (dentro == null)
-          pendientes.push(
-            "No hay una ventana local completa con fuente para validar esa fecha.",
-          );
-        evidencia(
-          "Fecha de siembra",
-          dentro === false
-            ? "fuera_de_ventana"
-            : dentro
-              ? "en_ventana"
-              : "sin_rango",
-          entrada.fecha,
-          sec?.fuente ?? "No hay ventana local verificada.",
-        );
-      }
-      if (cultivos.length > 1)
-        pendientes.push(
-          "Rotación múltiple: confirmar las fechas de los siguientes cultivos; la fecha capturada corresponde solo al primero.",
-        );
-    }
-    for (const c of cultivos) {
-      const req = datos.requisitos.cultivos[c];
-      if (!req) {
-        pendientes.push(`No hay requisitos de suelo publicados para ${c}.`);
-        continue;
-      }
-      const ph = entrada.ph ?? perfil?.ph;
-      if (req.ph && ph != null) {
-        const [min, max] = req.ph.tolerado;
-        const fuera = ph < min || ph > max;
-        if (fuera)
-          pendientes.push(
-            `El pH está fuera del intervalo general publicado para ${c}; revisar localmente, sin descartarlo solo por el mapa.`,
-          );
-        evidencia(
-          `pH · ${c}`,
-          fuera ? "fuera_del_rango_general" : "dentro_del_rango_general",
-          {
-            valor: ph,
-            origen: entrada.ph == null ? "mapa_regional" : "captura_usuario",
-            intervalo: req.ph.tolerado,
-          },
-          req.ph.fuente,
-        );
-      } else pendientes.push(`Falta pH o rango publicado para ${c}.`);
-      const sal = req.salinidad_umbral_ds_m;
-      if (entrada.salinidad == null)
-        pendientes.push(
-          `Falta ECe de laboratorio para ${c}; no se supone salinidad nula.`,
-        );
-      else if (sal?.valor != null) {
-        const supera = entrada.salinidad > sal.valor;
-        if (supera)
-          pendientes.push(
-            `La ECe supera el umbral de respuesta sin merma publicado para ${c}; revisar manejo de salinidad.`,
-          );
-        evidencia(
-          `Salinidad · ${c}`,
-          supera ? "supera_umbral" : "bajo_umbral",
-          { ece: entrada.salinidad, umbral: sal.valor },
-          sal.fuente,
-        );
-      } else
-        pendientes.push(
-          `No hay umbral numérico de salinidad publicado para ${c}.`,
-        );
-      if (req.textura && !perfil?.clase_textura)
-        pendientes.push(`Falta textura regional o medida para ${c}.`);
-      if (req.textura?.limitante?.includes(perfil?.clase_textura))
-        pendientes.push(
-          `La textura del mapa tiene una limitación general para ${c}; confirmar en campo antes de decidir.`,
-        );
-      if (req.textura)
-        evidencia(
-          `Textura · ${c}`,
-          "orientacion_regional",
-          {
-            textura: perfil?.clase_textura ?? null,
-            origen: "mapa_regional",
-            limitante:
-              req.textura.limitante?.includes(perfil?.clase_textura) ?? null,
-          },
-          req.textura.fuente,
-        );
-    }
-    if (cultivos.includes("cereal_invierno"))
-      pendientes.push(
-        "Cereal de invierno representa avena forrajera; su validación local de riego en Delicias está pendiente.",
-      );
-    const areaPlan = d.plan > 0 ? Math.min(area, (area * D) / d.plan) : 0;
-    const apoyoBajo = d.filas.filter((f) => f.alto <= D).length / d.n;
-    const apoyoAlto = d.filas.filter((f) => f.bajo <= D).length / d.n;
-    evidencia(
-      "Balance hídrico",
-      "calculado",
-      {
-        area_ha: area,
-        dotacion: D,
-        presupuesto_millares: D * area,
-        demanda_plan: d.plan,
-        area_plan_ha: areaPlan,
-        nivel,
-        eficiencia: d.eficiencia,
-      },
-      d.fuente,
-    );
-    evidencia(
-      "Eficiencia",
-      eficiencia == null ? "referencia_no_medida" : "captura_usuario",
-      d.eficiencia,
-      fuenteEa,
-    );
-    if (opcion)
-      evidencia(
-        "Candidato",
-        id === entrada.objetivo ? "seleccion_usuario" : "catalogo",
-        id,
-        opcion.fuente,
-      );
-    const observada = entrada.anioObservado
-      ? d.filas.find((f) => f.anio === entrada.anioObservado)
-      : null;
-    const factor = area * datos.metodo.m3_por_millar;
-    const contraste =
-      observada && entrada.riegoObservado != null
-        ? {
-            anio: observada.anio,
-            reportado_m3: entrada.riegoObservado,
-            modelo_central_m3: observada.central * factor,
-            modelo_bajo_m3: observada.bajo * factor,
-            modelo_alto_m3: observada.alto * factor,
-            diferencia_m3: entrada.riegoObservado - observada.central * factor,
-            alcance:
-              "Contraste con registro del usuario; exige misma superficie, cultivo, calendario y ciclo. No es calibración ni validación con una sola medición.",
-          }
-        : null;
-    return {
-      id,
-      nombre: rot.nombre,
-      estado: bloqueos.length
-        ? "bloqueado"
-        : pendientes.length
-          ? "condicionado"
-          : "plan_calculado",
-      bloqueos,
-      pendientes: [...new Set(pendientes)],
-      evidencias,
-      demanda: d,
-      areaPlan,
+  if (!entrada.dotacionConfirmada)
+    avisos.push({ id: "dotacion_escenario", texto: t("asesor.nota.dotacion_escenario"), fuente: null, etiqueta: null });
+  const sinRotacion = cubo.parcelas[parcela.id].sin_rotacion;
+  if (deDato(sinRotacion, "motivo"))
+    avisos.push({ id: "sin_rotacion", texto: deDato(sinRotacion, "motivo"), fuente: deDato(sinRotacion, "fuente"), etiqueta: sinRotacion.etiqueta ?? null });
+
+  // --- Una tarjeta por opción del cubo, en su orden ---------------------------------------------
+  const llave = llaveLluvia(r);
+  const comoLaFicha = formatoHectareas(area);
+  const tarjetas = opciones.map((opcion) => {
+    const lamina = opcion.agua?.lamina_bruta?.[llave];
+    const comun = {
+      id: opcion.id,
+      nombre: deDato(opcion, "nombre") ?? String(opcion.id ?? ""),
+      rotacion: opcion.rotacion ?? null,
+      etiqueta: opcion.etiqueta_opcion ?? null,
       area,
-      apoyoBajo,
-      apoyoAlto,
-      presupuesto: D * area,
       dotacion: D,
-      contraste,
-      esDescanso: !cultivos.length,
-      plazo: rot.plazo_anios,
-      fechaBase: rot.fecha_base,
-      fuenteClima: z.fuente_clima,
-      riesgoHelada,
+      lluvia: r,
     };
+    if (!lamina || ![lamina.p10, lamina.p50, lamina.p90].every(esNumero))
+      return { ...comun, estado: "sin_datos", rotulo: rotuloDeEstado("sin_datos"), restricciones: [], pendientes: [], cumplidas: [], descripcion: textoCobertura(null) };
+    const ev = evaluarOpcion(opcion, area, D, r); // MISMA regla que la ficha
+    const revision = revisarOpcion({ opcion, cubo, entrada, requisitos, perfil });
+    if (cultivoDistinto)
+      revision.pendientes.unshift({ id: "cultivo_distinto", texto: t("asesor.nota.cultivo_distinto_tarjeta"), fuente: null, etiqueta: null, origen: "captura" });
+    const estado = revision.restricciones.length ? "restriccion" : revision.pendientes.length ? "revisar" : "calculado";
+    const tarjeta = {
+      ...comun,
+      estado,
+      rotulo: rotuloDeEstado(estado),
+      lamina: ev.lamina,
+      cobertura: ev.cobertura,
+      hectareas: ev.hectareas,
+      // Las hectáreas escritas como en la ficha (formato de web/js/resumen.js), para comparar las dos páginas.
+      hectareas_ficha: { area: comoLaFicha(area), p50: comoLaFicha(ev.hectareas.p50), bajo: comoLaFicha(ev.hectareas.bajo), alto: comoLaFicha(ev.hectareas.alto) },
+      sinRiego: !(ev.lamina.p50 > 0),
+      plazo: opcion.agua?.plazo_anios ?? null,
+      ...revision,
+    };
+    return { ...tarjeta, descripcion: textoCobertura(tarjeta) };
   });
   return {
-    errores: [],
-    resultados,
-    entrada: { ...entrada, area, dotacion: D },
-    zona,
-    parcela: {
-      id: parcela.id,
-      zona: parcela.zona,
-      cultivo_detectado: parcela.cultivo_actual,
-      clasificacion_no_confiable: parcela.abstencion,
-      area_del_poligono_ha: parcela.area_ha,
-    },
-    cultivoUsado: cultivo,
-    confirmado,
-    fuentes: datos.fuentes,
-    metodo: datos.metodo,
-    alcance:
-      "Planes de agua condicionados a entradas y restricciones. No son pronósticos de rendimiento, rentabilidad ni asignación de presa.",
+    ...base,
+    estado: "calculado",
+    parcela: resumenParcela,
+    avisos,
+    tarjetas,
+    area,
+    dotacion: D,
+    lluvia: r,
+    dotacion_origen: volumen == null ? "escenario" : "volumen_capturado",
+    cultivo_confirmado: confirmado,
+    sistema_de_riego_anotado: entrada.sistema ?? null,
   };
+}
+
+/**
+ * Comprobaciones de consistencia del software con los datos de esta parcela (botón de comprobaciones).
+ * No son ensayos agronómicos. `validacion` es zonas[zona].validacion_lluvia de pronostico.json, o null.
+ */
+export function comprobarPlan(args, validacion = null) {
+  const lista = [];
+  const agregar = (clave, ok, detalle) =>
+    lista.push({ id: clave, nombre: t(`asesor.prueba.${clave}`), ok: Boolean(ok), detalle: detalle ?? t(`asesor.prueba.${clave}_detalle`) });
+  const plan = planDeParcela(args);
+  if (plan.estado !== "calculado") {
+    agregar("plan_existe", false, plan.motivo ?? plan.errores.join(" "));
+    return lista;
+  }
+  const conRiego = (p) => p.tarjetas.filter((x) => x.estado !== "sin_datos" && !x.sinRiego);
+  const sinVolumen = { ...args, entrada: { ...args.entrada, volumenDisponible: null } };
+  agregar("repetible", JSON.stringify(plan) === JSON.stringify(planDeParcela(args)));
+  agregar(
+    "mismas_hectareas",
+    plan.tarjetas
+      .filter((x) => x.estado !== "sin_datos")
+      .every((x) => {
+        const h = hectareasQueAlcanzan(x.area, x.dotacion, x.lamina);
+        return h.p50 === x.hectareas.p50 && h.bajo === x.hectareas.bajo && h.alto === x.hectareas.alto && cobertura(x.dotacion, x.lamina.p50) === x.cobertura;
+      }),
+  );
+  const cero = planDeParcela({ ...sinVolumen, dotacion: 0 });
+  agregar("sin_agua", cero.estado === "calculado" && conRiego(cero).every((x) => x.hectareas.p50 === 0));
+  const paso = Number(args.cubo?.dotaciones?.deslizador?.paso);
+  if (Number.isFinite(paso) && paso > 0) {
+    const mas = planDeParcela({ ...sinVolumen, dotacion: plan.dotacion + paso });
+    agregar(
+      "mas_agua",
+      mas.estado === "calculado" &&
+        plan.tarjetas.every((x) => x.estado === "sin_datos" || x.hectareas.p50 <= (mas.tarjetas.find((m) => m.id === x.id)?.hectareas.p50 ?? -Infinity)),
+    );
+  }
+  agregar("invalidas", planDeParcela({ ...args, entrada: { ...args.entrada, area: 0 } }).tarjetas.length === 0);
+  if (Array.isArray(validacion?.casos) && validacion.casos.length)
+    agregar("lluvia", validacion.casos.every((x) => x.entrenamiento_fin < x.anio));
+  return lista;
 }
