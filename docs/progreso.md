@@ -100,3 +100,4 @@
 | 07:45 | Portada | HECHO | Recorrido final con tres revisores de contexto nuevo: sin bloqueos; siete correcciones en el tablero y seis puntos abiertos menores | `docs/revisiones/2026-11-15_recorrido_final.md` |
 | 07:20 | Portada | HECHO | Revisión visual a pedido de Cristian. Resumen: zonas piloto y opciones de la parcela lado a lado, con la lluvia del registro y con menos lluvia; gráfica de lluvia a todo el ancho | `web/js/dashboard.js` (`ladoALado`), `tests/test_tablero_lado_a_lado.py` |
 | 06:36 | Portada | PUBLICADO | PR #9 en `main`: el tablero es la portada y el explorador queda en `explorer.html`; revisor final sin bloqueos; CI y las cinco pruebas con navegador en verde sobre el commit fusionado | `dfbf35e`, `084bb30` |
+| 08:30 | Portada | HECHO | El tablero abre siempre en inglés; el selector lo cambia al español (ya no toma el idioma del navegador) | `docs/decisiones/2026-11-15_ingles_primero.md`, `tests/i18n.test.js` |

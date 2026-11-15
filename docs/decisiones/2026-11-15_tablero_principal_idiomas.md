@@ -14,7 +14,7 @@
 
 ## Idiomas
 - Cuatro: **inglés, español, portugués y francés**, los mismos del mensaje de WhatsApp (`docs/decisiones/2026-11-14_whatsapp_idiomas.md`).
-- El tablero abre en el idioma del navegador si es uno de los cuatro. Si no lo es, abre en **inglés**. La persona puede cambiarlo con el selector; `?lang=xx` en la liga lo fija (`web/js/i18n.js`).
+- ~~El tablero abre en el idioma del navegador si es uno de los cuatro.~~ Desde `2026-11-15_ingles_primero.md`: el tablero abre siempre en **inglés**. La persona puede cambiarlo con el selector; `?lang=xx` en la liga lo fija (`web/js/i18n.js`).
 - Los textos de la interfaz viven en los diccionarios de `web/js/`. Los textos que vienen en los datos del tablero (`web/data/dashboard.json` y `web/data/pronostico.json`, que salen de `data/investigacion_dashboard.json`) llevan la llave de siempre en inglés y, al lado, `<llave>_es`, `<llave>_pt` y `<llave>_fr`. Ninguna llave cambia de nombre ni se quita.
 - Las cifras salen siempre de los datos y se formatean con `Intl` en el idioma elegido. Una traducción no puede cambiar un número: `tests/test_tablero_idiomas.py` exige las cuatro variantes de cada texto mostrado y los mismos números en las cuatro.
 
