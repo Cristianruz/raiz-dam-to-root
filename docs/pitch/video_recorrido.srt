@@ -1,0 +1,39 @@
+1
+00:00:00,000 --> 00:00:04,000
+Before you plant, see the water you are committing.
+
+2
+00:00:04,000 --> 00:00:10,000
+NASA data, a crop-water model, an answer per field.
+
+3
+00:00:10,000 --> 00:00:16,000
+Set the water allocation. The map and the indicator respond.
+
+4
+00:00:16,000 --> 00:00:26,000
+Each option: water asked, hectares covered, years committed.
+
+5
+00:00:26,000 --> 00:00:37,000
+Every option says why, and what changes from today.
+
+6
+00:00:37,000 --> 00:00:43,000
+From the dam to the crop and the aquifer.
+
+7
+00:00:43,000 --> 00:00:49,000
+The year the dam delivered no water.
+
+8
+00:00:49,000 --> 00:00:55,000
+A message for the farmer, in their language.
+
+9
+00:00:55,000 --> 00:01:01,000
+Five tests, published whatever the result.
+
+10
+00:01:01,000 --> 00:01:05,000
+The farmer decides.
