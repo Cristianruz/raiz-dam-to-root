@@ -244,8 +244,8 @@ Probado contra tu commit c5de01c.
   «applied water, district records 2009–2016 (measurement point not confirmed)». Las de INIFAP sí son láminas de riego
   recomendadas por gravedad, en la parcela. Si alguien del equipo abre el artículo (es de acceso abierto, DOI
   10.3390/su16051851) y lee la sección de métodos, se cierra la duda.
-- **Pendiente mío, en este orden:** D6 nogal (cobertura del dosel y vida de la huerta, con fuente). Lo de Tena
-  (`etiquetas_unidas.csv`) no ha llegado.
+- **Pendiente mío, en este orden:** D6 nogal (cobertura del dosel y vida de la huerta, con fuente). Las etiquetas del equipo
+  (`etiquetas_unidas.csv`) no han llegado.
 
 ## 14-nov 17:10 — D6 (nogal): cobertura estimada con NDVI y edad de las huertas
 - **ENTREGA: supuestos.json — prueba OK** (contra c5de01c; un aviso esperado: `nogal_referencia.vida_huerta_anios` va en null).
