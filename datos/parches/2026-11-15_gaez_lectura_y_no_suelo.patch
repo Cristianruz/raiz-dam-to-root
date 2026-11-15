@@ -1,0 +1,276 @@
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
+# Parche para la integración (motor/ y web/ son del integrador): la tarjeta de GAEZ lee la clase por su nombre, el factor
+# de la unidad de FAO aparte, el cultivo con que GAEZ evalúa la clase y la nota de la entrega; zona_urbana y
+# cuerpo_de_agua de suelo_tipos.json como «no suelo» sin aviso. Con pruebas (2 pytest y 2 node nuevas).
+# Probado sobre 85a8939 con el buzón completo de datos-satelite: construir.py OK (1135 pytest, 225 node), web_smoke 747/747.
+# Aplicar en claude/keen-mayer-sp0vvm con: git apply datos/parches/2026-11-15_gaez_lectura_y_no_suelo.patch
+# y después: python construir.py (regenera web/data/contexto.json, suelo.json, manifest.json y precache.json).
+diff --git a/motor/contexto_web.py b/motor/contexto_web.py
+index 218b8bf..ac8c3cc 100644
+--- a/motor/contexto_web.py
++++ b/motor/contexto_web.py
+@@ -60,7 +60,8 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página
+   ecostress        null + ecostress_motivo, o {archivo, fuente, fecha, meses, parcelas: {id: [valores
+                    por mes]}}
+   gaez             null + gaez_motivo, o {archivo, fuente, fecha, zonas: {zona: [{cultivo, variable,
+-                   valor, unidad, resolucion_m}]}}
++                   valor, unidad, resolucion_m, y si la entrega los trae: clase_nombre, cultivo_gaez,
++                   nota}]}}
+   heladas          null + heladas_motivo, o el contenido de heladas.json más «entrega» {archivo,
+                    fuente, fecha}
+   et_contraste     null + et_contraste_motivo, o {zona, motivo_otras_zonas, archivo, fuente, fecha,
+@@ -152,6 +153,11 @@ ARCHIVO_CONTEXTO = "contexto_regional.csv"
+ ARCHIVO_GEDI = "gedi_parcelas.csv"
+ ARCHIVO_ECOSTRESS = "ecostress_parcelas.csv"
+ ARCHIVO_GAEZ = "gaez_zona.csv"
++# Columnas adicionales de gaez_zona.csv (pieza G1 de la sesión de datos) que la tarjeta necesita para leer la fila:
++# el nombre de la clase de aptitud de FAO (en esa fila «valor» es el número de clase), el cultivo con que GAEZ evalúa
++# la clase del proyecto (Maize para maiz_forrajero, Oat para cereal_invierno) y la nota de la entrega (el maíz de
++# GAEZ es de grano). Son textos; la fila que no los trae va sin ellos.
++COLUMNAS_TEXTO_GAEZ = ("clase_nombre", "cultivo_gaez", "nota")
+ ARCHIVO_HELADAS = "heladas.json"
+ # Criterios para leer la altura de GEDI: entrega de la sesión de datos (pieza A11), ya validada.
+ ARCHIVO_SUPUESTOS = "supuestos.json"
+@@ -636,13 +642,19 @@ def bloque_gaez(ruta, zonas, registro, avisos):
+                 avisos.append(f"{ARCHIVO_GAEZ}: zona «{zona}» que no está en data/params.json; sus filas no se usan")
+             ajenas.add(zona)
+             continue
+-        por_zona.setdefault(zona, []).append({
++        renglon = {
+             "cultivo": fila["cultivo"].strip(),
+             "variable": fila["variable"].strip(),
+             "valor": numero(fila["valor"]),
+             "unidad": fila["unidad"].strip(),
+             "resolucion_m": numero_limpio(fila["resolucion_m"]),
+-        })
++        }
++        # Los textos que leen la fila (COLUMNAS_TEXTO_GAEZ), solo si la entrega los trae y no están vacíos.
++        for columna in COLUMNAS_TEXTO_GAEZ:
++            texto = (fila.get(columna) or "").strip()
++            if texto:
++                renglon[columna] = texto
++        por_zona.setdefault(zona, []).append(renglon)
+     return {**procedencia(registro), "zonas": por_zona}
+ 
+ 
+diff --git a/motor/suelo_web.py b/motor/suelo_web.py
+index 2e0ddca..4ac5999 100644
+--- a/motor/suelo_web.py
++++ b/motor/suelo_web.py
+@@ -181,6 +181,10 @@ ARCHIVO_REGLAS = "suelo_reglas.json"
+ # Zona → llave de suelo_tipos.json → zona con los suelos del municipio (textos_ficha_en.tipo_suelo.zona.cuando:
+ # «zona delicias_saucillo; {lista} = suelo_tipos.json → zona.municipio_delicias_pct»). Lázaro Cárdenas no la tiene.
+ LISTA_MUNICIPIO_DE_ZONA = {"delicias_saucillo": E.ZONA_PCT}
++# Superficies del mismo cuadro del INEGI (Tabla 1 del Plan Municipal de Desarrollo de Delicias) que no son suelo: con
++# ellas la lista suma el 100 % de la superficie del municipio, como pide el validador (motor/esquemas.py). No van en la
++# lista de suelos y no avisan; cualquier otra llave que no sea un grupo WRB del catálogo sí avisa.
++NO_SUELO = ("zona_urbana", "cuerpo_de_agua")
+ # Nutrientes que la ficha NO muestra como «near the limit» (textos_ficha_en.suelo.cerca_del_limite.cuando: «con
+ # cerca_del_limite sin N, K, Ca, Mg ni S (decisión del integrador)»; docs/suelo_tipos_y_nutrientes.md §6 de la rama
+ # datos-satelite: a pH 8.1 el grupo queda a 0.1 de su rango y en suelos calcáreos el Ca y el Mg dominan el complejo
+@@ -756,8 +760,8 @@ def leer_catalogo(processed, avisos):
+ 
+ def suelos_del_municipio(catalogo, zona, plantilla, avisos):
+     """{texto_en, suelos: [{grupo, pct}], fuente, etiqueta} de la zona (INEGI, del catálogo), o None. Los nombres
+-    son los grupos de la WRB del catálogo (por su nombre_es); lo que no es un grupo (zona urbana, cuerpo de agua) no
+-    es un suelo y no entra a la lista."""
++    son los grupos de la WRB del catálogo (por su nombre_es); lo que no es un grupo no entra a la lista: las superficies
++    que no son suelo (NO_SUELO: zona urbana, cuerpo de agua) sin aviso, y cualquier otra llave con aviso."""
+     llave = LISTA_MUNICIPIO_DE_ZONA.get(zona)
+     bloque = (catalogo or {}).get("zona") or {}
+     pct = bloque.get(llave) if llave else None
+@@ -768,7 +772,7 @@ def suelos_del_municipio(catalogo, zona, plantilla, avisos):
+     for nombre, valor in pct.items():
+         if nombre in grupo_de and finito(valor) is not None:
+             suelos.append({"grupo": grupo_de[nombre], "pct": valor})
+-        else:
++        elif nombre not in NO_SUELO:
+             fuera.append(nombre)
+     if fuera:
+         avisos.append(f"{ARCHIVO_CATALOGO}: zona.{llave} trae {', '.join(fuera)}, que no son grupos de suelo de la WRB del "
+diff --git a/tests/contexto.test.js b/tests/contexto.test.js
+index 8de3ed4..98ad6d5 100644
+--- a/tests/contexto.test.js
++++ b/tests/contexto.test.js
+@@ -28,6 +28,7 @@ import {
+   climaDelAnio,
+   contarEstados,
+   criteriosGedi,
++  cultivoDeGaez,
+   diasIncompletos,
+   diferenciaLluvia,
+   escalaY,
+@@ -44,6 +45,7 @@ import {
+   modeloTarjetas,
+   montarContextoRegional,
+   montarRecursosReto,
++  notasDeGaez,
+   num,
+   ordenarRecursos,
+   puntosAnuales,
+@@ -53,6 +55,7 @@ import {
+   textoMascon,
+   ultimoMesConDato,
+   valorAnual,
++  valorGaez,
+ } from "../web/js/contexto.js";
+ 
+ const leer = (ruta) => JSON.parse(readFileSync(new URL(ruta, import.meta.url), "utf8"));
+@@ -551,6 +554,32 @@ test("formatoNumero y etiquetaMes", () => {
+   assert.equal(etiquetaMes(null), "");
+ });
+ 
++test("GAEZ: la clase por su nombre, el factor de la unidad de FAO aparte y el cultivo con que GAEZ evalúa la clase", () => {
++  // Filas como las de gaez_zona.csv (pieza G1): «unidad» es la cadena de FAO. Valores de prueba.
++  const nombres = { alfalfa: "Alfalfa", maiz_forrajero: "Forage maize" };
++  assert.equal(valorGaez({ cultivo: "alfalfa", valor: 2, unidad: "Class", clase_nombre: "High" }), "High");
++  assert.equal(valorGaez({ valor: 1678.5, unidad: "10kg DW/ha" }), `${formatoNumero(1678.5)} × 10 kg DW/ha`);
++  assert.equal(valorGaez({ valor: 913, unidad: "kg lint/ha" }), `${formatoNumero(913)} kg lint/ha`);
++  assert.equal(valorGaez({ valor: 7778, unidad: "Index (0–10000)" }), `${formatoNumero(7778)} Index (0–10000)`);
++  assert.equal(valorGaez({ valor: 2, unidad: "Class" }), `${formatoNumero(2)} Class`, "sin clase_nombre, número y unidad");
++  assert.equal(valorGaez(null), "—");
++  assert.deepEqual(cultivoDeGaez({ cultivo: "maiz_forrajero", cultivo_gaez: "Maize" }, nombres), { nombre: "Forage maize", gaez: "Maize" });
++  assert.deepEqual(cultivoDeGaez({ cultivo: "alfalfa", cultivo_gaez: "Alfalfa" }, nombres), { nombre: "Alfalfa", gaez: null });
++  assert.deepEqual(cultivoDeGaez({ cultivo: "alfalfa" }, nombres), { nombre: "Alfalfa", gaez: null });
++  const nota = "nota de prueba";
++  assert.deepEqual(notasDeGaez([{ unidad: "10kg DW/ha" }, { nota }, { nota }]), [nota, "DW: dry weight."]);
++  assert.deepEqual(notasDeGaez([{ unidad: "kg lint/ha" }]), []);
++  assert.deepEqual(notasDeGaez(null), []);
++});
++
++test("GAEZ de hoy (web/data/contexto.json): cada fila de clase trae su nombre y el maíz dice con qué cultivo lo evalúa GAEZ", { skip: !(REAL && REAL.gaez) && "sin gaez en web/data/contexto.json" }, () => {
++  for (const filas of Object.values(REAL.gaez.zonas)) {
++    for (const f of filas.filter((x) => x.unidad === "Class")) assert.ok(f.clase_nombre, `${f.cultivo}: clase sin nombre`);
++    for (const f of filas.filter((x) => x.cultivo === "maiz_forrajero")) assert.ok(cultivoDeGaez(f).gaez, "maíz sin cultivo de GAEZ");
++    if (filas.some((x) => x.cultivo === "maiz_forrajero")) assert.ok(notasDeGaez(filas).some((n) => n !== "DW: dry weight."), "falta la nota del maíz");
++  }
++});
++
+ test("ordenarRecursos y contarEstados: en uso, pedidas, no aplica; conteos calculados de la lista", () => {
+   for (const [nombre, contexto] of [["fixture", LLENO], ["sin entregas", SIN_ENTREGAS], ["real", REAL]]) {
+     if (!contexto) continue;
+diff --git a/tests/test_contexto_web.py b/tests/test_contexto_web.py
+index 9d7b226..0818d8c 100644
+--- a/tests/test_contexto_web.py
++++ b/tests/test_contexto_web.py
+@@ -574,6 +574,23 @@ def test_lleno_gaez_y_heladas(lleno):
+     assert heladas["entrega"]["fuente"] and heladas["entrega"]["fecha"] == GEN.FECHA_PRUEBA
+ 
+ 
++def test_gaez_lleva_los_textos_de_la_entrega_solo_si_vienen(tmp_path):
++    """bloque_gaez: clase_nombre, cultivo_gaez y nota (columnas adicionales de G1) pasan tal cual cuando traen texto; la
++    celda vacía no se escribe. Valores de prueba."""
++    zona = ZONAS[0]
++    ruta = tmp_path / cw.ARCHIVO_GAEZ
++    ruta.write_text("zona,cultivo,variable,valor,unidad,resolucion_m,cultivo_gaez,clase_nombre,nota\n"
++                    f"{zona},alfalfa,Clase de prueba,2,Class,9000,Alfalfa,High,\n"
++                    f"{zona},maiz_forrajero,Rendimiento de prueba,10,kg DW/ha,9000,Maize,,nota de prueba\n",
++                    encoding="utf-8")
++    avisos = []
++    bloque = cw.bloque_gaez(ruta, set(ZONAS), {"archivo": cw.ARCHIVO_GAEZ, "fuente": "prueba", "fecha": "prueba"}, avisos)
++    clase, maiz = bloque["zonas"][zona]
++    assert (clase["clase_nombre"], clase["cultivo_gaez"]) == ("High", "Alfalfa") and "nota" not in clase
++    assert (maiz["cultivo_gaez"], maiz["nota"]) == ("Maize", "nota de prueba") and "clase_nombre" not in maiz
++    assert set(cw.COLUMNAS_TEXTO_GAEZ) <= set(clase) | set(maiz) and avisos == []
++
++
+ def test_et_contraste_lleva_la_zona_del_archivo_sin_sufijo(lleno):
+     """et_contraste.csv no lleva sufijo de zona: es de la zona por omisión (decisión de dos zonas)."""
+     contexto = lleno["contexto"]
+diff --git a/tests/test_suelo_tipo_nutrientes.py b/tests/test_suelo_tipo_nutrientes.py
+index 6a138cc..9458348 100644
+--- a/tests/test_suelo_tipo_nutrientes.py
++++ b/tests/test_suelo_tipo_nutrientes.py
+@@ -197,6 +197,20 @@ def test_suelos_del_municipio_segun_inegi(suelo_real, reglas, tipos):
+     assert "lazaro_cardenas" not in suelo_real["tipo_suelo"]["zonas"]
+ 
+ 
++def test_zona_urbana_y_cuerpo_de_agua_no_son_suelo_ni_avisan():
++    """Las superficies del cuadro del INEGI que no son suelo (sw.NO_SUELO) completan el 100 % del municipio: no entran a
++    la lista ni avisan. Otra llave que no sea un grupo WRB del catálogo sí avisa. Valores de prueba."""
++    catalogo = {"wrb": {"Cambisols": {"nombre_es": "Cambisol"}},
++                "zona": {"fuente": "prueba", "etiqueta": "[V]",
++                         "municipio_delicias_pct": {"Cambisol": 90.0, sw.NO_SUELO[0]: 9.0, sw.NO_SUELO[1]: 1.0}}}
++    avisos = []
++    z = sw.suelos_del_municipio(catalogo, "delicias_saucillo", "Soils: {lista}.", avisos)
++    assert [s["grupo"] for s in z["suelos"]] == ["Cambisols"] and avisos == []
++    catalogo["zona"]["municipio_delicias_pct"]["Inventado"] = 1.0
++    sw.suelos_del_municipio(catalogo, "delicias_saucillo", "Soils: {lista}.", avisos)
++    assert len(avisos) == 1 and "Inventado" in avisos[0] and not any(n in avisos[0] for n in sw.NO_SUELO)
++
++
+ @reales
+ def test_todas_las_parcelas_del_archivo_traen_su_tipo(suelo_real):
+     filas = leer_filas("tipo_suelo_parcelas.csv")
+diff --git a/web/js/contexto.js b/web/js/contexto.js
+index 505d4d4..974bdcd 100644
+--- a/web/js/contexto.js
++++ b/web/js/contexto.js
+@@ -1246,6 +1246,43 @@ function nombreCultivo(id, nombres) {
+   return (nombres && nombres[id]) || String(id ?? "").replace(/_/g, " ");
+ }
+ 
++// GAEZ (gaez_zona.csv, pieza G1 de la sesión de datos): «unidad» es la cadena que publica FAO, sin cambios. Una unidad
++// que empieza con un factor («10kg DW/ha») cuenta en múltiplos de ese factor; «DW» es materia seca (dry weight).
++const UNIDAD_CON_FACTOR = /^(\d+(?:[.,]\d+)?)\s*(\S.*)$/;
++const MARCA_DW = /\bDW\b/;
++const NOTA_DW = "DW: dry weight.";
++
++/** Valor de una fila de GAEZ como se lee: la fila de clase dice el nombre de la clase de FAO (clase_nombre), no su
++ *  número; una unidad con factor lo escribe aparte («1,678.5 × 10 kg DW/ha»); lo demás, número y unidad. */
++export function valorGaez(fila) {
++  const f = fila || {};
++  const clase = String(f.clase_nombre ?? "").trim();
++  if (clase) return clase;
++  const texto = formatoNumero(f.valor);
++  const unidad = String(f.unidad ?? "").trim();
++  const conFactor = unidad.match(UNIDAD_CON_FACTOR);
++  if (!conFactor) return conUnidad(texto, unidad);
++  const [, factor, resto] = conFactor;
++  return `${texto} × ${factor} ${resto}`;
++}
++
++/** Cultivo de una fila de GAEZ: el nombre del proyecto y, si GAEZ evalúa la clase con otro cultivo (cultivo_gaez:
++ *  Maize para el maíz forrajero, Oat para el cereal de invierno), ese nombre aparte; null si es el mismo. */
++export function cultivoDeGaez(fila, nombres) {
++  const nombre = nombreCultivo(fila && fila.cultivo, nombres);
++  const gaez = String((fila && fila.cultivo_gaez) || "").trim();
++  return { nombre, gaez: gaez && gaez.toLowerCase() !== nombre.toLowerCase() ? gaez : null };
++}
++
++/** Notas de la tarjeta de GAEZ: las de la entrega, una vez cada una (p. ej., el maíz de GAEZ es de grano), y qué es
++ *  «DW» si alguna unidad lo trae. */
++export function notasDeGaez(filas) {
++  const lista = Array.isArray(filas) ? filas : [];
++  const notas = [...new Set(lista.map((f) => String((f && f.nota) || "").trim()).filter(Boolean))];
++  if (lista.some((f) => MARCA_DW.test(String((f && f.unidad) || "")))) notas.push(NOTA_DW);
++  return notas;
++}
++
+ function htmlTarjetaGaez(contexto, zonaId, nivel, nombres) {
+   const titulo = "Agro-climatic suitability by crop";
+   const cabeza = `<h${nivel} class="contexto-tarjeta-titulo">${titulo}</h${nivel}>`;
+@@ -1263,18 +1300,21 @@ function htmlTarjetaGaez(contexto, zonaId, nivel, nombres) {
+     .map((f) => {
+       const resolucion = formatoResolucion(f.resolucion_m);
+       const escala = !unaEscala && resolucion ? ` <span class="contexto-equivalente">${esc(resolucion)} grid</span>` : "";
+-      return `<tr><th scope="row">${esc(nombreCultivo(f.cultivo, nombres))}</th><td>${esc(f.variable)}</td><td>${esc(conUnidad(formatoNumero(f.valor), f.unidad))}${escala}</td></tr>`;
++      const cultivo = cultivoDeGaez(f, nombres);
++      const comoGaez = cultivo.gaez ? ` <span class="contexto-equivalente">GAEZ: ${esc(cultivo.gaez)}</span>` : "";
++      return `<tr><th scope="row">${esc(cultivo.nombre)}${comoGaez}</th><td>${esc(f.variable)}</td><td>${esc(valorGaez(f))}${escala}</td></tr>`;
+     })
+     .join("");
+   const escalaComun = unaEscala ? `<p class="contexto-meta"><span>Regional, ${esc(resoluciones[0])} grid</span></p>` : "";
+   const fuente = htmlFuenteCorta(citasDeGaez(contexto, zonaId));
++  const notasEntrega = notasDeGaez(filas).map((n) => `<p class="contexto-tarjeta-nota">${esc(n)}</p>`).join("");
+   return `<article class="contexto-tarjeta" data-tarjeta="gaez">${cabeza}
+       <table class="contexto-tabla contexto-tabla--gaez">
+         <caption class="solo-lector">${titulo}</caption>
+         <thead><tr><th scope="col">Crop</th><th scope="col">Indicator</th><th scope="col">Value</th></tr></thead>
+         <tbody>${cuerpo}</tbody>
+       </table>
+-      ${escalaComun}${fuente}${nota}
++      ${escalaComun}${fuente}${notasEntrega}${nota}
+     </article>`;
+ }
+ 

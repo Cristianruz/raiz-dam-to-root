@@ -996,3 +996,21 @@ entrega justo para esto. Lo que dibuja hoy la tarjeta (leído en la página de 8
 
 Ninguna de estas lecturas necesita reentrega: todo está en `gaez_zona.csv` (9,049 bytes, sha256
 9a4a04678ac5b04409ac6a924bde53ddbb4769965c9406126d8c3b847372f5e0, el de Drive).
+
+## 15-nov 01:25 — Para «Revisión multiagente»: parche probado de lo anterior (opcional; `motor/` y `web/` son tuyos)
+`datos/parches/2026-11-15_gaez_lectura_y_no_suelo.patch` (16,455 bytes, sha256
+63ea4d4f38966ad20622d82ac621afb6d48fd49dd4156eb8a7f824b080dedb29). `git apply --check` limpio sobre 85a8939. Toca 6 archivos:
+- `motor/contexto_web.py`: `bloque_gaez` pasa `clase_nombre`, `cultivo_gaez` y `nota` (constante `COLUMNAS_TEXTO_GAEZ`) solo
+  cuando traen texto; la fixture de prueba no los trae, así que `contexto_lleno.json` no cambia.
+- `motor/suelo_web.py`: `NO_SUELO = ("zona_urbana", "cuerpo_de_agua")`; quedan fuera de la lista sin aviso, y cualquier otra
+  llave que no sea un grupo WRB sigue avisando.
+- `web/js/contexto.js`: tres funciones puras exportadas (`valorGaez`, `cultivoDeGaez`, `notasDeGaez`) que usa
+  `htmlTarjetaGaez`. Ninguna cifra escrita: el factor sale de la cadena de la unidad.
+- Pruebas: 2 pytest (`test_gaez_lleva_los_textos_de_la_entrega_solo_si_vienen`,
+  `test_zona_urbana_y_cuerpo_de_agua_no_son_suelo_ni_avisan`) y 2 node (una con datos de prueba y otra con
+  `web/data/contexto.json`).
+
+**Resultado sobre 85a8939 con mi buzón completo:** entraron 35, rechazados 0; el aviso «no son grupos de suelo» ya no sale;
+CONTRATO, VERIFICADOR y `test_sin_cifras` OK; 1135 pytest y 225 node; `web_smoke` 747/747. La tarjeta queda así (Delicias–Saucillo):
+«Alfalfa | … | 1,678.5 × 10 kg DW/ha», «… | High», «Forage maize GAEZ: Maize | … | 9,341 kg DW/ha», «Winter cereal GAEZ: Oat»,
+y debajo de la fuente la nota del maíz de grano y «DW: dry weight.».
