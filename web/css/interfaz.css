@@ -1263,9 +1263,6 @@ footer a {
   border-radius: 25px;
   background: #142018;
 }
-.decision-card.blocked {
-  border-left: 4px solid #de9b76;
-}
 .decision-card h3 {
   font-size: 24px;
   line-height: 1.2;
@@ -1274,25 +1271,12 @@ footer a {
   font-size: 10px;
   padding: 8px 12px;
 }
-.decision-card[data-state="plan_calculado"] .pill {
-  background: #b9ed871b;
-  border-color: #b9ed8750;
-  color: #d1f6b3;
-}
-.decision-card[data-state="bloqueado"] .pill {
-  background: #e0a47718;
-  border-color: #e0a47755;
-  color: #f5c5a3;
-}
 .decision-action {
   font-size: 18px;
   line-height: 1.6;
   color: #cbe9b7;
   font-weight: 400;
   max-width: 80ch;
-}
-.decision-card.blocked .decision-action {
-  color: #f0c3a3;
 }
 .decision-values {
   border-color: #ffffff1b;
@@ -2624,4 +2608,216 @@ footer a {
   fill: var(--field-color, #73837b);
   stroke: #d6f7a9;
   stroke-width: 1.3;
+}
+
+/* ==========================================================================================
+   Selector de idioma y aplicación en teléfono (el tablero es la portada; 15-nov-2026).
+   - .language-select y .language-note: selector de idioma de la cabecera y nota de borrador.
+   - Hasta 850 px: el mapa va solo, con altura útil (la mitad del alto de la pantalla); su
+     encabezado, la leyenda, el selector de color, los accesos y la dotación quedan en fila,
+     debajo, sin taparlo. Controles de 44 px.
+   - Hasta 600 px: zonas seguras (env(safe-area-inset-*)) en la cabecera, el contenido y la
+     barra de pestañas inferior; pie de página en una columna.
+   ========================================================================================== */
+.language-select {
+  width: auto;
+  min-height: 40px;
+  padding: 8px 32px 8px 14px;
+  font-size: 12px;
+  border-radius: 22px;
+  background-color: #17231a;
+  color: #e4eddf;
+  border: 1px solid #ffffff22;
+}
+.language-select option {
+  background: #17231a;
+  color: #e4eddf;
+}
+.topbar .breadcrumb {
+  order: 0;
+}
+.language-note {
+  order: 1;
+  margin: 0 14px 0 auto;
+  max-width: 300px;
+  font-size: 10px;
+  line-height: 1.35;
+  color: #a6ba9b;
+  text-align: right;
+}
+.language-note[hidden] {
+  display: none;
+}
+.topbar .top-actions {
+  order: 2;
+}
+.top-actions .data-status {
+  white-space: nowrap;
+}
+@media (max-width: 850px) {
+  .map-detail-grid .scene-map-area,
+  #terrain-slot .map-detail-grid .scene-map-area {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .map-detail-grid .scene-map-area .map-card {
+    position: relative;
+    inset: auto;
+    order: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .map-detail-grid .map-card .card-heading {
+    position: static;
+    max-width: none;
+    padding: 10px 12px;
+    border-radius: 19px;
+  }
+  .map-detail-grid .map-card #map,
+  .map-detail-grid .map-card #map-fallback,
+  #terrain-slot .map-card #map,
+  #terrain-slot .map-card #map-fallback {
+    height: clamp(300px, 52svh, 520px);
+    flex: none;
+    border: 1px solid #ffffff20;
+    border-radius: 24px;
+    overflow: hidden;
+  }
+  .map-detail-grid .map-card .map-legend {
+    position: static;
+    width: auto;
+    max-width: none;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 11px;
+    padding: 9px 12px;
+    border-radius: 17px;
+  }
+  .map-detail-grid .map-card .map-note {
+    display: block;
+    position: static;
+    max-width: none;
+    font-size: 11px;
+  }
+  .map-detail-grid .maplibregl-ctrl-bottom-right {
+    right: 8px;
+    bottom: 8px;
+  }
+  .map-detail-grid .maplibregl-ctrl-group button {
+    width: 44px;
+    height: 44px;
+  }
+  .map-detail-grid .scene-map-area .map-mode-switch {
+    position: static;
+    order: 1;
+    flex-direction: row;
+    gap: 4px;
+    border-radius: 22px;
+  }
+  .map-detail-grid .map-mode-switch button {
+    flex: 1;
+    width: auto;
+    min-height: 52px;
+  }
+  .map-detail-grid .scene-map-area .scene-parcels {
+    position: static;
+    order: 2;
+  }
+  .map-detail-grid .scene-parcels button {
+    min-height: 44px;
+  }
+  .map-detail-grid .scene-map-area .water-card {
+    position: static;
+    order: 3;
+    width: auto;
+  }
+  .map-detail-grid .allocation-presets button,
+  .scene-map-area .rain-toggle {
+    min-height: 44px;
+  }
+  .map-detail-grid .text-button {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+  .map-detail-grid .water-commitment > a {
+    width: 44px;
+    height: 44px;
+  }
+  .language-select,
+  .timeline-filters button,
+  .button {
+    min-height: 44px;
+  }
+  .top-actions .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+  /* La nota de borrador baja a su propio renglón, bajo el selector. */
+  .topbar {
+    height: auto;
+    min-height: 58px;
+    flex-wrap: wrap;
+    row-gap: 2px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  .language-note {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+    margin: 0;
+  }
+}
+@media (max-width: 600px) {
+  .topbar {
+    padding: calc(6px + env(safe-area-inset-top))
+      calc(17px + env(safe-area-inset-right)) 6px
+      calc(17px + env(safe-area-inset-left));
+  }
+  .topbar .avatar.small {
+    display: none;
+  }
+  .topbar .breadcrumb {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  main {
+    padding-bottom: calc(105px + env(safe-area-inset-bottom));
+    padding-left: calc(14px + env(safe-area-inset-left));
+    padding-right: calc(14px + env(safe-area-inset-right));
+  }
+  .sidebar {
+    width: auto;
+    left: calc(8px + env(safe-area-inset-left));
+    right: calc(8px + env(safe-area-inset-right));
+    bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+  footer p {
+    flex-basis: 100%;
+    max-width: none;
+    font-size: 12px;
+  }
+  footer a {
+    margin-left: 0;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .footer-brand {
+    white-space: normal;
+    font-size: 20px;
+  }
 }
