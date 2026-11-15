@@ -95,7 +95,7 @@ def main():
         w.writeheader()
         w.writerows(filas)
     registrar_fuentes("B8", ["tipo_suelo_parcelas.csv"],
-                      "OpenLandMap, Predicted USDA soil great groups at 250 m (Hengl y Nauman 2018, v01, DOI 10.5281/zenodo.1476844, "
+                      "OpenLandMap, grandes grupos del USDA (Predicted USDA soil great groups at 250 m, Hengl y Nauman 2018, v01, DOI 10.5281/zenodo.1476844, "
                       "CC-BY-SA 4.0), Earth Engine OpenLandMap/SOL/SOL_GRTGROUP_USDA-SOILTAX_C/v01, banda grtgroup; orden por el elemento "
                       "formativo (Moorberg y Crouse 2017); dos zonas; predicción de un modelo mundial, no un levantamiento de suelos",
                       "datos/earthengine/suelo.js + datos/colab/B8_tipo_suelo_parcelas.py")

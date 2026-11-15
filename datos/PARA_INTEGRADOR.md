@@ -444,3 +444,32 @@ La compu de Cristian volvió a responder y corrí lo pendiente.
   `data/raw/reto/` (`gaez_celdas.csv`, `suelo_clases_<zona>.csv`) y el código del navegador en `datos/navegador/gaez_leer.js`.
 - Sigue en pie lo de las 19:22: esquema y revisión independiente de `suelo_tipos.json`, `suelo_reglas.json`,
   `suelo_nutrientes_parcelas.csv` y ahora `tipo_suelo_parcelas.csv`.
+
+## 14-nov 20:05 — Tu prueba de impresión con mi buzón: 290/291 → 291/291 (cambié textos del LEEME). Y un detalle de fechas
+Corrí tu `construir.py` completo con mi buzón (`data/entrega_zonas`) sobre tu 3f938ad y luego `tests/e2e/web_smoke.mjs`.
+Daba **290/291**: fallaba «impresión: la ficha de P0757 (4 tarjetas) cabe en una hoja Letter — 2 páginas» (A4 sí cabía).
+- **Causa** (comprobada con `pdftotext` de las dos hojas): la lista «Sources» de la hoja impresa (`htmlFuentes` en
+  `web/js/mensaje.js`, forma corta hasta el primer «;» o « (») ganó un renglón con `gaez_zona.csv`: «FAO e IIASA, Global
+  Agro-Ecological Zones version 4» ocupa dos líneas y la lista pasó de 5 a 6 filas en cuatro columnas. La hoja no tenía
+  margen: un renglón más y Letter pasa a 2 páginas. Ojo: tu ensamblador conserva las fuentes de la corrida anterior si el
+  archivo sigue igual en `data/processed`, así que quitar `gaez_zona.csv` del buzón sin limpiar la salida no lo arregla.
+- **Lo que cambié (solo textos de la columna fuente del LEEME; ningún dato, archivo ni columna):** el primer tramo de cada
+  fuente es ahora una etiqueta corta y el detalle sigue igual después del «;»:
+  `eto_diaria*.csv` → «NASA POWER Daily API; community=AG, punto …» (se une con la de heladas); `h3_series.csv` →
+  «NASA HLS v2 (vía Google Earth Engine, memoria A3-M) …»; `contexto_regional.csv` → «SMAP, MODIS, GRACE, GLDAS, NLDAS y
+  ERA5-Land; vía Earth Engine …» (antes salía solo «Earth Engine»); `gaez_zona.csv` → «GAEZ v4 de FAO e IIASA (Global …»;
+  y en los cuatro archivos nuevos el «ARCHIVO NUEVO (no está en la tabla 0.4-B)» pasa al final (si no, la forma corta
+  saldría «ARCHIVO NUEVO»): «Catálogo de suelos WRB y USDA; …», «NOM-021-SEMARNAT-2000 y guías de MSU, NMSU e Illinois; …»,
+  «ISRIC SoilGrids 2.0; reglas de suelo_reglas.json …» y «OpenLandMap, grandes grupos del USDA (…». Los scripts que
+  escriben esos textos (A1, A7, A10, G1, B8) dicen lo mismo; las salidas comparadas no cambian.
+- **Resultado con el LEEME nuevo:** `construir.py` OK (30 entran, 4 rechazados = los nuevos de suelo sin esquema; 851
+  pytest, 116 node), **web_smoke 291/291**, y la lista impresa queda en 4 filas (15 fuentes; con los 4 de suelo
+  aceptados serían 18 y unas 5 filas, como en tu estado limpio). Drive: `LEEME.md` reemplazado.
+- **Sugerencia (tuya, es tu hoja):** la ficha de P0757 cabe en Letter sin holgura; si agregas un renglón de tipo de
+  suelo o más fuentes, volverá a pasar. Quizá 5 columnas o letra menor en `.impresion-fuentes-lista` al imprimir.
+- **Detalle de fechas (tuyo, `web/js/mensaje.js`, `fmtFechaUi`):** `new Date("2026-11-14")` se lee como medianoche UTC; en
+  Chihuahua (UTC−6) la hoja impresa dice «Accessed Nov 13, 2026» aunque todas las fuentes dicen 2026-11-14 (lo vi en la
+  hoja de P0757; «Data generated» sí sale bien porque trae hora y zona). Para fechas sin hora: `new Date(a, m - 1, d)` o
+  formatear con `timeZone: "UTC"`. Puede pasar en cualquier otro lugar que formatee una fecha AAAA-MM-DD.
+- Sigue en pie: esquema y revisión independiente de `suelo_tipos.json`, `suelo_reglas.json`,
+  `suelo_nutrientes_parcelas.csv` y `tipo_suelo_parcelas.csv` (notas de las 19:23 y 19:34).

@@ -65,7 +65,7 @@ def main():
         w.writeheader()
         w.writerows(out)
     registrar_fuentes("G1", ["gaez_zona.csv"],
-                      "FAO e IIASA, Global Agro-Ecological Zones version 4 (GAEZ v4), tema res05 «Suitability and Attainable Yield», "
+                      "GAEZ v4 de FAO e IIASA (Global Agro-Ecological Zones version 4), tema res05 «Suitability and Attainable Yield», "
                       "servicio https://gaez-services.fao.org/server/rest/services/res05/ImageServer (getSamples), leído el 14-nov-2026; "
                       "CRU TS 3.2, 1981–2010, insumos altos, riego por gravedad; cita: FAO and IIASA, GAEZ v4, http://www.fao.org/gaez/; "
                       "modelo: Fischer et al. 2021, doi:10.4060/cb4744en; licencia de las capas: CC BY-NC-SA (versión 4.0 o 3.0 IGO según "
