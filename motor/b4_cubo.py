@@ -40,6 +40,10 @@ Opciones y filtros oficiales (B3; contrato en la misma decisión, §1):
 - opciones[].filtros lleva una entrada por filtro que aplica a la opción, con los campos del contrato
   («motivo» = texto_en y «fuente») más id, tipo, etiqueta, estado («passes», «warning» o
   «needs_local_check»), «pasa» (true, false o null = sin decidir) y «razon» (código) cuando no se decide.
+  Si el filtro trae texto_por_opcion_en.<rotación> (buzón v11: una nota que vale para UNA opción, p. ej.
+  la del sorgo en fecha_siembra), ese texto se suma al «motivo» de esa rotación y de ninguna otra; no se
+  agrega ningún campo. Un texto por opción con el lenguaje que la ficha no admite (CLAUDE.md, regla 10;
+  lista de motor/verificador.py) no se publica y se avisa: el validador del buzón aún no revisa esa llave.
   Nunca se decide con un umbral inventado: el filtro de helada adjunta prob_helada (heladas.json de la
   zona de la parcela, en la fecha calculada más cercana anterior o igual a la siembra «desde»; null fuera
   de las fechas calculadas) y solo pasa o advierte si el filtro trae regla.prob_helada_max. Con varias
@@ -98,7 +102,10 @@ import statistics
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # para importar simulados.py
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # para importar simulados.py y verificador.py
+
+# Lista de lenguaje que la ficha no admite (CLAUDE.md, regla 10): una sola fuente, el verificador.
+import verificador as V  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parent.parent
 LLUVIAS = ("0", "-20")
@@ -124,6 +131,8 @@ UMBRAL_HELADA = "prob_helada_max"
 # Llave de «regla» con la edad mínima del rodal (filtro corte_verano_alfalfa_establecida de B3: «no en su primer
 # año»). Con ella el filtro se decide con la edad de CADA parcela (edad_perenne_anios de la memoria, A3-M).
 UMBRAL_EDAD = "edad_min_anios"
+# Llave opcional de un filtro de B3: {rotación: texto en inglés} que se suma al motivo SOLO en esa rotación.
+TEXTO_POR_OPCION = "texto_por_opcion_en"
 # Por qué un filtro queda «needs_local_check» (códigos; el texto lo pone la web).
 RAZON_DATO_LOCAL = "dato_local"            # el filtro pide un dato que no tenemos por parcela
 RAZON_SIN_UMBRAL = "sin_umbral"            # la fuente no fija umbral: se muestra la probabilidad y no se decide
@@ -594,9 +603,39 @@ def evidencia_helada(definicion, bloque_heladas):
     return principal["prob_helada"], evidencia, len(con_prob) == len(siembras)
 
 
+def textos_por_opcion(filtro):
+    """{rotación: texto} de filtro.texto_por_opcion_en, solo con los textos no vacíos; {} si no trae la llave
+    o no tiene esa forma."""
+    por_opcion = filtro.get(TEXTO_POR_OPCION)
+    if not isinstance(por_opcion, dict):
+        return {}
+    return {rot: t.strip() for rot, t in por_opcion.items() if isinstance(t, str) and t.strip()}
+
+
+def lenguaje_no_admitido(texto):
+    """True si el texto trae el lenguaje que la ficha no admite (CLAUDE.md, regla 10; lista del verificador)."""
+    return any(patron.search(texto) for patron, _ in V.PROHIBIDAS)
+
+
+def nota_de_opcion(filtro, rot_ref):
+    """Texto que el filtro trae SOLO para la rotación rot_ref; None si no lo trae o si no puede ir a la ficha."""
+    texto = textos_por_opcion(filtro).get(rot_ref)
+    return None if texto is None or lenguaje_no_admitido(texto) else texto
+
+
+def avisos_texto_por_opcion(b3):
+    """Un aviso por cada texto por opción de B3 que no se publica por su lenguaje. El aviso dice el filtro y la
+    opción, no repite la palabra (va a cubo.meta.notas)."""
+    return [f"{ARCHIVO_B3}: el texto del filtro {f.get('id')} para la opción {rot} ({TEXTO_POR_OPCION}) trae "
+            "lenguaje que la ficha no admite (CLAUDE.md, regla 10); no se agrega al motivo de esa opción"
+            for f in (b3 or {}).get("filtros") or [] if isinstance(f, dict)
+            for rot, texto in textos_por_opcion(f).items() if lenguaje_no_admitido(texto)]
+
+
 def filtros_de_opcion(rot_ref, b3, bloque_heladas, edad=None):
     """Entradas de opciones[].filtros para la rotación rot_ref: una por filtro de B3 que la nombra en
-    «aplica_a». Campos del contrato (§2.3): «motivo» (= texto_en) y «fuente»; además id, tipo, etiqueta,
+    «aplica_a». Campos del contrato (§2.3): «motivo» (= texto_en, más el texto que el filtro traiga solo para
+    esta rotación en texto_por_opcion_en) y «fuente»; además id, tipo, etiqueta,
     estado, «pasa» (true, false o null) y «razon» cuando no se decide. Ver el encabezado del archivo.
     edad: edad_perenne_anios de la parcela (o None); decide los filtros cuya regla trae edad_min_anios:
     menor → warning (nunca aprobado), igual o mayor → passes, sin edad → needs_local_check (dato local)."""
@@ -604,8 +643,10 @@ def filtros_de_opcion(rot_ref, b3, bloque_heladas, edad=None):
     for f in b3.get("filtros") or []:
         if rot_ref not in (f.get("aplica_a") or []):
             continue
+        nota = nota_de_opcion(f, rot_ref)
+        motivo = f"{f.get('texto_en')} {nota}" if nota and con_texto(f.get("texto_en")) else f.get("texto_en")
         entrada = {"id": f.get("id"), "tipo": f.get("tipo"), "estado": NEEDS_LOCAL_CHECK, "pasa": None,
-                   "motivo": f.get("texto_en"), "fuente": f.get("fuente"), "etiqueta": f.get("etiqueta")}
+                   "motivo": motivo, "fuente": f.get("fuente"), "etiqueta": f.get("etiqueta")}
         faltan = [n for n in (f.get("necesita") or []) if n not in DATOS_DISPONIBLES]
         prob, umbral, completa = None, None, False
         if f.get("tipo") == "helada":
@@ -767,6 +808,7 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     heladas = leer_json(processed / ARCHIVO_HELADAS) if (processed / ARCHIVO_HELADAS).exists() else None
     if b3 is not None and heladas is None and any(f.get("tipo") == "helada" for f in b3.get("filtros") or []):
         avisos.append(f"Falta {ARCHIVO_HELADAS}: los filtros de helada quedan «{NEEDS_LOCAL_CHECK}» sin probabilidad")
+    avisos += avisos_texto_por_opcion(b3)
     provisionales, omitidas, filtros_cache, secuencias_distintas = set(), {}, {}, {}
     sin_neta = {}   # (zona, rotación) -> parcelas cuya opción no trae lámina neta: La gota queda en null
     propuestas = {}   # cultivo -> rotaciones del diseño provisional con que se completó B3

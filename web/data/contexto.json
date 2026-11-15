@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/contexto_web.py con las entregas validadas de data/processed; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
- "generado": "2026-11-15T04:53:44+00:00",
+ "generado": "2026-11-15T05:04:42+00:00",
  "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
  "zonas": {
   "delicias_saucillo": {
@@ -12,7 +12,7 @@
   }
  },
  "motivo_pedido": "Requested from the data team — not delivered yet",
- "idioma_fuentes": "es",
+ "idioma_fuentes": "en",
  "clima_anual": {
   "delicias_saucillo": {
    "definicion_anio": "Agricultural year: from October 1 of the previous year to September 30 of the named year (kit v4, A3-M step 3; data/params.json, memoria.anio_actual)",
@@ -463,12 +463,12 @@
    "fuentes": {
     "power": {
      "archivo": "eto_diaria.csv",
-     "fuente": "NASA POWER Daily API; community=AG, punto 28.19 N −105.45 O (misma celda MERRA-2 0.5°×0.625° y CERES 1° que el rectángulo ampliado [-105.56, 28.07, -105.32, 28.19]); zona delicias_saucillo",
+     "fuente": "NASA POWER Daily API; community=AG, point 28.19 N −105.45 W (same MERRA-2 0.5°×0.625° and CERES 1° cell as the extended rectangle [-105.56, 28.07, -105.32, 28.19]); area delicias_saucillo",
      "fecha": "2026-11-14"
     },
     "imerg": {
      "archivo": "imerg_diaria.csv",
-     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) vía Google Earth Engine, proyecto iondroplet; media de las medias horas del día UTC × 24, promediada sobre el rectángulo de delicias_saucillo [-105.56, 28.07, -105.32, 28.19]; 2001-01-01 a 2026-11-13",
+     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) via Google Earth Engine; mean of the half-hourly rates of the UTC day × 24, averaged over the delicias_saucillo rectangle [-105.56, 28.07, -105.32, 28.19]; 2001-01-01 to 2026-11-13",
      "fecha": "2026-11-14"
     }
    }
@@ -922,12 +922,12 @@
    "fuentes": {
     "power": {
      "archivo": "eto_diaria_lazaro_cardenas.csv",
-     "fuente": "NASA POWER Daily API; community=AG, punto 28.39 N −105.61 O (celda MERRA-2 de centro 28.5 N, distinta de la de Delicias); zona lazaro_cardenas",
+     "fuente": "NASA POWER Daily API; community=AG, point 28.39 N −105.61 W (MERRA-2 cell centered at 28.5 N, not the Delicias one); area lazaro_cardenas",
      "fecha": "2026-11-14"
     },
     "imerg": {
      "archivo": "imerg_diaria_lazaro_cardenas.csv",
-     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) vía Google Earth Engine, proyecto iondroplet; media de las medias horas del día UTC × 24, promediada sobre el rectángulo de lazaro_cardenas [-105.66, 28.35, -105.56, 28.43]; 2001-01-01 a 2026-11-13",
+     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) via Google Earth Engine; mean of the half-hourly rates of the UTC day × 24, averaged over the lazaro_cardenas rectangle [-105.66, 28.35, -105.56, 28.43]; 2001-01-01 to 2026-11-13",
      "fecha": "2026-11-14"
     }
    }
@@ -947,7 +947,7 @@
     "resolucion_m": 55660,
     "n_celdas": 2,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2002-04",
@@ -1668,7 +1668,7 @@
     "malla_mascon": {
      "malla_grados": 0.5,
      "mascon_grados": 3.0,
-     "texto_fuente": "malla de 0.5° sobre mascons de 3°"
+     "texto_fuente": "0.5° grid on 3° mascons"
     }
    }
   },
@@ -1684,7 +1684,7 @@
     "resolucion_m": 11132,
     "n_celdas": 8,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -2544,7 +2544,7 @@
     "resolucion_m": 11132,
     "n_celdas": 8,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -3404,7 +3404,7 @@
     "resolucion_m": 27830,
     "n_celdas": 2,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -4255,7 +4255,7 @@
     "resolucion_m": 27830,
     "n_celdas": 2,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -5106,7 +5106,7 @@
     "resolucion_m": 500,
     "n_celdas": 1518,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -5939,7 +5939,7 @@
     "resolucion_m": 250,
     "n_celdas": null,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-02",
@@ -6801,7 +6801,7 @@
     "resolucion_m": 1000,
     "n_celdas": 406,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-02",
@@ -7659,7 +7659,7 @@
     "resolucion_m": 13915,
     "n_celdas": 6,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -8519,7 +8519,7 @@
     "resolucion_m": 13915,
     "n_celdas": 6,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -9379,7 +9379,7 @@
     "resolucion_m": 9000,
     "n_celdas": 6,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2015-04",
@@ -9768,7 +9768,7 @@
     "resolucion_m": 9000,
     "n_celdas": 6,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2015-04",
@@ -10159,7 +10159,7 @@
     "resolucion_m": 11132,
     "n_celdas": 2,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -11019,7 +11019,7 @@
     "resolucion_m": 11132,
     "n_celdas": 2,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -11879,7 +11879,7 @@
     "resolucion_m": 27830,
     "n_celdas": 1,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -12730,7 +12730,7 @@
     "resolucion_m": 27830,
     "n_celdas": 1,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -13581,7 +13581,7 @@
     "resolucion_m": 500,
     "n_celdas": 446,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -14414,7 +14414,7 @@
     "resolucion_m": 250,
     "n_celdas": null,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-02",
@@ -15276,7 +15276,7 @@
     "resolucion_m": 1000,
     "n_celdas": 122,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-02",
@@ -16134,7 +16134,7 @@
     "resolucion_m": 13915,
     "n_celdas": 4,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -16994,7 +16994,7 @@
     "resolucion_m": 13915,
     "n_celdas": 4,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2000-01",
@@ -17854,7 +17854,7 @@
     "resolucion_m": 9000,
     "n_celdas": 4,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2015-04",
@@ -18243,7 +18243,7 @@
     "resolucion_m": 9000,
     "n_celdas": 4,
     "archivo": "contexto_regional.csv",
-    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+    "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
     "fecha": "2026-11-14",
     "meses": [
      "2015-04",
@@ -18626,7 +18626,7 @@
  "contexto_regional_motivo": null,
  "gedi": {
   "archivo": "gedi_parcelas.csv",
-  "fuente": "GEDI L2A v2 (LARSE/GEDI/GEDI02_A_002_MONTHLY, rasterizado a 25 m) vía Google Earth Engine, proyecto iondroplet; rh98; disparos de 2019-04 a 2025-04; filtro: quality_flag = 1, degrade_flag = 0 y sensitivity >= 0.9; un disparo cuenta si el centro de su celda cae dentro de la parcela; 1072 de 1239 parcelas con al menos un disparo",
+  "fuente": "GEDI L2A v2 (LARSE/GEDI/GEDI02_A_002_MONTHLY, rasterized at 25 m) via Google Earth Engine; rh98; shots from 2019-04 to 2025-04; filter: quality_flag = 1, degrade_flag = 0 and sensitivity ≥ 0.9; a shot counts if the center of its cell falls inside the field; 1,072 of 1,239 fields with at least one shot",
   "fecha": "2026-11-14",
   "parcelas": {
    "P0002": {
@@ -25078,13 +25078,13 @@
     "min_m": 2.5,
     "max_m": 3.2,
     "etiqueta": "own analysis (A11)",
-    "fuente": "Análisis propio (datos/colab/A11_gedi_parcelas.py, 14-nov-2026): percentiles 10 y 90 (valor = mediana) de la mediana de rh98 por parcela en las 261 parcelas con 3 o más disparos que las reglas clasifican como alfalfa, barbecho o cereal de invierno (sin árboles). Por debajo de ese nivel rh98 refleja el ancho del pulso del instrumento, no la altura de la planta"
+    "fuente": "Own analysis (datos/colab/A11_gedi_parcelas.py, Nov 14, 2026): 10th and 90th percentiles (value = median) of the per-field median rh98 in the 261 fields with 3 or more shots that the rules classify as alfalfa, fallow or winter cereal (no trees). Below that level rh98 reflects the pulse width of the instrument, not plant height"
    },
    "dosel_alto": {
     "umbral_m": 5,
     "min_disparos": 3,
     "etiqueta": "own analysis (A11), assumption [S]",
-    "fuente": "Criterio propio (A11, 14-nov-2026): percentil 90 de rh98 de la parcela de 5 m o más. Con ese umbral, 57 de 86 parcelas de nogal con 3 o más disparos muestran dosel alto, frente a 7 de 95 de alfalfa y 0 de 11 de cereal de invierno"
+    "fuente": "Own criterion (A11, Nov 14, 2026): 90th percentile of the field's rh98 of 5 m or more. With that threshold, 57 of 86 pecan fields with 3 or more shots show tall canopy, against 7 of 95 alfalfa fields and 0 of 11 winter cereal fields"
    }
   },
   "n_dosel_alto": 198,
@@ -25094,7 +25094,7 @@
  "gedi_motivo": null,
  "ecostress": {
   "archivo": "ecostress_parcelas.csv",
-  "fuente": "NASA ECOSTRESS ECO_L3T_JET.002; ET diaria (ETdaily, integrada de la salida a la puesta del sol) a 70 m, colección 2 (Hook y Halverson 2024, DOI 10.5067/ECOSTRESS/ECO_L3T_JET.002, LP DAAC), vía AppEEARS v3.137 (muestra por puntos: solicitudes raiz_ecostress_delicias_saucillo, ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, y raiz_ecostress_lazaro_cardenas, ID 520f1233-5eb1-4c4e-b243-2c43940f784b, del 14-nov-2026, con la cuenta de Earthdata de Cristian), un punto dentro de cada parcela, 1-oct-2025 a 30-sep-2026; et_mm_dia = mediana de los pasos despejados del mes (cloud = 0 y water = 0), n_escenas = pasos despejados del mes; unidades: mm/día según el texto de la guía de usuario de ECOSTRESS colección 2 («daily ET estimate in millimeters per day»; su Tabla 10 y AppEEARS dicen W/m²), confirmado con los valores (mediana 1.1, percentil 99 3.7, máximo 5.8 en los pasos despejados); hubo pasos con dato en oct, dic, ene, may, jul y ago, y ninguno despejado con dato en nov, feb, mar, abr, jun y sep; columnas adicionales zona, etc_modelo_mm (mediana, en los mismos días, del Kc de A5 por la ETo de NASA POWER; solo con cultivo clasificado y dentro del ciclo) y razon (et_mm_dia / etc_modelo_mm); satellite ET at 70 m on clear days, not a field measurement; crudo sin cambios en data/raw/reto/ecostress_pasos_<zona>.csv (sha256 igual al del paquete de AppEEARS)",
+  "fuente": "NASA ECOSTRESS ECO_L3T_JET.002; daily ET (ETdaily, integrated between sunrise and sunset) at 70 m, collection 2 (Hook and Halverson 2024, DOI 10.5067/ECOSTRESS/ECO_L3T_JET.002, LP DAAC), via AppEEARS v3.137 (point samples: requests raiz_ecostress_delicias_saucillo, ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, and raiz_ecostress_lazaro_cardenas, ID 520f1233-5eb1-4c4e-b243-2c43940f784b, Nov 14, 2026), one point inside each field, Oct 1, 2025 to Sep 30, 2026; et_mm_dia = median of the clear passes of the month (cloud = 0 and water = 0), n_escenas = clear passes in the month; units: mm/day, as the text of the ECOSTRESS collection 2 user guide states («daily ET estimate in millimeters per day»; its Table 10 and AppEEARS say W/m²), confirmed by the values (median 1.1, 99th percentile 3.7, maximum 5.8 over the clear passes); clear passes with data in Oct, Dec, Jan, May, Jul and Aug, none in Nov, Feb, Mar, Apr, Jun and Sep; extra columns zona, etc_modelo_mm (median, on the same days, of the A5 Kc times the NASA POWER ETo; classified fields within the crop cycle) and razon (et_mm_dia / etc_modelo_mm); satellite ET at 70 m on clear days, not a field measurement; raw AppEEARS output unchanged in data/raw/reto/ecostress_pasos_<zona>.csv",
   "fecha": "2026-11-14",
   "meses": [
    "2025-10",
@@ -42462,7 +42462,7 @@
  "ecostress_motivo": null,
  "gaez": {
   "archivo": "gaez_zona.csv",
-  "fuente": "GAEZ v4 de FAO e IIASA (Global Agro-Ecological Zones version 4), tema res05 «Suitability and Attainable Yield», leído el 14-nov-2026 del servicio de imágenes https://gaez-services.fao.org/server/rest/services/res05/ImageServer (getSamples en el centro de las celdas de 5' que tocan cada zona: 12 en Delicias–Saucillo, 4 en Lázaro Cárdenas); CRU TS 3.2, 1981–2010, insumos altos, riego por gravedad, tierra cultivada actual; mediana de las celdas (moda para la clase); Maize de GAEZ (maíz de grano, mze) como sustituto de maiz_forrajero: el tema res05 no tiene capa de maíz para ensilaje (mzs) con insumos altos y riego por gravedad (consulta name LIKE '%Hg_mz%' del 14-nov-2026); GAEZ v4 no evalúa chile ni nogal; columnas adicionales cultivo_gaez, agua, insumos, periodo, n_celdas, valor_min, valor_max, clase_nombre, url_fao, nota (dice que el maíz es de grano); cita: FAO and IIASA, GAEZ v4, http://www.fao.org/gaez/ (modelo: Fischer et al. 2021, doi:10.4060/cb4744en); licencia CC BY-NC-SA; contexto regional, nunca por parcela (FAQ v2.0 de GAEZ, nov-2022, https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf, pregunta 16: «It is generally not recommended to calculate statistics at finer administrative levels with this version of the database.»); segunda entrega (14-nov 20:30): columna nota",
+  "fuente": "GAEZ v4 by FAO and IIASA (Global Agro-Ecological Zones version 4), theme res05 «Suitability and Attainable Yield», read on Nov 14, 2026 from the image service https://gaez-services.fao.org/server/rest/services/res05/ImageServer (getSamples at the center of the 5' cells that touch each area: 12 in Delicias–Saucillo, 4 in Lázaro Cárdenas); CRU TS 3.2, 1981–2010, high inputs, gravity irrigation, current cropland; median of the cells (mode for the class); GAEZ Maize (grain maize, mze) stands in for forage maize: theme res05 has no silage-maize (mzs) layer with these settings; GAEZ v4 does not assess chile or pecan; extra columns cultivo_gaez, agua, insumos, periodo, n_celdas, valor_min, valor_max, clase_nombre, url_fao and nota; citation: FAO and IIASA, GAEZ v4, http://www.fao.org/gaez/ (model: Fischer et al. 2021, doi:10.4060/cb4744en); CC BY-NC-SA license; regional context, never per field (GAEZ v4 FAQ v2.0, Nov 2022, question 16: «It is generally not recommended to calculate statistics at finer administrative levels with this version of the database.»)",
   "fecha": "2026-11-14",
   "zonas": {
    "delicias_saucillo": [
@@ -42783,7 +42783,7 @@
   },
   "entrega": {
    "archivo": "heladas.json",
-   "fuente": "NASA POWER Daily API (community=AG), T2M_MIN, 1984–2025 (42 complete years); helada = Tmin ≤ 0 °C; zona base delicias_saucillo y bloque «zonas» con lazaro_cardenas",
+   "fuente": "NASA POWER Daily API (community=AG), T2M_MIN, 1984–2025 (42 complete years); frost = Tmin ≤ 0 °C; base area delicias_saucillo and block «zonas» with lazaro_cardenas",
    "fecha": "2026-11-14"
   }
  },
@@ -42792,7 +42792,7 @@
   "zona": "delicias_saucillo",
   "motivo_otras_zonas": "Not run for this pilot area",
   "archivo": "et_contraste.csv",
-  "fuente": "SSEBop VIIRS v6 mensual (USGS, projects/usgs-ssebop/viirs_et_v6_monthly; banda et en mm, escala 1.0) vía Google Earth Engine, media del rectángulo original [-105.42, 28.08, -105.32, 28.16]; ETc FAO-56 con NASA POWER de las parcelas clasificadas de ese rectángulo; oct-2025 a sep-2026; et_wapor_mm vacío (WaPOR not run); regional comparison, not field-level validation; regenerado el 14-nov (19:22) con el cereal de invierno sembrado el 1-dic: ETc 1,139.5 mm (antes 1,139.3), sigue +393 mm (+53 %)",
+  "fuente": "SSEBop VIIRS v6 monthly (USGS, projects/usgs-ssebop/viirs_et_v6_monthly; band et in mm, scale 1.0) via Google Earth Engine, mean over the original rectangle [-105.42, 28.08, -105.32, 28.16]; FAO-56 crop ET with NASA POWER for the classified fields of that rectangle; Oct 2025 to Sep 2026; et_wapor_mm empty (WaPOR not run); regional comparison, not field-level validation",
   "fecha": "2026-11-14",
   "meses": [
    "2025-10",
@@ -42872,12 +42872,12 @@
    "fuentes": [
     {
      "archivo": "hls_mensual_parcelas.csv",
-     "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) vía Google Earth Engine, proyecto iondroplet; dos zonas",
+     "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) via Google Earth Engine; monthly median inside each field; two pilot areas",
      "fecha": "2026-11-14"
     },
     {
      "archivo": "memoria_parcelas.csv",
-     "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) vía Google Earth Engine, proyecto iondroplet; años agrícolas 2016-2026; dos zonas; columna adicional ndvi_min (mínimo mensual del año, para la edad de la alfalfa)",
+     "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) via Google Earth Engine; agricultural years 2016–2026; two pilot areas; extra column ndvi_min (lowest monthly NDVI of the year, used for the alfalfa stand age)",
      "fecha": "2026-11-14"
     }
    ],
@@ -42901,12 +42901,12 @@
    "fuentes": [
     {
      "archivo": "eto_diaria.csv",
-     "fuente": "NASA POWER Daily API; community=AG, punto 28.19 N −105.45 O (misma celda MERRA-2 0.5°×0.625° y CERES 1° que el rectángulo ampliado [-105.56, 28.07, -105.32, 28.19]); zona delicias_saucillo",
+     "fuente": "NASA POWER Daily API; community=AG, point 28.19 N −105.45 W (same MERRA-2 0.5°×0.625° and CERES 1° cell as the extended rectangle [-105.56, 28.07, -105.32, 28.19]); area delicias_saucillo",
      "fecha": "2026-11-14"
     },
     {
      "archivo": "eto_diaria_lazaro_cardenas.csv",
-     "fuente": "NASA POWER Daily API; community=AG, punto 28.39 N −105.61 O (celda MERRA-2 de centro 28.5 N, distinta de la de Delicias); zona lazaro_cardenas",
+     "fuente": "NASA POWER Daily API; community=AG, point 28.39 N −105.61 W (MERRA-2 cell centered at 28.5 N, not the Delicias one); area lazaro_cardenas",
      "fecha": "2026-11-14"
     }
    ],
@@ -42929,7 +42929,7 @@
    "fuentes": [
     {
      "archivo": "heladas.json",
-     "fuente": "NASA POWER Daily API (community=AG), T2M_MIN, 1984–2025 (42 complete years); helada = Tmin ≤ 0 °C; zona base delicias_saucillo y bloque «zonas» con lazaro_cardenas",
+     "fuente": "NASA POWER Daily API (community=AG), T2M_MIN, 1984–2025 (42 complete years); frost = Tmin ≤ 0 °C; base area delicias_saucillo and block «zonas» with lazaro_cardenas",
      "fecha": "2026-11-14"
     }
    ],
@@ -42957,32 +42957,32 @@
    "fuentes": [
     {
      "archivo": "nasadem_zona_piloto.tif",
-     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine, proyecto iondroplet, zona + 2 km, 30 m; zona delicias_saucillo",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) via Google Earth Engine, area plus 2 km, 30 m; area delicias_saucillo",
      "fecha": "2026-11-14"
     },
     {
      "archivo": "nasadem_zona_piloto_lazaro_cardenas.tif",
-     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine, proyecto iondroplet, zona + 2 km, 30 m; zona lazaro_cardenas",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) via Google Earth Engine, area plus 2 km, 30 m; area lazaro_cardenas",
      "fecha": "2026-11-14"
     },
     {
      "archivo": "relieve_parcelas.csv",
-     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta); dos zonas",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) via Google Earth Engine; storm from NASA GPM IMERG V07 (NASA POWER if missing); two pilot areas",
      "fecha": "2026-11-14"
     },
     {
      "archivo": "relieve_rutas.geojson",
-     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta de GPM IMERG V07 (o NASA POWER si falta); dos zonas (propiedad zona); sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) via Google Earth Engine; storm from NASA GPM IMERG V07 (NASA POWER if missing); two pilot areas (property zona); no routes inside closed depressions of the DEM 3 m deep or more [S] (there the flow direction comes from the fill, not from the terrain)",
      "fecha": "2026-11-14"
     },
     {
      "archivo": "relieve_meta.json",
-     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona delicias_saucillo; sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) via Google Earth Engine; P95 storm from NASA GPM IMERG V07 2001–2026 (NASA POWER as a contrast); area delicias_saucillo; no routes inside closed depressions of the DEM 3 m deep or more [S] (there the flow direction comes from the fill, not from the terrain)",
      "fecha": "2026-11-14"
     },
     {
      "archivo": "relieve_meta_lazaro_cardenas.json",
-     "fuente": "NASADEM (NASA/NASADEM_HGT/001) vía Google Earth Engine; tormenta P95 de GPM IMERG V07 2001-2026 (NASA POWER como contraste); zona lazaro_cardenas; sin rutas dentro de depresiones cerradas del DEM de 3 m o más [S] (ahí la dirección sale del relleno, no del terreno)",
+     "fuente": "NASADEM (NASA/NASADEM_HGT/001) via Google Earth Engine; P95 storm from NASA GPM IMERG V07 2001–2026 (NASA POWER as a contrast); area lazaro_cardenas; no routes inside closed depressions of the DEM 3 m deep or more [S] (there the flow direction comes from the fill, not from the terrain)",
      "fecha": "2026-11-14"
     }
    ],
@@ -43006,12 +43006,12 @@
    "fuentes": [
     {
      "archivo": "imerg_diaria.csv",
-     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) vía Google Earth Engine, proyecto iondroplet; media de las medias horas del día UTC × 24, promediada sobre el rectángulo de delicias_saucillo [-105.56, 28.07, -105.32, 28.19]; 2001-01-01 a 2026-11-13",
+     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) via Google Earth Engine; mean of the half-hourly rates of the UTC day × 24, averaged over the delicias_saucillo rectangle [-105.56, 28.07, -105.32, 28.19]; 2001-01-01 to 2026-11-13",
      "fecha": "2026-11-14"
     },
     {
      "archivo": "imerg_diaria_lazaro_cardenas.csv",
-     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) vía Google Earth Engine, proyecto iondroplet; media de las medias horas del día UTC × 24, promediada sobre el rectángulo de lazaro_cardenas [-105.66, 28.35, -105.56, 28.43]; 2001-01-01 a 2026-11-13",
+     "fuente": "NASA GPM IMERG V07 (NASA/GPM_L3/IMERG_V07) via Google Earth Engine; mean of the half-hourly rates of the UTC day × 24, averaged over the lazaro_cardenas rectangle [-105.66, 28.35, -105.56, 28.43]; 2001-01-01 to 2026-11-13",
      "fecha": "2026-11-14"
     }
    ],
@@ -43034,7 +43034,7 @@
    "fuentes": [
     {
      "archivo": "et_contraste.csv",
-     "fuente": "SSEBop VIIRS v6 mensual (USGS, projects/usgs-ssebop/viirs_et_v6_monthly; banda et en mm, escala 1.0) vía Google Earth Engine, media del rectángulo original [-105.42, 28.08, -105.32, 28.16]; ETc FAO-56 con NASA POWER de las parcelas clasificadas de ese rectángulo; oct-2025 a sep-2026; et_wapor_mm vacío (WaPOR not run); regional comparison, not field-level validation; regenerado el 14-nov (19:22) con el cereal de invierno sembrado el 1-dic: ETc 1,139.5 mm (antes 1,139.3), sigue +393 mm (+53 %)",
+     "fuente": "SSEBop VIIRS v6 monthly (USGS, projects/usgs-ssebop/viirs_et_v6_monthly; band et in mm, scale 1.0) via Google Earth Engine, mean over the original rectangle [-105.42, 28.08, -105.32, 28.16]; FAO-56 crop ET with NASA POWER for the classified fields of that rectangle; Oct 2025 to Sep 2026; et_wapor_mm empty (WaPOR not run); regional comparison, not field-level validation",
      "fecha": "2026-11-14"
     }
    ],
@@ -43057,7 +43057,7 @@
    "fuentes": [
     {
      "archivo": "contexto_regional.csv",
-     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
      "fecha": "2026-11-14"
     }
    ],
@@ -43080,7 +43080,7 @@
    "fuentes": [
     {
      "archivo": "contexto_regional.csv",
-     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
      "fecha": "2026-11-14"
     }
    ],
@@ -43103,7 +43103,7 @@
    "fuentes": [
     {
      "archivo": "contexto_regional.csv",
-     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
      "fecha": "2026-11-14"
     }
    ],
@@ -43126,7 +43126,7 @@
    "fuentes": [
     {
      "archivo": "contexto_regional.csv",
-     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
      "fecha": "2026-11-14"
     }
    ],
@@ -43149,7 +43149,7 @@
    "fuentes": [
     {
      "archivo": "contexto_regional.csv",
-     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
      "fecha": "2026-11-14"
     }
    ],
@@ -43172,7 +43172,7 @@
    "fuentes": [
     {
      "archivo": "contexto_regional.csv",
-     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS y ERA5-Land; vía Earth Engine (proyecto iondroplet), promedio mensual sobre el rectángulo de cada zona: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface y sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) y MODIS/061/MOD11A2 (LST_Day_1km), colección 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (mascons de JPL con CRI, lwe_thickness; malla de 0.5° sobre mascons de 3°; una sola serie, zona = cuenca, rectángulo [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg y RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forzamiento, total_precipitation y potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, no es un producto de NASA). Periodo por serie: desde 2000-01 o el inicio del producto hasta el último mes completo (en el archivo)",
+     "fuente": "SMAP, MODIS, GRACE, GLDAS, NLDAS and ERA5-Land; via Google Earth Engine, monthly mean over the rectangle of each area: smap = NASA/SMAP/SPL4SMGP/008 (SMAP L4 v8, sm_surface and sm_rootzone); modis = MODIS/061/MOD13Q1 (NDVI, SummaryQA 0–1), MODIS/061/MOD16A2GF (ET) and MODIS/061/MOD11A2 (LST_Day_1km), collection 6.1; grace = NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI (JPL mascons with CRI, lwe_thickness; 0.5° grid on 3° mascons; one series, area = basin, rectangle [-105.66, 28.07, -105.32, 28.43]); gldas = NASA/GLDAS/V021/NOAH/G025/T3H (GLDAS-2.1 Noah, Evap_tavg and RootMoist_inst); nldas = NASA/NLDAS/FORA0125_H002 (NLDAS-2 forcing, total_precipitation and potential_evaporation); era5_land = ECMWF/ERA5_LAND/DAILY_AGGR (temperature_2m_min; ECMWF/Copernicus, not a NASA product). Period per series: from 2000-01 or the start of the product to the last complete month (in the file)",
      "fecha": "2026-11-14"
     }
    ],
@@ -43195,7 +43195,7 @@
    "fuentes": [
     {
      "archivo": "gedi_parcelas.csv",
-     "fuente": "GEDI L2A v2 (LARSE/GEDI/GEDI02_A_002_MONTHLY, rasterizado a 25 m) vía Google Earth Engine, proyecto iondroplet; rh98; disparos de 2019-04 a 2025-04; filtro: quality_flag = 1, degrade_flag = 0 y sensitivity >= 0.9; un disparo cuenta si el centro de su celda cae dentro de la parcela; 1072 de 1239 parcelas con al menos un disparo",
+     "fuente": "GEDI L2A v2 (LARSE/GEDI/GEDI02_A_002_MONTHLY, rasterized at 25 m) via Google Earth Engine; rh98; shots from 2019-04 to 2025-04; filter: quality_flag = 1, degrade_flag = 0 and sensitivity ≥ 0.9; a shot counts if the center of its cell falls inside the field; 1,072 of 1,239 fields with at least one shot",
      "fecha": "2026-11-14"
     }
    ],
@@ -43218,7 +43218,7 @@
    "fuentes": [
     {
      "archivo": "ecostress_parcelas.csv",
-     "fuente": "NASA ECOSTRESS ECO_L3T_JET.002; ET diaria (ETdaily, integrada de la salida a la puesta del sol) a 70 m, colección 2 (Hook y Halverson 2024, DOI 10.5067/ECOSTRESS/ECO_L3T_JET.002, LP DAAC), vía AppEEARS v3.137 (muestra por puntos: solicitudes raiz_ecostress_delicias_saucillo, ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, y raiz_ecostress_lazaro_cardenas, ID 520f1233-5eb1-4c4e-b243-2c43940f784b, del 14-nov-2026, con la cuenta de Earthdata de Cristian), un punto dentro de cada parcela, 1-oct-2025 a 30-sep-2026; et_mm_dia = mediana de los pasos despejados del mes (cloud = 0 y water = 0), n_escenas = pasos despejados del mes; unidades: mm/día según el texto de la guía de usuario de ECOSTRESS colección 2 («daily ET estimate in millimeters per day»; su Tabla 10 y AppEEARS dicen W/m²), confirmado con los valores (mediana 1.1, percentil 99 3.7, máximo 5.8 en los pasos despejados); hubo pasos con dato en oct, dic, ene, may, jul y ago, y ninguno despejado con dato en nov, feb, mar, abr, jun y sep; columnas adicionales zona, etc_modelo_mm (mediana, en los mismos días, del Kc de A5 por la ETo de NASA POWER; solo con cultivo clasificado y dentro del ciclo) y razon (et_mm_dia / etc_modelo_mm); satellite ET at 70 m on clear days, not a field measurement; crudo sin cambios en data/raw/reto/ecostress_pasos_<zona>.csv (sha256 igual al del paquete de AppEEARS)",
+     "fuente": "NASA ECOSTRESS ECO_L3T_JET.002; daily ET (ETdaily, integrated between sunrise and sunset) at 70 m, collection 2 (Hook and Halverson 2024, DOI 10.5067/ECOSTRESS/ECO_L3T_JET.002, LP DAAC), via AppEEARS v3.137 (point samples: requests raiz_ecostress_delicias_saucillo, ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, and raiz_ecostress_lazaro_cardenas, ID 520f1233-5eb1-4c4e-b243-2c43940f784b, Nov 14, 2026), one point inside each field, Oct 1, 2025 to Sep 30, 2026; et_mm_dia = median of the clear passes of the month (cloud = 0 and water = 0), n_escenas = clear passes in the month; units: mm/day, as the text of the ECOSTRESS collection 2 user guide states («daily ET estimate in millimeters per day»; its Table 10 and AppEEARS say W/m²), confirmed by the values (median 1.1, 99th percentile 3.7, maximum 5.8 over the clear passes); clear passes with data in Oct, Dec, Jan, May, Jul and Aug, none in Nov, Feb, Mar, Apr, Jun and Sep; extra columns zona, etc_modelo_mm (median, on the same days, of the A5 Kc times the NASA POWER ETo; classified fields within the crop cycle) and razon (et_mm_dia / etc_modelo_mm); satellite ET at 70 m on clear days, not a field measurement; raw AppEEARS output unchanged in data/raw/reto/ecostress_pasos_<zona>.csv",
      "fecha": "2026-11-14"
     }
    ],
@@ -43241,7 +43241,7 @@
    "fuentes": [
     {
      "archivo": "gaez_zona.csv",
-     "fuente": "GAEZ v4 de FAO e IIASA (Global Agro-Ecological Zones version 4), tema res05 «Suitability and Attainable Yield», leído el 14-nov-2026 del servicio de imágenes https://gaez-services.fao.org/server/rest/services/res05/ImageServer (getSamples en el centro de las celdas de 5' que tocan cada zona: 12 en Delicias–Saucillo, 4 en Lázaro Cárdenas); CRU TS 3.2, 1981–2010, insumos altos, riego por gravedad, tierra cultivada actual; mediana de las celdas (moda para la clase); Maize de GAEZ (maíz de grano, mze) como sustituto de maiz_forrajero: el tema res05 no tiene capa de maíz para ensilaje (mzs) con insumos altos y riego por gravedad (consulta name LIKE '%Hg_mz%' del 14-nov-2026); GAEZ v4 no evalúa chile ni nogal; columnas adicionales cultivo_gaez, agua, insumos, periodo, n_celdas, valor_min, valor_max, clase_nombre, url_fao, nota (dice que el maíz es de grano); cita: FAO and IIASA, GAEZ v4, http://www.fao.org/gaez/ (modelo: Fischer et al. 2021, doi:10.4060/cb4744en); licencia CC BY-NC-SA; contexto regional, nunca por parcela (FAQ v2.0 de GAEZ, nov-2022, https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf, pregunta 16: «It is generally not recommended to calculate statistics at finer administrative levels with this version of the database.»); segunda entrega (14-nov 20:30): columna nota",
+     "fuente": "GAEZ v4 by FAO and IIASA (Global Agro-Ecological Zones version 4), theme res05 «Suitability and Attainable Yield», read on Nov 14, 2026 from the image service https://gaez-services.fao.org/server/rest/services/res05/ImageServer (getSamples at the center of the 5' cells that touch each area: 12 in Delicias–Saucillo, 4 in Lázaro Cárdenas); CRU TS 3.2, 1981–2010, high inputs, gravity irrigation, current cropland; median of the cells (mode for the class); GAEZ Maize (grain maize, mze) stands in for forage maize: theme res05 has no silage-maize (mzs) layer with these settings; GAEZ v4 does not assess chile or pecan; extra columns cultivo_gaez, agua, insumos, periodo, n_celdas, valor_min, valor_max, clase_nombre, url_fao and nota; citation: FAO and IIASA, GAEZ v4, http://www.fao.org/gaez/ (model: Fischer et al. 2021, doi:10.4060/cb4744en); CC BY-NC-SA license; regional context, never per field (GAEZ v4 FAQ v2.0, Nov 2022, question 16: «It is generally not recommended to calculate statistics at finer administrative levels with this version of the database.»)",
      "fecha": "2026-11-14"
     }
    ],

@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T04:55:07+00:00",
+ "generado": "2026-11-15T05:06:06+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T04:55:07+00:00",
+  "corrida": "2026-11-15T05:06:06+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -323,7 +323,7 @@
     "nombre": "Offline app (installable page)",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache 1d3d03a16021d087"
+    "detalle": "precache c2917df059983a12"
    },
    {
     "id": "manifest",
@@ -351,7 +351,7 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1080 passed, 30 warnings in 74.93s (0:01:14)"
+    "detalle": "1102 passed, 30 warnings in 76.31s (0:01:16)"
    },
    {
     "id": "node",

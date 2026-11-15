@@ -11,6 +11,8 @@ import re
 import sys
 from pathlib import Path
 
+import pytest
+
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "motor"))
 sys.path.insert(0, str(RAIZ / "tests"))
@@ -208,15 +210,48 @@ def test_et_con_contraste_y_puerta(tmp_path):
     assert etiqueta == "Modeled crop ET, area of the delivered file, Jan 2026–Dec 2026 total"
 
 
-def test_et_rotulo_con_el_rectangulo_de_la_fuente(tmp_path):
+# La línea de LEEME llega en español (hasta el buzón v10) o en inglés (desde el v11): el rectángulo se lee igual.
+FUENTES_CON_RECTANGULO = {
+    "es": "SSEBop, media del rectángulo original [-1.5, 2, -1, 2.5]; oct-sep",
+    "es sin acento": "SSEBop, media del rectangulo original [-1.5, 2, -1, 2.5]; oct-sep",
+    "en": "SSEBop, mean over the original rectangle [-1.5, 2, -1, 2.5]; Oct to Sep",
+    "en pilot": "SSEBop, mean over the original pilot rectangle [-1.5, 2, -1, 2.5]; Oct to Sep",
+}
+
+
+@pytest.mark.parametrize("idioma", sorted(FUENTES_CON_RECTANGULO))
+def test_et_rotulo_con_el_rectangulo_de_la_fuente(tmp_path, idioma):
     escribir(tmp_path, "data/processed/et_contraste.csv",
              "mes,et_modelo_mm,et_ssebop_mm,et_wapor_mm\n2025-10,10,9,\n2026-09,20,18,\n")
     escribir(tmp_path, "data/processed/fuentes.json", json.dumps({"fuentes": [
-        {"archivo": "et_contraste.csv", "fuente": "SSEBop, media del rectángulo original [-1.5, 2, -1, 2.5]; oct-sep"}]}))
+        {"archivo": "et_contraste.csv", "fuente": FUENTES_CON_RECTANGULO[idioma]}]}))
     et = por_id(pruebas_web.calcular(tmp_path))["contraste_et"]
     etiquetas = {x["id"]: x["etiqueta"] for x in et["metricas"]}
     assert etiquetas["et_ssebop_mm"] == "SSEBop VIIRS ET, original pilot rectangle [-1.5, 2, -1, 2.5], Oct 2025–Sep 2026 total"
     assert "pilot-area total" not in json.dumps(etiquetas)
+
+
+def test_et_rotulo_no_inventa_un_rectangulo_que_la_fuente_no_dice():
+    # Un rectángulo que no es «el original», o sin corchetes, no se toma: queda la zona o el rótulo genérico.
+    for fuente in ("SSEBop, mean over the rectangle of each area [-1.5, 2, -1, 2.5]", "SSEBop, original rectangle",
+                   "SSEBop, media del rectángulo ampliado [-1.5, 2, -1, 2.5]", "", None):
+        assert pruebas_web.ambito_et(fuente, None) == "area of the delivered file", fuente
+        assert pruebas_web.ambito_et(fuente, "lazaro_cardenas") == "pilot area lazaro_cardenas", fuente
+
+
+def test_real_et_rotulo_no_pierde_el_rectangulo_que_dice_la_fuente():
+    """Con data/processed REAL: si la línea de LEEME de et_contraste.csv trae un rectángulo [o, s, e, n] que
+    llama «original» (lectura independiente del motor, en español o en inglés), los rótulos lo dicen."""
+    linea = pruebas_web.fuentes_registradas(RAIZ).get("et_contraste.csv")
+    if not linea or not (RAIZ / "data/processed/et_contraste.csv").is_file():
+        pytest.skip("data/processed sin et_contraste.csv registrado")
+    rectangulos = [m.group(0) for m in re.finditer(r"\[[^\]]+\]", linea)
+                   if "original" in linea[max(0, m.start() - 40):m.start()].lower()]
+    if not rectangulos:
+        pytest.skip("la línea de LEEME no declara un rectángulo original")
+    et = por_id(pruebas_web.calcular(RAIZ))["contraste_et"]
+    etiquetas = [x["etiqueta"] for x in et["metricas"] if x["id"] != "meses"]
+    assert etiquetas and all(f"original pilot rectangle {rectangulos[0]}" in e for e in etiquetas), etiquetas
 
 
 def test_et_sin_contraste_dice_not_run_y_balance_fallido(tmp_path):

@@ -130,8 +130,9 @@ ROTULO_APTITUD = "General published range (FAO ECOCROP, worldwide), not a local 
 ARCHIVO_SUPUESTOS = "supuestos.json"
 SUPUESTO_MARGEN_PH = "suelo_margen_ph"
 SUPUESTO_COINCIDENCIA = "suelo_coincidencia_textura"
-# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) van en español.
-IDIOMA_FUENTES = "es"
+# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) llegan en inglés desde la reentrega
+# del 15-nov (buzón v11); antes iban en español.
+IDIOMA_FUENTES = "en"
 
 # Estados de aptitud, de mejor a peor (el peor manda), y el que no entra en esa escala.
 FITS, TOLERATED, NEAR, OUTSIDE = "fits", "tolerated", "near_limit", "outside_range"

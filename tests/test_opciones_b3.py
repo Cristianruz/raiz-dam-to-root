@@ -556,6 +556,96 @@ def test_cada_opcion_lleva_los_filtros_que_le_aplican(con_b3):
             assert ("razon" in e) == (e["estado"] == NEEDS), "la razón va solo cuando no se decide"
 
 
+# Texto que un filtro trae SOLO para una rotación (filtros[].texto_por_opcion_en, buzón v11). DATOS DE PRUEBA.
+NOTA_POR_OPCION = "TEST DATA: note shown for this option alone."
+CAMPOS_FILTRO = {"id", "tipo", "estado", "pasa", "motivo", "fuente", "etiqueta", "prob_helada", "evidencia", "razon"}
+
+
+def con_texto_por_opcion(valor, filtro="helada_siembra"):
+    """La fixture de B3 con texto_por_opcion_en = valor en un filtro."""
+    def cambio(o):
+        next(x for x in o["filtros"] if x["id"] == filtro)["texto_por_opcion_en"] = valor
+    return alterado(cambio)
+
+
+def motivos_del_filtro(geo, cubo, filtro="helada_siembra"):
+    """{rotación: {motivos}} del filtro en las opciones del cubo, comprobando que no gana campos."""
+    salida = {}
+    for (_, rot), filtros in filtros_por_zona(geo, cubo).items():
+        for f in filtros:
+            if f["id"] == filtro:
+                assert set(f) <= CAMPOS_FILTRO, f"el filtro por opción no gana campos: {sorted(set(f) - CAMPOS_FILTRO)}"
+                salida.setdefault(rot, set()).add(f["motivo"])
+    return salida
+
+
+def test_texto_por_opcion_se_agrega_al_motivo_de_esa_opcion(tmp_path):
+    """filtros[].texto_por_opcion_en.<rotación> se suma al motivo del filtro SOLO en esa rotación; en las demás
+    rotaciones del mismo filtro el motivo sigue siendo texto_en. El catálogo lo lleva tal como llegó."""
+    texto = next(f for f in B3["filtros"] if f["id"] == "helada_siembra")["texto_en"]
+    b3 = con_texto_por_opcion({"sorgo": NOTA_POR_OPCION, "rotacion_que_no_existe": "TEST DATA: unused."})
+    rep, geo, cubo, _, web = correr(procesados(tmp_path, b3=b3), tmp_path)
+    motivos = motivos_del_filtro(geo, cubo)
+    assert motivos.pop("sorgo") == {f"{texto} {NOTA_POR_OPCION}"}
+    assert motivos and all(m == {texto} for m in motivos.values()), motivos
+    assert cubo["filtros_catalogo"]["helada_siembra"]["texto_por_opcion_en"]["sorgo"] == NOTA_POR_OPCION
+    assert cubo["filtros_catalogo"]["helada_siembra"]["texto_en"] == texto
+    assert not [a for a in rep["avisos"] if "texto_por_opcion_en" in a], rep["avisos"]
+    assert fuera_de_regla(textos_de_la_ficha(cubo, con_notas=True)) == []
+    assert validar_contrato.validar(web) == []
+
+
+def test_texto_por_opcion_con_lenguaje_que_la_ficha_no_admite_no_se_publica(tmp_path):
+    """CLAUDE.md, regla 10: un texto por opción con «only», «first» o promesas no llega al motivo; se avisa
+    (filtro y opción) y el aviso no repite la palabra."""
+    texto = next(f for f in B3["filtros"] if f["id"] == "helada_siembra")["texto_en"]
+    b3 = con_texto_por_opcion({"sorgo": "TEST DATA: this rule covers only the winter cereal.",
+                               "chile": NOTA_POR_OPCION})
+    rep, geo, cubo, _, web = correr(procesados(tmp_path, b3=b3), tmp_path)
+    motivos = motivos_del_filtro(geo, cubo)
+    assert motivos["sorgo"] == {texto}, "el texto con lenguaje no admitido no se agrega"
+    assert motivos["chile"] == {f"{texto} {NOTA_POR_OPCION}"}, "el de otra opción, sí"
+    avisos = [a for a in rep["avisos"] if "texto_por_opcion_en" in a]
+    assert len(avisos) == 1 and "helada_siembra" in avisos[0] and "sorgo" in avisos[0], rep["avisos"]
+    assert "regla 10" in avisos[0] and palabras_prohibidas(avisos[0]) == []
+    assert avisos[0] in cubo["meta"]["notas"]
+    assert fuera_de_regla(textos_de_la_ficha(cubo, con_notas=True)) == []
+    assert validar_contrato.validar(web) == []
+
+
+@pytest.mark.parametrize("valor", [None, {}, {"sorgo": ""}, {"sorgo": "   "}, {"sorgo": None}, {"sorgo": 5},
+                                   "TEST DATA: not an object.", ["sorgo"]])
+def test_texto_por_opcion_vacio_o_mal_formado_no_cambia_el_motivo(valor):
+    """Sin texto para la rotación (o con una forma que no es {rotación: texto}), el motivo es texto_en."""
+    b3 = con_texto_por_opcion(valor)
+    for rot in ("sorgo", "chile"):
+        f = next(x for x in b4_cubo.filtros_de_opcion(rot, b3, None) if x["id"] == "helada_siembra")
+        assert f["motivo"] == next(x for x in B3["filtros"] if x["id"] == "helada_siembra")["texto_en"], (valor, rot)
+    assert b4_cubo.avisos_texto_por_opcion(b3) == []
+
+
+def test_real_motivo_de_cada_filtro_sale_del_catalogo():
+    """Cubo publicado: el motivo de cada filtro por opción es el texto_en del catálogo más, si el catálogo lo
+    trae para ESA rotación y no trae lenguaje que la ficha no admite, su texto por opción."""
+    if not (WEB / "cubo.json").exists():
+        pytest.skip("web/data/cubo.json aún no existe")
+    cubo = leer(WEB, "cubo.json")
+    catalogo = cubo.get("filtros_catalogo") or {}
+    if not catalogo:
+        pytest.skip("el cubo publicado no trae filtros de B3")
+    vistos = 0
+    for pid, pc in cubo["parcelas"].items():
+        for o in pc["opciones"]:
+            for f in o.get("filtros") or []:
+                d = catalogo[f["id"]]
+                por_opcion = d.get("texto_por_opcion_en")
+                nota = por_opcion.get(o.get("rotacion")) if isinstance(por_opcion, dict) else None
+                usable = isinstance(nota, str) and nota.strip() and not palabras_prohibidas(nota)
+                assert f["motivo"] == (f"{d['texto_en']} {nota.strip()}" if usable else d["texto_en"]), (pid, o["id"], f["id"])
+                vistos += 1
+    assert vistos, "el cubo publicado debe traer filtros por opción"
+
+
 def test_helada_usa_la_probabilidad_de_la_zona_y_el_umbral_de_la_regla(con_b3):
     _, geo, cubo, _, _ = con_b3
     por_zona = filtros_por_zona(geo, cubo)
