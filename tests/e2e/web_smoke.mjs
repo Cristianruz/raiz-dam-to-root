@@ -617,6 +617,15 @@ async function pruebaRelieve(page, prefijo, reducida, captura = null) {
   } else {
     omitir(`${prefijo}leyenda de rutas cortadas`, "relieve.json sin rutas_depresiones");
   }
+  // Revisión I20: en el piso plano del valle la dirección de las rutas sale del relleno del modelo; se leen aproximadas.
+  const aprox = (await page.locator("#capa-relieve .relieve-leyenda [data-parte='rutas-aproximadas']").count())
+    ? await texto(page, "#capa-relieve .relieve-leyenda [data-parte='rutas-aproximadas']")
+    : "";
+  check(
+    `${prefijo}leyenda del relieve: las rutas del piso plano del valle se leen como aproximadas`,
+    aprox.includes("filling small pits and flats of the elevation model") && aprox.includes("read the lines as approximate"),
+    aprox.slice(0, 160),
+  );
 
   // Tormenta: lámina con su definición, periodo y fuente.
   await page.locator(".relieve-boton-tormenta").click();
@@ -679,6 +688,26 @@ async function pruebaRelieveFicha(page, id, prefijo) {
     `${prefijo}renglón Soil de ${id}: línea de relieve en cada tarjeta, con la pendiente de la parcela y el rótulo de escala`,
     (await lineas.count()) === ops.length && t.includes("Terrain (context)") && (r.pendiente_media_pct == null || t.includes(`${nf({ maximumFractionDigits: 1 }).format(r.pendiente_media_pct)}%`)) && (!rotulo || t.includes(rotulo)),
     t.replace(/\n/g, " ").slice(0, 200),
+  );
+  // Revisión I17 a I19: pendiente ajustada con su ruido, aporte como mínimo y dentro del área exportada, y los hoyos
+  // cerrados del modelo plegados (el <details> empieza cerrado y su cifra no se ve hasta abrirlo).
+  const aporteOk = r.aportacion_externa_ha == null || (r.aportacion_externa_ha > 0
+    ? t.includes(`at least ${nf({ maximumFractionDigits: 1 }).format(r.aportacion_externa_ha)} ha drain into this field`)
+    : t.includes("no runoff drains into this field from upslope")) && t.includes("nothing outside the mapped area is counted");
+  const pozos = lineas.first().locator("details.relieve-parcela-pozos");
+  const cerrado = (await pozos.count()) === 1 && !(await pozos.evaluate((d) => d.open));
+  const pctPozos = r.frac_depresion == null ? "no data" : new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 0 }).format(r.frac_depresion);
+  let abierto = "";
+  if (cerrado) {
+    await pozos.locator("summary").click();
+    abierto = await pozos.innerText();
+    await pozos.locator("summary").click();
+  }
+  check(
+    `${prefijo}renglón Soil de ${id}: «fitted slope» con el ruido del modelo, aporte «at least» del área exportada y hoyos del modelo plegados`,
+    (r.pendiente_media_pct == null || t.includes("fitted slope") && t.includes("small fields are within its noise")) && !t.includes("mean slope") && aporteOk &&
+      cerrado && !t.includes(`${pctPozos} of the field`) && abierto.includes(pctPozos) && abierto.includes("mostly within its noise"),
+    `${t.replace(/\n/g, " ").slice(0, 200)} | ${abierto.replace(/\n/g, " ")}`,
   );
 }
 
