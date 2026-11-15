@@ -3,6 +3,8 @@
 //
 // Uso:   node tests/e2e/grabar_video.mjs
 //        RAIZ_URL=https://<liga pública>/ node tests/e2e/grabar_video.mjs   (graba la página publicada, no la local)
+//        RAIZ_VIDEO=recorrido node tests/e2e/grabar_video.mjs   (el recorrido largo, de 60 a 90 s: las mismas tomas con
+//                                     más calma; guion docs/pitch/guion_video_recorrido.md → video_recorrido.mp4 y .srt)
 //        RAIZ_LIGA_PAGINA=<liga>      liga pública que se escribe en la tarjeta de cierre (por omisión, la del proyecto)
 //        RAIZ_FOTOGRAMAS=<carpeta>    dónde dejar un fotograma de cada tramo para revisarlo (por omisión, una temporal)
 //        FFMPEG=<ruta> FFPROBE=<ruta> si ffmpeg y ffprobe no están en el PATH
@@ -65,9 +67,16 @@ const { chromium } = require("playwright");
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const RAIZ = path.resolve(AQUI, "..", "..");
 const WEB = path.join(RAIZ, "web");
-const GUION = path.join(RAIZ, "docs", "pitch", "guion_video_30s.md");
-const SRT = path.join(RAIZ, "docs", "pitch", "video_30s.srt");
-const MP4 = path.join(RAIZ, "docs", "pitch", "video_30s.mp4");
+// Dos videos con las mismas tomas: el del formulario (30 s o menos; por omisión) y el recorrido largo para el README y
+// la exposición (RAIZ_VIDEO=recorrido). Cada uno tiene su guion, sus salidas y sus límites de duración y de peso.
+const VIDEOS = {
+  oficial: { guion: "guion_video_30s.md", salida: "video_30s", maxima: 30.0, objetivo: [28.0, 29.0], megas: 10 },
+  recorrido: { guion: "guion_video_recorrido.md", salida: "video_recorrido", maxima: 90.0, objetivo: [60.0, 90.0], megas: 25 },
+};
+const VIDEO = VIDEOS[process.env.RAIZ_VIDEO === "recorrido" ? "recorrido" : "oficial"];
+const GUION = path.join(RAIZ, "docs", "pitch", VIDEO.guion);
+const SRT = path.join(RAIZ, "docs", "pitch", `${VIDEO.salida}.srt`);
+const MP4 = path.join(RAIZ, "docs", "pitch", `${VIDEO.salida}.mp4`);
 const TARJETAS = "docs/pitch/video/tarjetas.html"; // dentro del repo; el servidor local la sirve bajo /__repo__/
 const TEMPORAL = fs.mkdtempSync(path.join(os.tmpdir(), "raiz-video-"));
 const FOTOGRAMAS = process.env.RAIZ_FOTOGRAMAS ? path.resolve(process.env.RAIZ_FOTOGRAMAS) : path.join(TEMPORAL, "fotogramas");
@@ -94,9 +103,11 @@ const ASPECTO = PAGINA.ancho / PAGINA.alto;
 const FONDO = "0x1D2329"; // --tinta de web/style.css: fondo de la banda y de las tarjetas
 const FPS = 25;
 const FUNDIDO_S = 0.2; // al entrar y salir de las tarjetas; lo demás son cortes limpios
-const DURACION_MAX_S = 30.0; // regla del kit (C7) y de la guía de envío: más de 30 s deja fuera el proyecto
-const DURACION_OBJETIVO_S = [28.0, 29.0]; // margen pedido por el coordinador (guía de envío de Space Apps)
-const TAMANO_OBJETIVO_MB = 10;
+// Video del formulario: 30 s es regla del kit (C7) y de la guía de envío (más deja fuera el proyecto); se apunta a
+// 28–29 s (margen pedido por el coordinador) y a menos de 10 MB.
+const DURACION_MAX_S = VIDEO.maxima;
+const DURACION_OBJETIVO_S = VIDEO.objetivo;
+const TAMANO_OBJETIVO_MB = VIDEO.megas;
 const GOLPE_MIN_S = 2.4; // un golpe de la página no dura menos que esto
 const CIERRE_MIN_S = 2.5;
 const AVISO_JUICIO = "This tool supports, never replaces, the judgment of farmers and local experts.";
@@ -602,6 +613,11 @@ async function prepararLista(page) {
 }
 
 // ---------------------------------------------------------------- 4. los golpes de la página
+/**
+ * En un tramo que corta en el clic, fracción de su duración que se espera antes de mover el puntero: el clic cae cerca
+ * del final de la duración, así el tramo (que termina en el clic) no empieza antes que su preparación.
+ */
+const antesDelClic = (reloj) => Math.max(0.3, 1 - 0.75 / reloj.dur);
 const FICHA = { recorte: "#ficha", cabecera: ".ficha-cabeza" };
 /** Encuadre de la ficha entera: de su borde izquierdo al derecho, desde un poco arriba de su cabecera. */
 async function encuadreFicha(page) {
@@ -663,7 +679,7 @@ function tramosDelExplorador(ctx) {
             const b2 = await cajaDe(page, "#linea-tiempo .tiempo-boton");
             await moverPuntero(page, b2.x - 60, b2.y + b2.h + 50, 0);
           },
-          async accion(page) {
+          async accion(page, reloj) {
             const mapa = await cajaDe(page, "#mapa");
             const e = encuadre({ ancho: 950, x: VIEWPORT.width, y: mapa.y - 4 });
             // «Pause» al llegar al año destacado, desde la página: un observador del año pulsa el botón en cuanto cambia
@@ -685,11 +701,11 @@ function tramosDelExplorador(ctx) {
             await verPuntero(page, false);
             // Con WebGL por software la vista 3D dibuja pocos cuadros por segundo y la grabación llega con retraso:
             // el reloj no dice cuándo se VE el año destacado. El tramo se ancla a la grabación misma (anclaVisual): el
-            // instante en que aparece el anillo de la nota queda a 1.2 s del principio. Antes hay que dejar que la
-            // página termine de dibujar, para que ese instante esté grabado.
+            // instante en que aparece el anillo de la nota queda al 45 % del tramo (antes, el año anterior; después,
+            // el destacado). Hay que dejar que la página termine de dibujar y seguir grabando lo que dura el resto.
             await mapaQuieto(page);
-            await page.waitForTimeout(1500);
-            return { encuadre: e, resaltado: "si", anclaVisual: { antes: 1.2 } };
+            await page.waitForTimeout(Math.max(1500, reloj.dur * 550 + 700));
+            return { encuadre: e, resaltado: "si", anclaVisual: { antes: reloj.dur * 0.45 } };
           },
         }
       : {
@@ -732,7 +748,7 @@ function tramosDelExplorador(ctx) {
       const e = encuadre({ ancho: 1039, x: VIEWPORT.width, y: mapa.y + 4 });
       const boton = `.boton-parcela[data-id="${PARCELA}"]`;
       await resaltar(page, [{ sel: [boton] }], { margen: 3 });
-      await reloj.hasta(0.3);
+      await reloj.hasta(antesDelClic(reloj));
       const { x, y } = await apuntar(page, page.locator(boton), 320);
       await pulsar(page);
       await page.waitForTimeout(220);
@@ -806,7 +822,7 @@ function tramosDelExplorador(ctx) {
       const e = await encuadrePorque(page);
       const resumen = `${tarjetaPorque()} details.porque > summary`;
       await resaltar(page, [{ sel: [resumen] }], { ...FICHA, margen: 5 });
-      await reloj.hasta(0.3);
+      await reloj.hasta(antesDelClic(reloj));
       const { x, y } = await apuntar(page, page.locator(resumen), 320);
       await pulsar(page);
       await page.waitForTimeout(220);
@@ -1263,6 +1279,7 @@ async function main() {
       // Reloj del tramo: hasta(f) espera a que pase la fracción f de su duración (el ritmo no depende de la máquina).
       const inicio = Date.now();
       const reloj = {
+        dur, // segundos del tramo
         hasta: async (f) => {
           const falta = inicio + f * dur * 1000 - Date.now();
           if (falta > 0) await page.waitForTimeout(falta);
@@ -1319,7 +1336,9 @@ async function main() {
 
     await page.goto(explorador, { waitUntil: "load" });
     await page.waitForSelector("body[data-listo='si']", { timeout: 30000 });
-    await page.waitForFunction(() => ["listo", "sin-mapa"].includes(document.body.dataset.mapa), null, { timeout: 30000 });
+    // Sin red, el mapa base tarda en darse por vencido: se le da tiempo y, si no avisa, se sigue con lo dibujado.
+    await page.waitForFunction(() => ["listo", "sin-mapa"].includes(document.body.dataset.mapa), null, { timeout: 75000 })
+      .catch(() => aviso("el mapa no avisó que quedó listo en 75 s: se sigue con lo que haya dibujado"));
     await page.waitForFunction(() => Boolean(document.body.dataset.relieve), null, { timeout: 15000 }).catch(() => {});
     await mapaQuieto(page);
     await instalarAyudas(page);

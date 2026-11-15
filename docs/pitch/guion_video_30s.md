@@ -121,6 +121,7 @@ node tests/e2e/grabar_video.mjs
 RAIZ_FOTOGRAMAS=<carpeta> node tests/e2e/grabar_video.mjs      # deja un fotograma de cada tarjeta y de cada tramo
 RAIZ_URL=https://<liga pública>/ node tests/e2e/grabar_video.mjs   # graba la página publicada
 RAIZ_LIGA_PAGINA=<liga> node tests/e2e/grabar_video.mjs        # la liga que se escribe en el cierre
+RAIZ_VIDEO=recorrido node tests/e2e/grabar_video.mjs           # el recorrido largo (docs/pitch/guion_video_recorrido.md)
 ```
 
 Necesita Node con Playwright (Chromium) y `ffmpeg`/`ffprobe`. Escribe `docs/pitch/video_30s.mp4` y `docs/pitch/video_30s.srt`, y termina con 0 solo si pasan todas sus comprobaciones. Tarda de tres a cuatro minutos.
@@ -130,7 +131,7 @@ Necesita Node con Playwright (Chromium) y `ffmpeg`/`ffprobe`. Escribe `docs/pitc
 - **Sin** movimiento reducido: con él no hay gotas animadas ni reproducción de la línea de tiempo. Pantalla de inicio cerrada con la llave `LLAVE_INICIO` de `web/js/acerca.js` en `sessionStorage`. Sin *service worker*.
 - Cada toma se graba en uno o más tramos, con su preparación fuera de cámara. Los tramos se graban en el orden que conviene a la página y se montan en el orden de la sección 3. Una marca de color que el grabador muestra un instante, fuera de cámara, da la correspondencia exacta entre el reloj y la grabación. Si una acción tarda más que su tramo, el tramo se recorre para terminar con el resultado a la vista.
 - Montaje con `ffmpeg`: cada tramo se recorta a su encuadre y se escala a 1920 × 890; la banda de cada toma es una imagen de `tarjetas.html`. Cortes limpios; un fundido de 0.2 s solo al entrar y salir de las tarjetas.
-- Con red, el mapa base carga; sin red sale el aviso «Base map tiles are unavailable…» en todas las tomas (es válido, pero el video final debe grabarse con red).
+- Con red, el mapa base carga; sin red el mapa tarda en darse por listo (el grabador espera hasta 75 s y sigue) y sale el aviso «Base map tiles are unavailable…» en todas las tomas (es válido, pero el video final debe grabarse con red).
 
 **Selectores que usa (todos por estructura, ninguno por texto ni por su lugar en la cabecera)**
 
@@ -171,4 +172,4 @@ Necesita Node con Playwright (Chromium) y `ffmpeg`/`ffprobe`. Escribe `docs/pitc
 - Grabar el video final con red y con la portada nueva cuando la página esté cerrada; revisar a ojo la toma 3 sobre el tablero (hoy solo se ha grabado sobre el explorador).
 - Volver a llenar la sección 4 con lo que muestre la página final.
 - Subir el video y pasar la liga al integrador para el formulario de envío.
-- Recorrido largo (60 a 90 s) para el README y la exposición: su guion está en `docs/pitch/guion_video_recorrido.md`; el grabador todavía no lo produce.
+- Recorrido largo (65 s) para el README y la exposición: `RAIZ_VIDEO=recorrido node tests/e2e/grabar_video.mjs` (guion: `docs/pitch/guion_video_recorrido.md`; salidas: `docs/pitch/video_recorrido.mp4` y `.srt`). Hoy es este mismo video con más calma; los golpes nuevos que le faltan están en la sección 6 de ese guion. Regrabarlo también sobre la página final.
