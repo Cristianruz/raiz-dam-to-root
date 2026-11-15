@@ -95,3 +95,4 @@
 | 04:12 | Portada | DECISIÓN (Cristian) | El tablero de Tena, corregido, es la página principal, en cuatro idiomas y como aplicación; la página anterior queda como explorador | `docs/decisiones/2026-11-15_tablero_principal_idiomas.md` |
 | 06:09 | Portada | HECHO (pendiente: revisión del portugués y del francés por una persona) | El plan da las cifras de la ficha, sin órdenes; cuatro idiomas con selector; fuera los PDF; pruebas con navegador de las dos páginas en verde | `7dd3515`, `ef5453e` |
 | 06:20 | Materiales | HECHO (pendiente: nombres en la portada de las diapositivas y liga del video) | Video de 29 s diseñado y regrabado sobre la página final; recorrido de 87 s; diapositivas regeneradas | `docs/pitch/` |
+| 06:36 | Portada | PUBLICADO | PR #9 en `main`: el tablero es la portada y el explorador queda en `explorer.html`; revisor final sin bloqueos; CI y las cinco pruebas con navegador en verde sobre el commit fusionado | `dfbf35e`, `084bb30` |

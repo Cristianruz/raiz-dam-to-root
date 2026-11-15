@@ -8,7 +8,7 @@ Team **Orbital Farming** · NASA Space Apps Challenge 2026, Chihuahua local even
 
 **Status (Nov 15, 2026).** The app reads real team deliveries (`web/data/cubo.json` → `meta.mock: false`): two pilot areas and 1,239 estimated fields. Every test result is published with the same visibility, favorable or not. What was not executed is labeled "not run".
 
-**Public link:** https://cristianruz.github.io/raiz-dam-to-root/ opens the **dashboard** (the home page, and what the installed app opens); the **field explorer** described under [How it works](#how-it-works) is at https://cristianruz.github.io/raiz-dam-to-root/explorer.html. The repository is public and GitHub Pages publishes `main` (source: GitHub Actions); pull requests #4 and #5 carry the field explorer, and the dashboard as home page arrives with the pull request that follows them (until it is merged, the link opens the field explorer). To run it locally, or as a single-file offline demo, see [How to run](#how-to-run).
+**Public link:** https://cristianruz.github.io/raiz-dam-to-root/ opens the **dashboard** (the home page, and what the installed app opens); the **field explorer** described under [How it works](#how-it-works) is at https://cristianruz.github.io/raiz-dam-to-root/explorer.html. The repository is public and GitHub Pages publishes `main` (source: GitHub Actions); the field explorer arrived with pull requests #4 to #8 and the dashboard as home page with pull request #9. To run it locally, or as a single-file offline demo, see [How to run](#how-to-run).
 
 Three items depend on people and are not closed:
 
