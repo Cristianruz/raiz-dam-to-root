@@ -128,6 +128,9 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 12:27 | integrador | PR #15 fusionado en `main` (`701a34f`): el recorrido largo regrabado sobre la vista de Milo. GitHub Pages publicó el PR #14 a las 12:27 |
 | 12:50 | Cristian | Trae la estructura que pide la guía de Space Apps para el video de 30 s: preséntate, el reto y qué lo inspiró, el nombre y el lema, cómo funciona con el prototipo y los datos de NASA y de agencias socias, y la mirada al futuro |
 | 13:00 | integrador | Video de 30 s rehecho con esos cinco tiempos: tarjetas nuevas «We are Orbital Farming», «Our challenge / What inspired us» y «Looking ahead» (visión rotulada y en condicional); «How it works» nombra el dato de la ESA (Sentinel de Copernicus, dentro de HLS); tres golpes del prototipo. 29.0 s, 55 comprobaciones. Pendiente de Cristian: nombres de los integrantes (`RAIZ_INTEGRANTES`) y confirmar la frase de la inspiración y las de la visión |
+| 13:04 | integrador | PR #16 fusionado en `main` (`8ef790a`): el video de 30 s con la estructura de la guía |
+| 13:06 | equipo | El integrador del equipo pide quitar su nombre de la raíz del repositorio y del cierre del video |
+| 13:10 | integrador | En los archivos de la raíz (`README.md`, `AI_USAGE.md`, `CLAUDE.md`) el nombre pasa a ser el rol, «el integrador del equipo». El cierre de los videos ya no escribe la liga pública, cuya dirección trae el usuario de la cuenta (`RAIZ_LIGA_PAGINA` la vuelve a poner); videos regrabados. Sigue igual lo que no se puede o no se pidió cambiar: la dirección del repositorio y de la página, el historial de git, los documentos de `docs/` y los comentarios del código |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 

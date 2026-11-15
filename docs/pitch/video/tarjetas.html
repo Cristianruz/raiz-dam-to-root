@@ -21,7 +21,8 @@
                   agua, suministro, suelo y nutrientes, estaciones y clima, opciones por zona piloto, registro
                   satelital, límites por red neuronal, terreno y aplicación), en lenguaje formal. Cada una describe algo que la página ya hace (README, «How it works»
                   y «SI/AI tools used»); el grabador comprueba que el README siga diciéndolo;
-       cierre     frase de cierre (?frase=, del guion), aviso de juicio y liga pública (?liga=);
+       cierre     frase de cierre (?frase=, del guion), aviso de juicio y, solo si se pide, la liga pública (?liga=);
+                  por omisión no se escribe, porque la dirección trae el usuario de la cuenta;
                   ?app=si agrega la línea de la aplicación instalable (el grabador la pide solo si existen
                   web/manifest.webmanifest y web/sw.js);
        banda      banda inferior de una toma: rótulo del tiempo de la historia (?rotulo=) y subtítulo (?texto=).
@@ -377,7 +378,7 @@
       <svg class="subraya" viewBox="0 0 620 26" aria-hidden="true"><path class="anim" pathLength="1" d="M6 14 Q82 -6 160 14 T314 14 T468 14 T614 14"/></svg>
       <p class="aviso anim">This tool supports, never replaces, the judgment of farmers and local experts.</p>
     </div>
-    <p class="tarjeta-pie anim"><span class="liga" data-campo="liga"></span><span class="app" data-campo="app" hidden>Installs as an app · opens offline</span></p>
+    <p class="tarjeta-pie anim"><strong>ROOT – From Dam to Root · Orbital Farming</strong><span class="liga" data-campo="liga"></span><span class="app" data-campo="app" hidden>Installs as an app · opens offline</span></p>
   </section>
 
   <section class="banda" data-vista="banda" hidden>
