@@ -103,7 +103,7 @@ const TABLA = {
   ],
 
   // --- Resumen: tarjeta de entrada y dotación
-  "hero.pill": ["KNOW BEFORE YOU PLANT", "CULTIVA CON INFORMACIÓN", "CULTIVE COM INFORMAÇÃO", "CULTIVER EN CONNAISSANCE"],
+  "hero.pill": ["KNOW BEFORE YOU PLANT", "SABER ANTES DE SEMBRAR", "SABER ANTES DE PLANTAR", "SAVOIR AVANT DE SEMER"],
   "hero.titulo": [
     "Every crop has its own water story.",
     "Cada cultivo tiene su historia de agua.",
@@ -165,7 +165,7 @@ const TABLA = {
     "{n} com classificação de cultura",
     "{n} avec une classification de culture",
   ],
-  "cifra.comprometida": ["Water already committed", "Agua comprometida", "Água comprometida", "Eau engagée"],
+  "cifra.comprometida": ["Water already committed", "Agua ya comprometida", "Água comprometida", "Eau engagée"],
   "cifra.comprometida_nota": [
     "At least · need of perennial crops / allocation",
     "Al menos · demanda de perennes / dotación",
@@ -178,7 +178,7 @@ const TABLA = {
     "Sem dotação neste cenário",
     "Pas de dotation dans ce scénario",
   ],
-  "cifra.sin_clasificar": ["Area not classified", "Área sin clasificar", "Área sem classificar", "Surface non classée"],
+  "cifra.sin_clasificar": ["Area not classified", "Área sin clasificar", "Área não classificada", "Surface non classée"],
   "cifra.sin_clasificar_nota": [
     "Needs checking in the field",
     "Necesita verificación en campo",
@@ -229,6 +229,28 @@ const TABLA = {
     "Limites estimées · Fields of The World",
   ],
   "mapa.zona_completa": ["See the whole area", "Ver zona completa", "Ver a zona inteira", "Voir toute la zone"],
+  // Controles de la biblioteca del mapa, en el idioma elegido (js/dashboard.js, textosDelMapa)
+  "mapa.acercar": ["Zoom in", "Acercar", "Aproximar", "Zoom avant"],
+  "mapa.alejar": ["Zoom out", "Alejar", "Afastar", "Zoom arrière"],
+  "mapa.atribucion": ["Show or hide the map credits", "Mostrar u ocultar los créditos del mapa", "Mostrar ou ocultar os créditos do mapa", "Afficher ou masquer les crédits de la carte"],
+  "mapa.gesto_tactil": [
+    "Use two fingers to move the map",
+    "Usa dos dedos para mover el mapa",
+    "Use dois dedos para mover o mapa",
+    "Utilisez deux doigts pour déplacer la carte",
+  ],
+  "mapa.gesto_ctrl": [
+    "Hold Ctrl and scroll to zoom the map",
+    "Mantén Ctrl y desplaza para acercar el mapa",
+    "Segure Ctrl e role para aproximar o mapa",
+    "Maintenez Ctrl et faites défiler pour zoomer sur la carte",
+  ],
+  "mapa.gesto_cmd": [
+    "Hold ⌘ and scroll to zoom the map",
+    "Mantén ⌘ y desplaza para acercar el mapa",
+    "Segure ⌘ e role para aproximar o mapa",
+    "Maintenez ⌘ et faites défiler pour zoomer sur la carte",
+  ],
   "mapa.aria": [
     "Interactive map of fields",
     "Mapa interactivo de parcelas",
@@ -254,7 +276,7 @@ const TABLA = {
   "leyenda.verde": ["Enough water", "Alcanza el agua", "Água suficiente", "Eau suffisante"],
   "leyenda.ambar": ["Tight", "Justa", "Justa", "Juste"],
   "leyenda.rojo": ["Not enough water", "Falta agua", "Falta água", "Eau insuffisante"],
-  "leyenda.gris": ["Not classified", "Sin clasificar", "Sem classificar", "Non classée"],
+  "leyenda.gris": ["Not classified", "Sin clasificar", "Não classificada", "Non classée"],
   "leyenda.clasificado": ["Classified crop", "Cultivo clasificado", "Cultura classificada", "Culture classée"],
   "mapa.sin_base": [
     "The base map is not available. The field polygons are drawn from local data.",
@@ -322,14 +344,14 @@ const TABLA = {
     "Aucune parcelle disponible dans cette zone.",
   ],
   "ficha.parcela": ["Field {id} · {area} ha", "Parcela {id} · {area} ha", "Parcela {id} · {area} ha", "Parcelle {id} · {area} ha"],
-  "ficha.sin_clasificar": ["Crop not classified", "Cultivo sin clasificar", "Cultura sem classificar", "Culture non classée"],
+  "ficha.sin_clasificar": ["Crop not classified", "Cultivo sin clasificar", "Cultura não classificada", "Culture non classée"],
   "ficha.demanda": ["Yearly water need · median", "Demanda anual · mediana", "Demanda anual · mediana", "Besoin annuel · médiane"],
   "ficha.suelo": ["Soil · regional map", "Suelo · mapa regional", "Solo · mapa regional", "Sol · carte régionale"],
   "ficha.riego": ["Actual irrigation system", "Sistema de riego real", "Sistema de irrigação real", "Système d'irrigation réel"],
   "ficha.sin_registrar": ["Not recorded", "Sin registrar", "Não registrado", "Non renseigné"],
-  "ficha.pendiente": ["Mean slope", "Pendiente media", "Declive médio", "Pente moyenne"],
+  "ficha.pendiente": ["Mean slope", "Pendiente media", "Declividade média", "Pente moyenne"],
   "ficha.textura": ["Estimated texture · map", "Textura estimada · mapa", "Textura estimada · mapa", "Texture estimée · carte"],
-  "ficha.plazo": ["Water term in the model", "Compromiso del modelo", "Compromisso do modelo", "Engagement du modèle"],
+  "ficha.plazo": ["Water commitment (model)", "Compromiso de agua (modelo)", "Compromisso de água (modelo)", "Engagement en eau (modèle)"],
   "ficha.cobertura": [
     "Area covered in this scenario",
     "Área cubierta por el escenario",
@@ -337,10 +359,10 @@ const TABLA = {
     "Surface couverte par le scénario",
   ],
   "ficha.hectareas": [
-    "{cubiertas} of {area} ha have water at the median need. Likely range: {bajo}–{alto} ha.",
-    "{cubiertas} de {area} ha con agua a demanda mediana. Rango probable: {bajo}–{alto} ha.",
-    "{cubiertas} de {area} ha com água na demanda mediana. Faixa provável: {bajo}–{alto} ha.",
-    "{cubiertas} sur {area} ha ont de l'eau au besoin médian. Plage probable : {bajo}–{alto} ha.",
+    "{cubiertas} of {area} ha have water at the median need. Range: {bajo}–{alto} ha.",
+    "{cubiertas} de {area} ha con agua a demanda mediana. Rango: {bajo}–{alto} ha.",
+    "{cubiertas} de {area} ha com água na demanda mediana. Faixa: {bajo}–{alto} ha.",
+    "{cubiertas} sur {area} ha ont de l'eau au besoin médian. Plage : {bajo}–{alto} ha.",
   ],
   "ficha.sin_calculo_nota": [
     "Nothing is computed for a field without a crop classification. The crop can be confirmed with your technician.",
@@ -480,12 +502,12 @@ const TABLA = {
   ],
   "cultivos.plazo.perenne": ["PERENNIAL CROP", "CULTIVO PERENNE", "CULTURA PERENE", "CULTURE PÉRENNE"],
   "cultivos.rango": [
-    "Likely range: {bajo}–{alto}",
-    "Rango probable: {bajo}–{alto}",
-    "Faixa provável: {bajo}–{alto}",
-    "Plage probable : {bajo}–{alto}",
+    "Range: {bajo}–{alto}",
+    "Rango: {bajo}–{alto}",
+    "Faixa: {bajo}–{alto}",
+    "Plage : {bajo}–{alto}",
   ],
-  "cultivos.compromiso": ["Water term", "Compromiso", "Compromisso", "Engagement"],
+  "cultivos.compromiso": ["Water commitment (model)", "Compromiso de agua (modelo)", "Compromisso de água (modelo)", "Engagement en eau (modèle)"],
   "cultivos.siembra": ["Planting · month-day", "Siembra · mes-día", "Plantio · mês-dia", "Semis · mois-jour"],
   "cultivos.siembra_rango": ["{desde} to {hasta}", "{desde} a {hasta}", "{desde} a {hasta}", "{desde} au {hasta}"],
   "cultivos.sin_siembra": ["Not in the data", "No está en los datos", "Não está nos dados", "Absent des données"],
@@ -522,7 +544,7 @@ const TABLA = {
   "cultivo.barbecho": ["Fallow", "Barbecho", "Pousio", "Jachère"],
   "cultivo.descanso": ["Rest", "Descanso", "Descanso", "Repos"],
   "cultivo.anual": ["Annual crop", "Cultivo anual", "Cultura anual", "Culture annuelle"],
-  "cultivo.sin_clasificar": ["Not classified", "Sin clasificar", "Sem classificar", "Non classée"],
+  "cultivo.sin_clasificar": ["Not classified", "Sin clasificar", "Não classificada", "Non classée"],
   "opcion.alfalfa": ["Alfalfa (perennial)", "Alfalfa (perenne)", "Alfafa (perene)", "Luzerne (pérenne)"],
   "opcion.alfalfa_corte_verano": [
     "Alfalfa with summer irrigation cut",

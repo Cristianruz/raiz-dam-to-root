@@ -2821,3 +2821,117 @@ footer a {
     font-size: 20px;
   }
 }
+
+/* ---------------------------------------------------------------------------------------------------------
+   Ajustes de la revisión de la portada (15-nov-2026). Van al final para ganar a las reglas anteriores:
+   objetivos táctiles de 44 px, letra de 12 px o más en teléfono, el foco no queda bajo la barra inferior
+   y nada se desborda cuando la letra crece.
+   --------------------------------------------------------------------------------------------------------- */
+/* Deslizador de la dotación: la caja mide 44 px (antes 9) y la pista se dibuja dentro. El espacio total es
+   el mismo de antes (17 + 9 + 8 px), así que nada se mueve; la caja queda encima de los rótulos del rango para
+   que tocar justo debajo de la pista mueva el deslizador y no otra cosa. */
+.scene-map-area .water-card input[type="range"] {
+  height: 44px;
+  margin: 0 0 -10px;
+  background: transparent;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+}
+.scene-map-area .water-card input[type="range"]::-webkit-slider-runnable-track {
+  height: 9px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ed8b78, #f1c263, #8ed665, #66b6d2);
+}
+.scene-map-area .water-card input[type="range"]::-moz-range-track {
+  height: 9px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ed8b78, #f1c263, #8ed665, #66b6d2);
+}
+.scene-map-area .water-card input[type="range"]::-webkit-slider-thumb {
+  margin-top: -8px;
+}
+/* Los accesos a parcelas y la barra de contexto pasan a otra línea cuando la letra crece (no se desbordan). */
+.scene-parcels {
+  flex-wrap: wrap;
+}
+.context-bar select {
+  max-width: 100%;
+  height: auto;
+}
+@media (max-width: 850px) {
+  /* Enlaces y resúmenes desplegables que se tocan con el dedo: 44 px de alto. */
+  .scenario-label,
+  .field-link,
+  .section-heading > a,
+  .insight-card > a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-link {
+    display: flex;
+  }
+  #history-chart summary {
+    padding: 12px 0;
+    cursor: pointer;
+  }
+  /* Créditos del mapa: el botón que los muestra u oculta mide 44 px. */
+  .map-detail-grid .maplibregl-ctrl-attrib.maplibregl-compact {
+    min-height: 44px;
+    padding: 0 44px 0 0;
+    border-radius: 22px !important;
+  }
+  .map-detail-grid .maplibregl-ctrl-attrib.maplibregl-compact-show {
+    min-height: 18px;
+    padding: 13px 48px 13px 12px;
+  }
+  .map-detail-grid .maplibregl-ctrl-attrib-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}
+@media (max-width: 600px) {
+  /* El campo enfocado no queda bajo la barra de pestañas ni bajo la cabecera. */
+  html {
+    scroll-padding-top: 70px;
+    scroll-padding-bottom: calc(130px + env(safe-area-inset-bottom));
+  }
+  /* Letra de 12 px o más: cejas, etiquetas y barra de pestañas. */
+  .eyebrow,
+  .page-heading .eyebrow,
+  .section-heading .eyebrow,
+  .insight-card .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.8px;
+  }
+  .pill,
+  .card-heading .pill,
+  .section-heading .pill,
+  .crop-card .pill,
+  .decision-card .pill {
+    font-size: 12px;
+    color: #c6d8bc;
+  }
+  .scenario-label {
+    font-size: 12px;
+  }
+  /* La barra de pestañas crece lo que pidan sus rótulos (hasta tres renglones de 12 px). */
+  .sidebar {
+    height: auto;
+    min-height: 76px;
+  }
+  .sidebar nav a {
+    font-size: 12px;
+    line-height: 1.15;
+    gap: 3px;
+    overflow-wrap: anywhere;
+  }
+  main {
+    padding-bottom: calc(128px + env(safe-area-inset-bottom));
+  }
+}

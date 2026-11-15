@@ -14,6 +14,7 @@ import {
   planDeParcela,
   comprobarPlan,
   textoRestriccion,
+  textoDeCondicion,
   nombreCultivo,
   formatoHa,
 } from "./recomendador.js";
@@ -406,13 +407,13 @@ export async function crearAsesor(contexto) {
       ? ` <small>${esc(t("asesor.fuente"))} ${fuenteHtml(x.fuente)}${x.etiqueta ? ` ${esc(x.etiqueta)}` : ""}</small>`
       : "";
   const listaHtml = (items) =>
-    items.map((x) => `<li>${esc(x.texto)}${fuenteDe(x)}</li>`).join("");
+    items.map((x) => `<li>${esc(textoDeCondicion(x))}${fuenteDe(x)}</li>`).join("");
   /** Una tarjeta del plan: lo que cubre la dotación, las restricciones con su fuente y el aviso de juicio. */
   function tarjetaHtml(x) {
     const aviso = `<p class="aviso-juicio">${esc(avisoJuicio())}</p>`;
     const cabeza = `<div class="card-heading"><h3>${esc(x.nombre)}</h3><span class="pill">${esc(x.rotulo)}</span></div>`;
     if (x.estado === "sin_datos")
-      return `<article class="card decision-card" data-plan-option="${esc(x.id)}" data-state="${esc(x.estado)}">${cabeza}<p class="decision-action" data-plan-coverage>${esc(x.descripcion)}</p>${aviso}</article>`;
+      return `<article class="card decision-card" data-plan-option="${esc(x.id)}" data-rotacion="${esc(x.rotacion)}" data-state="${esc(x.estado)}">${cabeza}<p class="decision-action" data-plan-coverage>${esc(x.descripcion)}</p>${aviso}</article>`;
     // Una cifra con su rótulo; la unidad va aparte y más pequeña, para que la cifra se lea de un vistazo en el teléfono.
     const dato = (rotulo, valor, u = "") =>
       `<div><dt>${esc(rotulo)}</dt><dd>${esc(valor)}${u ? ` <span class="unit">${esc(u)}</span>` : ""}</dd></div>`;
@@ -442,7 +443,7 @@ export async function crearAsesor(contexto) {
       ? `<details data-parte="cumplidas"><summary>${esc(t("asesor.tarjeta.cumplidas", { n: fmt(x.cumplidas.length, 0) }))}</summary><ul>${listaHtml(x.cumplidas)}</ul><p>${esc(t("asesor.tarjeta.cumplidas_nota"))}</p></details>`
       : "";
     const ha = x.hectareas_ficha;
-    return `<article class="card decision-card ${x.estado === "restriccion" ? "restricted" : ""}" data-plan-option="${esc(x.id)}" data-state="${esc(x.estado)}" data-area="${esc(ha.area)}" data-ha="${esc(ha.p50)}" data-ha-low="${esc(ha.bajo)}" data-ha-high="${esc(ha.alto)}">${cabeza}<p class="decision-action" data-plan-coverage>${esc(x.descripcion)}</p>
+    return `<article class="card decision-card ${x.estado === "restriccion" ? "restricted" : ""}" data-plan-option="${esc(x.id)}" data-rotacion="${esc(x.rotacion)}" data-state="${esc(x.estado)}" data-area="${esc(ha.area)}" data-ha="${esc(ha.p50)}" data-ha-low="${esc(ha.bajo)}" data-ha-high="${esc(ha.alto)}">${cabeza}<p class="decision-action" data-plan-coverage>${esc(x.descripcion)}</p>
       <dl class="decision-values">${valores}</dl>${restricciones}${pendientes}${cumplidas}
       <details data-parte="calculo"><summary>${esc(t("asesor.tarjeta.calculo"))}</summary><p>${esc(t("asesor.tarjeta.calculo_texto"))}</p><p>${esc(alcance())}</p></details>
       ${aviso}</article>`;

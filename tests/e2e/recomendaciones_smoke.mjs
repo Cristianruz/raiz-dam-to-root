@@ -29,6 +29,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { TEXTOS_ASESOR } from "../../web/js/textos_asesor.js";
+import { TEXTOS_TABLERO } from "../../web/js/textos_tablero.js";
 import { IDIOMAS } from "../../web/js/i18n.js";
 
 const require = createRequire(import.meta.url);
@@ -150,6 +151,8 @@ function leerPlan(page) {
   return page.evaluate(() =>
     [...document.querySelectorAll("#recommendations [data-plan-option]")].map((el) => ({
       id: el.dataset.planOption,
+      rotacion: el.dataset.rotacion ?? null,
+      titulo: el.querySelector("h3")?.textContent ?? "",
       estado: el.dataset.state,
       area: el.dataset.area ?? null,
       ha: el.dataset.ha ?? null,
@@ -225,6 +228,45 @@ function mismasHectareas(tarjeta, ficha) {
   return false;
 }
 
+// ---------------------------------------------------------------- las mismas hectáreas en las cuatro vistas
+/**
+ * Para cada parcela, con la misma dotación: la ficha del tablero, la tarjeta de «Cultivos y opciones», el plan y
+ * la ficha de explorer.html#<id> escriben el mismo texto numérico (formato de web/js/resumen.js).
+ */
+async function probarMismasHectareas(navegador, base, parcelas, D) {
+  const { ctx, page, errores } = await nuevaPagina(navegador, ESCRITORIO);
+  const numeros = (texto) => texto.match(/\d[\d,]*(?:\.\d+)?/g) ?? [];
+  for (const id of parcelas) {
+    await page.goto(`${base}/explorer.html#${id}`, { waitUntil: "load" });
+    await page.waitForSelector("body[data-listo='si']", { timeout: ESPERA_MS });
+    await page.waitForSelector('.tarjeta[data-opcion="ACTUAL"] .alcanza', { timeout: ESPERA_MS });
+    await fijarDotacion(page, "#dotacion", D);
+    await page.waitForFunction((v) => Number(document.querySelector("#dotacion").value) === v, D);
+    const ficha = (await leerFicha(page)).find((x) => x.id === "ACTUAL");
+    const deLaFicha = numeros(ficha.texto);
+    await abrirTablero(page, base, "en", id);
+    await fijarDotacion(page, "#allocation", D);
+    const actual = (await leerPlan(page)).find((x) => x.id === "ACTUAL");
+    const delTablero = await page.evaluate((parcela) => {
+      const rotacion = document.querySelector('#recommendations [data-plan-option="ACTUAL"]')?.dataset.rotacion;
+      return {
+        ficha: document.querySelector("#field-detail > p.micro")?.textContent ?? "",
+        titulo: document.querySelector("#field-detail .field-title p")?.textContent.replaceAll(parcela, "") ?? "",
+        cultivos: document.querySelector(`.crop-card[data-rotacion="${rotacion}"] p.micro`)?.textContent.replaceAll(parcela, "") ?? "",
+      };
+    }, id);
+    const r = `D=${D} ${id}: `;
+    check(`${r}la ficha de explorer.html dice cuántas hectáreas alcanzan`, ficha.tipo === "parte" && deLaFicha.length >= 4, ficha.texto);
+    const [ha, area, bajo, alto] = deLaFicha;
+    check(`${r}el plan escribe las hectáreas de explorer.html`, actual.ha === ha && actual.area === area && actual.bajo === bajo && actual.alto === alto, `plan ${actual.ha} de ${actual.area} (${actual.bajo}–${actual.alto}) · explorador «${ficha.texto}»`);
+    check(`${r}la ficha del tablero escribe las mismas hectáreas, también en el rango`, numeros(delTablero.ficha).join() === [ha, area, bajo, alto].join(), `tablero «${delTablero.ficha}» · explorador «${ficha.texto}»`);
+    check(`${r}la ficha del tablero escribe el área como el explorador`, numeros(delTablero.titulo).join() === area, delTablero.titulo);
+    check(`${r}«Cultivos y opciones» escribe las mismas hectáreas`, numeros(delTablero.cultivos).join() === [ha, area].join(), `cultivos «${delTablero.cultivos}» · explorador «${ficha.texto}»`);
+  }
+  check("mismas hectáreas en las cuatro vistas: sin errores de página", errores.length === 0, errores.join(" | "));
+  await ctx.close();
+}
+
 // ---------------------------------------------------------------- un idioma, de principio a fin
 async function probarIdioma(navegador, base, idioma, ficha) {
   const T = TEXTOS_ASESOR[idioma];
@@ -249,6 +291,25 @@ async function probarIdioma(navegador, base, idioma, ficha) {
     check(`${e}D=${D}: aviso de juicio a la vista en cada tarjeta`, plan.length > 0 && plan.every((x) => x.aviso === T["asesor.aviso_juicio"] && x.avisoVisible), plan.map((x) => x.aviso).join(" | "));
   }
   await fijarDotacion(page, "#allocation", MARCAS[1] ?? MARCAS[0]);
+
+  // --- títulos del plan: los mismos textos de «Cultivos y opciones» (tablero.opcion.<rotación>), en el idioma
+  {
+    const delPlan = await leerPlan(page);
+    await irA(page, "cultivos");
+    const deCultivos = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll(".crop-card[data-rotacion]")].map((el) => [el.dataset.rotacion, el.querySelector("h3")?.textContent ?? ""])));
+    await irA(page, "recomendaciones");
+    const esperado = (x) => (x.id === "ACTUAL" ? T["asesor.opcion.actual"].replace("{nombre}", deCultivos[x.rotacion]) : deCultivos[x.rotacion]);
+    const distintos = delPlan.filter((x) => !deCultivos[x.rotacion] || x.titulo !== esperado(x));
+    check(`${e}los títulos del plan son los textos de «Cultivos y opciones»`, delPlan.length > 0 && distintos.length === 0, distintos.map((x) => `${x.id}: «${x.titulo}» · «${deCultivos[x.rotacion]}»`).join(" | "));
+    const delDiccionario = delPlan.every((x) => deCultivos[x.rotacion] === TEXTOS_TABLERO[idioma][`tablero.opcion.${x.rotacion}`]);
+    check(`${e}esos títulos salen de tablero.opcion.<rotación>, no del nombre en inglés del cubo`, delDiccionario && (idioma === "en" || delPlan.every((x) => !x.titulo.includes(cubo.parcelas[PARCELA].opciones.find((o) => o.id === x.id).nombre))), delPlan.map((x) => x.titulo).join(" | "));
+    // Lo que el cubo trae escrito (condiciones de la tabla de rotaciones) va rotulado como condición citada.
+    const rotuloCondicion = T["asesor.condicion_tabla"].split("{texto}")[0].trim();
+    const delCubo = [...new Set(cubo.parcelas[PARCELA].opciones.flatMap((o) => (o.filtros ?? []).map((f) => f.motivo)).filter(Boolean))];
+    const puntos = await page.evaluate(() => [...document.querySelectorAll("#recommendations li")].map((li) => li.textContent));
+    const sinRotulo = puntos.filter((p) => delCubo.some((m) => p.includes(m)) && !p.includes(rotuloCondicion));
+    check(`${e}las condiciones que vienen del cubo llevan su rótulo («${rotuloCondicion}»)`, puntos.some((p) => p.includes(rotuloCondicion)) && sinRotulo.length === 0, sinRotulo.slice(0, 2).join(" | "));
+  }
 
   // --- textos del idioma, sin claves, sin roturas, sin palabras vetadas
   const rotulos = ["restriccion", "revisar", "calculado", "sin_datos"].map((k) => T[`asesor.estado.${k}`]);
@@ -330,6 +391,22 @@ async function probarIdioma(navegador, base, idioma, ficha) {
   const planDescanso = await leerPlan(page);
   check(`${e}parcela en descanso (${descanso}): salen las opciones del cubo`, planDescanso.map((x) => x.id).join() === cubo.parcelas[descanso].opciones.map((o) => o.id).join() && planDescanso.length > 1, planDescanso.map((x) => x.id).join());
   check(`${e}parcela en descanso: aviso en cada tarjeta`, planDescanso.every((x) => x.aviso === T["asesor.aviso_juicio"]));
+
+  // --- un área mayor que la de la parcela no se acepta: aviso en el idioma, con el área que viene del dato
+  const fijarArea = (valor) =>
+    page.evaluate((v) => {
+      const campo = document.querySelector("#rec-area");
+      campo.value = v;
+      campo.dispatchEvent(new Event("input", { bubbles: true }));
+    }, valor);
+  const areaDelDato = String(propiedades(descanso).area_ha);
+  await irA(page, "recomendaciones");
+  await fijarArea("1e9");
+  const avisoArea = T["asesor.error.area_mayor"].replace("{area}", numero(areaDelDato));
+  const conAreaAbsurda = { resumen: await page.locator("#decision-summary").textContent(), tarjetas: (await leerPlan(page)).length };
+  check(`${e}un área mayor que la de la parcela no se acepta y lo dice con el área del dato`, conAreaAbsurda.tarjetas === 0 && conAreaAbsurda.resumen.includes(avisoArea), `${conAreaAbsurda.tarjetas} tarjetas · «${conAreaAbsurda.resumen}» · se esperaba «${avisoArea}»`);
+  await fijarArea(areaDelDato);
+  check(`${e}con el área de la parcela el plan vuelve`, (await leerPlan(page)).length === planDescanso.length);
 
   check(`${e}sin errores de página`, errores.length === 0, errores.join(" | "));
   await ctx.close();
@@ -430,6 +507,7 @@ async function main() {
     const ficha = await hectareasDeLaFicha(navegador, base);
     for (const idioma of IDIOMAS) await probarIdioma(navegador, base, idioma, ficha);
     await probarCambioDeIdioma(navegador, base, ficha);
+    await probarMismasHectareas(navegador, base, ["P0757", "P0632", "L0175"], MARCAS[0]);
     await probarDatosHostiles(navegador, base);
   } finally {
     await navegador.close().catch(() => {});
