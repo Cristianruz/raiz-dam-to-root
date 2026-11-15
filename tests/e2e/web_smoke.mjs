@@ -27,7 +27,7 @@
 //   · La gota (X3.2): Sankey con d3-sankey; cada nodo lleva los m³ del cubo y su alto y el ancho de cada banda son la
 //     escala común por los m³; las gotas recorren las bandas una sola vez (o se omiten con movimiento reducido); con
 //     bloques de goteo (los del cubo: escritorio con la transición de d3 y teléfono con movimiento reducido), el
-//     botón, las cifras grandes, la misma escala para las variantes, el tope, el aviso «Not recommended» y la
+//     botón, las cifras grandes, la misma escala para las variantes, el tope, el aviso «Flagged» y la
 //     etiqueta de las eficiencias (cubo.meta.goteo: «indicative, not local») en los supuestos; sin ellos, la nota
 //     «Drip scenario not available yet». El caso que los datos NO traen se prueba con la variante en memoria;
 //   · filtros oficiales (B3; decisión docs/decisiones/2026-11-14_opciones_b3.md): si el cubo trae filtros con
@@ -90,7 +90,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { aguaComprometida, conteosZona, cobertura, evaluarOpcion } from "../../web/reglas.js";
-import { fraseResumen } from "../../web/js/resumen.js";
+import { fraseResumen, formatoHectareas } from "../../web/js/resumen.js";
 import { ESTADOS_APTITUD, ROTULO_APTITUD, grupoDeTextura } from "../../web/js/suelo.js";
 import { NOTA_GEDI, NOTA_REGIONAL, riesgoDeHelada, climaDelAnio, contarEstados, diasIncompletos, formatoNumero, textoMascon } from "../../web/js/contexto.js";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
@@ -551,7 +551,7 @@ async function pruebaGota(page, id, c, prefijo, reducida, capturas = null) {
     const et = fmtCambio(op.tope_consumo.et_goteo_sin_tope_m3 / op.tope_consumo.et_historica_m3 - 1);
     check(`${prefijo}sin tope: «Crop consumption (ET) ${et} vs. historical»`, sinTope.includes("Crop consumption (ET)") && sinTope.includes(et) && sinTope.includes("vs. historical"), sinTope.replace(/\n/g, " "));
     const alerta = page.locator("#gota-alerta");
-    check(`${prefijo}sin tope: aviso «Not recommended» solo si cumple_sin_tope = false`, (await alerta.isVisible()) === (op.tope_consumo.cumple_sin_tope === false));
+    check(`${prefijo}sin tope: aviso «Flagged» solo si cumple_sin_tope = false`, (await alerta.isVisible()) === (op.tope_consumo.cumple_sin_tope === false));
     // El retorno al acuífero sin tope es una cota superior (cubo.meta.goteo.retorno_sin_tope_es_cota_superior).
     if (c.meta?.goteo?.retorno_sin_tope_es_cota_superior === true) {
       const acu = await page.locator('#gota-cifras [data-cifra="acuifero"]').innerText();
@@ -1281,7 +1281,10 @@ async function pruebaGemelo3D(page, prefijo, telefono) {
     await dosCuadros(page);
   }
 
-  // Clic (o toque) en una columna abre su ficha.
+  // Clic (o toque) en una columna abre su ficha. Antes, el mapa entero a la vista: al marcar «Rain» Playwright desplaza
+  // la página hasta la franja de controles, y en el teléfono (franja con objetivos de 44 px e indicador más largo) el
+  // centro del lienzo quedaba bajo el borde de la pantalla. Quien toca una columna primero ve el mapa.
+  await page.evaluate(() => document.querySelector("#mapa").scrollIntoView({ block: "end" }));
   await quieto(page);
   const punto = await page.evaluate(() => window.raizDepuracion.puntoDeColumna());
   if (punto) {
@@ -1388,7 +1391,32 @@ function fraseEsperada(id, D) {
   const p = porId.get(id);
   const actual = actualDe(id) ?? null;
   const evaluacion = actual && !p.abstencion ? evaluarOpcion(actual, p.area_ha, D, 0) : null;
-  return fraseResumen({ parcela: p, opcionActual: actual, evaluacion, D, formato: (v, k) => (k === "area" ? nfFicha(v, 3) : nfFicha(v)) });
+  // El mismo formato que app.js (pintarResumen): hectáreas y área con formatoHectareas; años con la precisión del dato.
+  const fh = formatoHectareas(p.area_ha);
+  return fraseResumen({ parcela: p, opcionActual: actual, evaluacion, D, formato: (v, k) => (k === "ha" || k === "area" ? fh(v) : k === "anios" ? nfFicha(v, 3) : nfFicha(v)) });
+}
+
+/**
+ * C2 de la revisión total y punto 6 de la revisión con Playwright («Enough for 8 of 7.95 hectares», «20.7 of 20.66»):
+ * con cada marca de dotación, ninguna cifra de hectáreas que alcanzan (tarjeta, rango, lámina local, frase) pasa del
+ * área, y el área se escribe igual que en formatoHectareas. Devuelve la lista de textos que fallan.
+ */
+async function hectareasSobreArea(page, id) {
+  const area = porId.get(id).area_ha;
+  const fh = formatoHectareas(area);
+  const num = (x) => Number(String(x).replace(/,/g, "").replace("−", "-"));
+  const malos = [];
+  for (const m of marcas) {
+    await fijarDeslizador(page, m.valor);
+    const textos = await page.locator("#ficha .alcanza, #ficha .lamina-local-alcanza, #ficha-resumen").allInnerTexts();
+    for (const t of textos.map((x) => x.replace(/\s+/g, " "))) {
+      for (const [, x, y] of t.matchAll(/([\d,.]+)(?:–[\d,.]+)? of ([\d,.]+) hectares?/g)) if (!(num(x) <= area) || y !== fh(area)) malos.push(`${m.id}: ${t}`);
+      for (const [, a, b] of t.matchAll(/range ([\d,.]+) to ([\d,.]+)/g)) if (!(num(a) <= area && num(b) <= area)) malos.push(`${m.id}: ${t}`);
+      for (const [, y] of t.matchAll(/whole field \(([\d,.]+) ha\)/g)) if (y !== nfFicha(area, 3)) malos.push(`${m.id}: ${t}`);
+      for (const [, x] of t.matchAll(/high estimate of its need: ([\d,.]+) hectares?/g)) if (!(num(x) < area)) malos.push(`${m.id}: ${t}`);
+    }
+  }
+  return malos;
 }
 
 /**
@@ -1488,6 +1516,28 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
     }
     const caso = await page.locator("#ficha-resumen").getAttribute("data-caso");
     check(`${prefijo}frase resumen de ${P0757}: caso «parcial» o «completa»`, ["parcial", "completa"].includes(caso), caso);
+    // Punto 1 de la revisión con Playwright: el plazo del agua de la opción ACTUAL va en la frase (leído del cubo).
+    const plazo = actualDe(P0757)?.agua?.plazo_anios;
+    if (plazo) {
+      const fraseP = (await texto(page, "#ficha-resumen")).trim();
+      const esperado = plazo.max <= 1 ? "ties up water for one season" : `ties up water for ${plazo.min === plazo.max ? nfFicha(plazo.min, 3) : `${nfFicha(plazo.min, 3)}–${nfFicha(plazo.max, 3)}`} years`;
+      check(`${prefijo}frase resumen de ${P0757}: lleva el plazo del agua de la opción actual («${esperado}»)`, fraseP.includes(esperado), fraseP);
+    }
+    // Pendientes de web del motor (1c6619b): «Remaining term» en todas las tarjetas con plazo restante, y la ventana de
+    // siembra solo de los cultivos de la secuencia publicada (avena_maiz sin la alfalfa del catálogo).
+    for (const o of opcionesDe(P0757)) {
+      const t = tarjeta(page, o.id);
+      const pr = o.agua?.plazo_restante;
+      const pa = o.agua?.plazo_anios;
+      if (pr && (o.id === "ACTUAL" || pr.min !== pa?.min || pr.max !== pa?.max)) {
+        const agua = (await t.locator('[data-parte="agua"]').innerText()).replace(/\s+/g, " ");
+        check(`${prefijo}${P0757}/${o.id}: «Remaining term» también en las alternativas (si difiere del plazo completo)`, agua.includes("Remaining term:"), agua.slice(-160));
+      }
+      const pasos = (cubo.opciones_catalogo?.[o.rotacion]?.secuencia ?? []).filter((x) => x?.siembra?.desde);
+      const esperados = pasos.filter((x) => !Array.isArray(o.secuencia) || !o.secuencia.length || o.secuencia.includes(x.cultivo)).length;
+      const vistos = await t.locator(".siembra-cultivo").count();
+      check(`${prefijo}${P0757}/${o.id}: ventanas de siembra solo de los cultivos de la secuencia publicada (${esperados})`, vistos === esperados, `${vistos} vistas · secuencia ${JSON.stringify(o.secuencia)}`);
+    }
     const frase = await texto(page, "#ficha-resumen");
     check(`${prefijo}frase resumen: describe, sin «best», «recommended» ni pesos`, !/\b(best|recommended|weight|score)\b/i.test(frase));
     // --- NDVI mensual con sus umbrales (leídos de ndvi_mensual.json) ---
@@ -1526,9 +1576,11 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
         await fijarDeslizador(page, D);
         const t = (await caja.innerText()).replace(/\s+/g, " ");
         vistos.push(t);
-        const ha = nfFicha(area * cobertura(D, ll.valor_millares_ha));
-        check(`${prefijo}lámina local de ${P0757}/${conRefLocal.o.id} con ${D}: ${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha y «enough for ${ha} of ${nfFicha(area, 3)} hectares»`,
-          t.includes(`${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha`) && t.includes(`enough for ${ha} of ${nfFicha(area, 3)} hectares`), t);
+        const fh = formatoHectareas(area);
+        const cob = cobertura(D, ll.valor_millares_ha);
+        const alcanza = cob >= 1 ? `enough for the whole field (${nfFicha(area, 3)} ha)` : `enough for ${fh(area * cob)} of ${fh(area)} hectares`;
+        check(`${prefijo}lámina local de ${P0757}/${conRefLocal.o.id} con ${D}: ${nfFicha(ll.valor_millares_ha)} thousand m³/ha (I8: un decimal) y «${alcanza}»`,
+          t.includes(`${nfFicha(ll.valor_millares_ha)} thousand m³/ha`) && t.includes(alcanza), t);
       }
       check(`${prefijo}lámina local: las hectáreas cambian con el deslizador`, vistos[0] !== vistos[1]);
       const titulo = ll.tipo === "aplicada"
@@ -1665,7 +1717,7 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
   if (conSinRotacion) {
     const sr = cubo.parcelas[conSinRotacion].sin_rotacion;
     await abrirDesdeLista(page, conSinRotacion);
-    const t = (await page.locator("#ficha [data-parte='sin-rotacion']").innerText().catch(() => "")).replace(/\s+/g, " ");
+    const t = (await page.locator("#ficha [data-parte='sin-rotacion']").textContent().catch(() => "")).replace(/\s+/g, " ");
     check(`${prefijo}${conSinRotacion} (no rota): una tarjeta y su motivo y fuente del dato`, (await page.locator("#ficha .tarjeta").count()) === 1 && t.includes(sr.motivo) && t.includes(sr.fuente.slice(0, 40)), t.slice(0, 160));
     await page.locator("#ficha [data-parte='sin-rotacion']").scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_nogal_sin_rotacion.png`) });
@@ -1674,6 +1726,36 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
   if (telefono) {
     check(`${prefijo}con la ficha completa, sin desplazamiento horizontal`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   }
+}
+
+/**
+ * Punto 5 de la revisión con Playwright (5 a 10 s de página vacía en 3G/4G): con los datos retrasados, la página dice
+ * «Loading field data…» sin cifras, la pantalla de inicio ya está y el deslizador no se ve hasta tener su valor; al
+ * llegar los datos, el deslizador queda en la marca inicial sin haber mostrado otro valor.
+ */
+async function pruebaCargaLenta(navegador, base) {
+  const ctx = await navegador.newContext({ serviceWorkers: "block", viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  let soltar;
+  const espera = new Promise((ok) => { soltar = ok; });
+  await page.route("**/data/cubo.json", async (route) => { await espera; await route.continue(); });
+  await page.route((url) => esOpcional(url.href), (route) => route.abort());
+  await page.goto(`${base}/index.html`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector(".acerca-inicio", { timeout: 10000 }).catch(() => null);
+  const antes = await page.evaluate(() => ({
+    cifra: document.querySelector("#indicador-cifra").textContent.trim(),
+    inicio: Boolean(document.querySelector(".acerca-inicio")),
+    deslizador: getComputedStyle(document.querySelector("#dotacion")).visibility,
+    listo: document.body.dataset.listo ?? null,
+  }));
+  check("carga lenta: «Loading field data…» sin cifras, inicio a la vista y el deslizador oculto mientras llegan los datos",
+    antes.cifra === "Loading field data…" && !/\d/.test(antes.cifra) && antes.inicio && antes.deslizador === "hidden" && antes.listo === null, JSON.stringify(antes));
+  soltar();
+  await page.waitForSelector("body[data-listo='si']", { timeout: 20000 });
+  const despues = await page.evaluate(() => ({ valor: Number(document.querySelector("#dotacion").value), visible: getComputedStyle(document.querySelector("#dotacion")).visibility, cargando: Boolean(document.querySelector("#indicador-cifra .cargando")) }));
+  const inicial = marcas.find((m) => m.id === `como_${parcelas.meta?.anio_actual}`) ?? marcas[0];
+  check("carga lenta: con los datos, el deslizador aparece en la marca inicial y el indicador deja de decir «Loading…»", despues.visible === "visible" && despues.valor === inicial.valor && !despues.cargando, JSON.stringify(despues));
+  await ctx.close();
 }
 
 /** Enlace directo: #P0757 abre su ficha (sin pantalla de inicio), el hash sigue a la ficha, un id desconocido avisa. */
@@ -1691,6 +1773,22 @@ async function pruebaEnlaceDirecto(navegador, base, prefijo, opciones) {
   }
   await cerrarFicha(page);
   check(`${prefijo}al cerrar la ficha el hash se quita`, (await page.evaluate(() => location.hash)) === "");
+  // Punto 4 de la revisión con Playwright: el botón Atrás cierra la ficha y la página sigue (no sale de la aplicación).
+  const largo0 = await page.evaluate(() => history.length);
+  await abrirDesdeLista(page, P0757);
+  check(`${prefijo}abrir una ficha agrega una entrada propia al historial (#${P0757})`,
+    (await page.evaluate(() => location.hash)) === `#${P0757}` && (await page.evaluate(() => history.state?.raizFicha)) === P0757);
+  await page.goBack({ waitUntil: "commit" }).catch(() => null);
+  await page.waitForSelector("#ficha", { state: "hidden", timeout: 5000 }).catch(() => null);
+  const trasAtras = await page.evaluate(() => ({ ficha: document.querySelector("#ficha").hidden, hash: location.hash, listo: document.body.dataset.listo, ruta: location.pathname }));
+  check(`${prefijo}botón Atrás con la ficha abierta: la cierra y la página sigue`, trasAtras.ficha && trasAtras.hash === "" && trasAtras.listo === "si" && trasAtras.ruta.endsWith("/index.html"), JSON.stringify(trasAtras));
+  await page.goForward({ waitUntil: "commit" }).catch(() => null);
+  await page.waitForSelector("#ficha:not([hidden])", { timeout: 5000 }).catch(() => null);
+  check(`${prefijo}botón Adelante vuelve a abrir la ficha`, (await page.locator("#ficha").isVisible()) && (await texto(page, "#ficha-titulo")) === `Field ${P0757}`);
+  await cerrarFicha(page);
+  await page.waitForFunction(() => !history.state?.raizFicha, null, { timeout: 5000 }).catch(() => null);
+  check(`${prefijo}cerrar con el botón vuelve a la entrada anterior (el historial no acumula fichas)`,
+    (await page.evaluate(() => history.state?.raizFicha ?? null)) === null && (await page.evaluate(() => location.hash)) === "", String(largo0));
   // Una parcela de otra zona por «hashchange»: la página pasa a su zona y abre la ficha.
   const deOtraZona = protagonistas.find((x) => zonaDeProp(porId.get(x)) !== zonaDeProp(porId.get(P0757)));
   if (deOtraZona && zonasCubo.length > 1) {
@@ -1823,8 +1921,9 @@ async function pruebaContextoRegional(page, prefijo, telefono) {
     await fijarAnio(a2);
     const v2 = await lluviaImerg();
     const d2 = await texto(page, "#contexto-regional .contexto-donde");
-    const e1 = formatoNumero(climaDelAnio(contexto, zonaContexto, a1).lluviaImerg);
-    const e2 = formatoNumero(climaDelAnio(contexto, zonaContexto, a2).lluviaImerg);
+    // I8: los mm van sin decimales en las cifras del año.
+    const e1 = formatoNumero(climaDelAnio(contexto, zonaContexto, a1).lluviaImerg, { decimales: 0 });
+    const e2 = formatoNumero(climaDelAnio(contexto, zonaContexto, a2).lluviaImerg, { decimales: 0 });
     check(`${prefijo}Regional context: mover la línea de tiempo de ${a1} a ${a2} cambia la lluvia mostrada (${e1} → ${e2} mm)`, v1.includes(e1) && v2.includes(e2) && v1 !== v2 && d2.includes(`agricultural year ${a2}`), `${v1.replace(/\n/g, " ")} → ${v2.replace(/\n/g, " ")}`);
     const resaltado = await raiz.locator('.contexto-figura[data-grafica="clima-lluvia"] .contexto-elegido-texto').textContent().catch(() => "");
     check(`${prefijo}Regional context: la gráfica de lluvia resalta ${a2}`, resaltado === String(a2), resaltado);
@@ -1924,14 +2023,18 @@ async function pruebaAuditoriaMotor(page, prefijo, telefono) {
   const d = cubo.distrito ?? {};
   const b = d.boquilla;
   if (b) {
-    const alm = await texto(page, '#boquilla [data-dato="almacenamiento"]');
-    const namo = await texto(page, '#boquilla [data-dato="namo"]');
+    // I5: la cita está plegada en «Storage source» / «Capacity source»: se lee el contenido del nodo.
+    const alm = await page.locator('#boquilla [data-dato="almacenamiento"]').textContent();
+    const namo = await page.locator('#boquilla [data-dato="namo"]').textContent();
     check(`${prefijo}La Boquilla: almacenamiento con su fuente y su etiqueta ${b.etiqueta_almacenamiento}`, alm.includes(b.fuente_almacenamiento) && alm.includes(b.etiqueta_almacenamiento), alm);
     check(`${prefijo}La Boquilla: capacidad (NAMO) con su fuente y su etiqueta ${b.etiqueta_namo}`, namo.includes(b.fuente_namo) && namo.includes(b.etiqueta_namo), namo);
+    // I9: cada etiqueta de evidencia dice qué significa (title) y el glosario de la ficha trae la leyenda.
+    const titulos = await page.locator("#boquilla .etiqueta-dato").evaluateAll((xs) => xs.map((x) => x.title));
+    check(`${prefijo}La Boquilla: las etiquetas de evidencia llevan su significado en el title`, titulos.length > 0 && titulos.every((t) => /^Evidence label: (\[(V|P|S|NE)\] |an interface)/.test(t)), titulos.join(" | "));
   }
   const llave = Object.keys(d).find((k) => k.startsWith("acuifero_"));
   if (llave) {
-    const a = await texto(page, '#acuifero [data-dato="acuifero"]');
+    const a = await page.locator('#acuifero [data-dato="acuifero"]').textContent();
     check(`${prefijo}acuífero: fuente y etiqueta ${d[llave].etiqueta}`, a.includes(d[llave].fuente) && a.includes(d[llave].etiqueta), a);
   }
   // Textos de las marcas, la equivalencia y el punto de medición en inglés (los del cubo, copia de params). En el
@@ -2004,6 +2107,11 @@ async function pruebasEscritorio(page, peticiones) {
     const info = await page.locator("#info-marca").textContent();
     const pulsado = await page.locator(`.boton-marca[data-marca="${m.id}"]`).getAttribute("aria-pressed");
     check(`marca ${m.id} lleva el deslizador a ${m.valor} y muestra fuente`, v === m.valor && info.includes(m.fuente) && pulsado === "true", `valor ${v}`);
+    // Punto 2 / I3: la fuente (en español en params.json) queda dentro de «Source and note», plegado; no se ve en la franja.
+    const franja = await page.locator("#controles").innerText();
+    check(`marca ${m.id}: «Source and note» y «Units and measuring point» plegados en escritorio; la fuente no se ve en la franja fija`,
+      !(await page.locator("#info-marca-detalle").evaluate((d) => d.open)) && !(await page.locator("#unidades").evaluate((d) => d.open)) && !franja.includes(m.fuente),
+      franja.replace(/\s+/g, " ").slice(0, 160));
   }
 
   // El indicador cambia al mover el deslizador (con el teclado)
@@ -2059,7 +2167,7 @@ async function pruebasEscritorio(page, peticiones) {
   // Localidades del equipo: listadas en texto (con su fuente) si el cubo las trae
   const locs = Array.isArray(cubo.localidades) ? cubo.localidades : [];
   if (locs.length) {
-    const textoLoc = await texto(page, "#bloque-localidades");
+    const textoLoc = (await page.locator("#bloque-localidades").textContent()).replace(/\s+/g, " "); // I5: la fuente va plegada
     check(
       "localidades del equipo listadas en texto con su fuente",
       (await page.locator("#lista-localidades li").count()) === locs.length && locs.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(locs[0].fuente),
@@ -2081,7 +2189,7 @@ async function pruebasEscritorio(page, peticiones) {
 
   // Segunda cifra: X de Y parcelas
   const segunda = await texto(page, "#indicador-segunda");
-  check("segunda cifra «… of … fields don't have enough water…»", /fields don't have enough water for their current rotation/.test(segunda), segunda);
+  check("segunda cifra «… of … classified fields don't have enough water…» (I4: el total son las clasificadas)", /\d of [\d,]+ classified fields don't have enough water for their current rotation/.test(segunda), segunda);
 
   // Capas solo si están en capas_disponibles
   const capas = await page.locator("#capas input").evaluateAll((xs) => xs.map((x) => x.value));
@@ -2185,6 +2293,8 @@ async function pruebasEscritorio(page, peticiones) {
       );
       check(`ficha de ${id}: cada tarjeta con Water, Soil y Money`, resumen.every((r) => r.renglones.join(",") === "Water,Soil,Money"), JSON.stringify(resumen.map((r) => r.renglones)));
       check(`ficha de ${id}: botón Why? con las cinco respuestas en cada tarjeta`, resumen.every((r) => r.preguntas === 5));
+      const sobreArea = await hectareasSobreArea(page, id);
+      check(`ficha de ${id}: con cada marca, ninguna cifra de hectáreas que alcanzan pasa del área y el área va con su precisión (C2)`, sobreArea.length === 0, sobreArea.slice(0, 3).join(" | "));
       const confianza = await texto(page, "#ficha .ficha-cultivo");
       check(`ficha de ${id}: cultivo con su confianza (o «confidence not available»)`, /confidence/.test(confianza) && !/—\s*—/.test(confianza), confianza);
     }
@@ -2194,8 +2304,14 @@ async function pruebasEscritorio(page, peticiones) {
       const nota = await page.locator(".nota-fija").innerText();
       check(`nota fija de la memoria en ${id}`, nota.includes("Rule-based reading of monthly greenness; not a crop census."));
     }
+    const glosario = await page.locator("#ficha .glosario").textContent();
+    check(`ficha de ${id}: el glosario explica las etiquetas [V] [P] [S] (I9)`, /\[V\] verified in a primary source/.test(glosario) && /\[S\] stated assumption/.test(glosario));
     const aviso = await page.locator("#ficha .aviso-juicio").innerText();
     check(`aviso de juicio local en ${id}`, aviso.includes("This tool supports, never replaces, the judgment of farmers and local experts."));
+    // I6 de la revisión total: la ficha no es bitácora (ninguna nota de proceso del equipo a la vista).
+    const vista = await page.locator("#ficha").innerText();
+    check(`ficha de ${id}: sin notas de proceso («not delivered yet», «Requested from the data team»)`, !/not delivered yet|requested from the data team/i.test(vista),
+      (vista.match(/.{0,60}(not delivered yet|requested from the data team).{0,20}/i) ?? [""])[0]);
     const sinMarcadores = await page.locator("#ficha").evaluate((el) => !/\{\{\w+\}\}/.test(el.innerText) && !/\{\{\w+\}\}/.test(el.textContent));
     check(`sin marcadores {{…}} sin rellenar en ${id}`, sinMarcadores);
     await page.keyboard.press("Escape");
@@ -2228,7 +2344,7 @@ async function pruebasEscritorio(page, peticiones) {
     const area = new Intl.NumberFormat("en-US", { maximumFractionDigits: 3 }).format(porId.get(id).area_ha);
     const alcanza = await t.locator(".alcanza").innerText();
     check(`necesidad cero (${id}/${o.id}): «No irrigation needed», semáforo verde`, lamina.includes("No irrigation needed") && sem === "verde", `${lamina} · ${sem}`);
-    check(`necesidad cero (${id}/${o.id}): alcanza para toda la parcela`, alcanza.includes(`of ${area} hectares`) && alcanza.startsWith(`Enough for ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(porId.get(id).area_ha)}`), alcanza);
+    check(`necesidad cero (${id}/${o.id}): alcanza para toda la parcela`, alcanza.startsWith(`Enough for the whole field (${area} ha)`), alcanza);
     await cerrarFicha(page);
   } else {
     omitir("necesidad cero «No irrigation needed»", "ninguna opción con lámina P50 = 0 en estos datos");
@@ -2408,6 +2524,34 @@ async function pruebasTelefono(page, peticiones) {
   });
   check("teléfono: la ficha se lee sin desplazamiento horizontal", ancho.cabe);
   check("teléfono: el deslizador queda visible con la ficha abierta", ancho.deslizadorVisible);
+  // Punto 3 de la revisión con Playwright: con la ficha abierta la franja se compacta (solo el deslizador) y la ficha
+  // ocupa al menos tres cuartos de la pantalla; también con el texto al 200 % (WCAG 1.4.4 / 1.4.10).
+  const alto = async () => page.evaluate(() => {
+    const f = document.querySelector("#ficha").getBoundingClientRect();
+    const oculto = (sel) => getComputedStyle(document.querySelector(sel)).display === "none";
+    return { fraccion: f.height / innerHeight, compacta: oculto(".marcas") && oculto(".control-extra") && oculto("#marca") };
+  });
+  const normal = await alto();
+  check("teléfono: con la ficha abierta la franja se compacta y la ficha ocupa ≥ 75 % del alto", normal.compacta && normal.fraccion >= 0.75, JSON.stringify(normal));
+  await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+  const doble = await alto();
+  check("teléfono: con el texto al 200 % la ficha sigue ocupando ≥ 60 % del alto", doble.fraccion >= 0.6, JSON.stringify(doble));
+  await page.evaluate(() => { document.documentElement.style.fontSize = ""; });
+  // Punto 7: ningún control de la página ni de la ficha mide menos de 44 px de alto en el teléfono (una casilla dentro
+  // de una etiqueta cuenta por su etiqueta).
+  const pequenos = await page.evaluate(() => {
+    const sel = "a[href], button, input, select, summary, [role=button], [role=switch]";
+    const out = [];
+    for (const el of document.querySelectorAll(sel)) {
+      if (el.closest("[hidden], [inert]") || el.matches(".solo-lector, .saltar")) continue;
+      const objetivo = el.matches("input[type=checkbox]") && el.closest("label") ? el.closest("label") : el;
+      const r = objetivo.getBoundingClientRect();
+      if (!r.width || !r.height || getComputedStyle(el).visibility === "hidden") continue;
+      if (r.height < 44 - 0.5) out.push(`${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""} «${(el.innerText || el.getAttribute("aria-label") || "").trim().slice(0, 30)}» ${Math.round(r.height)} px`);
+    }
+    return out;
+  });
+  check("teléfono: objetivos táctiles de al menos 44 px de alto con la ficha abierta (punto 7)", pequenos.length === 0, pequenos.slice(0, 6).join(" | "));
   if (await tarjeta(page, "ACTUAL").count()) {
     const alcanza = tarjeta(page, "ACTUAL").locator(".alcanza");
     await fijarDeslizador(page, D2);
@@ -2631,7 +2775,8 @@ async function pruebasDosZonas(page, v) {
     const ind = await indicador(page);
     check(
       `dos zonas (${etiqueta}): el indicador usa su bloque de zona (${pct(ac.p50)}, rango ${pct(ac.p10)}–${pct(ac.p90)})`,
-      ind.includes(pct(ac.p50)) && ind.includes(`Likely range: ${pct(ac.p10)} to ${pct(ac.p90)}`) && ind.includes("at least") === ac.alMenos,
+      ind.includes(pct(ac.p50)) && ind.includes("at least") === ac.alMenos &&
+        ind.includes(ac.alMenos ? `Likely range for the classified area: ${pct(ac.p10)} to ${pct(ac.p90)}; unclassified fields can raise it, not lower it` : `Likely range: ${pct(ac.p10)} to ${pct(ac.p90)}`),
       `${await texto(page, "#indicador-cifra")} · ${await texto(page, "#indicador-rango")}`,
     );
     const segunda = await texto(page, "#indicador-segunda");
@@ -2708,7 +2853,7 @@ async function pruebasDosZonas(page, v) {
   }
 
   // Localidades: listadas en texto con su fuente; «Show on map» las lleva al mapa.
-  const textoLoc = await texto(page, "#bloque-localidades");
+  const textoLoc = (await page.locator("#bloque-localidades").textContent()).replace(/\s+/g, " "); // I5: la fuente va plegada
   check(
     "dos zonas: localidades listadas en texto con la leyenda y su fuente",
     textoLoc.includes("Team reference localities (not fields)") && c.localidades.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(c.localidades[0].fuente),
@@ -2773,6 +2918,7 @@ async function main() {
     await tel.ctx.close();
 
     // Enlace directo #id (escritorio y teléfono) y NDVI con huecos (variante en memoria).
+    await pruebaCargaLenta(navegador, base);
     await pruebaEnlaceDirecto(navegador, base, "", { viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" });
     await pruebaEnlaceDirecto(navegador, base, "teléfono: ", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
     await pruebaNDVIHuecos(navegador, base);

@@ -52,13 +52,15 @@ const TEXTOS = {
   consumo: "Crop consumption (ET):",
   vsActual: "vs. current irrigation",
   vsHistorico: "vs. historical",
-  noRecomendado: "Not recommended: district consumption would exceed the historical level.",
-  // Frase fija de X3.2 §4. El kit dice «recommended only if…»; aquí va sin «only» (CLAUDE.md, regla 10),
-  // con el mismo sentido: el goteo se recomienda si la ET del distrito no pasa de su nivel histórico.
+  // Aviso del escenario sin tope (kit X3.2 §3). Decisión de Cristian del 15-nov-2026: la página marca el
+  // escenario y no aconseja (CLAUDE.md, regla 10); ver docs/decisiones/2026-11-15_correcciones_motor.md §5.
+  noRecomendado: "Flagged: district consumption (ET) would exceed its historical level.",
+  // Frase fija de X3.2 §4, con la misma decisión: en lugar de decir cuándo conviene el goteo, dice cuándo la
+  // página muestra el escenario sin aviso y cuándo lo marca. La cita y «consumo, no solo extracción» no cambian.
   frase:
     "Efficiency reduces dam withdrawals but can reduce aquifer recharge (Grafton et al., Science 2018). " +
     "We count consumption (ET), not just withdrawals. " +
-    "Drip is recommended when district ET stays at or below its historical level; if it would rise above that level, it is not.",
+    "The drip scenario is shown without a warning when district ET stays at or below its historical level; if ET would rise above it, the page flags the scenario.",
   fuenteRetorno: "Return-flow coefficient:",
   // Eficiencias del goteo (cubo.meta.goteo): rótulo y fuente a la vista junto a las cifras.
   eficiencias: "Field efficiencies used: drip",
