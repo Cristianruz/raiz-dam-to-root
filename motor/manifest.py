@@ -1000,7 +1000,7 @@ def cifras_de_puerta(m, pruebas, fecha, script):
         m.agregar(ARCHIVO_PRUEBAS, "generado", fecha, ARCHIVO_PRUEBAS, fecha, script, ETIQUETA_CORRIDA, False)
 
 
-# --- Tablero (web/dashboard.html): dashboard.json y pronostico.json -----------------------------------------
+# --- Tablero (web/index.html): dashboard.json y pronostico.json -----------------------------------------
 ARCHIVO_DASHBOARD = "web/data/dashboard.json"
 SCRIPT_DASHBOARD = "motor/dashboard_web.py"
 ARCHIVO_PRONOSTICO = "web/data/pronostico.json"
@@ -1260,7 +1260,7 @@ def generar(raiz=RAIZ, escribir=True, hoy=None):
     if ruta_pruebas.exists():
         cifras_de_pruebas(m, leer_json(ruta_pruebas))
 
-    # 8) dashboard.json y pronostico.json (tablero, web/dashboard.html): cada cifra con la fuente y la etiqueta de
+    # 8) dashboard.json y pronostico.json (tablero, web/index.html): cada cifra con la fuente y la etiqueta de
     #    SU origen (params.json, la entrega de la que se copió, el CSV de Conagua o el cálculo del motor).
     ruta_dashboard = raiz / ARCHIVO_DASHBOARD
     if ruta_dashboard.exists():
