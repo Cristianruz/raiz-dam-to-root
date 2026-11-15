@@ -1098,7 +1098,7 @@ Los 35 archivos de `data/processed/` tienen el mismo sha256 que lo que hay en Dr
 `n_escenas` cuenta sobrevuelos, y en `docs/pitch/textos_envio.md` el uso va antes de la cita de AppEEARS, que sigue textual.
 De mi lado solo queda D4, escrito como límite.
 
-## 15-nov 06:46 — Revisión de las 6:40 sobre `main` (`084bb30`, PR #9). Nada que hacer antes del congelamiento
+## 15-nov 06:43 — Revisión de las 6:40 sobre `main` (`084bb30`, PR #9). Nada que hacer antes del congelamiento
 - **Buzón:** los 35 archivos de `data/processed/` son iguales a lo entregado (v14).
 - **Tablero (`web/data/pronostico.json`):** cita por sha256 ocho archivos míos (`opciones_b3.json`, `suelo_requisitos.json`,
   `supuestos.json`, y `eto_diaria` y `rotaciones` de las dos zonas) y los ocho coinciden con lo entregado. Sus
