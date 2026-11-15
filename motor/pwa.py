@@ -65,7 +65,9 @@ LARGO_VERSION = 16  # caracteres hexadecimales de la versión (64 bits: de sobra
 COLORES = {"agua": "#1F6FB2", "brote": "#4C9A2A", "tierra": "#8A5A3B", "ambar": "#D98E04", "arena": "#F5EFE6"}
 
 # Textos del manifest. Interfaz en inglés; sin «first», sin «only» y sin cifras (CLAUDE.md, reglas 3, 9 y 10).
-# La descripción es la misma frase de <meta name="description"> de web/index.html.
+# La descripción es la misma frase de <meta name="description"> de web/index.html, que desde el 15-nov es la
+# portada (el tablero): «./» abre esa página y la copia sin conexión guarda también el explorador (web/explorer.html)
+# y los diccionarios de idioma (docs/decisiones/2026-11-15_tablero_principal_idiomas.md; tests/test_pwa.py).
 NOMBRE = "ROOT – From Dam to Root"
 NOMBRE_CORTO = "ROOT"
 DESCRIPCION = ("Before you plant, see the water you are committing: how much each crop needs per year, "

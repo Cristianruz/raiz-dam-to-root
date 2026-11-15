@@ -1000,6 +1000,152 @@ def cifras_de_puerta(m, pruebas, fecha, script):
         m.agregar(ARCHIVO_PRUEBAS, "generado", fecha, ARCHIVO_PRUEBAS, fecha, script, ETIQUETA_CORRIDA, False)
 
 
+# --- Tablero (web/index.html): dashboard.json y pronostico.json -----------------------------------------
+ARCHIVO_DASHBOARD = "web/data/dashboard.json"
+SCRIPT_DASHBOARD = "motor/dashboard_web.py"
+ARCHIVO_PRONOSTICO = "web/data/pronostico.json"
+SCRIPT_PRONOSTICO = "motor/pronostico_web.py"
+ETIQUETA_HUELLA = "Huella sha256 del archivo de origen"
+ETIQUETA_TEXTO = "Texto descriptivo (no es un dato)"
+# metodo.<campo> de pronostico.json -> entrada de data/params.json de la que sale (su fuente y su etiqueta).
+ORIGEN_METODO = {
+    "minimo_entrenamiento": "tablero.minimo_ciclos",
+    "niveles_plan": "tablero.niveles_plan",
+    "nivel_plan": "tablero.nivel_plan",
+    "intervalo": "tablero.intervalo_lluvia",
+    "conversion_mm_millares_ha": "unidades.millar",
+    "cm_por_millar": "unidades.millar",
+    "m3_por_millar": "unidades.millar",
+}
+# Bloques de pronostico.json copiados de una entrega de data/processed (cada dato conserva su fuente y su etiqueta).
+ENTREGAS_PRONOSTICO = {"catalogo": ENTREGA_B3, "requisitos": "suelo_requisitos.json", "supuestos": ENTREGA_SUPUESTOS}
+# Bloques de cada zona calculados por motor/pronostico_web.py con la serie diaria de NASA POWER.
+CALCULOS_DE_CLIMA = ("fecha_corte", "heladas_primavera", "anios", "ciclos_excluidos", "validacion_lluvia",
+                     "pronostico_lluvia")
+
+
+def hojas_con_origen(obj, clave, fuente, etiqueta):
+    """(clave, valor, fuente, etiqueta) de cada número y de cada texto con dígitos. La fuente y la etiqueta son las
+    del bloque más cercano que las declare (sus llaves «fuente» y «etiqueta»); si ninguno, las que se pasan."""
+    if isinstance(obj, dict):
+        if isinstance(obj.get("fuente"), str) and obj["fuente"].strip():
+            fuente = obj["fuente"]
+        if isinstance(obj.get("etiqueta"), str) and obj["etiqueta"].strip():
+            etiqueta = obj["etiqueta"]
+        for k, v in obj.items():
+            if not str(k).startswith("_"):  # _encabezado y _nota no son cifras
+                yield from hojas_con_origen(v, f"{clave}.{k}" if clave else str(k), fuente, etiqueta)
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            yield from hojas_con_origen(v, f"{clave}[{i}]", fuente, etiqueta)
+    elif es_numero(obj) or (isinstance(obj, str) and tiene_digito(obj)):
+        yield clave, obj, fuente, etiqueta
+
+
+def origen_de_entrega(fuentes_origen, archivo, hoy):
+    """(fuente, fecha, etiqueta) de una entrega de data/processed: la cita que registró el ensamblador."""
+    fo = entrega_de(fuentes_origen, archivo) or {}
+    cita = fo.get("fuente") or fo.get("url_o_api")
+    fuente = f"data/processed/{archivo}" + (f": {cita}" if cita else "")
+    return fuente, fo.get("fecha_consulta") or hoy, f"Entrega validada ({archivo})"
+
+
+def cifras_de_dashboard(m, dashboard, fuentes_origen, hoy):
+    """dashboard.json: la superficie regada lleva la fuente y la etiqueta del CSV de Conagua; cada evento, su propia
+    fuente con la etiqueta de las notas del equipo; las rotaciones, la entrega de A5 de su zona (cálculo)."""
+    fecha = dashboard.get("fecha") or hoy
+    notas = (dashboard.get("fuente"), dashboard.get("etiqueta"))
+
+    def registrar(hojas, fecha_de=fecha, etiqueta_fija=None):
+        for clave, valor, fuente, etiqueta in hojas:
+            m.agregar(ARCHIVO_DASHBOARD, clave, valor, fuente, fecha_de, SCRIPT_DASHBOARD, etiqueta_fija or etiqueta, False)
+
+    for llave, valor in dashboard.items():
+        if llave.startswith("_") or llave == "rotaciones":
+            continue
+        if llave.startswith("historia"):
+            # historia, historia_archivo, historia_columna…: todo sale del CSV de Conagua que el motor lee.
+            registrar(hojas_con_origen(valor, llave, dashboard.get("historia_fuente"), dashboard.get("historia_etiqueta")))
+        elif llave == "fuentes":
+            registrar(hojas_con_origen(valor, llave, "data/investigacion_dashboard.json (list of sources of the dashboard)",
+                                       ETIQUETA_TEXTO))
+        else:  # fecha, etiqueta, fuente y eventos: notas del equipo; cada evento declara su fuente
+            registrar(hojas_con_origen(valor, llave, *notas))
+    for zona, rotaciones in (dashboard.get("rotaciones") or {}).items():
+        if rotaciones is None:
+            continue  # zona sin entrega: null, sin cifra que rastrear
+        archivo = "rotaciones.json" if zona == "delicias_saucillo" else f"rotaciones_{zona}.json"
+        fuente, fecha_e, _ = origen_de_entrega(fuentes_origen, archivo, hoy)
+        registrar(hojas_con_origen(rotaciones, f"rotaciones.{zona}", fuente, ETIQUETA_CALCULO), fecha_e, ETIQUETA_CALCULO)
+
+
+def cifras_de_pronostico(m, pronostico, params, fuentes_origen, hoy):
+    """pronostico.json: «metodo» sale de data/params.json (tablero y unidades); catálogo, requisitos, supuestos y
+    parámetros, de su entrega (cada dato con su etiqueta); las series y la retroprueba son cálculo del motor."""
+    zonas = {k: v for k, v in (pronostico.get("zonas") or {}).items() if v}
+    corte = max((z.get("fecha_corte") or "" for z in zonas.values()), default="") or hoy
+
+    def agregar(clave, valor, fuente, fecha, etiqueta):
+        m.agregar(ARCHIVO_PRONOSTICO, clave, valor, fuente, fecha, SCRIPT_PRONOSTICO, etiqueta, False)
+
+    # metodo: supuestos de diseño y conversiones de unidades de params.json; los textos son del motor.
+    for campo, valor in (pronostico.get("metodo") or {}).items():
+        entrada = obtener(params, ORIGEN_METODO[campo]) if campo in ORIGEN_METODO else None
+        if campo in ORIGEN_METODO and not isinstance(entrada, dict):
+            m.avisos.append(f"params.json no tiene la entrada {ORIGEN_METODO[campo]} de pronostico.json:metodo.{campo}")
+            entrada = {}
+        for clave, v, _, _ in hojas_con_origen(valor, f"metodo.{campo}", None, None):
+            if entrada is None:
+                agregar(clave, v, f"{SCRIPT_PRONOSTICO} (description of the method)", corte, ETIQUETA_TEXTO)
+            else:
+                agregar(clave, v, f"data/params.json → {ORIGEN_METODO[campo]}: {entrada.get('fuente_en') or entrada.get('fuente')}",
+                        entrada.get("fecha") or entrada.get("fecha_consulta") or corte, entrada.get("etiqueta"))
+
+    # Bloques copiados de una entrega: cada dato con la fuente y la etiqueta que la entrega le declara.
+    for bloque, archivo in ENTREGAS_PRONOSTICO.items():
+        fuente, fecha, etiqueta = origen_de_entrega(fuentes_origen, archivo, hoy)
+        for clave, v, f, e in hojas_con_origen(pronostico.get(bloque), bloque, fuente, etiqueta):
+            agregar(clave, v, f if f == fuente else f"{f} (data/processed/{archivo})", fecha, e)
+
+    nominal = obtener(params, "tablero.cobertura_nominal") or {}
+    for zid, zona in zonas.items():
+        base = f"zonas.{zid}"
+        clima = Path(str(zona.get("fuente_clima") or "eto_diaria.csv")).name
+        rot = clima.replace("eto_diaria", "rotaciones").replace(".csv", ".json")
+        fuente_clima, fecha_clima, _ = origen_de_entrega(fuentes_origen, clima, hoy)
+        fuente_rot, fecha_rot, etiqueta_rot = origen_de_entrega(fuentes_origen, rot, hoy)
+        fecha_zona = zona.get("fecha_corte") or fecha_clima
+        for llave, valor in zona.items():
+            clave0 = f"{base}.{llave}"
+            if llave in CALCULOS_DE_CLIMA:
+                for clave, v, _, _ in hojas_con_origen(valor, clave0, None, None):
+                    if clave == f"{base}.validacion_lluvia.cobertura_nominal":
+                        agregar(clave, v, f"data/params.json → tablero.cobertura_nominal: {nominal.get('fuente_en') or nominal.get('fuente')}",
+                                nominal.get("fecha") or fecha_zona, nominal.get("etiqueta"))
+                    else:
+                        agregar(clave, v, fuente_clima, fecha_zona, ETIQUETA_CALCULO)
+            elif llave == "parametros":
+                for clave, v, f, e in hojas_con_origen(valor, clave0, fuente_rot, etiqueta_rot):
+                    agregar(clave, v, f if f == fuente_rot else f"{f} (data/processed/{rot})", fecha_rot, e)
+            elif llave == "rotaciones":
+                # Lámina y plazo: copia de la entrega de A5. Serie anual y presiembra: A5 corrido aquí, año por año.
+                for rid, r in (valor or {}).items():
+                    for campo, v0 in r.items():
+                        propio = campo in ("serie", "presiembra_mm")
+                        fuente = (f"A5 (datos/colab/A5_demanda_plazo.py) run by {SCRIPT_PRONOSTICO} on {fuente_clima}"
+                                  if propio else fuente_rot)
+                        for clave, v, _, _ in hojas_con_origen(v0, f"{clave0}.{rid}.{campo}", None, None):
+                            agregar(clave, v, fuente, fecha_zona if propio else fecha_rot, ETIQUETA_CALCULO)
+            else:  # fuente_clima, clima_origen: textos del motor
+                for clave, v, _, _ in hojas_con_origen(valor, clave0, None, None):
+                    agregar(clave, v, f"{SCRIPT_PRONOSTICO} (description of the climate series)", fecha_zona, ETIQUETA_TEXTO)
+
+    # Huellas de los archivos de origen (las comprueba motor/verificar_pronostico.py).
+    for i, f in enumerate(pronostico.get("fuentes") or []):
+        for clave, v, _, _ in hojas_con_origen(f, f"fuentes[{i}]", None, None):
+            agregar(clave, v, f.get("archivo"), corte, ETIQUETA_HUELLA)
+
+
 def generar(raiz=RAIZ, escribir=True, hoy=None):
     """Construye el manifest a partir de web/data/* y data/params.json.
 
@@ -1113,6 +1259,15 @@ def generar(raiz=RAIZ, escribir=True, hoy=None):
     ruta_pruebas = raiz / ARCHIVO_PRUEBAS
     if ruta_pruebas.exists():
         cifras_de_pruebas(m, leer_json(ruta_pruebas))
+
+    # 8) dashboard.json y pronostico.json (tablero, web/index.html): cada cifra con la fuente y la etiqueta de
+    #    SU origen (params.json, la entrega de la que se copió, el CSV de Conagua o el cálculo del motor).
+    ruta_dashboard = raiz / ARCHIVO_DASHBOARD
+    if ruta_dashboard.exists():
+        cifras_de_dashboard(m, leer_json(ruta_dashboard), fuentes_origen, hoy)
+    ruta_pronostico = raiz / ARCHIVO_PRONOSTICO
+    if ruta_pronostico.exists():
+        cifras_de_pronostico(m, leer_json(ruta_pronostico), params, fuentes_origen, hoy)
 
     simuladas = sum(1 for c in m.cifras.values() if c["mock"])
     cifras = agrupar_cifras(m.cifras)

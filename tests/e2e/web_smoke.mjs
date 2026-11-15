@@ -305,7 +305,7 @@ async function abrir(navegador, base, opciones, etiqueta, alterados = {}, { inic
   });
   // Sin red para las teselas (como en esta máquina): se abortan de inmediato.
   await page.route((url) => esOpcional(url.href), (route) => route.abort());
-  await page.goto(`${base}/index.html${hash}`, { waitUntil: "load" });
+  await page.goto(`${base}/explorer.html${hash}`, { waitUntil: "load" });
   await page.waitForSelector("body[data-listo='si']", { timeout: 15000 });
   await page.waitForFunction(() => document.body.dataset.mapa === "listo" || document.body.dataset.mapa === "sin-mapa", null, { timeout: 30000 });
   await page.waitForFunction(() => Boolean(document.body.dataset.relieve), null, { timeout: 15000 });
@@ -1008,6 +1008,22 @@ async function pruebaInicio(navegador, base, opciones, etiqueta, prefijo, cerrar
   check(`${prefijo}«How it works» vuelve a abrir los tres pasos`, await dialogo.isVisible());
   await page.locator(".acerca-inicio-x").click();
   check(`${prefijo}la «×» cierra la pantalla de inicio`, (await page.locator(".acerca-inicio").count()) === 0);
+  // La portada es el tablero (index.html): la cabecera del explorador lleva un enlace «Dashboard» con la misma
+  // forma que «How it works» y «About & Data» (en el teléfono, de 44 px de alto como ellos).
+  const enlaceTablero = await page.evaluate(() => {
+    const a = document.querySelector(".marca-acciones a#enlace-tablero");
+    const b = document.querySelector("#boton-acerca");
+    if (!a || !b) return null;
+    const ra = a.getBoundingClientRect();
+    return { href: a.getAttribute("href"), clase: a.className, texto: a.innerText.trim(), alto: Math.round(ra.height),
+      altoBoton: Math.round(b.getBoundingClientRect().height), subrayado: getComputedStyle(a).textDecorationLine };
+  });
+  check(
+    `${prefijo}la cabecera enlaza la portada: «Dashboard» → index.html, con la forma de los botones de la cabecera`,
+    enlaceTablero && enlaceTablero.href === "index.html" && enlaceTablero.clase.split(" ").includes("boton-cabecera") && enlaceTablero.texto === "Dashboard" &&
+      enlaceTablero.alto === enlaceTablero.altoBoton && enlaceTablero.subrayado === "none" && (!opciones.isMobile || enlaceTablero.alto >= 44),
+    JSON.stringify(enlaceTablero),
+  );
   check(`${prefijo}inicio: sin errores de consola`, ini.errores.length === 0, ini.errores.join(" | "));
   await ini.ctx.close();
 }
@@ -2312,7 +2328,7 @@ async function pruebaCargaLenta(navegador, base) {
   const espera = new Promise((ok) => { soltar = ok; });
   await page.route("**/data/cubo.json", async (route) => { await espera; await route.continue(); });
   await page.route((url) => esOpcional(url.href), (route) => route.abort());
-  await page.goto(`${base}/index.html`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${base}/explorer.html`, { waitUntil: "domcontentloaded" });
   await page.waitForSelector(".acerca-inicio", { timeout: 10000 }).catch(() => null);
   const antes = await page.evaluate(() => ({
     cifra: document.querySelector("#indicador-cifra").textContent.trim(),
@@ -2353,7 +2369,7 @@ async function pruebaEnlaceDirecto(navegador, base, prefijo, opciones) {
   await page.goBack({ waitUntil: "commit" }).catch(() => null);
   await page.waitForSelector("#ficha", { state: "hidden", timeout: 5000 }).catch(() => null);
   const trasAtras = await page.evaluate(() => ({ ficha: document.querySelector("#ficha").hidden, hash: location.hash, listo: document.body.dataset.listo, ruta: location.pathname }));
-  check(`${prefijo}botón Atrás con la ficha abierta: la cierra y la página sigue`, trasAtras.ficha && trasAtras.hash === "" && trasAtras.listo === "si" && trasAtras.ruta.endsWith("/index.html"), JSON.stringify(trasAtras));
+  check(`${prefijo}botón Atrás con la ficha abierta: la cierra y la página sigue`, trasAtras.ficha && trasAtras.hash === "" && trasAtras.listo === "si" && trasAtras.ruta.endsWith("/explorer.html"), JSON.stringify(trasAtras));
   await page.goForward({ waitUntil: "commit" }).catch(() => null);
   await page.waitForSelector("#ficha:not([hidden])", { timeout: 5000 }).catch(() => null);
   check(`${prefijo}botón Adelante vuelve a abrir la ficha`, (await page.locator("#ficha").isVisible()) && (await texto(page, "#ficha-titulo")) === `Field ${P0757}`);
@@ -3539,13 +3555,16 @@ async function pruebasTelefono(page, peticiones) {
 }
 
 function htmlSinCifras() {
-  // Texto visible de index.html (sin comentarios, scripts ni etiquetas): no debe llevar dígitos.
-  let s = fs.readFileSync(path.join(WEB, "index.html"), "utf-8");
-  s = s.replace(/<!--[\s\S]*?-->/g, "").replace(/<(script|style)\b[\s\S]*?<\/\1>/g, "");
-  const visibles = [...s.matchAll(/\s(?:aria-label|title|alt|placeholder)="([^"]*)"/g)].map((m) => m[1]);
-  const textoVisible = s.replace(/<[^>]+>/g, " ");
-  const malos = [...(textoVisible.match(/.{0,15}\d.{0,15}/g) ?? []), ...visibles.filter((v) => /\d/.test(v))];
-  check("index.html sin cifras en el texto visible", malos.length === 0, malos.join(" | "));
+  // Texto visible de las dos páginas (sin comentarios, scripts ni etiquetas): no debe llevar dígitos. Primero
+  // explorer.html, que es la página que esta prueba abre; después index.html, la portada (el tablero).
+  for (const pagina of ["explorer.html", "index.html"]) {
+    let s = fs.readFileSync(path.join(WEB, pagina), "utf-8");
+    s = s.replace(/<!--[\s\S]*?-->/g, "").replace(/<(script|style)\b[\s\S]*?<\/\1>/g, "");
+    const visibles = [...s.matchAll(/\s(?:aria-label|title|alt|placeholder)="([^"]*)"/g)].map((m) => m[1]);
+    const textoVisible = s.replace(/<[^>]+>/g, " ");
+    const malos = [...(textoVisible.match(/.{0,15}\d.{0,15}/g) ?? []), ...visibles.filter((v) => /\d/.test(v))];
+    check(`${pagina} sin cifras en el texto visible`, malos.length === 0, malos.join(" | "));
+  }
 }
 
 // ---------------------------------------------------------------- variante en memoria
@@ -4016,7 +4035,7 @@ async function main() {
     const pMalo = await ctxMalo.newPage();
     await pMalo.route((url) => esOpcional(url.href), (route) => route.abort());
     await pMalo.route("**/data/cubo.json", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(malo) }));
-    await pMalo.goto(`${base}/index.html`);
+    await pMalo.goto(`${base}/explorer.html`);
     await pMalo.waitForSelector(".error-carga", { timeout: 15000 }).catch(() => null);
     const avisoMalo = (await pMalo.locator(".error-carga").count()) ? await pMalo.locator(".error-carga").first().innerText() : "";
     check("arranque fallido: aviso visible «The page could not start: …»", avisoMalo.includes("The page could not start") && (await pMalo.evaluate(() => document.body.dataset.listo)) === "error", avisoMalo);

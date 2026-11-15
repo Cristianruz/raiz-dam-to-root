@@ -496,7 +496,10 @@ function pngPorPagina() {
 async function main() {
   const datos = calcular();
   const srv = process.env.RAIZ_URL ? null : await servidor();
-  const url = process.env.RAIZ_URL ?? `http://127.0.0.1:${srv.address().port}/index.html`;
+  // Desde el 15-nov la portada es el tablero y la página de las capturas (centro de control, ficha, La gota,
+  // «Tests in sight») es el explorador de parcelas, web/explorer.html. Si no existe (una copia anterior), index.html.
+  const pagina = fs.existsSync(path.join(WEB, "explorer.html")) ? "explorer.html" : "index.html";
+  const url = process.env.RAIZ_URL ?? `http://127.0.0.1:${srv.address().port}/${pagina}`;
   console.log(`Página: ${url}`);
   // El navegador se lanza dentro del try: si falla el arranque, el finally cierra el servidor.
   let navegador = null;

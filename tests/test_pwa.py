@@ -234,7 +234,10 @@ def mini(tmp_path):
     (web / ".oculto").write_text("x", encoding="utf-8")
     (web / "data/.cache").mkdir()
     (web / "data/.cache/resto.json").write_text("{}", encoding="utf-8")
-    shutil.copytree(WEB / "icons", web / "icons")
+    # La mini web utiliza solo los iconos declarados en su manifest; no los SVG de otras vistas.
+    (web / "icons").mkdir()
+    for icono in pwa.ICONOS:
+        shutil.copyfile(WEB / icono["archivo"], web / icono["archivo"])
     return web
 
 
@@ -260,9 +263,12 @@ def test_manifest_textos_en_ingles_sin_cifras_ni_palabras_prohibidas(manifest):
         assert not re.search(r"\d", texto), f"{campo}: cifra escrita a mano (CLAUDE.md regla 3): {texto!r}"
     # Es la misma frase que la página ya dice de sí misma.
     assert descripcion == pwa.DESCRIPCION
+    # La portada (index.html, el tablero) es lo que abre la aplicación instalada: su <meta name="description"> es
+    # la descripción del manifest. Debe existir (antes, si faltaba, la comparación se saltaba).
     index = (WEB / "index.html").read_text(encoding="utf-8")
-    if 'name="description"' in index:
-        assert descripcion in index, "la descripción del manifest ya no es la de <meta name=description> de index.html"
+    meta = re.search(r'<meta\b[^>]*name="description"[^>]*content="([^"]+)"', index, re.S)
+    assert meta, 'la portada (web/index.html) no trae <meta name="description">'
+    assert meta.group(1) == descripcion, "la descripción del manifest ya no es la de <meta name=description> de la portada"
 
 
 def test_manifest_usa_los_colores_de_la_identidad(manifest):
@@ -274,18 +280,46 @@ def test_manifest_usa_los_colores_de_la_identidad(manifest):
     assert manifest["background_color"].upper() == variables["arena"]
 
 
-def test_la_pagina_enlaza_el_manifest_y_monta_la_instalacion(manifest):
-    """La página real conecta la aplicación instalable (decisión del gemelo, punto 4): manifest, theme-color igual al
-    del manifest, icono, la hoja del módulo y montarInstalacion en app.js (tests/e2e/pwa_smoke.mjs lo prueba en vivo)."""
-    index = (WEB / "index.html").read_text(encoding="utf-8")
-    app = (WEB / "app.js").read_text(encoding="utf-8")
-    assert re.search(r'<link\b[^>]*rel="manifest"[^>]*href="manifest\.webmanifest"', index)
-    tema = re.search(r'<meta\b[^>]*name="theme-color"[^>]*content="(#[0-9A-Fa-f]{6})"', index)
-    assert tema and tema.group(1).upper() == manifest["theme_color"].upper(), "theme-color de index.html ≠ theme_color"
-    iconos = re.findall(r'<link\b[^>]*rel="(?:icon|apple-touch-icon)"[^>]*href="([^"]+)"', index)
+# Las dos páginas de la aplicación (docs/decisiones/2026-11-15_tablero_principal_idiomas.md): la portada es el
+# tablero y la página anterior es el explorador de parcelas. Cada una con su módulo de entrada.
+PAGINAS = ("index.html", "explorer.html")
+
+
+def modulo_de_entrada(html):
+    """El módulo que la página carga con <script type="module" src="…">."""
+    m = re.search(r'<script\b[^>]*type="module"[^>]*src="([^"]+)"', html, re.S)
+    return m.group(1) if m else None
+
+
+@pytest.mark.parametrize("pagina", PAGINAS)
+def test_la_pagina_enlaza_el_manifest_y_monta_la_instalacion(manifest, pagina):
+    """Cada página real conecta la aplicación instalable (decisión del gemelo, punto 4): manifest, theme-color igual al
+    del manifest, icono, la hoja del módulo y montarInstalacion en su módulo de entrada (tests/e2e/pwa_smoke.mjs lo
+    prueba en vivo, con la red cortada, en las dos)."""
+    html = (WEB / pagina).read_text(encoding="utf-8")
+    entrada = modulo_de_entrada(html)
+    assert entrada and (WEB / entrada).is_file(), f"{pagina} no carga un módulo de entrada que exista: {entrada}"
+    app = (WEB / entrada).read_text(encoding="utf-8")
+    assert re.search(r'<link\b[^>]*rel="manifest"[^>]*href="manifest\.webmanifest"', html, re.S), pagina
+    tema = re.search(r'<meta\b[^>]*name="theme-color"[^>]*content="(#[0-9A-Fa-f]{6})"', html, re.S)
+    assert tema and tema.group(1).upper() == manifest["theme_color"].upper(), f"theme-color de {pagina} ≠ theme_color"
+    iconos = re.findall(r'<link\b[^>]*rel="(?:icon|apple-touch-icon)"[^>]*href="([^"]+)"', html)
     assert iconos and all((WEB / i).exists() for i in iconos) and all(i in {x["src"] for x in manifest["icons"]} for i in iconos)
-    assert 'href="css/instalar.css"' in index
-    assert re.search(r'from "\./js/instalar\.js"', app) and "montarInstalacion(" in app
+    assert 'href="css/instalar.css"' in html, pagina
+    # instalar.js vive en web/js/: desde app.js es «./js/instalar.js» y desde un módulo de js/, «./instalar.js».
+    importa = r'from "\./instalar\.js"' if entrada.startswith("js/") else r'from "\./js/instalar\.js"'
+    assert re.search(importa, app) and "montarInstalacion(" in app, f"{entrada} no monta la instalación"
+
+
+def test_la_portada_es_el_tablero_y_el_explorador_enlaza_la_portada(manifest):
+    """La aplicación instalada abre «./» (index.html): es el tablero. El explorador conserva su página y su cabecera
+    lleva el enlace «Dashboard» a la portada, con la forma de los botones de la cabecera."""
+    assert manifest["start_url"] == "./" and manifest["scope"] == "./"
+    assert modulo_de_entrada((WEB / "index.html").read_text(encoding="utf-8")) == "js/dashboard.js"
+    explorador = (WEB / "explorer.html").read_text(encoding="utf-8")
+    assert modulo_de_entrada(explorador) == "app.js"
+    assert re.search(r'<a\b[^>]*class="boton-cabecera"[^>]*id="enlace-tablero"[^>]*href="index\.html"[^>]*>Dashboard</a>', explorador)
+    assert not (WEB / "explorador.html").exists() and not (WEB / "dashboard.html").exists()
 
 
 def test_iconos_del_manifest_existen_con_el_tamano_declarado(manifest):
@@ -336,14 +370,30 @@ def test_precache_trae_lo_que_la_aplicacion_necesita_sin_red(precache):
     listados = set(precache["archivos"])
     assert "sw.js" not in listados, "sw.js no va en el listado: el navegador lo guarda aparte"
     assert not [r for r in listados if any(p.startswith(".") for p in r.split("/"))], "hay archivos ocultos en el listado"
-    for fijo in ("index.html", "app.js", "style.css", "reglas.js", "js/instalar.js", "css/instalar.css",
-                 "manifest.webmanifest", "data/precache.json", "data/cubo.json", "data/parcelas.geojson"):
+    for fijo in ("index.html", "explorer.html", "app.js", "style.css", "reglas.js", "js/instalar.js", "css/instalar.css",
+                 "manifest.webmanifest", "data/precache.json", "data/cubo.json", "data/parcelas.geojson",
+                 # El tablero (la portada): sus módulos, el de idiomas, sus hojas y sus datos.
+                 "js/dashboard.js", "js/asesor.js", "js/recomendador.js", "js/interfaz.js", "js/i18n.js",
+                 "css/dashboard.css", "css/asesor.css", "css/interfaz.css", "data/dashboard.json", "data/pronostico.json",
+                 # La tipografía de las dos páginas (web/vendor, con su hash en VERSIONS.json).
+                 "vendor/atkinson-hyperlegible-5.3.0/atkinson-hyperlegible-latin-400-normal.woff2",
+                 "vendor/atkinson-hyperlegible-5.3.0/atkinson-hyperlegible-latin-700-normal.woff2"):
         assert fijo in listados, f"falta {fijo}"
-    # Todo lo que index.html carga de la propia web.
-    index = (WEB / "index.html").read_text(encoding="utf-8")
-    for ruta in re.findall(r"""<(?:script|link)\b[^>]*?(?:src|href)=["']([^"'#?]+)""", index):
-        if not re.match(r"^([a-z]+:)?//", ruta):
-            assert ruta.removeprefix("./") in listados, f"index.html carga {ruta} y no está en el listado"
+    # Las notas internas en PDF y las tipografías duplicadas ya no se publican ni se guardan en la copia.
+    assert not [r for r in listados if r.startswith(("research/", "fonts/")) or r.endswith(".pdf")]
+    # Todo lo que cada página carga de la propia web, y los diccionarios de idioma del tablero.
+    for pagina in PAGINAS:
+        html = (WEB / pagina).read_text(encoding="utf-8")
+        for ruta in re.findall(r"""<(?:script|link)\b[^>]*?(?:src|href)=["']([^"'#?]+)""", html):
+            if not re.match(r"^([a-z]+:)?//", ruta):
+                assert ruta.removeprefix("./") in listados, f"{pagina} carga {ruta} y no está en el listado"
+    for diccionario in (WEB / "js").glob("textos_*.js"):
+        assert f"js/{diccionario.name}" in listados, f"falta el diccionario js/{diccionario.name}"
+    # Cada tipografía que una hoja de estilo declara existe y está en el listado (ninguna apunta a web/fonts/).
+    for hoja in [WEB / "style.css"] + sorted((WEB / "css").glob("*.css")):
+        for url in re.findall(r"""@font-face\s*{[^}]*?url\(["']?([^"')]+)""", hoja.read_text(encoding="utf-8")):
+            destino = (hoja.parent / url).resolve().relative_to(WEB.resolve()).as_posix()
+            assert destino in listados and destino.startswith("vendor/"), f"{hoja.name}: tipografía {url} fuera de vendor/ o sin listar"
     # Bibliotecas locales, datos, teselas de relieve e iconos.
     for lib in leer(WEB / "vendor/VERSIONS.json")["librerias"]:
         for a in lib["archivos"]:

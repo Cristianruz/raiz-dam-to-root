@@ -72,6 +72,21 @@
    "motivo": "Nombre del módulo web/js/gemelo3d.js (vista 3D del gemelo) y de los id que app.js le da a su leyenda (#t-gemelo3d, #bloque-gemelo3d); «3d» es parte del nombre, no una cifra de los datos"
   },
   {
+   "texto": "p50_mm",
+   "archivos": [
+    "js/asesor.js"
+   ],
+   "motivo": "Clave del campo de mediana en la serie de validación; el gráfico obtiene todos sus valores del archivo de datos."
+  },
+  {
+   "patron": "\\bi18n\\b",
+   "archivos": [
+    "*.js",
+    "*.html"
+   ],
+   "motivo": "Nombre del módulo web/js/i18n.js (abreviatura de «internationalization»); «18» es parte del nombre, no una cifra de los datos"
+  },
+  {
    "patron": "\\bterreno2d\\b",
    "archivos": [
     "*.js"

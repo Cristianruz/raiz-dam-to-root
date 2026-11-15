@@ -1,233 +1,517 @@
 <!doctype html>
-<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
-<!-- web/index.html — Centro de control (C1), ficha de parcela (C2), La gota (X3.2), mensaje e impresión (C4),
-     inicio y «About & Data» (C5).
-     Regla: el texto visible de este archivo NO lleva cifras. Todos los números los escribe
-     app.js leyendo web/data/ (cubo.json, parcelas.geojson, explicaciones.json).
-     Librerías locales con versión fija (web/vendor/VERSIONS.json); nada desde un CDN.
-     Los módulos de web/js/ los importa app.js; sus hojas de web/css/ se enlazan aquí (imprimir.css al
-     final: solo actúa en papel).
-     Gemelo digital (docs/decisiones/2026-11-14_gemelo_digital.md): vista 3D (js/gemelo3d.js, css/gemelo.css),
-     línea de tiempo (js/tiempo.js, css/tiempo.css), tarjeta «Twin status» (js/estado_gemelo.js, css/resumen.css)
-     y aplicación instalable y sin conexión (manifest.webmanifest, js/instalar.js, css/instalar.css, sw.js).
-     Ficha completa: frase resumen, NDVI mensual y enlace «#id» (js/resumen.js, css/resumen.css), perfil y aptitud de
-     suelo (js/suelo.js, css/suelo.css) y evidencia de las bases del reto (js/contexto.js, css/contexto.css).
-     Paneles (etapa 3): «Regional context» plegable en el panel y «Challenge data sources» en «About & Data»
-     (js/contexto.js), H1-b junto a H1 y los documentos enlazados (js/acerca.js con pruebas.json). -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex -->
+<!-- web/index.html — Tablero (portada de la aplicación). El explorador de parcelas es explorer.html.
+     Regla: el texto visible de este archivo NO lleva cifras; los números los escribe js/dashboard.js
+     leyendo web/data/. Cuatro idiomas (js/i18n.js): el texto escrito aquí es el inglés de respaldo;
+     el atributo data-i18n lleva la clave del texto del elemento y data-i18n-attr, pares atributo:clave
+     (js/interfaz.js, pintarTextos), con los textos de js/textos_tablero.js. El nombre del producto no se
+     traduce. Los identificadores (#resumen, data-panel…) siguen en español: las hojas de estilo y las
+     pruebas dependen de ellos. -->
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ROOT – From Dam to Root</title>
-  <meta name="description" content="Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover.">
-  <!-- Aplicación instalable: el manifest y los iconos los escribe motor/pwa.py; theme-color = theme_color del manifest. -->
-  <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#1F6FB2">
-  <link rel="icon" type="image/png" href="icons/raiz-192.png">
-  <link rel="apple-touch-icon" href="icons/raiz-192.png">
-  <!-- Tipografía: Atkinson Hyperlegible si está instalada; si no, la del sistema (style.css).
-       No se carga de Google Fonts: su hoja no admite hash de integridad (tests/versiones.test.js)
-       y la página no depende de la red. Copiarla a web/vendor/ queda como pendiente. -->
-  <link rel="stylesheet" href="vendor/maplibre-gl-5.24.0/maplibre-gl.css">
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="css/relieve.css">
-  <link rel="stylesheet" href="css/terreno2d.css">
-  <link rel="stylesheet" href="css/gota.css">
-  <link rel="stylesheet" href="css/mensaje.css">
-  <link rel="stylesheet" href="css/acerca.css">
-  <link rel="stylesheet" href="css/gemelo.css">
-  <link rel="stylesheet" href="css/tiempo.css">
-  <link rel="stylesheet" href="css/resumen.css">
-  <link rel="stylesheet" href="css/instalar.css">
-  <link rel="stylesheet" href="css/suelo.css">
-  <link rel="stylesheet" href="css/contexto.css">
-  <link rel="stylesheet" href="css/prioridades.css">
-  <link rel="stylesheet" href="css/imprimir.css">
-  <script defer src="vendor/maplibre-gl-5.24.0/maplibre-gl.js"></script>
-  <script defer src="vendor/d3-7.9.0/d3.min.js"></script>
-  <script defer src="vendor/d3-sankey-0.12.3/d3-sankey.min.js"></script>
-  <script type="module" src="app.js"></script>
-</head>
-<body>
-  <a class="saltar" href="#principal">Skip to the map and indicators</a>
-
-  <!-- La marca se desplaza con la página; los controles quedan fijos arriba (sticky) para mover
-       el deslizador también con la ficha abierta. -->
-  <header class="marca" id="marca">
-    <span><span class="marca-nombre">ROOT</span> <span class="marca-sub">– From Dam to Root<span class="marca-lema"> · pre-planting water commitments</span></span></span>
-    <span class="aviso-simulado" id="aviso-simulado" role="note" hidden>SIMULATED DATA</span>
-    <span class="aviso-simulado-detalle" id="aviso-simulado-detalle" hidden>Placeholder values so the screens work before the real data arrive. Not real fields or measurements.</span>
-    <nav class="marca-acciones" aria-label="Help and data sources">
-      <button type="button" class="boton-cabecera" id="boton-inicio">How it works</button>
-      <button type="button" class="boton-cabecera" id="boton-acerca" aria-haspopup="dialog" aria-controls="acerca">About &amp; Data</button>
-    </nav>
-    <!-- «Install app» y el indicador Online/Offline: los dibuja web/js/instalar.js (solo con https o localhost). -->
-    <div class="marca-instalar" id="marca-instalar"></div>
-  </header>
-
-  <section class="controles" id="controles" aria-label="Water allocation controls">
-    <div class="control-dotacion">
-      <label for="dotacion" class="etiqueta-control">Water allocation <span class="unidad">(thousand m³ per hectare)</span></label>
-      <div class="fila-deslizador">
-        <!-- data-cargando: oculto (sin mover el diseño) hasta que app.js le pone min, max y valor del cubo; así no salta
-             del valor por omisión del navegador al de los datos. -->
-        <input type="range" id="dotacion" list="dotacion-marcas" aria-describedby="punto-medicion" data-cargando>
-        <datalist id="dotacion-marcas"></datalist>
-        <output id="dotacion-valor" class="valor-dotacion" for="dotacion" aria-live="off"></output>
-      </div>
-      <div class="marcas" id="marcas" role="group" aria-label="Reference allocations"></div>
-      <div class="info-marca" id="info-marca" aria-live="polite" hidden>
-        <p id="info-marca-resumen"></p>
-        <details id="info-marca-detalle"><summary>Source and note</summary><p id="info-marca-fuente"></p></details>
-      </div>
-    </div>
-
-    <div class="control-extra">
-      <label class="interruptor" for="lluvia">
-        <input type="checkbox" role="switch" id="lluvia" aria-describedby="lluvia-ayuda">
-        <span id="lluvia-etiqueta">Rain</span>
-      </label>
-      <span class="ayuda-interruptor" id="lluvia-ayuda">Less rain: every option needs more irrigation water.</span>
-      <details class="unidades" id="unidades">
-        <summary>Units and measuring point</summary>
-        <p><strong>Equivalence:</strong> <span id="equivalencia"></span></p>
-        <p><strong>Measured at:</strong> <span id="punto-medicion"></span></p>
-      </details>
-    </div>
-  </section>
-
-  <main id="principal" class="principal">
-    <section class="zona-mapa" aria-label="Pilot area map">
-      <div class="indicador" id="indicador">
-        <!-- Selector de zona piloto: app.js lo llena con cubo.zonas y lo muestra solo si hay más de una. -->
-        <div class="selector-zona" id="selector-zona" hidden>
-          <label for="zona-sel">Pilot area</label>
-          <select id="zona-sel"></select>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>ROOT – From Dam to Root · Water dashboard</title>
+    <meta
+      name="description"
+      content="Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover."
+    />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#1F6FB2" />
+    <link rel="stylesheet" href="css/instalar.css" />
+    <link rel="icon" href="icons/raiz-192.png" />
+    <link rel="stylesheet" href="vendor/maplibre-gl-5.24.0/maplibre-gl.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/asesor.css" />
+    <link rel="stylesheet" href="css/interfaz.css" />
+    <script defer src="vendor/maplibre-gl-5.24.0/maplibre-gl.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#contenido" data-i18n="tablero.saltar">Skip to content</a>
+    <aside class="sidebar">
+      <a class="brand" href="#resumen"
+        ><span class="brand-icon">✳</span> ROOT</a
+      >
+      <div class="workspace">
+        <span class="workspace-icon">⌘</span>
+        <div data-i18n="tablero.zona_piloto">
+          Pilot area<small data-i18n="tablero.distrito"
+            >Delicias irrigation district, Chihuahua</small
+          >
         </div>
-        <h1 class="indicador-titulo">Water already committed by perennial crops</h1>
-        <div aria-live="polite" aria-atomic="true">
-          <!-- Estado de carga (sin cifras): app.js lo reemplaza con el indicador cuando llegan los datos. -->
-          <p class="indicador-cifra" id="indicador-cifra"><span class="cargando">Loading field data…</span></p>
-          <p class="indicador-rango" id="indicador-rango"></p>
-          <div class="indicador-mensaje" id="indicador-mensaje" hidden></div>
-          <p class="indicador-segunda" id="indicador-segunda"></p>
+        <span>⌄</span>
+      </div>
+      <p class="nav-label" data-i18n="tablero.nav.rotulo">VIEWS</p>
+      <nav aria-label="Main navigation" data-i18n-attr="aria-label:tablero.nav.aria">
+        <a
+          class="active"
+          href="#resumen"
+          data-view="resumen"
+          data-i18n="tablero.nav.resumen"
+          ><span>◫</span> Overview</a
+        >
+        <a href="#terreno" data-view="terreno" data-i18n="tablero.nav.terreno"
+          ><span>⌘</span> My field</a
+        >
+        <a href="#cultivos" data-view="cultivos" data-i18n="tablero.nav.cultivos"
+          ><span>♧</span> Crops and options</a
+        >
+        <a
+          href="#recomendaciones"
+          data-view="recomendaciones"
+          data-i18n="tablero.nav.comparar"
+          ><span>✧</span> Compare options</a
+        >
+        <a
+          href="#predicciones"
+          data-view="predicciones"
+          data-i18n="tablero.nav.historia"
+          ><span>↗</span> History and rainfall range</a
+        >
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="research-mark">FROM DAM TO ROOT</div>
+        <p data-i18n="tablero.lema">
+          Before you plant, see the water you are committing.
+        </p>
+        <a href="explorer.html" data-i18n="tablero.abrir_explorador"
+          >Open the field explorer <span>↗</span></a
+        >
+      </div>
+
+      <div class="profile">
+        <span class="avatar">R</span>
+        <div data-i18n="tablero.perfil.nombre">
+          Local grower<small data-i18n="tablero.perfil.zona"
+            >Pilot area · Delicias district</small
+          >
         </div>
       </div>
-      <div id="mapa" class="mapa" role="region" aria-label="Map of the pilot-area fields. Use the field list to open a field with the keyboard."></div>
-      <p class="mapa-aviso" id="mapa-aviso" role="status" hidden></p>
-      <!-- Enlace directo a una parcela (#id) que no está en los datos: lo escribe app.js con el id de la dirección. -->
-      <p class="mapa-aviso aviso-enlace" id="aviso-enlace" role="status" hidden></p>
-    </section>
-
-    <aside class="panel" aria-label="Map options, fields and district summary">
-      <!-- Leyenda de la vista 3D del gemelo (web/js/gemelo3d.js, leyendaHTML): visible solo con la vista activa.
-           El título lo escribe app.js. -->
-      <section class="bloque bloque-gemelo3d" id="bloque-gemelo3d" aria-labelledby="t-gemelo3d" hidden>
-        <h2 id="t-gemelo3d"></h2>
-        <div id="gemelo-leyenda"></div>
-      </section>
-
-      <section class="bloque" aria-labelledby="t-colorear">
-        <h2 id="t-colorear">Color fields by</h2>
-        <fieldset aria-describedby="nota-colorear">
-          <legend>Water</legend>
-          <label class="opcion-radio"><input type="radio" name="colorear" value="semaforo" checked> Enough water?</label>
-          <label class="opcion-radio"><input type="radio" name="colorear" value="plazo"> Water term</label>
-        </fieldset>
-        <fieldset id="capas" hidden aria-describedby="nota-colorear">
-          <legend>Layers</legend>
-        </fieldset>
-        <p class="nota-colorear" id="nota-colorear" hidden></p>
-        <div class="leyenda" id="leyenda" aria-live="polite"></div>
-        <!-- Capa «Terrain & runoff» y botón «Simulate a storm»: los dibuja web/js/relieve.js con
-             relieve.json y relieve_rutas.geojson; sin esos archivos dice «Terrain layer: not run». -->
-        <div class="capa-relieve" id="capa-relieve" role="group" aria-labelledby="t-relieve">
-          <p class="capa-relieve-titulo" id="t-relieve">Terrain overlay</p>
-        </div>
-      </section>
-
-      <!-- Línea de tiempo del gemelo (web/js/tiempo.js): el estado observado de cada parcela, año agrícola por año. -->
-      <section class="bloque" id="bloque-tiempo" aria-labelledby="t-tiempo">
-        <h2 id="t-tiempo">Observed state by year</h2>
-        <div id="linea-tiempo"></div>
-      </section>
-
-      <section class="bloque" aria-labelledby="t-campos">
-        <h2 id="t-campos">Fields</h2>
-        <p class="ayuda">Select a field to open its sheet. Example fields are at the top, then classified fields, then fields not classified.</p>
-        <label class="buscar" for="buscar-parcela">Find a field <span class="unidad">(ID or crop)</span></label>
-        <input type="search" id="buscar-parcela" class="buscar-campo" autocomplete="off" spellcheck="false" aria-controls="lista-parcelas" aria-describedby="lista-resumen">
-        <p class="lista-resumen" id="lista-resumen" aria-live="polite"></p>
-        <ul class="lista-parcelas" id="lista-parcelas" aria-label="Fields"></ul>
-      </section>
-
-      <section class="bloque" aria-labelledby="t-conteos">
-        <h2 id="t-conteos">Fields at this allocation</h2>
-        <ul class="conteos" id="conteos-semaforo"></ul>
-        <h3>Water term</h3>
-        <ul class="conteos" id="conteos-plazo"></ul>
-      </section>
-
-      <!-- Tarjeta «Twin status» (web/js/estado_gemelo.js): observado, modelado y escenario, con la fecha de cada fuente. -->
-      <div class="bloque" id="estado-gemelo"></div>
-
-      <!-- «Regional context» (web/js/contexto.js, montarContextoRegional): series de la zona elegida, con el año de la línea
-           de tiempo resaltado. Plegable: se dibuja la primera vez que se abre. -->
-      <details class="bloque bloque-contexto" id="bloque-contexto">
-        <!-- El nombre accesible del plegable es solo su título; la ayuda (a la vista aunque esté cerrado) va como
-             descripción (aria-describedby) y no entra al nombre. El signo «+» / «−» es decorativo (style.css). -->
-        <summary class="bloque-plegable" aria-describedby="ayuda-contexto">
-          <h2 id="t-contexto">Regional context</h2>
-          <span class="bloque-plegable-ayuda" id="ayuda-contexto" aria-hidden="true">Climate, soil moisture, basin water and frost of the pilot area, year by year. They describe the area or the basin, not a single field.</span>
-        </summary>
-        <div id="contexto-regional"></div>
-      </details>
-
-      <!-- Localidades del equipo (cubo.localidades): puntos de referencia del mapa, no parcelas. -->
-      <section class="bloque" id="bloque-localidades" aria-labelledby="t-localidades" hidden>
-        <h2 id="t-localidades">Team reference localities (not fields)</h2>
-        <p class="ayuda">Places to find your way on the map. They are not fields and carry no water data.</p>
-        <ul class="lista-localidades" id="lista-localidades"></ul>
-        <div class="fuente" id="localidades-fuente"></div>
-      </section>
-
-      <section class="bloque" aria-labelledby="t-boquilla">
-        <h2 id="t-boquilla">La Boquilla dam</h2>
-        <div id="boquilla"></div>
-      </section>
-
-      <section class="bloque" aria-labelledby="t-acuifero">
-        <h2 id="t-acuifero">Aquifer</h2>
-        <div id="acuifero"></div>
-      </section>
-
-      <section class="bloque" aria-label="Notice">
-        <p class="aviso-juicio">This tool supports, never replaces, the judgment of farmers and local experts.</p>
-        <p class="limites">It does not allocate, sell or trade water, and it does not forecast the dam. Field boundaries are estimated.</p>
-        <p class="fuente" id="pie-fuentes"></p>
-      </section>
     </aside>
-  </main>
-
-  <section class="ficha" id="ficha" role="dialog" aria-modal="false" aria-labelledby="ficha-titulo" hidden>
-    <div class="ficha-cabeza">
-      <h2 id="ficha-titulo" tabindex="-1"></h2>
-      <button type="button" class="boton-cerrar" id="ficha-cerrar">Close</button>
+    <div class="main-shell">
+      <header class="topbar">
+        <div class="breadcrumb" data-i18n="tablero.zona_piloto">
+          Pilot area <span>/</span> <strong id="breadcrumb">Overview</strong>
+        </div>
+        <div class="top-actions">
+          <!-- Selector de idioma: js/interfaz.js llena las opciones (NOMBRE_IDIOMA). -->
+          <label class="sr-only" for="idioma" data-i18n="tablero.idioma.rotulo"
+            >Language</label
+          ><select id="idioma" class="language-select"></select>
+          <span class="data-status" data-i18n="tablero.estado_datos"
+            ><i></i> Research data</span
+          ><a
+            class="icon-button"
+            href="explorer.html"
+            aria-label="«About &amp; Data», in the field explorer"
+            data-i18n-attr="aria-label:tablero.acerca.aria"
+            >ⓘ</a
+          ><span class="avatar small" aria-hidden="true">R</span>
+        </div>
+        <!-- Nota junto al selector cuando el idioma elegido es una traducción hecha por máquina. -->
+        <p class="language-note" id="idioma-nota" hidden></p>
+      </header>
+      <main id="contenido">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">ROOT – FROM DAM TO ROOT</p>
+            <h1 id="page-title">Water dashboard</h1>
+            <p id="page-description">
+              Before you plant, see the water you are committing.
+            </p>
+          </div>
+          <button class="button export" id="exportar">
+            ↓ <span data-i18n="tablero.descargar_resumen">Download summary</span>
+          </button>
+        </div>
+        <div class="context-bar">
+          <span
+            ><i class="location-dot"></i>
+            <strong data-i18n="tablero.zona_piloto">Pilot area</strong></span
+          ><label
+            class="sr-only"
+            for="zona-dashboard"
+            data-i18n="tablero.zona_piloto"
+            >Pilot area</label
+          ><select id="zona-dashboard"></select
+          ><a href="#resumen" id="scenario-label" class="scenario-label"></a
+          ><span class="context-date" id="data-date"></span>
+        </div>
+        <p id="load-status" role="status" data-i18n="tablero.cargando">
+          Loading the dashboard…
+        </p>
+        <div id="app-content" hidden>
+          <section data-panel="resumen">
+            <div class="overview-grid">
+              <article class="hero-card">
+                <div class="hero-content">
+                  <span class="pill light" data-i18n="tablero.hero.pill"
+                    >KNOW BEFORE YOU PLANT</span
+                  >
+                  <h2 data-i18n="tablero.hero.titulo">
+                    Every crop has its own water story.
+                  </h2>
+                  <p data-i18n="tablero.hero.texto">
+                    Look at your field and compare what you plant with the
+                    water in this scenario.
+                  </p>
+                  <a
+                    class="button lime"
+                    href="#terreno"
+                    data-i18n="tablero.hero.boton"
+                    >Explore my field <span>↗</span></a
+                  >
+                </div>
+                <div class="hero-land" aria-hidden="true">
+                  <div class="land-field f-a"></div>
+                  <div class="land-field f-b"></div>
+                  <div class="land-field f-c"></div>
+                  <div class="land-field f-d"></div>
+                  <div class="land-field f-e"></div>
+                  <span class="field-pin">♧</span>
+                </div>
+                <span class="hero-caption" data-i18n="tablero.hero.pie"
+                  >ROOT · DELICIAS IRRIGATION DISTRICT</span
+                >
+              </article>
+              <article class="water-card">
+                <div class="card-top">
+                  <span class="mini-icon">♧</span
+                  ><span class="pill" data-i18n="tablero.agua.pill"
+                    >SCENARIO TO EXPLORE</span
+                  >
+                </div>
+                <h2 data-i18n="tablero.agua.titulo">Water allocation</h2>
+                <p data-i18n="tablero.agua.texto">
+                  Set an allocation to explore your options.
+                </p>
+                <div class="allocation-value">
+                  <output id="allocation-value" for="allocation"></output
+                  ><span data-i18n="tablero.unidad">thousand m³/ha</span>
+                </div>
+                <label
+                  class="sr-only"
+                  for="allocation"
+                  data-i18n="tablero.agua.aria"
+                  >Water allocation in thousand cubic meters per hectare</label
+                ><input type="range" id="allocation" />
+                <div class="range-labels" id="range-labels"></div>
+                <label class="rain-toggle" data-i18n="tablero.agua.menos_lluvia"
+                  ><input type="checkbox" id="rain" /> Explore with less rain
+                  <span id="rain-pct"></span
+                ></label>
+                <p class="micro" data-i18n="tablero.agua.nota">
+                  This is a scenario to explore: it is not an assigned
+                  allocation, and it does not tell how much water there will
+                  be.
+                </p>
+              </article>
+            </div>
+            <div class="stats-grid" id="stats"></div>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow" data-i18n="tablero.seccion.mapa.ceja">
+                  A LOOK AT THE PILOT AREA
+                </p>
+                <h2 data-i18n="tablero.seccion.mapa.titulo">
+                  From the map to the field
+                </h2>
+              </div>
+              <a href="#terreno"
+                ><span data-i18n="tablero.seccion.mapa.enlace"
+                  >Explore the map</span
+                >
+                ↗</a
+              >
+            </div>
+            <div class="map-detail-grid">
+              <article class="card map-card">
+                <div class="card-heading">
+                  <div>
+                    <h3 data-i18n="tablero.nav.terreno">My field</h3>
+                    <span data-i18n="tablero.mapa.limites"
+                      >Estimated boundaries · Fields of The World</span
+                    >
+                  </div>
+                  <button class="text-button" id="fit-map">Center ↗</button>
+                </div>
+                <div
+                  id="map"
+                  aria-label="Interactive map of fields"
+                  data-i18n-attr="aria-label:tablero.mapa.aria"
+                ></div>
+                <div id="map-fallback" hidden></div>
+                <div class="map-legend"></div>
+                <p class="map-note" id="map-note">
+                  Select a field on the map or use the search box.
+                </p>
+              </article>
+              <article class="card field-card">
+                <div class="card-heading">
+                  <h3 data-i18n="tablero.ficha.titulo">Your field, up close</h3>
+                  <span class="leaf-badge">♧</span>
+                </div>
+                <p class="micro" id="field-notice" data-i18n="tablero.aviso">
+                  This tool supports, never replaces, the judgment of farmers
+                  and local experts.
+                </p>
+                <label
+                  class="sr-only"
+                  for="field-search"
+                  data-i18n="tablero.ficha.buscar"
+                  >Search field by ID or crop</label
+                ><input
+                  id="field-search"
+                  type="search"
+                  placeholder="Search field by ID or crop…"
+                  data-i18n-attr="placeholder:tablero.ficha.buscar_ph"
+                /><label
+                  class="sr-only"
+                  for="field-select"
+                  data-i18n="tablero.ficha.seleccionar"
+                  >Select field</label
+                ><select id="field-select"></select>
+                <div id="field-detail" aria-live="polite"></div>
+              </article>
+            </div>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow" data-i18n="tablero.seccion.historia.ceja">
+                  PAST SEASONS, FOR CONTEXT
+                </p>
+                <h2 data-i18n="tablero.seccion.historia.titulo">
+                  What earlier years looked like
+                </h2>
+              </div>
+              <a href="#predicciones"
+                ><span data-i18n="tablero.seccion.historia.enlace"
+                  >See the history</span
+                >
+                ↗</a
+              >
+            </div>
+            <div class="bottom-grid">
+              <article class="card history-preview">
+                <div class="card-heading">
+                  <h3 data-i18n="tablero.historia.titulo">
+                    Irrigated area in the district
+                  </h3>
+                  <span class="pill" data-i18n="tablero.historia.pill"
+                    >CONAGUA · SECONDARY REFERENCE</span
+                  >
+                </div>
+                <div id="history-chart"></div>
+                <p class="micro" data-i18n="tablero.historia.nota">
+                  Selected years from the project research. It is not a
+                  continuous series, and it says nothing about coming years.
+                </p>
+              </article>
+              <article class="insight-card">
+                <span class="mini-icon">✧</span>
+                <p class="eyebrow" data-i18n="tablero.idea.ceja">
+                  BEYOND THIS SEASON
+                </p>
+                <h3 data-i18n="tablero.idea.titulo">
+                  Planting also commits water.
+                </h3>
+                <p data-i18n="tablero.idea.texto">
+                  An orchard stays for years. An annual crop lets you rethink
+                  the next season.
+                </p>
+                <a href="#cultivos" data-i18n="tablero.idea.enlace"
+                  >Compare my options <span>↗</span></a
+                >
+              </article>
+            </div>
+          </section>
+          <section data-panel="terreno" hidden>
+            <div class="section-heading">
+              <h2 data-i18n="tablero.terreno.titulo">Explore your field</h2>
+              <a href="explorer.html"
+                ><span data-i18n="tablero.abrir_explorador"
+                  >Open the field explorer</span
+                >
+                ↗</a
+              >
+            </div>
+            <p class="section-intro" data-i18n="tablero.terreno.intro">
+              The map and the field detail are here. Change the pilot area,
+              search for a field or select its polygon. Terrain, runoff and
+              the twin view are in the field explorer.
+            </p>
+            <div id="terrain-slot"></div>
+          </section>
+          <section data-panel="cultivos" hidden>
+            <div class="section-heading">
+              <h2 data-i18n="tablero.cultivos.titulo">Choose what to compare</h2>
+              <span class="pill" data-i18n="tablero.cultivos.pill"
+                >FAO MODEL · SCENARIOS</span
+              >
+            </div>
+            <p class="section-intro" data-i18n="tablero.cultivos.intro">
+              Modeled yearly water need for the selected pilot area. The range
+              expresses uncertainty, not the chance of a harvest. Surface
+              (gravity) irrigation uses an assumed efficiency range; drip
+              irrigation needs local validation.
+            </p>
+            <div id="crop-grid" class="crop-grid"></div>
+            <article class="card formula">
+              <h3 data-i18n="tablero.cultivos.formula_titulo">
+                Where does each crop's water need come from?
+              </h3>
+              <p data-i18n="tablero.cultivos.formula">
+                ETc = Kc × ETo → Monthly net depth = ETc − effective rain,
+                never below zero → Gross depth = net ÷ efficiency + pre-planting
+                irrigation for annual crops.
+              </p>
+              <p data-i18n="tablero.cultivos.formula_nota">
+                ET is the water the crop consumes. The water that has to be
+                delivered also depends on rain and on the irrigation system.
+              </p>
+            </article>
+          </section>
+          <section data-panel="recomendaciones" hidden>
+            <div class="section-heading">
+              <h2 data-i18n="tablero.comparar.titulo">
+                Compare options with your field data
+              </h2>
+              <span class="pill" data-i18n="tablero.comparar.pill"
+                >RULES AND CALCULATIONS YOU CAN AUDIT</span
+              >
+            </div>
+            <p class="section-intro" data-i18n="tablero.comparar.intro">
+              Confirm the crop and enter what you know. The page works out the
+              water each option asks for and shows the constraints it finds,
+              with their source. Unconfirmed data stays marked as unconfirmed;
+              it is not turned into measurements.
+            </p>
+            <div id="decision-inputs"></div>
+            <div class="section-heading">
+              <h2 data-i18n="tablero.comparar.lado">Options side by side</h2>
+              <button
+                class="button"
+                id="download-audit"
+                data-i18n="tablero.comparar.descargar"
+              >
+                Download calculation and evidence
+              </button>
+            </div>
+            <div id="decision-summary" role="status"></div>
+            <div id="recommendations" class="decision-results"></div>
+            <article class="card formula">
+              <h3 data-i18n="tablero.comparar.comprobar_titulo">
+                Check the calculation
+              </h3>
+              <p data-i18n="tablero.comparar.comprobar_texto">
+                Run consistency checks with this field's data: sensitivity to
+                water and to efficiency, repeatability, and abstaining when
+                inputs are missing. These are software consistency tests, not
+                agronomic trials.
+              </p>
+              <button
+                class="button dark"
+                id="run-checks"
+                data-i18n="tablero.comparar.comprobar_boton"
+              >
+                Run checks
+              </button>
+              <div id="decision-checks" aria-live="polite"></div>
+            </article>
+            <article class="card formula">
+              <h3 data-i18n="tablero.comparar.supuestos_titulo">
+                What the categories and assumptions mean
+              </h3>
+              <p data-i18n="tablero.comparar.supuestos_texto">
+                Winter cereal is a seasonal class; the model uses forage oats
+                to represent it, and the satellite does not confirm which
+                cereal it is. Fallow here means land that may have no crop:
+                low greenness does not prove the land was rested on purpose.
+                Texture, salinity, crop stage and application efficiency are
+                confirmed in the field. A regional soil map does not replace
+                a laboratory analysis. The options computed for each field are
+                in its card in the field explorer.
+              </p>
+              <a
+                id="recommendation-link"
+                class="button dark"
+                href="explorer.html"
+                ><span data-i18n="tablero.abrir_explorador"
+                  >Open the field explorer</span
+                >
+                ↗</a
+              >
+            </article>
+          </section>
+          <section data-panel="predicciones" hidden>
+            <div id="forecast-analysis"></div>
+            <div class="section-heading">
+              <h2 data-i18n="tablero.eventos.titulo">Past events in the region</h2>
+              <button id="export-timeline" class="button">
+                ↓
+                <span data-i18n="tablero.eventos.descargar"
+                  >Download timeline</span
+                >
+              </button>
+            </div>
+            <p class="section-intro" data-i18n="tablero.eventos.intro">
+              Events from the project research. Their figures are secondary
+              references still to be checked against primary sources. They are
+              context, not a validated data set, and this page does not
+              forecast the dam, yields or income.
+            </p>
+            <div
+              class="timeline-filters"
+              role="group"
+              aria-label="Filter events"
+              data-i18n-attr="aria-label:tablero.eventos.filtro_aria"
+            >
+              <button
+                class="active"
+                data-filter="todos"
+                data-i18n="tablero.eventos.todos"
+              >
+                All events</button
+              ><button data-filter="sequia" data-i18n="tablero.eventos.sequia">
+                Drought</button
+              ><button
+                data-filter="inundacion"
+                data-i18n="tablero.eventos.inundacion"
+              >
+                Rain and flooding
+              </button>
+            </div>
+            <div id="timeline" class="timeline"></div>
+          </section>
+        </div>
+        <footer>
+          <span class="footer-brand">ROOT – From Dam to Root</span>
+          <p>
+            <strong id="footer-notice" data-i18n="tablero.aviso"
+              >This tool supports, never replaces, the judgment of farmers and
+              local experts.</strong
+            >
+            <span data-i18n="tablero.pie.limites"
+              >It does not allocate, sell or trade water, and it does not
+              forecast the dam. Field boundaries are estimated.</span
+            >
+            <span data-i18n="tablero.pie.leyenda"
+              >The legend of the evidence tags [V] / [P] / [S], «About &amp;
+              Data» and «Tests in sight» are in the field explorer.</span
+            >
+          </p>
+          <a href="explorer.html"
+            ><span data-i18n="tablero.abrir_explorador"
+              >Open the field explorer</span
+            >
+            ↗</a
+          >
+          <div id="dashboard-install"></div>
+        </footer>
+      </main>
     </div>
-    <div class="ficha-cuerpo" id="ficha-cuerpo"></div>
-  </section>
-
-  <!-- «About & Data» (kit C5): web/js/acerca.js la dibuja al abrirla; manifest.json y pruebas.json se
-       leen en ese momento. -->
-  <dialog class="dialogo-acerca" id="acerca" aria-label="About and data">
-    <div class="dialogo-acerca-cabeza">
-      <button type="button" class="boton-cerrar" id="acerca-cerrar">Close</button>
-    </div>
-    <div class="dialogo-acerca-cuerpo" id="acerca-cuerpo">
-      <p class="ayuda">Reading the data sources and the test results…</p>
-    </div>
-  </dialog>
-
-  <noscript><p class="error-carga">This page needs JavaScript to read its data files.</p></noscript>
-</body>
+  </body>
 </html>

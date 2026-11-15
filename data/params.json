@@ -468,5 +468,59 @@
       "etiqueta": "[P]",
       "nota": "Año que la línea de tiempo resalta. S9 §2: en 2025 el distrito no recibió agua de las presas"
     }
+  },
+  "tablero": {
+    "minimo_ciclos": {
+      "valor": 10,
+      "unidad": "ciclos agrícolas completos (octubre a septiembre) antes del primer año de prueba",
+      "fuente": "Supuesto de diseño del equipo (tablero de Tena, 14-nov-2026); sin fuente externa",
+      "fuente_en": "Team design assumption (dashboard by Tena, Nov 14, 2026); no external source",
+      "etiqueta": "[S]",
+      "fecha": "2026-11-14",
+      "nota": "Retroprueba del rango histórico de lluvia: cada año de prueba usa solo los ciclos anteriores, y se exige este mínimo para que los cuantiles no salgan de muy pocos años. motor/pronostico_web.py lo publica en pronostico.json (metodo.minimo_entrenamiento)"
+    },
+    "niveles_plan": {
+      "valor": [
+        0.8,
+        0.9,
+        0.95
+      ],
+      "unidad": "fracción de los años históricos cuya demanda queda cubierta",
+      "fuente": "Supuesto de diseño del equipo (tablero de Tena, 14-nov-2026); sin fuente externa",
+      "fuente_en": "Team design assumption (dashboard by Tena, Nov 14, 2026); no external source",
+      "etiqueta": "[S]",
+      "fecha": "2026-11-14",
+      "nota": "Niveles que el tablero deja elegir al comparar la demanda de un cultivo con la serie histórica; no son probabilidades de un año futuro. Publicado en pronostico.json (metodo.niveles_plan)"
+    },
+    "nivel_plan": {
+      "valor": 0.9,
+      "unidad": "fracción de los años históricos cuya demanda queda cubierta",
+      "fuente": "Supuesto de diseño del equipo (tablero de Tena, 14-nov-2026); sin fuente externa",
+      "fuente_en": "Team design assumption (dashboard by Tena, Nov 14, 2026); no external source",
+      "etiqueta": "[S]",
+      "fecha": "2026-11-14",
+      "nota": "Nivel con el que abre el tablero; debe ser uno de niveles_plan. Publicado en pronostico.json (metodo.nivel_plan)"
+    },
+    "intervalo_lluvia": {
+      "valor": [
+        0.1,
+        0.9
+      ],
+      "unidad": "cuantiles de la lluvia del ciclo agrícola (octubre a septiembre)",
+      "fuente": "Supuesto de diseño del equipo (tablero de Tena, 14-nov-2026); sin fuente externa",
+      "fuente_en": "Team design assumption (dashboard by Tena, Nov 14, 2026); no external source",
+      "etiqueta": "[S]",
+      "fecha": "2026-11-14",
+      "nota": "Extremos del rango histórico de lluvia (NASA POWER) que el tablero dibuja; la mediana es el centro. Es un rango de años pasados, no un pronóstico. Publicado en pronostico.json (metodo.intervalo)"
+    },
+    "cobertura_nominal": {
+      "valor": 0.8,
+      "unidad": "fracción de los años de prueba que el rango debería contener",
+      "fuente": "Supuesto de diseño del equipo (tablero de Tena, 14-nov-2026); sin fuente externa",
+      "fuente_en": "Team design assumption (dashboard by Tena, Nov 14, 2026); no external source",
+      "etiqueta": "[S]",
+      "fecha": "2026-11-14",
+      "nota": "Es la distancia entre los dos cuantiles de intervalo_lluvia; motor/pronostico_web.py se detiene si no coinciden. La retroprueba publica al lado la cobertura que de verdad se observó, sea mayor o menor"
+    }
   }
 }

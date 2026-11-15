@@ -345,6 +345,14 @@ async function main() {
       omitir("«Regional context»", "la página no trae el bloque #bloque-contexto");
     }
 
+    // El enlace «Dashboard» de la cabecera lleva a otra página del sitio (index.html), que no viaja en el archivo
+    // suelto: en la copia no se muestra (un botón que abre una página que no está sería un enlace roto).
+    if ((await page.locator("#enlace-tablero").count()) > 0) {
+      check("el enlace «Dashboard» (otra página del sitio) no se muestra en la copia de un solo archivo", !(await page.locator("#enlace-tablero").isVisible()));
+    } else {
+      omitir("enlace «Dashboard»", "la página no trae #enlace-tablero");
+    }
+
     // «About & Data», si la página trae el botón: lee manifest.json y pruebas.json de la copia.
     if ((await page.locator("#boton-acerca").count()) > 0) {
       await page.locator("#boton-acerca").click();

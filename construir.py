@@ -341,7 +341,10 @@ def paso_gemelo():
     # Cada módulo con su nombre en el detalle en español y en el de inglés.
     for modulo, etiqueta, etiqueta_en in (("motor.gemelo_web", "gemelo", "twin"),
                                           ("motor.contexto_web", "contexto", "context"),
-                                          ("motor.suelo_web", "suelo", "soil")):
+                                          ("motor.suelo_web", "suelo", "soil"),
+                                          ("motor.dashboard_web", "dashboard", "dashboard"),
+                                          # La lluvia del tablero es un rango histórico, no un pronóstico.
+                                          ("motor.pronostico_web", "rango de lluvia", "rainfall range")):
         try:
             rep = importar(modulo).construir()
         except Exception as ex:  # noqa: BLE001
