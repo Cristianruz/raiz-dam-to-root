@@ -1,3 +1,3 @@
-# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; Codex.
-# Conservar los documentos de investigación byte a byte en todos los sistemas.
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex
+# Conservar los PDF byte a byte en todos los sistemas (hoy, las diapositivas de docs/pitch/).
 *.pdf binary

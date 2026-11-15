@@ -351,7 +351,7 @@ def test_cada_camino_de_construir_da_las_mismas_cifras_en_los_dos_idiomas(falsos
             f"{rotulo}: quedó español en el detalle en inglés: {paso.detalle_en!r}"
     assert por_rotulo["cubo real"].detalle_en == "REAL cube: 1239 fields, 458 classified, 1267 options"
     assert por_rotulo["manifest"].detalle_en == "112946 figures (0 simulated), 35 source files, 59 notices"
-    assert por_rotulo["gemelo, contexto y suelo"].detalle_en == "twin: OK · context: OK · soil: OK · dashboard: OK · forecast: OK"
+    assert por_rotulo["gemelo, contexto y suelo"].detalle_en == "twin: OK · context: OK · soil: OK · dashboard: OK · rainfall range: OK"
     assert por_rotulo["ensamblar con buzón"].detalle_en == "deliveries validated: 35 accepted, 2 rejected"
 
 

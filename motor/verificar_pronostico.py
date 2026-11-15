@@ -1,5 +1,9 @@
-# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; Codex.
-"""Verificación reproducible con biblioteca estándar: hashes, lluvia original y retroprueba."""
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex
+"""Verificación reproducible con biblioteca estándar: hashes, lluvia original y retroprueba.
+
+Comprueba web/data/pronostico.json contra sus archivos de origen. Corre dentro del comando único como prueba de
+pytest (tests/test_pronostico_web.py::test_verificador_pasa_con_lo_publicado) y suelto: python motor/verificar_pronostico.py
+"""
 import csv
 import hashlib
 import json

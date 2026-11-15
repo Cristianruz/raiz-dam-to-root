@@ -31,7 +31,7 @@
    **[ALTERNATIVA]** «Pilot area» en «All areas» y capa «Field memory: 2025».
 5. Respaldo sin red: **[SI ESTÁ CONECTADO]** la app instalada («Install app»). **[ALTERNATIVA]** `dist/raiz-offline.html`, que se genera con `python motor/demo_offline.py` (`README.md`, «How to run»).
 6. Las tres protagonistas son P0757, P0632 y L0175 (`web/data/parcelas.geojson` → `protagonista`). Aparecen arriba en la lista «Fields» con la etiqueta «story field».
-7. Liga pública, por si alguien la pide: https://cristianruz.github.io/raiz-dam-to-root/ (publica `main`, con el PR #4 ya fusionado).
+7. Liga pública, por si alguien la pide: https://cristianruz.github.io/raiz-dam-to-root/ (publica `main`, con el PR #4 ya fusionado). Con el tablero como portada (decisión del 15-nov, `docs/decisiones/2026-11-15_tablero_principal_idiomas.md`), esa liga abre el tablero; esta demostración se hace en el explorador de parcelas: https://cristianruz.github.io/raiz-dam-to-root/explorer.html (una parcela se abre directo con `explorer.html#P0757`).
 
 ## 4. El guion
 
@@ -185,7 +185,7 @@ Las dos versiones no llevan cifras: no dependen de qué zona o qué marca esté 
 ## 9. Pendientes de este guion
 
 - Volver a leer las cifras de la ficha y del indicador en la página final, después de la última corrida de `python construir.py`. Si cambia un dato, cambia la frase.
-- Liga pública: https://cristianruz.github.io/raiz-dam-to-root/ (publica `main`; el PR #4 ya está fusionado). Ábrala en incógnito antes del ensayo.
+- Liga pública: https://cristianruz.github.io/raiz-dam-to-root/ (publica `main`; el PR #4 ya está fusionado). Abre el tablero (la portada); el explorador de parcelas de esta demostración está en `explorer.html`. Abra las dos en incógnito antes del ensayo.
 - Si la mentoría dio una eficiencia parcelaria o el punto de medición del millar, actualice la petición del bloque 5.
 - **H1-b y la lámina del modelo.** Después de escribir este guion llegaron `docs/resultado_H1b.md` y `docs/modelo_vs_practica.md` (commit `b73e8b3`). El texto que se lee no cambia: el bloque 4 ya dice que el modelo calcula toda el agua que pide el cultivo y que el distrito riega con menos. Dos cuidados: no diga que el modelo «acierta en la forma del ciclo», y no explique toda la diferencia de la alfalfa con la eficiencia (`docs/pitch/preguntas_dificiles.md`, respuestas 8, 15 y 17). Si el equipo quiere que la petición del bloque 5 pregunte por el agua aplicada, hay una frase con las mismas 14 palabras: «Un técnico de módulo que nos diga cuánta agua se aplica en la parcela.»
 - **Protagonistas.** Falta que una persona revise en imagen a P0757, P0632 y L0175 (`docs/reparto_faltantes.md`, D3).

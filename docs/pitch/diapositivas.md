@@ -100,7 +100,7 @@
 | Text on slide | Supports, never replaces, the judgment of farmers and local experts. · It does not allocate, sell or trade water. It does not forecast the dam. · We ask: a district technician to check field efficiency; farmers to correct their fields. · Next phase / vision: conversational agent · field sensors · optimizer |
 | Capture | `tests/e2e/capturas/telefono_ficha_whatsapp.png` (mensaje al agricultor, en español) |
 | Cifra y fuente | Ninguna. Límites: S9 §11. Fuera del alcance: S9 §8 |
-| Nota del orador | Cierre con la petición: un técnico de módulo, agricultores que revisen su parcela y que el jurado abra la página. Ligas en la diapositiva: página https://cristianruz.github.io/raiz-dam-to-root/, repositorio https://github.com/Cristianruz/raiz-dam-to-root y video [LINK: pendiente — responsable de video (P6)]. |
+| Nota del orador | Cierre con la petición: un técnico de módulo, agricultores que revisen su parcela y que el jurado abra la página. Ligas en la diapositiva: página https://cristianruz.github.io/raiz-dam-to-root/ (abre el tablero; las capturas de las diapositivas son del explorador de parcelas, en `explorer.html`), repositorio https://github.com/Cristianruz/raiz-dam-to-root y video [LINK: pendiente — responsable de video (P6)]. |
 
 ## 4. Lista de comprobación
 

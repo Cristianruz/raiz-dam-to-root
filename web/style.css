@@ -195,6 +195,8 @@ button, input, select { font: inherit; color: inherit; }
   transition: background 0.15s, box-shadow 0.15s;
 }
 .boton-cabecera:hover { background: var(--superficie); box-shadow: var(--sombra); }
+/* «Dashboard» es un enlace con la misma forma de botón: centrado y sin subrayado; así también toma el alto mínimo. */
+a.boton-cabecera { display: inline-flex; align-items: center; text-decoration: none; }
 
 .controles {
   position: sticky; top: var(--sp-2); z-index: 30;

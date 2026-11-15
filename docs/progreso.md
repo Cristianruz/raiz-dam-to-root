@@ -90,3 +90,5 @@
 | 2026-11-15 | Interfaz moderna | HECHO | Rediseño oscuro con mapa protagonista, controles de agua, captura por pasos y gráfico de validación; 77 comprobaciones del planificador y 71 de mapa/dashboard correctas. Resultados numéricos conservados. | docs/interfaz-moderna.md |
 
 | 2026-11-15 | Publicación en Tena | PUBLICACIÓN | El usuario solicita subir a GitHub el dashboard, el motor verificable y la interfaz moderna. Se prepara el commit sobre la rama remota Tena, conservando el historial existente. | docs/interfaz-moderna.md |
+
+| 2026-11-15 | Tablero como portada (frente de motor, datos, pruebas y documentos) | HECHO | Decisión de Cristian tras la revisión de la rama `Tena`: el tablero es `web/index.html` y la página anterior, `web/explorer.html`, con enlace «Dashboard». Fuera `web/research/` y `web/fonts/`; superficie regada leída del CSV de Conagua; supuestos del tablero en `data/params.json` (`tablero`); manifest con la etiqueta de origen; textos de los datos en inglés, español, portugués y francés con su prueba; `pwa_smoke` prueba las dos páginas sin red. | docs/decisiones/2026-11-15_tablero_principal_idiomas.md |

@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; iconos de interfaz dibujados con Codex. -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex (iconos de la interfaz) -->
 <svg xmlns="http://www.w3.org/2000/svg"><defs>
 <symbol id="home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></symbol>
 <symbol id="map" viewBox="0 0 24 24"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2Zm6-2v16m6-14v16"/></symbol>
