@@ -174,6 +174,9 @@ def test_las_reglas_nuevas_solo_las_usan_los_esquemas_de_suelo():
         usadas = {r["regla"] for r in esq.get("reglas", [])}
         if nombre == PERFIL:
             assert usadas == REGLAS_NUEVAS_CSV
+        elif nombre == "suelo_nutrientes_parcelas.csv":
+            # B7 (tests/test_esquemas_suelo_b7.py) reutiliza todas_o_ninguna para su fila sin dato.
+            assert usadas & REGLAS_NUEVAS_CSV == {"todas_o_ninguna"}
         else:
             assert not usadas & REGLAS_NUEVAS_CSV, f"{nombre} no debía cambiar"
         if nombre != REQUISITOS:

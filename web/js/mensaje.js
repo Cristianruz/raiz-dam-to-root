@@ -37,6 +37,9 @@
 //           ficha       el elemento de la ficha (por omisión #ficha)
 //           fecha       fecha de impresión (por omisión, hoy)
 //           imprimir    función que imprime (por omisión window.print; las pruebas la sustituyen)
+//   fmtFechaUi(valor, estilo = "medium") -> string
+//       Fecha de la hoja impresa en inglés. «AAAA-MM-DD» (sin hora) sale el mismo día en cualquier zona
+//       horaria; un instante con hora o un Date, en la hora local. Se exporta para las pruebas (tests/fechas.test.js).
 //
 // Formato de web/data/whatsapp_plantilla.json (todas las llaves son opcionales; la que falte o no pase la
 // validación se toma de la plantilla interna). Texto en español, con marcadores {{…}} y SIN dígitos:
@@ -203,7 +206,20 @@ function fmtPctEs(fraccion) {
 function fmtSignoUi(v) {
   return conMenos(formateador(LOCALE_UI, { maximumFractionDigits: 3, signDisplay: "exceptZero" }).format(v));
 }
-function fmtFechaUi(valor, estilo = "medium") {
+// Una fecha sin hora («AAAA-MM-DD», como la fecha de consulta de las fuentes) es un día del calendario, no un
+// instante: new Date("2026-11-14") la lee como medianoche UTC y en Chihuahua (UTC−6) la hoja diría «Nov 13».
+// Por eso se arma con Date.UTC y se formatea en UTC (el mismo día en cualquier zona). Con hora (p. ej.
+// cubo.meta.generado) o un Date, es un instante: se dice en la hora local de quien imprime, como antes.
+const FORMA_DIA = /^(\d{4})-(\d{2})-(\d{2})$/;
+export function fmtFechaUi(valor, estilo = "medium") {
+  const dia = typeof valor === "string" ? FORMA_DIA.exec(valor.trim()) : null;
+  if (dia) {
+    const [anio, mes, d] = dia.slice(1).map(Number);
+    const fecha = new Date(Date.UTC(anio, mes - 1, d));
+    // Un día que no existe (p. ej. 30 de febrero) no se corre al mes siguiente: se deja tal cual.
+    if (fecha.getUTCFullYear() !== anio || fecha.getUTCMonth() !== mes - 1 || fecha.getUTCDate() !== d) return String(valor);
+    return new Intl.DateTimeFormat(LOCALE_UI, { dateStyle: estilo, timeZone: "UTC" }).format(fecha);
+  }
   const fecha = valor instanceof Date ? valor : new Date(valor);
   if (Number.isNaN(fecha.getTime())) return String(valor ?? "");
   return new Intl.DateTimeFormat(LOCALE_UI, { dateStyle: estilo }).format(fecha);
