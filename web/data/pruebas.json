@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T05:49:14+00:00",
+ "generado": "2026-11-15T05:50:41+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T05:49:14+00:00",
+  "corrida": "2026-11-15T05:50:41+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -323,7 +323,7 @@
     "nombre": "Offline app (installable page)",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache 770f9cc34a4faa66"
+    "detalle": "precache d8c6a698683c6045"
    },
    {
     "id": "manifest",
@@ -351,14 +351,14 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1131 passed, 30 warnings in 46.55s"
+    "detalle": "1134 passed, 30 warnings in 46.15s"
    },
    {
     "id": "node",
     "nombre": "JavaScript tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "208 pass, 0 fail, 0 skipped"
+    "detalle": "223 pass, 0 fail, 0 skipped"
    }
   ],
   "nota": "Last full run recorded by python construir.py. The browser smoke test (tests/e2e/web_smoke.mjs) runs separately, before each release."
