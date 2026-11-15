@@ -27,6 +27,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
 import { aguaComprometida, evaluarOpcion } from "../../web/reglas.js";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
+import { formatoHectareas } from "../../web/js/resumen.js";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -118,7 +119,9 @@ function calcular() {
   c["s3.dotacion"] = fmt(mFicha.valor);
   c["s3.lamina"] = fmtDato(ev.lamina.p50);
   c["s3.plazo"] = fmtRango(actual.agua.plazo_anios.min, actual.agua.plazo_anios.max);
-  c["s3.hectareas"] = fmt(ev.hectareas.p50);
+  // Las hectáreas se escriben como en la ficha (web/js/resumen.js): con los decimales del área, hacia abajo
+  // y nunca más que el área. Así la diapositiva y la captura dicen lo mismo.
+  c["s3.hectareas"] = formatoHectareas(p.area_ha)(ev.hectareas.p50);
   c["s3.area"] = fmtDato(p.area_ha);
 
   // 4 · La gota de la opción actual de la alfalfa.
@@ -332,7 +335,7 @@ async function capturas(navegador, url, datos) {
     await page.locator("#ficha").screenshot({ path: ruta("ficha_alfalfa_tarjetas.png") });
     const tarjeta = await page.locator('.tarjeta[data-opcion="ACTUAL"]').innerText();
     const alcanza = `Enough for ${datos.cifras["s3.hectareas"]} of ${datos.cifras["s3.area"]} hectares`;
-    check(`diapositiva 3: la tarjeta actual dice «${alcanza}» y la lámina ${datos.cifras["s3.lamina"]}`, tarjeta.includes(alcanza) && tarjeta.includes(datos.cifras["s3.lamina"]) && tarjeta.includes(`Commits water for ${datos.cifras["s3.plazo"]}`), `${fmt(ev.hectareas.p50)} ha`);
+    check(`diapositiva 3: la tarjeta actual dice «${alcanza}» y la lámina ${datos.cifras["s3.lamina"]}`, tarjeta.includes(alcanza) && tarjeta.includes(datos.cifras["s3.lamina"]) && tarjeta.includes(`Commits water for ${datos.cifras["s3.plazo"]}`), `${datos.cifras["s3.hectareas"]} ha`);
 
     // 4 · La gota de la misma ficha, completa (ventana más alta solo para esta captura).
     await page.setViewportSize({ width: 1366, height: 1180 });
