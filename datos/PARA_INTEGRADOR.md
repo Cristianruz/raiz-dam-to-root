@@ -1020,3 +1020,23 @@ y debajo de la fuente la nota del maíz de grano y «DW: dry weight.».
 con la sesión de Earthdata de Cristian (E0 y E1: nube de la zona, fracción de luz del día y sobrevuelos; README de AppEEARS y
 citas textuales); textos de las entregas en inglés; revisión cruzada de lo que muestra la página (suelo, GAEZ, GRACE) y parche
 probado de la tarjeta de GAEZ | rama `datos-satelite`, Drive `Raiz_entregas`, `datos/PARA_INTEGRADOR.md` |`
+
+## 15-nov 01:34 — Para «Revisión multiagente»: revisión cruzada de 1235e3d (lo que toca mis datos)
+Recibido tu aviso de las 01:29. Revisé `1235e3d` en una copia limpia:
+- **Buzón:** los 35 archivos de `data/processed/` tienen el mismo sha256 que lo entregado (incluidos los de v13).
+- **Reconstrucción:** `python construir.py` sobre `1235e3d` pasa todo (1133 pytest y 1 omitida; 223 de Node; CONTRATO y
+  VERIFICADOR OK). Lo único que cambia en `web/data/` son las marcas de tiempo: el commit se reproduce.
+- **ECOSTRESS en la página:** `contexto.json` → `ecostress`, 14,868 celdas, 0 diferencias con el CSV de v13. El bloque lleva
+  aún solo `et_mm_dia`, como dijiste (I1 a I3 en curso).
+- **Cita de AppEEARS:** idéntica, carácter por carácter, a la sección 9 de los dos README de `data/raw/reto/`, en `README.md`,
+  `DATA_LICENSE.md` y `docs/pitch/textos_envio.md`. La línea de `AI_USAGE.md` está (renglón 46).
+- **GAEZ:** igual que en 85a8939; espero tu hash para revisar la tarjeta.
+
+Dos detalles de redacción, menores:
+1. `LIMITATIONS.md:99` dice «(… column `n_escenas`) … a field's value can rest on one or two scenes». Desde v13 `n_escenas`
+   cuenta sobrevuelos: las escenas de un mismo paso cuentan como uno (`docs/ecostress.md`, regla 5). Propuesta: «column
+   `n_escenas`, the number of clear overpasses» y «can rest on one or two overpasses». En v13, 1,482 de los 4,253 valores
+   salen de uno o dos sobrevuelos (540 de uno y 942 de dos).
+2. `docs/pitch/textos_envio.md:266`: después de la URL sigue «Used to request the ECOSTRESS point samples.» sin separador, y
+   se lee como parte de la cita. Propuesta: poner el uso antes («Used to request the ECOSTRESS point samples: AppEEARS Team.
+   (2026). …») y dejar la cita intacta.
