@@ -291,6 +291,21 @@ function fmtPct(fraccion) {
 function fmtSigno(v) {
   return conMenos(formateador({ maximumFractionDigits: 3, signDisplay: "exceptZero" }).format(v));
 }
+/**
+ * Decimales por unidad (I8 de la revisión total: «28.4, 25.49 y 18.94» o «825.577 hm³» junto a «2,846.78 hm³»).
+ * La misma unidad lleva siempre los mismos decimales como máximo; el valor exacto del dato va en el title.
+ */
+const DECIMALES_UNIDAD = { millares: 1, hm3: 1 };
+/** Lámina o dotación en millares/ha (thousand m³/ha): un decimal. */
+const fmtMillares = (v) => fmt(v, DECIMALES_UNIDAD.millares);
+/** Volumen en hm³: un decimal. */
+const fmtHm3 = (v) => fmt(v, DECIMALES_UNIDAD.hm3);
+/** <span> con la cifra redondeada y el valor exacto del dato en el title (si el redondeo lo cambió). */
+function conExacto(v, f) {
+  const corto = f(v);
+  const exacto = fmtDato(v);
+  return corto === exacto ? esc(corto) : `<span title="${esc(exacto)}">${esc(corto)}</span>`;
+}
 function fmtRango(a, b, f = fmtDato) {
   return a === b ? f(a) : `${f(a)}–${f(b)}`;
 }
@@ -762,10 +777,10 @@ function actualizarValorDeslizador() {
     info.hidden = true;
     return;
   }
-  const rango = fmtRango(m.min, m.max);
+  const rango = fmtRango(m.min, m.max, fmtMillares);
   $("#info-marca-resumen").innerHTML = [
     `<strong>${esc(m.nombre)}:</strong> ${esc(rango)} thousand m³/ha`,
-    m.min !== m.max ? `slider set to the midpoint, ${esc(fmtDato(m.valor))}` : "",
+    m.min !== m.max ? `slider set to the midpoint, ${esc(fmtMillares(m.valor))}` : "",
   ]
     .filter(Boolean)
     .join(" · ");
@@ -1804,12 +1819,12 @@ function pintarDistrito() {
     const fraccion = hay && b.namo_hm3 > 0 ? Math.min(1, b.almacenamiento_hm3 / b.namo_hm3) : null;
     $("#boquilla").innerHTML =
       (hay
-        ? `<p>Storage on ${esc(fmtFecha(b.fecha_almacenamiento))}</p><p class="dato-grande">${esc(fmtDato(b.almacenamiento_hm3))} hm³</p>`
+        ? `<p>Storage on ${esc(fmtFecha(b.fecha_almacenamiento))}</p><p class="dato-grande">${conExacto(b.almacenamiento_hm3, fmtHm3)} hm³</p>`
         : "<p>Storage: <strong>no data</strong></p>") +
       (fraccion != null
-        ? `<div class="barra-presa" role="img" aria-label="Storage ${esc(fmtDato(b.almacenamiento_hm3))} hm³ of ${esc(fmtDato(b.namo_hm3))} hm³ at NAMO"><span style="width: ${fraccion * 100}%"></span></div>`
+        ? `<div class="barra-presa" role="img" aria-label="Storage ${esc(fmtHm3(b.almacenamiento_hm3))} hm³ of ${esc(fmtHm3(b.namo_hm3))} hm³ at NAMO"><span style="width: ${fraccion * 100}%"></span></div>`
         : "") +
-      `<p>Capacity at <abbr title="Normal maximum operating level">NAMO</abbr>: <strong>${esc(fmtDato(b.namo_hm3))} hm³</strong></p>` +
+      `<p>Capacity at <abbr title="Normal maximum operating level">NAMO</abbr>: <strong>${conExacto(b.namo_hm3, fmtHm3)} hm³</strong></p>` +
       // Fuente y etiqueta de cada cifra ([P] prensa, [V] verificado; cubo.distrito, copia de params.json).
       `<p class="fuente" data-dato="almacenamiento">Storage: ${b.fuente_almacenamiento ? textoEs(b.fuente_almacenamiento) : "no source"}${etiquetaDato(b.etiqueta_almacenamiento)}.</p>` +
       `<p class="fuente" data-dato="namo">Capacity: ${b.fuente_namo ? textoEs(b.fuente_namo) : "no source"}${etiquetaDato(b.etiqueta_namo)}.</p>`;
@@ -2308,7 +2323,7 @@ function htmlFiltros(o, D = estado.D) {
           : "";
         const etiqueta = f.etiqueta ? ` ${esc(f.etiqueta)}` : "";
         const vivo = f.vivo
-          ? `<span class="filtro-vivo"> Your allocation, ${esc(fmt(f.vivo.D))} thousand m³/ha, ${f.pasa ? "reaches" : "is below"} the ${esc(fmtDato(f.vivo.minimo))} thousand m³/ha this rule asks for.</span>`
+          ? `<span class="filtro-vivo"> Your allocation, ${esc(fmt(f.vivo.D))} thousand m³/ha, ${f.pasa ? "reaches" : "is below"} the ${esc(fmtMillares(f.vivo.minimo))} thousand m³/ha this rule asks for.</span>`
           : "";
         return (
           `<li class="${clase}" data-estado="${esc(e)}" data-filtro="${esc(f.id ?? "")}"${f.vivo ? ' data-vivo="si"' : ""}>${marca} <span class="filtro-texto">${esc(f.motivo ?? f.filtro)}</span>${razon}${helada}${vivo}` +
@@ -2371,15 +2386,15 @@ function actualizarFicha() {
 
     const lamina =
       L.p50 > 0
-        ? `<p class="lamina"><strong>${esc(fmtDato(L.p50))}</strong> thousand m³/ha per year <span class="fuente">(median)</span></p>`
+        ? `<p class="lamina"><strong>${conExacto(L.p50, fmtMillares)}</strong> thousand m³/ha per year <span class="fuente">(median)</span></p>`
         : '<p class="lamina"><strong>No irrigation needed</strong></p>';
     const banda =
       L.p50 > 0
-        ? `<div class="barra-banda" role="img" aria-label="Need: median ${esc(fmtDato(L.p50))}, likely range ${esc(fmtDato(L.p10))} to ${esc(fmtDato(L.p90))} thousand m³/ha per year; your allocation: ${esc(fmt(D))}">` +
+        ? `<div class="barra-banda" role="img" aria-label="Need: median ${esc(fmtMillares(L.p50))}, likely range ${esc(fmtMillares(L.p10))} to ${esc(fmtMillares(L.p90))} thousand m³/ha per year; your allocation: ${esc(fmt(D))}">` +
           `<span class="banda" style="left: ${pos(L.p10)}%; width: ${pos(L.p90) - pos(L.p10)}%"></span>` +
           `<span class="mediana" style="left: ${pos(L.p50)}%"></span>` +
           `<span class="marca-d" style="left: ${pos(D)}%"></span></div>` +
-          `<div class="leyenda-banda" aria-hidden="true"><span>likely range ${esc(fmtDato(L.p10))}–${esc(fmtDato(L.p90))}</span><span>┆ dashed line: your allocation (${esc(fmt(D))})</span></div>`
+          `<div class="leyenda-banda" aria-hidden="true"><span>likely range ${esc(fmtMillares(L.p10))}–${esc(fmtMillares(L.p90))}</span><span>┆ dashed line: your allocation (${esc(fmt(D))})</span></div>`
         : "";
 
     const alcanza = htmlAlcanza(ev, p.area_ha);
@@ -2393,7 +2408,7 @@ function actualizarFicha() {
       htmlLaminaLocal(o, L, p.area_ha, D) +
       `<p>${esc(textoPlazo(o.agua?.plazo_anios))}${o.agua?.nota_plazo ? ` <span class="fuente">(${esc(o.agua.nota_plazo)})</span>` : ""}</p>` +
       (o.id === "ACTUAL" && rest ? `<p>Remaining term: ${esc(fmtRango(rest.min, rest.max))} ${anios(rest.max)}</p>` : "") +
-      (comp ? `<p>Water committed over the remaining term: ${esc(fmtRango(comp.min, comp.max))} thousand m³/ha</p>` : "") +
+      (comp ? `<p>Water committed over the remaining term: ${esc(fmtRango(comp.min, comp.max, fmtMillares))} thousand m³/ha</p>` : "") +
       "</div>";
 
     // advertir_si_rojo (tabla oficial): con el semáforo de agua en rojo, recuerda por cuántos años obliga (el
@@ -2459,7 +2474,7 @@ function htmlLaminaLocal(o, L, areaHa, D) {
   if (valor == null && !(rango && Number.isFinite(rango.min) && Number.isFinite(rango.max))) {
     return `<p class="lamina-local" data-tipo="ninguna"><span class="lamina-local-titulo">${esc(t.titulo)}:</span> ${esc(TEXTO_SIN_REFERENCIA)}</p>`;
   }
-  const lamina = valor != null ? fmtDato(valor) : fmtRango(rango.min, rango.max);
+  const lamina = valor != null ? fmtMillares(valor) : fmtRango(rango.min, rango.max, fmtMillares);
   // Hectáreas que alcanzan con la referencia local: mismo formato que el área (formatoHectareas, punto 6 de la
   // revisión); si alcanza para toda la parcela, lo dice así.
   const fh = formatoHectareas(areaHa);

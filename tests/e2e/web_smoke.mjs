@@ -1447,8 +1447,8 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
         const fh = formatoHectareas(area);
         const cob = cobertura(D, ll.valor_millares_ha);
         const alcanza = cob >= 1 ? `enough for the whole field (${nfFicha(area, 3)} ha)` : `enough for ${fh(area * cob)} of ${fh(area)} hectares`;
-        check(`${prefijo}lámina local de ${P0757}/${conRefLocal.o.id} con ${D}: ${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha y «${alcanza}»`,
-          t.includes(`${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha`) && t.includes(alcanza), t);
+        check(`${prefijo}lámina local de ${P0757}/${conRefLocal.o.id} con ${D}: ${nfFicha(ll.valor_millares_ha)} thousand m³/ha (I8: un decimal) y «${alcanza}»`,
+          t.includes(`${nfFicha(ll.valor_millares_ha)} thousand m³/ha`) && t.includes(alcanza), t);
       }
       check(`${prefijo}lámina local: las hectáreas cambian con el deslizador`, vistos[0] !== vistos[1]);
       const titulo = ll.tipo === "aplicada"

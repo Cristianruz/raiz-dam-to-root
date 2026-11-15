@@ -182,7 +182,8 @@ function numero(v, opciones) {
   return conMenos(formatos.get(llave).format(v));
 }
 /** Valor del NDVI con la precisión del archivo (tres decimales como máximo). */
-const fmtNdvi = (v) => numero(v, { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+// Dos decimales siempre (I8 de la revisión total: «0.844» junto a «0.79»); el valor exacto va en la tabla oculta.
+const fmtNdvi = (v) => numero(v, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 /** Umbral o marca de la escala: sin ceros de relleno. */
 const fmtEscala = (v) => numero(v, { maximumFractionDigits: 3 });
 
