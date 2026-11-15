@@ -34,7 +34,7 @@
 
   min-width: 0;
   color: var(--tiempo-tinta);
-  font-size: 1rem;
+  font-size: var(--fs-3);
   line-height: 1.4;
   text-align: left;
 }
@@ -81,7 +81,7 @@
 .tiempo-valor {
   grid-area: valor;
   justify-self: start;
-  font-size: 2rem; line-height: 1.1; font-weight: 700;
+  font-size: var(--fs-6); line-height: 1.1; font-weight: 700;
   color: var(--tiempo-agua-osc);
   font-variant-numeric: tabular-nums;
   border-bottom: 4px solid transparent; /* reserva el subrayado del año destacado: el texto no brinca */
@@ -199,10 +199,10 @@
   width: auto; height: 16px; margin-bottom: 0;
   background: none;
   color: var(--tiempo-tinta);
-  font-size: 1rem; line-height: 1;
+  font-size: var(--fs-3); line-height: 1;
 }
 .tiempo-marca-anio {
-  font-size: 0.8rem; line-height: 1.2;
+  font-size: var(--fs-2); line-height: 1.2;
   color: var(--tiempo-tinta-suave);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -216,9 +216,9 @@
 .tiempo-modo {
   padding: 6px 10px; border-radius: 4px;
   background: var(--tiempo-agua-clara); border-left: 4px solid var(--tiempo-agua);
-  font-size: 0.9rem;
+  font-size: var(--fs-2);
 }
-.tiempo-nota { font-size: 0.85rem; color: var(--tiempo-tinta-suave); font-style: italic; }
+.tiempo-nota { font-size: var(--fs-2); color: var(--tiempo-tinta-suave); font-style: italic; }
 
 /* ---------------------------------------------------------------------------
    Año destacado. Todas las notas y la guía ocupan la MISMA celda: el alto es el de la más larga y
@@ -237,14 +237,14 @@
   border-style: solid; border-color: var(--tiempo-ambar);
   background: var(--tiempo-ambar-claro);
 }
-.tiempo-destacados-guia { align-self: center; font-size: 0.9rem; color: var(--tiempo-tinta-suave); }
+.tiempo-destacados-guia { align-self: center; font-size: var(--fs-2); color: var(--tiempo-tinta-suave); }
 .tiempo-destacados-anios { font-weight: 700; color: var(--tiempo-tinta); font-variant-numeric: tabular-nums; }
 .tiempo-estrella { color: var(--tiempo-tinta); }
 .tiempo-destacado { display: grid; gap: 2px; overflow-wrap: anywhere; }
-.tiempo-destacado-titulo { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.02em; }
+.tiempo-destacado-titulo { font-size: var(--fs-2); font-weight: 700; letter-spacing: 0.02em; }
 .tiempo-destacado-anio { font-variant-numeric: tabular-nums; }
 .tiempo-destacado-texto { font-weight: 700; }
-.tiempo-destacado-fuente { font-size: 0.85rem; color: var(--tiempo-tinta-suave); }
+.tiempo-destacado-fuente { font-size: var(--fs-2); color: var(--tiempo-tinta-suave); }
 .tiempo-destacado-etiqueta { white-space: nowrap; }
 
 /* ---------------------------------------------------------------------------
@@ -253,7 +253,7 @@
 .tiempo-conteos { min-width: 0; }
 .tiempo-conteos-titulo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; }
 .tiempo-conteos-anio { font-variant-numeric: tabular-nums; }
-.tiempo-total { font-size: 0.85rem; color: var(--tiempo-tinta-suave); }
+.tiempo-total { font-size: var(--fs-2); color: var(--tiempo-tinta-suave); }
 
 .tiempo-estados {
   list-style: none; margin: 8px 0 0; padding: 0;
@@ -290,7 +290,7 @@
   min-width: 16px; height: 16px; padding: 0 2px;
   border-radius: 3px;
   background: var(--tiempo-papel); color: var(--tiempo-tinta);
-  font-size: 0.75rem; font-weight: 700; line-height: 16px; text-align: center;
+  font-size: var(--fs-1); font-weight: 700; line-height: 16px; text-align: center;
 }
 /* Tramas: las mismas que usan la ficha y el mapa para cada estado. */
 .tiempo-trama-horizontal { background-image: repeating-linear-gradient(0deg, var(--tiempo-trama) 0 2px, transparent 2px 6px); }

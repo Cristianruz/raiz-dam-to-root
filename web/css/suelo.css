@@ -36,7 +36,7 @@
 /* ---------- Base ---------- */
 .suelo-perfil, .suelo-aptitud {
   color: var(--suelo-tinta);
-  font-size: 0.9rem; line-height: 1.4;
+  font-size: var(--fs-2); line-height: 1.4;
   min-width: 0; max-width: 100%;
   overflow-wrap: break-word;
 }
@@ -60,7 +60,7 @@ p.suelo-perfil.suelo-pendiente {
   border: 1px dashed var(--suelo-sin-rango);
   background: var(--suelo-sin-rango-claro);
 }
-p.suelo-aptitud.suelo-pendiente { font-size: 0.85rem; color: var(--suelo-tinta-suave); }
+p.suelo-aptitud.suelo-pendiente { font-size: var(--fs-2); color: var(--suelo-tinta-suave); }
 .suelo-pendiente-que { font-weight: 700; }
 
 /* ---------- Perfil de suelo ---------- */
@@ -96,7 +96,7 @@ div.suelo-perfil {
 .suelo-leyenda {
   list-style: none; margin: 0; padding: 0;
   display: flex; flex-wrap: wrap; gap: 4px 14px;
-  font-size: 0.85rem;
+  font-size: var(--fs-2);
 }
 .suelo-leyenda li { display: inline-flex; align-items: center; gap: 6px; }
 .suelo-clave {
@@ -116,7 +116,7 @@ div.suelo-perfil {
 .suelo-ph-clase {
   display: inline-block; margin-left: 2px; padding: 0 6px;
   border: 1px solid var(--suelo-tinta-suave); border-radius: 4px;
-  font-size: 0.8rem; font-weight: 700; color: var(--suelo-tinta-suave);
+  font-size: var(--fs-2); font-weight: 700; color: var(--suelo-tinta-suave);
 }
 
 /* Lo que ningún mapa abierto da por parcela: se dice a la vista, no en letra chica. */
@@ -125,7 +125,7 @@ div.suelo-perfil {
   border-left: 4px solid var(--suelo-tinta-suave); border-radius: 0 6px 6px 0;
   background: var(--suelo-papel);
 }
-.suelo-escala, .suelo-fuente, .suelo-evidencia { font-size: 0.8rem; color: var(--suelo-tinta-suave); }
+.suelo-escala, .suelo-fuente, .suelo-evidencia { font-size: var(--fs-2); color: var(--suelo-tinta-suave); }
 .suelo-escala { font-weight: 700; }
 .suelo-fuente { overflow-wrap: anywhere; }
 
@@ -137,7 +137,7 @@ div.suelo-aptitud { display: grid; gap: 2px; }
   padding: 1px 9px; border-radius: 999px;
   border: 2px solid var(--suelo-sin-rango);
   background: var(--suelo-fondo);
-  font-size: 0.85rem; font-weight: 700; color: var(--suelo-tinta);
+  font-size: var(--fs-2); font-weight: 700; color: var(--suelo-tinta);
 }
 .suelo-insignia--fits { border-color: var(--suelo-fits); background: var(--suelo-fits-claro); }
 .suelo-insignia--tolerated { border-color: var(--suelo-tolerated); background: var(--suelo-tolerated-claro); }
@@ -145,26 +145,26 @@ div.suelo-aptitud { display: grid; gap: 2px; }
 /* Cerca del límite publicado: borde rayado (no solo el color lo distingue de «outside»); también su símbolo. */
 .suelo-insignia--near_limit { border-color: var(--suelo-outside); border-style: dashed; background: var(--suelo-tolerated-claro); }
 .suelo-insignia--no_published_range { border-style: dashed; background: var(--suelo-sin-rango-claro); }
-.suelo-marca-aviso { font-size: 0.8rem; color: var(--suelo-tinta-suave); }
+.suelo-marca-aviso { font-size: var(--fs-2); color: var(--suelo-tinta-suave); }
 /* Rótulo de la aptitud: rango general y mundial, no un ensayo local (a la vista, debajo del estado). */
-.suelo-aptitud-rotulo { font-size: 0.8rem; color: var(--suelo-tinta-suave); font-style: italic; }
+.suelo-aptitud-rotulo { font-size: var(--fs-2); color: var(--suelo-tinta-suave); font-style: italic; }
 
 /* Textura por su grupo; la clase exacta y la coincidencia de los dos mapas van plegadas. */
 .suelo-etiqueta {
   display: inline-block; margin-left: 4px; padding: 0 5px;
   border: 1px solid var(--suelo-borde); border-radius: 4px;
-  font-size: 0.75rem; color: var(--suelo-tinta-suave);
+  font-size: var(--fs-1); color: var(--suelo-tinta-suave);
 }
 .suelo-clase-exacta > summary {
   width: fit-content; max-width: 100%; cursor: pointer;
-  font-size: 0.85rem; font-weight: 700; color: var(--suelo-enlace);
+  font-size: var(--fs-2); font-weight: 700; color: var(--suelo-enlace);
 }
 .suelo-clase-exacta > summary:focus-visible { outline: 3px solid var(--suelo-foco); outline-offset: 2px; }
-.suelo-clase-exacta p { margin-top: 4px !important; font-size: 0.85rem; }
+.suelo-clase-exacta p { margin-top: 4px !important; font-size: var(--fs-2); }
 .suelo-datos > div[data-falta="si"] dd { color: var(--suelo-tinta-suave); font-style: italic; }
 .suelo-fuente-detalle > summary {
   width: fit-content; max-width: 100%; cursor: pointer;
-  font-size: 0.8rem; font-weight: 700; color: var(--suelo-enlace);
+  font-size: var(--fs-2); font-weight: 700; color: var(--suelo-enlace);
 }
 .suelo-fuente-detalle > summary:focus-visible { outline: 3px solid var(--suelo-foco); outline-offset: 2px; }
 
@@ -173,7 +173,7 @@ div.suelo-aptitud { display: grid; gap: 2px; }
   margin: 0; padding: 6px 10px;
   border-left: 4px solid var(--suelo-tolerated); border-radius: 0 6px 6px 0;
   background: var(--suelo-tolerated-claro);
-  color: var(--suelo-tinta); font-size: 0.85rem; line-height: 1.4;
+  color: var(--suelo-tinta); font-size: var(--fs-2); line-height: 1.4;
 }
 
 .suelo-porque > summary {
@@ -200,20 +200,20 @@ div.suelo-aptitud { display: grid; gap: 2px; }
 /* ---------- Tipo de suelo y notas de nutrientes (dentro del perfil) ---------- */
 /* El tipo de suelo en una línea; la explicación a la vista, en chico; el detalle plegado. */
 .suelo-tipo-linea { overflow-wrap: anywhere; }
-.suelo-tipo-explica { font-size: 0.8rem; color: var(--suelo-tinta-suave); font-style: italic; }
-p.suelo-tipo.suelo-pendiente, p.suelo-nutrientes.suelo-pendiente { font-size: 0.85rem; color: var(--suelo-tinta-suave); }
+.suelo-tipo-explica { font-size: var(--fs-2); color: var(--suelo-tinta-suave); font-style: italic; }
+p.suelo-tipo.suelo-pendiente, p.suelo-nutrientes.suelo-pendiente { font-size: var(--fs-2); color: var(--suelo-tinta-suave); }
 .suelo-tipo-detalle > summary, .suelo-nutrientes > summary {
   width: fit-content; max-width: 100%; cursor: pointer;
-  font-size: 0.85rem; font-weight: 700; color: var(--suelo-enlace);
+  font-size: var(--fs-2); font-weight: 700; color: var(--suelo-enlace);
 }
-.suelo-nutrientes > summary { font-size: 0.9rem; }
+.suelo-nutrientes > summary { font-size: var(--fs-2); }
 .suelo-tipo-detalle > summary:focus-visible, .suelo-nutrientes > summary:focus-visible {
   outline: 3px solid var(--suelo-foco); outline-offset: 2px;
 }
 .suelo-tipo-detalle[open], .suelo-nutrientes[open] { display: grid; gap: 4px; }
-.suelo-tipo-detalle p { font-size: 0.85rem; }
+.suelo-tipo-detalle p { font-size: var(--fs-2); }
 .suelo-tipo-detalle > summary + p, .suelo-nutrientes > summary + p { margin-top: 4px !important; }
-.suelo-nutrientes-aviso { font-size: 0.85rem; font-weight: 700; }
+.suelo-nutrientes-aviso { font-size: var(--fs-2); font-weight: 700; }
 .suelo-nutrientes-lista {
   list-style: none; margin: 0; padding: 0;
   display: grid; gap: 8px;
@@ -227,7 +227,7 @@ p.suelo-tipo.suelo-pendiente, p.suelo-nutrientes.suelo-pendiente { font-size: 0.
 .suelo-nota-cabeza { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
 .suelo-nota-estado { font-weight: 700; }
 .suelo-nota-elementos abbr { text-decoration: none; font-weight: 700; }
-.suelo-nota-escala { font-size: 0.8rem; color: var(--suelo-tinta-suave); }
+.suelo-nota-escala { font-size: var(--fs-2); color: var(--suelo-tinta-suave); }
 
 @media print {
   .suelo-porque > summary { color: var(--suelo-tinta); }

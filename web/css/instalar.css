@@ -29,7 +29,7 @@
   min-width: 0;
   max-width: 100%;
   color: var(--instalar-tinta);
-  font-size: 0.88rem;
+  font-size: var(--fs-2);
   line-height: 1.25;
   text-align: left;
 }
@@ -108,7 +108,7 @@
   display: grid;
   place-items: center;
   border-top: 0;
-  font-size: 0.7rem;
+  font-size: var(--fs-1);
   font-weight: 700;
   line-height: 1;
   transform: none;
@@ -146,7 +146,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 0.7rem;
+  font-size: var(--fs-1);
   font-weight: 700;
   line-height: 1;
 }

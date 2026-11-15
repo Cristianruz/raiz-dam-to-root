@@ -52,14 +52,14 @@
   display: grid; gap: 12px;
 }
 .acerca-inicio-tarjeta:focus { outline: none; }
-.acerca-inicio-titulo { font-size: 1.35rem; padding-right: 44px; }
+.acerca-inicio-titulo { font-size: var(--fs-5); padding-right: 44px; }
 .acerca-inicio-lema { color: var(--acerca-tinta-suave); }
 
 .acerca-inicio-x {
   position: absolute; top: 10px; right: 10px;
   width: 40px; height: 40px; border-radius: 50%;
   border: 2px solid var(--acerca-borde); background: var(--acerca-fondo);
-  font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--acerca-tinta);
+  font-size: var(--fs-5); line-height: 1; cursor: pointer; color: var(--acerca-tinta);
 }
 .acerca-inicio-x:hover { background: var(--acerca-arena); }
 
@@ -80,13 +80,13 @@
   width: 40px; height: 40px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--acerca-agua-osc); color: var(--acerca-fondo);
-  font-weight: 700; font-size: 1.15rem;
+  font-weight: 700; font-size: var(--fs-4);
 }
-.acerca-inicio-pasos strong { font-size: 1.05rem; }
-.acerca-inicio-pasos span { color: var(--acerca-tinta-suave); font-size: 0.92rem; }
+.acerca-inicio-pasos strong { font-size: var(--fs-3); }
+.acerca-inicio-pasos span { color: var(--acerca-tinta-suave); font-size: var(--fs-2); }
 
 .acerca-inicio-aviso {
-  font-size: 0.9rem; font-weight: 700;
+  font-size: var(--fs-2); font-weight: 700;
   background: var(--acerca-ok-claro); border-left: 4px solid var(--acerca-ok);
   padding: 6px 10px; border-radius: 4px;
 }
@@ -105,7 +105,7 @@
   max-width: 1100px; margin: 0 auto;
   padding: 16px;
 }
-.acerca-titulo { font-size: 1.4rem; }
+.acerca-titulo { font-size: var(--fs-5); }
 .acerca-entrada { color: var(--acerca-tinta-suave); }
 .acerca-bloque {
   background: var(--acerca-fondo); border-radius: 10px;
@@ -113,14 +113,14 @@
   padding: 14px 16px; display: grid; gap: 10px;
   min-width: 0;
 }
-.acerca-bloque h3 { font-size: 1.15rem; }
-.acerca-subtitulo { font-size: 1rem; margin-top: 4px; }
-.acerca-ayuda, .acerca-pie { color: var(--acerca-tinta-suave); font-size: 0.88rem; }
+.acerca-bloque h3 { font-size: var(--fs-4); }
+.acerca-subtitulo { font-size: var(--fs-3); margin-top: 4px; }
+.acerca-ayuda, .acerca-pie { color: var(--acerca-tinta-suave); font-size: var(--fs-2); }
 .acerca-vacio {
   border: 2px dashed var(--acerca-borde); border-radius: 8px; padding: 10px 12px;
   color: var(--acerca-tinta-suave);
 }
-.acerca code { font-size: 0.85em; overflow-wrap: anywhere; }
+.acerca code { font-size: var(--fs-2); overflow-wrap: anywhere; }
 .acerca a { color: var(--acerca-agua-osc); font-weight: 700; }
 .acerca a:hover { color: var(--acerca-agua); }
 .acerca details > summary { cursor: pointer; }
@@ -134,28 +134,28 @@
 
 /* Tabla de datos NASA y tabla de pasos de la puerta */
 .acerca-tabla-caja { overflow-x: auto; }
-.acerca-tabla { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.acerca-tabla { width: 100%; border-collapse: collapse; font-size: var(--fs-2); }
 .acerca-tabla th, .acerca-tabla td {
   text-align: left; vertical-align: top;
   padding: 8px 10px; border-bottom: 1px solid var(--acerca-borde);
 }
-.acerca-tabla thead th { background: var(--acerca-arena); font-size: 0.85rem; }
+.acerca-tabla thead th { background: var(--acerca-arena); font-size: var(--fs-2); }
 .acerca-tabla tbody th { font-weight: 700; min-width: 9em; }
 .acerca-producto { display: block; font-weight: 700; overflow-wrap: anywhere; }
-.acerca-escala { display: block; margin-top: 4px; font-size: 0.85rem; color: var(--acerca-tinta-suave); }
+.acerca-escala { display: block; margin-top: 4px; font-size: var(--fs-2); color: var(--acerca-tinta-suave); }
 .acerca-usos li + li { margin-top: 2px; }
 .acerca-archivos { list-style: none; padding-left: 0 !important; display: grid; gap: 4px; }
 .acerca-cache {
-  display: inline-block; font-size: 0.78rem; font-weight: 700;
+  display: inline-block; font-size: var(--fs-1); font-weight: 700;
   border: 1px solid var(--acerca-ok); background: var(--acerca-ok-claro);
   border-radius: 999px; padding: 0 8px;
 }
 .acerca-cache--no { border-color: var(--acerca-no-corrida); background: var(--acerca-no-corrida-claro); }
 .acerca-fuente-registrada {
-  font-size: 0.82rem; color: var(--acerca-tinta-suave); margin: 4px 0 2px;
+  font-size: var(--fs-2); color: var(--acerca-tinta-suave); margin: 4px 0 2px;
   overflow-wrap: anywhere;
 }
-.acerca-otras { font-size: 0.92rem; }
+.acerca-otras { font-size: var(--fs-2); }
 .acerca-escalas li + li { margin-top: 4px; }
 
 /* Pruebas: todas con la misma tarjeta; «not run» con la misma visibilidad que un resultado.
@@ -175,21 +175,21 @@
   display: inline-flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; margin-right: 8px; border-radius: 50%;
   background: var(--acerca-agua-osc); color: var(--acerca-fondo);
-  font-size: 0.95rem; vertical-align: middle;
+  font-size: var(--fs-3); vertical-align: middle;
 }
 .acerca-prueba-cabeza {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px;
 }
-.acerca-prueba-titulo { font-size: 1.05rem; }
+.acerca-prueba-titulo { font-size: var(--fs-3); }
 .acerca-rotulo { font-weight: 700; }
-.acerca-criterio { font-size: 0.92rem; }
+.acerca-criterio { font-size: var(--fs-2); }
 .acerca-resumen { font-weight: 700; }
-.acerca-metricas { display: grid; gap: 2px; font-size: 0.92rem; }
+.acerca-metricas { display: grid; gap: 2px; font-size: var(--fs-2); }
 .acerca-metrica-etiqueta { color: var(--acerca-tinta-suave); }
-.acerca-partes { list-style: none; padding-left: 0 !important; display: grid; gap: 6px; font-size: 0.92rem; }
+.acerca-partes { list-style: none; padding-left: 0 !important; display: grid; gap: 6px; font-size: var(--fs-2); }
 .acerca-partes li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
 .acerca-parte-nombre { font-weight: 700; }
-.acerca-parte-nota { flex-basis: 100%; color: var(--acerca-tinta-suave); font-size: 0.86rem; }
+.acerca-parte-nota { flex-basis: 100%; color: var(--acerca-tinta-suave); font-size: var(--fs-2); }
 
 /* Complemento de una prueba (H1-b junto a H1): misma insignia, dentro de la tarjeta de la prueba principal. */
 .acerca-complemento {
@@ -197,16 +197,16 @@
   border-radius: 0 8px 8px 0; padding: 8px 10px;
 }
 .acerca-complemento > * + * { margin-top: 4px; }
-.acerca-complemento-titulo { font-size: 0.98rem; }
+.acerca-complemento-titulo { font-size: var(--fs-3); }
 .acerca-complemento[data-estado="failed"] { border-left-color: var(--acerca-falla); }
 .acerca-complemento[data-estado="passed"] { border-left-color: var(--acerca-ok); }
 .acerca-complemento-nota { font-weight: 700; }
 
 /* Documentos enlazados (modelo frente a la práctica, revisión de las protagonistas). */
 .acerca-documentos { margin-top: 10px; }
-.acerca-lista-documentos { display: grid; gap: 6px; font-size: 0.92rem; }
-.acerca-lista-documentos code { font-size: 0.8rem; color: var(--acerca-tinta-suave); overflow-wrap: anywhere; }
-.acerca-documento-nota { display: block; color: var(--acerca-tinta-suave); font-size: 0.86rem; }
+.acerca-lista-documentos { display: grid; gap: 6px; font-size: var(--fs-2); }
+.acerca-lista-documentos code { font-size: var(--fs-2); color: var(--acerca-tinta-suave); overflow-wrap: anywhere; }
+.acerca-documento-nota { display: block; color: var(--acerca-tinta-suave); font-size: var(--fs-2); }
 /* Hueco de «Challenge data sources» (web/js/contexto.js la dibuja con su propia hoja). */
 .acerca-recursos:empty { display: none; }
 
@@ -216,7 +216,7 @@
   border: 2px solid var(--acerca-no-corrida); background: var(--acerca-no-corrida-claro);
   color: var(--acerca-tinta);
   border-radius: 999px; padding: 1px 10px;
-  font-size: 0.85rem; font-weight: 700; white-space: nowrap;
+  font-size: var(--fs-2); font-weight: 700; white-space: nowrap;
 }
 .acerca-estado-simbolo { font-size: 0.95em; }
 .acerca-estado--passed { border-color: var(--acerca-ok); background: var(--acerca-ok-claro); }
@@ -234,7 +234,7 @@
   font-weight: 700; background: var(--acerca-ok-claro);
   border-left: 4px solid var(--acerca-ok); padding: 8px 10px; border-radius: 4px;
 }
-.acerca-limites { font-size: 0.88rem; color: var(--acerca-tinta-suave); }
+.acerca-limites { font-size: var(--fs-2); color: var(--acerca-tinta-suave); }
 
 /* Respaldo si style.css no está cargado */
 .acerca .solo-lector, .acerca-inicio .solo-lector {
@@ -256,7 +256,7 @@
   .acerca-tabla th, .acerca-tabla td { border-bottom: none; padding: 4px 10px; }
   .acerca-tabla tbody td::before {
     content: attr(data-etiqueta);
-    display: block; font-size: 0.78rem; font-weight: 700; color: var(--acerca-tinta-suave);
+    display: block; font-size: var(--fs-1); font-weight: 700; color: var(--acerca-tinta-suave);
   }
 }
 

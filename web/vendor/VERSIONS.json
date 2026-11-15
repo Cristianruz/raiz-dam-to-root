@@ -59,6 +59,30 @@
           "sha384": "sha384-SM54CE5h+qdDI046d2Y5ym7wq1kq4uxcQ1cqGq5/+5jrE5tPLeDJSq711Q8sIska"
         }
       ]
+    },
+    {
+      "nombre": "@fontsource/atkinson-hyperlegible",
+      "version": "5.3.0",
+      "registro": "https://registry.npmjs.org/",
+      "tarball_integrity": "sha512-Sp8Ve8+rQmENY2Lv02VH7sLpntzTTvnncnJMTbRE7DX6TLxGraN4ykZfzaUWIoCFmaomwkvNiqmlPkrKBuDoSA==",
+      "nota": "Tipografía de identidad (kit C1 §10). Solo pesos 400 y 700, subconjunto latin. Licencia SIL OFL 1.1 (LICENSE junto a los archivos).",
+      "archivos": [
+        {
+          "archivo": "vendor/atkinson-hyperlegible-5.3.0/LICENSE",
+          "ruta_en_tarball": "package/LICENSE",
+          "sha384": "sha384-mIa7eMD0hfQQMEzf5lXFvhAZPTw0zmDX4OBulXXk+lndNK4AVMEFiCwe38NdR7PT"
+        },
+        {
+          "archivo": "vendor/atkinson-hyperlegible-5.3.0/atkinson-hyperlegible-latin-400-normal.woff2",
+          "ruta_en_tarball": "package/files/atkinson-hyperlegible-latin-400-normal.woff2",
+          "sha384": "sha384-idlpjMgZTjOmx6zrv5Ae+oGIwhOzri+uCqMmDHcHbeZSD83FdoJ3vrtowWb6+kH2"
+        },
+        {
+          "archivo": "vendor/atkinson-hyperlegible-5.3.0/atkinson-hyperlegible-latin-700-normal.woff2",
+          "ruta_en_tarball": "package/files/atkinson-hyperlegible-latin-700-normal.woff2",
+          "sha384": "sha384-nQ0Z7JQYR9+re+CEt4QFS/80lVM63lK+vHYQhrfJ4nQWibIMndxkRAdPQ3UA6pUw"
+        }
+      ]
     }
   ]
 }

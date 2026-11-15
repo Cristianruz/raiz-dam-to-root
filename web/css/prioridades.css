@@ -30,7 +30,7 @@
   margin: 0 0 12px;
   min-width: 0; max-width: 100%;
 }
-.prioridades-titulo { font-size: 1rem; }
+.prioridades-titulo { font-size: var(--fs-3); }
 .prioridades-botones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 
 .prioridad-boton {
@@ -52,7 +52,7 @@
 /* Prioridades sin dato en el cubo: se listan, desactivadas (no son objetivos táctiles) */
 .prioridades-sin-dato {
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
-  margin-top: 10px; font-size: 0.85rem; color: var(--prio-tinta-suave);
+  margin-top: 10px; font-size: var(--fs-2); color: var(--prio-tinta-suave);
 }
 .prioridades-sin-dato-titulo { font-style: italic; }
 .prioridades-sin-dato .prioridad-boton,
@@ -63,8 +63,8 @@
   font-weight: 400; cursor: not-allowed;
 }
 
-.prioridades-nota { font-size: 0.85rem; color: var(--prio-tinta-suave); font-style: italic; margin-top: 10px; }
-.prioridades-estado { font-size: 0.85rem; margin-top: 4px; }
+.prioridades-nota { font-size: var(--fs-2); color: var(--prio-tinta-suave); font-style: italic; margin-top: 10px; }
+.prioridades-estado { font-size: var(--fs-2); margin-top: 4px; }
 
 /* ---------- Marcas en las tarjetas ---------- */
 .prioridad-marcas {
@@ -72,7 +72,7 @@
   display: grid; gap: 2px;
   background: var(--prio-verde-claro); color: var(--prio-tinta);
   border-bottom: 1px solid var(--prio-borde);
-  font-size: 0.9rem; font-weight: 700;
+  font-size: var(--fs-2); font-weight: 700;
 }
 .prioridad-marcas li { display: flex; gap: 6px; align-items: baseline; }
 .prioridad-marca-simbolo { flex: none; }

@@ -25,7 +25,7 @@
 }
 
 .wa-rotulo {
-  font-size: 0.85rem;
+  font-size: var(--fs-2);
   color: var(--wa-tinta-suave);
   text-align: center;
   max-width: 380px;
@@ -89,7 +89,7 @@
   color: var(--wa-barra);
 }
 .wa-contacto { display: grid; line-height: 1.2; }
-.wa-contacto small { font-size: 0.78rem; opacity: 0.9; }
+.wa-contacto small { font-size: var(--fs-1); opacity: 0.9; }
 
 .wa-chat { padding: 12px 10px 14px; }
 
@@ -100,7 +100,7 @@
   border-radius: 0 10px 10px 10px;
   padding: 8px 10px 10px;
   box-shadow: 0 1px 1px rgba(29, 35, 41, 0.18);
-  font-size: 0.95rem;
+  font-size: var(--fs-3);
   line-height: 1.38;
   overflow-wrap: anywhere;
   display: grid;
@@ -125,11 +125,11 @@
 }
 .wa-opcion { display: grid; gap: 2px; }
 .wa-titulo strong { font-weight: 700; }
-.wa-agua, .wa-suelo { font-size: 0.92rem; }
+.wa-agua, .wa-suelo { font-size: var(--fs-2); }
 
-.wa-respuesta { font-size: 1rem; }
+.wa-respuesta { font-size: var(--fs-3); }
 .wa-aviso {
-  font-size: 0.85rem;
+  font-size: var(--fs-2);
   color: var(--wa-tinta-suave);
   background: var(--wa-aviso);
   border-radius: 6px;
@@ -140,7 +140,7 @@
 @media (max-width: 420px) {
   .wa-telefono { border-radius: 12px; }
   .wa-chat { padding: 10px 8px 12px; }
-  .wa-burbuja { font-size: 0.93rem; }
+  .wa-burbuja { font-size: var(--fs-2); }
 }
 
 /* Impresión: la maqueta no va en la ficha de papel (css/imprimir.css también la oculta) */
