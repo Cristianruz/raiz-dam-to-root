@@ -15,6 +15,7 @@
 // El video (guion: docs/pitch/guion_video_30s.md) tiene cuatro partes:
 //   qué es            tarjeta de apertura animada (docs/pitch/video/tarjetas.html, vista «apertura»);
 //   cómo funciona     tarjeta «How it works» animada (vista «como»): tres pasos y cuatro señas de cómo está hecha;
+//   qué la distingue  tarjeta «Beyond what to plant» animada (vista «aparte»): nueve señas de lo que reúne;
 //   se ve que funciona siete golpes cortos sobre la página REAL, cada uno con su acción y su consecuencia;
 //   cierre            tarjeta de cierre (vista «cierre») con el aviso de juicio y la liga pública.
 //
@@ -137,6 +138,7 @@ const AVISO_JUICIO = "This tool supports, never replaces, the judgment of farmer
 // Las tomas, en el orden del guion (una por subtítulo de la sección 5). `rotulo`: el nombre del golpe en la banda.
 const APERTURA = { tipo: "tarjeta", vista: "apertura" };
 const COMO = { tipo: "tarjeta", vista: "como" };
+const APARTE = { tipo: "tarjeta", vista: "aparte" }; // lo que la aplicación reúne además de la rotación
 const CIERRE = { tipo: "tarjeta", vista: "cierre" };
 const GOLPES = {
   dotacion: { tipo: "pagina", clave: "dotacion", rotulo: "Set the water" },
@@ -156,8 +158,8 @@ const GOLPES = {
 };
 const G = GOLPES;
 const TOMAS = RECORRIDO
-  ? [APERTURA, COMO, G.dotacion, G.idioma, G.lluvia, G.zonas, G.historia, G.parcela, G.porque, G.gota, G.evidencia, G.suelo, G.otras, G.anios, G.compartir, G.pruebas, CIERRE]
-  : [APERTURA, COMO, G.dotacion, G.parcela, G.porque, G.gota, G.evidencia, G.compartir, G.pruebas, CIERRE];
+  ? [APERTURA, COMO, APARTE, G.dotacion, G.idioma, G.lluvia, G.zonas, G.historia, G.parcela, G.porque, G.gota, G.evidencia, G.suelo, G.otras, G.anios, G.compartir, G.pruebas, CIERRE]
+  : [APERTURA, COMO, APARTE, G.dotacion, G.parcela, G.porque, G.gota, G.evidencia, G.compartir, G.pruebas, CIERRE];
 // Las otras dos parcelas de ejemplo (solo en el recorrido): una con el plazo libre y un nogal comprometido.
 const OTRAS_PARCELAS = ["P0632", "L0175"];
 
@@ -1470,6 +1472,16 @@ async function capturarTarjetas(navegador, baseLocal, cues) {
         const productos = await page.locator('[data-vista="como"] [data-producto]').evaluateAll((ns) => ns.map((n) => n.dataset.producto));
         const faltan = productos.filter((p) => !manifiesto.includes(p));
         check("tarjeta «como»: cada producto de NASA que nombra está en web/data/manifest.json", productos.length > 0 && !faltan.length, faltan.length ? `faltan: ${faltan.join(", ")}` : productos.join(", "));
+      }
+      if (toma.vista === "aparte") {
+        // Cada seña de la tarjeta describe algo que la página ya hace: el README debe seguir diciéndolo.
+        const leeme = fs.readFileSync(path.join(RAIZ, "README.md"), "utf-8");
+        const sostenes = ["Fields of The World neural network", "Nutrient notes", "Simulate a storm", "Follow the drop", "SoilGrids", "Tests in sight", "Random Forest (machine learning): not run"];
+        const faltan = sostenes.filter((x) => !leeme.includes(x));
+        const senas = await page.locator('[data-vista="aparte"] .sena').count();
+        check("tarjeta «aparte»: nueve señas, y el README sostiene lo que dicen (suelo, suministro, tormenta, red neuronal, pruebas)", senas === 9 && !faltan.length, faltan.length ? `el README ya no dice: ${faltan.join(" · ")}` : `${senas} señas`);
+        // La seña de aprendizaje automático habla de los límites de parcela (red neuronal de terceros), no del mapa de cultivos.
+        check("tarjeta «aparte»: el aprendizaje automático se atribuye a los límites de parcela, no al mapa de cultivos", /Machine-learning field map/.test(t) && /Boundaries from a neural network/.test(t));
       }
       if (toma.vista === "cierre") {
         const liga = await page.locator('[data-vista="cierre"] [data-campo="liga"]').innerText();

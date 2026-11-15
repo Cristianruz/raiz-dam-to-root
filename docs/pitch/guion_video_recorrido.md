@@ -25,27 +25,28 @@ Las de la sección 2 de `docs/pitch/guion_video_30s.md`: ningún dígito en subt
 
 ## 3. Tabla de tomas
 
-Duración total: **103.4 segundos**. Los encuadres, los resaltados y los selectores de las tomas que comparte con el video corto son los de la sección 3 de su guion.
+Duración total: **110.4 segundos**. Los encuadres, los resaltados y los selectores de las tomas que comparte con el video corto son los de la sección 3 de su guion.
 
 | Toma | Inicio (s) | Fin (s) | Qué se ve | Resaltado | Rótulo | Subtítulo (inglés) |
 |---|---|---|---|---|---|---|
 | 1 · Qué es | 0 | 4 | Tarjeta de apertura, animada | — | — | Before you plant, see the water you are committing. |
 | 2 · Cómo funciona | 4 | 10 | Tarjeta «How it works», animada: tres pasos y cuatro señas de cómo está hecha | — | — | NASA data, a crop-water model, an answer per field. |
-| 3 · La dotación | 10 | 16 | En la portada: clic en una marca de la dotación; cambian la cifra, el indicador y los colores del mapa | El control y, después, lo que cambió | Set the water | Set the water allocation. The map and the indicator respond. |
-| 4 · El idioma | 16 | 21 | En la portada: el selector de idioma pasa del inglés al español y la página se vuelve a escribir | El selector y, después, el título | Your language | The app speaks the farmer's language. |
-| 5 · Menos lluvia | 21 | 27 | En la portada, dos tramos: (a) clic en la casilla de menos lluvia (`#rain`); cambia el indicador del agua comprometida; (b) el bloque «lado a lado» del resumen, con la barra de menos lluvia resaltada en la zona y en las opciones | La casilla y el indicador; después, las barras de la zona en uso y las de la opción actual | Less rain | Explore a drier year. Every option needs more irrigation water. |
-| 6 · Las zonas | 27 | 32 | En el mismo bloque: clic en la otra zona piloto; cambian la zona en uso y las opciones de su parcela | La zona por elegir y, después, la zona elegida y sus opciones | Pilot areas | The pilot areas, side by side. Tap one to open. |
-| 7 · El registro de lluvia | 32 | 37.4 | En la portada, vista de la historia: las tres cifras del rango histórico de NASA POWER; la página baja a la gráfica de la comprobación año por año | Las tres cifras y, después, la gráfica | Rainfall record | The rainfall record from NASA POWER, checked year by year. |
-| 8 · La parcela | 37.4 | 46.4 | En el explorador: clic en P0757; su frase principal; sus opciones lado a lado | Como en el video corto | Pick a field | Each option: water asked, hectares covered, years committed. |
-| 9 · El porqué | 46.4 | 56.4 | Clic en «Why?» de una alternativa; «Why it's suggested»; «Benefits» | Como en el video corto | Ask why | Every option says why, and what changes from today. |
-| 10 · La gota | 56.4 | 62.4 | «Follow the drop» con sus gotas | El primer nodo | Follow the drop | From the dam to the crop and the aquifer. |
-| 11 · La evidencia | 62.4 | 68.4 | La memoria satelital de la parcela por año y su curva de verdor | La tira de años y, después, la curva | Satellite evidence | What satellites saw on this field, year by year. |
-| 12 · El suelo | 68.4 | 73.4 | En la misma ficha, la sección «Soil and satellite evidence» (`#t-evidencia`), con sus fuentes | El título de la sección | Soil and evidence | Soil and satellite evidence, each with its source. |
-| 13 · Otras parcelas | 73.4 | 81.4 | La ficha de P0632 y la de L0175 | La frase principal y el plazo de cada una | Other fields | A free field can choose. An orchard stays committed. |
-| 14 · Los años | 81.4 | 87.4 | Vista 3D: «Play» hasta el año destacado y su nota | La nota del año destacado | Look back | The year the dam delivered no water. |
-| 15 · Compartir | 87.4 | 93.4 | El mensaje de WhatsApp cambia de idioma | El saludo del mensaje | Share | A message for the farmer, in their language. |
-| 16 · Las pruebas | 93.4 | 99.4 | «Tests in sight», con el estado de cada prueba | El estado de cada prueba | Check the tests | Five tests, published whatever the result. |
-| 17 · Cierre | 99.4 | 103.4 | Tarjeta de cierre, animada | — | — | The farmer decides. |
+| 3 · Qué la distingue | 10 | 17 | Tarjeta «Beyond what to plant», animada: nueve señas de lo que la aplicación reúne además de la rotación | — | — | Beyond what to plant: water, soil, rain and evidence. |
+| 4 · La dotación | 17 | 23 | En la portada: clic en una marca de la dotación; cambian la cifra, el indicador y los colores del mapa | El control y, después, lo que cambió | Set the water | Set the water allocation. The map and the indicator respond. |
+| 5 · El idioma | 23 | 28 | En la portada: el selector de idioma pasa del inglés al español y la página se vuelve a escribir | El selector y, después, el título | Your language | The app speaks the farmer's language. |
+| 6 · Menos lluvia | 28 | 34 | En la portada, dos tramos: (a) clic en la casilla de menos lluvia (`#rain`); cambia el indicador del agua comprometida; (b) el bloque «lado a lado» del resumen, con la barra de menos lluvia resaltada en la zona y en las opciones | La casilla y el indicador; después, las barras de la zona en uso y las de la opción actual | Less rain | Explore a drier year. Every option needs more irrigation water. |
+| 7 · Las zonas | 34 | 39 | En el mismo bloque: clic en la otra zona piloto; cambian la zona en uso y las opciones de su parcela | La zona por elegir y, después, la zona elegida y sus opciones | Pilot areas | The pilot areas, side by side. Tap one to open. |
+| 8 · El registro de lluvia | 39 | 44.4 | En la portada, vista de la historia: las tres cifras del rango histórico de NASA POWER; la página baja a la gráfica de la comprobación año por año | Las tres cifras y, después, la gráfica | Rainfall record | The rainfall record from NASA POWER, checked year by year. |
+| 9 · La parcela | 44.4 | 53.4 | En el explorador: clic en P0757; su frase principal; sus opciones lado a lado | Como en el video corto | Pick a field | Each option: water asked, hectares covered, years committed. |
+| 10 · El porqué | 53.4 | 63.4 | Clic en «Why?» de una alternativa; «Why it's suggested»; «Benefits» | Como en el video corto | Ask why | Every option says why, and what changes from today. |
+| 11 · La gota | 63.4 | 69.4 | «Follow the drop» con sus gotas | El primer nodo | Follow the drop | From the dam to the crop and the aquifer. |
+| 12 · La evidencia | 69.4 | 75.4 | La memoria satelital de la parcela por año y su curva de verdor | La tira de años y, después, la curva | Satellite evidence | What satellites saw on this field, year by year. |
+| 13 · El suelo | 75.4 | 80.4 | En la misma ficha, la sección «Soil and satellite evidence» (`#t-evidencia`), con sus fuentes | El título de la sección | Soil and evidence | Soil and satellite evidence, each with its source. |
+| 14 · Otras parcelas | 80.4 | 88.4 | La ficha de P0632 y la de L0175 | La frase principal y el plazo de cada una | Other fields | A free field can choose. An orchard stays committed. |
+| 15 · Los años | 88.4 | 94.4 | Vista 3D: «Play» hasta el año destacado y su nota | La nota del año destacado | Look back | The year the dam delivered no water. |
+| 16 · Compartir | 94.4 | 100.4 | El mensaje de WhatsApp cambia de idioma | El saludo del mensaje | Share | A message for the farmer, in their language. |
+| 17 · Las pruebas | 100.4 | 106.4 | «Tests in sight», con el estado de cada prueba | El estado de cada prueba | Check the tests | Five tests, published whatever the result. |
+| 18 · Cierre | 106.4 | 110.4 | Tarjeta de cierre, animada | — | — | The farmer decides. |
 
 Notas:
 - **Toma 4.** El selector se localiza por estructura (el `<select>` cuyas opciones traen `en` y `es`). Al terminar, fuera de cámara, la portada vuelve al inglés.
@@ -70,63 +71,67 @@ Before you plant, see the water you are committing.
 NASA data, a crop-water model, an answer per field.
 
 3
-00:00:10,000 --> 00:00:16,000
-Set the water allocation. The map and the indicator respond.
+00:00:10,000 --> 00:00:17,000
+Beyond what to plant: water, soil, rain and evidence.
 
 4
-00:00:16,000 --> 00:00:21,000
-The app speaks the farmer's language.
+00:00:17,000 --> 00:00:23,000
+Set the water allocation. The map and the indicator respond.
 
 5
-00:00:21,000 --> 00:00:27,000
-Explore a drier year. Every option needs more irrigation water.
+00:00:23,000 --> 00:00:28,000
+The app speaks the farmer's language.
 
 6
-00:00:27,000 --> 00:00:32,000
-The pilot areas, side by side. Tap one to open.
+00:00:28,000 --> 00:00:34,000
+Explore a drier year. Every option needs more irrigation water.
 
 7
-00:00:32,000 --> 00:00:37,400
-The rainfall record from NASA POWER, checked year by year.
+00:00:34,000 --> 00:00:39,000
+The pilot areas, side by side. Tap one to open.
 
 8
-00:00:37,400 --> 00:00:46,400
-Each option: water asked, hectares covered, years committed.
+00:00:39,000 --> 00:00:44,400
+The rainfall record from NASA POWER, checked year by year.
 
 9
-00:00:46,400 --> 00:00:56,400
-Every option says why, and what changes from today.
+00:00:44,400 --> 00:00:53,400
+Each option: water asked, hectares covered, years committed.
 
 10
-00:00:56,400 --> 00:01:02,400
-From the dam to the crop and the aquifer.
+00:00:53,400 --> 00:01:03,400
+Every option says why, and what changes from today.
 
 11
-00:01:02,400 --> 00:01:08,400
-What satellites saw on this field, year by year.
+00:01:03,400 --> 00:01:09,400
+From the dam to the crop and the aquifer.
 
 12
-00:01:08,400 --> 00:01:13,400
-Soil and satellite evidence, each with its source.
+00:01:09,400 --> 00:01:15,400
+What satellites saw on this field, year by year.
 
 13
-00:01:13,400 --> 00:01:21,400
-A free field can choose. An orchard stays committed.
+00:01:15,400 --> 00:01:20,400
+Soil and satellite evidence, each with its source.
 
 14
-00:01:21,400 --> 00:01:27,400
-The year the dam delivered no water.
+00:01:20,400 --> 00:01:28,400
+A free field can choose. An orchard stays committed.
 
 15
-00:01:27,400 --> 00:01:33,400
-A message for the farmer, in their language.
+00:01:28,400 --> 00:01:34,400
+The year the dam delivered no water.
 
 16
-00:01:33,400 --> 00:01:39,400
-Five tests, published whatever the result.
+00:01:34,400 --> 00:01:40,400
+A message for the farmer, in their language.
 
 17
-00:01:39,400 --> 00:01:43,400
+00:01:40,400 --> 00:01:46,400
+Five tests, published whatever the result.
+
+18
+00:01:46,400 --> 00:01:50,400
 The farmer decides.
 ```
 

@@ -10,6 +10,10 @@
        como       «How it works»: tres pasos en una línea, con iconos dibujados aquí (sin logotipos). Los nombres
                   de productos de NASA llevan data-producto: el grabador comprueba que cada uno aparezca en
                   web/data/manifest.json antes de usar la tarjeta;
+       aparte     «Beyond what to plant»: nueve señas de lo que la aplicación reúne además de la rotación (agua,
+                  suministro, suelo y nutrientes, lluvia, memoria satelital, límites por red neuronal, terreno,
+                  aplicación y apoyo de IA). Cada una describe algo que la página ya hace (README, «How it works»
+                  y «SI/AI tools used»); el grabador comprueba que el README siga diciéndolo;
        cierre     frase de cierre (?frase=, del guion), aviso de juicio y liga pública (?liga=);
                   ?app=si agrega la línea de la aplicación instalable (el grabador la pide solo si existen
                   web/manifest.webmanifest y web/sw.js);
@@ -146,6 +150,24 @@
   }
   .hecho span.anim { animation-name: brota; animation-duration: 400ms; animation-delay: calc(2050ms + var(--n) * 100ms); }
 
+  /* ---------- «Beyond what to plant»: nueve señas en una cuadrícula ---------- */
+  .aparte-titulo { position: absolute; left: 96px; top: 70px; font-size: 44px; font-weight: 700; color: var(--ambar); letter-spacing: 0.01em; }
+  .aparte-titulo.anim { animation-name: sube; animation-duration: 420ms; animation-delay: 40ms; }
+  .aparte-sub { position: absolute; right: 96px; top: 82px; font-size: 32px; color: var(--agua-clara); }
+  .aparte-sub.anim { animation-name: aparece; animation-duration: 420ms; animation-delay: 260ms; }
+  .senas { position: absolute; left: 96px; right: 96px; top: 168px; bottom: 76px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 22px; }
+  .sena {
+    display: grid; grid-template-columns: 92px 1fr; column-gap: 24px; align-items: center; padding: 22px 30px;
+    border-radius: 28px; border: 2px solid rgba(185, 237, 135, 0.26); background: rgba(255, 255, 255, 0.045);
+  }
+  .sena.anim { animation-name: brota; animation-duration: 440ms; animation-delay: calc(170ms + var(--n) * 95ms); }
+  .sena svg { width: 92px; height: 92px; fill: none; stroke: var(--arena); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+  .sena svg .agua { stroke: #6FB1E6; }
+  .sena svg .agua-llena { fill: #6FB1E6; stroke: none; }
+  .sena svg .lima { stroke: var(--ambar); }
+  .sena h2 { font-size: 39px; line-height: 1.1; font-weight: 700; color: var(--arena); text-wrap: balance; }
+  .sena p { margin-top: 10px; font-size: 27px; line-height: 1.24; color: var(--agua-clara); text-wrap: balance; }
+
   /* Cierre: la frase, una línea de agua que la subraya, el aviso y el pie */
   .subraya { display: block; margin-top: 26px; width: 620px; height: 26px; overflow: visible; fill: none; stroke: #6FB1E6; stroke-width: 8; stroke-linecap: round; }
   .subraya path { stroke-dasharray: 1; }
@@ -229,6 +251,49 @@
     </div>
     <!-- Cómo está hecha (README: código abierto, web estática, aplicación instalable, pruebas a la vista) -->
     <p class="hecho"><span class="anim" style="--n: 0">Open source</span><span class="anim" style="--n: 1">Static web app</span><span class="anim" style="--n: 2">Works offline</span><span class="anim" style="--n: 3">Every figure with its source</span></p>
+  </section>
+
+  <section class="tarjeta" data-vista="aparte" hidden>
+    <p class="aparte-titulo anim">Beyond what to plant</p>
+    <p class="aparte-sub anim">What ROOT brings together for each field</p>
+    <div class="senas">
+      <div class="sena anim" style="--n: 0">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><path class="agua-llena" d="M48 10 C62 30 72 42 72 56 A24 24 0 0 1 24 56 C24 42 34 30 48 10 Z"/></svg>
+        <div><h2>Water per crop</h2><p>What each option asks for per year, and for how long</p></div>
+      </div>
+      <div class="sena anim" style="--n: 1">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M10 78 L22 22 H40 L52 78 Z"/><path class="agua" d="M56 44 Q64 36 72 44 T88 44"/><path class="agua" d="M56 60 Q64 52 72 60 T88 60"/><path class="agua" d="M56 76 Q64 68 72 76 T88 76"/></svg>
+        <div><h2>Water supply</h2><p>From the dam to the field and back to the aquifer</p></div>
+      </div>
+      <div class="sena anim" style="--n: 2">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M10 34 H86"/><path class="lima" d="M10 54 H86"/><path d="M10 74 H86"/><path class="lima" d="M48 34 V16 M48 24 C40 24 36 20 36 14 C44 14 48 18 48 24 Z"/><circle cx="26" cy="64" r="3"/><circle cx="62" cy="44" r="3"/><circle cx="72" cy="64" r="3"/></svg>
+        <div><h2>Soil and nutrients</h2><p>Soil type, texture, pH and nutrient notes per field</p></div>
+      </div>
+      <div class="sena anim" style="--n: 3">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M26 54 A16 16 0 0 1 30 22 A20 20 0 0 1 68 26 A14 14 0 0 1 70 54 Z"/><path class="agua" d="M32 66 L28 80"/><path class="agua" d="M48 66 L44 80"/><path class="agua" d="M64 66 L60 80"/></svg>
+        <div><h2>Rain and weather</h2><p>The rainfall record, a drier year, a reference storm</p></div>
+      </div>
+      <div class="sena anim" style="--n: 4">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><rect x="38" y="22" width="20" height="26" rx="4"/><rect x="8" y="26" width="24" height="18" rx="3"/><rect x="64" y="26" width="24" height="18" rx="3"/><line x1="32" y1="35" x2="38" y2="35"/><line x1="58" y1="35" x2="64" y2="35"/><path class="agua" d="M36 62 Q48 52 60 62"/><path class="agua" d="M28 76 Q48 60 68 76"/></svg>
+        <div><h2>Satellite memory</h2><p>What satellites saw on each field, year by year</p></div>
+      </div>
+      <div class="sena anim" style="--n: 5">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M14 30 L44 14 L82 26 L78 66 L40 82 L12 62 Z"/><path class="lima" d="M44 14 L40 82 M14 30 L78 66"/><circle class="lima" cx="44" cy="14" r="4"/><circle class="lima" cx="82" cy="26" r="4"/><circle class="lima" cx="78" cy="66" r="4"/><circle class="lima" cx="40" cy="82" r="4"/><circle class="lima" cx="12" cy="62" r="4"/><circle class="lima" cx="14" cy="30" r="4"/></svg>
+        <div><h2>Machine-learning field map</h2><p>Boundaries from a neural network, filtered by confidence</p></div>
+      </div>
+      <div class="sena anim" style="--n: 6">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><path d="M8 76 L34 30 L50 56 L62 40 L88 76 Z"/><path class="agua" d="M34 30 Q40 52 30 62 T36 76"/></svg>
+        <div><h2>Terrain twin</h2><p>Relief, slope and where the runoff goes</p></div>
+      </div>
+      <div class="sena anim" style="--n: 7">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><rect x="28" y="10" width="40" height="76" rx="8"/><line x1="42" y1="74" x2="54" y2="74"/><path class="lima" d="M38 44 L45 52 L58 34"/></svg>
+        <div><h2>A friendly app</h2><p>Works offline, in four languages, with a message to share</p></div>
+      </div>
+      <div class="sena anim" style="--n: 8">
+        <svg viewBox="0 0 96 96" aria-hidden="true"><path class="lima" d="M48 12 L55 38 L82 46 L55 54 L48 82 L41 54 L14 46 L41 38 Z"/><path d="M74 14 V26 M68 20 H80"/></svg>
+        <div><h2>Built with AI support</h2><p>Every figure with its source, tests published in sight</p></div>
+      </div>
+    </div>
   </section>
 
   <section class="tarjeta" data-vista="cierre" hidden>
