@@ -1547,6 +1547,8 @@ async function pruebaGemelo3D(page, prefijo, telefono) {
 // ---------------------------------------------------------------- ficha completa (etapa 2 del gemelo)
 const nfFicha = (v, d = 1) => (v == null || !Number.isFinite(Number(v)) ? "—" : nf({ maximumFractionDigits: d }).format(v).replace("-", "−"));
 const pctFicha = (f) => nf({ style: "percent", maximumFractionDigits: 0 }).format(f).replace("-", "−");
+// Cobertura de la dotación como la escribe la ficha: porcentaje entero hacia abajo (fmtCobertura de web/app.js).
+const cobFicha = (f) => pctFicha(Math.floor(f * 100) / 100);
 const P0757 = porId.has("P0757") ? "P0757" : protagonistas.find((id) => opcionesDe(id).length > 3) ?? conNecesidad;
 /** Parcela cuya opción ACTUAL no pide agua (lámina cero) y una abstenida, para los tres casos de la frase. */
 const conLaminaCero = candidatos.find((id) => !porId.get(id).abstencion && actualDe(id) && !(l50(actualDe(id)) > 0));
@@ -1658,6 +1660,203 @@ async function hectareasSobreArea(page, id) {
     }
   }
   return malos;
+}
+
+// ---------------------------------------------------------------- «Why?», nota de La gota, cabeza de tarjeta y pie
+// Bloque propio de los renglones C2, I10, I15, M4 y M6 del cierre de hallazgos (docs/revisiones/2026-11-15_cierre_hallazgos.md).
+// Todo lo esperado se lee de cubo.json y explicaciones.json, con las reglas de web/reglas.js y la función pura de
+// web/js/beneficios.js (tests/beneficios.test.js la prueba aparte); se importa aquí para no tocar el encabezado.
+const { beneficiosDeOpcion, textoRenglon } = await import("../../web/js/beneficios.js");
+const FICHAS_PORQUE = ["P0757", "P0632", "L0175"].filter((id) => porId.has(id) && !porId.get(id).abstencion && opcionesDe(id).length);
+// CLAUDE.md regla 10 en «Benefits»: diferencias descritas, sin promesas ni orden; el agua no «se libera» ni «se ahorra».
+const VETADAS_BENEFICIOS = /\b(sav(e|es|ed|ing|ings)|best|better|recommend\w*|only|first|free[sd]?|freeing|releas(e|es|ed|ing))\b/i;
+const sinEspacios = (t) => String(t ?? "").replace(/\s+/g, " ").trim();
+
+/** Lo que una tarjeta dice en «Why it's suggested» y en «Benefits» (se lee con el «Why?» plegado: textContent). */
+const leerPorQue = (page, idOpcion) =>
+  tarjeta(page, idOpcion).evaluate((t) => {
+    const limpio = (n) => (n?.textContent ?? "").replace(/\s+/g, " ").trim();
+    const porQue = t.querySelector('.porque dd[data-respuesta="por_que"]');
+    const motivo = porQue?.querySelector('[data-parte="motivo"]');
+    const frase = porQue?.querySelector('[data-parte="frase-agua"]');
+    const pliegue = porQue?.querySelector("details");
+    return {
+      tarjeta: limpio(t.querySelector(".alcanza strong")),
+      motivo: limpio(motivo),
+      sinMotivo: motivo?.dataset.motivo === "sin",
+      porQue: limpio(porQue),
+      frase: limpio(frase),
+      motivoAntes: Boolean(motivo && frase && motivo.compareDocumentPosition(frase) & Node.DOCUMENT_POSITION_FOLLOWING),
+      pliegue: pliegue ? { abierto: pliegue.open, rotulo: limpio(pliegue.querySelector("summary")) } : null,
+      beneficios: [...t.querySelectorAll('.porque dd[data-respuesta="beneficios"] p')].map(limpio),
+      beneficiosTexto: limpio(t.querySelector('.porque dd[data-respuesta="beneficios"]')),
+      cabeza: limpio(t.querySelector(".tarjeta-cabeza")),
+      insignias: t.querySelectorAll(".insignia-actual").length,
+    };
+  });
+
+/** Renglones de «Benefits» esperados para una opción, con el formato de las tarjetas (un decimal en la lámina). */
+function beneficiosEsperados(id, o, llave) {
+  const b = beneficiosDeOpcion({ opcion: o, opciones: opcionesDe(id), llave, formato: { millares: (v) => nfFicha(v, 1), dato: (v) => nfFicha(v, 3) } });
+  return b ? b.renglones.map(textoRenglon) : null;
+}
+
+/**
+ * En las fichas de P0757, P0632 y L0175 (las que cita el guion):
+ *  · C2: con cada marca de dotación, la frase del agua del «Why?» escribe las hectáreas igual que la tarjeta («enough
+ *    for 0.97 of 7.95 hectares», «enough for the whole field (7.95 ha)») y ya no «enough for 8 hectares»;
+ *  · I10, «Why it's suggested»: primero el motivo de la tabla oficial (opciones_catalogo[rotación].por_que_en) con su
+ *    etiqueta y su fuente (plegada, si va en un <details>), después la frase del agua; una propuesta del equipo dice
+ *    que la tabla oficial no da motivo, con su etiqueta, y no toma prestado el texto del catálogo;
+ *  · I10, «Benefits»: los renglones de web/js/beneficios.js (la opción contra la ACTUAL de la parcela, con el formato
+ *    de las tarjetas), también con la lluvia seca; la ACTUAL dice que es la base; sin alternativas (el nogal) queda
+ *    la frase de explicaciones.json; ninguna palabra vetada;
+ *  · I15: el primer nodo de La gota dice que es el agua que la opción necesita y la nota bajo el diagrama dice cuánto
+ *    cubre la dotación (cobertura de web/reglas.js por los m³ del bloque gota), o se oculta si alcanza para todo;
+ *  · M4: «Current rotation» una sola vez en la cabeza de la tarjeta ACTUAL;
+ *  · M6: el pie del panel en una línea (fecha legible y número de archivos), sin rutas ni fecha ISO.
+ */
+async function pruebaPorQueYBeneficios(page, prefijo, telefono) {
+  const catalogo = cubo.opciones_catalogo ?? {};
+  const sinMotivoOficial = [];
+  for (const id of FICHAS_PORQUE) {
+    const area = porId.get(id).area_ha;
+    const ops = opcionesDe(id);
+    await abrirDesdeLista(page, id);
+
+    // --- C2: hectáreas del «Why?» = las de la tarjeta, con cada marca ---
+    const malas = [];
+    for (const m of marcas) {
+      await fijarDeslizador(page, m.valor);
+      for (const o of ops) {
+        const v = await leerPorQue(page, o.id);
+        const esperado = v.tarjeta.charAt(0).toLowerCase() + v.tarjeta.slice(1);
+        const cifras = [...v.frase.matchAll(/enough for ([\d.,]+)(?: of ([\d.,]+))? hectares?/g)];
+        const pasa = v.tarjeta.startsWith("Enough for") && v.frase.includes(esperado) &&
+          cifras.every(([, x, y]) => y != null && Number(x.replace(/,/g, "")) <= area);
+        if (!pasa) malas.push(`${m.id}/${o.id}: tarjeta «${v.tarjeta}» · Why «${v.frase.slice(-70)}»`);
+      }
+    }
+    check(`${prefijo}${id}: con cada marca, el «Why?» escribe las hectáreas igual que la tarjeta (C2)`, malas.length === 0, malas.slice(0, 2).join(" | "));
+
+    // --- I10: «Why it's suggested» y «Benefits», opción por opción ---
+    await fijarDeslizador(page, D1);
+    const hayAlternativas = ops.some((o) => o.id !== "ACTUAL");
+    const malMotivo = [];
+    const malBeneficio = [];
+    for (const o of ops) {
+      const v = await leerPorQue(page, o.id);
+      const d = catalogo[o.rotacion];
+      const oficial = o.origen_opcion !== "team_proposal" && Boolean(d?.por_que_en);
+      if (oficial) {
+        const pasa = v.motivo === sinEspacios(d.por_que_en) && !v.sinMotivo && v.motivoAntes && v.porQue.includes(sinEspacios(d.fuente)) &&
+          v.porQue.includes(sinEspacios(d.etiqueta)) && (!v.pliegue || (!v.pliegue.abierto && v.pliegue.rotulo.startsWith("Source")));
+        if (!pasa) malMotivo.push(`${o.id}: «${v.porQue.slice(0, 120)}»`);
+      } else {
+        sinMotivoOficial.push(`${id}/${o.id}`);
+        const pasa = v.sinMotivo && v.motivo.includes("The official rotation table gives no reason for this option.") &&
+          v.motivo.includes(sinEspacios(o.etiqueta_opcion)) && !(d?.por_que_en && v.porQue.includes(sinEspacios(d.por_que_en))) && v.motivoAntes;
+        if (!pasa) malMotivo.push(`${o.id} (sin motivo oficial): «${v.porQue.slice(0, 120)}»`);
+      }
+      const esperados = beneficiosEsperados(id, o, "0");
+      const fija = sinEspacios(explicaciones.explicaciones?.[o.preguntas_ref]?.textos?.beneficios);
+      const pasaB = esperados
+        ? JSON.stringify(v.beneficios) === JSON.stringify(esperados) && (o.id !== "ACTUAL" || /baseline/.test(v.beneficiosTexto)) &&
+          (o.id === "ACTUAL" || (v.beneficios[0].startsWith("Compared with the current rotation") && v.beneficiosTexto !== fija))
+        : !hayAlternativas && v.beneficiosTexto === fija;
+      if (!pasaB || VETADAS_BENEFICIOS.test(v.beneficiosTexto) || /NaN|undefined|null|\{\{/.test(v.beneficiosTexto)) {
+        malBeneficio.push(`${o.id}: «${v.beneficiosTexto.slice(0, 140)}»`);
+      }
+    }
+    check(`${prefijo}${id}: «Why it's suggested» lleva el motivo oficial con su etiqueta y su fuente, y después la frase del agua (I10)`, malMotivo.length === 0, malMotivo.slice(0, 2).join(" | "));
+    check(`${prefijo}${id}: «Benefits» compara cada opción con la rotación actual de la parcela${hayAlternativas ? "" : " (sin alternativas: la frase de explicaciones.json)"} (I10)`,
+      malBeneficio.length === 0, malBeneficio.slice(0, 2).join(" | "));
+
+    // --- M4: «Current rotation» una sola vez en la cabeza de la tarjeta ACTUAL ---
+    const actual = await leerPorQue(page, "ACTUAL");
+    check(`${prefijo}${id}: la cabeza de la tarjeta actual dice «Current rotation» una sola vez (M4)`,
+      (actual.cabeza.match(/current rotation/gi) ?? []).length === 1 && actual.insignias === 0 && actual.cabeza === sinEspacios(actualDe(id).nombre), actual.cabeza);
+
+    // --- I15: el primer nodo y la nota de cobertura de La gota ---
+    const idGota = await page.locator("#gota-opcion").inputValue().catch(() => null);
+    const og = ops.find((o) => o.id === idGota);
+    if (og?.gota?.m3_salen_presa > 0) {
+      const necesita = og.gota.m3_salen_presa;
+      const malasNota = [];
+      for (const m of marcas) {
+        await fijarDeslizador(page, m.valor);
+        const cob = evaluarOpcion(og, area, m.valor, 0).cobertura;
+        const nota = await page.locator("#gota-cobertura").evaluate((n) => ({ oculta: n.hidden, texto: n.textContent.replace(/\s+/g, " ").trim() }));
+        const esperada = `With ${nfFicha(m.valor)} thousand m³/ha, the allocation covers ${cobFicha(cob)} of this need: about ${nfFicha(cob * necesita, 0)} of the ` +
+          `${nfFicha(necesita, 0)} m³ this option needs with the current irrigation, counted from La Boquilla. The rest comes from wells or stays unmet.`;
+        if (cob < 1 ? nota.oculta || nota.texto !== esperada : !nota.oculta) malasNota.push(`${m.id}: ${nota.oculta ? "(oculta) " : ""}«${nota.texto}»`);
+      }
+      check(`${prefijo}${id}: la nota de La gota dice cuánto cubre la dotación de los ${nfFicha(necesita, 0)} m³ que la opción necesita (I15)`, malasNota.length === 0, malasNota.slice(0, 2).join(" | "));
+      const rotulos = await page.locator("#seccion-gota").evaluate((s) => ({
+        nodo: s.querySelector('text[data-gota-etiqueta="presa"] .gota-etiqueta-nombre')?.textContent ?? s.querySelector(".gota-pb-rotulo")?.textContent ?? "",
+        tabla: [...s.querySelectorAll("table th[scope=row]")].map((th) => th.textContent)[0] ?? "",
+        todo: s.textContent,
+      }));
+      check(`${prefijo}${id}: el primer nodo de La gota es el agua que la opción necesita, no «La Boquilla (dam)» (I15)`,
+        /^(Needed from La Boquilla|Water needed)$/.test(rotulos.nodo.trim()) && rotulos.tabla.startsWith("Water this option needs, counted from La Boquilla") &&
+        !/Released from La Boquilla|Leaves La Boquilla/.test(rotulos.todo), `${rotulos.nodo} · ${rotulos.tabla}`);
+    } else {
+      omitir(`${prefijo}${id}: nota y primer nodo de La gota (I15)`, "la opción dibujada no pide agua de la presa");
+    }
+    if (id === "P0757") {
+      await tarjeta(page, opcionesDe(id)[1]?.id ?? "ACTUAL").locator(".porque > summary").click();
+      await tarjeta(page, opcionesDe(id)[1]?.id ?? "ACTUAL").locator('.porque dd[data-respuesta="beneficios"]').scrollIntoViewIfNeeded();
+      await esperarAnimaciones(page).catch(() => null);
+      await page.screenshot({ path: path.join(CAPTURAS, `${telefono ? "telefono" : "escritorio"}_ficha_porque_beneficios.png`) });
+      if (telefono) check(`${prefijo}${id}: con el «Why?» abierto, sin desplazamiento horizontal`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+    }
+    await cerrarFicha(page);
+  }
+  if (!FICHAS_PORQUE.length) omitir(`${prefijo}«Why?» y «Benefits» (C2, I10, I15, M4)`, "P0757, P0632 y L0175 no están en estos datos");
+  else console.log(`NOTA   ${prefijo}opciones sin motivo oficial en ${FICHAS_PORQUE.join(", ")}: ${sinMotivoOficial.join(", ") || "ninguna"}`);
+
+  // --- I10 con la lluvia seca: «Benefits» compara las láminas de ese escenario ---
+  const seca = cubo.lluvia_pct?.find((x) => x !== 0);
+  const conAlternativas = FICHAS_PORQUE.find((id) => opcionesDe(id).some((o) => o.id !== "ACTUAL"));
+  if (seca != null && conAlternativas) {
+    await page.locator("#lluvia").check();
+    await abrirDesdeLista(page, conAlternativas);
+    const malos = [];
+    for (const o of opcionesDe(conAlternativas)) {
+      const v = await leerPorQue(page, o.id);
+      if (JSON.stringify(v.beneficios) !== JSON.stringify(beneficiosEsperados(conAlternativas, o, String(seca)))) malos.push(`${o.id}: «${v.beneficiosTexto.slice(0, 140)}»`);
+    }
+    check(`${prefijo}${conAlternativas}: con la lluvia de ${seca} %, «Benefits» compara las láminas de ese escenario`, malos.length === 0, malos.slice(0, 2).join(" | "));
+    // La nota de La gota con la lluvia seca: el porcentaje es el de ese escenario y los m³ del diagrama (calculados con la
+    // lluvia base) no se multiplican por él (hallazgo del revisor de código, 15-nov).
+    const idGotaSeca = await page.locator("#gota-opcion").inputValue().catch(() => null);
+    const ogSeca = opcionesDe(conAlternativas).find((o) => o.id === idGotaSeca);
+    if (ogSeca?.gota?.m3_salen_presa > 0) {
+      const notaSeca = await page.locator("#gota-cobertura").evaluate((n) => ({ oculta: n.hidden, texto: n.textContent.replace(/\s+/g, " ").trim() }));
+      check(`${prefijo}${conAlternativas}: con la lluvia de ${seca} %, la nota de La gota no multiplica el porcentaje por los m³ de la lluvia base`,
+        notaSeca.oculta || (!/ m³ this option needs/.test(notaSeca.texto) && /in the drier-rain scenario; the amounts in the diagram are for the base rainfall\./.test(notaSeca.texto)),
+        `«${notaSeca.texto}»`);
+    } else {
+      omitir(`${prefijo}${conAlternativas}: nota de La gota con la lluvia seca`, "la opción dibujada no pide agua de la presa");
+    }
+    await cerrarFicha(page);
+    await page.locator("#lluvia").uncheck();
+  } else {
+    omitir(`${prefijo}«Benefits» con la lluvia seca`, "el cubo no trae otro escenario de lluvia o ninguna de las fichas tiene alternativas");
+  }
+
+  // --- M6: el pie del panel, en una línea ---
+  const pie = sinEspacios(await page.locator("#pie-fuentes").textContent());
+  const archivos = (cubo.meta?.fuentes ?? []).filter((f) => !String(f).split("/").pop().startsWith("."));
+  const generado = new Date(cubo.meta?.generado ?? NaN);
+  if (archivos.length && !Number.isNaN(generado.getTime())) {
+    const fecha = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" }).format(generado);
+    const lineaPie = `Built ${fecha} from ${nfFicha(archivos.length, 0)} data ${archivos.length === 1 ? "file" : "files"} — see About & Data`;
+    check(`${prefijo}pie del panel en una línea: «${lineaPie}», sin rutas de archivo ni fecha ISO (M6)`,
+      pie.startsWith(lineaPie) && !/data\/processed|\.csv|\.json|\d{4}-\d{2}-\d{2}T/.test(pie), pie.slice(0, 160));
+  } else {
+    check(`${prefijo}pie del panel sin rutas de archivo ni fecha ISO (M6)`, !/data\/processed|\.csv|\.json|\d{4}-\d{2}-\d{2}T/.test(pie), pie.slice(0, 160));
+  }
 }
 
 /**
@@ -1968,6 +2167,7 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
     await cerrarFicha(page);
   }
   await pruebaTarjetasCoherentes(page, prefijo, sufijo);
+  await pruebaPorQueYBeneficios(page, prefijo, telefono);
   if (telefono) {
     check(`${prefijo}con la ficha completa, sin desplazamiento horizontal`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   }
@@ -2766,7 +2966,7 @@ async function pruebasEscritorio(page, peticiones) {
   await pruebaGota(page, idFicha, cubo, "", false, { con: "escritorio_gota_goteo_con_tope.png", sin: "escritorio_gota_goteo_sin_tope.png" });
   await pruebaRelieveFicha(page, idFicha, "");
   await pruebaWhatsApp(page, idFicha, "", false, "escritorio_ficha_whatsapp.png");
-  if (await tarjeta(page, "ACTUAL").count()) await tarjeta(page, "ACTUAL").locator(".porque summary").click();
+  if (await tarjeta(page, "ACTUAL").count()) await tarjeta(page, "ACTUAL").locator(".porque > summary").click();
   await page.locator("#ficha").evaluate((el) => { el.scrollTop = 0; });
   await esperarAnimaciones(page);
   await page.screenshot({ path: path.join(CAPTURAS, "escritorio_ficha.png") });

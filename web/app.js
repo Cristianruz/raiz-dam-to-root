@@ -16,6 +16,7 @@
 // - relieve.js: capa «Terrain & runoff» y botón «Simulate a storm» en el panel (kit A9, parte web), y la
 //   línea de relieve del renglón Soil de cada tarjeta (S9 §4 bis);
 // - gota.js: «Follow the drop» dentro de la ficha, Sankey con d3-sankey (kit X3.1 y X3.2);
+// - beneficios.js: «Benefits» del «Why?» de cada tarjeta, la opción comparada con la rotación ACTUAL de la parcela (I10);
 // - mensaje.js: maqueta del mensaje de WhatsApp (en español) y ficha imprimible (kit C4);
 // - acerca.js: pantalla de inicio de tres pasos y sección «About & Data» (kit C5). pruebas.json se lee solo al
 //   abrir «About & Data» (carga perezosa); manifest.json se lee una vez al arrancar (la tarjeta «Twin status»
@@ -63,6 +64,7 @@ import {
 } from "./reglas.js";
 import { agregarCapaRelieve, htmlRelieveParcela, cargarRelieve, leerOpcional } from "./js/relieve.js";
 import { dibujarGota } from "./js/gota.js";
+import { beneficiosDeOpcion } from "./js/beneficios.js";
 import { htmlWhatsApp, imprimirFicha } from "./js/mensaje.js";
 import { montarInicio, montarAcerca, LLAVE_INICIO } from "./js/acerca.js";
 import { crearGemelo3D } from "./js/gemelo3d.js";
@@ -303,6 +305,15 @@ function fmtDato(v) {
 function fmtPct(fraccion) {
   if (fraccion == null || !Number.isFinite(fraccion)) return "—";
   return conMenos(formateador({ style: "percent", maximumFractionDigits: 0 }).format(fraccion));
+}
+/**
+ * Cobertura de la dotación, en porcentaje entero HACIA ABAJO: una cobertura de 0.996 no puede leerse «100%» junto a
+ * «the rest comes from wells» ni junto a unas hectáreas que no llegan al área (mismo criterio que formatoHectareas).
+ */
+function fmtCobertura(fraccion) {
+  if (fraccion == null || !Number.isFinite(fraccion)) return fmtPct(fraccion);
+  const CIEN = 100;
+  return fmtPct(Math.floor(fraccion * CIEN) / CIEN);
 }
 function fmtSigno(v) {
   return conMenos(formateador({ maximumFractionDigits: 3, signDisplay: "exceptZero" }).format(v));
@@ -1959,13 +1970,19 @@ function etiquetaDato(etiqueta) {
   return ` <span class="etiqueta-dato" title="${esc(titulo)}" aria-label="${esc(`${texto} (${titulo})`)}">${esc(texto)}</span>`;
 }
 
+/**
+ * Pie del panel (M6 de la revisión total): una línea con la fecha en que se generaron los datos y cuántos archivos los
+ * forman (cubo.meta.generado y cubo.meta.fuentes); la lista de fuentes se lee en «About & Data», no aquí.
+ */
 function pintarPie() {
   const meta = estado.cubo.meta ?? {};
   const partes = [];
   // Los archivos ocultos de la caché (p. ej. data/processed/.gitkeep) no son fuentes de datos.
   const archivos = (Array.isArray(meta.fuentes) ? meta.fuentes : []).filter((f) => !String(f).split("/").pop().startsWith("."));
-  if (archivos.length) partes.push(`Data files: ${archivos.join(", ")}`);
-  if (meta.generado) partes.push(`generated ${meta.generado}`);
+  const cuantos = archivos.length ? ` from ${fmtDato(archivos.length)} data ${archivos.length === 1 ? "file" : "files"}` : "";
+  const fechaValida = meta.generado && !Number.isNaN(new Date(meta.generado).getTime());
+  const cuando = !meta.generado ? "" : ` ${fechaValida ? fmtFecha(meta.generado) : String(meta.generado)}`;
+  if (meta.generado || cuantos) partes.push(`Built${cuando}${cuantos} — see About & Data`);
   if (meta.mock && Array.isArray(meta.mock_campos)) partes.push(`simulated blocks: ${meta.mock_campos.join(", ")}`);
   $("#pie-fuentes").textContent = partes.join(" · ");
 }
@@ -2277,14 +2294,13 @@ function circulo(clave, tabla) {
  * nombre. Los filtros se dibujan en actualizarFicha: dotacion_minima depende del deslizador.
  */
 function htmlTarjeta(o, relieve = "", p = {}) {
-  const esActual = o.id === "ACTUAL";
   const propuesta = o.origen_opcion === "team_proposal" && o.etiqueta_opcion
     ? `<span class="insignia-propuesta" data-parte="propuesta">${esc(o.etiqueta_opcion)}</span>`
     : "";
   return (
     `<article class="tarjeta" data-opcion="${esc(o.id)}">` +
+    // M4 de la revisión total: el nombre de la opción ACTUAL ya dice «Current rotation: …»; sin insignia encima.
     '<header class="tarjeta-cabeza">' +
-    (esActual ? '<span class="insignia-actual">Current rotation</span>' : "") +
     `<h4>${esc(o.nombre)}</h4>${propuesta}</header>` +
     '<div class="renglon renglon-agua" data-parte="agua"></div>' +
     htmlSuelo(o, relieve, p) +
@@ -2569,7 +2585,11 @@ function actualizarFicha() {
       : "";
     $('[data-parte="filtros"]', tarjeta).innerHTML = htmlFiltros(o, D);
 
-    $('[data-parte="respuestas"]', tarjeta).innerHTML = htmlRespuestas(o, ev);
+    // El motivo oficial trae su fuente plegada: si estaba abierta, sigue abierta al mover el deslizador.
+    const respuestas = $('[data-parte="respuestas"]', tarjeta);
+    const fuenteAbierta = Boolean($("details.fuente-plegada[open]", respuestas));
+    respuestas.innerHTML = htmlRespuestas(o, ev, p.area_ha, ops);
+    if (fuenteAbierta) $("details.fuente-plegada", respuestas)?.setAttribute("open", "");
   }
   pintarCoberturaGota();
   if (estado.whatsapp) pintarWhatsApp(); // el mensaje dice cuántas hectáreas alcanzan con la dotación elegida
@@ -2645,19 +2665,67 @@ function htmlLaminaLocal(o, L, areaHa, D) {
   );
 }
 
-function htmlRespuestas(o, ev) {
+// «Why it's suggested» de una opción sin motivo en la tabla oficial (I10 de la revisión total): se dice; no se inventa.
+const TEXTO_SIN_MOTIVO = "The official rotation table gives no reason for this option.";
+// Final de la frase del agua de explicaciones.json («… enough for {{ha}} hectares.»): se escribe como en la tarjeta.
+const MARCADOR_ALCANZA = /enough for \{\{ha\}\} hectares/;
+
+/**
+ * Motivo oficial de una opción (I10): cubo.opciones_catalogo[rotación].por_que_en, con su etiqueta de evidencia y su
+ * fuente plegada (htmlFuente). Una propuesta del equipo (origen_opcion = team_proposal) no tiene motivo en la tabla
+ * oficial: el texto del catálogo para esa rotación habla de otro uso («Current rotation…», «Suggested for an old
+ * alfalfa stand…»), así que no se muestra ni se inventa otro; va la etiqueta de la opción.
+ */
+function htmlMotivo(o) {
+  const d = estado.cubo.opciones_catalogo?.[o.rotacion];
+  if (o.origen_opcion !== "team_proposal" && d?.por_que_en) {
+    return (
+      `<p data-parte="motivo">${esc(d.por_que_en)}</p>` +
+      `<div class="fuente">${htmlFuente(d.fuente, { en: d.fuente_en, etiqueta: d.etiqueta || undefined })}</div>`
+    );
+  }
+  const etiqueta = o.etiqueta_opcion || d?.etiqueta;
+  return `<p data-parte="motivo" data-motivo="sin">${esc(TEXTO_SIN_MOTIVO)}${etiqueta ? etiquetaDato(etiqueta) : ""}</p>`;
+}
+
+/**
+ * Las cinco respuestas del «Why?» (explicaciones.json). Dos se arman además con los datos de la parcela:
+ * - «Why it's suggested» (I10 y C2 de la revisión total): primero el motivo de la tabla oficial (htmlMotivo) y después
+ *   la frase del agua, con las hectáreas escritas como en la tarjeta (htmlAlcanza: formatoHectareas, nunca más que el
+ *   área, y «the whole field» cuando alcanza para toda la parcela);
+ * - «Benefits» (I10): la opción comparada con la rotación ACTUAL de la misma parcela (web/js/beneficios.js), con el
+ *   formato de las tarjetas; donde no hay con qué comparar (el nogal) se conserva la frase de explicaciones.json.
+ */
+function htmlRespuestas(o, ev, areaHa, ops = []) {
   const bloque = estado.explicaciones?.explicaciones?.[o.preguntas_ref];
   if (!bloque?.textos) return "<dt>Explanation</dt><dd>Not available yet for this option.</dd>";
   const dinamicos = { d: estado.D, ha: ev.hectareas.p50, cobertura: ev.cobertura };
+  const fh = formatoHectareas(areaHa);
   const formatear = (v, k) => {
-    if (k === "cobertura") return fmtPct(v);
-    if (k === "ha" || k === "d") return fmt(v);
+    if (k === "cobertura") return fmtCobertura(v);
+    if (k === "ha") return fh(v);
+    if (k === "d") return fmt(v);
     return fmtDato(v);
   };
+  const alcanza = ev.cobertura >= 1
+    ? `enough for the whole field (${fmtDato(areaHa)} ha)`
+    : `enough for ${fh(ev.hectareas.p50)} of ${fh(areaHa)} ${hectareasTexto(areaHa)}`;
+  let beneficios = null;
+  try {
+    beneficios = beneficiosDeOpcion({ opcion: o, opciones: ops, llave: llaveLluvia(estado.r), formato: { millares: fmtMillares, dato: fmtDato } });
+  } catch (err) {
+    console.error("ROOT: the benefits comparison could not be built", err);
+  }
   return PREGUNTAS.map(([k, titulo]) => {
     const t = bloque.textos[k];
-    const texto = t ? rellenarMarcadores(t, bloque.valores, dinamicos, formatear) : "Not available yet.";
-    return `<dt>${esc(titulo)}</dt><dd>${esc(texto)}</dd>`;
+    const plantilla = t && k === "por_que" ? t.replace(MARCADOR_ALCANZA, () => alcanza) : t;
+    const texto = plantilla ? rellenarMarcadores(plantilla, bloque.valores, dinamicos, formatear) : "Not available yet.";
+    let cuerpo = esc(texto);
+    if (k === "por_que") cuerpo = `${htmlMotivo(o)}<p data-parte="frase-agua">${cuerpo}</p>`;
+    else if (k === "beneficios" && beneficios) {
+      cuerpo = beneficios.renglones.map((r) => `<p>${r.rotulo ? `<strong>${esc(r.rotulo)}:</strong> ` : ""}${esc(r.texto)}</p>`).join("");
+    }
+    return `<dt>${esc(titulo)}</dt><dd data-respuesta="${esc(k)}">${cuerpo}</dd>`;
   }).join("");
 }
 
@@ -2683,7 +2751,8 @@ function htmlGota(ops, p = {}) {
   return (
     '<section class="gota" id="seccion-gota" aria-labelledby="t-gota">' +
     '<h3 id="t-gota" tabindex="-1">Follow the drop</h3>' +
-    "<p>Where this option's water goes each year, from La Boquilla to the crop and the aquifer (m³ for this field).</p>" +
+    // I15 de la revisión total: el diagrama dibuja lo que la opción necesita, no lo que la presa entrega.
+    "<p>Where the water this option needs would go each year, counted from La Boquilla dam to the crop and the aquifer (m³ for this field).</p>" +
     '<div class="gota-controles">' +
     `<label>Option <select id="gota-opcion">${conGota.map((o) => `<option value="${esc(o.id)}">${esc(o.nombre)}</option>`).join("")}</select></label>` +
     "</div>" +
@@ -2728,7 +2797,12 @@ function pintarGota() {
   });
 }
 
-/** Línea de cobertura de La gota: depende del deslizador. */
+/**
+ * Línea de cobertura de La gota: depende del deslizador. El diagrama dibuja lo que la opción NECESITA, contado desde
+ * La Boquilla (bloque gota del cubo, con el riego actual); esta nota dice cuánto de eso cubre la dotación elegida (I15
+ * de la revisión total): la cobertura de evaluarOpcion (web/reglas.js, la misma de la tarjeta) y esa fracción de los
+ * m³ del primer nodo. Sin ese dato en el bloque, solo la cobertura.
+ */
 function pintarCoberturaGota() {
   const nodo = $("#gota-cobertura");
   const o = opcionGota();
@@ -2736,7 +2810,16 @@ function pintarCoberturaGota() {
   if (!nodo || !o || !f) return;
   const ev = evaluarOpcion(o, f.properties.area_ha, estado.D, estado.r, Boolean(f.properties.abstencion));
   nodo.hidden = !(ev.cobertura < 1);
-  nodo.textContent = "The allocation covers part of this need; the rest comes from wells or stays unmet.";
+  // Los m³ del diagrama (gota.m3_salen_presa) se calculan con la lluvia base. Con la lluvia seca la cobertura es la
+  // del escenario seco, así que no se multiplica por esos m³: se da el porcentaje y se dice a qué lluvia corresponde
+  // el diagrama (hallazgo del revisor de código, 15-nov).
+  const lluviaBase = estado.r === estado.rBase;
+  const necesita = o.gota?.m3_salen_presa;
+  const cuanto = lluviaBase && Number.isFinite(necesita) && necesita > 0
+    ? `: about ${fmt(ev.cobertura * necesita, 0)} of the ${fmt(necesita, 0)} m³ this option needs with the current irrigation, counted from La Boquilla`
+    : "";
+  const seca = lluviaBase ? "" : " in the drier-rain scenario; the amounts in the diagram are for the base rainfall";
+  nodo.textContent = `With ${fmt(estado.D)} thousand m³/ha, the allocation covers ${fmtCobertura(ev.cobertura)} of this need${cuanto}${seca}. The rest comes from wells or stays unmet.`;
 }
 
 // ---------------------------------------------------------------------------
