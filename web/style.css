@@ -247,6 +247,11 @@ button, input, select { font: inherit; color: inherit; }
   background: var(--blanco); color: var(--agua-osc); font-weight: 700; cursor: pointer;
 }
 .indicador-cifra { font-size: 2rem; font-weight: 700; color: var(--agua-osc); margin-top: 2px; }
+/* Estado de carga del indicador (punto 5): texto normal, con un pulso suave (sin movimiento si se pide reducirlo). */
+.indicador-cifra .cargando { font-size: 1rem; font-weight: 400; color: var(--tinta-suave); animation: cargando 1.2s ease-in-out infinite alternate; }
+@keyframes cargando { from { opacity: 1; } to { opacity: 0.45; } }
+/* Deslizador antes de los datos: ocupa su lugar pero no se ve (no salta de valor al cargar). */
+#dotacion[data-cargando] { visibility: hidden; }
 .indicador-cifra .al-menos { font-size: 1.1rem; font-weight: 700; color: var(--tinta); }
 .indicador-cifra .de-dotacion { font-size: 1rem; font-weight: 400; color: var(--tinta-suave); }
 .indicador-rango { font-size: 0.9rem; color: var(--tinta-suave); }
@@ -704,6 +709,33 @@ details[open] > .bloque-plegable::after { content: "−"; background: var(--agua
   }
   .celda .anio { font-size: 0.6rem; }
   .glosario dl { grid-template-columns: minmax(0, 1fr); }
+
+  /* Objetivos táctiles de al menos 44 px de alto (revisión con Playwright, 2026-11-15, punto 7; WCAG 2.5.5): botones de
+     la cabecera y de las marcas, el deslizador, el interruptor de lluvia, «Close», los selectores y cada <summary> de
+     la franja, el panel y la ficha. Solo en el teléfono: el escritorio conserva su diseño. */
+  .saltar, .boton-cabecera, .boton-marca, .boton-cerrar, .gota-controles select, .selector-zona select { min-height: 44px; }
+  .fila-deslizador input[type="range"] { height: 44px; }
+  .interruptor { min-height: 44px; }
+  .controles summary, .panel summary, #ficha summary {
+    min-height: 44px; box-sizing: border-box; padding-top: 12px; padding-bottom: 12px;
+  }
+  /* El «Why?» de las cinco respuestas es un botón con borde: el mismo alto, el texto centrado. */
+  #ficha .porque > summary { display: inline-flex; align-items: center; padding-top: 0; padding-bottom: 0; }
+  /* La casilla del tope de La gota (22 px) va dentro de su etiqueta, que ya mide 44 px (css/gota.css): el objetivo
+     táctil es la etiqueta. */
+}
+
+/* ---------- Teléfono con la ficha abierta (revisión con Playwright, 2026-11-15, punto 3) ----------
+   La franja fija dejaba 560 de 839 px a la ficha en un Pixel 7 y la volvía ilegible con texto al 200 % (WCAG 1.4.4 y
+   1.4.10). Con la ficha abierta queda solo el deslizador y su valor (se sigue moviendo con la ficha abierta); la marca,
+   los botones de referencia, su fuente, la lluvia y las unidades vuelven al cerrar la ficha. app.js pone
+   body[data-ficha="abierta"]. */
+@media (max-width: 899px) {
+  body[data-ficha="abierta"] .marca,
+  body[data-ficha="abierta"] .marcas,
+  body[data-ficha="abierta"] .info-marca,
+  body[data-ficha="abierta"] .control-extra { display: none; }
+  body[data-ficha="abierta"] .controles { padding-top: 4px; padding-bottom: 4px; }
 }
 
 /* ---------- Pantallas muy bajas (zoom de 200 %, teléfono horizontal) ----------
@@ -754,6 +786,10 @@ details[open] > .bloque-plegable::after { content: "−"; background: var(--agua
 /* La nota de GEDI va siempre junto al valor (no plegada): GEDI no marca cero sobre suelo desnudo. */
 .evidencia-nota { margin-top: 2px !important; padding: 4px 8px; border-left: 3px solid var(--ambar); background: var(--ambar-claro); font-size: 0.85rem !important; }
 .evidencia-fuente > summary { cursor: pointer; font-size: 0.8rem; color: var(--agua-osc); font-weight: 700; width: fit-content; }
+/* Fuente plegada de un dato (htmlFuente de app.js, I5): la cita en español se lee al abrir «Source». */
+.fuente-plegada > summary { cursor: pointer; font-size: 0.8rem; color: var(--agua-osc); font-weight: 700; width: fit-content; }
+.fuente-plegada .fuente { overflow-wrap: anywhere; margin-top: 2px; }
+.filtros .fuente-plegada { margin-top: 2px; }
 
 /* Papel (la ficha imprimible la arma css/imprimir.css; aquí, lo que depende de cómo app.js monta los
    módulos). Kit C4: la ficha cabe en una hoja, también con cuatro tarjetas (alfalfa establecida). */
