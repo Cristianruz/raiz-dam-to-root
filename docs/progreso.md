@@ -65,3 +65,4 @@
 | 22:36 | Página | HECHO | «criterion declared before the analysis» en lugar de «preregistered» (I22) | `56009d2` |
 | 22:37 | Materiales | EN CURSO | Video de 29 s y diapositivas (borrador; se vuelve a grabar sobre la página final) | `cd900ae` |
 | 22:40 | Coordinación | DECISIÓN (Cristian) | Una rama de integración, cada chat en su rama, revisión cruzada; diseño en su chat | `docs/coordinacion.md` |
+| 22:33 | Diseño (fase 0) | HECHO | Diagramas del sistema actual, principios y sistema visual vigente, crítica de las capturas y revisión de escalabilidad: otras zonas del DR-005 y cualquier suelo sí; otro distrito todavía no (contrato con `distrito.boquilla` y `distrito.acuifero_0831`, cultivos y perennes fijos, calendario del hemisferio norte). Solo `docs/`; el cambio de contrato lo decide Cristian | `docs/diseno/` |
