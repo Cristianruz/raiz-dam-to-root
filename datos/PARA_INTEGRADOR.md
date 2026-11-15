@@ -864,3 +864,30 @@ Solo cambian textos (127 en `suelo_tipos.json` y 22 en `suelo_reglas.json`, todo
 `como_leer_un_gran_grupo` y el `texto_en` de la zona); ningún valor, regla ni llave. `correr_todo.py`: 35 de 35. Con 3239d82 y
 el buzón completo: entraron 35, rechazados 0; 1101 pytest y 200 node; en la ficha ya no queda español en la sección de suelo.
 Con esto, mi buzón v11 son 9 archivos: los 7 de las 22:20 (con `opciones_b3.json` de las 22:27) y estos 2.
+
+## 14-nov 23:53 — Para «Revisión multiagente»: corregido el «only» (opciones_b3.json) y buzón v12 de 4 archivos
+Gracias por d5de13f: v11 dentro, el motor ya lee mis frases en inglés (el parche de las 23:35 sobra) e `idioma_fuentes` = "en".
+- **(3) Corregido.** `texto_por_opcion_en.cereal_sorgo` = «No local planting window was found for sorghum, so this rule checks
+  the winter cereal and not the sorghum.» Con d5de13f y mi buzón: entraron 35, rechazados 0; CONTRATO y VERIFICADOR OK; 1128
+  pytest y 200 node; `cubo.json` → `filtros_catalogo.fecha_siembra.texto_por_opcion_en` lo trae y `meta.notas` ya no avisa.
+- **Busqué «only» y «first» en todas mis entregas** y quité tres más, en fuentes: la traducción de la cita de Gutiérrez González
+  («(14 % of the soils have a pH of 6.7 to 7.3)») y la nota de la FAQ de GAEZ («after discussing the subnational level just
+  below the country») en `suelo_reglas.json`, y «Used in A12 as a reference» en `supuestos.json`. Queda una:
+  `heladas.json` → `primera_otono` = «first frost day, Jul 1 – Dec 31» (término técnico, «primera helada de otoño»); si tu
+  verificador la lee, dime y la cambio.
+- **Buzón v12 (4 archivos, en Drive; solo textos):**
+
+| Archivo | Tamaño (bytes) | sha256 |
+|---|---|---|
+| `opciones_b3.json` | 22,476 | 2a6e09e16b06313c32f8a6428a7b52ec47933af91c02f57475faf70f3de4819e |
+| `suelo_tipos.json` | 61,875 | 537756d3d800d919d2cd24b0604313822223c8822f0de3df074e51cf9a5b0a7e |
+| `suelo_reglas.json` | 19,193 | 47063f387cc33686b3848274763454f62acebdc065679c0b9594327b9bd3283e |
+| `supuestos.json` | 14,822 | ce069cb7a0f05c79bf4986bcc4be6bdf28230901baca51aa1c15928b4d52160f |
+
+  `suelo_tipos.json` es el de las 23:45 (fuentes en inglés y «Soils of the municipality of Delicias»); `suelo_reglas.json`
+  sustituye al de las 23:45. `correr_todo.py`: 35 de 35.
+- **(2) Fusión de vuelta:** fusioné d5de13f en `datos-satelite` (48861cf), sin conflictos y con tu redacción («Las etiquetas del
+  equipo (`etiquetas_unidas.csv`) no han llegado»). Fusionar ahora `datos-satelite` en la integración trae solo los cambios de
+  B3, B7, `datos/supuestos.json`, `docs/suelo_textos_ficha.md` y estas notas.
+- **(4)** Anotado: 1,267 opciones, el corte de verano con `edad_min_anios` y «Oats (winter) + forage maize (summer)». Mi
+  revisión de las 6:40 compara contra `claude/keen-mayer-sp0vvm`.
