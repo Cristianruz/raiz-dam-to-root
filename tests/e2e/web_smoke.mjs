@@ -1248,7 +1248,10 @@ async function pruebaGemelo3D(page, prefijo, telefono) {
     await dosCuadros(page);
   }
 
-  // Clic (o toque) en una columna abre su ficha.
+  // Clic (o toque) en una columna abre su ficha. Antes, el mapa entero a la vista: al marcar «Rain» Playwright desplaza
+  // la página hasta la franja de controles, y en el teléfono (franja con objetivos de 44 px e indicador más largo) el
+  // centro del lienzo quedaba bajo el borde de la pantalla. Quien toca una columna primero ve el mapa.
+  await page.evaluate(() => document.querySelector("#mapa").scrollIntoView({ block: "end" }));
   await quieto(page);
   const punto = await page.evaluate(() => window.raizDepuracion.puntoDeColumna());
   if (punto) {
