@@ -216,7 +216,7 @@
    "ordenada": -0.18
   },
   "etiqueta": "[V] published relation; assumption [S] when applied to adult pecan orchards",
-  "fuente": "Johnson, L.F. and Trout, T.J. (2012), Remote Sensing 4(2):439–455, DOI 10.3390/rs4020439, Eq. 1: Fc = 1.26 × NDVI − 0.18 (r² = 0.96; Landsat NDVI; vegetables, vineyards and young orchards of the San Joaquin Valley; the authors did not verify it in adult orchards). Read on Nov 14, 2026. Used only in A12 (reference); the demand calculation does not use it"
+  "fuente": "Johnson, L.F. and Trout, T.J. (2012), Remote Sensing 4(2):439–455, DOI 10.3390/rs4020439, Eq. 1: Fc = 1.26 × NDVI − 0.18 (r² = 0.96; Landsat NDVI; vegetables, vineyards and young orchards of the San Joaquin Valley; the authors did not verify it in adult orchards). Read on Nov 14, 2026. Used in A12 as a reference; the demand calculation does not use it"
  },
  "nogal_referencia": {
   "_nota": "REFERENCE on the pecan orchards of the pilot areas (A12, Nov 14, 2026). The demand calculation does not use this block: A5 keeps cobertura_dosel_nogal. Details in docs/nogal_cobertura.md",

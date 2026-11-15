@@ -379,7 +379,7 @@
    "necesita": [],
    "texto_en": "Planting must fall inside the window reported for the crop.",
    "texto_por_opcion_en": {
-    "cereal_sorgo": "No local planting window was found for sorghum, so this rule covers only the winter cereal."
+    "cereal_sorgo": "No local planting window was found for sorghum, so this rule checks the winter cereal and not the sorghum."
    },
    "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), filter 1 (INIFAP planting dates by crop)",
    "etiqueta": "[V]"
