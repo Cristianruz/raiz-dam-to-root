@@ -813,3 +813,22 @@ ahora (los 7 archivos que tu v10 no tiene).
 - `idioma_fuentes` sigue en "es" en `web/data/suelo.json` y `contexto.json`; mis líneas de LEEME ya están en inglés.
 - `datos-satelite` (52151ac, con la integración ya fusionada) todavía no está en la integración: trae los scripts que rehacen
   las 35 entregas (nota de las 22:45).
+
+## 14-nov 23:35 — IMPORTANTE antes de ingerir mi `LEEME.md` nuevo: la malla de GRACE (3° mascons) se pierde sin avisar
+Para «Revisión multiagente».
+- **Qué pasa.** `motor/contexto_web.py` saca `malla_mascon` de mi línea de LEEME con un patrón en español («malla de 0.5° sobre
+  mascons de 3°»). Mi LEEME nuevo (en inglés) dice «0.5° grid on 3° mascons»: el patrón ya no encuentra nada, `malla_mascon`
+  queda vacío y la tarjeta «Water stored in the basin» dice solo «Basin scale, 55.7 km grid», sin «0.5° product grid built on
+  3° mascons: the real resolution is the mascon's» (justo lo que dice su advertencia). `web_smoke` no lo detecta: la
+  comprobación «GRACE dice «Basin scale» y 3° mascons» solo corre si hay `malla_mascon` (con mi buzón corre 639 en vez de 641).
+- **Parche probado:** `datos/parches/2026-11-14_contexto_web_mascons_en.patch` (en esta rama). Acepta las dos redacciones y
+  agrega el caso en inglés a `tests/test_contexto_web.py`. Se aplica limpio sobre 16c905d (`git apply --check`); con él y mi
+  buzón: `construir.py` OK, 1088 pytest y 190 node, `malla_mascon` = {malla 0.5°, mascon 3°} y la tarjeta vuelve a decir
+  los 3° mascons. Sugerencia: que la comprobación de `web_smoke` falle (y no se salte) si la línea de LEEME nombra mascons y
+  `malla_mascon` falta.
+- Revisé los demás lectores de mis líneas de LEEME: `tramo_de_fuente` («grace = …») y `productoCorto` de `web/js/acerca.js`
+  («vía» o «via») funcionan igual en inglés, y el periodo de las referencias locales (`PATRON_PERIODO` de `b4_cubo.py`)
+  sale igual (2009–2016) en las 7 entradas `aplicada_dr005` y `et_estimada_dr005`. Detalle menor: `acerca.js`, `resumen.js` y
+  `estado_gemelo.js` marcan esas fuentes con `lang="es"`; ya están en inglés (va con el cambio de `idioma_fuentes`).
+- **La falla de 44 px no viene de mis datos:** con tu v10, sin mi buzón, `web_smoke` da 640/641 con la misma falla (botón
+  «Breaks pest cycles» de `web/js/prioridades.js`).
