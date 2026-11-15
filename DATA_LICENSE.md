@@ -45,6 +45,11 @@ These files are validated in `data/processed/` (`data/processed/fuentes.json`). 
 | NLDAS-2 forcing (`NASA/NLDAS/FORA0125_H002`) | NASA and NOAA | `contexto_regional.csv` | Same as above |
 | GEDI L2A v2 (`LARSE/GEDI/GEDI02_A_002_MONTHLY`) | NASA | `gedi_parcelas.csv` | Same as above |
 | ERA5-Land (`ECMWF/ERA5_LAND/DAILY_AGGR`) | ECMWF, Copernicus Climate Change Service. Not a NASA product | `contexto_regional.csv` | **Terms to be confirmed** |
+| SoilGrids 2.0 (`projects/soilgrids-isric/*_mean`, 0–30 cm) | ISRIC – World Soil Information | `suelo_parcelas.csv` (texture, pH, organic carbon, CEC) | CC-BY 4.0, as recorded by the data session in `docs/suelo_parcelas.md` and `datos/LEEME.md`; cite ISRIC SoilGrids |
+| OpenLandMap soil texture class | OpenLandMap (OpenGeoHub) | Column `clase_textura_olm` of `suelo_parcelas.csv`, used to report how often the two maps agree | **CC-BY-SA 4.0**: this column and anything derived from it must be shared under the same license (`docs/suelo_parcelas.md`) |
+| FAO ECOCROP crop requirements, read online sheet by sheet | FAO | Published pH and texture ranges in `suelo_requisitos.json`, each with its citation and link | **Terms to be confirmed**: only cited ranges were transcribed, not the database (`docs/suelo_parcelas.md`) |
+| FAO Irrigation and Drainage Paper 29 (water quality), Table 4 | FAO | Salinity thresholds in `suelo_requisitos.json`, each cited | Cited figures |
+| FAO Irrigation Water Management Training Manual No. 4, Annex I, Table 8 | FAO | Indicative drip and surface field efficiencies in `supuestos.json` (La gota) | Cited figures |
 
 Holders as listed in `data/recursos_reto.json`.
 
