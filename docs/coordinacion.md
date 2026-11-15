@@ -106,4 +106,4 @@ Revisión pedida por Cristian: cada chat, cada rama y la conversación del integ
 | `dependabot/…` (PR #2 y #3) | Sin fusionar a propósito hasta después del envío; el #3 rompe la prueba que fija la versión con que se generaron las teselas |
 | `Milo`, `Milo2`, `Tena` | Iguales a `main` (`e819b52`), sin commits propios. Cuando entre el PR #5 hay que actualizarlas desde `main` antes de trabajar en ellas |
 
-Hallazgos de las revisiones de anoche, uno por uno: `docs/revisiones/2026-11-15_cierre_hallazgos.md` (cuando el revisor lo entregue).
+Hallazgos de las revisiones de anoche, uno por uno: `docs/revisiones/2026-11-15_cierre_hallazgos.md` (146 renglones: 73 resueltos, 31 parciales, 25 abiertos, 11 de persona y 6 para después del evento, comprobados contra `f0dbf3b`).
