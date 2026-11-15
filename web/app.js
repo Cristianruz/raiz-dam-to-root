@@ -2197,7 +2197,10 @@ function htmlEvidencia(p) {
     // Calendario del modelo de la rotación actual (opción ACTUAL): para decir si el mes del valor de ECOSTRESS
     // no tiene cultivo. Una parcela sin clasificar no tiene opción ACTUAL: no se dice nada.
     const actual = (estado.cubo.parcelas?.[p.id]?.opciones ?? []).find((o) => o.id === "ACTUAL");
-    filas = ctx ? evidenciaDeParcela({ contexto: ctx, id: p.id, mesesCultivo: actual?.meses_cultivo }) : [];
+    // Una huerta que no rota tiene árboles todo el año: en sus meses de reposo el calendario marca «sin cultivo», pero
+    // la nota de ECOSTRESS «field without a crop» no aplica (revisor del contrato, 15-nov). Sin calendario, sin nota.
+    const noRota = estado.cubo.opciones_catalogo?.[actual?.rotacion]?.letra_maestro === LETRA_NO_ROTA;
+    filas = ctx ? evidenciaDeParcela({ contexto: ctx, id: p.id, mesesCultivo: noRota ? null : actual?.meses_cultivo }) : [];
   } catch (err) {
     console.error("ROOT: the satellite evidence could not be read", err);
   }
@@ -2719,7 +2722,8 @@ const TEXTO_SIN_MOTIVO = "The official rotation table gives no reason for this o
 const MARCADOR_ALCANZA = /enough for \{\{ha\}\} hectares/;
 // Valores de opciones_catalogo[rotación].letra_maestro con que la tabla oficial describe lo que la parcela YA tiene
 // (su rotación actual o una huerta que no rota). Con cualquier otro, la tabla habla de una alternativa.
-const LETRAS_DE_ESTADO_ACTUAL = ["ACTUAL", "nogal_no_rota"];
+const LETRA_NO_ROTA = "nogal_no_rota";
+const LETRAS_DE_ESTADO_ACTUAL = ["ACTUAL", LETRA_NO_ROTA];
 const TEXTO_ESTADO_ACTUAL =
   "This is the field's current state. The official rotation table describes it as an alternative for a cropped field, so it gives no reason for a field that is already in it.";
 

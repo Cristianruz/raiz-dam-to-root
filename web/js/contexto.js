@@ -844,7 +844,8 @@ export function textoEcostress(valor, mes, detras) {
   if (d.conteo !== CONTEO_SOBREVUELOS) return `${base}, from ${formatoNumero(n)} clear-sky ${plural(n, "scene", "scenes")}`;
   const [minimo, maximo] = [num(d.minimo), num(d.maximo)];
   // El intervalo solo tiene sentido con dos o más sobrevuelos y con sus dos extremos en los datos.
-  const intervalo = n > 1 && minimo != null && maximo != null ? ` (${formatoNumero(minimo)} to ${formatoNumero(maximo)})` : "";
+  // Si los dos extremos son iguales no hay intervalo que escribir («(2.11 to 2.11)»).
+  const intervalo = n > 1 && minimo != null && maximo != null && minimo !== maximo ? ` (${formatoNumero(minimo)} to ${formatoNumero(maximo)})` : "";
   return `${base}, from ${formatoNumero(n)} clear ${plural(n, "overpass", "overpasses")}${intervalo}`;
 }
 
@@ -888,7 +889,7 @@ export function evidenciaDeParcela({ contexto, id, mesesCultivo } = {}) {
     const delMes = (lista) => (i >= 0 ? ((lista || {})[id] || [])[i] : null);
     const detras = { n: delMes(eco.escenas_parcelas), conteo: eco.conteo, minimo: delMes(eco.minimos_parcelas), maximo: delMes(eco.maximos_parcelas) };
     const sinCultivo = Boolean(ultimo) && sinCultivoEnElMes(mesesCultivo, ultimo.mes);
-    const aviso = typeof eco.aviso === "string" && eco.aviso.trim() ? `${eco.aviso.trim().replace(/\.$/, "")}.` : AVISO_ECOSTRESS;
+    const aviso = typeof eco.aviso === "string" && eco.aviso.trim() ? `${eco.aviso.trim().replace(/[.!?]+$/, "")}.` : AVISO_ECOSTRESS;
     lista.push({
       etiqueta: "Evapotranspiration (ECOSTRESS)",
       texto: ultimo ? textoEcostress(ultimo.valor, ultimo.mes, detras) : "ECOSTRESS: no clear scene over this field",

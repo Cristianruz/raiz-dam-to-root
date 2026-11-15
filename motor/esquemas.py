@@ -921,6 +921,14 @@ ESQUEMAS = {
             "unidad": {"tipo": "texto"},
             "resolucion_m": {"tipo": "numero", "mayor_que": 0},
         },
+        # clase_nombre, cultivo_gaez y nota: textos de la entrega que la tarjeta de GAEZ muestra desde el 15-nov
+        # (nombre de la clase de aptitud, cultivo de GAEZ que respalda la fila y su nota). Se declaran para que no
+        # entren «sin validar» (I7 de las revisiones del 15-nov); son opcionales y pueden venir vacíos.
+        "columnas_opcionales": {
+            "clase_nombre": {"tipo": "texto", "nulo": True},
+            "cultivo_gaez": {"tipo": "texto", "nulo": True},
+            "nota": {"tipo": "texto", "nulo": True},
+        },
         "fuente_reglas": (f"{FUENTE_RECURSOS}: zona de zona_piloto.zonas (params); cultivo de las clases "
                           "del proyecto (contrato v4, kit §2.2; sin «sin_clasificar» ni «barbecho», que no "
                           "son cultivos); variable y unidad tal como las publica FAO (texto no vacío); "

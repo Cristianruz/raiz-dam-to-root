@@ -137,6 +137,20 @@ def test_web_data_pares_con_las_mismas_cifras_y_sin_lenguaje_prohibido(archivo):
     assert not errores, "\n".join(errores[:20])
 
 
+@pytest.mark.parametrize("archivo", ["cubo.json", "gemelo.json", "relieve.json", "pruebas.json", "contexto.json",
+                                     "suelo.json", "ndvi_mensual.json", "explicaciones.json"])
+def test_web_data_ningun_ingles_vacio_junto_a_su_original(archivo):
+    """Un «X_en» vacío junto a un «X» con texto dejaría la página sin la cita: revisar() compara cifras y no lo vería
+    (hallazgo del revisor de código del 15-nov). Limitación conocida de revisar(): compara las cifras sin su orden."""
+    ruta = WEB / archivo
+    if not ruta.exists():
+        pytest.skip(f"sin web/data/{archivo}")
+    # Excepción: una unidad puede quedar vacía en inglés a propósito («adimensional» → sin unidad, como el NDVI).
+    vacios = [donde for donde, es, en in pares(json.loads(ruta.read_text(encoding="utf-8")))
+              if es.strip() and not en.strip() and not donde.endswith(".unidad")]
+    assert not vacios, "\n".join(vacios[:20])
+
+
 def test_el_cubo_copia_el_ingles_de_params():
     ruta = WEB / "cubo.json"
     if not ruta.exists():
