@@ -378,6 +378,13 @@ async function capturas(navegador, url, datos) {
     await t.locator("#boton-whatsapp").click();
     const maqueta = t.locator("#vista-whatsapp .wa-maqueta");
     await maqueta.waitFor({ timeout: 10000 });
+    // El mensaje abre en el idioma del teléfono (cuatro idiomas desde el 14-nov). La diapositiva enseña el que recibe
+    // el agricultor del distrito, en español: se elige en el selector «Message language» antes de la captura.
+    const idioma = t.locator("#vista-whatsapp select.wa-idioma-select");
+    if (await idioma.count()) {
+      await idioma.selectOption("es");
+      await maqueta.waitFor({ timeout: 10000 });
+    }
     // En el teléfono la ficha es una hoja fija con su propio desplazamiento: se sube la maqueta al borde de la hoja y se
     // fotografía la hoja tal como se ve (la captura de un elemento más alto que la ventana saldría de la página de abajo).
     await subir(t, "#ficha", "#vista-whatsapp .wa-maqueta", ".ficha-cabeza", 6);
