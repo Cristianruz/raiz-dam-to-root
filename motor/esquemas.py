@@ -347,7 +347,7 @@ ELEMENTO_VARIOS = "varios"
 CLASES_PH = ("fuertemente ácido", "moderadamente ácido", "neutro", "medianamente alcalino", "fuertemente alcalino")
 CLASES_MO = ("muy bajo", "bajo", "medio", "alto", "muy alto")
 CLASES_CIC = ("muy baja", "baja", "media", "alta", "muy alta")
-GRUPOS_TEXTURA = ("light", "medium", "heavy")
+NOMBRES_GRUPO_TEXTURA = ("light", "medium", "heavy")  # no confundir con GRUPOS_TEXTURA (la llave)
 # Llaves de primer nivel de suelo_tipos.json (las del archivo del 14-nov y de la nota de las 19:23) y su tipo.
 LLAVES_SUELO_TIPOS = {
     "fuente": "texto", "nota": "texto", "texto_explica_en": "texto", "wrb": "objeto", "usda_ordenes": "objeto",
@@ -1033,7 +1033,7 @@ ESQUEMAS = {
             "mo_clase": {"tipo": "texto", "valores": CLASES_MO, "nulo": True},
             "cic_cmol_kg": _con(NO_NEGATIVO, nulo=True),
             "cic_clase": {"tipo": "texto", "valores": CLASES_CIC, "nulo": True},
-            "textura_grupo": {"tipo": "texto", "valores": GRUPOS_TEXTURA, "nulo": True},
+            "textura_grupo": {"tipo": "texto", "valores": NOMBRES_GRUPO_TEXTURA, "nulo": True},
         },
         "reglas": [
             {"regla": "todas_o_ninguna",

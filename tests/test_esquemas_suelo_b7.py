@@ -171,12 +171,12 @@ def test_clases_del_csv_son_las_del_archivo_de_reglas():
     assert tuple(columnas["ph_clase"]["valores"]) == esquemas.CLASES_PH
     assert tuple(columnas["mo_clase"]["valores"]) == esquemas.CLASES_MO
     assert tuple(columnas["cic_clase"]["valores"]) == esquemas.CLASES_CIC
-    assert tuple(columnas["textura_grupo"]["valores"]) == esquemas.GRUPOS_TEXTURA
+    assert tuple(columnas["textura_grupo"]["valores"]) == esquemas.NOMBRES_GRUPO_TEXTURA
     requisitos = PROCESADOS / "suelo_requisitos.json"
     if not requisitos.is_file():
         pytest.skip("data/processed/suelo_requisitos.json aún no existe")
     grupos = json.loads(requisitos.read_text(encoding="utf-8"))["grupos_textura"]["valor"]
-    assert tuple(grupos) == esquemas.GRUPOS_TEXTURA
+    assert tuple(grupos) == esquemas.NOMBRES_GRUPO_TEXTURA
 
 
 def test_columnas_y_llaves_son_las_de_los_archivos_reales():
