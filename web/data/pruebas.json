@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T04:09:44+00:00",
+ "generado": "2026-11-15T08:09:17+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T04:09:44+00:00",
+  "corrida": "2026-11-15T08:09:16+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -316,21 +316,21 @@
     "nombre": "gemelo",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "gemelo: OK · contexto: OK · suelo: OK"
+    "detalle": "gemelo: OK · contexto: OK · suelo: OK · dashboard: OK · pronóstico: OK"
    },
    {
     "id": "pwa",
     "nombre": "pwa",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache a6e7c91d4375717f"
+    "detalle": "precache 72338a926cd3bb59"
    },
    {
     "id": "manifest",
     "nombre": "Manifest of every figure",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "114196 cifras (0 simuladas), 35 fuentes de origen, 59 avisos"
+    "detalle": "121113 cifras (0 simuladas), 35 fuentes de origen, 59 avisos"
    },
    {
     "id": "contrato",
@@ -351,14 +351,14 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1040 passed, 30 warnings in 41.03s"
+    "detalle": "1058 passed, 5 skipped in 57.78s"
    },
    {
     "id": "node",
     "nombre": "JavaScript tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "167 pass, 0 fail, 0 skipped"
+    "detalle": "179 pass, 0 fail, 0 skipped"
    }
   ],
   "nota": "Last full run recorded by python construir.py. The browser smoke test (tests/e2e/web_smoke.mjs) runs separately, before each release."

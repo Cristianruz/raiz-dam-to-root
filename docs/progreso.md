@@ -49,3 +49,15 @@
 | 21:33 | Nombre | HECHO (Cristian) | El nombre ROOT y el equipo Orbital Farming ya están registrados en la plataforma de Space Apps | `docs/decisiones/2026-11-14_nombre_root.md` |
 | 20:50 | Integración del gemelo a la página (etapas 1–3) | HECHO | Etapa 1: vista 3D, línea de tiempo, «Twin status», app instalable y apertura en Delicias–Saucillo. Etapa 2: ficha completa (frase, NDVI, #id, suelo, lámina local, opciones B3, evidencia GEDI y helada). Etapa 3: «Regional context» plegable ligado a zona y año con las advertencias de la sesión de datos a la vista, «Challenge data sources» y H1-b (does not hold, sin cambiar H1) en «About & Data», enlaces a `docs/modelo_vs_practica.md` y `docs/revision_protagonistas.md` (revisión de IA; falta la de una persona), pendientes de la auditoría del motor en la web (etiquetas del distrito, textos en inglés, ventana de suelo desnudo, rutas cortadas, rótulo del goteo y «upper bound») y regla 11 completa en `manifest.json` para gemelo, contexto, suelo y NDVI | sin commit; rama `claude/sleepy-heisenberg-pxyhtx` |
 | 20:50 | Integración (etapa 3) | MENOR (diferido) | Contrato a anotar en docs/decisiones (lo decide Cristian): `tarjetas[].advertencias` en `data/recursos_reto.json`, `malla_mascon` en las series de `contexto.json`, `complementos` (H1-b) y `documentos` en `pruebas.json` | reporte de la etapa 3 |
+
+| 2026-11-14 | Dashboard Tena | EN CURSO | Entrada en español solicitada por el usuario, referencias adjuntas, escenarios del motor y cronología; explorador técnico preservado. | docs/dashboard-flujos.md |
+
+| 2026-11-14 | Dashboard Tena | HECHO | Dashboard adaptable, investigación trazable y Mermaid. Construcción completa correcta; 53 comprobaciones del dashboard, 39 PWA y 53 dirigidas del explorador correctas. Corrida extensa y limitaciones documentadas. Cambios locales, sin publicación. | docs/dashboard-flujos.md |
+
+| 2026-11-15 | Recomendador y pronóstico | EN CURSO | Motor trazable por parcela con captura manual y restricciones; A5 por ciclos completos, lluvia con retroprueba temporal y helada regional. | docs/recomendador-validacion.md |
+
+| 2026-11-15 | Recomendador y pronóstico | HECHO | Balance hídrico y restricciones trazables, captura y auditoría, retroprueba de lluvia y frecuencia de helada; construcción completa y verificaciones dirigidas correctas. Paquete con fuentes y verificador reproducible. | docs/recomendador-validacion.md |
+
+| 2026-11-15 | Interfaz moderna | HECHO | Rediseño oscuro con mapa protagonista, controles de agua, captura por pasos y gráfico de validación; 77 comprobaciones del planificador y 71 de mapa/dashboard correctas. Resultados numéricos conservados. | docs/interfaz-moderna.md |
+
+| 2026-11-15 | Publicación en Tena | PUBLICACIÓN | El usuario solicita subir a GitHub el dashboard, el motor verificable y la interfaz moderna. Se prepara el commit sobre la rama remota Tena, conservando el historial existente. | docs/interfaz-moderna.md |

@@ -344,3 +344,19 @@ Code: Apache-2.0 (`LICENSE`). Third-party data and libraries keep their own lice
 ## Resumen en español
 
 ROOT muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa (S9 §1). Es un gemelo digital de dos zonas piloto del DR-005 Delicias, Chihuahua, con datos abiertos de la NASA (HLS, POWER, NASADEM y GPM IMERG). No tiene sensores en campo ni datos en tiempo real: se actualiza en cada corrida. La herramienta no reparte, vende ni intercambia agua, no pronostica la presa y apoya, sin sustituir, el juicio del agricultor y del técnico. Los resultados desfavorables se publican igual que los favorables, y las pruebas que no se han ejecutado aparecen como «not run».
+
+## Dashboard de la rama Tena
+
+La entrada `web/index.html` presenta el dashboard Raíz en español: resumen, mapa y detalle de parcela, comparación de cultivos, recomendaciones para revisar con el técnico, cronología y fuentes de investigación. Es adaptable a celular. El explorador técnico anterior se conserva en `web/explorador.html`, con acceso desde el dashboard.
+
+Los PDF aportados se consultan desde la vista de investigación; las cifras transcritas llevan etiqueta de referencia secundaria. Los escenarios usan el motor existente. La sección de predicciones prepara el contexto para trabajo futuro: no hay aprendizaje automático entrenado ni probabilidades de cosecha. Los flujos Mermaid, su significado, los archivos y las limitaciones se explican en [docs/dashboard-flujos.md](docs/dashboard-flujos.md).
+
+Para verlo: `python -m http.server 8000 --directory web` y abrir `http://localhost:8000`. `python construir.py` también genera `web/data/dashboard.json`. La demo monolítica sin conexión continúa usando el explorador técnico. La prueba del nuevo dashboard es `node tests/e2e/dashboard_smoke.mjs` con el servidor activo y Playwright instalado.
+
+### Motor de recomendaciones y predicción de referencia
+
+La vista **Recomendaciones** ahora recalcula alternativas con históricos de demanda A5 y entradas manuales, emite impedimentos/condiciones y exporta la auditoría. **Historia y predicciones** incluye lluvia de referencia con retroprueba temporal por zona y descarga de cada año evaluado. Los ciclos incompletos se excluyen; no hay pronóstico de rendimiento, de presa ni riego diario. Método, fuentes, ejemplo de comprobación y pruebas en [docs/recomendador-validacion.md](docs/recomendador-validacion.md). `python construir.py` genera los datos nuevos con `motor/pronostico_web.py`.
+
+### Interfaz moderna
+
+La página principal adopta el diseño del prototipo adjunto: mapa central, controles flotantes, paneles oscuros y captura del plan por pasos. El motor de recomendaciones y la auditoría siguen disponibles. Diseño, accesibilidad y licencias: [docs/interfaz-moderna.md](docs/interfaz-moderna.md).

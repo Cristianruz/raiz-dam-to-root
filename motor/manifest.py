@@ -1078,6 +1078,45 @@ def generar(raiz=RAIZ, escribir=True, hoy=None):
     if ruta_pruebas.exists():
         cifras_de_pruebas(m, leer_json(ruta_pruebas))
 
+    # Dashboard: cifras curadas de los PDF y copias de rotaciones con fuente separada.
+    ruta_dashboard = raiz / "web/data/dashboard.json"
+    if ruta_dashboard.exists():
+        dashboard = leer_json(ruta_dashboard)
+        def registrar_dashboard(obj, clave=""):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    registrar_dashboard(v, f"{clave}.{k}" if clave else k)
+            elif isinstance(obj, list):
+                for i, v in enumerate(obj):
+                    registrar_dashboard(v, f"{clave}[{i}]")
+            elif isinstance(obj, (int, float)) and not isinstance(obj, bool) or isinstance(obj, str) and re.search(r"\d", obj):
+                modelo = clave.startswith("rotaciones.")
+                fuente = "data/processed/rotaciones[_lazaro_cardenas].json; A5 FAO-56 con NASA POWER y supuestos declarados" if modelo else dashboard["fuente"]
+                m.agregar("web/data/dashboard.json", clave, obj, fuente, dashboard["fecha"],
+                          "motor/dashboard_web.py", "[S] modelo con incertidumbre" if modelo else dashboard["etiqueta"], False)
+        registrar_dashboard(dashboard)
+
+    # Series de clima, demanda y validación publicadas por el nuevo motor; ninguna cifra sin rastro.
+    ruta_pronostico = raiz / "web/data/pronostico.json"
+    if ruta_pronostico.exists():
+        pronostico = leer_json(ruta_pronostico)
+        def registrar_pronostico(obj, clave=""):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    registrar_pronostico(v, f"{clave}.{k}" if clave else k)
+            elif isinstance(obj, list):
+                for i, v in enumerate(obj):
+                    registrar_pronostico(v, f"{clave}[{i}]")
+            elif (isinstance(obj, (int, float)) and not isinstance(obj, bool)) or (isinstance(obj, str) and re.search(r"\d", obj)):
+                zona_id = clave.split(".")[1] if clave.startswith("zonas.") else None
+                zona_p = pronostico.get("zonas", {}).get(zona_id) or {}
+                corte = zona_p.get("fecha_corte") or max((z.get("fecha_corte", "") for z in pronostico["zonas"].values() if z), default=hoy)
+                fuente = zona_p.get("fuente_clima", "data/processed/opciones_b3.json; suelo_requisitos.json; supuestos.json")
+                m.agregar("web/data/pronostico.json", clave, obj,
+                          f"{fuente}; método y hashes de origen en pronostico.json; demanda FAO A5 y retroprueba temporal de lluvia, no rendimiento",
+                          corte, "motor/pronostico_web.py", "[S] modelo y reglas con fuentes declaradas; clima cacheado NASA POWER", False)
+        registrar_pronostico(pronostico)
+
     simuladas = sum(1 for c in m.cifras.values() if c["mock"])
     cifras = agrupar_cifras(m.cifras)
     manifest = {

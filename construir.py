@@ -285,7 +285,7 @@ def paso_gemelo():
     titulo("(b3) Gemelo digital, bases del reto y suelo (gemelo_web, contexto_web, suelo_web)")
     detalles = []
     for modulo, etiqueta in (("motor.gemelo_web", "gemelo"), ("motor.contexto_web", "contexto"),
-                             ("motor.suelo_web", "suelo")):
+                             ("motor.suelo_web", "suelo"), ("motor.dashboard_web", "dashboard"), ("motor.pronostico_web", "pronóstico")):
         try:
             rep = importar(modulo).construir()
         except Exception as ex:  # noqa: BLE001

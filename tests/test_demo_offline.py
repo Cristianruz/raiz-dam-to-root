@@ -147,7 +147,7 @@ def test_no_quedan_scripts_ni_hojas_que_apunten_a_archivos(copia):
 
 
 def test_cada_hoja_y_cada_biblioteca_de_index_va_incrustada(copia):
-    original = Leida((copia["web"] / "index.html").read_text(encoding="utf-8"))
+    original = Leida((copia["web"] / ("explorador.html" if (copia["web"] / "explorador.html").exists() else "index.html")).read_text(encoding="utf-8"))
     estilos = {e["attrs"].get("data-origen"): e["texto"] for e in copia["leida"].estilos}
     hojas = [at["href"] for at in original.de("link") if "stylesheet" in at.get("rel", "").lower()]
     assert hojas, "index.html ya no enlaza hojas de estilos: revise esta prueba"
@@ -166,7 +166,7 @@ def test_cada_hoja_y_cada_biblioteca_de_index_va_incrustada(copia):
 
 def test_todos_los_modulos_alcanzables_van_incrustados_y_en_orden(copia):
     web, paquete = copia["web"], copia["leida"].paquete()
-    original = Leida((web / "index.html").read_text(encoding="utf-8"))
+    original = Leida((web / ("explorador.html" if (web / "explorador.html").exists() else "index.html")).read_text(encoding="utf-8"))
     entradas = [s["attrs"]["src"] for s in original.scripts if s["attrs"].get("type") == "module"]
     assert paquete["entradas"] == entradas and entradas
     incrustados = set(paquete["modulos"])

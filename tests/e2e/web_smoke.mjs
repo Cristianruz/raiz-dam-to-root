@@ -272,7 +272,7 @@ async function abrir(navegador, base, opciones, etiqueta, alterados = {}, { inic
   });
   // Sin red para las teselas (como en esta máquina): se abortan de inmediato.
   await page.route((url) => esOpcional(url.href), (route) => route.abort());
-  await page.goto(`${base}/index.html${hash}`, { waitUntil: "load" });
+  await page.goto(`${base}/explorador.html${hash}`, { waitUntil: "load" });
   await page.waitForSelector("body[data-listo='si']", { timeout: 15000 });
   await page.waitForFunction(() => document.body.dataset.mapa === "listo" || document.body.dataset.mapa === "sin-mapa", null, { timeout: 30000 });
   await page.waitForFunction(() => Boolean(document.body.dataset.relieve), null, { timeout: 15000 });
@@ -2788,7 +2788,7 @@ async function main() {
     const pMalo = await ctxMalo.newPage();
     await pMalo.route((url) => esOpcional(url.href), (route) => route.abort());
     await pMalo.route("**/data/cubo.json", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(malo) }));
-    await pMalo.goto(`${base}/index.html`);
+    await pMalo.goto(`${base}/explorador.html`);
     await pMalo.waitForSelector(".error-carga", { timeout: 15000 }).catch(() => null);
     const avisoMalo = (await pMalo.locator(".error-carga").count()) ? await pMalo.locator(".error-carga").first().innerText() : "";
     check("arranque fallido: aviso visible «The page could not start: …»", avisoMalo.includes("The page could not start") && (await pMalo.evaluate(() => document.body.dataset.listo)) === "error", avisoMalo);

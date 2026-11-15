@@ -70,6 +70,36 @@
     "*.js"
    ],
    "motivo": "Nombre del módulo web/js/gemelo3d.js (vista 3D del gemelo) y de los id que app.js le da a su leyenda (#t-gemelo3d, #bloque-gemelo3d); «3d» es parte del nombre, no una cifra de los datos"
+  },
+  {
+   "texto": "Banda P10–P90:",
+   "motivo": "Nombres de percentiles, no valores; los valores se leen del modelo.",
+   "archivos": [
+    "js/dashboard.js"
+   ]
+  },
+  {
+   "patron": "(?:demanda_p(?:10|50|90)|ha_cubiertas_p50)",
+   "motivo": "Claves de las columnas CSV; los valores provienen de reglas.js y cubo.json.",
+   "archivos": [
+    "js/dashboard.js"
+   ]
+  },
+  {
+   "patron": "\\bA5\\b|\\bA5_demanda_plazo\\b",
+   "archivos": [
+    "js/asesor.js",
+    "js/recomendador.js",
+    "js/dashboard.js"
+   ],
+   "motivo": "Identificador del motor de demanda y nombre de su archivo; no es una cifra de una predicción."
+  },
+  {
+   "texto": "p50_mm",
+   "archivos": [
+    "js/asesor.js"
+   ],
+   "motivo": "Clave del campo de mediana en la serie de validación; el gráfico obtiene todos sus valores del archivo de datos."
   }
  ]
 }

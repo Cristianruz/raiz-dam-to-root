@@ -1,0 +1,271 @@
+/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; Codex. */
+.decision-form h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.form-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+.form-heading span {
+  font-size: 11px;
+  color: #617052;
+}
+.decision-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.decision-form-grid label {
+  display: grid;
+  gap: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #52644b;
+}
+.decision-form-grid input,
+.decision-form-grid select {
+  width: 100%;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid #dce3d4;
+  border-radius: 6px;
+  background: #fafcf7;
+  font-size: 12px;
+  color: #23432e;
+  min-height: 43px;
+}
+.confirmation {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 25px 0 16px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.confirmation input {
+  accent-color: #3c6745;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+.form-actions .button {
+  font-size: 12px;
+}
+#decision-summary {
+  font-size: 13px;
+  line-height: 1.9;
+  color: #4b6344;
+  padding: 5px 0 20px;
+}
+.decision-results {
+  display: grid;
+  gap: 20px;
+}
+.decision-card {
+  padding: 25px;
+}
+.decision-card.blocked {
+  border-left: 5px solid #b67743;
+}
+.decision-card h3 {
+  font-size: 19px;
+  font-weight: 550;
+}
+.decision-card .pill {
+  font-size: 9px;
+  white-space: normal;
+}
+.decision-action {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #2e5439;
+  font-weight: 550;
+  max-width: 850px;
+}
+.decision-values {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  padding: 20px 0;
+  border-block: 1px solid #e4eada;
+}
+.decision-values dt {
+  font-size: 10px;
+  line-height: 1.6;
+  color: #627058;
+  margin-bottom: 10px;
+}
+.decision-values dd {
+  font-size: 19px;
+  margin: 0;
+  color: #385132;
+}
+.decision-card details {
+  font-size: 12px;
+  line-height: 1.9;
+  border-top: 1px solid #e2e7d9;
+  padding-top: 14px;
+  margin-top: 14px;
+  overflow-wrap: anywhere;
+}
+.decision-card summary,
+.evidence-table summary {
+  cursor: pointer;
+  font-weight: 550;
+}
+.decision-card ul {
+  padding-left: 20px;
+}
+.decision-card li {
+  margin: 9px 0;
+}
+.decision-card small {
+  color: #69785d;
+}
+.blocking-reasons {
+  color: #854722;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.forecast-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 22px;
+}
+.forecast-metrics h3 {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.forecast-metrics strong {
+  display: block;
+  font-size: 32px;
+  font-weight: 500;
+  margin: 17px 0;
+}
+.forecast-metrics p,
+.evidence-table p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #65745a;
+}
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  margin: 20px 0;
+}
+.table-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  text-align: right;
+}
+.table-scroll th,
+.table-scroll td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e5eadf;
+  white-space: nowrap;
+}
+.evidence-table {
+  font-size: 12px;
+}
+.observation {
+  background: #edf3e7;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 18px;
+}
+.observation h4 {
+  font-size: 13px;
+  margin: 0;
+}
+.observation p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+#decision-checks {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.decision-card .micro {
+  font-size: 11px !important;
+}
+.decision-results:empty {
+  display: none;
+}
+@media (max-width: 1050px) {
+  .decision-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .decision-values {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .forecast-metrics {
+    gap: 12px;
+  }
+  .forecast-metrics strong {
+    font-size: 26px;
+  }
+}
+@media (max-width: 600px) {
+  .decision-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .decision-card {
+    padding: 20px;
+  }
+  .decision-card h3 {
+    font-size: 17px;
+  }
+  .decision-card .card-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .decision-action {
+    font-size: 15px;
+  }
+  .decision-values {
+    grid-template-columns: 1fr 1fr;
+    gap: 17px;
+  }
+  .decision-values dd {
+    font-size: 17px;
+  }
+  .forecast-metrics {
+    grid-template-columns: 1fr;
+  }
+  .form-actions {
+    flex-wrap: wrap;
+  }
+  .decision-form-grid input,
+  .decision-form-grid select {
+    font-size: 16px;
+  }
+  .confirmation {
+    font-size: 12px;
+  }
+  #forecast-analysis .section-heading {
+    align-items: flex-start;
+  }
+  .table-scroll {
+    border: 1px solid #e5eadf;
+    border-radius: 8px;
+  }
+  .decision-card details {
+    font-size: 12px;
+  }
+}

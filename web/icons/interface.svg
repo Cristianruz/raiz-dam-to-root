@@ -1,0 +1,15 @@
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; iconos de interfaz dibujados con Codex. -->
+<svg xmlns="http://www.w3.org/2000/svg"><defs>
+<symbol id="home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></symbol>
+<symbol id="map" viewBox="0 0 24 24"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2Zm6-2v16m6-14v16"/></symbol>
+<symbol id="sprout" viewBox="0 0 24 24"><path d="M12 21V11M12 14C4 15 3 9 3 5c7-1 10 3 9 9Zm0-4c0-6 4-8 9-7 0 6-3 9-9 9"/></symbol>
+<symbol id="sparkles" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Zm7-1v4m-2-2h4"/></symbol>
+<symbol id="chart" viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-5 4 3 6-7m-5 0h5v5"/></symbol>
+<symbol id="drop" viewBox="0 0 24 24"><path d="M12 2c-3 5-8 9-8 13a8 8 0 0 0 16 0c0-4-5-8-8-13Z"/></symbol>
+<symbol id="layers" viewBox="0 0 24 24"><path d="m2 8 10-6 10 6-10 6Zm0 5 10 6 10-6M2 18l10 5 10-5"/></symbol>
+<symbol id="target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 1v5m0 12v5M1 12h5m12 0h5"/><circle cx="12" cy="12" r="2"/></symbol>
+<symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></symbol>
+<symbol id="arrow" viewBox="0 0 24 24"><path d="M5 19 19 5M5 5h14v14"/></symbol>
+<symbol id="download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+<symbol id="chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+</defs></svg>

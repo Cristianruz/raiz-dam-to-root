@@ -234,7 +234,10 @@ def mini(tmp_path):
     (web / ".oculto").write_text("x", encoding="utf-8")
     (web / "data/.cache").mkdir()
     (web / "data/.cache/resto.json").write_text("{}", encoding="utf-8")
-    shutil.copytree(WEB / "icons", web / "icons")
+    # La mini web utiliza solo los iconos declarados en su manifest; no los SVG de otras vistas.
+    (web / "icons").mkdir()
+    for icono in pwa.ICONOS:
+        shutil.copyfile(WEB / icono["archivo"], web / icono["archivo"])
     return web
 
 

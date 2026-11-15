@@ -88,3 +88,7 @@ Terms that are not recorded in this repository and that a team member has to con
 8. OpenStreetMap: tile usage terms for the public site.
 9. GAEZ and WaPOR v3: terms, if they are ever used.
 10. The license of the team's own derived tables in `data/processed/` and `web/data/` is not stated in the repository. The field polygons derive from Fields of The World and carry its attribution.
+
+### Tipografía de la interfaz moderna
+
+Atkinson Hyperlegible, copyright 2020 Braille Institute of America, Inc., SIL Open Font License 1.1. Archivos originales extraídos sin modificar del prototipo HTML proporcionado por el usuario. Licencia completa y hashes de procedencia en `web/fonts/OFL.txt` y `web/fonts/ORIGEN.json`. No se reutilizan los datos de demostración del prototipo.
