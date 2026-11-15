@@ -1,4 +1,4 @@
-/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 */
 /* web/css/gota.css — La gota (kit X3.2): Sankey, gotas, controles del goteo, plan B y tabla oculta.
    Colores de la identidad como variables (kit X3.2 §5): Agua para el agua que fluye, Brote para la ET del
    cultivo, Tierra para el acuífero y Ámbar para las pérdidas. Si style.css ya define la identidad, se usa
@@ -56,6 +56,15 @@
 .gota-mod-cifra-rotulo { font-weight: 700; font-size: 1.05rem; }
 .gota-mod-cifra-valor { font-size: 1.7rem; font-variant-numeric: tabular-nums; }
 .gota-mod-cifra small { display: block; font-size: 0.85rem; font-weight: 400; color: var(--gota-texto-suave); }
+/* Eficiencias del goteo con su rótulo y su fuente, a la vista junto a las cifras (cubo.meta.goteo). */
+.gota-mod-etiqueta {
+  margin: 0 0 6px; padding: 4px 8px; border-radius: 6px;
+  border-left: 3px solid var(--gota-oscuro); background: var(--agua-clara, #DCEAF6);
+  font-size: 0.82rem; color: var(--gota-oscuro); line-height: 1.35;
+}
+.gota-mod-etiqueta[hidden], .gota-mod-cota[hidden] { display: none; }
+.gota-mod-etiqueta-fuente { color: var(--gota-texto-suave); }
+.gota-mod-cota { margin: 0 0 6px; font-size: 0.82rem; color: var(--gota-texto-suave); }
 .gota-mod-alerta {
   background: var(--gota-alerta-fondo); border-left: 4px solid var(--gota-alerta);
   padding: 6px 8px; border-radius: 4px; font-weight: 700; margin: 8px 0;

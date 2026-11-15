@@ -1,5 +1,5 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/ndvi_web.py a partir de data/processed/hls_mensual_parcelas.csv (banda ndvi, columna mediana); nunca se edita a mano. Cada lista está alineada a «meses»; null = sin dato.",
  "meses": ["2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09"],
  "parcelas": {
@@ -1243,5 +1243,6 @@
   "P0939": [0.539,0.387,0.302,0.203,0.176,0.167,0.17,0.171,0.188,0.286,0.255,0.246],
   "P0940": [0.712,0.624,0.298,0.28,0.363,0.592,0.753,0.781,0.804,0.762,0.795,0.778]
  },
+ "umbrales": {"verde":{"valor":0.4,"etiqueta":"assumption [S]","fuente":"S9 §5; sensibilidad 0.35–0.45; calibrar con etiquetas a ciegas","archivo":"data/processed/supuestos.json"},"desnudo":{"valor":0.2,"etiqueta":"assumption [S]","fuente":"Kit A3","archivo":"data/processed/supuestos.json"}},
  "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) vía Google Earth Engine, proyecto iondroplet; dos zonas"
 }

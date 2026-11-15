@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Bases de datos del reto para la web: escribe web/data/contexto.json.
 
 Decisión: docs/decisiones/2026-11-14_recursos_del_reto.md (papel de cada base de datos del reto y
@@ -21,6 +21,8 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
   _encabezado, generado (fecha y hora UTC), decision
   zonas            {id: {"nombre"}} de data/params.json → zona_piloto.zonas
   motivo_pedido    el texto común de lo pedido y aún no entregado
+  idioma_fuentes   idioma de los textos de «fuente» (las líneas de LEEME.md del buzón), para que la
+                   página los marque con su atributo «lang»
   recursos         uno por renglón de data/recursos_reto.json: id, nombre, organismo, papel, aplica,
                    estado («in_use» si AL MENOS UNA de sus entregas está en processed; «requested» si
                    aplica y no hay ninguna; «not_applicable»), entregas_presentes, entregas_faltantes,
@@ -31,15 +33,43 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                    dias_con_dato_imerg, dias_del_anio}], fuentes: {power, imerg}}}
                    calculado de eto_diaria[_zona].csv (NASA POWER) e imerg_diaria[_zona].csv.
   contexto_regional  null + contexto_regional_motivo, o {zona: {"fuente.variable": {fuente_id,
-                   variable, unidad, unidad_en, estadistica, unidad_anual_en, resolucion_m, n_celdas,
-                   fuente, fecha, meses, valores, anual: [{anio, media, n_meses, suma, completo}]}}}
-  gedi             null + gedi_motivo, o {fuente, fecha, parcelas: {id: {n_disparos, altura_mediana_m,
-                   altura_p90_m}} (solo n_disparos > 0), n_con_dato, n_total}
-  ecostress        null + ecostress_motivo, o {fuente, fecha, meses, parcelas: {id: [valores por mes]}}
-  gaez             null + gaez_motivo, o {fuente, fecha, zonas: {zona: [{cultivo, variable, valor,
-                   unidad, resolucion_m}]}}
-  heladas          null + heladas_motivo, o el contenido de heladas.json más «entrega» {fuente, fecha}
-  et_contraste     null + et_contraste_motivo, o {fuente, fecha, meses, columnas: {columna: [valores]}}
+                   variable, ambito, unidad, unidad_en, estadistica, unidad_anual_en, resolucion_m,
+                   n_celdas, archivo, fuente, fecha, meses, valores, anual: [{anio, media, n_meses,
+                   suma, completo}]}}}. GRACE llega como UNA serie de cuenca (nota de GRACE de la
+                   decisión): va bajo la llave «cuenca» (esquemas.ZONA_CUENCA) con ambito «cuenca», y
+                   la página la muestra igual en las dos zonas; las demás series llevan ambito «zona».
+                   «malla_mascon» (solo si la línea de LEEME de la entrega lo dice, p. ej. GRACE: «malla de
+                   0.5° sobre mascons de 3°»): {malla_grados, mascon_grados, texto_fuente}. Son cifras de la
+                   entrega, no de este archivo: la página las escribe para decir que la resolución real es la
+                   del mascon y no la de la malla del producto (resolucion_m).
+  gedi             null + gedi_motivo, o {archivo, fuente, fecha, parcelas: {id: {n_disparos,
+                   altura_mediana_m, altura_p90_m, dosel_alto}} (solo n_disparos > 0), n_con_dato,
+                   n_total, referencia, criterios, n_dosel_alto, n_sin_dosel_alto, n_pocos_disparos}.
+                   GEDI (rh98) no marca cero sobre suelo desnudo: su lectura NO es la altura del
+                   cultivo, y la ficha no la presenta así. Para leerla, el bloque trae:
+                   · referencia {n_parcelas, minimo_m, mediana_m, maximo_m} | null: cómo se reparte
+                     altura_mediana_m entre las parcelas con disparos de ESA entrega;
+                   · criterios | null: los de la sesión de datos (análisis propio de A11), tal como
+                     llegaron en supuestos.json: {archivo, fecha, piso_instrumento: {valor_m, min_m,
+                     max_m, etiqueta, fuente} | null, dosel_alto: {umbral_m, min_disparos, etiqueta,
+                     fuente} | null}. null si supuestos.json no los trae: entonces no se clasifica;
+                   · dosel_alto de cada parcela: true si su altura_p90_m llega al umbral, false si
+                     no, null si tiene menos disparos que min_disparos o no hay criterio. Los tres
+                     conteos (null sin criterio) suman n_con_dato.
+  ecostress        null + ecostress_motivo, o {archivo, fuente, fecha, meses, parcelas: {id: [valores
+                   por mes]}}
+  gaez             null + gaez_motivo, o {archivo, fuente, fecha, zonas: {zona: [{cultivo, variable,
+                   valor, unidad, resolucion_m}]}}
+  heladas          null + heladas_motivo, o el contenido de heladas.json más «entrega» {archivo,
+                   fuente, fecha}
+  et_contraste     null + et_contraste_motivo, o {zona, motivo_otras_zonas, archivo, fuente, fecha,
+                   meses, columnas: {columna: [valores]}}. «zona» es la zona piloto del contraste:
+                   et_contraste.csv no lleva sufijo de zona, así que es de la zona por omisión
+                   (esquemas.ZONA_POR_OMISION; docs/decisiones/2026-11-14_dos_zonas.md). La página lo
+                   dibuja solo en esa zona; en las demás dice «motivo_otras_zonas» y no cruza sus
+                   series regionales con las de otra área.
+  En cada bloque, «archivo», «fuente» y «fecha» son la entrega de data/processed y su línea de
+  fuentes.json (LEEME.md del buzón). La página escribe el texto de «fuente» una sola vez por sección.
   tarjetas, unidades  cómo agrupa y rotula la página las series (de data/recursos_reto.json)
   avisos           lo que el motor no pudo leer o encontró inconsistente (lista de textos)
 
@@ -52,13 +82,16 @@ Reglas:
 - Un año con días faltantes (−999 o fila ausente) desde la fracción que ya usa el validador para
   eto_diaria.csv (esquemas.FALTANTES_MAX_FRACCION) va con su suma en null y su «dias_con_dato» real.
 - Los únicos números escritos aquí son definiciones con su fuente (inicio del año agrícola, umbral
-  de helada, 12 meses) y decimales de redondeo; ninguno es un dato.
+  de helada, 12 meses) y decimales de redondeo; ninguno es un dato. Los criterios para leer GEDI
+  (piso del instrumento y umbral de dosel alto) se LEEN de data/processed/supuestos.json.
 """
 import argparse
 import csv
 import datetime
 import json
 import math
+import re
+import statistics
 import sys
 from collections import Counter
 from pathlib import Path
@@ -69,7 +102,7 @@ if str(RAIZ) not in sys.path:
 
 from motor import esquemas as E  # noqa: E402
 
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 NOMBRE_SALIDA = "contexto.json"
 NOMBRE_FUENTES = "fuentes.json"
 DECISION = "docs/decisiones/2026-11-14_recursos_del_reto.md"
@@ -93,9 +126,15 @@ DEFINICION_HELADA = (f"Frost day: daily minimum temperature at or below {UMBRAL_
 # Texto de data/params.json (memoria.anio_actual.unidad) que confirma la definición del año.
 MARCAS_PARAMS_ANIO = ("1-oct", "30-sep")
 
+# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) se escriben en español,
+# como el resto de la operación del equipo (CLAUDE.md, OPERACIÓN). La interfaz va en inglés: la
+# página marca esos textos con este idioma para los lectores de pantalla.
+IDIOMA_FUENTES = "es"
+
 # Redondeos de presentación (no cambian el dato de origen).
 DECIMALES_MM = 1
 DECIMALES_MEDIA = 4
+DECIMALES_ALTURA = 2   # los de la entrega de GEDI (metros con centésimas)
 # Unidades del contrato que se suman en el año (láminas y días); las demás se promedian.
 UNIDADES_ADITIVAS = ("mm/mes", "dias")
 
@@ -104,6 +143,8 @@ MOTIVO_PEDIDO = "Requested from the data team — not delivered yet"
 MOTIVO_SIN_FILAS = "The delivered file has no rows for this source yet"
 MOTIVO_ILEGIBLE = "The delivered file could not be read; see the build log"
 MOTIVO_SIN_CLIMA = "No daily weather file in the validated deliveries"
+# et_contraste.csv es de una sola zona (ver bloque_et_contraste): lo que dice la página en las demás.
+MOTIVO_CONTRASTE_OTRA_ZONA = "Not run for this pilot area"
 
 # Entregas nuevas (docs/decisiones/2026-11-14_recursos_del_reto.md): un archivo para las dos zonas.
 ARCHIVO_CONTEXTO = "contexto_regional.csv"
@@ -111,6 +152,10 @@ ARCHIVO_GEDI = "gedi_parcelas.csv"
 ARCHIVO_ECOSTRESS = "ecostress_parcelas.csv"
 ARCHIVO_GAEZ = "gaez_zona.csv"
 ARCHIVO_HELADAS = "heladas.json"
+# Criterios para leer la altura de GEDI: entrega de la sesión de datos (pieza A11), ya validada.
+ARCHIVO_SUPUESTOS = "supuestos.json"
+CLAVE_PISO_GEDI = "gedi_piso_instrumento_m"
+CLAVE_UMBRAL_GEDI = "gedi_umbral_dosel_alto_m"
 ARCHIVO_ET_CONTRASTE = "et_contraste.csv"
 ARCHIVO_POWER = "eto_diaria.csv"
 ARCHIVO_IMERG = "imerg_diaria.csv"
@@ -196,6 +241,12 @@ def entrega(nombre, registradas):
     """{"archivo", "fuente", "fecha"} de una entrega presente (fuente y fecha en None si no está registrada)."""
     r = registradas.get(nombre) or {}
     return {"archivo": nombre, "fuente": r.get("fuente"), "fecha": r.get("fecha")}
+
+
+def procedencia(registro):
+    """De qué entrega sale un bloque: {"archivo", "fuente", "fecha"}. `registro` es lo que armar() le
+    pasa al lector del bloque (entrega(nombre, registradas)); lo que falte va en None."""
+    return {"archivo": registro.get("archivo"), "fuente": registro.get("fuente"), "fecha": registro.get("fecha")}
 
 
 # ---------------------------------------------------------------------------------------
@@ -353,12 +404,42 @@ def resumen_anual(meses, valores, aditiva):
     return salida
 
 
+# La línea de LEEME de contexto_regional.csv enumera sus productos como «<fuente> = <producto> (…)»; de GRACE dice
+# además «malla de 0.5° sobre mascons de 3°» (la malla del producto es más fina que los mascons de los que sale).
+MALLA_MASCON = re.compile(r"malla de\s*([0-9]+(?:[.,][0-9]+)?)\s*°\s*sobre mascons de\s*([0-9]+(?:[.,][0-9]+)?)\s*°", re.I)
+
+
+def tramo_de_fuente(texto, fuente_id, fuentes=E.FUENTES_CONTEXTO):
+    """Parte de la línea de LEEME que describe a `fuente_id` («grace = …» hasta la siguiente «<otra> =»); None si
+    la línea no la nombra así."""
+    texto = texto or ""
+    inicio = re.search(rf"(?<![\w]){re.escape(fuente_id)}\s*=", texto)
+    if not inicio:
+        return None
+    resto = texto[inicio.end():]
+    fines = [m.start() for o in fuentes if o != fuente_id
+             for m in [re.search(rf"(?<![\w]){re.escape(o)}\s*=", resto)] if m]
+    return resto[:min(fines)] if fines else resto
+
+
+def malla_mascon(fuente_texto, fuente_id):
+    """{malla_grados, mascon_grados, texto_fuente} si la línea de LEEME dice, para esa fuente, «malla de X° sobre
+    mascons de Y°»; None si no lo dice (no se supone nada)."""
+    tramo = tramo_de_fuente(fuente_texto, fuente_id)
+    m = MALLA_MASCON.search(tramo or "")
+    if not m:
+        return None
+    a_numero = lambda s: float(s.replace(",", "."))   # noqa: E731
+    return {"malla_grados": a_numero(m.group(1)), "mascon_grados": a_numero(m.group(2)), "texto_fuente": m.group(0)}
+
+
 def bloque_contexto(ruta, zonas, unidades, registro, avisos):
     """(bloque por zona, fuentes con al menos un valor) de contexto_regional.csv."""
     series, ajenas = {}, set()   # (zona, fuente, variable) → filas; zonas que params no conoce
     for fila in leer_csv(ruta):
         zona, fuente, variable = (fila[c].strip() for c in ("zona", "fuente", "variable"))
-        if zona not in zonas:
+        # «cuenca» es la zona de GRACE (una sola serie, la misma para las dos zonas piloto).
+        if zona not in zonas and zona != E.ZONA_CUENCA:
             ajenas.add(zona)
             continue
         series.setdefault((zona, fuente, variable), []).append(fila)
@@ -389,6 +470,8 @@ def bloque_contexto(ruta, zonas, unidades, registro, avisos):
         serie = {
             "fuente_id": fuente,
             "variable": variable,
+            # «cuenca»: una sola serie para las dos zonas (GRACE); «zona»: promedio del rectángulo de la zona.
+            "ambito": "cuenca" if zona == E.ZONA_CUENCA else "zona",
             "unidad": unidad,
             "unidad_en": rotulo.get("en", unidad),
             # Lo que resume el año: la suma de los 12 meses (láminas, días) o la media mensual.
@@ -396,12 +479,14 @@ def bloque_contexto(ruta, zonas, unidades, registro, avisos):
             "unidad_anual_en": rotulo.get("anual_en", rotulo.get("en", unidad)) if aditiva else rotulo.get("en", unidad),
             "resolucion_m": resolucion,
             "n_celdas": _unico(celdas),
-            "fuente": registro.get("fuente"),
-            "fecha": registro.get("fecha"),
+            **procedencia(registro),
             "meses": [_texto_mes(*m) for m in meses],
             "valores": valores,
             "anual": resumen_anual(meses, valores, aditiva),
         }
+        mascon = malla_mascon(registro.get("fuente"), fuente)
+        if mascon:
+            serie["malla_mascon"] = mascon   # la resolución real es la del mascon, no la de la malla
         if serie["n_celdas"] is None and any(c is not None for c in celdas):
             presentes = [c for c in celdas if c is not None]
             serie["n_celdas_rango"] = [min(presentes), max(presentes)]   # varía de un mes a otro
@@ -412,19 +497,114 @@ def bloque_contexto(ruta, zonas, unidades, registro, avisos):
 # ---------------------------------------------------------------------------------------
 # Evidencia por parcela y por zona
 # ---------------------------------------------------------------------------------------
-def bloque_gedi(ruta, registro):
+def referencia_gedi(parcelas):
+    """Cómo se reparte la lectura de GEDI (altura_mediana_m) entre las parcelas con disparos de ESTA
+    entrega: cuántas son, y su mínimo, su mediana y su máximo. Nada se supone: sale del propio archivo.
+    Sirve de vara en la ficha, porque rh98 no marca cero sobre suelo desnudo y una lectura baja no es la
+    altura de un cultivo. None si ninguna parcela trae lectura."""
+    lecturas = sorted(p["altura_mediana_m"] for p in parcelas.values() if p["altura_mediana_m"] is not None)
+    if not lecturas:
+        return None
+    return {
+        "n_parcelas": len(lecturas),
+        "minimo_m": lecturas[0],
+        "mediana_m": redondear(statistics.median(lecturas), DECIMALES_ALTURA),
+        "maximo_m": lecturas[-1],
+    }
+
+
+def _finito(v):
+    """El número tal cual (entero o decimal) si es finito; None en otro caso (los booleanos no cuentan)."""
+    return v if isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) else None
+
+
+def criterios_gedi(processed, registradas, avisos):
+    """Cómo leer la altura de GEDI según la sesión de datos (supuestos.json, análisis propio de A11):
+    - piso_instrumento: lo que rh98 marca en parcelas sin árboles (valor y rango). Por debajo de ese
+      nivel la lectura refleja el ancho del pulso del instrumento, no la altura de la planta;
+    - dosel_alto: el umbral del percentil 90 de la parcela y el mínimo de disparos para leerla.
+    Se copian con su etiqueta y su fuente; aquí no se escribe ningún valor. Devuelve None si el
+    archivo no está o no trae ninguno de los dos; un criterio incompleto va en None con su aviso."""
+    ruta = Path(processed) / ARCHIVO_SUPUESTOS
+    if not ruta.is_file():
+        return None
+    try:
+        supuestos = leer_json(ruta)
+    except (json.JSONDecodeError, UnicodeDecodeError) as ex:
+        avisos.append(f"{ARCHIVO_SUPUESTOS}: no se pudo leer ({type(ex).__name__}: {ex}); GEDI va sin criterios")
+        return None
+    if not isinstance(supuestos, dict):
+        avisos.append(f"{ARCHIVO_SUPUESTOS}: no es un objeto; GEDI va sin criterios")
+        return None
+
+    def texto(nodo, llave):
+        v = nodo.get(llave)
+        return v.strip() if isinstance(v, str) and v.strip() else None
+
+    piso = None
+    crudo = supuestos.get(CLAVE_PISO_GEDI)
+    if isinstance(crudo, dict):
+        valor, minimo, maximo = (_finito(crudo.get(k)) for k in ("valor", "min", "max"))
+        if None not in (valor, minimo, maximo) and minimo <= valor <= maximo:
+            piso = {"valor_m": valor, "min_m": minimo, "max_m": maximo,
+                    "etiqueta": texto(crudo, "etiqueta"), "fuente": texto(crudo, "fuente")}
+        else:
+            avisos.append(f"{ARCHIVO_SUPUESTOS} → {CLAVE_PISO_GEDI}: se esperaba valor, min y max con "
+                          "min ≤ valor ≤ max; el piso del instrumento va en null")
+    elif crudo is not None:
+        avisos.append(f"{ARCHIVO_SUPUESTOS} → {CLAVE_PISO_GEDI}: no es un objeto; va en null")
+
+    dosel = None
+    crudo = supuestos.get(CLAVE_UMBRAL_GEDI)
+    if isinstance(crudo, dict):
+        umbral = _finito(crudo.get("valor"))
+        minimo = crudo.get("min_disparos")
+        disparos = _finito(minimo.get("valor")) if isinstance(minimo, dict) else None
+        if umbral is not None and umbral > 0 and disparos is not None and disparos >= 1 and float(disparos).is_integer():
+            dosel = {"umbral_m": umbral, "min_disparos": int(disparos),
+                     "etiqueta": texto(crudo, "etiqueta"), "fuente": texto(crudo, "fuente")}
+        else:
+            avisos.append(f"{ARCHIVO_SUPUESTOS} → {CLAVE_UMBRAL_GEDI}: se esperaba valor > 0 y min_disparos.valor "
+                          "entero ≥ 1; el umbral de dosel alto va en null")
+    elif crudo is not None:
+        avisos.append(f"{ARCHIVO_SUPUESTOS} → {CLAVE_UMBRAL_GEDI}: no es un objeto; va en null")
+
+    if piso is None and dosel is None:
+        return None
+    return {"archivo": ARCHIVO_SUPUESTOS, "fecha": (registradas.get(ARCHIVO_SUPUESTOS) or {}).get("fecha"),
+            "piso_instrumento": piso, "dosel_alto": dosel}
+
+
+def dosel_alto(parcela, criterio):
+    """Aplica el criterio de la sesión de datos a una parcela: True si el percentil 90 de sus disparos
+    llega al umbral, False si no, None si no hay criterio, si tiene menos disparos que el mínimo para
+    leerla o si no trae el percentil 90. No decide nada por su cuenta: el umbral viene de la entrega."""
+    if not criterio or parcela["altura_p90_m"] is None or parcela["n_disparos"] < criterio["min_disparos"]:
+        return None
+    return parcela["altura_p90_m"] >= criterio["umbral_m"]
+
+
+def bloque_gedi(ruta, registro, criterios=None):
     filas = leer_csv(ruta)
+    criterio = (criterios or {}).get("dosel_alto")
     parcelas = {}
     for fila in filas:
         n = entero(fila["n_disparos"])
         if n:   # sin disparos no hay altura: la parcela no entra (la página dice «no shots»)
-            parcelas[fila["id"].strip()] = {
+            parcela = {
                 "n_disparos": n,
                 "altura_mediana_m": numero(fila["altura_mediana_m"]),
                 "altura_p90_m": numero(fila["altura_p90_m"]),
             }
-    return {"fuente": registro.get("fuente"), "fecha": registro.get("fecha"),
-            "parcelas": parcelas, "n_con_dato": len(parcelas), "n_total": len(filas)}
+            parcela["dosel_alto"] = dosel_alto(parcela, criterio)
+            parcelas[fila["id"].strip()] = parcela
+    lecturas = Counter(p["dosel_alto"] for p in parcelas.values())
+    return {**procedencia(registro), "parcelas": parcelas, "n_con_dato": len(parcelas), "n_total": len(filas),
+            "referencia": referencia_gedi(parcelas), "criterios": criterios or None,
+            # Con criterio: cuántas parcelas muestran dosel alto, cuántas no y cuántas tienen pocos disparos.
+            "n_dosel_alto": lecturas[True] if criterio else None,
+            "n_sin_dosel_alto": lecturas[False] if criterio else None,
+            "n_pocos_disparos": lecturas[None] if criterio else None}
 
 
 def bloque_ecostress(ruta, registro):
@@ -436,7 +616,7 @@ def bloque_ecostress(ruta, registro):
         mes = fila["mes"].strip()
         if mes in indice:
             parcelas.setdefault(fila["id"].strip(), [None] * len(meses))[indice[mes]] = numero(fila["et_mm_dia"])
-    return {"fuente": registro.get("fuente"), "fecha": registro.get("fecha"), "meses": meses, "parcelas": parcelas}
+    return {**procedencia(registro), "meses": meses, "parcelas": parcelas}
 
 
 def bloque_gaez(ruta, zonas, registro, avisos):
@@ -455,7 +635,7 @@ def bloque_gaez(ruta, zonas, registro, avisos):
             "unidad": fila["unidad"].strip(),
             "resolucion_m": numero_limpio(fila["resolucion_m"]),
         })
-    return {"fuente": registro.get("fuente"), "fecha": registro.get("fecha"), "zonas": por_zona}
+    return {**procedencia(registro), "zonas": por_zona}
 
 
 def bloque_heladas(ruta, registro):
@@ -463,15 +643,24 @@ def bloque_heladas(ruta, registro):
     contenido = leer_json(ruta)
     if not isinstance(contenido, dict):
         raise ValueError("heladas.json no es un objeto")
-    return {**contenido, "entrega": {"fuente": registro.get("fuente"), "fecha": registro.get("fecha")}}
+    return {**contenido, "entrega": procedencia(registro)}
 
 
 def bloque_et_contraste(ruta, registro):
-    """Meses y columnas de et_contraste.csv tal cual (A8), para dibujarlas junto a MODIS y GLDAS."""
+    """Meses y columnas de et_contraste.csv tal cual (A8), y la zona piloto a la que pertenecen.
+
+    et_contraste.csv es un archivo SIN sufijo de zona y no va en esquemas.ARCHIVOS_POR_ZONA: es de la
+    zona por omisión (docs/decisiones/2026-11-14_dos_zonas.md: «Los archivos sin sufijo son de
+    delicias_saucillo»). La página lo dibuja junto a MODIS y GLDAS solo en esa zona; en las demás
+    dice «motivo_otras_zonas», porque cruzar las series regionales de una zona con el contraste de
+    otra compararía dos áreas distintas en los mismos ejes.
+    """
     filas = leer_csv(ruta)
     columnas = [c for c in (filas[0].keys() if filas else []) if c and c != "mes"]
     return {
-        "fuente": registro.get("fuente"), "fecha": registro.get("fecha"),
+        "zona": E.ZONA_POR_OMISION,
+        "motivo_otras_zonas": MOTIVO_CONTRASTE_OTRA_ZONA,
+        **procedencia(registro),
         "meses": [fila["mes"].strip() for fila in filas],
         "columnas": {c: [numero(fila.get(c)) for fila in filas] for c in columnas},
     }
@@ -547,6 +736,7 @@ def armar(processed, params, catalogo):
         "zonas": zonas,
         # Motivo común de lo pedido y no entregado (el de cada bloque y cada recurso sin entrega).
         "motivo_pedido": MOTIVO_PEDIDO,
+        "idioma_fuentes": IDIOMA_FUENTES,
     }
 
     def bloque_opcional(nombre, archivo, leer):
@@ -556,7 +746,7 @@ def armar(processed, params, catalogo):
             contexto[nombre], contexto[f"{nombre}_motivo"] = None, MOTIVO_PEDIDO
             return None
         try:
-            valor = leer(ruta, registradas.get(archivo) or {})
+            valor = leer(ruta, entrega(archivo, registradas))
         except (KeyError, ValueError, AttributeError, csv.Error, json.JSONDecodeError, UnicodeDecodeError) as ex:
             avisos.append(f"{archivo}: no se pudo leer ({type(ex).__name__}: {ex}); el bloque «{nombre}» va en null")
             contexto[nombre], contexto[f"{nombre}_motivo"] = None, MOTIVO_ILEGIBLE
@@ -586,7 +776,8 @@ def armar(processed, params, catalogo):
         return bloque
 
     bloque_opcional("contexto_regional", ARCHIVO_CONTEXTO, leer_contexto)
-    bloque_opcional("gedi", ARCHIVO_GEDI, bloque_gedi)
+    bloque_opcional("gedi", ARCHIVO_GEDI, lambda ruta, registro: bloque_gedi(
+        ruta, registro, criterios_gedi(processed, registradas, avisos)))
     bloque_opcional("ecostress", ARCHIVO_ECOSTRESS, bloque_ecostress)
     bloque_opcional("gaez", ARCHIVO_GAEZ, lambda ruta, registro: bloque_gaez(ruta, zonas, registro, avisos))
     bloque_opcional("heladas", ARCHIVO_HELADAS, bloque_heladas)

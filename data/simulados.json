@@ -1,5 +1,5 @@
 {
-  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
   "mock": true,
   "_nota": "DATOS SIMULADOS para que la web arranque antes de que lleguen las entregas reales (kit v4, K-INT). NO son datos. Las láminas de alfalfa (17.5), algodón (6.8) y maíz forrajero (5.5) imitan el orden de magnitud de INIFAP citado en S9 §5, y la de chile (9.2) el de kit A5 (~92 cm); la del nogal es un marcador sin fuente. Geometrías: cuadrados alrededor del centro de zona_piloto.bbox, no parcelas reales. motor/ensamblar.py sustituye cada campo cuando llega su entrega válida.",
   "eficiencia_parcelaria_mock": 0.70,

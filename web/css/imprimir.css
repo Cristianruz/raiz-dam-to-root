@@ -1,4 +1,4 @@
-/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 */
 /* web/css/imprimir.css — Ficha imprimible (kit C4, parte B; web/js/mensaje.js → imprimirFicha).
    Una sola hoja (carta o A4): encabezado, memoria, tarjetas con sus tres renglones, La gota estática,
    dotación y lluvia elegidas, fecha, fuentes y aviso de juicio local. Se ocultan controles y mapa.
@@ -69,7 +69,8 @@
     border: none !important;
   }
   #ficha .ficha-cabeza h2 { font-size: 12pt; }
-  #ficha .ficha-cuerpo { padding: 0 !important; gap: 1.2mm !important; }
+  /* Separación entre bloques: 0.9 mm deja sitio a la aptitud de suelo y a la lámina local en una carta. */
+  #ficha .ficha-cuerpo { padding: 0 !important; gap: 0.9mm !important; }
   #ficha .ficha-cuerpo h3 { font-size: 9pt; margin-bottom: 1mm; }
   #ficha p { margin: 0; }
 
@@ -157,8 +158,15 @@
   #ficha .meses-leyenda { font-size: 6pt; margin-top: 0.4mm; gap: 2mm; }
   /* La leyenda del calendario (cultivo / suelo desnudo) basta una vez: en la tarjeta de la izquierda. */
   #ficha .tarjeta:not(:first-child) .meses-leyenda { display: none; }
-  #ficha .filtros { padding: 0.8mm 1.5mm; font-size: 6.5pt; gap: 0.3mm; }
-  #ficha .advertencia { margin: 1mm 1.5mm 1mm; padding: 0.8mm 1.2mm; font-size: 7pt; }
+  #ficha .filtros { padding: 0.8mm 1.5mm; font-size: 6pt; gap: 0.2mm; line-height: 1.15; }
+  /* En papel cada filtro va con su estado y su texto; la fuente larga se lee en la ficha en línea. */
+  #ficha .filtros .fuente { display: none; }
+  /* En papel solo los filtros que piden atención (aviso o revisión local); los aprobados, en línea. */
+  /* En papel los filtros van como un resumen de una línea (cuántos piden revisión local, avisan o pasan);
+     el texto de cada uno se lee en la ficha en línea. */
+  #ficha .filtros li[data-estado] { display: none !important; }
+  #ficha .filtros li.filtros-resumen { display: block !important; }
+  #ficha .advertencia { margin: 0.6mm 1.2mm; padding: 0.5mm 1mm; font-size: 6pt; line-height: 1.15; }
   #ficha .nota-abstenida { padding: 1mm 2mm; }
 
   /* La gota, estática */
@@ -189,6 +197,8 @@
   #ficha .gota-leyenda .muestra { width: 3mm; height: 3mm; }
   #ficha .gota-nota, #ficha .gota-sin-goteo, #ficha .gota-alerta { font-size: 7pt; margin-top: 0.8mm; padding: 0.5mm 1.2mm; }
   #ficha .gota .fuente { font-size: 6pt; line-height: 1.15; margin-top: 0.5mm; }
+  /* Rótulo de las eficiencias del goteo y nota de la cota superior: compactos en papel (solo con una variante de goteo). */
+  #ficha .gota-mod-etiqueta, #ficha .gota-mod-cota { font-size: 6pt; line-height: 1.15; margin: 0.4mm 0; padding: 0.3mm 1mm; }
 
   /* Aviso de juicio local y fuentes, al pie */
   #ficha .aviso-juicio { font-size: 8pt; padding: 1mm 2mm; break-inside: avoid; }

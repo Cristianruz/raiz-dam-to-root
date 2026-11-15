@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/tiempo.js — Línea de tiempo del gemelo digital: el estado observado de cada parcela, año agrícola por
 // año agrícola (docs/decisiones/2026-11-14_gemelo_digital.md, «Qué cambia en el producto», punto 2).
 // Módulo ES, sin dependencias. Estilos: web/css/tiempo.css (cargue esa hoja junto con este módulo).
@@ -7,7 +7,8 @@
 //   crearLineaDeTiempo({ contenedor, gemelo, alCambiar, reducirMovimiento, anioInicial }) -> controlador
 //     contenedor         elemento del DOM donde se dibuja. El módulo AGREGA ahí un solo nodo (<div class="tiempo">)
 //                        y al destruirse retira ese nodo; no borra lo demás que tenga el contenedor. El diseño
-//                        se acomoda al ancho de ese nodo (angosto: una columna; ancho: control y leyenda lado a lado).
+//                        se acomoda al ancho de ese nodo (angosto: una columna; ancho: control y leyenda lado a
+//                        lado, con la clase «tiempo-ancha» que el módulo pone al medirse).
 //     gemelo             contenido de web/data/gemelo.json (contrato de la decisión). Se usa gemelo.tiempo:
 //                          anios         [mínimo, máximo] del deslizador (si trae más años, se toman los extremos);
 //                          intervalo_ms  espera entre un año y el siguiente al reproducir;
@@ -82,6 +83,7 @@ const LOCALE = "en-US";
 const SIN_DATO = "sin_dato";
 const PASO_ANIOS = 1; // el eje avanza de un año agrícola en un año agrícola (unidad del eje, no un dato)
 const MAX_MARCAS = 40; // medida de diseño: con más años que estos, solo se marcan los extremos y los destacados
+const ANCHO_DOS_COLUMNAS_PX = 680; // medida de diseño: desde este ancho del módulo, control y leyenda lado a lado
 const CONSULTA_MOVIMIENTO = "(prefers-reduced-motion: reduce)";
 const ESTRELLA = "★";
 const RAYA = "–";
@@ -366,6 +368,22 @@ export function crearLineaDeTiempo({ contenedor, gemelo, alCambiar, reducirMovim
 
   contenedor.append(raiz);
 
+  // Diseño según el ancho del propio módulo (no el de la ventana): se mide al crear y cada vez que cambia.
+  const acomodar = (ancho) => raiz.classList.toggle("tiempo-ancha", ancho >= ANCHO_DOS_COLUMNAS_PX);
+  acomodar(raiz.getBoundingClientRect().width);
+  const observador =
+    typeof ventana.ResizeObserver === "function"
+      ? new ventana.ResizeObserver((entradas) => {
+          // El cambio de clase se difiere un cuadro: hecho dentro del aviso, cambia el alto del nodo observado y el
+          // navegador emite «ResizeObserver loop completed with undelivered notifications».
+          const ancho = entradas[entradas.length - 1].contentRect.width;
+          ventana.requestAnimationFrame(() => {
+            if (!destruido) acomodar(ancho);
+          });
+        })
+      : null;
+  observador?.observe(raiz);
+
   // ---------------------------------------------------------------------------
   // Cálculo
   // ---------------------------------------------------------------------------
@@ -631,6 +649,7 @@ export function crearLineaDeTiempo({ contenedor, gemelo, alCambiar, reducirMovim
       dom.boton.removeEventListener("click", alPulsar);
       consulta?.removeEventListener?.("change", alCambiarPreferencia);
       documento.removeEventListener("visibilitychange", alOcultarse);
+      observador?.disconnect();
       raiz.remove();
     },
   };

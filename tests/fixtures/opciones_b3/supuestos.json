@@ -1,0 +1,22 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_nota": "DATOS DE PRUEBA para tests/test_b4.py y tests/test_opciones_b3.py: eficiencias de prueba, no son las de FAO.",
+ "ea_gravedad": {
+  "valor": [
+   0.45,
+   0.7
+  ],
+  "etiqueta": "TEST DATA assumption [S]",
+  "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+ },
+ "ea_goteo": {
+  "valor": 0.8,
+  "etiqueta": "TEST DATA indicative",
+  "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+ },
+ "ea_superficial_referencia": {
+  "valor": 0.5,
+  "etiqueta": "TEST DATA indicative",
+  "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)"
+ }
+}

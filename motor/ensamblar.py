@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Ensamblador del buzón de entregas (kit v4: K-ENS pasos 1, 2 y 6(a); tabla 0.4-B).
 
 Qué hace:
@@ -67,8 +67,10 @@ if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 
 from motor import esquemas as E  # noqa: E402
+# Lista de lenguaje que la ficha no admite (CLAUDE.md, regla 10): una sola fuente, el verificador.
+from motor import verificador as V  # noqa: E402
 
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO ="AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 SALIDA_POR_OMISION = RAIZ / "data/processed"
 LOG_POR_OMISION = RAIZ / "docs/entregas_log.md"
 PARAMS_POR_OMISION = RAIZ / "data/params.json"
@@ -763,6 +765,23 @@ def regla_rango_segun(regla, filas, ctx, res, faltantes):
             res.motivo(f"{col} con {g['segun']} «{segun}» {cota_txt}", f"fila {n}: {fmt(v)}")
 
 
+def regla_valores_segun(regla, filas, ctx, res, faltantes):
+    """Lista cerrada de «columna» según el valor de otra columna de la fila: «casos» da la lista de
+    cada valor de «segun» y «resto» la de los demás (contexto_regional.csv: GRACE va con zona
+    «cuenca»; las demás fuentes, con una zona de params). Una lista «@nombre» sale de params; si
+    params no la trae, esa parte no se comprueba y se avisa (cota())."""
+    col, segun = regla["columna"], regla["segun"]
+    resto = cota(regla.get("resto"), ctx, res, f"la lista de {col}")
+    for n, fila in filas:
+        valor, de = fila.get(col), fila.get(segun)
+        if valor is None or de is None:
+            continue
+        permitidos = regla["casos"].get(de, resto)
+        if permitidos is not None and valor not in permitidos:
+            res.motivo(f"{col} «{valor}» no se admite con {segun} «{de}» (se admite: {', '.join(permitidos)})",
+                       f"fila {n}")
+
+
 def regla_vacias_segun(regla, filas, ctx, res, faltantes):
     """Las «columnas» van vacías cuando «columna» vale «valor» (sin disparos de GEDI no hay
     altura; sin escenas no hay ET) y, con «llenas_si_no», traen valor en cualquier otro caso."""
@@ -778,6 +797,94 @@ def regla_vacias_segun(regla, filas, ctx, res, faltantes):
                 res.motivo(f"{c} sin valor con {col} distinto de {fmt(valor)}", f"fila {n}: {col} = {fmt(v)}")
 
 
+def regla_todas_o_ninguna(regla, filas, ctx, res, faltantes):
+    """Las «columnas» de cada fila vienen todas llenas o todas vacías (suelo_parcelas.csv: una parcela que
+    el mapa no cubre lleva su fila sin dato; una fila a medias es un error). Las filas sin dato se cuentan
+    en un aviso con «aviso_ninguna». Con «vacias_si_ninguna», esas otras columnas también van vacías en la
+    fila sin dato (pueden venir vacías en las demás: suelo_nutrientes_parcelas.csv, las listas de nutrientes)."""
+    cols = regla["columnas"]
+    tambien = regla.get("vacias_si_ninguna", ())
+    sin_dato = []
+    for n, fila in filas:
+        llenas = [c for c in cols if fila.get(c) is not None]
+        if not llenas:
+            sin_dato.append(str(fila.get("id") or f"fila {n}"))
+            con_valor = [c for c in tambien if fila.get(c) is not None]
+            if con_valor:
+                res.motivo(f"fila sin dato ({', '.join(cols)} vacías) con otras columnas llenas: van vacías también "
+                           f"{', '.join(tambien)}", f"fila {n}: llenas {', '.join(con_valor)}")
+        elif len(llenas) < len(cols):
+            vacias = [c for c in cols if fila.get(c) is None]
+            res.motivo(f"fila a medias: {', '.join(cols)} van todas llenas o todas vacías",
+                       f"fila {n}: vacías {', '.join(vacias)}")
+    if sin_dato:
+        res.aviso(f"{regla.get('aviso_ninguna', 'filas sin dato')}: {len(sin_dato)} ({', '.join(sin_dato[:5])})")
+
+
+def regla_suma_cercana(regla, filas, ctx, res, faltantes):
+    """La suma de «columnas» de cada fila es «total» ± «tolerancia» (suelo_parcelas.csv: arena, limo y
+    arcilla suman 100 ± 2). Una fila con alguna de esas celdas vacía o mal escrita ya tiene su motivo
+    y aquí se salta."""
+    cols, total, tolerancia = regla["columnas"], regla["total"], regla["tolerancia"]
+    texto = f"{' + '.join(cols)} debe sumar {fmt(total)} ± {fmt(tolerancia)}"
+    for n, fila in filas:
+        valores = [fila.get(c) for c in cols]
+        if not all(es_numero(v) for v in valores):
+            continue
+        suma = math.fsum(valores)
+        if abs(suma - total) > tolerancia + 1e-9:
+            res.motivo(texto, f"fila {n}: suma {fmt(float(round(suma, 6)))}")
+
+
+def regla_forma_texto(regla, filas, ctx, res, faltantes):
+    """El texto de «columna» tiene la forma de «patron» (expresión regular; «forma» la describe en el
+    motivo). Con «creciente», los grupos del patrón son enteros en orden estrictamente creciente
+    (suelo_parcelas.csv: profundidad_cm «a-b» con a < b). Una celda vacía ya tiene su motivo."""
+    col, patron = regla["columna"], re.compile(regla["patron"])
+    for n, fila in filas:
+        v = fila.get(col)
+        if v is None:
+            continue
+        m = patron.match(str(v))
+        if not m:
+            res.motivo(f"{col} no tiene la forma {regla['forma']}", f"fila {n}: {v!r}")
+        elif regla.get("creciente"):
+            partes = [int(g) for g in m.groups()]
+            if any(a >= b for a, b in zip(partes, partes[1:])):
+                res.motivo(f"{col}: el primer número debe ser menor que el segundo ({regla['forma']})",
+                           f"fila {n}: {v!r}")
+
+
+def regla_lista_separada(regla, filas, ctx, res, faltantes):
+    """Cada celda de «columnas» es una lista separada por «separador» (suelo_nutrientes_parcelas.csv: «P;B;Zn»;
+    celda vacía = ningún elemento) cuyos elementos están en la lista cerrada «valores» («que» los nombra en el
+    motivo), sin elementos vacíos («P;;B» o un «;» al final) y sin repetir. Se compara tal cual: «zn» o « B» no
+    son símbolos. Con «excluyentes», un mismo elemento no puede estar en dos de esas columnas de la misma fila
+    (un nutriente queda «less available» o «near the limit», no las dos)."""
+    sep, permitidos = regla["separador"], set(regla["valores"])
+    excluyentes = set(regla.get("excluyentes", ()))
+    for n, fila in filas:
+        donde_esta = {}     # elemento → primera columna excluyente donde aparece en esta fila
+        for col in regla["columnas"]:
+            v = fila.get(col)
+            if v is None:
+                continue
+            partes = str(v).split(sep)
+            if any(not p for p in partes):
+                res.motivo(f"{col}: elemento vacío en la lista (separador «{sep}» de sobra)", f"fila {n}: {v!r}")
+            ajenos = [p for p in partes if p and p not in permitidos]
+            if ajenos:
+                res.motivo(f"{col}: elemento que no es {regla['que']}", f"fila {n}: {', '.join(map(repr, ajenos))}")
+            repetidos = sorted({p for p in partes if p and partes.count(p) > 1})
+            if repetidos:
+                res.motivo(f"{col}: elemento repetido en la lista", f"fila {n}: {', '.join(repetidos)}")
+            if col in excluyentes:
+                for p in dict.fromkeys(p for p in partes if p):
+                    if p in donde_esta and donde_esta[p] != col:
+                        res.motivo(f"un mismo elemento en {donde_esta[p]} y en {col} (son excluyentes)", f"fila {n}: {p}")
+                    donde_esta.setdefault(p, col)
+
+
 REGLAS_CSV = {
     "orden": regla_orden,
     "rango_por_banda": regla_rango_por_banda,
@@ -788,7 +895,14 @@ REGLAS_CSV = {
     # Bases de datos del reto (docs/decisiones/2026-11-14_recursos_del_reto.md).
     "combinacion_permitida": regla_combinacion_permitida,
     "rango_segun": regla_rango_segun,
+    "valores_segun": regla_valores_segun,
     "vacias_segun": regla_vacias_segun,
+    # Perfil de suelo (docs/decisiones/2026-11-14_suelo_aptitud.md).
+    "suma_cercana": regla_suma_cercana,
+    "todas_o_ninguna": regla_todas_o_ninguna,
+    "forma_texto": regla_forma_texto,
+    # Nutrientes por parcela (B7; entregas de la sesión de datos del 14-nov, esquemas.FUENTE_B7).
+    "lista_separada": regla_lista_separada,
 }
 
 
@@ -1486,12 +1600,732 @@ def regla_rotaciones(obj, ctx, res, esq):
                     res.motivo("rotación con un cultivo que no está en el objeto «cultivos»", f"{donde}: {c}")
 
 
+def lenguaje_prohibido(texto):
+    """[(palabra en minúsculas, motivo)], sin repetir, del lenguaje que la ficha no admite (CLAUDE.md,
+    regla 10: «first», «only», promesas de ahorro, vender o repartir agua, pronósticos de la presa) en un
+    texto. Usa la MISMA lista que el verificador de explicaciones (motor/verificador.py → PROHIBIDAS),
+    leída al llamar: aquí no se copia ninguna palabra. Como allá, es conservadora (marca también la frase
+    negada): el texto se redacta sin esas palabras."""
+    if not isinstance(texto, str):
+        return []
+    hallados = {}
+    for patron, motivo in V.PROHIBIDAS:
+        for m in patron.finditer(texto):
+            hallados.setdefault((" ".join(m.group(0).lower().split()), motivo))
+    return list(hallados)
+
+
+def regla_opciones_b3(obj, ctx, res, esq):
+    """opciones_b3.json (B3; docs/decisiones/2026-11-14_opciones_b3.md): opciones y filtros oficiales.
+    Valida la ESTRUCTURA con las listas cerradas de su esquema (motor/esquemas.py):
+    - «fuente» del archivo;
+    - «opciones»: {id de rotación: {letra_maestro de su lista, nombre_en, secuencia [{ciclo OI|PV,
+      cultivo, siembra {desde, hasta} en MM-DD o null}], indicadores true/false/null, advertir_si_rojo,
+      fuente, etiqueta}};
+    - «por_cultivo_actual»: {cultivo del contrato: [ids]}, y cada id es una opción definida;
+    - «filtros»: [{id único, tipo de su lista, aplica_a con opciones definidas, regla, necesita,
+      texto_en, fuente, etiqueta}].
+    Y los TEXTOS que la ficha muestra tal cual (nombre_en, por_que_en, texto_en y etiqueta): sin el
+    lenguaje de la regla 10 de CLAUDE.md (lenguaje_prohibido). nombre_en, además, sin cifras, corchetes,
+    llaves ni «Source:»: el motor lo interpola en explicaciones.json (kit C3), donde toda cifra va en un
+    marcador y un corchete se lee como cita; así el rechazo nombra este archivo y no falla más adelante.
+    Las fuentes (citas) no se revisan.
+    Lo que la fuente no dice llega en null y solo se avisa. No comprueba que cada opción tenga lámina en
+    rotaciones.json: eso lo hace el motor (motor/b4_cubo.py la omite con aviso)."""
+    if not isinstance(obj, dict):
+        res.motivo("no es un objeto JSON")
+        return
+    if not _texto_lleno(obj.get("fuente")):
+        res.motivo("falta fuente (documento y sección de donde sale todo)")
+
+    def lista(valores):
+        return ", ".join(map(str, valores))
+
+    def revisar_lenguaje(d, campos, donde):
+        """Un motivo por campo y palabras halladas; la opción o el filtro va de ejemplo (con su cuenta)."""
+        for campo in campos:
+            hallados = lenguaje_prohibido(d.get(campo))
+            if hallados:
+                detalle = ", ".join(f"«{palabra}» ({motivo})" for palabra, motivo in hallados)
+                res.motivo(f"{campo} con lenguaje que la ficha no admite (CLAUDE.md, regla 10): {detalle}", donde)
+
+    # --- opciones ---------------------------------------------------------------------------
+    opciones = obj.get("opciones")
+    if not isinstance(opciones, dict) or not opciones:
+        res.motivo("falta opciones (objeto {id de rotación: opción}) o viene vacío")
+        opciones = {}
+    for oid, o in opciones.items():
+        donde = f"opción {oid}"
+        if not isinstance(o, dict):
+            res.motivo("opción que no es objeto", donde)
+            continue
+        if not en_lista(o.get("letra_maestro"), esq["letras_maestro"]):
+            res.motivo(f"letra_maestro fuera de la lista ({lista(esq['letras_maestro'])})",
+                       f"{donde}: {o.get('letra_maestro')!r}")
+        for campo in ("nombre_en", "fuente", "etiqueta"):
+            if not _texto_lleno(o.get(campo)):
+                res.motivo(f"opción sin {campo}", donde)
+        if o.get("por_que_en") is None:
+            res.aviso(f"{donde}: por_que_en es null (la ficha no dirá por qué se sugiere)")
+        elif not _texto_lleno(o.get("por_que_en")):
+            res.motivo("por_que_en debe ser un texto en inglés o null", donde)
+        # Textos que la ficha muestra: regla 10. nombre_en va además dentro de las explicaciones.
+        revisar_lenguaje(o, ("nombre_en", "por_que_en", "etiqueta"), donde)
+        nombre = o.get("nombre_en")
+        if isinstance(nombre, str):
+            cifras = V.NUMERO.findall(nombre)
+            if cifras:
+                res.motivo("nombre_en no admite cifras (se interpola en explicaciones.json, donde toda cifra va "
+                           "en un marcador; escríbala con letra)",
+                           f"{donde}: " + ", ".join(f"«{n}»" for n in cifras))
+            if re.search(r"[\[\]{}]", nombre) or V.CITA_ETIQUETA.search(nombre):
+                res.motivo("nombre_en no admite corchetes, llaves ni «Source:» (se interpola en "
+                           "explicaciones.json, donde se leerían como cita o como marcador)",
+                           f"{donde}: {nombre!r}")
+        if not isinstance(o.get("advertir_si_rojo"), bool):
+            res.motivo("advertir_si_rojo debe ser true o false", donde)
+        # Secuencia: lista (vacía = sin cultivo) de pasos con ciclo, cultivo y fechas de siembra.
+        secuencia = o.get("secuencia")
+        if not isinstance(secuencia, list):
+            res.motivo("secuencia debe ser una lista (vacía si la opción no siembra)", donde)
+            secuencia = []
+        for i, paso in enumerate(secuencia):
+            d_paso = f"{donde}, paso {i + 1}"
+            if not isinstance(paso, dict):
+                res.motivo("secuencia con un paso que no es objeto", d_paso)
+                continue
+            if not en_lista(paso.get("ciclo"), esq["ciclos"]):
+                res.motivo(f"ciclo fuera de la lista ({lista(esq['ciclos'])})", f"{d_paso}: {paso.get('ciclo')!r}")
+            if not _texto_lleno(paso.get("cultivo")):
+                res.motivo("secuencia con un paso sin cultivo", d_paso)
+            siembra = paso.get("siembra")
+            if siembra is None:
+                res.aviso(f"{d_paso}: siembra es null (sin fecha no hay probabilidad de helada)")
+            elif not isinstance(siembra, dict):
+                res.motivo("siembra debe ser un objeto {desde, hasta} o null", d_paso)
+            else:
+                # Una ventana que cruza el año (desde > hasta, p. ej. 11-15 a 01-31) es válida: no se compara.
+                for extremo in ("desde", "hasta"):
+                    v = siembra.get(extremo)
+                    if v is None:
+                        res.aviso(f"{d_paso}: siembra.{extremo} es null")
+                    elif not (isinstance(v, str) and es_mes_dia(v)):
+                        res.motivo(f"siembra.{extremo} no es una fecha MM-DD", f"{d_paso}: {v!r}")
+            if not _texto_lleno(paso.get("fuente")):
+                res.aviso(f"{d_paso}: sin fuente de la fecha de siembra")
+        # Indicadores: las llaves de la lista, cada una true, false o null.
+        ind = o.get("indicadores")
+        if not isinstance(ind, dict):
+            res.motivo("indicadores debe ser un objeto", donde)
+        else:
+            for k in esq["indicadores"]:
+                if k not in ind:
+                    res.motivo(f"indicadores sin la llave {k} (true, false o null)", donde)
+                elif ind[k] is not None and not isinstance(ind[k], bool):
+                    res.motivo(f"indicadores.{k} debe ser true, false o null", f"{donde}: {ind[k]!r}")
+            if any(isinstance(ind.get(k), bool) for k in esq["indicadores"]) and not _texto_lleno(ind.get("fuente")):
+                res.motivo("indicadores sin fuente", donde)
+
+    # --- por_cultivo_actual -------------------------------------------------------------------
+    por_cultivo = obj.get("por_cultivo_actual")
+    if not isinstance(por_cultivo, dict) or not por_cultivo:
+        res.motivo("falta por_cultivo_actual (objeto {cultivo actual: [ids de opción]}) o viene vacío")
+        por_cultivo = {}
+    for cultivo, ids in por_cultivo.items():
+        donde = f"por_cultivo_actual.{cultivo}"
+        if not en_lista(cultivo, esq["cultivos"]):
+            res.motivo(f"por_cultivo_actual: cultivo fuera del contrato ({lista(esq['cultivos'])})", cultivo)
+        if not isinstance(ids, list):
+            res.motivo("por_cultivo_actual: el valor debe ser una lista de ids de opción", donde)
+            continue
+        for oid in ids:
+            if not isinstance(oid, str) or oid not in opciones:
+                res.motivo("por_cultivo_actual nombra una opción que no está definida en «opciones»",
+                           f"{donde}: {oid!r}")
+        if len(set(map(str, ids))) != len(ids):
+            res.motivo("por_cultivo_actual: opción repetida", donde)
+        if len(ids) < esq["alternativas_minimas"]:
+            res.aviso(f"{donde}: trae {len(ids)} alternativas; el contrato del cubo pide ACTUAL + "
+                      f"{esq['alternativas_minimas']} (kit §2.3)")
+    faltan = [c for c in esq["cultivos"] if c not in por_cultivo]
+    if por_cultivo and faltan:
+        res.aviso(f"por_cultivo_actual no lista: {lista(faltan)}; esas parcelas seguirán con el diseño provisional")
+
+    # --- filtros ------------------------------------------------------------------------------
+    filtros = obj.get("filtros")
+    if not isinstance(filtros, list):
+        res.motivo("falta filtros (lista; vacía si no hay ninguno)")
+        return
+    vistos = set()
+    for i, f in enumerate(filtros):
+        if not isinstance(f, dict):
+            res.motivo("filtro que no es objeto", f"posición {i}")
+            continue
+        fid = f.get("id")
+        donde = f"filtro {fid}" if _texto_lleno(fid) else f"filtro en la posición {i}"
+        if not _texto_lleno(fid):
+            res.motivo("filtro sin id", donde)
+        elif fid in vistos:
+            res.motivo("id de filtro repetido", fid)
+        vistos.add(fid)
+        if not en_lista(f.get("tipo"), esq["tipos_filtro"]):
+            res.motivo(f"tipo de filtro fuera de la lista ({lista(esq['tipos_filtro'])})", f"{donde}: {f.get('tipo')!r}")
+        for campo in ("texto_en", "fuente", "etiqueta"):
+            if not _texto_lleno(f.get(campo)):
+                res.motivo(f"filtro sin {campo}", donde)
+        revisar_lenguaje(f, ("texto_en", "etiqueta"), donde)   # la ficha los muestra tal cual: regla 10
+        aplica = f.get("aplica_a")
+        if not isinstance(aplica, list) or not aplica:
+            res.motivo("aplica_a debe ser una lista no vacía de ids de opción", donde)
+        else:
+            for oid in aplica:
+                if not isinstance(oid, str) or oid not in opciones:
+                    res.motivo("aplica_a nombra una opción que no está definida en «opciones»", f"{donde}: {oid!r}")
+        necesita = f.get("necesita", [])
+        if not isinstance(necesita, list) or not all(_texto_lleno(n) for n in necesita):
+            res.motivo("necesita debe ser una lista de textos (vacía si no necesita nada)", donde)
+        regla = f.get("regla")
+        if regla is not None and not isinstance(regla, dict):
+            res.motivo("regla debe ser un objeto con sus parámetros o null", donde)
+            regla = None
+        if f.get("tipo") == "helada":
+            llave = esq["umbral_helada"]
+            umbral = (regla or {}).get(llave)
+            if isinstance(umbral, dict):
+                umbral = umbral.get("valor")
+            if llave not in (regla or {}):
+                res.aviso(f"{donde}: sin {llave} en «regla»; la ficha mostrará la probabilidad de helada y no decidirá")
+            elif not es_numero(umbral) or not 0 <= umbral <= 1:
+                res.motivo(f"regla.{llave} debe ser una probabilidad entre 0 y 1 (número o {{valor}})",
+                           f"{donde}: {(regla or {}).get(llave)!r}")
+
+
+def regla_suelo_requisitos(obj, ctx, res, esq):
+    """suelo_requisitos.json (A15; docs/decisiones/2026-11-14_suelo_aptitud.md): rangos publicados de
+    suelo de cada cultivo. Valida la ESTRUCTURA con las listas de su esquema (motor/esquemas.py):
+    - «fuente» del archivo;
+    - «cultivos»: {clase de cultivo del proyecto: requisitos}. Cada requisito trae las llaves ph, textura
+      y salinidad_umbral_ds_m (cada una null —la fuente no da ese rango— o un objeto con su fuente) y
+      nutrientes (lista; vacía o null si no hay avisos);
+    - ph {optimo, tolerado}: pares [min, max] con min ≤ max, dentro de la escala de pH, y el óptimo
+      contenido en el tolerado;
+    - textura {apta, limitante}: clases de la lista cerrada, sin repetir dentro de cada lista ni entre sí;
+    - salinidad_umbral_ds_m {valor}: número ≥ 0;
+    - nutrientes[]: elemento, texto_en y fuente; «condicion» opcional con llaves conocidas (ph_mayor_que
+      y ph_menor_que: un pH de la escala; textura_en: clases de la lista). texto_en va tal cual a la
+      ficha: se rechaza si trae el lenguaje de la regla 10 de CLAUDE.md (lenguaje_prohibido);
+    - llave opcional de la escala de pH: {acido_menor_que ≤ alcalino_mayor_que, en la escala, fuente}.
+    No compara ningún rango con la bibliografía: cada uno llega con su fuente y es de quien lo entrega."""
+    if not isinstance(obj, dict):
+        res.motivo("no es un objeto JSON")
+        return
+    if not _texto_lleno(obj.get("fuente")):
+        res.motivo("falta fuente (tabla o tablas de donde salen los rangos)")
+    ph_min, ph_max, clases = esq["ph_min"], esq["ph_max"], esq["clases_textura"]
+    escala_txt = f"[{fmt(ph_min)}, {fmt(ph_max)}]"
+
+    def lista(valores):
+        return ", ".join(map(str, valores))
+
+    def es_ph(v):
+        return es_numero(v) and ph_min <= v <= ph_max
+
+    def par(v, nombre, donde):
+        """(min, max) de un par [min, max] dentro de la escala de pH; None, con su motivo, si no lo es."""
+        if not (isinstance(v, list) and len(v) == 2 and all(es_numero(x) for x in v)):
+            res.motivo(f"{nombre} debe ser un par [min, max] de números", f"{donde}: {v!r}"[:120])
+            return None
+        rango = f"[{fmt(v[0])}, {fmt(v[1])}]"
+        if v[0] > v[1]:
+            res.motivo(f"{nombre}: min mayor que max", f"{donde}: {rango}")
+            return None
+        if not (es_ph(v[0]) and es_ph(v[1])):
+            res.motivo(f"{nombre} fuera de la escala de pH {escala_txt}", f"{donde}: {rango}")
+            return None
+        return v[0], v[1]
+
+    def clases_de(v, nombre, donde, vacia=True):
+        """La lista si todas son clases de textura de la lista cerrada; None, con su motivo, si no."""
+        if not isinstance(v, list):
+            res.motivo(f"{nombre} debe ser una lista de clases de textura", f"{donde}: {v!r}"[:120])
+            return None
+        if not v and not vacia:
+            res.motivo(f"{nombre}: lista vacía", donde)
+            return None
+        ajenas = [c for c in v if not (isinstance(c, str) and en_lista(c, clases))]
+        if ajenas:
+            res.motivo(f"{nombre}: clase de textura fuera de la lista ({lista(clases)})",
+                       f"{donde}: {lista(map(repr, ajenas))}"[:120])
+            return None
+        if len(set(v)) != len(v):
+            res.motivo(f"{nombre}: clase de textura repetida", donde)
+        return v
+
+    cultivos = obj.get("cultivos")
+    if not isinstance(cultivos, dict) or not cultivos:
+        res.motivo("falta cultivos (objeto {clase de cultivo: requisitos}) o viene vacío")
+        cultivos = {}
+    for cultivo, req in cultivos.items():
+        donde = f"cultivo {cultivo}"
+        if not en_lista(cultivo, esq["cultivos"]):
+            res.motivo(f"cultivo fuera de las clases de cultivo del proyecto ({lista(esq['cultivos'])})", cultivo)
+        if not isinstance(req, dict):
+            res.motivo("los requisitos de un cultivo deben ser un objeto", donde)
+            continue
+        con_rango = False
+        for bloque in esq["bloques"]:
+            if bloque not in req:
+                res.motivo(f"falta la llave {bloque} (null si la fuente no da ese rango)", donde)
+                continue
+            b = req[bloque]
+            if b is None:
+                continue
+            if not isinstance(b, dict):
+                res.motivo(f"{bloque} debe ser un objeto con su fuente, o null", donde)
+                continue
+            con_rango = True
+            if not _texto_lleno(b.get("fuente")):
+                res.motivo(f"{bloque} sin fuente (un bloque sin fuente va en null)", donde)
+            if not _texto_lleno(b.get("etiqueta")):
+                res.aviso(f"{donde}: {bloque} sin etiqueta")
+            if bloque == "ph":
+                optimo = par(b.get("optimo"), "ph.optimo", donde)
+                tolerado = par(b.get("tolerado"), "ph.tolerado", donde)
+                if optimo and tolerado and not (tolerado[0] <= optimo[0] and optimo[1] <= tolerado[1]):
+                    res.motivo("ph.optimo no está contenido en ph.tolerado",
+                               f"{donde}: [{fmt(optimo[0])}, {fmt(optimo[1])}] no cabe en "
+                               f"[{fmt(tolerado[0])}, {fmt(tolerado[1])}]")
+            elif bloque == "textura":
+                apta = clases_de(b.get("apta"), "textura.apta", donde)
+                limitante = clases_de(b.get("limitante"), "textura.limitante", donde)
+                if apta is not None and limitante is not None:
+                    en_ambas = [c for c in apta if c in limitante]
+                    if en_ambas:
+                        res.motivo("textura: una clase no puede estar en apta y en limitante",
+                                   f"{donde}: {lista(dict.fromkeys(en_ambas))}")
+                    if not apta and not limitante:
+                        res.motivo("textura sin ninguna clase en apta ni en limitante (si la fuente no da "
+                                   "clases, el bloque va en null)", donde)
+            else:   # salinidad_umbral_ds_m
+                valor = b.get("valor")
+                if not es_numero(valor) or valor < 0:
+                    res.motivo(f"{bloque}.valor debe ser un número ≥ 0", f"{donde}: {valor!r}"[:120])
+        nutrientes = req.get("nutrientes")
+        if "nutrientes" not in req:
+            res.motivo("falta la llave nutrientes (lista; vacía si no hay avisos con fuente)", donde)
+        elif nutrientes is not None and not isinstance(nutrientes, list):
+            res.motivo("nutrientes debe ser una lista (vacía si no hay avisos con fuente)", donde)
+        nutrientes = nutrientes if isinstance(nutrientes, list) else []
+        for i, nut in enumerate(nutrientes):
+            d_nut = f"{donde}, nutriente {i + 1}"
+            if not isinstance(nut, dict):
+                res.motivo("nutrientes con un elemento que no es objeto", d_nut)
+                continue
+            for campo in ("elemento", "texto_en", "fuente"):
+                if not _texto_lleno(nut.get(campo)):
+                    res.motivo(f"nutriente sin {campo}", d_nut)
+            # texto_en llega tal cual a la ficha: sin el lenguaje de la regla 10 (misma lista que B3).
+            hallados = lenguaje_prohibido(nut.get("texto_en"))
+            if hallados:
+                detalle = ", ".join(f"«{palabra}» ({motivo})" for palabra, motivo in hallados)
+                res.motivo(f"texto_en con lenguaje que la ficha no admite (CLAUDE.md, regla 10): {detalle}", d_nut)
+            cond = nut.get("condicion")
+            if cond is None:
+                continue
+            if not isinstance(cond, dict):
+                res.motivo("condicion debe ser un objeto con sus llaves o null", d_nut)
+                continue
+            ajenas = [str(k) for k in cond if k not in esq["condiciones"]]
+            if ajenas:
+                res.motivo(f"condicion con una llave desconocida (se admite: {lista(esq['condiciones'])})",
+                           f"{d_nut}: {lista(ajenas)}")
+            for k in ("ph_mayor_que", "ph_menor_que"):
+                if k in cond and not es_ph(cond[k]):
+                    res.motivo(f"condicion.{k} debe ser un pH de la escala {escala_txt}", f"{d_nut}: {cond[k]!r}"[:120])
+            if "textura_en" in cond:
+                clases_de(cond["textura_en"], "condicion.textura_en", d_nut, vacia=False)
+        if not con_rango and not nutrientes:
+            res.aviso(f"{donde}: sin ningún rango ni aviso con fuente; su aptitud quedará en «no published range»")
+
+    # Escala de pH (opcional): los cortes con que la ficha dice si un pH es ácido, neutro o alcalino.
+    llave = esq["escala_ph"]
+    escala = obj.get(llave)
+    if escala is not None and not isinstance(escala, dict):
+        res.motivo(f"{llave} debe ser un objeto con sus cortes y su fuente, o null")
+    elif escala is not None:
+        acido, alcalino = escala.get("acido_menor_que"), escala.get("alcalino_mayor_que")
+        for k, v in (("acido_menor_que", acido), ("alcalino_mayor_que", alcalino)):
+            if not es_ph(v):
+                res.motivo(f"{llave}.{k} debe ser un pH de la escala {escala_txt}", f"{v!r}"[:120])
+        if es_ph(acido) and es_ph(alcalino) and acido > alcalino:
+            res.motivo(f"{llave}: acido_menor_que no puede ser mayor que alcalino_mayor_que",
+                       f"{fmt(acido)} > {fmt(alcalino)}")
+        if not _texto_lleno(escala.get("fuente")):
+            res.motivo(f"{llave} sin fuente")
+    # Grupos de textura (opcional): cada grupo, una lista de clases de la lista cerrada; con su fuente. Si no tiene
+    # esa forma se avisa (la ficha muestra entonces la clase exacta); no se rechaza la entrega.
+    llave_grupos = esq.get("grupos_textura")
+    grupos = obj.get(llave_grupos) if llave_grupos else None
+    if grupos is not None:
+        valor = grupos.get("valor") if isinstance(grupos, dict) else None
+        forma = isinstance(valor, dict) and valor and all(
+            isinstance(v, list) and v and all(isinstance(c, str) and en_lista(c, clases) for c in v) for v in valor.values())
+        if not forma or not _texto_lleno(grupos.get("fuente")):
+            res.aviso(f"{llave_grupos}: no es {{valor: {{grupo: [clases de textura]}}, fuente}}; la ficha mostrará la "
+                      "clase exacta en vez del grupo")
+    ajenas = [str(k) for k in obj if k not in ("fuente", "cultivos", llave, llave_grupos) and not str(k).startswith("_")]
+    if ajenas:
+        res.aviso(f"llaves adicionales (se copian sin validar): {lista(ajenas)}")
+
+
+# --- Catálogo de suelos y reglas de nutrientes (B7; esquemas.FUENTE_B7) ------------------------------------
+def _lista_txt(valores):
+    return ", ".join(map(str, valores))
+
+
+def _fuera_txt(minimo, maximo):
+    """«fuera de [0, 14]», «con un valor menor que 0» o «con un valor mayor que 100» para los motivos."""
+    if minimo is not None and maximo is not None:
+        return f"fuera de [{fmt(minimo)}, {fmt(maximo)}]"
+    return f"con un valor menor que {fmt(minimo)}" if minimo is not None else f"con un valor mayor que {fmt(maximo)}"
+
+
+def _revisar_rango(v, nombre, donde, res, minimo=None, maximo=None):
+    """Un par [min, max] de números dentro de [minimo, maximo]; un extremo puede ser null (rango abierto:
+    [8.5, null] = «8.5 o más»), los dos no. min ≤ max si vienen los dos. (min, max) o None con su motivo."""
+    if not (isinstance(v, list) and len(v) == 2 and all(x is None or es_numero(x) for x in v)) or v == [None, None]:
+        res.motivo(f"{nombre} debe ser un par [min, max] de números (un extremo null = rango abierto)", f"{donde}: {v!r}"[:120])
+        return None
+    rango = "[" + ", ".join("null" if x is None else fmt(x) for x in v) + "]"
+    fuera = [x for x in v if x is not None and ((minimo is not None and x < minimo) or (maximo is not None and x > maximo))]
+    if fuera:
+        res.motivo(f"{nombre} {_fuera_txt(minimo, maximo)}", f"{donde}: {rango}")
+        return None
+    if None not in v and v[0] > v[1]:
+        res.motivo(f"{nombre}: min mayor que max", f"{donde}: {rango}")
+        return None
+    return v[0], v[1]
+
+
+def _revisar_simbolos(v, nombre, donde, res, simbolos, vacia=True):
+    """Una lista de símbolos de elementos químicos (lista cerrada de esquemas.ELEMENTOS_QUIMICOS), sin repetir.
+    True si es una lista válida."""
+    if not isinstance(v, list):
+        res.motivo(f"{nombre} debe ser una lista de símbolos de elementos químicos", f"{donde}: {v!r}"[:120])
+        return False
+    if not v and not vacia:
+        res.motivo(f"{nombre}: lista vacía", donde)
+        return False
+    ajenos = [s for s in v if not (isinstance(s, str) and s in simbolos)]
+    if ajenos:
+        res.motivo(f"{nombre}: símbolo que no es un elemento químico (tabla periódica de la IUPAC)",
+                   f"{donde}: {_lista_txt(map(repr, ajenos))}"[:120])
+        return False
+    if len(set(v)) != len(v):
+        res.motivo(f"{nombre}: símbolo repetido", donde)
+        return False
+    return True
+
+
+def _tabla_de_clases(tabla, nombre, res, minimo=None, maximo=None):
+    """Lista de {clase, min, max} (las tablas de la NOM-021): clase no vacía y sin repetir; min y max con
+    _revisar_rango (null = sin límite de ese lado). Devuelve los nombres de las clases."""
+    if not isinstance(tabla, list) or not tabla:
+        res.motivo(f"{nombre} debe ser una lista no vacía de {{clase, min, max}}")
+        return []
+    clases = []
+    for i, fila in enumerate(tabla):
+        donde = f"{nombre}, fila {i + 1}"
+        if not isinstance(fila, dict) or not _texto_lleno(fila.get("clase")):
+            res.motivo(f"{nombre}: fila sin clase", donde)
+            continue
+        if fila["clase"] in clases:
+            res.motivo(f"{nombre}: clase repetida", f"{donde}: {fila['clase']}")
+        clases.append(fila["clase"])
+        if "min" not in fila or "max" not in fila:
+            res.motivo(f"{nombre}: cada fila trae min y max (null = sin límite de ese lado)", f"{donde} «{fila['clase']}»")
+            continue
+        _revisar_rango([fila["min"], fila["max"]], nombre, f"{donde} «{fila['clase']}»", res, minimo, maximo)
+    return clases
+
+
+def _textos_en(nodo, ruta=""):
+    """(ruta, llave, texto) de cada texto en inglés de un JSON: el valor de una llave que termina en «_en»
+    (texto_en, texto_explica_en, definicion_en…) o que empieza con «texto_» (texto_fe)."""
+    if isinstance(nodo, dict):
+        for k, v in nodo.items():
+            r = f"{ruta}.{k}" if ruta else str(k)
+            if isinstance(v, str) and (str(k).endswith("_en") or str(k).startswith("texto_")):
+                yield r, str(k), v
+            else:
+                yield from _textos_en(v, r)
+    elif isinstance(nodo, list):
+        for i, v in enumerate(nodo):
+            yield from _textos_en(v, f"{ruta}[{i}]")
+
+
+def _revisar_textos_en(obj, res):
+    """Regla 10 de CLAUDE.md en todos los textos en inglés del archivo (van tal cual a la página)."""
+    for ruta, llave, texto in _textos_en(obj):
+        hallados = lenguaje_prohibido(texto)
+        if hallados:
+            detalle = ", ".join(f"«{palabra}» ({motivo})" for palabra, motivo in hallados)
+            res.motivo(f"{llave} con lenguaje que la ficha no admite (CLAUDE.md, regla 10): {detalle}", ruta)
+
+
+def regla_suelo_tipos(obj, ctx, res, esq):
+    """suelo_tipos.json (B7): catálogo de suelos del mundo (WRB y USDA) y suelos del municipio. Valida:
+    - las llaves de primer nivel de esq["llaves"] con su tipo (texto no vacío u objeto no vacío); otras se avisan;
+    - wrb: {grupo: ficha}. Una ficha trae texto_en, fuente y etiqueta (texto no vacío), ricos_en y pobres_en
+      (listas de símbolos de elementos, vacías si la fuente no nombra ninguno) y ph_rango ([min, max] en la
+      escala de pH, con un extremo null si el rango es abierto, o null). Un grupo que la fuente no describe es
+      exactamente {ficha: null, nota} con la nota que dice por qué;
+    - usda_ordenes y usda_prefijos_gran_grupo: cada entrada es un objeto con su fuente;
+    - zona: con fuente y esq["zona_pct"]; cada objeto «*_pct» de la zona trae números entre 0 y 100 que suman
+      esq["suma_pct"] ± esq["tolerancia_pct"];
+    - todos los textos en inglés, sin el lenguaje de la regla 10 de CLAUDE.md.
+    Las demás llaves de una ficha (rasgo, textura, cic_cmol_kg, limitaciones…) se copian sin validar."""
+    if not isinstance(obj, dict):
+        res.motivo("no es un objeto JSON")
+        return
+    for llave, tipo in esq["llaves"].items():
+        v = obj.get(llave)
+        if llave not in obj:
+            res.motivo(f"falta la llave {llave}")
+        elif tipo == "texto" and not _texto_lleno(v):
+            res.motivo(f"{llave} debe ser un texto no vacío")
+        elif tipo == "objeto" and not (isinstance(v, dict) and v):
+            res.motivo(f"{llave} debe ser un objeto no vacío")
+    ajenas = [str(k) for k in obj if k not in esq["llaves"] and not str(k).startswith("_")]
+    if ajenas:
+        res.aviso(f"llaves adicionales (se copian sin validar): {_lista_txt(ajenas)}")
+    simbolos, ph_min, ph_max = set(esq["simbolos"]), esq["ph_min"], esq["ph_max"]
+
+    wrb = obj.get("wrb") if isinstance(obj.get("wrb"), dict) else {}
+    for grupo, ficha in wrb.items():
+        donde = f"wrb.{grupo}"
+        if not isinstance(ficha, dict):
+            res.motivo("grupo de wrb que no es objeto (una ficha, o {ficha: null, nota})", donde)
+            continue
+        if "ficha" in ficha:
+            # Grupo sin ficha: exactamente {ficha: null, nota}.
+            if ficha["ficha"] is not None or set(ficha) != {"ficha", "nota"}:
+                res.motivo("grupo sin ficha: se escribe exactamente {ficha: null, nota}",
+                           f"{donde}: trae {_lista_txt(ficha)}"[:120])
+            if not _texto_lleno(ficha.get("nota")):
+                res.motivo("grupo sin ficha y sin nota que diga por qué", donde)
+            continue
+        for campo in esq["textos_ficha"]:
+            if not _texto_lleno(ficha.get(campo)):
+                res.motivo(f"ficha sin {campo}", donde)
+        for campo in esq["listas_simbolos"]:
+            if campo not in ficha:
+                res.motivo(f"falta {campo} (lista de símbolos; vacía si la fuente no nombra ninguno)", donde)
+            else:
+                _revisar_simbolos(ficha[campo], campo, donde, res, simbolos)
+        if "ph_rango" not in ficha:
+            res.motivo("falta ph_rango ([min, max] o null si la fuente no da un rango)", donde)
+        elif ficha["ph_rango"] is not None:
+            _revisar_rango(ficha["ph_rango"], "ph_rango", donde, res, ph_min, ph_max)
+
+    for llave in esq["catalogos_usda"]:
+        catalogo = obj.get(llave)
+        if not isinstance(catalogo, dict):
+            continue        # su motivo ya está en las llaves de primer nivel
+        for k, v in catalogo.items():
+            if not (isinstance(v, dict) and _texto_lleno(v.get("fuente"))):
+                res.motivo(f"{llave}: cada entrada es un objeto con su fuente", f"{llave}.{k}")
+
+    zona = obj.get("zona") if isinstance(obj.get("zona"), dict) else None
+    if zona is not None:
+        if not _texto_lleno(zona.get("fuente")):
+            res.motivo("zona sin fuente")
+        if esq["zona_pct"] not in zona:
+            res.motivo(f"falta zona.{esq['zona_pct']} (porcentaje de cada tipo de suelo)")
+        total, tolerancia = esq["suma_pct"], esq["tolerancia_pct"]
+        for k, pct in zona.items():
+            if not str(k).endswith("_pct"):
+                continue
+            nombre = f"zona.{k}"
+            if not (isinstance(pct, dict) and pct):
+                res.motivo(f"{nombre} debe ser un objeto {{tipo de suelo: porcentaje}} no vacío")
+                continue
+            malos = [s for s, x in pct.items() if not (es_numero(x) and 0 <= x <= 100)]
+            if malos:
+                res.motivo(f"{nombre}: cada porcentaje es un número entre 0 y 100",
+                           _lista_txt(f"{s}: {pct[s]!r}" for s in malos)[:120])
+                continue
+            suma = math.fsum(pct.values())
+            if abs(suma - total) > tolerancia + 1e-9:
+                res.motivo(f"{nombre}: los porcentajes deben sumar {fmt(total)} ± {fmt(tolerancia)}",
+                           f"suman {fmt(float(round(suma, 6)))}")
+    _revisar_textos_en(obj, res)
+
+
+def _revisar_condicion(cond, donde, res, esq, clases_ph):
+    """«condicion» de un aviso por cultivo: null o un objeto con llaves de esq["condiciones"], cada valor de su
+    tipo (un pH de la escala, una clase de ph_clases del mismo archivo, un porcentaje o un par de porcentajes)."""
+    if cond is None:
+        return
+    if not (isinstance(cond, dict) and cond):
+        res.motivo("condicion debe ser un objeto con sus llaves o null", f"{donde}: {cond!r}"[:120])
+        return
+    tipos = esq["condiciones"]
+    ajenas = [str(k) for k in cond if k not in tipos]
+    if ajenas:
+        res.motivo(f"condicion con una llave desconocida (se admite: {_lista_txt(tipos)})", f"{donde}: {_lista_txt(ajenas)}")
+    ph_min, ph_max = esq["ph_min"], esq["ph_max"]
+    pct_min, pct_max = E.PORCENTAJE["min"], E.PORCENTAJE["max"]
+    for k, v in cond.items():
+        tipo = tipos.get(k)
+        if tipo == "ph" and not (es_numero(v) and ph_min <= v <= ph_max):
+            res.motivo(f"condicion.{k} debe ser un pH de la escala [{fmt(ph_min)}, {fmt(ph_max)}]", f"{donde}: {v!r}"[:120])
+        elif tipo == "pct" and not (es_numero(v) and pct_min <= v <= pct_max):
+            res.motivo(f"condicion.{k} debe ser un porcentaje entre {fmt(pct_min)} y {fmt(pct_max)}",
+                       f"{donde}: {v!r}"[:120])
+        elif tipo == "par_pct":
+            _revisar_rango(v, f"condicion.{k}", donde, res, pct_min, pct_max)
+        elif tipo == "clase_ph" and v not in clases_ph:
+            res.motivo(f"condicion.{k} debe ser una clase de ph_clases ({_lista_txt(clases_ph)})", f"{donde}: {v!r}"[:120])
+
+
+def regla_suelo_reglas(obj, ctx, res, esq):
+    """suelo_reglas.json (B7): reglas de nutrientes con su fuente. Valida:
+    - las llaves obligatorias de esq["obligatorias"] y la fuente del archivo; las que no están en
+      esq["conocidas"] se avisan;
+    - ph_clases: {tabla [{clase, min, max}], fuente}, con min y max en la escala de pH (null = sin límite);
+    - las tablas de clases de esq["tablas_de_clases"] (materia orgánica, CIC, carbonatos y salinidad), si
+      vienen: min ≤ max dentro de sus límites por definición, y la fuente de cada bloque;
+    - disponibilidad_ph: {grupos [{nutrientes (símbolos), mas_disponible_entre [min, max]}], fuente} con cada
+      nutriente en un solo grupo y, si viene, toxicidad_ph_menor_que {valor (pH), elementos (símbolos)};
+    - cultivos: {clase de cultivo del proyecto: [avisos] o null, nota}. Cada aviso trae elemento (símbolo o
+      «varios»), condicion (null o con llaves conocidas), texto_en, fuente y etiqueta; necesita es opcional
+      (lista de textos);
+    - todos los textos en inglés, sin el lenguaje de la regla 10 de CLAUDE.md.
+    analisis_suelo, margen_ph y nota se copian sin validar: la ficha no los usa todavía."""
+    if not isinstance(obj, dict):
+        res.motivo("no es un objeto JSON")
+        return
+    for llave in esq["obligatorias"]:
+        if llave not in obj:
+            res.motivo(f"falta la llave {llave}")
+    if "fuente" in obj and not _texto_lleno(obj.get("fuente")):
+        res.motivo("fuente debe ser un texto no vacío")
+    ajenas = [str(k) for k in obj if k not in esq["conocidas"] and not str(k).startswith("_")]
+    if ajenas:
+        res.aviso(f"llaves adicionales (se copian sin validar): {_lista_txt(ajenas)}")
+    simbolos, ph_min, ph_max = set(esq["simbolos"]), esq["ph_min"], esq["ph_max"]
+
+    # Clases de pH (la condición «ph_clase_minima» de los avisos las nombra).
+    clases_ph = []
+    bloque = obj.get("ph_clases")
+    if "ph_clases" in obj and not isinstance(bloque, dict):
+        res.motivo("ph_clases debe ser un objeto {tabla, fuente}")
+    elif isinstance(bloque, dict):
+        clases_ph = _tabla_de_clases(bloque.get("tabla"), "ph_clases.tabla", res, ph_min, ph_max)
+        if not _texto_lleno(bloque.get("fuente")):
+            res.motivo("ph_clases sin fuente")
+    for llave, spec in esq["tablas_de_clases"].items():
+        bloque = obj.get(llave)
+        if bloque is None:
+            continue
+        if not isinstance(bloque, dict):
+            res.motivo(f"{llave} debe ser un objeto con sus tablas y su fuente")
+            continue
+        for tabla in spec["tablas"]:
+            if tabla not in bloque:
+                res.motivo(f"falta {llave}.{tabla} (lista de {{clase, min, max}})")
+            else:
+                _tabla_de_clases(bloque[tabla], f"{llave}.{tabla}", res, spec.get("min"), spec.get("max"))
+        if not _texto_lleno(bloque.get("fuente")):
+            res.motivo(f"{llave} sin fuente")
+
+    # Disponibilidad según el pH.
+    disp = obj.get("disponibilidad_ph")
+    if "disponibilidad_ph" in obj and not isinstance(disp, dict):
+        res.motivo("disponibilidad_ph debe ser un objeto {grupos, fuente}")
+    elif isinstance(disp, dict):
+        grupos = disp.get("grupos")
+        if not (isinstance(grupos, list) and grupos):
+            res.motivo("disponibilidad_ph.grupos debe ser una lista no vacía de {nutrientes, mas_disponible_entre}")
+            grupos = []
+        en_grupo = {}
+        for i, g in enumerate(grupos):
+            donde = f"disponibilidad_ph, grupo {i + 1}"
+            if not isinstance(g, dict):
+                res.motivo("disponibilidad_ph: grupo que no es objeto", donde)
+                continue
+            if _revisar_simbolos(g.get("nutrientes"), "nutrientes", donde, res, simbolos, vacia=False):
+                for s in g["nutrientes"]:
+                    if s in en_grupo:
+                        res.motivo("disponibilidad_ph: un nutriente en dos grupos", f"{s}: grupos {en_grupo[s]} y {i + 1}")
+                    en_grupo.setdefault(s, i + 1)
+            _revisar_rango(g.get("mas_disponible_entre"), "mas_disponible_entre", donde, res, ph_min, ph_max)
+        tox = disp.get("toxicidad_ph_menor_que")
+        if tox is not None:
+            donde = "disponibilidad_ph.toxicidad_ph_menor_que"
+            if not isinstance(tox, dict):
+                res.motivo("toxicidad_ph_menor_que debe ser un objeto {valor, elementos} o null", donde)
+            else:
+                v = tox.get("valor")
+                if not (es_numero(v) and ph_min <= v <= ph_max):
+                    res.motivo(f"toxicidad_ph_menor_que.valor debe ser un pH de la escala [{fmt(ph_min)}, {fmt(ph_max)}]",
+                               f"{donde}: {v!r}"[:120])
+                _revisar_simbolos(tox.get("elementos"), "toxicidad_ph_menor_que.elementos", donde, res, simbolos, vacia=False)
+        if not _texto_lleno(disp.get("fuente")):
+            res.motivo("disponibilidad_ph sin fuente")
+
+    # Avisos por cultivo.
+    cultivos = obj.get("cultivos")
+    if "cultivos" in obj and not (isinstance(cultivos, dict) and cultivos):
+        res.motivo("cultivos debe ser un objeto no vacío {clase de cultivo: avisos o null}")
+        cultivos = {}
+    for cultivo, avisos in (cultivos or {}).items():
+        if cultivo == esq["nota_cultivos"]:
+            if not isinstance(avisos, str):
+                res.motivo(f"cultivos.{cultivo} debe ser un texto")
+            continue
+        if not en_lista(cultivo, esq["cultivos"]):
+            res.motivo(f"cultivo fuera de las clases de cultivo del proyecto ({_lista_txt(esq['cultivos'])})", cultivo)
+        if avisos is None:
+            continue
+        if not isinstance(avisos, list):
+            res.motivo("los avisos de un cultivo son una lista (o null si la fuente no da ninguno)", f"cultivo {cultivo}")
+            continue
+        for i, aviso in enumerate(avisos):
+            donde = f"cultivo {cultivo}, aviso {i + 1}"
+            if not isinstance(aviso, dict):
+                res.motivo("aviso que no es objeto", donde)
+                continue
+            elemento = aviso.get("elemento")
+            if not (isinstance(elemento, str) and (elemento in simbolos or elemento == esq["elemento_varios"])):
+                res.motivo(f"elemento debe ser un símbolo de elemento químico (tabla periódica de la IUPAC) o "
+                           f"«{esq['elemento_varios']}»", f"{donde}: {elemento!r}"[:120])
+            for campo in ("texto_en", "fuente", "etiqueta"):
+                if not _texto_lleno(aviso.get(campo)):
+                    res.motivo(f"aviso sin {campo}", donde)
+            if "condicion" not in aviso:
+                res.motivo("falta condicion (null si el aviso no depende de la parcela)", donde)
+            else:
+                _revisar_condicion(aviso["condicion"], donde, res, esq, clases_ph)
+            necesita = aviso.get("necesita", [])
+            if not (isinstance(necesita, list) and all(_texto_lleno(x) for x in necesita)):
+                res.motivo("necesita debe ser una lista de textos", donde)
+    _revisar_textos_en(obj, res)
+
+
 REGLAS_JSON = {
     "heladas": regla_heladas,
     "dotaciones": regla_dotaciones,
     "supuestos": regla_supuestos,
     "rotaciones": regla_rotaciones,
     "objeto": regla_objeto,
+    "opciones_b3": regla_opciones_b3,
+    # Requisitos de suelo de cada cultivo (docs/decisiones/2026-11-14_suelo_aptitud.md).
+    "suelo_requisitos": regla_suelo_requisitos,
+    # Catálogo de suelos y reglas de nutrientes (B7; esquemas.FUENTE_B7).
+    "suelo_tipos": regla_suelo_tipos,
+    "suelo_reglas": regla_suelo_reglas,
 }
 
 

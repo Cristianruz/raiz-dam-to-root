@@ -1,0 +1,2 @@
+archivo,fuente,fecha,script,sha256
+suelo_requisitos.json,"FAO ECOCROP (fichas por especie, ecocrop.apps.fao.org) y FAO Tierras y Aguas («Crop information») para pH y textura; FAO-29, Tabla 4, para salinidad (vía opciones_b3.json); Gutiérrez González et al. (2022) para nutrientes en nogal. Todo leído el 14-nov-2026; cada bloque lleva su liga",2026-11-14,datos/colab/B6_suelo_requisitos.py,51aa9c298273ccc55fe9804158e5417f6f8b1242a02488f622a9dda4fdf08a82

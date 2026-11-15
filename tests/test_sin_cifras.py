@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """K-TEST 7 (versión inicial): «ninguna cifra en la página que no venga de los datos».
 
 Revisa:
@@ -272,7 +272,7 @@ def test_excepciones_bien_formadas():
 
 
 def test_detector_encuentra_cifra_escrita_a_mano_en_html():
-    html = ("<html><head><title>Raíz</title><style>.a{width:12px}</style></head><body>"
+    html = ("<html><head><title>ROOT</title><style>.a{width:12px}</style></head><body>"
             "<h1>Water allocation</h1><p>Like 2026: 3.5 thousand m³/ha</p>"
             "<img alt='Map'><input type='range' min='0' max='12'>"
             "<script>const x = 'Rain −20%';</script><p>FAO-56 method</p></body></html>")
@@ -362,5 +362,5 @@ def test_modulos_js_con_encabezado(nombre):
     ruta = WEB / nombre
     if not ruta.exists():
         pytest.skip(f"pendiente: web/{nombre} aún no existe")
-    assert ruta.read_text(encoding="utf-8").startswith("// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"), \
+    assert ruta.read_text(encoding="utf-8").startswith("// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"), \
         f"web/{nombre} sin el encabezado de la regla 4"

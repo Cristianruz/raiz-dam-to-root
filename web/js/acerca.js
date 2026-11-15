@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/acerca.js — Pantalla de inicio de tres pasos y sección «About & Data» (kit C5, pasos 2 y 3;
 // S9 §4 «Pruebas a la vista» y §6). Módulo ES, sin dependencias.
 //
@@ -19,8 +19,13 @@
 //         (archivos que están en la caché del build); la escala de NASADEM, de relieve.zonas[].rotulo.
 //         Las resoluciones NO se escriben aquí: van dentro de la fuente registrada;
 //       - cómo encajan las escalas (armonización), solo con los conjuntos de datos presentes;
+//       - un hueco [data-bloque="recursos"] después de los datos NASA, donde app.js monta la tabla «Challenge data
+//         sources» (web/js/contexto.js, montarRecursosReto, con contexto.json);
 //       - las cinco pruebas de S9 §6 con su estado (pruebas.json): «not run» con la misma tarjeta y la
-//         misma insignia que un resultado favorable; la puerta automática (docs/pruebas.md);
+//         misma insignia que un resultado favorable; junto a una prueba, sus complementos (H1-b junto a H1: su
+//         veredicto, sus cifras y su fuente, sin cambiar el de H1); la puerta automática (docs/pruebas.md); los
+//         documentos enlazados (pruebas.documentos: el modelo frente a la práctica y la revisión de las
+//         protagonistas, con la nota de quién la hizo), solo los que existen en el repo;
 //       - el rastro de cifras de manifest.json, la liga al repo, «SI/AI tools used» en una línea con
 //         liga al README y el aviso de juicio local.
 //         ctx = { manifest, pruebas, cubo, relieve, errores }
@@ -116,6 +121,8 @@ const USOS = {
 };
 const USO_IMERG_TORMENTA = "Storm depth of “Simulate a storm”";
 const USO_IMERG_RESERVA = "Daily rainfall over the pilot area; not used in the calculation yet";
+
+const TITULO_DOCUMENTOS = "Related documents";
 
 const NOMBRES_ENLACES = {
   repositorio: "Code, data and tests on GitHub",
@@ -231,7 +238,7 @@ export function montarInicio(contenedor = typeof document !== "undefined" ? docu
   fondo.innerHTML = `
     <section class="acerca-inicio-tarjeta" role="dialog" aria-modal="true" aria-labelledby="${id}-titulo" aria-describedby="${id}-lema" tabindex="-1">
       <button type="button" class="acerca-inicio-x" aria-label="Close the introduction"><span aria-hidden="true">×</span></button>
-      <h2 class="acerca-inicio-titulo" id="${id}-titulo">Raíz – From Dam to Root</h2>
+      <h2 class="acerca-inicio-titulo" id="${id}-titulo">ROOT – From Dam to Root</h2>
       <p class="acerca-inicio-lema" id="${id}-lema">Before you plant, see the water you are committing.</p>
       <ol class="acerca-inicio-pasos">
         ${PASOS_INICIO.map((p) => `<li><strong>${esc(p.titulo)}</strong><span>${esc(p.texto)}</span></li>`).join("")}
@@ -391,8 +398,8 @@ function htmlDatosNasa(manifest, cubo, relieve, id, error) {
   const { filas, otras, hayCache } = filasNasa(manifest, cubo, relieve);
   const cuerpo = filas.length
     ? `<div class="acerca-tabla-caja"><table class="acerca-tabla">
-        <caption class="solo-lector">NASA data used by Raíz, read from manifest.json</caption>
-        <thead><tr><th scope="col">Data</th><th scope="col">Product</th><th scope="col">What Raíz uses it for</th><th scope="col">Files and recorded source</th></tr></thead>
+        <caption class="solo-lector">NASA data used by ROOT, read from manifest.json</caption>
+        <thead><tr><th scope="col">Data</th><th scope="col">Product</th><th scope="col">What ROOT uses it for</th><th scope="col">Files and recorded source</th></tr></thead>
         <tbody>${filas
           .map(
             (r) => `<tr data-familia="${esc(r.familia.id)}">
@@ -400,7 +407,7 @@ function htmlDatosNasa(manifest, cubo, relieve, id, error) {
               <td data-etiqueta="Product">${r.productos.map((p) => `<span class="acerca-producto">${esc(p)}</span>`).join("")}` +
               (r.escala.length ? `<span class="acerca-escala">Scale: ${r.escala.map(esc).join(" · ")}</span>` : "") +
               `</td>
-              <td data-etiqueta="What Raíz uses it for"><ul class="acerca-usos">${r.usos.map((u) => `<li>${esc(u)}</li>`).join("")}</ul></td>
+              <td data-etiqueta="What ROOT uses it for"><ul class="acerca-usos">${r.usos.map((u) => `<li>${esc(u)}</li>`).join("")}</ul></td>
               <td data-etiqueta="Files and recorded source"><ul class="acerca-archivos">${r.archivos.map((f) => htmlArchivo(f, hayCache)).join("")}</ul></td>
             </tr>`,
           )
@@ -475,13 +482,47 @@ function htmlPrueba(p, cubo) {
         .join("")}</ul>`
     : "";
   const fuentes = unicos(p.fuentes || []);
+  const complementos = Array.isArray(p.complementos) ? p.complementos.filter((c) => c && typeof c === "object") : [];
   return `<li class="acerca-prueba" data-prueba="${esc(p.id)}" data-estado="${esc(p.estado)}"${numero != null ? ` value="${numero}"` : ""}>
       <div class="acerca-prueba-cabeza"><h4 class="acerca-prueba-titulo">${esc(p.titulo)}</h4>${insignia(p.estado)}</div>
       <p class="acerca-criterio"><span class="acerca-rotulo">Criterion, declared before the result:</span> ${esc(p.criterio)}</p>
       ${p.resumen ? `<p class="acerca-resumen">${esc(p.resumen)}</p>` : ""}
       ${metricas}${partes}
       ${fuentes.length ? `<p class="acerca-pie">Source: ${fuentes.map((f) => `<code>${esc(f)}</code>`).join(" · ")}</p>` : ""}
+      ${complementos.map((c) => htmlComplemento(c, cubo)).join("")}
     </li>`;
+}
+
+/**
+ * Prueba complementaria junto a una prueba (H1-b junto a H1): su veredicto con la misma insignia, su criterio con su
+ * fuente, sus cifras y su documento. No cambia el estado de la prueba principal (lo dice su nota, de pruebas.json).
+ */
+function htmlComplemento(c, cubo) {
+  const metricas = Array.isArray(c.metricas) && c.metricas.length
+    ? `<ul class="acerca-metricas">${c.metricas.map((m) => `<li>${textoMetrica(m, cubo)}</li>`).join("")}</ul>`
+    : "";
+  const fuentes = unicos(c.fuentes || []);
+  return `<div class="acerca-complemento" data-complemento="${esc(c.id)}" data-estado="${esc(c.estado)}">
+      <div class="acerca-prueba-cabeza"><h5 class="acerca-complemento-titulo">${esc(c.titulo)}</h5>${insignia(c.estado)}</div>
+      ${c.criterio ? `<p class="acerca-criterio"><span class="acerca-rotulo">Criterion${c.criterio_fuente ? ` (${esc(c.criterio_fuente)})` : ""}:</span> ${esc(c.criterio)}</p>` : ""}
+      ${c.resumen ? `<p class="acerca-resumen">${esc(c.resumen)}</p>` : ""}
+      ${metricas}
+      ${c.nota ? `<p class="acerca-pie acerca-complemento-nota">${esc(c.nota)}</p>` : ""}
+      ${fuentes.length ? `<p class="acerca-pie">Source: ${fuentes.map((f) => `<code>${esc(f)}</code>`).join(" · ")}</p>` : ""}
+    </div>`;
+}
+
+/** Documentos enlazados (pruebas.documentos), solo los que existen en el repo, cada uno con su nota. */
+function htmlDocumentos(pruebas, id) {
+  const docs = (Array.isArray(pruebas?.documentos) ? pruebas.documentos : []).filter((d) => d && d.existe && d.url);
+  if (!docs.length) return "";
+  return `<div class="acerca-documentos">
+      <h4 class="acerca-subtitulo" id="${id}-documentos">${esc(TITULO_DOCUMENTOS)}</h4>
+      <ul class="acerca-lista-documentos" aria-labelledby="${id}-documentos">${docs
+        .map((d) => `<li data-documento="${esc(d.id)}">${enlace(d.url, d.titulo)} <code>${esc(d.ruta)}</code>` +
+          (d.nota ? `<span class="acerca-documento-nota">${esc(d.nota)}</span>` : "") + `</li>`)
+        .join("")}</ul>
+    </div>`;
 }
 
 function htmlPuerta(puerta, id) {
@@ -523,6 +564,7 @@ function htmlPruebas(pruebas, cubo, id, error) {
       }. Every result is published here the same way: favorable, unfavorable or not run.</p>
       <ol class="acerca-pruebas">${lista.map((p) => htmlPrueba(p, cubo)).join("")}</ol>
       ${htmlPuerta(pruebas.puerta, id)}
+      ${htmlDocumentos(pruebas, id)}
       ${pruebas.generado ? `<p class="acerca-pie">Test status read from the repository on ${esc(fmtFecha(pruebas.generado))} (<code>web/data/pruebas.json</code>).</p>` : ""}
     </section>`;
 }
@@ -573,6 +615,7 @@ export function montarAcerca(contenedor, ctx = {}) {
     <p class="acerca-entrada">Where the numbers come from and how we test them. No number in this section is typed by hand: each one is read from the data files.</p>
     ${htmlRastro(manifest)}
     ${htmlDatosNasa(manifest, cubo, relieve, id, errores?.manifest)}
+    <div class="acerca-bloque acerca-recursos" data-bloque="recursos"></div>
     ${htmlPruebas(pruebas, cubo, id, errores?.pruebas)}
     ${htmlCierre(pruebas, id)}`;
   contenedor.replaceChildren(seccion);

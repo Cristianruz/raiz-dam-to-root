@@ -1,4 +1,4 @@
-/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */
+/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 */
 /* web/style.css — Centro de control (C1), ficha de parcela (C2) y lo que app.js pone alrededor de los
    módulos de web/js/ (barra de la marca, bloque del relieve, «Share with the farmer», diálogo «About & Data»).
    Cada módulo trae su propia hoja en web/css/ (relieve, gota, mensaje, acerca, imprimir).
@@ -444,7 +444,10 @@ button, input, select { font: inherit; color: inherit; }
 }
 .boton-cerrar:hover { background: var(--arena); }
 
-.ficha-cuerpo { padding: 12px 16px 32px; display: grid; gap: 18px; }
+.ficha-cuerpo { padding: 12px 16px 32px; display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
+/* Ningún control de la ficha se sale de la pantalla del teléfono (nombres de opción largos). */
+.ficha-cuerpo select { max-width: 100%; }
+.ficha-cuerpo label { min-width: 0; max-width: 100%; }
 .ficha-cuerpo h3 { font-size: 1.1rem; margin-bottom: 6px; }
 
 .ficha-encabezado { display: grid; gap: 4px; }
@@ -495,6 +498,13 @@ button, input, select { font: inherit; color: inherit; }
 .lamina strong { font-size: 1.15rem; }
 .alcanza { background: var(--agua-clara); border-radius: 6px; padding: 4px 8px; margin-top: 6px !important; }
 .alcanza strong { color: var(--agua-osc); }
+/* Etiqueta de un dato del distrito ([P], [V]) junto a su fuente (cubo.distrito). */
+.etiqueta-dato {
+  display: inline-block; padding: 0 6px; border-radius: 4px;
+  border: 1px solid var(--borde); background: var(--arena); color: var(--tinta);
+  font-size: 0.78rem; font-weight: 700; white-space: nowrap;
+}
+.etiqueta-dato--falta { font-weight: 400; border-style: dashed; }
 .etiqueta-origen {
   font-size: 0.75rem; font-weight: 700; border: 1px solid var(--tinta-suave);
   border-radius: 4px; padding: 0 4px; margin-left: 4px; color: var(--tinta-suave);
@@ -528,7 +538,9 @@ button, input, select { font: inherit; color: inherit; }
 .meses-leyenda i.desnudo { background-color: var(--tierra); background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.45) 0 2px, transparent 2px 5px); }
 
 .filtros { list-style: none; margin: 0; padding: 8px 12px; display: grid; gap: 4px; font-size: 0.85rem; border-bottom: 1px solid var(--arena-osc); }
+.filtros li { overflow-wrap: anywhere; }
 .filtros li.no { color: var(--rojo); }
+.filtros li.revisar { background: var(--ambar-claro); border-left: 3px solid var(--ambar); padding-left: 6px; }
 .advertencia {
   margin: 8px 12px 0; background: var(--rojo-claro); border-left: 4px solid var(--rojo);
   padding: 6px 8px; border-radius: 4px; font-size: 0.9rem; font-weight: 700;
@@ -602,6 +614,55 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
 }
 .nota-sin-calculo { padding: 8px 10px; background: var(--arena); border-left: 4px solid var(--sem-sin_calculo); border-radius: 4px; }
 
+/* ---------- Gemelo digital en la página (app.js monta los módulos de web/js/) ---------- */
+/* Botón «3D twin view» en los controles del mapa (web/js/gemelo3d.js). Texto + casilla: vacía = mapa plano,
+   llena = vista 3D activa, punteada = no disponible (con su motivo debajo). Nada depende solo del color. */
+.control-gemelo { max-width: min(230px, calc(100vw - 72px)); }
+.maplibregl-ctrl-group.control-gemelo button.boton-gemelo {
+  display: flex; align-items: center; gap: 8px;
+  width: auto; height: auto; min-height: 36px; padding: 6px 12px;
+  font: inherit; font-size: 0.88rem; font-weight: 700; line-height: 1.2;
+  color: var(--agua-osc); text-align: left; white-space: normal; border-radius: 4px;
+}
+.boton-gemelo::before {
+  content: ""; flex: none; width: 14px; height: 14px; box-sizing: border-box;
+  border: 2px solid currentColor; border-radius: 3px;
+}
+.maplibregl-ctrl-group.control-gemelo button.boton-gemelo[aria-pressed="true"] { background: var(--agua); color: var(--blanco); }
+.maplibregl-ctrl-group.control-gemelo button.boton-gemelo[aria-pressed="true"]:hover { background: var(--agua-osc); }
+.boton-gemelo[aria-pressed="true"]::before { background: currentColor; box-shadow: inset 0 0 0 2px var(--agua); }
+.maplibregl-ctrl-group.control-gemelo button.boton-gemelo[aria-disabled="true"] { color: var(--tinta-suave); cursor: not-allowed; }
+.boton-gemelo[aria-disabled="true"]::before { border-style: dashed; }
+.maplibregl-ctrl-group.control-gemelo button.boton-gemelo:focus-visible { outline: 3px solid var(--agua-osc); outline-offset: 2px; }
+.gemelo-motivo { margin: 0; padding: 0 12px 8px; font-size: 0.8rem; line-height: 1.3; color: var(--tinta-suave); }
+.gemelo-motivo[hidden] { display: none; }
+/* Leyenda de la vista 3D: primer bloque del panel, solo con la vista activa. */
+.bloque-gemelo3d { border-top: 6px solid var(--agua); }
+.bloque-gemelo3d[hidden] { display: none; }
+/* «Regional context» (web/js/contexto.js): bloque plegable del panel. El título del bloque está en el <summary>; el del
+   módulo queda para los lectores de pantalla (la sección lo usa como nombre). */
+.bloque-plegable { cursor: pointer; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; align-items: center; }
+.bloque-plegable::-webkit-details-marker { display: none; }
+.bloque-plegable h2 { margin: 0; }
+.bloque-plegable::after {
+  content: "+"; grid-row: 1; grid-column: 2;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--agua); color: var(--agua-osc); font-weight: 700;
+}
+details[open] > .bloque-plegable::after { content: "−"; background: var(--agua); color: var(--blanco); }
+.bloque-plegable-ayuda { grid-column: 1 / -1; font-size: 0.85rem; color: var(--tinta-suave); }
+.bloque-plegable:focus-visible { outline: 3px solid var(--agua-osc); outline-offset: 2px; border-radius: 6px; }
+.bloque-contexto[open] > .bloque-plegable { margin-bottom: 10px; }
+.bloque-contexto .contexto { gap: 12px; }
+.bloque-contexto .contexto-titulo {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+/* «Install app» e indicador Online/Offline (web/js/instalar.js) en la barra de la marca. */
+.marca-instalar { display: flex; min-width: 0; max-width: 100%; }
+.marca-instalar:empty { display: none; }
+
 /* ---------- Pantallas angostas: el panel pasa debajo del mapa ---------- */
 @media (max-width: 899px) {
   .controles { grid-template-columns: minmax(0, 1fr); padding: 2px 12px 8px; gap: 6px; }
@@ -654,6 +715,46 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
   .ficha { top: 0; z-index: 35; }
 }
 
+/* ---------- Ficha completa (etapa 2 del gemelo) ----------
+   Frase resumen y NDVI (css/resumen.css), perfil y aptitud de suelo (css/suelo.css); aquí, lo que arma app.js. */
+.aviso-enlace { bottom: 84px; border-left-color: var(--rojo); }
+.ficha-ndvi { min-width: 0; }
+.insignia-propuesta {
+  display: inline-block; margin-top: 4px; padding: 1px 6px;
+  border: 1px dashed var(--tinta-suave); border-radius: 4px;
+  font-size: 0.75rem; font-weight: 700; color: var(--tinta-suave); background: var(--blanco);
+}
+/* Lámina local de referencia: debajo de la necesidad del modelo, con su límite a la vista. */
+.lamina-local { margin-top: 6px; padding: 4px 8px; border-left: 3px solid var(--agua); background: var(--arena); border-radius: 0 6px 6px 0; }
+.lamina-local p { margin: 0; font-size: 0.85rem; }
+.lamina-local[data-tipo="ninguna"] { color: var(--tinta-suave); font-size: 0.85rem; border-left-style: dashed; }
+.lamina-local-titulo { font-weight: 700; }
+.lamina-local-limite { color: var(--tinta-suave); font-style: italic; }
+.lamina-local-etiqueta { font-size: 0.75rem; color: var(--tinta-suave); }
+.lamina-local-fuente > summary { cursor: pointer; font-size: 0.8rem; color: var(--agua-osc); font-weight: 700; width: fit-content; }
+.lamina-local-fuente .fuente { overflow-wrap: anywhere; }
+.siembra { padding: 6px 12px; font-size: 0.85rem; border-bottom: 1px solid var(--arena-osc); }
+.siembra .fuente { display: block; }
+.siembra-helada strong { color: var(--agua-osc); }
+.filtro-vivo { font-weight: 700; }
+.sin-rotacion {
+  margin-top: 10px; padding: 8px 12px; border-left: 4px solid var(--tinta-suave);
+  background: var(--arena); border-radius: 0 8px 8px 0;
+}
+.sin-rotacion p { margin: 0; font-size: 0.9rem; }
+.sin-rotacion .fuente { margin-top: 4px; }
+/* «Soil and satellite evidence»: el perfil de suelo una vez por ficha y la evidencia de las bases del reto. */
+.evidencia { display: grid; gap: 10px; min-width: 0; }
+.evidencia-suelo { display: grid; gap: 8px; min-width: 0; }
+.evidencia-satelite { border: 1px solid var(--borde); border-radius: 8px; padding: 10px 12px; background: var(--blanco); min-width: 0; }
+.evidencia-titulo { font-size: 0.95rem; margin-bottom: 4px; }
+.evidencia-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.evidencia-lista li { overflow-wrap: anywhere; }
+.evidencia-lista p { margin: 0; font-size: 0.9rem; }
+/* La nota de GEDI va siempre junto al valor (no plegada): GEDI no marca cero sobre suelo desnudo. */
+.evidencia-nota { margin-top: 2px !important; padding: 4px 8px; border-left: 3px solid var(--ambar); background: var(--ambar-claro); font-size: 0.85rem !important; }
+.evidencia-fuente > summary { cursor: pointer; font-size: 0.8rem; color: var(--agua-osc); font-weight: 700; width: fit-content; }
+
 /* Papel (la ficha imprimible la arma css/imprimir.css; aquí, lo que depende de cómo app.js monta los
    módulos). Kit C4: la ficha cabe en una hoja, también con cuatro tarjetas (alfalfa establecida). */
 @media print {
@@ -679,6 +780,22 @@ abbr[title] { text-decoration: underline dotted; cursor: help; }
   #ficha .gota-mod-fuente, #ficha .gota-mod-nota { font-size: 6.5pt; }
   /* «Showing: …» repite la línea «Static view of …»; los supuestos van plegados (en papel, solo el título). */
   #ficha .gota-mod-mostrando, #ficha .gota-mod-supuestos { display: none !important; }
+
+  /* Ficha completa: frase resumen compacta; la lámina local en una línea (sin «no local reference» ni la fuente
+     plegada, que se leen en la ficha en línea); rótulo de la propuesta del equipo en pequeño. */
+  /* La frase resumen repite lo que la tarjeta actual ya dice con la dotación de la hoja: en papel no va. */
+  #ficha .resumen-frase { display: none !important; }
+  #ficha .lamina-local { display: none !important; }
+  #ficha .lamina-local-impresion { font-size: 5.8pt !important; line-height: 1.15; margin-top: 0.4mm !important; padding-left: 1mm; border-left: 0.5mm solid var(--agua, #1F6FB2); }
+  #ficha .suelo-aptitud-rotulo { display: none !important; }
+  /* La insignia de aptitud en la misma línea que «Soil …» (ahorra un renglón por tarjeta en la hoja). */
+  #ficha .renglon-suelo h5 { display: inline-flex; margin-right: 0.8mm; }
+  #ficha .renglon-suelo .suelo-aptitud { display: inline-block; vertical-align: baseline; }
+  #ficha .renglon-suelo .suelo-aptitud-fila { display: inline; }
+  #ficha .nota-aptitud-impresion { font-size: 6pt; font-weight: 400; font-style: italic; }
+  #ficha .insignia-propuesta { font-size: 5.8pt; padding: 0 1mm; margin-top: 0.4mm; border-width: 0.3mm; }
+  #ficha .sin-rotacion { margin-top: 1mm; padding: 0.8mm 2mm; }
+  #ficha .sin-rotacion p { font-size: 6.5pt; }
 }
 
 /* Movimiento reducido: sin animaciones ni transiciones */

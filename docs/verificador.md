@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Verificador de cifras
 
 Kit v4 C3 paso 3 y K-TEST 6; S9 §6, prueba 4: «30 casos, con trampas; 0 % de cifras alteradas por la IA».

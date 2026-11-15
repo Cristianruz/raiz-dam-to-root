@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas de motor/pruebas_web.py (las cinco pruebas a la vista, S9 §6) y de las reglas de
 web/js/acerca.js que se pueden revisar sin navegador (sin cifras escritas a mano, sin «first»/«only»).
 
@@ -37,7 +37,7 @@ def parcelas(raiz, filas):
 
 def llm_eval(raiz, casos=30, malos=0, trampas=5, alteradas=0, plantilla=None):
     plantilla = casos if plantilla is None else plantilla
-    lineas = ["# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+    lineas = ["# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
               f"# casos correctos: {casos - malos} de {casos}",
               f"# cifras alteradas: {alteradas} de 71 números en los casos aprobados (meta 0 %)",
               f"# uso de plantilla: {plantilla} de {casos}",
@@ -283,7 +283,7 @@ def test_acerca_js_sin_cifras_ni_palabras_prohibidas():
 
     ruta = RAIZ / "web/js/acerca.js"
     fuente = ruta.read_text(encoding="utf-8")
-    assert fuente.startswith("// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026")
+    assert fuente.startswith("// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026")
     malas = sc.cifras_sin_fuente(sc.fragmentos_js(fuente), "acerca.js")
     assert not malas, sc.mensaje("js/acerca.js", malas)
     visibles = " ".join(t for _, t in sc.fragmentos_js(fuente))
@@ -299,7 +299,7 @@ def test_acerca_js_sin_cifras_ni_palabras_prohibidas():
 
 def test_acerca_css_con_encabezado():
     assert (RAIZ / "web/css/acerca.css").read_text(encoding="utf-8").startswith(
-        "/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */")
+        "/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 */")
 
 
 # --- Repo real ---------------------------------------------------------------------------------
@@ -335,3 +335,81 @@ def test_datos_actuales(tmp_path):
         assert m["total"] == len(filas)
     assert d["enlaces"]["readme_ia"].endswith("#siai-tools-used")
     assert r["puerta"] in ("passed", "failed", "not run")
+
+
+# --- H1-b junto a H1 y documentos enlazados (integración, etapa 3) ------------------------------
+H1B_MINIMO = """# Resultado de H1-b · forma estacional en ciclos anteriores
+
+**H1-b does not hold.** La forma del modelo no describe la salida mejor que las formas simples. **No cambia H1**.
+
+## Resultado
+| | Modelo de demanda | L1-s (curva de ETo de NASA POWER) | L1 (lineal) |
+|---|---|---|---|
+| Fracción del ciclo al 14-jul | 71–80 % | 67.4 % | 61.2 % |
+| Mediana del error (puntos porcentuales, 26 años) | **8.66** | **3.34** | 7.9 |
+
+- Condición 1: **no**. Gana en 6 de 26.
+"""
+
+
+def test_h1b_va_junto_a_h1_sin_cambiar_su_veredicto(tmp_path):
+    escribir(tmp_path, "docs/resultado_H1.md", "**H1: does not meet the preregistered criterion.** Texto.\n")
+    escribir(tmp_path, "docs/resultado_H1b.md", H1B_MINIMO)
+    h1 = por_id(pruebas_web.calcular(tmp_path))["backtest_h1"]
+    assert h1["estado"] == "failed" and h1["resumen"].startswith("H1: does not meet")
+    (h1b,) = h1["complementos"]
+    assert h1b["id"] == "h1b" and h1b["estado"] == "failed" and h1b["resumen"] == "H1-b does not hold."
+    assert h1b["nota"] == "It does not change the H1 verdict."
+    assert h1b["fuentes"][0] == "docs/resultado_H1b.md"
+    mets = {m["id"]: m for m in h1b["metricas"]}
+    assert (mets["anios_gana"]["valor"], mets["anios_gana"]["total"]) == (6, 26)
+    # Cada mediana se toma de SU columna (por el encabezado del documento, no por la posición).
+    assert (mets["mediana_modelo"]["valor"], mets["mediana_l1s"]["valor"], mets["mediana_l1"]["valor"]) == (8.66, 3.34, 7.9)
+    assert all(m["fuente"] == "docs/resultado_H1b.md" for m in h1b["metricas"])
+    # El criterio no lleva cifras (las dos condiciones del documento); «L1» y «L1-s» son nombres de las formas simples.
+    assert not re.search(r"\d", re.sub(r"\bL1(-s)?\b", "", h1b["criterio"])), h1b["criterio"]
+
+
+def test_h1b_sin_documento_dice_not_run_y_h1_sigue_igual(tmp_path):
+    escribir(tmp_path, "docs/resultado_H1.md", "**H1: does not meet the preregistered criterion.**\n")
+    h1 = por_id(pruebas_web.calcular(tmp_path))["backtest_h1"]
+    assert h1["estado"] == "failed"
+    (h1b,) = h1["complementos"]
+    assert h1b["estado"] == "not run" and h1b["metricas"] == [] and "docs/resultado_H1b.md" in h1b["resumen"]
+
+
+def test_h1b_holds_se_publica_igual(tmp_path):
+    escribir(tmp_path, "docs/resultado_H1b.md", "**H1-b holds.** El modelo gana.\n")
+    (h1b,) = por_id(pruebas_web.calcular(tmp_path))["backtest_h1"]["complementos"]
+    assert h1b["estado"] == "passed" and h1b["resumen"] == "H1-b holds."
+
+
+def test_documentos_enlazados_y_nota_de_la_revision(tmp_path):
+    escribir(tmp_path, "docs/modelo_vs_practica.md", "# El modelo frente a la práctica\n")
+    escribir(tmp_path, "docs/revision_protagonistas.md",
+             "**Quién revisó:** la sesión de datos (asistente de IA). La revisión de una persona sigue pendiente.\n")
+    docs = {d["id"]: d for d in pruebas_web.calcular(tmp_path)["documentos"]}
+    assert set(docs) == {"modelo_vs_practica", "revision_protagonistas"}
+    for d in docs.values():
+        assert d["existe"] and d["url"] == f"{pruebas_web.REPOSITORIO}/blob/main/{d['ruta']}" and d["titulo"]
+    assert docs["revision_protagonistas"]["nota"] == pruebas_web.NOTA_REVISION_IA
+    # Si el documento ya no dice que falta la revisión de una persona, la nota no lo afirma.
+    escribir(tmp_path, "docs/revision_protagonistas.md", "**Quién revisó:** Lara, en campo, el 15-nov.\n")
+    docs = {d["id"]: d for d in pruebas_web.calcular(tmp_path)["documentos"]}
+    assert docs["revision_protagonistas"]["nota"] == pruebas_web.NOTA_REVISION_VER
+    # Sin el documento: existe = False (la página no enlaza un archivo que no está).
+    (tmp_path / "docs/modelo_vs_practica.md").unlink()
+    docs = {d["id"]: d for d in pruebas_web.calcular(tmp_path)["documentos"]}
+    assert docs["modelo_vs_practica"]["existe"] is False
+
+
+def test_h1b_y_documentos_del_repo_real():
+    d = pruebas_web.calcular(RAIZ)
+    h1 = por_id(d)["backtest_h1"]
+    if (RAIZ / "docs/resultado_H1b.md").exists():
+        (h1b,) = h1["complementos"]
+        assert h1b["estado"] in ("failed", "passed") and "H1-b" in h1b["resumen"]
+        assert {m["id"] for m in h1b["metricas"]} == {"anios_gana", "mediana_modelo", "mediana_l1s", "mediana_l1"}
+        assert not ESPANOL.search(h1b["resumen"]) and not ESPANOL.search(h1b.get("nota") or "")
+    for doc in d["documentos"]:
+        assert doc["existe"] == (RAIZ / doc["ruta"]).exists()

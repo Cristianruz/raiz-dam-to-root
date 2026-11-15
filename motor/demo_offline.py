@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Copia SIN RED de la web en un solo archivo HTML (respaldo para el Open House).
 
 Lee la web/ ACTUAL y escribe UNA página que abre con doble clic (file://), sin servidor y sin red:
@@ -445,7 +445,7 @@ ESTILO_NOTA = """<style data-raiz-offline="nota">
 
 # Arranque de la página sin red. Va en un <script> clásico al final del cuerpo, después de las
 # bibliotecas y de los bloques de datos y antes de que corra ningún módulo de la web.
-ARRANQUE_JS = r"""// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+ARRANQUE_JS = r"""// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // Arranque de la copia sin red (lo escribe motor/demo_offline.py; no se edita aquí).
 (() => {
   "use strict";
@@ -864,7 +864,7 @@ def texto_informe(informe):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Copia sin red de la web de Raíz en un solo archivo HTML.")
+    ap = argparse.ArgumentParser(description="Copia sin red de la web de ROOT en un solo archivo HTML.")
     ap.add_argument("--salida", default=str(SALIDA), help="archivo HTML que se escribe (por omisión dist/raiz-offline.html)")
     ap.add_argument("--web", default=str(WEB), help="carpeta de la web (por omisión web/)")
     args = ap.parse_args(argv)

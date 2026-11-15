@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Empieza aquí · Guía del equipo para el sábado 14 y el domingo 15 de noviembre
 
 **Para quién:** P2 a P6. Se trabaja con Gemini en Colab o con Claude en el navegador; no hace falta Claude Code.
@@ -36,9 +36,9 @@
 - **16:00 y 17:00:** mentorías obligatorias. Faltar descalifica.
 - **20:30:** una parcela real completa, publicada.
 
-## 1. Qué es Raíz (S9 §1)
+## 1. Qué es ROOT (S9 §1)
 
-**Raíz muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa.**
+**ROOT muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa.**
 
 - Zona piloto del Distrito de Riego 005 Delicias, Chihuahua. El usuario elige la dotación de la presa con un deslizador, en millares por hectárea, y la web calcula para cuántas hectáreas alcanza cada cultivo.
 - En la página en inglés: *"Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover."*
@@ -182,7 +182,7 @@ heladas.json | Derivado de eto_diaria.csv (NASA POWER Daily, community=AG); hela
 4. **Un prompt = una pieza pequeña**, con entrada, salida y prueba. Nunca «genere toda la aplicación».
 5. **No se avanza sin aprobar la prueba.** Si falla 2 veces, R1 (§9). Si falla 3 veces, el plan B de la pieza.
 6. **La IA no inventa cifras.** Todo número sale de un archivo, de `data/params.json` o de S9 y S8, con su fuente y etiqueta. Un número «típico» se rechaza.
-7. **Encabezado.** Cada cuaderno empieza con `# AI-assisted (Gemini) — Raíz, NASA Space Apps 2026`. Los commits pequeños los hace Cristian.
+7. **Encabezado.** Cada cuaderno empieza con `# AI-assisted (Gemini) — ROOT, NASA Space Apps 2026`. Los commits pequeños los hace Cristian.
 8. **Después de cada pieza, R2:** lo que el equipo no entiende no lo puede defender ante el jurado.
 9. **Registro de IA:** cada persona anota en la hoja compartida «AI_USAGE» qué pidió, con qué herramienta y qué archivos salieron ([herramientas.md](herramientas.md#5-registro-de-ia-hoja-ai_usage)).
 10. **Hitos obligatorios:** los de §2.

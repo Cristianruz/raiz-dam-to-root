@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Teselas de relieve (NASADEM, 30 m) para la vista 3D del gemelo digital.
 
 Decisión: docs/decisiones/2026-11-14_gemelo_digital.md. Lee los ráster ya validados por
@@ -50,7 +50,7 @@ import zlib
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 ZONA_POR_OMISION = "delicias_saucillo"  # el .tif sin sufijo (docs/decisiones/2026-11-14_dos_zonas.md)
 LADO = 256                # píxeles por lado de tesela (tileSize del contrato de gemelo.json)
 CODIFICACION = "terrarium"

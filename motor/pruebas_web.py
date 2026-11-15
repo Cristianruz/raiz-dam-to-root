@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Las cinco pruebas a la vista (S9 §6) para la sección «About & Data» de la web (kit C5, paso 3).
 
 Escribe web/data/pruebas.json con cada prueba, su criterio declarado ANTES de ver el resultado
@@ -11,6 +11,9 @@ y su ESTADO REAL, leído del repo en el momento de construir:
      («meets / does not meet the preregistered criterion», kit A6). El resumen que muestra la página es la
      línea «Rótulo para la página: "…"» del documento (en inglés); si no la trae, solo la frase en negrita
      del veredicto (o la primera oración que lo dice), nunca el párrafo en español que sigue.
+     Junto a H1 (campo «complementos», sin cambiar su veredicto): H1-b, la prueba post hoc de la forma estacional en
+     ciclos anteriores (docs/resultado_H1b.md, criterio en docs/h1b_especificacion.md): «does not hold / holds», el
+     conteo de años en que gana el modelo y las medianas del error de cada forma, leídos del documento.
   3. Experimento natural H3: igual, con docs/resultado_H3.md («H3 supported / not supported», kit A7).
   4. Verificador de cifras: resumen de docs/figuras/llm_eval.csv (motor/verificador.py).
   5. Contraste regional de ET («not run» si no hay data/processed/et_contraste*.csv, kit A8), con SSEBop VIIRS
@@ -19,7 +22,9 @@ y su ESTADO REAL, leído del repo en el momento de construir:
      pruebas automáticas: FAO-56 contra los ejemplos del manual (tests/test_fao*56*.py) y cierre
      del balance de La gota (validar_contrato.py, renglón «contrato» de la puerta).
 Además, la PUERTA AUTOMÁTICA: la tabla de docs/pruebas.md, que escribe `python construir.py`
-al terminar una corrida completa (se lee la última corrida registrada, con su fecha).
+al terminar una corrida completa (se lee la última corrida registrada, con su fecha), y los DOCUMENTOS que «About &
+Data» enlaza (docs/modelo_vs_practica.md y docs/revision_protagonistas.md), cada uno con su nota; la de la revisión de
+las protagonistas dice, leyéndolo del documento, si la hizo una sesión de IA y si falta la de una persona.
 
 Estados (en inglés: la web los muestra tal cual con su rótulo):
   "passed"  cumple su criterio        "failed"  no lo cumple
@@ -43,7 +48,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 SCRIPT = "motor/pruebas_web.py"
 
 # Repositorio público (git remote «origin») y anclas que cita la web.
@@ -53,6 +58,22 @@ ENLACES = {
     "readme_ia": REPOSITORIO + "#siai-tools-used",  # sección «SI/AI tools used» del README
     "pruebas_md": REPOSITORIO + "/blob/main/docs/pruebas.md",
 }
+# Documentos que «About & Data» enlaza (ruta en el repo, título en inglés y nota). La nota de la revisión de las
+# protagonistas se decide leyendo el documento (revision_documentos).
+DOCUMENTOS = (
+    {"id": "modelo_vs_practica", "ruta": "docs/modelo_vs_practica.md",
+     "titulo": "The model against what is really irrigated in the district",
+     "nota": "Gathers the published local references (water applied in the district and INIFAP guidance) next to the "
+             "model's water need; it changes no verdict."},
+    {"id": "revision_protagonistas", "ruta": "docs/revision_protagonistas.md",
+     "titulo": "True-color review of the story fields"},
+)
+NOTA_REVISION_IA = ("Done by an AI session (the data session) looking at Sentinel-2 true-color images. The review by a "
+                    "person of the team who knows the area is still pending.")
+NOTA_REVISION_VER = "See the document for who reviewed it and when."
+# Frases del documento que dicen que la revisión la hizo la IA y que falta la de una persona.
+MARCAS_REVISION_IA = ("asistente de ia", "sesión de datos")
+MARCAS_FALTA_PERSONA = ("falta la de una persona", "sigue pendiente")
 
 # Vocabulario de estados (ver el docstring).
 PASSED, FAILED, PARTIAL, NOT_RUN, RUN = "passed", "failed", "partial", "not run", "run"
@@ -102,7 +123,24 @@ AVISO_ABSTENCION = 0.5
 VEREDICTOS = {
     "H1": (("does not meet", "meets"), ("no cumple", "cumple")),
     "H3": (("not supported", "supported"), ("no se sostiene", "se sostiene")),
+    "H1b": (("does not hold", "holds"), ("no se sostiene", "se sostiene")),
 }
+
+# H1-b (post hoc, docs/h1b_especificacion.md): criterio en inglés, sin cifras (las dos condiciones del documento).
+H1B = {
+    "id": "h1b",
+    "titulo": "H1-b: the model's seasonal shape in earlier cycles (post hoc)",
+    "criterio": ("The model's seasonal shape must beat both simple shapes (L1-s, the NASA POWER ETo curve, and L1, "
+                 "linear) in more than half of the earlier cycles, and its median error must be lower than theirs"),
+    "criterio_fuente": "docs/h1b_especificacion.md, a post hoc test committed before computing",
+}
+# Columnas de la tabla «Resultado» de docs/resultado_H1b.md: encabezado del documento -> id y rótulo en inglés.
+COLUMNAS_H1B = (
+    ("L1-s", "mediana_l1s", "Median error of L1-s (NASA POWER ETo curve)"),
+    ("L1", "mediana_l1", "Median error of L1 (linear)"),
+    ("Modelo", "mediana_modelo", "Median error of the model's shape"),
+)
+UNIDAD_H1B = "percentage points"
 
 
 # ---------------------------------------------------------------------------
@@ -384,6 +422,75 @@ def prueba_hipotesis(raiz, hipotesis):
     return {"estado": estado, "resumen": resumen or None, "fuentes": [rel], "partes": [], "metricas": []}
 
 
+def celdas(linea):
+    """Celdas de un renglón de tabla de Markdown, sin las marcas de negrita."""
+    return [re.sub(r"[*_`]+", "", c).strip() for c in linea.strip().strip("|").split("|")]
+
+
+def metricas_h1b(texto, rel):
+    """Cifras de docs/resultado_H1b.md: años en que gana el modelo («Gana en N de M») y la mediana del error de cada
+    forma (renglón «Mediana del error» de la primera tabla, por el encabezado de cada columna). Lo que el documento
+    no traiga no se pone."""
+    metricas = []
+    m = re.search(r"Gana en (\d+) de (\d+)", texto)
+    if m:
+        metricas.append(metrica("anios_gana", "Earlier cycles where the model's shape beats both simple shapes",
+                                int(m.group(1)), total=int(m.group(2)), fuente=rel, con_fraccion=True))
+    lineas = texto.splitlines()
+    for i, linea in enumerate(lineas):
+        if not linea.strip().startswith("| Mediana del error"):
+            continue
+        # Encabezado de la tabla: el renglón justo arriba del separador «|---|» (se sube por los renglones de datos).
+        j = i - 1
+        while j > 0 and lineas[j].strip().startswith("|") and not re.match(r"^\|[\s|:-]+\|$", lineas[j].strip()):
+            j -= 1
+        if j <= 0 or not re.match(r"^\|[\s|:-]+\|$", lineas[j].strip()):
+            break   # sin encabezado reconocible: no se adivina qué columna es cuál
+        cabeza, valores = celdas(lineas[j - 1]), celdas(linea)
+        for prefijo, id_, etiqueta in COLUMNAS_H1B:
+            k = next((n for n, c in enumerate(cabeza) if c.startswith(prefijo)
+                      and not any(c.startswith(otro) for otro, _, _ in COLUMNAS_H1B if otro != prefijo and otro.startswith(prefijo))), None)
+            v = numero(valores[k]) if k is not None and k < len(valores) else None
+            if v is not None:
+                metricas.append(metrica(id_, etiqueta, v, unidad=UNIDAD_H1B, fuente=rel))
+        break
+    orden = ["anios_gana", "mediana_modelo", "mediana_l1s", "mediana_l1"]
+    return sorted(metricas, key=lambda x: orden.index(x["id"]) if x["id"] in orden else len(orden))
+
+
+def prueba_h1b(raiz):
+    """H1-b (post hoc) junto a H1: su veredicto, sus cifras y su fuente. No cambia el estado de H1."""
+    rel = "docs/resultado_H1b.md"
+    texto = leer_texto(Path(raiz) / rel)
+    base = {**H1B, "fuentes": [], "metricas": [], "nota": None}
+    if texto is None:
+        return {**base, "estado": NOT_RUN, "resumen": f"Not run: {rel} is not in the repo yet."}
+    pares = VEREDICTOS["H1b"]
+    estado, linea = veredicto_crudo(texto, pares)
+    if estado is None:
+        return {**base, "estado": RUN, "resumen": f"Run: {rel} does not state a verdict yet.", "fuentes": [rel]}
+    fuentes = [rel] + [f for f in ("docs/h1b_especificacion.md",) if (Path(raiz) / f).exists()]
+    nota = "It does not change the H1 verdict." if re.search(r"no cambia h1", texto, re.I) else None
+    return {**base, "estado": estado, "resumen": frase_del_veredicto(linea, pares), "fuentes": fuentes,
+            "metricas": metricas_h1b(texto, rel), "nota": nota}
+
+
+def documentos(raiz):
+    """Documentos que «About & Data» enlaza: ruta, URL en el repositorio, título, nota y si existe en el repo."""
+    salida = []
+    for d in DOCUMENTOS:
+        texto = leer_texto(Path(raiz) / d["ruta"])
+        nota = d.get("nota")
+        if d["id"] == "revision_protagonistas" and texto is not None:
+            baja = texto.lower()
+            hecha_por_ia = any(x in baja for x in MARCAS_REVISION_IA)
+            falta_persona = any(x in baja for x in MARCAS_FALTA_PERSONA)
+            nota = NOTA_REVISION_IA if (hecha_por_ia and falta_persona) else NOTA_REVISION_VER
+        salida.append({"id": d["id"], "titulo": d["titulo"], "ruta": d["ruta"],
+                       "url": f"{REPOSITORIO}/blob/main/{d['ruta']}", "existe": texto is not None, "nota": nota})
+    return salida
+
+
 # ---------------------------------------------------------------------------
 # Prueba 4: verificador de cifras (docs/figuras/llm_eval.csv)
 # ---------------------------------------------------------------------------
@@ -552,7 +659,7 @@ def calcular(raiz=RAIZ):
     puerta = leer_puerta(raiz)
     calculos = {
         "mapa_cultivos": prueba_mapa(raiz),
-        "backtest_h1": prueba_hipotesis(raiz, "H1"),
+        "backtest_h1": {**prueba_hipotesis(raiz, "H1"), "complementos": [prueba_h1b(raiz)]},
         "experimento_h3": prueba_hipotesis(raiz, "H3"),
         "verificador": prueba_verificador(raiz, puerta),
         "contraste_et": prueba_et(raiz, puerta),
@@ -560,9 +667,12 @@ def calcular(raiz=RAIZ):
     pruebas = []
     for base in PRUEBAS_S9:
         c = calculos[base["id"]]
-        pruebas.append({**base, "criterio_fuente": FUENTE_CRITERIOS, "estado": c["estado"],
-                        "resumen": c.get("resumen"), "partes": c["partes"], "metricas": c["metricas"],
-                        "fuentes": c["fuentes"]})
+        entrada = {**base, "criterio_fuente": FUENTE_CRITERIOS, "estado": c["estado"],
+                   "resumen": c.get("resumen"), "partes": c["partes"], "metricas": c["metricas"],
+                   "fuentes": c["fuentes"]}
+        if c.get("complementos"):
+            entrada["complementos"] = c["complementos"]   # p. ej. H1-b junto a H1 (no cambia su estado)
+        pruebas.append(entrada)
     return {
         "_encabezado": ENCABEZADO,
         "_nota": ("Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. "
@@ -573,6 +683,7 @@ def calcular(raiz=RAIZ):
         "pruebas": pruebas,
         "puerta": puerta,
         "enlaces": ENLACES,
+        "documentos": documentos(raiz),
     }
 
 

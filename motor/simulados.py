@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Genera los datos SIMULADOS del contrato v4 (kit §2.2–2.5) a partir de
 data/simulados.json y data/params.json.
 

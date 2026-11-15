@@ -1,7 +1,7 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-14T21:28:59+00:00",
+ "generado": "2026-11-15T04:09:44+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -80,6 +80,52 @@
    "metricas": [],
    "fuentes": [
     "docs/resultado_H1.md"
+   ],
+   "complementos": [
+    {
+     "id": "h1b",
+     "titulo": "H1-b: the model's seasonal shape in earlier cycles (post hoc)",
+     "criterio": "The model's seasonal shape must beat both simple shapes (L1-s, the NASA POWER ETo curve, and L1, linear) in more than half of the earlier cycles, and its median error must be lower than theirs",
+     "criterio_fuente": "docs/h1b_especificacion.md, a post hoc test committed before computing",
+     "fuentes": [
+      "docs/resultado_H1b.md",
+      "docs/h1b_especificacion.md"
+     ],
+     "metricas": [
+      {
+       "id": "anios_gana",
+       "etiqueta": "Earlier cycles where the model's shape beats both simple shapes",
+       "valor": 6,
+       "total": 26,
+       "fraccion": 0.2308,
+       "fuente": "docs/resultado_H1b.md"
+      },
+      {
+       "id": "mediana_modelo",
+       "etiqueta": "Median error of the model's shape",
+       "valor": 8.66,
+       "unidad": "percentage points",
+       "fuente": "docs/resultado_H1b.md"
+      },
+      {
+       "id": "mediana_l1s",
+       "etiqueta": "Median error of L1-s (NASA POWER ETo curve)",
+       "valor": 3.34,
+       "unidad": "percentage points",
+       "fuente": "docs/resultado_H1b.md"
+      },
+      {
+       "id": "mediana_l1",
+       "etiqueta": "Median error of L1 (linear)",
+       "valor": 7.9,
+       "unidad": "percentage points",
+       "fuente": "docs/resultado_H1b.md"
+      }
+     ],
+     "nota": "It does not change the H1 verdict.",
+     "estado": "failed",
+     "resumen": "H1-b does not hold."
+    }
    ]
   },
   {
@@ -190,8 +236,9 @@
     {
      "id": "fao56",
      "nombre": "FAO-56 against the manual's worked examples",
-     "estado": "not run",
-     "nota": "No test against the manual's worked examples in tests/ yet."
+     "estado": "passed",
+     "nota": "Runs with the Python tests.",
+     "fuente": "tests/test_fao56_manual.py"
     },
     {
      "id": "balance",
@@ -211,7 +258,7 @@
     {
      "id": "et_modelo_mm",
      "etiqueta": "Modeled crop ET, original pilot rectangle [-105.42, 28.08, -105.32, 28.16], Oct 2025–Sep 2026 total",
-     "valor": 1139.3,
+     "valor": 1139.5,
      "unidad": "mm",
      "fuente": "data/processed/et_contraste.csv"
     },
@@ -225,6 +272,7 @@
    ],
    "fuentes": [
     "data/processed/et_contraste.csv",
+    "tests/test_fao56_manual.py",
     "docs/pruebas.md"
    ]
   }
@@ -233,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-14T21:28:59+00:00",
+  "corrida": "2026-11-15T04:09:44+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -254,7 +302,7 @@
     "nombre": "Cube engine",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "cubo REAL: 1239 parcelas, 458 clasificadas, 1492 opciones"
+    "detalle": "cubo REAL: 1239 parcelas, 458 clasificadas, 1282 opciones"
    },
    {
     "id": "relieve",
@@ -264,11 +312,25 @@
     "detalle": "zonas: delicias_saucillo, lazaro_cardenas"
    },
    {
+    "id": "gemelo",
+    "nombre": "gemelo",
+    "estado": "passed",
+    "estado_original": "OK",
+    "detalle": "gemelo: OK · contexto: OK · suelo: OK"
+   },
+   {
+    "id": "pwa",
+    "nombre": "pwa",
+    "estado": "passed",
+    "estado_original": "OK",
+    "detalle": "precache a6e7c91d4375717f"
+   },
+   {
     "id": "manifest",
     "nombre": "Manifest of every figure",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "55189 cifras (0 simuladas), 22 fuentes de origen, 33 avisos"
+    "detalle": "114196 cifras (0 simuladas), 35 fuentes de origen, 59 avisos"
    },
    {
     "id": "contrato",
@@ -289,14 +351,14 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "535 passed, 30 warnings in 14.89s"
+    "detalle": "1040 passed, 30 warnings in 41.03s"
    },
    {
     "id": "node",
     "nombre": "JavaScript tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "31 pass, 0 fail, 0 skipped"
+    "detalle": "167 pass, 0 fail, 0 skipped"
    }
   ],
   "nota": "Last full run recorded by python construir.py. The browser smoke test (tests/e2e/web_smoke.mjs) runs separately, before each release."
@@ -305,5 +367,23 @@
   "repositorio": "https://github.com/Cristianruz/raiz-dam-to-root",
   "readme_ia": "https://github.com/Cristianruz/raiz-dam-to-root#siai-tools-used",
   "pruebas_md": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/pruebas.md"
- }
+ },
+ "documentos": [
+  {
+   "id": "modelo_vs_practica",
+   "titulo": "The model against what is really irrigated in the district",
+   "ruta": "docs/modelo_vs_practica.md",
+   "url": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/modelo_vs_practica.md",
+   "existe": true,
+   "nota": "Gathers the published local references (water applied in the district and INIFAP guidance) next to the model's water need; it changes no verdict."
+  },
+  {
+   "id": "revision_protagonistas",
+   "titulo": "True-color review of the story fields",
+   "ruta": "docs/revision_protagonistas.md",
+   "url": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/revision_protagonistas.md",
+   "existe": true,
+   "nota": "Done by an AI session (the data session) looking at Sentinel-2 true-color images. The review by a person of the team who knows the area is still pending."
+  }
+ ]
 }

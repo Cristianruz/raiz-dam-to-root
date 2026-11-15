@@ -6,13 +6,20 @@ Qué escribe:
 - escribir_processed(destino): un data/processed DE PRUEBA con las cuatro entregas nuevas del
   contrato (docs/decisiones/2026-11-14_recursos_del_reto.md): contexto_regional.csv,
   gedi_parcelas.csv, ecostress_parcelas.csv y gaez_zona.csv; además heladas.json, et_contraste.csv,
-  el clima diario de las dos zonas (eto_diaria[_zona].csv e imerg_diaria[_zona].csv) y fuentes.json.
+  el clima diario de las dos zonas (eto_diaria[_zona].csv e imerg_diaria[_zona].csv), fuentes.json y
+  un supuestos.json con los dos criterios para leer GEDI (piso del instrumento y umbral de dosel alto).
   Los valores salen de fórmulas fijas (senos del día del año): no hay azar y no significan nada.
   Las resoluciones y los nombres de fuente también son de prueba. Trae huecos a propósito:
   · eto_mm con el centinela de faltante de POWER durante DIAS_FALTANTES días de un año en una zona;
   · DIAS_AUSENTES filas ausentes en otro año de la otra zona;
-  · meses sin fila (GRACE) y un valor vacío (SMAP) en contexto_regional.csv;
-  · parcelas sin disparos de GEDI y meses sin escena de ECOSTRESS.
+  · meses sin fila (GRACE) y un valor vacío (SMAP) en contexto_regional.csv; GRACE va como una
+    sola serie con zona «cuenca» (nota de GRACE del contrato);
+  · parcelas sin disparos de GEDI y meses sin escena de ECOSTRESS;
+  · GEDI: una parcela con dosel alto, una sin dosel alto (lectura en el piso del instrumento) y una con
+    menos disparos que el mínimo del criterio.
+  La «fuente» de contexto_regional.csv en fuentes.json es LARGA a propósito (como la línea real de
+  LEEME, que enumera sus seis productos): sirve para probar que la página no la repite por tarjeta.
+  et_contraste.csv va sin sufijo de zona: el motor lo asigna a la zona por omisión.
 - main(): regenera tests/fixtures/contexto_reto/contexto_lleno.json con motor/contexto_web.py
   sobre ese processed (en una carpeta temporal) y con «generado» fijo (GENERADO_PRUEBA).
 
@@ -148,6 +155,13 @@ def contexto_regional():
     lineas = ["zona,fuente,variable,mes,valor,unidad,resolucion_m,n_celdas"]
     for zona in ZONAS:
         for fuente, variable, unidad in esquemas.COMBINACIONES_CONTEXTO:
+            # GRACE va una sola vez, con zona «cuenca» (nota de GRACE del contrato).
+            if fuente == esquemas.FUENTE_DE_CUENCA:
+                if zona != ZONA_A:
+                    continue
+                zona_fila = esquemas.ZONA_CUENCA
+            else:
+                zona_fila = zona
             for anio, mes in meses():
                 texto_mes = f"{anio:04d}-{mes:02d}"
                 if fuente == "grace" and anio == 2023 and mes in (3, 4, 5):
@@ -158,16 +172,39 @@ def contexto_regional():
                 celdas = CELDAS_PRUEBA[fuente]
                 if (fuente, variable) == ("nldas", "lluvia") and mes == 1:
                     celdas -= 1                                 # n_celdas que varía de un mes a otro
-                lineas.append(f"{zona},{fuente},{variable},{texto_mes},{valor},{unidad},"
+                lineas.append(f"{zona_fila},{fuente},{variable},{texto_mes},{valor},{unidad},"
                               f"{RESOLUCIONES_PRUEBA[fuente]},{celdas}")
     return lineas
 
 
+# Criterios DE PRUEBA para leer GEDI (la forma de supuestos.json; valores distintos de los reales a
+# propósito, para que ninguna prueba pase con un número escrito en el código).
+PISO_GEDI_PRUEBA = {"min": 2.4, "valor": 2.6, "max": 3.0}
+UMBRAL_GEDI_PRUEBA, MIN_DISPAROS_PRUEBA = 4, 2
+
+
 def gedi_parcelas():
+    """Cuatro parcelas: dosel alto (a1), sin disparos (a2), un solo disparo (b1: menos que el mínimo
+    del criterio) y sin dosel alto con disparos de sobra (b2: lectura en el piso del instrumento)."""
     a1, a2 = IDS[ZONA_A]
     b1, b2 = IDS[ZONA_B]
     return ["id,n_disparos,altura_mediana_m,altura_p90_m",
-            f"{a1},4,6.2,8.1", f"{a2},0,,", f"{b1},1,0.4,0.4", f"{b2},0,,"]
+            f"{a1},4,6.2,8.1", f"{a2},0,,", f"{b1},1,0.4,0.4", f"{b2},5,2.6,2.9"]
+
+
+def supuestos():
+    """supuestos.json DE PRUEBA con las dos claves que lee motor/contexto_web.py (la forma de la entrega real)."""
+    return {
+        "_encabezado": ENCABEZADO, "_nota": ROTULO,
+        contexto_web.CLAVE_PISO_GEDI: {**PISO_GEDI_PRUEBA, "etiqueta": "etiqueta de prueba (piso)",
+                                       "fuente": f"piso del instrumento {ROTULO}"},
+        contexto_web.CLAVE_UMBRAL_GEDI: {
+            "valor": UMBRAL_GEDI_PRUEBA,
+            "min_disparos": {"valor": MIN_DISPAROS_PRUEBA, "etiqueta": "etiqueta de prueba",
+                             "fuente": f"mínimo de disparos {ROTULO}"},
+            "etiqueta": "etiqueta de prueba (umbral), assumption [S]",
+            "fuente": f"umbral de dosel alto {ROTULO}"},
+    }
 
 
 def ecostress_parcelas():
@@ -216,6 +253,21 @@ def et_contraste():
     return lineas
 
 
+def fuente_de_prueba(nombre):
+    """Texto de «fuente» DE PRUEBA de una entrega (el de fuentes.json). El de contexto_regional.csv
+    es largo a propósito: un producto de prueba por cada fuente del contrato, con sus variables."""
+    base = f"{nombre}: {ROTULO}"
+    if nombre != "contexto_regional.csv":
+        return base
+    productos = "; ".join(
+        f"{fuente} = PRODUCTO/DE/PRUEBA/{fuente.upper()} "
+        f"(variables de prueba: {', '.join(v for f, v, _ in esquemas.COMBINACIONES_CONTEXTO if f == fuente)}; "
+        f"celda de prueba de {RESOLUCIONES_PRUEBA[fuente]} m)"
+        for fuente in esquemas.FUENTES_CONTEXTO)
+    return (f"{base}. Texto largo a propósito, como una línea de LEEME que enumera sus productos: {productos}. "
+            "Periodo de prueba: el del archivo")
+
+
 def escribir_processed(destino):
     """Escribe en `destino` el data/processed DE PRUEBA y devuelve la lista de archivos."""
     destino = Path(destino)
@@ -232,9 +284,11 @@ def escribir_processed(destino):
     for nombre, lineas in archivos.items():
         escribir(destino / nombre, lineas)
     (destino / "heladas.json").write_text(json.dumps(heladas(), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    nombres = sorted([*archivos, "heladas.json"])
+    (destino / "supuestos.json").write_text(json.dumps(supuestos(), ensure_ascii=False, indent=1) + "\n",
+                                            encoding="utf-8")
+    nombres = sorted([*archivos, "heladas.json", "supuestos.json"])
     fuentes = {"_encabezado": ENCABEZADO, "_nota": ROTULO, "generado": GENERADO_PRUEBA,
-               "fuentes": [{"archivo": n, "tipo": "entrega", "fuente": f"{n}: {ROTULO}", "fecha": FECHA_PRUEBA,
+               "fuentes": [{"archivo": n, "tipo": "entrega", "fuente": fuente_de_prueba(n), "fecha": FECHA_PRUEBA,
                             "script": "tests/fixtures/contexto_reto/generar.py"} for n in nombres]}
     (destino / "fuentes.json").write_text(json.dumps(fuentes, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return nombres

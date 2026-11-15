@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // tests/e2e/offline_smoke.mjs — Prueba de humo de la copia SIN RED (motor/demo_offline.py) con Playwright.
 //
 // Uso:   node tests/e2e/offline_smoke.mjs
@@ -14,7 +14,9 @@
 //   demás al fetch de verdad), los archivos que no son JSON (teselas de relieve) por fetch, por XMLHttpRequest
 //   y desde MapLibre, el lienzo del mapa y las parcelas dibujadas o listadas, el indicador que
 //   cambia con el deslizador, la ficha de una parcela clasificada con una tarjeta por opción, el mensaje
-//   de WhatsApp sin enlazar hojas de estilos que no existen, y «About & Data» si la página trae el botón;
+//   de WhatsApp sin enlazar hojas de estilos que no existen, «Regional context» (plegable del panel) dibujado con
+//   el contexto.json de la copia y «About & Data» si la página trae el botón (con «Challenge data sources» y H1-b
+//   cuando la copia trae contexto.json y pruebas.json);
 // - guarda capturas en RAIZ_CAPTURAS (por omisión, una carpeta temporal que se anuncia al final).
 // No supone un juego de datos: las dotaciones de referencia y la parcela de la prueba se leen de la copia.
 
@@ -324,6 +326,25 @@ async function main() {
       check("hay una parcela clasificada en la lista para abrir su ficha", false, `${d.clasificadas.length} clasificadas en los datos`);
     }
 
+    // «Regional context» (etapa 3), si la página trae el bloque: se dibuja con el contexto.json incrustado, sin red.
+    if ((await page.locator("#bloque-contexto").count()) > 0) {
+      // La ficha abierta deja el panel inert: se cierra antes de abrir el bloque.
+      if (await page.locator("#ficha").isVisible()) await page.locator("#ficha-cerrar").click();
+      await page.locator("#bloque-contexto > summary").click();
+      await page.waitForFunction(() => Boolean(document.body.dataset.contexto), null, { timeout: 10000 }).catch(() => null);
+      const marca = await page.evaluate(() => document.body.dataset.contexto ?? "");
+      const tarjetas = await page.locator("#contexto-regional .contexto-tarjeta").count();
+      const conDatos = d.incrustados.includes("contexto.json");
+      check(
+        "«Regional context» se abre en la copia sin red" + (conDatos ? " y dibuja sus tarjetas con el contexto.json incrustado" : ""),
+        conDatos ? marca === "listo" && tarjetas > 0 : ["ausente", "listo"].includes(marca),
+        `${marca} · ${tarjetas} tarjetas`,
+      );
+      await page.locator("#bloque-contexto > summary").click();
+    } else {
+      omitir("«Regional context»", "la página no trae el bloque #bloque-contexto");
+    }
+
     // «About & Data», si la página trae el botón: lee manifest.json y pruebas.json de la copia.
     if ((await page.locator("#boton-acerca").count()) > 0) {
       await page.locator("#boton-acerca").click();
@@ -338,6 +359,14 @@ async function main() {
           (!d.incrustados.includes("pruebas.json") || pruebas > 0),
         `${filas} filas de datos · ${pruebas} pruebas`,
       );
+      if (d.incrustados.includes("contexto.json")) {
+        const recursos = await page.locator('#acerca [data-bloque="recursos"] tbody tr[data-recurso]').count();
+        check("«About & Data»: «Challenge data sources» con el contexto.json de la copia", recursos > 0, `${recursos} recursos`);
+      }
+      if (d.incrustados.includes("pruebas.json")) {
+        const h1b = await page.locator('#acerca .acerca-complemento[data-complemento="h1b"]').count();
+        check("«About & Data»: H1-b junto a H1 con el pruebas.json de la copia", h1b === 1, `${h1b} bloque(s)`);
+      }
       await page.screenshot({ path: path.join(CAPTURAS, "offline_3_acerca.png") });
       await page.keyboard.press("Escape");
     } else {

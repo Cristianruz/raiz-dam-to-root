@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # P6 · Textos, página, video y jurado
 
 **Qué le toca** (S9 §10; kit §3 y §7):
@@ -70,7 +70,7 @@ En `plantillas_explicaciones.md`, la lista (a) tiene que quedar vacía, sin exce
 **Bloque para pegar en Gemini o Claude** (G0 adaptado a textos; el kit no trae prefijo para P6):
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
 App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
@@ -210,7 +210,7 @@ Aviso: `ENTREGA: textos_ui.md — prueba OK`.
 **Bloque para pegar:**
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
 App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
@@ -285,7 +285,7 @@ Aviso: `ENTREGA: plantillas_explicaciones.md — prueba OK`.
 **Bloque para pegar:**
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
 App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
@@ -354,7 +354,7 @@ Aviso: `ENTREGA: whatsapp_plantilla.md — prueba OK`.
 **Bloque para pegar:**
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
 App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
@@ -374,10 +374,10 @@ No es una fila de la tabla 0.4-B: la página no pasa por el buzón. Entrego el t
 
 DOCUMENTOS DE REFERENCIA (pegados)
 S9 §1 (copiado tal cual):
-**Raíz muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa.**
+**ROOT muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa.**
 
 - En inglés, para la página: *"Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover."*
-- Nombre: Raíz – From Dam to Root. Equipo: Los Norteados. Reto: Field Shift.
+- Nombre: ROOT – From Dam to Root. Equipo: Orbital Farming. Reto: Field Shift.
 S9 §6 "Pruebas a la vista" (copiado tal cual):
 | # | Prueba | Criterio declarado antes de ver el resultado |
 |---|---|---|
@@ -440,7 +440,7 @@ Texto del kit (copiado tal cual):
 **Bloque para el guion** (Gemini o Claude):
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
 App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
@@ -484,10 +484,10 @@ S9 §7 "Criterios y premios" (copiado tal cual):
 - En la fase global la categoría la asignan los jueces y cada premio va a un proyecto distinto. No se puede garantizar ningún premio; lo que se controla es cubrir los seis criterios con evidencia.
 - En el formulario se mantienen Local Impact y Best Use of Data.
 S9 §1 (copiado tal cual):
-**Raíz muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa.**
+**ROOT muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa.**
 
 - En inglés, para la página: *"Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover."*
-- Nombre: Raíz – From Dam to Root. Equipo: Los Norteados. Reto: Field Shift.
+- Nombre: ROOT – From Dam to Root. Equipo: Orbital Farming. Reto: Field Shift.
 [PEGA AQUÍ cifras.csv (P5) para las cifras que aparezcan en pantalla.]
 
 TAREA
@@ -519,7 +519,7 @@ Y de S9 §7:
 
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P6 Textos, página y jurado.
 
 ENTORNO
 App de Gemini o Claude en el navegador (no Colab). Entrego archivos de texto en Google Drive, en la carpeta Raiz_entregas (UNA carpeta plana, sin subcarpetas), y agrego una línea por archivo al final de Raiz_entregas/LEEME.md, sin borrar las líneas de los demás. Ahí también están los datos que ya entregó la sesión de datos (otra sesión de Claude); no los modifico.
@@ -539,13 +539,13 @@ No es una fila de la tabla 0.4-B. Entrego textos cortos para historias de Instag
 
 DOCUMENTOS DE REFERENCIA (pegados)
 S9 §1 (copiado tal cual):
-**Raíz muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa.**
+**ROOT muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa.**
 
 - En inglés, para la página: *"Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover."*
-- Nombre: Raíz – From Dam to Root. Equipo: Los Norteados. Reto: Field Shift.
+- Nombre: ROOT – From Dam to Root. Equipo: Orbital Farming. Reto: Field Shift.
 
 TAREA
-Tarea PC. Escribe varias ideas de historia para #MejorMeme durante el evento (humor sobre el agua, la presa y la parcela, sin burlarse de los agricultores ni de las instituciones), cada una con el nombre del equipo (Los Norteados) y la etiqueta #MejorMeme, y un texto corto para pedir el voto del People's Choice con la liga del video. Sin cifras, sin logotipos de NASA, sin "first"/"only", sin promesas de ahorro.
+Tarea PC. Escribe varias ideas de historia para #MejorMeme durante el evento (humor sobre el agua, la presa y la parcela, sin burlarse de los agricultores ni de las instituciones), cada una con el nombre del equipo (Orbital Farming) y la etiqueta #MejorMeme, y un texto corto para pedir el voto del People's Choice con la liga del video. Sin cifras, sin logotipos de NASA, sin "first"/"only", sin promesas de ahorro.
 PRUEBA: AUTOVERIFICACIÓN de la regla 7.
 ```
 - **Hora límite:** las historias, durante el evento (sáb 20:30–1:00, kit §3); la publicación del People's Choice, lista con la liga del video el dom 12:00, para la votación del 17 al 20-nov.

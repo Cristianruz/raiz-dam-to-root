@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas del motor del gemelo digital (docs/decisiones/2026-11-14_gemelo_digital.md), sin red.
 
 Qué se comprueba:
@@ -85,7 +85,8 @@ def teselas(gemelo, zonas_params):
 
 # --- 1. Contrato de gemelo.json -----------------------------------------------------------
 def test_gemelo_cumple_el_contrato(gemelo, zonas_params):
-    assert set(gemelo) - META == {"terreno", "columnas", "camara", "tiempo", "ndvi"}
+    assert set(gemelo) - META == {"terreno", "columnas", "camara", "tiempo", "ndvi", "zona_inicial"}
+    assert gemelo["zona_inicial"] is None or gemelo["zona_inicial"] in zonas_params
     assert gemelo["_encabezado"].startswith("AI-assisted (Claude Code)")
     t = gemelo["terreno"]
     if t is not None:
@@ -97,7 +98,8 @@ def test_gemelo_cumple_el_contrato(gemelo, zonas_params):
         assert t["rotulo"] == "regional, 30 m (NASADEM); vertical exaggeration applied"
         for zid, b in t["zonas"].items():
             assert zid in zonas_params, f"zona {zid} fuera de params.zona_piloto.zonas"
-            assert set(b) == {"teselas", "bounds", "elev_min_m", "elev_max_m"}
+            assert set(b) == {"teselas", "bounds", "elev_min_m", "elev_max_m", "exageracion"}
+            assert isinstance(b["exageracion"], (int, float)) and b["exageracion"] > 0, zid
             assert b["teselas"] == f"data/dem/{zid}/{{z}}/{{x}}/{{y}}.png"
             assert b["bounds"] == zonas_params[zid]["bbox"], "bounds debe ser el rectángulo de la zona en params"
             assert b["elev_min_m"] < b["elev_max_m"]
@@ -116,12 +118,17 @@ def test_valores_de_diseno_son_los_de_params(gemelo, params):
     g = params["gemelo"]
     if gemelo["terreno"] is not None:
         assert gemelo["terreno"]["exageracion"] == g["exageracion_vertical"]["valor"]
+        por_zona = g.get("exageracion_por_zona", {}).get("valor", {})
+        for zid, b in gemelo["terreno"]["zonas"].items():
+            # La de la zona si params la trae; si no, la general (respaldo).
+            assert b["exageracion"] == por_zona.get(zid, g["exageracion_vertical"]["valor"]), zid
         assert gemelo["terreno"]["minzoom"] == g["dem"]["valor"]["minzoom"]
         assert gemelo["terreno"]["maxzoom"] == g["dem"]["valor"]["maxzoom"]
     assert gemelo["columnas"] == {"metros_por_millar": g["metros_por_millar"]["valor"],
                                   "nota": g["metros_por_millar"]["nota_web"], "etiqueta": "Diseño"}
     assert gemelo["camara"] == g["camara"]["valor"]
     assert gemelo["tiempo"]["intervalo_ms"] == g["reproduccion_intervalo_ms"]["valor"]
+    assert gemelo["zona_inicial"] == g["zona_inicial"]["valor"]
     d = g["anio_destacado"]
     assert gemelo["tiempo"]["destacados"] == {str(d["valor"]): {"texto": d["texto"], "fuente": d["fuente"],
                                                                 "etiqueta": d["etiqueta"]}}
@@ -129,7 +136,8 @@ def test_valores_de_diseno_son_los_de_params(gemelo, params):
 
 def test_params_gemelo_declara_fuente_y_etiqueta(params):
     g = params["gemelo"]
-    for clave in ("exageracion_vertical", "metros_por_millar", "camara", "reproduccion_intervalo_ms", "dem"):
+    for clave in ("exageracion_vertical", "metros_por_millar", "camara", "reproduccion_intervalo_ms", "dem",
+                  "exageracion_por_zona", "zona_inicial"):
         e = g[clave]
         assert e["etiqueta"] == "Diseño" and e["fuente"] == f"Decisión {DECISION}", clave
         assert e["valor"] is not None and e["unidad"] and e["nota"], clave
@@ -139,6 +147,39 @@ def test_params_gemelo_declara_fuente_y_etiqueta(params):
     for texto in (d["texto"], g["metros_por_millar"]["nota_web"]):
         palabras = texto.lower().replace(":", " ").replace(".", " ").replace(",", " ").split()
         assert "first" not in palabras and "only" not in palabras, texto
+
+
+def test_exageracion_por_zona_sigue_el_desnivel(gemelo, params, zonas_params):
+    """Diseño: con más desnivel, menos exageración, para que el relieve exagerado de cada zona se lea parecido
+    (Lázaro Cárdenas tiene cerca de tres veces el desnivel de Delicias–Saucillo)."""
+    por_zona = params["gemelo"]["exageracion_por_zona"]["valor"]
+    assert set(por_zona) <= set(zonas_params), "exageracion_por_zona nombra una zona que no está en params"
+    if gemelo["terreno"] is None:
+        pytest.skip("sin terreno")
+    zonas = gemelo["terreno"]["zonas"]
+    desnivel = {zid: b["elev_max_m"] - b["elev_min_m"] for zid, b in zonas.items()}
+    for a in zonas:
+        for b in zonas:
+            if desnivel[a] > desnivel[b]:
+                assert zonas[a]["exageracion"] <= zonas[b]["exageracion"], (a, b)
+
+
+def test_exageracion_y_zona_inicial_con_respaldo(tmp_path, params):
+    """Sin exageracion_por_zona cada zona lleva la general; una zona_inicial desconocida queda en null con aviso."""
+    import copy
+    p = copy.deepcopy(params)
+    p["gemelo"].pop("exageracion_por_zona")
+    p["gemelo"]["zona_inicial"]["valor"] = "zona_que_no_existe"
+    ruta = tmp_path / "params.json"
+    ruta.write_text(json.dumps(p), encoding="utf-8")
+    web = tmp_path / "web"
+    shutil.copytree(WEB / "dem", web / "dem")
+    shutil.copy(WEB / "parcelas.geojson", web / "parcelas.geojson")
+    r = gemelo_web.construir(web=web, params_ruta=ruta, processed=PROCESSED)
+    g = leer(web / "gemelo.json")
+    assert g["zona_inicial"] is None and any("zona_inicial" in a for a in r["avisos"]), r["avisos"]
+    if g["terreno"] is not None:
+        assert all(b["exageracion"] == p["gemelo"]["exageracion_vertical"]["valor"] for b in g["terreno"]["zonas"].values())
 
 
 def test_anios_son_los_de_la_memoria(gemelo):
@@ -472,7 +513,7 @@ def test_sin_rasterio_lo_dice_y_no_borra(tmp_path, monkeypatch):
 
 def test_requirements_datos_fija_la_version_que_genero_las_teselas(gemelo):
     lineas = (RAIZ / "requirements-datos.txt").read_text(encoding="utf-8").splitlines()
-    assert lineas[0] == "# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+    assert lineas[0] == "# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
     fijas = [x.strip() for x in lineas if x.strip() and not x.startswith("#")]
     assert len(fijas) == 1 and fijas[0].startswith("rasterio=="), fijas
     if gemelo["terreno"] is not None:
@@ -540,7 +581,7 @@ def csv_ndvi():
 
 
 def test_ndvi_una_serie_por_parcela(ndvi, gemelo):
-    assert set(ndvi) - META == {"meses", "parcelas", "fuente"}
+    assert set(ndvi) - META == {"meses", "parcelas", "umbrales", "fuente"}
     meses = ndvi["meses"]
     assert meses == sorted(set(meses)) and all(len(m) == 7 and m[4] == "-" for m in meses)
     ids = [f["properties"]["id"] for f in leer(WEB / "parcelas.geojson")["features"]]
@@ -598,3 +639,62 @@ def test_ndvi_sin_csv_borra_el_archivo_viejo(tmp_path):
     (web / "ndvi_mensual.json").write_text("{}", encoding="utf-8")
     r = ndvi_web.construir(processed=tmp_path / "sin_entregas", web=web)
     assert r["ejecutado"] is False and not (web / "ndvi_mensual.json").exists()
+
+
+# --- 6b. Umbrales de referencia de la gráfica del NDVI (ficha) -------------------------------
+def test_ndvi_umbrales_son_los_de_supuestos_con_su_fuente(ndvi):
+    """Las dos líneas de referencia salen de data/processed/supuestos.json (las que usó la sesión de datos para
+    la memoria y el suelo desnudo), con su valor, su fuente y su etiqueta; nunca escritas a mano."""
+    sup = leer(PROCESSED / "supuestos.json")
+    for clave, (llave, _) in ndvi_web.UMBRALES.items():
+        u = ndvi["umbrales"][clave]
+        assert u == {"valor": sup[llave]["valor"], "etiqueta": sup[llave]["etiqueta"], "fuente": sup[llave]["fuente"],
+                     "archivo": "data/processed/supuestos.json"}, clave
+        assert -1 <= u["valor"] <= 1 and u["fuente"]
+    assert ndvi["umbrales"]["desnudo"]["valor"] < ndvi["umbrales"]["verde"]["valor"]
+
+
+def _csv_minimo(proc):
+    proc.mkdir(parents=True, exist_ok=True)
+    (proc / "hls_mensual_parcelas.csv").write_text(
+        "id,mes,banda,mediana,p25,p75,n_validos\nP0001,2026-01,ndvi,0.5,0,0,1\n", encoding="utf-8")  # DATOS DE PRUEBA
+
+
+def test_ndvi_umbrales_sin_supuestos_salen_de_params(tmp_path, params):
+    proc, web = tmp_path / "processed", tmp_path / "web"
+    _csv_minimo(proc)
+    ndvi_web.construir(processed=proc, web=web, params_ruta=PARAMS_RUTA)
+    u = leer(web / "ndvi_mensual.json")["umbrales"]
+    for clave, (_, ruta) in ndvi_web.UMBRALES.items():
+        bloque = params
+        for parte in ruta:
+            bloque = bloque[parte]
+        assert u[clave]["valor"] == bloque["valor"] and u[clave]["fuente"] == bloque["fuente"]
+        assert u[clave]["archivo"] == "data/params.json"
+
+
+def test_ndvi_umbral_sin_fuente_o_fuera_de_rango_va_en_null_y_se_avisa(tmp_path):
+    proc, web = tmp_path / "processed", tmp_path / "web"
+    _csv_minimo(proc)
+    # DATOS DE PRUEBA: un umbral sin fuente y otro fuera de [−1, 1]; params sin los bloques.
+    (proc / "supuestos.json").write_text(json.dumps({
+        "umbral_verde_ndvi": {"valor": 0.5, "etiqueta": "[prueba]"},
+        "umbral_desnudo_ndvi": {"valor": 3, "etiqueta": "[prueba]", "fuente": "prueba"}}), encoding="utf-8")
+    (tmp_path / "params.json").write_text("{}", encoding="utf-8")
+    r = ndvi_web.construir(processed=proc, web=web, params_ruta=tmp_path / "params.json")
+    assert leer(web / "ndvi_mensual.json")["umbrales"] == {"verde": None, "desnudo": None}
+    assert sum("umbral" in a for a in r["avisos"]) == 2
+
+
+def test_ndvi_umbrales_distintos_en_supuestos_y_params_se_avisa(tmp_path, params):
+    proc, web = tmp_path / "processed", tmp_path / "web"
+    _csv_minimo(proc)
+    verde = params["memoria"]["ndvi_verde"]["valor"]
+    otro = round(verde / 2, 3)                        # DATOS DE PRUEBA: distinto del de params
+    (proc / "supuestos.json").write_text(json.dumps({
+        "umbral_verde_ndvi": {"valor": otro, "etiqueta": "[prueba]", "fuente": "prueba"}}), encoding="utf-8")
+    r = ndvi_web.construir(processed=proc, web=web, params_ruta=PARAMS_RUTA)
+    u = leer(web / "ndvi_mensual.json")["umbrales"]
+    assert u["verde"]["valor"] == otro and u["verde"]["archivo"] == "data/processed/supuestos.json"
+    assert u["desnudo"]["archivo"] == "data/params.json", "el que supuestos no trae sale de params"
+    assert any("umbral verde" in a and "se usa el de supuestos.json" in a for a in r["avisos"])

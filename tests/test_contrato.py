@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """K-TEST 8: contrato de datos v4 (kit §2.2–2.5) con validar_contrato.py.
 
 1) Los archivos de web/data pasan el validador.
@@ -10,8 +10,13 @@
    fuente y periodo; umbral de las rutas con su etiqueta); TODAS las hojas numéricas de
    properties en parcelas.geojson (las de relieve con la fuente de relieve_parcelas.csv) y las
    cifras de web/data/pruebas.json que muestra «About & Data».
+4) Cifras nuevas del motor (escenario de goteo, pendientes de la auditoría): los bloques de goteo llevan
+   la fuente y la etiqueta de data/processed/supuestos.json; cubo.meta (eficiencias y ventana de suelo
+   desnudo) y las variantes en inglés de dotaciones, las de params; rutas_depresiones de relieve.json,
+   la fuente de la entrega relieve_meta y la etiqueta de su bloque.
 """
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -83,6 +88,29 @@ def balance_de_gota_roto(cubo, geo, expl):
     g["m3_otras_perdidas"] = g["m3_otras_perdidas"] + g["m3_salen_presa"]
 
 
+def opcion_con_goteo(cubo):
+    """Primera opción con escenario de goteo; si el cubo no lo trae, la prueba se omite."""
+    for pc in cubo["parcelas"].values():
+        for op in pc["opciones"]:
+            if op.get("gota_goteo_con_tope") and op.get("gota_goteo_sin_tope"):
+                return op
+    pytest.skip("el cubo actual no trae el escenario de goteo")
+
+
+def balance_de_goteo_con_tope_roto(cubo, geo, expl):
+    g = opcion_con_goteo(cubo)["gota_goteo_con_tope"]
+    g["m3_regresan_acuifero"] = g["m3_regresan_acuifero"] + g["m3_salen_presa"]
+
+
+def balance_de_goteo_sin_tope_roto(cubo, geo, expl):
+    g = opcion_con_goteo(cubo)["gota_goteo_sin_tope"]
+    g["m3_consume_cultivo_et"] = g["m3_consume_cultivo_et"] + g["m3_salen_presa"]
+
+
+def tope_sin_veredicto(cubo, geo, expl):
+    opcion_con_goteo(cubo)["tope_consumo"]["cumple_sin_tope"] = None
+
+
 def digito_en_explicacion(cubo, geo, expl):
     llave = next(iter(expl["explicaciones"]))
     expl["explicaciones"][llave]["textos"]["por_que"] += " " + str(cubo["dotaciones"]["deslizador"]["max"])
@@ -133,6 +161,9 @@ ALTERACIONES = {
     "P50 > P90": (p50_mayor_que_p90, "P10 ≤ P50 ≤ P90"),
     "semáforo de agua guardado": (semaforo_de_agua_guardado, "semáforo de agua"),
     "balance de La gota roto": (balance_de_gota_roto, "balance no cierra"),
+    "balance del goteo con tope roto": (balance_de_goteo_con_tope_roto, "gota_goteo_con_tope: el balance no cierra"),
+    "balance del goteo sin tope roto": (balance_de_goteo_sin_tope_roto, "gota_goteo_sin_tope: el balance no cierra"),
+    "tope de consumo sin veredicto": (tope_sin_veredicto, "cumple_sin_tope debe ser bool"),
     "dígito escrito en una explicación": (digito_en_explicacion, "dígitos fuera de los marcadores"),
     "estado_plazo fuera de lista": (estado_plazo_fuera_de_lista, "estado_plazo fuera de lista"),
     "zona de parcela fuera de params": (zona_de_parcela_fuera_de_params, "zona fuera de params.zona_piloto.zonas"),
@@ -442,3 +473,234 @@ def test_manifest_no_altera_el_contrato():
     antes = {n: (RAIZ / "web/data" / n).read_bytes() for n in ARCHIVOS}
     manifest.generar(escribir=False)
     assert all((RAIZ / "web/data" / n).read_bytes() == b for n, b in antes.items())
+
+
+# --- 4) cifras nuevas: goteo, meta, variantes en inglés y rutas cortadas -------------------------
+def test_manifest_goteo_con_la_fuente_y_la_etiqueta_de_supuestos(man):
+    cubo = leer("cubo.json")
+    g = cubo["meta"].get("goteo") or {}
+    if cubo["meta"].get("mock") or not g.get("disponible"):
+        pytest.skip("el cubo actual no trae el escenario de goteo real")
+    sup = json.loads((RAIZ / "data/processed/supuestos.json").read_text(encoding="utf-8"))
+    entrega = manifest.entrega_de(man["fuentes_de_origen"], manifest.ENTREGA_SUPUESTOS) or {}
+    campos = ["m3_salen_presa", "m3_perdidas_canal", "m3_llegan_parcela", "m3_consume_cultivo_et",
+              "m3_regresan_acuifero", "m3_otras_perdidas"]
+    claves = [f"{b}.{c}" for b in ("gota_goteo_con_tope", "gota_goteo_sin_tope") for c in campos]
+    claves += ["tope_consumo.et_historica_m3", "tope_consumo.et_goteo_sin_tope_m3"]
+    n = sum(1 for pc in cubo["parcelas"].values() for op in pc["opciones"] if op["gota_goteo_con_tope"])
+    for clave in claves:
+        e = man["cifras"].get(f"cubo.json:parcelas.*.opciones[*].{clave}")
+        assert e and e["n"] == n, f"{clave}: sin entrada o con otro número de valores"
+        assert e["fuente"] == sup["ea_goteo"]["fuente"], f"{clave}: fuente {e['fuente']}"
+        assert e["etiqueta"] == sup["ea_goteo"]["etiqueta"], f"{clave}: etiqueta {e['etiqueta']}"
+        assert "motor/b4_cubo.py" in e["script"]
+        if entrega:
+            assert entrega["script"] in e["script"] and e["fecha"] == (entrega.get("fecha_consulta") or entrega.get("fecha"))
+    # El bloque «gota» (riego actual) sigue siendo cálculo del motor: no hereda la etiqueta del goteo.
+    actual = man["cifras"]["cubo.json:parcelas.*.opciones[*].gota.m3_salen_presa"]
+    assert actual["etiqueta"] == manifest.ETIQUETA_CALCULO
+    # Las eficiencias mismas, con su fuente y su etiqueta; el rango de A5, con las suyas.
+    for clave in ("ea_goteo", "ea_superficial_referencia"):
+        e = man["cifras"][f"cubo.json:meta.goteo.{clave}.valor"]
+        assert (e["min"], e["fuente"], e["etiqueta"]) == (sup[clave]["valor"], sup[clave]["fuente"], sup[clave]["etiqueta"])
+    rango = man["cifras"]["cubo.json:meta.goteo.zonas.*.ea_gravedad.valor[*]"]
+    valores = [v for z in g["zonas"].values() for v in z["ea_gravedad"]["valor"]]
+    assert rango["n"] == len(valores) and (rango["min"], rango["max"]) == (min(valores), max(valores))
+    assert contiene(rango["etiqueta"], next(iter(g["zonas"].values()))["ea_gravedad"]["etiqueta"])
+
+
+def test_manifest_ventana_de_suelo_y_textos_en_ingles_con_la_fuente_de_params(man):
+    cubo = leer("cubo.json")
+    if cubo["meta"].get("mock") or "ventana_desnudo" not in cubo["meta"]:
+        pytest.skip("cubo simulado: los simulados no llevan estos campos")
+    params = json.loads((RAIZ / "data/params.json").read_text(encoding="utf-8"))
+    p = params["suelo"]["ventana_desnudo"]
+    for k in ("inicio", "fin"):
+        e = man["cifras"][f"cubo.json:meta.ventana_desnudo.{k}"]
+        assert e["textos"] == [p["valor"][k]] and (e["fuente"], e["etiqueta"]) == (p["fuente"], p["etiqueta"])
+    millar = params["unidades"]["millar"]
+    e = man["cifras"]["cubo.json:dotaciones.equivalencia_en"]
+    assert e["textos"] == [millar["nota_en"]] and (e["fuente"], e["etiqueta"]) == (millar["fuente"], millar["etiqueta"])
+    # La nota en inglés de una marca se registra si lleva cifras, con la fuente de su marca.
+    con_cifras = [(i, m) for i, m in enumerate(cubo["dotaciones"]["marcas"]) if any(c.isdigit() for c in m.get("nota_en") or "")]
+    assert con_cifras, "al menos una nota en inglés lleva cifras (la de la marca de pozos)"
+    for i, m in con_cifras:
+        e = entrada(man, "cubo.json", f"dotaciones.marcas[{i}].nota_en")
+        assert e and m["nota_en"] in e["textos"] and contiene(e["fuente"], params["dotaciones"][m["id"]]["fuente"])
+    # Son copias de params: el manifest no debe avisar que el cubo dice otra cosa.
+    distintos = [a for a in man["avisos"] if ("nota_en" in a and "no coincide" in a)
+                 or ("ventana_desnudo" in a and "el cubo dice" in a)]
+    assert not distintos, distintos
+
+
+def test_manifest_rutas_depresiones_con_la_fuente_de_relieve_meta(man):
+    ruta = RAIZ / "web/data/relieve.json"
+    if not ruta.exists():
+        pytest.skip("sin web/data/relieve.json (la capa de relieve no se ha ejecutado)")
+    relieve = json.loads(ruta.read_text(encoding="utf-8"))
+    con_bloque = {z: b["rutas_depresiones"] for z, b in relieve["zonas"].items() if b.get("rutas_depresiones")}
+    if not con_bloque:
+        pytest.skip("relieve.json sin rutas_depresiones (A9 no lo entregó)")
+    for zid, dep in con_bloque.items():
+        entrega = manifest.entrega_de_relieve(man["fuentes_de_origen"], zid) or {}
+        for k, v in dep.items():
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                e = entrada(man, "relieve.json", f"zonas.{zid}.rutas_depresiones.{k}")
+                assert e and e["min"] <= v <= e["max"], f"rutas_depresiones.{k} sin entrada en el manifest"
+                assert contiene(e["etiqueta"], dep["etiqueta"]), f"{k}: etiqueta {e['etiqueta']}"
+                if entrega:
+                    assert contiene(e["fuente"], entrega["fuente"]), f"{k}: fuente {e['fuente']}"
+                    assert entrega["script"] in str(e["script"])
+        if any(c.isdigit() for c in dep.get("nota") or ""):
+            e = entrada(man, "relieve.json", f"zonas.{zid}.rutas_depresiones.nota")
+            assert e and dep["nota"] in e["textos"] and contiene(e["etiqueta"], dep["etiqueta"])
+    assert not [a for a in man["avisos"] if "rutas_depresiones" in a and "sin regla propia" in a], man["avisos"]
+
+
+def test_manifest_cubre_la_ficha_completa(man):
+    """Etapa 2 de la ficha (decisión del gemelo §5 y del suelo): la lámina local de referencia de cada opción y la
+    constante de la equivalencia (cubo), los umbrales del NDVI (ndvi_mensual.json), los supuestos y la alcalinidad
+    de suelo (suelo.json) y GEDI por parcela (contexto.json) tienen su entrada, con fuente y etiqueta."""
+    cubo = leer("cubo.json")
+    claves = {c["clave"] for c in man["cifras"].values() if c["archivo"] == "web/data/cubo.json"}
+    esperadas = set()
+    for pid, pc in cubo["parcelas"].items():
+        for i, op in enumerate(pc["opciones"]):
+            ll = (op.get("agua") or {}).get("lamina_local")
+            if isinstance(ll, dict):
+                esperadas |= {patron(r) for r, _ in hojas(ll, f"parcelas.{pid}.opciones[{i}].agua.lamina_local")}
+    if "lamina_cm_por_millar" in cubo["dotaciones"]:
+        esperadas.add("dotaciones.lamina_cm_por_millar.valor")
+    faltan = sorted(esperadas - claves)
+    assert not faltan, f"cifras de la ficha sin entrada en el manifest: {faltan[:10]}"
+    for clave in [c for c in claves if ".lamina_local." in c]:
+        e = man["cifras"][f"cubo.json:{clave}"]
+        assert e["fuente"] and e["etiqueta"], clave
+    por_archivo = {}
+    for c in man["cifras"].values():
+        por_archivo.setdefault(c["archivo"], set()).add(c["clave"])
+    ruta = RAIZ / "web/data"
+    if (ruta / "ndvi_mensual.json").exists():
+        ndvi = json.loads((ruta / "ndvi_mensual.json").read_text(encoding="utf-8"))
+        for clave, u in (ndvi.get("umbrales") or {}).items():
+            if u:
+                e = man["cifras"][f"ndvi_mensual.json:umbrales.{clave}.valor"]
+                assert e["min"] == e["max"] == u["valor"] and e["fuente"] == u["fuente"] and e["etiqueta"] == u["etiqueta"]
+    if (ruta / "suelo.json").exists():
+        suelo = json.loads((ruta / "suelo.json").read_text(encoding="utf-8"))
+        for clave in ("margen_ph", "coincidencia_textura"):
+            if suelo.get(clave):
+                e = man["cifras"][f"suelo.json:{clave}.valor"]
+                assert e["min"] == e["max"] == suelo[clave]["valor"] and e["fuente"] == suelo[clave]["fuente"]
+        if suelo.get("perfil"):
+            assert "perfil.parcelas.*.ph" in por_archivo["web/data/suelo.json"]
+        if suelo.get("alcalinidad_zona"):
+            assert "alcalinidad_zona.zonas.*.n_sobre_optimo" in por_archivo["web/data/suelo.json"]
+    if (ruta / "contexto.json").exists():
+        ctx = json.loads((ruta / "contexto.json").read_text(encoding="utf-8"))
+        if (ctx.get("gedi") or {}).get("parcelas"):
+            assert "gedi.parcelas.*.altura_mediana_m" in por_archivo["web/data/contexto.json"]
+
+
+# --- Regla 11 en la integración (etapa 3): cada cifra de gemelo, contexto, suelo y NDVI registrada -----------------
+ARCHIVOS_NUEVOS = {
+    "gemelo.json": lambda r: r,
+    "contexto.json": manifest.renombrar_contexto,
+    "suelo.json": manifest.renombrar_suelo,
+    "ndvi_mensual.json": lambda r: r,
+}
+
+
+def _rutas_a_registrar(nombre, datos):
+    """(ruta del manifest, valor) de cada hoja numérica y cada texto con cifras que la página puede mostrar."""
+    renombrar = ARCHIVOS_NUEVOS[nombre]
+    salida = []
+    for ruta, v in manifest.hojas_numericas(datos, ""):
+        if not ruta.startswith("_"):
+            salida.append((renombrar(ruta), v))
+    for ruta, v in manifest.textos_con_digitos(datos, ""):
+        ruta = ruta.lstrip(".")
+        if ruta.startswith("_") or ruta.split(".")[0] in ("generado", "decision"):
+            continue
+        if nombre == "contexto.json" and re.search(r"\.meses\[\d+\]$", ruta):
+            # Los meses de una serie se registran como su periodo (una entrada por lista).
+            salida.append((renombrar(re.sub(r"\[\d+\]$", "", ruta)) + ".periodo", None))
+            continue
+        salida.append((renombrar(ruta), v))
+    return salida
+
+
+def test_manifest_registra_cada_cifra_de_gemelo_contexto_suelo_y_ndvi(man):
+    """Toda hoja numérica y todo texto con cifras de los cuatro archivos tiene su entrada (por patrón), con fuente y
+    script; los números caen en el rango de su patrón. Con los datos de hoy, ninguno queda «sin regla propia»."""
+    revisados = 0
+    for nombre in ARCHIVOS_NUEVOS:
+        ruta = RAIZ / "web/data" / nombre
+        if not ruta.exists():
+            continue
+        datos = json.loads(ruta.read_text(encoding="utf-8"))
+        faltan = []
+        for clave, v in _rutas_a_registrar(nombre, datos):
+            e = man["cifras"].get(f"{nombre}:{patron(clave)}")
+            if e is None:
+                faltan.append(clave)
+                continue
+            assert e["script"], f"{nombre}:{clave} sin script"
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                assert e["min"] <= v <= e["max"], f"{nombre}:{clave} = {v} fuera de [{e['min']}, {e['max']}]"
+            elif isinstance(v, str):
+                assert v in (e.get("textos") or []), f"{nombre}:{clave}: texto sin registrar"
+            revisados += 1
+        assert not faltan, f"{nombre}: cifras sin entrada en el manifest: {faltan[:8]}"
+        sin_regla = [a for a in man["avisos"] if a.startswith(f"{nombre}:") and "sin regla propia" in a]
+        assert not sin_regla, sin_regla
+    assert revisados > 0
+
+
+def test_manifest_contexto_cada_serie_con_su_producto_y_su_periodo(man):
+    ruta = RAIZ / "web/data/contexto.json"
+    if not ruta.exists():
+        pytest.skip("sin web/data/contexto.json")
+    ctx = json.loads(ruta.read_text(encoding="utf-8"))
+    for zona, series in (ctx.get("contexto_regional") or {}).items():
+        for clave, s in series.items():
+            e = man["cifras"][f"contexto.json:contexto_regional.zonas.*.{clave}.valores[*]"]
+            # La fuente cita el producto de ESA serie (su tramo de la línea de LEEME), no la de otra.
+            assert any(f"{s['fuente_id']} = " in f for f in (e["fuente"] if isinstance(e["fuente"], list) else [e["fuente"]]))
+            p = man["cifras"][f"contexto.json:contexto_regional.zonas.*.{clave}.meses.periodo"]
+            assert f"{s['meses'][0]} … {s['meses'][-1]}" in p["textos"]
+            if s.get("malla_mascon"):
+                m = man["cifras"][f"contexto.json:contexto_regional.zonas.*.{clave}.malla_mascon.mascon_grados"]
+                assert m["min"] == s["malla_mascon"]["mascon_grados"] and m["etiqueta"]
+    # El clima del año: lluvia de IMERG con la fuente de imerg_diaria; ETo con la de eto_diaria.
+    for zona, b in (ctx.get("clima_anual") or {}).items():
+        imerg = man["cifras"]["contexto.json:clima_anual.zonas.*.anios[*].lluvia_imerg_mm"]
+        eto = man["cifras"]["contexto.json:clima_anual.zonas.*.anios[*].eto_mm"]
+        assert contiene(imerg["fuente"], b["fuentes"]["imerg"]["fuente"])
+        assert contiene(eto["fuente"], b["fuentes"]["power"]["fuente"])
+
+
+def test_barrido_registra_y_avisa_lo_que_no_tiene_regla():
+    """Una cifra nueva sin regla propia no se salta: se registra con la fuente del archivo y se avisa una vez."""
+    m = manifest.Manifest("2026-11-15")
+    datos = {"_encabezado": "AI-assisted 2026", "generado": "2026-11-15", "bloque_nuevo": {"a": [1, 2], "texto": "en 2026"}}
+    manifest.barrer(m, "web/data/suelo.json", datos, lambda r: r, ("fuente del archivo", None, "motor/suelo_web.py", "x"))
+    claves = sorted(c["clave"] for c in m.cifras.values())
+    assert claves == ["bloque_nuevo.a[0]", "bloque_nuevo.a[1]", "bloque_nuevo.texto"]
+    avisos = [a for a in m.avisos if "sin regla propia" in a]
+    assert len(avisos) == 2 and any("bloque_nuevo.a[*]" in a for a in avisos)
+    # Lo ya registrado no se repite.
+    manifest.barrer(m, "web/data/suelo.json", datos, lambda r: r, ("fuente del archivo", None, "motor/suelo_web.py", "x"))
+    assert len(m.cifras) == 3 and not [a for a in m.avisos if "clave repetida" in a]
+
+
+def test_manifest_registra_h1b_junto_a_h1(man):
+    ruta = RAIZ / "web/data/pruebas.json"
+    if not ruta.exists():
+        pytest.skip("sin web/data/pruebas.json")
+    pruebas = json.loads(ruta.read_text(encoding="utf-8"))
+    for i, p in enumerate(pruebas["pruebas"]):
+        for j, c in enumerate(p.get("complementos") or []):
+            for k, met in enumerate(c.get("metricas") or []):
+                e = man["cifras"][f"pruebas.json:pruebas[*].complementos[*].metricas[*].valor"]
+                assert e["min"] <= met["valor"] <= e["max"] and contiene(e["fuente"], met["fuente"])

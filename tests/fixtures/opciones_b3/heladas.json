@@ -1,0 +1,59 @@
+{
+ "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_nota": "DATOS DE PRUEBA para tests/test_opciones_b3.py: probabilidades inventadas para la prueba, no son de NASA POWER.",
+ "ultima_primavera": {
+  "p10": "02-01",
+  "p50": "02-20",
+  "p90": "03-10"
+ },
+ "primera_otono": {
+  "p10": "11-10",
+  "p50": "11-28",
+  "p90": "12-15"
+ },
+ "prob_helada_despues_de": {
+  "02-01": 0.9,
+  "02-08": 0.8,
+  "02-15": 0.6,
+  "02-22": 0.5,
+  "03-01": 0.3,
+  "03-08": 0.15,
+  "03-15": 0.1,
+  "03-22": 0.05,
+  "03-29": 0.05,
+  "04-05": 0.0,
+  "04-12": 0.0
+ },
+ "fuente": "DATO DE PRUEBA (fixture de tests/test_opciones_b3.py; no es el maestro §5.2 ni una fuente real)",
+ "nota": "TEST DATA",
+ "definicion": {
+  "prob_helada_despues_de": "TEST DATA: share of years with frost from that date on"
+ },
+ "zonas": {
+  "lazaro_cardenas": {
+   "ultima_primavera": {
+    "p10": "02-01",
+    "p50": "02-20",
+    "p90": "03-10"
+   },
+   "primera_otono": {
+    "p10": "11-10",
+    "p50": "11-28",
+    "p90": "12-15"
+   },
+   "prob_helada_despues_de": {
+    "02-01": 0.95,
+    "02-08": 0.85,
+    "02-15": 0.7,
+    "02-22": 0.6,
+    "03-01": 0.45,
+    "03-08": 0.3,
+    "03-15": 0.2,
+    "03-22": 0.1,
+    "03-29": 0.1,
+    "04-05": 0.05,
+    "04-12": 0.0
+   }
+  }
+ }
+}

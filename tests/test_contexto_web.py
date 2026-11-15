@@ -1,9 +1,9 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas de motor/contexto_web.py (bases de datos del reto → web/data/contexto.json).
 
 Decisión: docs/decisiones/2026-11-14_recursos_del_reto.md.
-(a) Con data/processed REAL (hoy sin las entregas nuevas): el clima del año existe para las dos
-    zonas y sus sumas coinciden con un cálculo independiente hecho aquí; los días con helada
+(a) Con data/processed REAL (con las entregas que hayan llegado): el clima del año existe para las
+    dos zonas y sus sumas coinciden con un cálculo independiente hecho aquí; los días con helada
     coinciden con contar Tmin ≤ 0 °C; los bloques de entregas ausentes van en null con su motivo;
     el estado de cada recurso es coherente con los archivos presentes.
 (b) Con un processed DE PRUEBA (tests/fixtures/contexto_reto/generar.py, escrito en tmp_path) que
@@ -11,6 +11,12 @@ Decisión: docs/decisiones/2026-11-14_recursos_del_reto.md.
     esos mismos archivos pasan el validador del buzón (motor/ensamblar.py).
 (c) El JSON nunca trae NaN ni Infinity; un año con faltantes por encima del umbral va en null con
     sus «dias_con_dato» reales; la fixture contexto_lleno.json está al día.
+(d) et_contraste lleva la zona piloto a la que pertenece (archivo sin sufijo = zona por omisión) y
+    el motivo fijo para las demás zonas; cada bloque dice de qué archivo salió.
+(e) GEDI: el bloque trae la referencia de la propia entrega (mínimo, mediana y máximo de las lecturas
+    de las parcelas con disparos), igual a un cálculo independiente; null si no hay lecturas. Los
+    criterios para leerla (piso del instrumento y umbral de dosel alto) se leen de supuestos.json y
+    la lectura de cada parcela coincide con aplicarlos aquí; sin criterios, nada se clasifica.
 Todo se escribe en tmp_path: nunca en data/processed ni en web/data. Los valores de (b) y (c) son
 DE PRUEBA; los umbrales se leen de motor/esquemas.py y de data/params.json, no se escriben aquí.
 """
@@ -195,7 +201,10 @@ def test_real_et_contraste_tal_cual(real):
     for columna, valores in bloque["columnas"].items():
         assert len(valores) == len(filas)
         assert valores == [float(f[columna]) if f[columna].strip() else None for f in filas]
-    assert bloque["fuente"] and bloque["fecha"]
+    assert bloque["fuente"] and bloque["fecha"] and bloque["archivo"] == "et_contraste.csv"
+    # El contraste es de UNA zona (archivo sin sufijo): la página no lo cruza con las series de otra.
+    assert bloque["zona"] == esquemas.ZONA_POR_OMISION and bloque["zona"] in contexto["zonas"]
+    assert bloque["motivo_otras_zonas"] == cw.MOTIVO_CONTRASTE_OTRA_ZONA
 
 
 def test_real_estado_de_cada_recurso_coherente_con_los_archivos(real):
@@ -283,11 +292,16 @@ def test_lleno_todos_los_bloques(lleno):
 
 def test_lleno_contexto_regional_alineado(lleno):
     bloque = lleno["contexto"]["contexto_regional"]
-    assert set(bloque) == set(ZONAS)
+    cuenca = esquemas.ZONA_CUENCA
+    assert set(bloque) == {*ZONAS, cuenca}, "las zonas de params y la serie de cuenca de GRACE"
     claves = {f"{f}.{v}": u for f, v, u in esquemas.COMBINACIONES_CONTEXTO}
-    for zona in ZONAS:
-        assert set(bloque[zona]) == set(claves), "las 12 series de la tabla"
+    de_cuenca = {c for c in claves if c.startswith(f"{esquemas.FUENTE_DE_CUENCA}.")}
+    assert set(bloque[cuenca]) == de_cuenca, "GRACE: una sola serie, bajo «cuenca»"
+    for zona in (*ZONAS, cuenca):
+        if zona != cuenca:
+            assert set(bloque[zona]) == set(claves) - de_cuenca, "las otras 11 series de la tabla, por zona"
         for clave, serie in bloque[zona].items():
+            assert serie["ambito"] == ("cuenca" if zona == cuenca else "zona")
             assert serie["unidad"] == claves[clave]
             assert f"{serie['fuente_id']}.{serie['variable']}" == clave
             assert len(serie["meses"]) == len(serie["valores"]) > 0
@@ -329,8 +343,8 @@ def test_lleno_media_y_suma_anual_con_un_calculo_independiente(lleno):
 
 def test_lleno_huecos_no_se_rellenan(lleno):
     series = lleno["contexto"]["contexto_regional"][ZONAS[0]]
-    # GRACE: tres meses sin fila → null en su lugar y año incompleto.
-    grace = series["grace.agua_almacenada_anomalia"]
+    # GRACE (serie de cuenca): tres meses sin fila → null en su lugar y año incompleto.
+    grace = lleno["contexto"]["contexto_regional"][esquemas.ZONA_CUENCA]["grace.agua_almacenada_anomalia"]
     por_mes = dict(zip(grace["meses"], grace["valores"]))
     assert [por_mes[m] for m in ("2023-03", "2023-04", "2023-05")] == [None, None, None]
     anio = next(a for a in grace["anual"] if a["anio"] == 2023)
@@ -348,10 +362,187 @@ def test_lleno_huecos_no_se_rellenan(lleno):
 
 def test_lleno_gedi_solo_parcelas_con_disparos(lleno):
     gedi = lleno["contexto"]["gedi"]
-    assert gedi["n_total"] == 4 and gedi["n_con_dato"] == len(gedi["parcelas"]) == 2
-    assert gedi["parcelas"]["P0001"] == {"n_disparos": 4, "altura_mediana_m": 6.2, "altura_p90_m": 8.1}
-    assert "P0002" not in gedi["parcelas"] and "L0002" not in gedi["parcelas"], "sin disparos: no es cero, no entra"
+    assert gedi["n_total"] == 4 and gedi["n_con_dato"] == len(gedi["parcelas"]) == 3
+    assert gedi["parcelas"]["P0001"] == {"n_disparos": 4, "altura_mediana_m": 6.2, "altura_p90_m": 8.1,
+                                         "dosel_alto": True}
+    assert "P0002" not in gedi["parcelas"], "sin disparos: no es cero, no entra"
     assert gedi["fuente"] and gedi["fecha"]
+
+
+def filas_de_gedi(ruta):
+    """Filas con disparos de gedi_parcelas.csv, leídas sin pasar por el motor: {id: (n, mediana, p90)}."""
+    with open(ruta, newline="", encoding="utf-8") as f:
+        return {fila["id"]: (int(fila["n_disparos"]), float(fila["altura_mediana_m"]), float(fila["altura_p90_m"]))
+                for fila in csv.DictReader(f) if int(fila["n_disparos"]) > 0}
+
+
+def lecturas_de_gedi(ruta):
+    """altura_mediana_m de las parcelas con disparos, leída del CSV sin pasar por el motor."""
+    return [mediana for _, mediana, _ in filas_de_gedi(ruta).values()]
+
+
+def mediana_independiente(valores):
+    orden = sorted(valores)
+    n = len(orden)
+    return orden[n // 2] if n % 2 else (orden[n // 2 - 1] + orden[n // 2]) / 2
+
+
+def clasificar_independiente(filas, umbral, min_disparos):
+    """El criterio de la sesión de datos aplicado aquí, sin el motor: True, False o None por parcela."""
+    return {pid: (None if n < min_disparos else p90 >= umbral) for pid, (n, _, p90) in filas.items()}
+
+
+def test_lleno_gedi_referencia_de_la_propia_entrega(lleno):
+    """GEDI (rh98) no marca cero sobre suelo desnudo: el bloque dice entre qué valores leen las parcelas de
+    la entrega, para que la ficha compare una lectura con las demás y no la presente como altura del cultivo."""
+    gedi = lleno["contexto"]["gedi"]
+    lecturas = sorted(lecturas_de_gedi(lleno["processed"] / ARCHIVO_DE["gedi"]))
+    assert len(lecturas) == 3, "la fixture trae tres parcelas con disparos"
+    assert gedi["referencia"] == {"n_parcelas": 3, "minimo_m": lecturas[0], "mediana_m": lecturas[1],
+                                  "maximo_m": lecturas[2]}
+
+
+def test_lleno_gedi_criterios_de_la_sesion_de_datos(lleno):
+    """El piso del instrumento y el umbral de dosel alto se LEEN de supuestos.json (con su etiqueta y su
+    fuente) y se aplican a cada parcela: nada de eso está escrito en el motor."""
+    gedi = lleno["contexto"]["gedi"]
+    supuestos = json.loads((lleno["processed"] / cw.ARCHIVO_SUPUESTOS).read_text(encoding="utf-8"))
+    piso, umbral = supuestos[cw.CLAVE_PISO_GEDI], supuestos[cw.CLAVE_UMBRAL_GEDI]
+    assert gedi["criterios"] == {
+        "archivo": cw.ARCHIVO_SUPUESTOS, "fecha": GEN.FECHA_PRUEBA,
+        "piso_instrumento": {"valor_m": piso["valor"], "min_m": piso["min"], "max_m": piso["max"],
+                             "etiqueta": piso["etiqueta"], "fuente": piso["fuente"]},
+        "dosel_alto": {"umbral_m": umbral["valor"], "min_disparos": umbral["min_disparos"]["valor"],
+                       "etiqueta": umbral["etiqueta"], "fuente": umbral["fuente"]},
+    }
+    assert (umbral["valor"], umbral["min_disparos"]["valor"]) == (GEN.UMBRAL_GEDI_PRUEBA, GEN.MIN_DISPAROS_PRUEBA)
+    # Las tres lecturas posibles están en la fixture, y coinciden con el criterio aplicado aquí.
+    esperado = clasificar_independiente(filas_de_gedi(lleno["processed"] / ARCHIVO_DE["gedi"]),
+                                        GEN.UMBRAL_GEDI_PRUEBA, GEN.MIN_DISPAROS_PRUEBA)
+    assert {pid: p["dosel_alto"] for pid, p in gedi["parcelas"].items()} == esperado
+    assert esperado == {"P0001": True, "L0001": None, "L0002": False}
+    assert (gedi["n_dosel_alto"], gedi["n_sin_dosel_alto"], gedi["n_pocos_disparos"]) == (1, 1, 1)
+    assert gedi["n_dosel_alto"] + gedi["n_sin_dosel_alto"] + gedi["n_pocos_disparos"] == gedi["n_con_dato"]
+
+
+def test_gedi_sin_supuestos_no_se_clasifica(lleno, tmp_path):
+    """Si la sesión de datos no ha entregado sus criterios, el bloque sale sin ellos: ninguna parcela se
+    clasifica y los conteos van en null (no en cero). La referencia de la entrega sigue estando."""
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    (processed / cw.ARCHIVO_SUPUESTOS).unlink()
+    resumen, contexto, _ = construir_en(tmp_path, processed)
+    gedi = contexto["gedi"]
+    assert resumen["avisos"] == [] and gedi["criterios"] is None
+    assert all(p["dosel_alto"] is None for p in gedi["parcelas"].values())
+    assert (gedi["n_dosel_alto"], gedi["n_sin_dosel_alto"], gedi["n_pocos_disparos"]) == (None, None, None)
+    assert gedi["referencia"] == lleno["contexto"]["gedi"]["referencia"]
+    # Un supuestos.json sin esas dos claves (como el de antes del 14-nov) da lo mismo, sin aviso.
+    (processed / cw.ARCHIVO_SUPUESTOS).write_text(json.dumps({"otra_clave": {"valor": 1, "fuente": "DE PRUEBA"}}),
+                                                  encoding="utf-8")
+    resumen, contexto, _ = construir_en(tmp_path, processed)
+    assert resumen["avisos"] == [] and contexto["gedi"]["criterios"] is None
+
+
+@pytest.mark.parametrize("clave, cambio, queda", [
+    ("gedi_umbral_dosel_alto_m", {"min_disparos": None}, "piso_instrumento"),
+    ("gedi_umbral_dosel_alto_m", {"min_disparos": {"valor": 2.5}}, "piso_instrumento"),
+    ("gedi_umbral_dosel_alto_m", {"valor": "alto"}, "piso_instrumento"),
+    ("gedi_umbral_dosel_alto_m", {"valor": 0}, "piso_instrumento"),
+    ("gedi_piso_instrumento_m", {"max": None}, "dosel_alto"),
+    ("gedi_piso_instrumento_m", {"min": 99}, "dosel_alto"),
+])
+def test_gedi_criterio_incompleto_va_en_null_con_aviso(lleno, tmp_path, clave, cambio, queda):
+    """Un criterio que no trae lo que hace falta no se completa con nada: va en null y el motor avisa."""
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    supuestos = GEN.supuestos()
+    supuestos[clave] = {**supuestos[clave], **cambio}
+    (processed / cw.ARCHIVO_SUPUESTOS).write_text(json.dumps(supuestos, ensure_ascii=False), encoding="utf-8")
+    resumen, contexto, _ = construir_en(tmp_path, processed)
+    gedi = contexto["gedi"]
+    assert any(clave in a for a in resumen["avisos"]), resumen["avisos"]
+    otro = "dosel_alto" if queda == "piso_instrumento" else "piso_instrumento"
+    assert gedi["criterios"][otro] is None and gedi["criterios"][queda] == lleno["contexto"]["gedi"]["criterios"][queda]
+    if otro == "dosel_alto":
+        assert all(p["dosel_alto"] is None for p in gedi["parcelas"].values())
+        assert gedi["n_dosel_alto"] is None
+
+
+def test_gedi_supuestos_ilegible_no_tumba_el_bloque(lleno, tmp_path):
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    (processed / cw.ARCHIVO_SUPUESTOS).write_text("{ no es json", encoding="utf-8")
+    resumen, contexto, _ = construir_en(tmp_path, processed)
+    assert any(cw.ARCHIVO_SUPUESTOS in a for a in resumen["avisos"])
+    assert contexto["gedi"] is not None and contexto["gedi"]["criterios"] is None
+    assert len(contexto["gedi"]["parcelas"]) == lleno["contexto"]["gedi"]["n_con_dato"]
+
+
+def test_gedi_referencia_null_si_ninguna_parcela_tiene_disparos(lleno, tmp_path):
+    """Sin lecturas no hay referencia: null, no un cero ni un valor supuesto."""
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    (processed / ARCHIVO_DE["gedi"]).write_text("id,n_disparos,altura_mediana_m,altura_p90_m\nP0001,0,,\nP0002,0,,\n",
+                                                encoding="utf-8")
+    _, contexto, _ = construir_en(tmp_path, processed)
+    gedi = contexto["gedi"]
+    assert gedi["parcelas"] == {} and gedi["n_con_dato"] == 0 and gedi["n_total"] == 2
+    assert gedi["referencia"] is None
+    assert cw.referencia_gedi({}) is None
+
+
+def test_gedi_referencia_con_numero_impar_de_parcelas():
+    """La mediana de un número impar es una lectura de la entrega; con una sola parcela, las tres coinciden."""
+    def parcela(v):
+        return {"n_disparos": 1, "altura_mediana_m": v, "altura_p90_m": v}
+    tres = cw.referencia_gedi({"A": parcela(9.5), "B": parcela(2.5), "C": parcela(3.25)})
+    assert tres == {"n_parcelas": 3, "minimo_m": 2.5, "mediana_m": 3.25, "maximo_m": 9.5}
+    assert cw.referencia_gedi({"A": parcela(4.5)}) == {"n_parcelas": 1, "minimo_m": 4.5, "mediana_m": 4.5,
+                                                         "maximo_m": 4.5}
+
+
+def test_real_gedi_referencia_coincide_con_un_calculo_independiente(real):
+    """Con la entrega real de hoy (si ya llegó): mínimo, mediana y máximo calculados aquí, del CSV."""
+    _, contexto, _ = real
+    ruta = PROCESADOS / ARCHIVO_DE["gedi"]
+    if not ruta.is_file():
+        assert contexto["gedi"] is None and contexto["gedi_motivo"] == cw.MOTIVO_PEDIDO
+        pytest.skip("data/processed aún no trae gedi_parcelas.csv")
+    lecturas = sorted(lecturas_de_gedi(ruta))
+    referencia = contexto["gedi"]["referencia"]
+    assert referencia["n_parcelas"] == len(lecturas) == contexto["gedi"]["n_con_dato"]
+    assert referencia["minimo_m"] == lecturas[0] and referencia["maximo_m"] == lecturas[-1]
+    assert referencia["mediana_m"] == pytest.approx(mediana_independiente(lecturas), abs=0.005)
+    assert referencia["minimo_m"] <= referencia["mediana_m"] <= referencia["maximo_m"]
+
+
+def test_real_gedi_criterios_y_lecturas_coinciden_con_la_entrega(real):
+    """Con las entregas reales de hoy (si ya llegaron): los criterios son los de supuestos.json, tal cual,
+    y la lectura de cada parcela coincide con aplicar aquí ese criterio al CSV."""
+    _, contexto, _ = real
+    ruta, ruta_supuestos = PROCESADOS / ARCHIVO_DE["gedi"], PROCESADOS / cw.ARCHIVO_SUPUESTOS
+    if not ruta.is_file():
+        pytest.skip("data/processed aún no trae gedi_parcelas.csv")
+    supuestos = json.loads(ruta_supuestos.read_text(encoding="utf-8")) if ruta_supuestos.is_file() else {}
+    gedi = contexto["gedi"]
+    if cw.CLAVE_UMBRAL_GEDI not in supuestos:
+        assert not (gedi["criterios"] or {}).get("dosel_alto") and gedi["n_dosel_alto"] is None
+        pytest.skip("supuestos.json aún no trae el umbral de dosel alto de GEDI")
+    umbral = supuestos[cw.CLAVE_UMBRAL_GEDI]
+    criterio = gedi["criterios"]["dosel_alto"]
+    assert (criterio["umbral_m"], criterio["min_disparos"]) == (umbral["valor"], umbral["min_disparos"]["valor"])
+    assert criterio["etiqueta"] == umbral["etiqueta"] and criterio["fuente"] == umbral["fuente"]
+    esperado = clasificar_independiente(filas_de_gedi(ruta), umbral["valor"], umbral["min_disparos"]["valor"])
+    assert {pid: p["dosel_alto"] for pid, p in gedi["parcelas"].items()} == esperado
+    cuenta = [sum(1 for v in esperado.values() if v is caso) for caso in (True, False, None)]
+    assert [gedi["n_dosel_alto"], gedi["n_sin_dosel_alto"], gedi["n_pocos_disparos"]] == cuenta
+    assert sum(cuenta) == gedi["n_con_dato"]
+    if cw.CLAVE_PISO_GEDI in supuestos:
+        piso = supuestos[cw.CLAVE_PISO_GEDI]
+        assert gedi["criterios"]["piso_instrumento"] == {
+            "valor_m": piso["valor"], "min_m": piso["min"], "max_m": piso["max"],
+            "etiqueta": piso["etiqueta"], "fuente": piso["fuente"]}
 
 
 def test_lleno_ecostress_alineado_a_los_meses(lleno):
@@ -374,6 +565,58 @@ def test_lleno_gaez_y_heladas(lleno):
     original = json.loads((lleno["processed"] / "heladas.json").read_text(encoding="utf-8"))
     assert {k: v for k, v in heladas.items() if k != "entrega"} == original, "el contenido de heladas.json, tal cual"
     assert heladas["entrega"]["fuente"] and heladas["entrega"]["fecha"] == GEN.FECHA_PRUEBA
+
+
+def test_et_contraste_lleva_la_zona_del_archivo_sin_sufijo(lleno):
+    """et_contraste.csv no lleva sufijo de zona: es de la zona por omisión (decisión de dos zonas)."""
+    contexto = lleno["contexto"]
+    bloque = contexto["et_contraste"]
+    # Supuesto del motor: un solo et_contraste.csv. Si un día va uno por zona (ARCHIVOS_POR_ZONA),
+    # esta prueba falla para que se revise bloque_et_contraste.
+    assert "et_contraste.csv" not in esquemas.ARCHIVOS_POR_ZONA
+    assert bloque["zona"] == esquemas.ZONA_POR_OMISION
+    assert bloque["zona"] in ZONAS and len(ZONAS) > 1, "hay otra zona piloto donde el contraste no se corrió"
+    assert bloque["zona"] != esquemas.ZONA_CUENCA
+    motivo = bloque["motivo_otras_zonas"]
+    assert motivo == cw.MOTIVO_CONTRASTE_OTRA_ZONA and motivo.strip()
+    assert not any(ch.isdigit() for ch in motivo), "texto fijo, sin cifras"
+    # Las series regionales de la otra zona existen: por eso hace falta decir de qué zona es el contraste.
+    otra = next(z for z in ZONAS if z != bloque["zona"])
+    assert {"modis.et", "gldas.et"} <= set(contexto["contexto_regional"][otra])
+    # La decisión de dos zonas que lo sustenta sigue diciendo lo mismo.
+    decision = (RAIZ / "docs/decisiones/2026-11-14_dos_zonas.md").read_text(encoding="utf-8")
+    assert f"Los archivos sin sufijo son de {esquemas.ZONA_POR_OMISION}" in decision
+
+
+def test_lleno_cada_bloque_dice_su_archivo(lleno):
+    """«archivo», «fuente» y «fecha» de cada bloque: la página escribe el texto de la fuente una sola vez."""
+    contexto = lleno["contexto"]
+    for bloque in ("gedi", "ecostress", "gaez"):
+        assert contexto[bloque]["archivo"] == ARCHIVO_DE[bloque], bloque
+        assert contexto[bloque]["fuente"] and contexto[bloque]["fecha"] == GEN.FECHA_PRUEBA
+    assert contexto["et_contraste"]["archivo"] == "et_contraste.csv"
+    assert contexto["heladas"]["entrega"]["archivo"] == ARCHIVO_DE["heladas"]
+    series = [s for por_zona in contexto["contexto_regional"].values() for s in por_zona.values()]
+    assert {s["archivo"] for s in series} == {ARCHIVO_DE["contexto_regional"]}
+    # Todas las series de un archivo comparten su línea de fuentes.json; la de prueba es larga a
+    # propósito (enumera las seis fuentes), como la real: es el caso que la página no debe repetir.
+    fuentes = {s["fuente"] for s in series}
+    assert len(fuentes) == 1 and len(series) > len(esquemas.FUENTES_CONTEXTO)
+    fuente = fuentes.pop()
+    assert all(f in fuente for f in esquemas.FUENTES_CONTEXTO)
+    assert len(fuente) > len(contexto["et_contraste"]["fuente"])
+
+
+def test_bloque_sin_registro_en_fuentes_json(lleno, tmp_path):
+    """Una entrega presente pero sin línea en fuentes.json: el bloque dice su archivo; fuente y fecha, null."""
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    (processed / "fuentes.json").unlink()
+    _, contexto, _ = construir_en(tmp_path, processed)
+    for bloque, archivo in (("gedi", ARCHIVO_DE["gedi"]), ("et_contraste", "et_contraste.csv")):
+        assert contexto[bloque]["archivo"] == archivo
+        assert contexto[bloque]["fuente"] is None and contexto[bloque]["fecha"] is None
+    assert contexto["et_contraste"]["zona"] == esquemas.ZONA_POR_OMISION
 
 
 def test_lleno_recursos_pasan_a_en_uso(lleno):
@@ -456,6 +699,7 @@ def test_contexto_regional_sin_filas_de_una_fuente(tmp_path):
     assert recursos["grace"]["estado"] == "requested" and recursos["grace"]["motivo"] == cw.MOTIVO_SIN_FILAS
     assert recursos["grace"]["entregas_faltantes"] == ["contexto_regional.csv"]
     assert recursos["smap"]["estado"] == "in_use"
+    assert esquemas.ZONA_CUENCA not in contexto["contexto_regional"], "sin GRACE no hay serie de cuenca"
     assert all("grace." not in clave for z in ZONAS for clave in contexto["contexto_regional"][z])
 
 
@@ -552,3 +796,66 @@ def test_web_data_contexto_json_generado_y_valido():
         assert (contexto[bloque] is None) == bool(contexto[f"{bloque}_motivo"]), bloque
     assert [r["id"] for r in contexto["recursos"]] == [r["id"] for r in CATALOGO["recursos"]]
     assert "DE PRUEBA" not in json.dumps(contexto, ensure_ascii=False), "la página no lleva datos de prueba"
+
+
+# ---------------------------------------------------------------------------------------
+# (f) Advertencias de la sesión de datos a la vista (integración, etapa 3) y malla de GRACE
+# ---------------------------------------------------------------------------------------
+# Lo que cada advertencia debe decir (decisión de recursos del reto y líneas de LEEME de la sesión de datos).
+ADVERTENCIAS_PEDIDAS = {
+    "evapotranspiracion": "comparison, not validation",
+    "segundo_clima": "not the FAO-56 reference evapotranspiration",
+    "agua_almacenada": "basin series",
+    "temperatura_minima": "not from NASA",
+}
+
+
+def test_catalogo_trae_las_advertencias_sin_cifras_ni_palabras_prohibidas():
+    import re
+    por_id = {t["id"]: t for t in CATALOGO["tarjetas"]}
+    for tarjeta, frase in ADVERTENCIAS_PEDIDAS.items():
+        textos = [a["texto"] for a in por_id[tarjeta].get("advertencias") or []]
+        assert any(frase in x for x in textos), f"{tarjeta}: falta «{frase}»"
+    fuentes = set(esquemas.FUENTES_CONTEXTO)
+    for t in CATALOGO["tarjetas"]:
+        for a in t.get("advertencias") or []:
+            assert set(a) <= {"id", "texto", "fuente_id"} and a["id"] and a["texto"], a
+            assert a.get("fuente_id") is None or a["fuente_id"] in fuentes, a
+            # Sin cifras de datos: los dígitos que quedan son parte del nombre de un producto o de un método.
+            sin_nombres = re.sub(r"FAO-56|ERA5(-Land)?", "", a["texto"])
+            assert not re.search(r"\d", sin_nombres), a["texto"]
+            assert not re.search(r"\b(first|only|save|saves|savings|best|recommended)\b", a["texto"], re.I), a["texto"]
+
+
+def test_advertencias_llegan_a_contexto_json_real():
+    ruta = RAIZ / "web/data/contexto.json"
+    if not ruta.is_file():
+        pytest.skip("web/data/contexto.json aún no se genera")
+    contexto = json.loads(ruta.read_text(encoding="utf-8"))
+    por_id = {t["id"]: t for t in contexto["tarjetas"]}
+    for tarjeta, frase in ADVERTENCIAS_PEDIDAS.items():
+        assert any(frase in a["texto"] for a in por_id[tarjeta].get("advertencias") or []), tarjeta
+
+
+def test_malla_mascon_se_lee_de_la_linea_de_leeme_de_su_fuente():
+    linea = ("Earth Engine: smap = PRODUCTO (malla de 9 km); grace = OTRO (mascons de JPL; malla de 0.5° sobre mascons "
+             "de 3°; una sola serie); gldas = TERCERO (malla de 0.25°)")
+    assert cw.malla_mascon(linea, "grace") == {"malla_grados": 0.5, "mascon_grados": 3.0,
+                                                "texto_fuente": "malla de 0.5° sobre mascons de 3°"}
+    # Otra fuente de la misma línea no hereda la frase de GRACE; sin la frase, nada se supone.
+    assert cw.malla_mascon(linea, "gldas") is None and cw.malla_mascon(linea, "smap") is None
+    assert cw.malla_mascon("grace = PRODUCTO sin malla declarada", "grace") is None
+    assert cw.malla_mascon(None, "grace") is None
+    assert cw.malla_mascon("malla de 0,5 ° sobre mascons de 3 °", "grace") is None, "sin «grace =» no es de GRACE"
+    assert cw.malla_mascon("grace = X (malla de 0,5 ° sobre mascons de 3 °)", "grace")["malla_grados"] == 0.5
+
+
+def test_malla_de_grace_en_contexto_json_real_sale_de_su_fuente():
+    ruta = RAIZ / "web/data/contexto.json"
+    if not ruta.is_file():
+        pytest.skip("web/data/contexto.json aún no se genera")
+    regional = json.loads(ruta.read_text(encoding="utf-8")).get("contexto_regional") or {}
+    for zona, series in regional.items():
+        for clave, serie in series.items():
+            esperado = cw.malla_mascon(serie.get("fuente"), serie["fuente_id"])
+            assert serie.get("malla_mascon") == esperado, f"{zona} {clave}"

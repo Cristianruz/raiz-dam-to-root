@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Prompt del implementador (una tarea)
 
 **Uso:**
@@ -7,7 +7,7 @@
 - La tarea sale de la plantilla del protocolo (`docs/prompts/README.md`, §2).
 
 ```
-Usted implementa la TAREA [N] — [nombre corto] de la pieza [ID del kit] de Raíz – From Dam to Root (NASA Space Apps 2026, equipo Los Norteados). Repo: [ruta del repo], rama [rama].
+Usted implementa la TAREA [N] — [nombre corto] de la pieza [ID del kit] de ROOT – From Dam to Root (NASA Space Apps 2026, equipo Orbital Farming). Repo: [ruta del repo], rama [rama].
 
 ## Lea antes de empezar
 - CLAUDE.md (reglas obligatorias).
@@ -24,7 +24,7 @@ Si la tarea necesita un documento que no está en el repo (33, 27, 29, 30, maest
 - No invente cifras: todo número sale de data/raw, data/processed, data/params.json, web/data/* o de S9 y S8 con su fuente y etiqueta. Si falta un dato, use null y avíselo en el reporte.
 - Ninguna cifra escrita a mano en el HTML, en el JavaScript ni en los textos de la web: la web lee los datos.
 - No cambie nombres de archivos ni de campos del contrato (kit §2).
-- Encabezado "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026" en cada archivo nuevo, como comentario de su lenguaje.
+- Encabezado "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026" en cada archivo nuevo, como comentario de su lenguaje.
 - Comentarios y documentación interna en español; interfaz web en inglés.
 - La herramienta no reparte, vende ni intercambia agua; no pronostica la presa; no promete ahorros; no dice "first" ni "only".
 - Sin logotipos de NASA.

@@ -1,18 +1,30 @@
 <!doctype html>
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 <!-- web/index.html — Centro de control (C1), ficha de parcela (C2), La gota (X3.2), mensaje e impresión (C4),
      inicio y «About & Data» (C5).
      Regla: el texto visible de este archivo NO lleva cifras. Todos los números los escribe
      app.js leyendo web/data/ (cubo.json, parcelas.geojson, explicaciones.json).
      Librerías locales con versión fija (web/vendor/VERSIONS.json); nada desde un CDN.
      Los módulos de web/js/ los importa app.js; sus hojas de web/css/ se enlazan aquí (imprimir.css al
-     final: solo actúa en papel). -->
+     final: solo actúa en papel).
+     Gemelo digital (docs/decisiones/2026-11-14_gemelo_digital.md): vista 3D (js/gemelo3d.js, css/gemelo.css),
+     línea de tiempo (js/tiempo.js, css/tiempo.css), tarjeta «Twin status» (js/estado_gemelo.js, css/resumen.css)
+     y aplicación instalable y sin conexión (manifest.webmanifest, js/instalar.js, css/instalar.css, sw.js).
+     Ficha completa: frase resumen, NDVI mensual y enlace «#id» (js/resumen.js, css/resumen.css), perfil y aptitud de
+     suelo (js/suelo.js, css/suelo.css) y evidencia de las bases del reto (js/contexto.js, css/contexto.css).
+     Paneles (etapa 3): «Regional context» plegable en el panel y «Challenge data sources» en «About & Data»
+     (js/contexto.js), H1-b junto a H1 y los documentos enlazados (js/acerca.js con pruebas.json). -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Raíz – From Dam to Root</title>
+  <title>ROOT – From Dam to Root</title>
   <meta name="description" content="Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover.">
+  <!-- Aplicación instalable: el manifest y los iconos los escribe motor/pwa.py; theme-color = theme_color del manifest. -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#1F6FB2">
+  <link rel="icon" type="image/png" href="icons/raiz-192.png">
+  <link rel="apple-touch-icon" href="icons/raiz-192.png">
   <!-- Tipografía: Atkinson Hyperlegible si está instalada; si no, la del sistema (style.css).
        No se carga de Google Fonts: su hoja no admite hash de integridad (tests/versiones.test.js)
        y la página no depende de la red. Copiarla a web/vendor/ queda como pendiente. -->
@@ -22,6 +34,12 @@
   <link rel="stylesheet" href="css/gota.css">
   <link rel="stylesheet" href="css/mensaje.css">
   <link rel="stylesheet" href="css/acerca.css">
+  <link rel="stylesheet" href="css/gemelo.css">
+  <link rel="stylesheet" href="css/tiempo.css">
+  <link rel="stylesheet" href="css/resumen.css">
+  <link rel="stylesheet" href="css/instalar.css">
+  <link rel="stylesheet" href="css/suelo.css">
+  <link rel="stylesheet" href="css/contexto.css">
   <link rel="stylesheet" href="css/imprimir.css">
   <script defer src="vendor/maplibre-gl-5.24.0/maplibre-gl.js"></script>
   <script defer src="vendor/d3-7.9.0/d3.min.js"></script>
@@ -34,13 +52,15 @@
   <!-- La marca se desplaza con la página; los controles quedan fijos arriba (sticky) para mover
        el deslizador también con la ficha abierta. -->
   <header class="marca" id="marca">
-    <span><span class="marca-nombre">Raíz</span> <span class="marca-sub">– From Dam to Root<span class="marca-lema"> · pre-planting water commitments</span></span></span>
+    <span><span class="marca-nombre">ROOT</span> <span class="marca-sub">– From Dam to Root<span class="marca-lema"> · pre-planting water commitments</span></span></span>
     <span class="aviso-simulado" id="aviso-simulado" role="note" hidden>SIMULATED DATA</span>
     <span class="aviso-simulado-detalle" id="aviso-simulado-detalle" hidden>Placeholder values so the screens work before the real data arrive. Not real fields or measurements.</span>
     <nav class="marca-acciones" aria-label="Help and data sources">
       <button type="button" class="boton-cabecera" id="boton-inicio">How it works</button>
       <button type="button" class="boton-cabecera" id="boton-acerca" aria-haspopup="dialog" aria-controls="acerca">About &amp; Data</button>
     </nav>
+    <!-- «Install app» y el indicador Online/Offline: los dibuja web/js/instalar.js (solo con https o localhost). -->
+    <div class="marca-instalar" id="marca-instalar"></div>
   </header>
 
   <section class="controles" id="controles" aria-label="Water allocation controls">
@@ -90,9 +110,18 @@
       </div>
       <div id="mapa" class="mapa" role="region" aria-label="Map of the pilot-area fields. Use the field list to open a field with the keyboard."></div>
       <p class="mapa-aviso" id="mapa-aviso" role="status" hidden></p>
+      <!-- Enlace directo a una parcela (#id) que no está en los datos: lo escribe app.js con el id de la dirección. -->
+      <p class="mapa-aviso aviso-enlace" id="aviso-enlace" role="status" hidden></p>
     </section>
 
     <aside class="panel" aria-label="Map options, fields and district summary">
+      <!-- Leyenda de la vista 3D del gemelo (web/js/gemelo3d.js, leyendaHTML): visible solo con la vista activa.
+           El título lo escribe app.js. -->
+      <section class="bloque bloque-gemelo3d" id="bloque-gemelo3d" aria-labelledby="t-gemelo3d" hidden>
+        <h2 id="t-gemelo3d"></h2>
+        <div id="gemelo-leyenda"></div>
+      </section>
+
       <section class="bloque" aria-labelledby="t-colorear">
         <h2 id="t-colorear">Color fields by</h2>
         <fieldset>
@@ -111,6 +140,12 @@
         </div>
       </section>
 
+      <!-- Línea de tiempo del gemelo (web/js/tiempo.js): el estado observado de cada parcela, año agrícola por año. -->
+      <section class="bloque" id="bloque-tiempo" aria-labelledby="t-tiempo">
+        <h2 id="t-tiempo">Observed state by year</h2>
+        <div id="linea-tiempo"></div>
+      </section>
+
       <section class="bloque" aria-labelledby="t-campos">
         <h2 id="t-campos">Fields</h2>
         <p class="ayuda">Select a field to open its sheet. Story fields are at the top, then classified fields, then fields not classified.</p>
@@ -126,6 +161,19 @@
         <h3>Water term</h3>
         <ul class="conteos" id="conteos-plazo"></ul>
       </section>
+
+      <!-- Tarjeta «Twin status» (web/js/estado_gemelo.js): observado, modelado y escenario, con la fecha de cada fuente. -->
+      <div class="bloque" id="estado-gemelo"></div>
+
+      <!-- «Regional context» (web/js/contexto.js, montarContextoRegional): series de la zona elegida, con el año de la línea
+           de tiempo resaltado. Plegable: se dibuja la primera vez que se abre. -->
+      <details class="bloque bloque-contexto" id="bloque-contexto">
+        <summary class="bloque-plegable">
+          <h2 id="t-contexto">Regional context</h2>
+          <span class="bloque-plegable-ayuda">Climate, soil moisture, basin water and frost of the pilot area, year by year. They describe the area or the basin, not a single field.</span>
+        </summary>
+        <div id="contexto-regional"></div>
+      </details>
 
       <!-- Localidades del equipo (cubo.localidades): puntos de referencia del mapa, no parcelas. -->
       <section class="bloque" id="bloque-localidades" aria-labelledby="t-localidades" hidden>

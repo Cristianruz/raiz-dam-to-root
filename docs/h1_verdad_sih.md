@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # H1 · Fuente de verdad: qué dice la serie oficial del SIH (14-nov-2026)
 
 Solo se calculó la **verdad** del back-test (kit A6, paso 2). El modelo y las líneas base **no se han corrido**.

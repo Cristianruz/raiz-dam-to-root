@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Prompt de re-revisión (una ronda del ciclo de corrección)
 
 **Uso:**
@@ -12,7 +12,7 @@
 3. Copia textuales los hallazgos abiertos: solo CRITICO, IMPORTANTE y NO CUMPLE; los MENOR no entran.
 
 ```
-Usted hace la RE-REVISIÓN de la ronda [R]/3 de la TAREA [N] — [nombre corto] (pieza [ID del kit]) de Raíz – From Dam to Root.
+Usted hace la RE-REVISIÓN de la ronda [R]/3 de la TAREA [N] — [nombre corto] (pieza [ID del kit]) de ROOT – From Dam to Root.
 
 ## Reglas
 - SOLO LECTURA: no modifique archivos, el índice, HEAD ni la rama. No corra `python construir.py` ni los scripts de motor/. Sin red. No lance subagentes.

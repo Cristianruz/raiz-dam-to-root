@@ -14,23 +14,23 @@ Cada base entra con un papel que se pueda explicar en una frase. Ninguna cambia 
 |---|---|---|---|
 | Landsat y Sentinel-2 (HLS) | En uso | Verdor mensual por parcela y memoria 2016–2026 | `hls_mensual_parcelas.csv`, `memoria_parcelas.csv` |
 | NASA POWER | En uso | Clima diario y agua que pide cada cultivo (FAO-56) | `eto_diaria[_zona].csv` |
-| NASA POWER (heladas) | **Pedido** | Riesgo de helada por fecha de siembra (kit A2) | `heladas.json` |
+| NASA POWER (heladas) | Entregado (14-nov) | Riesgo de helada por fecha de siembra (kit A2) | `heladas.json` |
 | SRTM / NASADEM | En uso | Relieve 3D, rutas de escurrimiento y tormenta | `nasadem_zona_piloto[_zona].tif`, `relieve_*` |
 | GPM IMERG | En uso | Lluvia diaria y tormenta de diseño | `imerg_diaria[_zona].csv` |
 | VIIRS (SSEBop) | En uso | Contraste regional de evapotranspiración (A8) | `et_contraste.csv` |
-| SMAP | **Pedido** | Estado observado: humedad del suelo de la región, mes a mes | `contexto_regional.csv` |
-| MODIS | **Pedido** | Verdor de la zona desde antes de HLS; segundo contraste de ET; temperatura de la superficie | `contexto_regional.csv` |
-| GRACE / GRACE-FO | **Pedido** | Estado observado: agua almacenada en la cuenca (superficie + suelo + acuífero), mes a mes | `contexto_regional.csv` |
-| GLDAS | **Pedido** | Tercer contraste de ET y de humedad en la zona de raíces (modelo de superficie) | `contexto_regional.csv` |
-| NLDAS | **Pedido** | Segunda fuente de clima para acotar la incertidumbre de POWER (lluvia y evaporación potencial) | `contexto_regional.csv` |
-| ERA5 (ERA5-Land) | **Pedido** | Segunda fuente de temperatura mínima y días con helada | `contexto_regional.csv` |
-| GEDI | **Pedido** | Evidencia por parcela: altura del dosel (distingue huerta de cultivo bajo) | `gedi_parcelas.csv` |
+| SMAP | Entregado (14-nov) | Estado observado: humedad del suelo de la región, mes a mes | `contexto_regional.csv` |
+| MODIS | Entregado (14-nov) | Verdor de la zona desde antes de HLS; segundo contraste de ET; temperatura de la superficie | `contexto_regional.csv` |
+| GRACE / GRACE-FO | Entregado (14-nov) | Estado observado: agua almacenada en la cuenca (superficie + suelo + acuífero), mes a mes | `contexto_regional.csv` |
+| GLDAS | Entregado (14-nov) | Tercer contraste de ET y de humedad en la zona de raíces (modelo de superficie) | `contexto_regional.csv` |
+| NLDAS | Entregado (14-nov) | Segunda fuente de clima para acotar la incertidumbre de POWER (lluvia y evaporación potencial) | `contexto_regional.csv` |
+| ERA5 (ERA5-Land) | Entregado (14-nov) | Segunda fuente de temperatura mínima y días con helada | `contexto_regional.csv` |
+| GEDI | Entregado (14-nov) | Evidencia por parcela: altura del dosel (distingue huerta de cultivo bajo) | `gedi_parcelas.csv` |
 | ECOSTRESS | **Pedido** | Contraste de ET a escala de parcela (A8 hoy solo es regional) | `ecostress_parcelas.csv` |
 | GAEZ (FAO) | **Pedido** | Evidencia regional: aptitud agroclimática por cultivo | `gaez_zona.csv` |
 | OpenET | No aplica | No cubre México (S9 §11). En su lugar: SSEBop VIIRS | — |
 | USDA, NRCS, CDL, NAIP, NLCD, PRISM, NWIS, CoCoRaHS, AMS, NASS, LANDFIRE | No aplica | Cubren solo Estados Unidos. Equivalentes locales en uso: SIAP (estadística agrícola), SIH/Conagua (presas) y SDR Chihuahua | — |
 
-«Pedido» pasa a «En uso» solo cuando la entrega llega al buzón y pasa el validador. Si una no llega antes del congelamiento, la página lo dice con su motivo («not run: …»); no se rellena con nada.
+**Estado al 14-nov, 15:45:** las filas «Entregado» ya pasaron el validador del buzón (26 entregas, 0 rechazadas) y falta mostrarlas en la página; siguen pedidas ECOSTRESS y GAEZ. «Pedido» pasa a «En uso» solo cuando la entrega llega al buzón y pasa el validador. Si una no llega antes del congelamiento, la página lo dice con su motivo («not run: …»); no se rellena con nada.
 
 ## Dónde se ve en el gemelo
 1. **Estado del gemelo → «Regional context»:** una serie por variable y zona, con su resolución y su fuente. Al mover la línea de tiempo se resalta el año elegido.

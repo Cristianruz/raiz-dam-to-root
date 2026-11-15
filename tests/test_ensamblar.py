@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas del ensamblador del buzón (motor/ensamblar.py; kit v4 K-ENS y tabla 0.4-B).
 
 Cubre:
@@ -576,9 +576,11 @@ VALIDOS = {
     "rotaciones.json": (BUZON_OK / "rotaciones.json").read_text(encoding="utf-8"),
     "demanda_cultivos.csv": (BUZON_OK / "demanda_cultivos.csv").read_text(encoding="utf-8"),
     "relieve_meta.json": (BUZON_OK / "relieve_meta.json").read_text(encoding="utf-8"),
+    # B3 (decisión 2026-11-14_opciones_b3.md): fixture DE PRUEBA; el detalle está en tests/test_opciones_b3.py.
+    "opciones_b3.json": (FIXTURES / "opciones_b3/opciones_b3.json").read_text(encoding="utf-8"),
     "fuentes_A1.csv": f"archivo,url_o_api,fecha_consulta,sha256\npower.json,https://power.larc.nasa.gov/api/temporal/daily/point,2026-11-14,{'a' * 64}\n",
     "resultado_H1.md": "# Resultado H1\nmeets the preregistered criterion (prueba)\n",
-    "plantillas_explicaciones.md": "<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->\n¿Por qué? Pide {{f1}} millares por {{f2}}.\n",
+    "plantillas_explicaciones.md": "<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->\n¿Por qué? Pide {{f1}} millares por {{f2}}.\n",
     "figura_tornado.png": None,  # se arma con la firma PNG
 }
 
@@ -610,6 +612,7 @@ INVALIDOS = {
                              "alfalfa,0,1000,900,10,12,14\nalfalfa,0,1000,900,10,12,14\n",
                              "fila repetida para (cultivo, lluvia_pct)"),
     "relieve_meta.json": (None, "falta tormenta.fuente"),   # se arma desde la fixture
+    "opciones_b3.json": (None, "por_cultivo_actual nombra una opción que no está definida"),   # se arma desde la fixture
     "fuentes_A1.csv": ("archivo,url_o_api,fecha_consulta,sha256\npower.json,https://x,2026-11-14,abc\n", "sha256"),
     "plantillas_explicaciones.md": ("¿Por qué? Pide 7 millares (valor de prueba).\n", "cifras escritas a mano"),
     "figura_tornado.png": (b"no soy un png", "no es PNG"),
@@ -667,6 +670,10 @@ def test_resto_de_la_tabla_invalido_se_rechaza(tmp_path, nombre):
         contenido = rotaciones_con(lambda o: o["rotaciones"][1].update(plazo="bienal"))
     elif nombre == "relieve_meta.json":
         contenido = relieve_meta_con(lambda o: o["tormenta"].pop("fuente"))
+    elif nombre == "opciones_b3.json":
+        b3 = json.loads(VALIDOS[nombre])
+        del b3["opciones"]["chile"]   # las alternativas y los filtros siguen nombrando «chile»
+        contenido = json.dumps(b3, ensure_ascii=False)
     b = buzon_con(tmp_path, {nombre: contenido})
     rep = correr(b, tmp_path)
     assert nombre in nombres(rep["rechazados"]), rep["entraron"]

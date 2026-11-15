@@ -1,11 +1,13 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/relieve.js — Relieve y tormenta (S9 §4 bis; kit A9, parte web). Módulo ES, sin dependencias.
 //
 // Qué exporta (lo conecta app.js; este archivo no toca el resto de la página):
 //   agregarCapaRelieve(mapa, ctx) -> Promise<controlador>
 //       Lee relieve_rutas.geojson y relieve.json, agrega al mapa de MapLibre la capa
 //       «Terrain & runoff» (oculta por omisión) y dibuja en ctx.contenedor el interruptor,
-//       el botón «Simulate a storm», la leyenda y la tarjeta de la tormenta.
+//       el botón «Simulate a storm», la leyenda y la tarjeta de la tormenta. La leyenda explica además las rutas
+//       cortadas en depresiones cerradas con relieve.json → zonas.<id>.rutas_depresiones (profundidad mínima, su
+//       etiqueta y su nota), por zona si difieren.
 //       Si falta cualquiera de los dos archivos (HTTP 404), la capa no se agrega y el bloque dice
 //       «Terrain layer: not run» (kit A9, PRUEBA). Cualquier otra falla (HTTP 500, red, JSON roto) NO es
 //       «not run»: el bloque dice «Terrain layer: could not be loaded (…)» y queda en la consola (console.error).
@@ -518,9 +520,32 @@ function htmlLeyenda(relieve, bloques, nombreZona) {
     `<li><span class="relieve-muestra-ruta" aria-hidden="true"></span><span>${rutas}</span></li>` +
     `<li><span class="relieve-muestra-gota" aria-hidden="true"></span><span>Rain drops in “Simulate a storm”</span></li>` +
     `</ul>` +
+    htmlDepresiones(bloques, nombreZona) +
     `<p class="relieve-escala">Scale: ${escala}</p>` +
     `<p class="fuente">Thicker lines: more runoff paths have joined. Zone context, not a field measurement.` +
     `${relieve?.fuente ? ` Source: ${esc(relieve.fuente)}` : ""}</p>`
+  );
+}
+
+/**
+ * Rutas cortadas (relieve.json → rutas_depresiones): dónde no se dibuja ruta y por qué, con la profundidad mínima de
+ * la depresión, su etiqueta y la nota del archivo. Por zona si difieren; "" si ninguna zona trae el bloque.
+ */
+function htmlDepresiones(bloques, nombreZona) {
+  const con = bloques.filter(([, z]) => z?.rutas_depresiones);
+  if (!con.length) return "";
+  const grupos = distintos(con, (z) => {
+    const d = z.rutas_depresiones;
+    return { m: num(d.prof_min_m), etiqueta: d.etiqueta ?? null, nota: d.nota ?? null };
+  }, nombreZona);
+  const partes = grupos.map(({ v, prefijo }) => {
+    const prof = v.m == null ? "depth not available" : `at least <strong>${esc(fmt(v.m, 2))} m</strong> deep`;
+    const etiqueta = v.etiqueta ? ` <span class="relieve-etiqueta">${esc(v.etiqueta)}</span>` : "";
+    return `${esc(prefijo)}closed depressions ${prof}${etiqueta}${v.nota ? `. ${esc(v.nota)}` : ""}`;
+  });
+  return (
+    `<p class="relieve-depresiones" data-parte="depresiones"><span class="relieve-muestra-corte" aria-hidden="true"></span>` +
+    `<span><strong>Cut paths:</strong> ${partes.join("; ")}</span></p>`
   );
 }
 
@@ -658,7 +683,7 @@ export async function agregarCapaRelieve(mapa, ctx = {}) {
   };
   // Falla de lectura o de dibujo: no es «not run». Se dice en la página y en la consola.
   const conError = (texto, err) => {
-    console.error(`Raíz: ${texto}`, err ?? "");
+    console.error(`ROOT: ${texto}`, err ?? "");
     elemento.dataset.relieve = "error";
     elemento.innerHTML = `<p class="relieve-no-corrido relieve-error" role="alert">${esc(texto)}</p>`;
   };

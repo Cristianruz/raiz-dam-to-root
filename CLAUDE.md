@@ -1,4 +1,4 @@
-# CLAUDE.md — Raíz – From Dam to Root (NASA Space Apps 2026, Field Shift) · equipo Los Norteados
+# CLAUDE.md — ROOT – From Dam to Root (NASA Space Apps 2026, Field Shift) · equipo Orbital Farming
 
 Proyecto: mostrar, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. Zona piloto del Distrito de Riego 005 Delicias, Chihuahua.
 
@@ -9,7 +9,7 @@ REGLAS:
 1. Respete el contrato de datos v4 (kit, sección 2). No modifique nombres de archivos ni de campos.
 2. No invente cifras en ningún caso: todo número proviene de data/raw, data/processed, data/params.json o de S9 y S8 con su fuente y etiqueta. Si falta un dato, utilice null y notifíquelo.
 3. Ninguna cifra escrita en el HTML, en el JavaScript ni en los textos: la web lee los datos. Una prueba automática lo comprueba.
-4. Encabezado en cada archivo: "# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026" (o el equivalente en comentario del lenguaje). Los cuadernos hechos con Gemini conservan "# AI-assisted (Gemini) — Raíz, NASA Space Apps 2026".
+4. Encabezado en cada archivo: "# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026" (o el equivalente en comentario del lenguaje). Los cuadernos hechos con Gemini conservan "# AI-assisted (Gemini) — ROOT, NASA Space Apps 2026".
 5. Código simple y comentado en español; sin frameworks pesados. Python en scripts y cuadernos; web estática en HTML + JS + MapLibre GL JS + d3-sankey (copiadas con versión fija en web/vendor/, verificadas por hash).
 6. Un comando reconstruye todo desde la caché (data/processed): `python construir.py`. Toda pieza nueva se conecta a ese comando y trae su prueba automática.
 7. Cada tarea concluye con: (a) archivos creados, (b) instrucciones de ejecución, (c) resultado de la prueba de aceptación y de las pruebas automáticas, (d) pendientes.
