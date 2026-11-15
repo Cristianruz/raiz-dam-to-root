@@ -629,7 +629,7 @@ function htmlCierre(pruebas, id) {
   return `<section class="acerca-bloque" aria-labelledby="${id}-repo">
       <h3 id="${id}-repo">Repository and AI</h3>
       ${ligas ? `<p class="acerca-ligas">${ligas}</p>` : ""}
-      <p class="acerca-ia"><strong>SI/AI tools used:</strong> Claude Code, Claude and Gemini helped write the code, data scripts and texts; field boundaries are neural-network predictions (Fields of The World). AI never generates the numbers or makes the decision: farmers and technicians decide.${
+      <p class="acerca-ia"><strong>SI/AI tools used:</strong> Claude Code, Claude and Gemini helped write the code, data scripts and texts; field boundaries are neural-network predictions (Fields of The World). The WhatsApp message in English, Portuguese and French was machine-drafted from the Spanish one; review by a speaker. AI never generates the numbers or makes the decision: farmers and technicians decide.${
         enlaces.readme_ia ? ` ${enlace(enlaces.readme_ia, NOMBRES_ENLACES.readme_ia)}.` : ""
       }</p>
       <p class="acerca-aviso">${esc(AVISO_JUICIO)}</p>

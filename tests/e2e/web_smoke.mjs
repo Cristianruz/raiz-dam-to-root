@@ -32,7 +32,8 @@
 //     «Drip scenario not available yet». El caso que los datos NO traen se prueba con la variante en memoria;
 //   · filtros oficiales (B3; decisión docs/decisiones/2026-11-14_opciones_b3.md): si el cubo trae filtros con
 //     «estado», uno que no pasa nunca se dibuja como aprobado y «needs_local_check» dice «needs a local check»;
-//   · mensaje (C4): maqueta de WhatsApp en español con las opciones numeradas, «Responda 1, 2 o 3.» y el aviso de
+//   · mensaje (C4): maqueta de WhatsApp con selector de idioma (Español, English, Português, Français); en español,
+//     las opciones numeradas, «Responda 1, 2 o 3.» y el aviso de
 //     Conagua, que cambia con el deslizador y cabe en el teléfono; «Print field sheet» con emulación de impresión:
 //     sin mapa, panel ni controles, con la ficha, los valores usados y La gota estática, en UNA hoja (carta y A4);
 //   · inicio y «About & Data» (C5): la pantalla de inicio de tres pasos se cierra (Escape o «Start exploring»), no
@@ -351,6 +352,7 @@ async function pruebaFichaAbstenida(page, id, prefijo, captura = null, p = porId
   check(`${prefijo}aviso de juicio local en la ficha abstenida ${id}`, cuerpo.includes("This tool supports, never replaces, the judgment of farmers and local experts."));
   // Sin opciones, el mensaje de WhatsApp pide revisar la parcela con el técnico (y no pide responder un número).
   await page.locator("#boton-whatsapp").click();
+  await mensajeEnEspanol(page);
   const wa = await texto(page, "#vista-whatsapp");
   check(
     `${prefijo}WhatsApp de la parcela abstenida ${id}: pide revisarla con el técnico, sin «Responda»`,
@@ -684,7 +686,26 @@ async function pruebaRelieveFicha(page, id, prefijo) {
   );
 }
 
-/** Maqueta de WhatsApp (kit C4): español, opciones numeradas, «Responda 1, 2 o 3.», aviso de Conagua. */
+/**
+ * El mensaje abre en el idioma del navegador (en-US en estas pruebas) o en el ya elegido en el contexto: se elige
+ * español para las comprobaciones del texto en español (docs/decisiones/2026-11-14_whatsapp_idiomas.md).
+ */
+async function mensajeEnEspanol(page) {
+  const sel = page.locator("#vista-whatsapp select.wa-idioma-select");
+  await sel.waitFor({ state: "visible", timeout: 5000 });
+  if ((await sel.inputValue()) !== "es") await sel.selectOption("es");
+  await page.locator('#vista-whatsapp .wa-maqueta[data-idioma="es"]').waitFor({ state: "visible", timeout: 5000 });
+}
+
+// Lo que distingue el mensaje en los otros tres idiomas (decisión de los cuatro idiomas): la respuesta, el aviso de
+// juicio local y el locale con que se formatean los números.
+const IDIOMAS_MENSAJE = [
+  { codigo: "en", nombre: "English", locale: "en-US", respuesta: "Reply", juicio: "judgment of the farmer" },
+  { codigo: "pt", nombre: "Português", locale: "pt-BR", respuesta: "Responda", juicio: "julgamento do agricultor" },
+  { codigo: "fr", nombre: "Français", locale: "fr-FR", respuesta: "Répondez", juicio: "jugement de l'agriculteur" },
+];
+
+/** Maqueta de WhatsApp (kit C4): cuatro idiomas; en español, opciones numeradas, «Responda 1, 2 o 3.», aviso de Conagua. */
 async function pruebaWhatsApp(page, id, prefijo, telefono, captura = null) {
   const ops = opcionesDe(id);
   const boton = page.locator("#boton-whatsapp");
@@ -692,6 +713,12 @@ async function pruebaWhatsApp(page, id, prefijo, telefono, captura = null) {
   await boton.click();
   const maqueta = page.locator("#vista-whatsapp .wa-maqueta");
   await maqueta.waitFor({ state: "visible", timeout: 5000 });
+  const selector = page.locator("#vista-whatsapp select.wa-idioma-select");
+  const nombres = await selector.locator("option").allInnerTexts();
+  check(`${prefijo}selector «Message language» con Español, English, Português y Français`,
+    JSON.stringify(nombres) === JSON.stringify(["Español", "English", "Português", "Français"]) && (await page.locator('#vista-whatsapp label[for^="wa-idioma-"]').innerText()) === "Message language",
+    nombres.join(", "));
+  await mensajeEnEspanol(page);
   const t = await maqueta.innerText();
   const numeros = new Intl.ListFormat("es-MX", { type: "disjunction" }).format(ops.map((_, i) => new Intl.NumberFormat("es-MX").format(i + 1)));
   check(
@@ -704,6 +731,29 @@ async function pruebaWhatsApp(page, id, prefijo, telefono, captura = null) {
     t.includes("Es una simulación; la asignación oficial la decide Conagua.") && t.includes("Esta herramienta apoya y no sustituye el juicio del agricultor ni del técnico."),
   );
   check(`${prefijo}la maqueta no envía nada (sin formularios ni enlaces)`, (await page.locator("#vista-whatsapp form, #vista-whatsapp a[href]").count()) === 0 && (await boton.getAttribute("aria-expanded")) === "true");
+  check(`${prefijo}en español no va la nota de traducción automática (la plantilla la escribió el equipo)`, (await page.locator("#vista-whatsapp .wa-traduccion").count()) === 0);
+  // Los otros tres idiomas: el mensaje se vuelve a dibujar en su lugar, con su respuesta, su aviso, los números en
+  // su formato (Intl) y la nota «machine-drafted; review by a speaker».
+  const area = porId.get(id)?.area_ha;
+  for (const L of IDIOMAS_MENSAJE) {
+    await selector.selectOption(L.codigo);
+    const fig = page.locator(`#vista-whatsapp .wa-maqueta[data-idioma="${L.codigo}"]`);
+    await fig.waitFor({ state: "visible", timeout: 5000 });
+    const tt = await fig.innerText();
+    const nums = new Intl.ListFormat(L.locale, { type: "disjunction" }).format(ops.map((_, i) => new Intl.NumberFormat(L.locale).format(i + 1)));
+    const sup = new Intl.NumberFormat(L.locale, { maximumFractionDigits: 3 }).format(area);
+    check(`${prefijo}WhatsApp en ${L.nombre}: lang="${L.codigo}", «${L.respuesta} ${nums}.», superficie «${sup} ha», aviso de juicio y nota de traducción`,
+      (await fig.locator(`.wa-telefono[lang="${L.codigo}"]`).count()) === 1 && (await page.locator("#vista-whatsapp .wa-opcion").count()) === ops.length &&
+        tt.includes(`${L.respuesta} ${nums}.`) && tt.includes(`(${sup} ha)`) && tt.includes(L.juicio) && tt.includes("Conagua") && /machine-drafted/i.test(tt),
+      tt.split("\n").slice(0, 3).join(" "));
+  }
+  check(`${prefijo}el foco vuelve al selector tras cambiar de idioma`, await page.evaluate(() => Boolean(document.activeElement?.matches?.("select.wa-idioma-select"))));
+  if (l50(actualDe(id)) > Math.min(D1, D2)) {
+    // El idioma elegido se queda cuando la página vuelve a dibujar el mensaje (deslizador).
+    await fijarDeslizador(page, D1);
+    check(`${prefijo}el idioma elegido se queda al mover el deslizador`, (await page.locator('#vista-whatsapp .wa-maqueta[data-idioma="fr"]').count()) === 1);
+  }
+  await mensajeEnEspanol(page);
   if (l50(actualDe(id)) > Math.min(D1, D2)) {
     await fijarDeslizador(page, D1);
     const a = await maqueta.innerText();
@@ -2535,6 +2585,7 @@ async function pruebaSinCalculo(page, v) {
   check(`ficha de ${id}: dice que falta el clima de su zona (no que el mapa no sabe qué hay)`,
     cuerpo.includes("no climate data for this field's pilot area") && !cuerpo.includes("not sure what grows"), cuerpo.split("\n").slice(0, 8).join(" | "));
   await page.locator("#boton-whatsapp").click();
+  await mensajeEnEspanol(page);
   const wa = await texto(page, "#vista-whatsapp");
   check(`WhatsApp de ${id}: «falta el clima de su zona», sin «no está seguro»`, wa.includes("falta el clima de su zona") && !wa.includes("no está seguro"), wa.split("\n")[1] ?? wa);
   await cerrarFicha(page);
