@@ -2511,9 +2511,12 @@ function actualizarFicha() {
       alcanza +
       banda +
       htmlLaminaLocal(o, L, p.area_ha, D) +
-      `<p>${esc(textoPlazo(o.agua?.plazo_anios))}${o.agua?.nota_plazo ? ` <span class="fuente">(${esc(o.agua.nota_plazo)})</span>` : ""}</p>` +
-      // «Remaining term» en todas las tarjetas (el motor descuenta la edad observada en las que conservan el alfalfar).
-      (rest ? `<p>Remaining term: ${esc(fmtRango(rest.min, rest.max))} ${anios(rest.min === rest.max ? rest.max : null)}</p>` : "") +
+      `<p>${esc(textoPlazo(o.agua?.plazo_anios))}${o.agua?.nota_plazo ? ` <span class="fuente nota-plazo">(${esc(o.agua.nota_plazo)})</span>` : ""}</p>` +
+      // «Remaining term» en cualquier tarjeta (el motor descuenta la edad observada en las que conservan el alfalfar),
+      // cuando dice algo distinto del plazo completo; en la ACTUAL, siempre.
+      (rest && (o.id === "ACTUAL" || rest.min !== o.agua?.plazo_anios?.min || rest.max !== o.agua?.plazo_anios?.max)
+        ? `<p>Remaining term: ${esc(fmtRango(rest.min, rest.max))} ${anios(rest.min === rest.max ? rest.max : null)}</p>`
+        : "") +
       (comp ? `<p>Water committed over the remaining term: ${esc(fmtRango(comp.min, comp.max, fmtMillares))} thousand m³/ha</p>` : "") +
       "</div>";
 

@@ -1410,9 +1410,11 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
     // siembra solo de los cultivos de la secuencia publicada (avena_maiz sin la alfalfa del catálogo).
     for (const o of opcionesDe(P0757)) {
       const t = tarjeta(page, o.id);
-      if (o.agua?.plazo_restante) {
+      const pr = o.agua?.plazo_restante;
+      const pa = o.agua?.plazo_anios;
+      if (pr && (o.id === "ACTUAL" || pr.min !== pa?.min || pr.max !== pa?.max)) {
         const agua = (await t.locator('[data-parte="agua"]').innerText()).replace(/\s+/g, " ");
-        check(`${prefijo}${P0757}/${o.id}: «Remaining term» también en las alternativas`, agua.includes("Remaining term:"), agua.slice(-160));
+        check(`${prefijo}${P0757}/${o.id}: «Remaining term» también en las alternativas (si difiere del plazo completo)`, agua.includes("Remaining term:"), agua.slice(-160));
       }
       const pasos = (cubo.opciones_catalogo?.[o.rotacion]?.secuencia ?? []).filter((x) => x?.siembra?.desde);
       const esperados = pasos.filter((x) => !Array.isArray(o.secuencia) || !o.secuencia.length || o.secuencia.includes(x.cultivo)).length;
