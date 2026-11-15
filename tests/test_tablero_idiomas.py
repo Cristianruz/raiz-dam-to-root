@@ -29,7 +29,7 @@ SUFIJOS = tuple(f"_{c}" for c in VARIANTES)
 # Rutas de los textos que el tablero muestra, por archivo («*» = cualquier llave o índice).
 MOSTRADOS = {
     "dashboard.json": (
-        "etiqueta", "fuente", "historia_etiqueta", "historia_fuente", "mapa_atribucion",
+        "etiqueta", "fuente", "historia_etiqueta", "historia_fuente",
         "fuentes.*.titulo", "fuentes.*.descripcion",
         "eventos.*.periodo", "eventos.*.titulo", "eventos.*.detalle", "eventos.*.fuente",
         "rotaciones.*.*.nombre",
@@ -40,7 +40,7 @@ MOSTRADOS = {
         "zonas.*.rotaciones.*.nombre",
     ),
     "investigacion_dashboard.json": (
-        "etiqueta", "fuente", "historia_etiqueta", "historia_fuente", "mapa_atribucion",
+        "etiqueta", "fuente", "historia_etiqueta", "historia_fuente",
         "fuentes.*.titulo", "fuentes.*.descripcion",
         "eventos.*.periodo", "eventos.*.titulo", "eventos.*.detalle", "eventos.*.fuente",
         "textos_pronostico.metodo.nombre", "textos_pronostico.metodo.etiqueta", "textos_pronostico.metodo.fuente",
@@ -51,7 +51,7 @@ MOSTRADOS = {
 # Llaves que web/js/ lee y que no pueden cambiar de nombre ni desaparecer.
 LLAVES_DE_SIEMPRE = {
     "dashboard.json": ("fecha", "etiqueta", "fuente", "fuentes", "historia", "historia_fuente", "eventos",
-                       "mapa_atribucion", "rotaciones"),
+                       "rotaciones"),
     "pronostico.json": ("metodo", "catalogo", "requisitos", "supuestos", "zonas", "fuentes"),
 }
 LLAVES_DE_ZONA = ("fuente_clima", "heladas_primavera", "clima_origen", "fecha_corte", "anios", "rotaciones",
@@ -187,6 +187,17 @@ def test_las_llaves_de_siempre_siguen_en_su_lugar():
     assert all({"titulo", "descripcion", "archivo"} <= set(f) for f in dashboard["fuentes"])
     assert all({"periodo", "tipo", "titulo", "detalle", "fuente"} <= set(e) for e in dashboard["eventos"])
     assert all({"anio", "superficie_ha"} <= set(h) for h in dashboard["historia"])
+
+
+def test_la_atribucion_del_mapa_ya_no_viaja_en_los_datos():
+    """La portada usa la misma capa base que el explorador (OpenStreetMap) y escribe su atribución con el mapa; la
+    llave mapa_atribucion (era la de la imagen de Esri) se retiró porque ya nadie la lee."""
+    for nombre in ("dashboard.json", "investigacion_dashboard.json"):
+        assert not [k for k in cargar(nombre) if k.startswith("mapa_atribucion")], nombre
+    for modulo in (RAIZ / "web/js").glob("*.js"):
+        fuente = modulo.read_text(encoding="utf-8")
+        assert "mapa_atribucion" not in fuente, f"{modulo.name} aún lee mapa_atribucion"
+        assert "arcgisonline" not in fuente and "Esri" not in fuente, f"{modulo.name} aún nombra la capa de Esri"
 
 
 def test_el_nombre_en_espanol_de_cada_rotacion_es_el_de_la_entrega():

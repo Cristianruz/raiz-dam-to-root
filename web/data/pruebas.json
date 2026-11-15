@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T10:52:27+00:00",
+ "generado": "2026-11-15T11:01:54+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T10:52:27+00:00",
+  "corrida": "2026-11-15T11:01:54+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -328,16 +328,16 @@
     "nombre": "Offline app (installable page)",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache 13107dbfaac329ea",
-    "detalle_en": "precache 13107dbfaac329ea"
+    "detalle": "precache e81e796899c5b077",
+    "detalle_en": "precache e81e796899c5b077"
    },
    {
     "id": "manifest",
     "nombre": "Manifest of every figure",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "141428 cifras (0 simuladas), 35 fuentes de origen, 59 avisos",
-    "detalle_en": "141428 figures (0 simulated), 35 source files, 59 notices"
+    "detalle": "141424 cifras (0 simuladas), 35 fuentes de origen, 59 avisos",
+    "detalle_en": "141424 figures (0 simulated), 35 source files, 59 notices"
    },
    {
     "id": "contrato",
@@ -360,16 +360,16 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1248 passed, 30 warnings in 61.94s (0:01:01)",
-    "detalle_en": "1248 passed, 30 warnings in 61.94s (0:01:01)"
+    "detalle": "1252 passed, 30 warnings in 55.73s",
+    "detalle_en": "1252 passed, 30 warnings in 55.73s"
    },
    {
     "id": "node",
     "nombre": "JavaScript tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "265 pass, 0 fail, 0 skipped",
-    "detalle_en": "265 pass, 0 fail, 0 skipped"
+    "detalle": "275 pass, 0 fail, 0 skipped",
+    "detalle_en": "275 pass, 0 fail, 0 skipped"
    }
   ],
   "nota": "Last full run recorded by python construir.py. The browser smoke test (tests/e2e/web_smoke.mjs) runs separately, before each release."

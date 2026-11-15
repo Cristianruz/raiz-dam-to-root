@@ -229,10 +229,6 @@
       "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), pp. 2–3 ; rapport inclus dans la note du 14 nov. 2026, non vérifié de manière indépendante."
     }
   ],
-  "mapa_atribucion": "© OpenStreetMap contributors. Field boundaries: Fields of The World (CC BY 4.0).",
-  "mapa_atribucion_es": "© Colaboradores de OpenStreetMap. Límites de parcelas: Fields of The World (CC BY 4.0).",
-  "mapa_atribucion_pt": "© Colaboradores do OpenStreetMap. Limites das parcelas: Fields of The World (CC BY 4.0).",
-  "mapa_atribucion_fr": "© Contributeurs d'OpenStreetMap. Limites des parcelles : Fields of The World (CC BY 4.0).",
   "nombres_rotaciones": {
     "_nota": "Nombre de cada rotación en inglés, portugués y francés. El español es el «nombre» de data/processed/rotaciones*.json (la entrega), que el motor publica en nombre_es.",
     "alfalfa": {

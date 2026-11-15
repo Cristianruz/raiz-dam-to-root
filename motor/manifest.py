@@ -1007,7 +1007,6 @@ ARCHIVO_PRONOSTICO = "web/data/pronostico.json"
 SCRIPT_PRONOSTICO = "motor/pronostico_web.py"
 ETIQUETA_HUELLA = "Huella sha256 del archivo de origen"
 ETIQUETA_TEXTO = "Texto descriptivo (no es un dato)"
-ETIQUETA_ATRIBUCION = "Atribución de las capas del mapa (DATA_LICENSE.md)"
 # metodo.<campo> de pronostico.json -> entrada de data/params.json de la que sale (su fuente y su etiqueta).
 ORIGEN_METODO = {
     "minimo_entrenamiento": "tablero.minimo_ciclos",
@@ -1067,8 +1066,6 @@ def cifras_de_dashboard(m, dashboard, fuentes_origen, hoy):
         if llave.startswith("historia"):
             # historia, historia_archivo, historia_columna…: todo sale del CSV de Conagua que el motor lee.
             registrar(hojas_con_origen(valor, llave, dashboard.get("historia_fuente"), dashboard.get("historia_etiqueta")))
-        elif llave == "mapa_atribucion":
-            registrar(hojas_con_origen(valor, llave, "DATA_LICENSE.md (OpenStreetMap; Fields of The World)", ETIQUETA_ATRIBUCION))
         elif llave == "fuentes":
             registrar(hojas_con_origen(valor, llave, "data/investigacion_dashboard.json (list of sources of the dashboard)",
                                        ETIQUETA_TEXTO))
