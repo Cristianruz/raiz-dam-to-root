@@ -477,17 +477,20 @@ const FORMATO_PCT = new Intl.NumberFormat(LOCALE, { style: "percent", maximumFra
  */
 function htmlTextura(m) {
   if (!m.grupo) return `<p class="suelo-textura">Texture: <strong>${esc(m.clase ?? "no data")}</strong></p>`;
+  // Las dos citas son textos de las entregas: van con el idioma que declara suelo.json (idioma_fuentes), como las
+  // demás fuentes de este módulo; si el archivo no lo declara, sin marca.
+  const lang = m.idioma ? ` lang="${esc(m.idioma)}"` : "";
   const etiqueta = m.grupoEtiqueta ? ` <span class="suelo-etiqueta">${esc(m.grupoEtiqueta)}</span>` : "";
   const c = m.coincidencia;
   const nota = c
     ? `<p class="suelo-coincidencia">The two global soil maps compared give the same exact class in ${esc(FORMATO_PCT.format(c.valor))} of the fields${c.etiqueta ? ` (${esc(c.etiqueta)})` : ""}; elsewhere they differ, so read the group, not the exact class.` +
-      (c.fuente ? ` <span class="suelo-fuente">Source: <span lang="es">${esc(c.fuente)}</span></span>` : "") + "</p>"
+      (c.fuente ? ` <span class="suelo-fuente">Source: <span${lang}>${esc(c.fuente)}</span></span>` : "") + "</p>"
     : "";
   return (
     `<p class="suelo-textura">Texture group: <strong>${esc(m.grupo)}</strong>${etiqueta}</p>` +
     '<details class="suelo-clase-exacta"><summary>Exact texture class</summary>' +
     `<p>${esc(m.clase ?? "no data")} (USDA class).</p>${nota}` +
-    (m.grupoFuente ? `<p class="suelo-fuente">Groups: <span lang="es">${esc(m.grupoFuente)}</span></p>` : "") +
+    (m.grupoFuente ? `<p class="suelo-fuente">Groups: <span${lang}>${esc(m.grupoFuente)}</span></p>` : "") +
     "</details>"
   );
 }

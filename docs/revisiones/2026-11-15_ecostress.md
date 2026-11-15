@@ -247,3 +247,11 @@ Lo que hay que corregir: el control de calidad de los pasos (hora, nube alrededo
 
 ## Cómo se rehizo
 Scripts del revisor (`docs/revisiones/2026-11-15_ecostress_scripts/`; reciben sus rutas de entrada como argumentos y no forman parte de `python construir.py`): `01_csv.py` (esquema, llaves y rangos), `03_reproducir.py` (recálculo de `et_mm_dia` y `n_escenas`), `04_modelo_y_doc.py` (ETc del modelo y afirmaciones del documento), `05_incertidumbre.py` (dispersión entre modelos, ETo y SSEBop), `06_ndvi_por_paso.py` (señal por paso y efecto de las correcciones 1 y 2), `07_puntos.py` (puntos de la solicitud), `08_tabla_pasos.py` y `09_protagonistas.py` (tablas de este informe). Entradas: los crudos de `adc6157` y `data/processed/` de `6041f51` (los archivos usados son iguales en `40c01ec`). Los scripts se corrieron dos veces, la segunda sobre la copia fija de `6041f51`, con resultados idénticos.
+
+## Seguimiento (15-nov, 01:30, hora de Chihuahua)
+
+Anotado por el integrador después de la revisión; el texto de arriba no se cambió.
+
+- **Sesión de datos.** Reentregó `ecostress_parcelas.csv` (buzón v13; sha256 `ee360cbd…c013336`, comprobado al bajarlo de Drive): un sobrevuelo, un valor (D5); fuera los pasos cercanos a la salida o a la puesta del sol (D1) y las escenas con la zona nublada (D2), con los umbrales como supuestos [S] en `supuestos.json`; columnas nuevas con el mínimo y el máximo de los sobrevuelos usados y la incertidumbre (D3); `etc_modelo_mm` y `razon` vacíos en los meses sin verdor de los cultivos anuales (D9). `docs/ecostress.md` se reescribió (D3, D6, D7). El README de cada solicitud de AppEEARS está en `data/raw/reto/` y de ahí se copiaron, textuales, la cita del producto y la del software (D8, I5). Queda abierto D4 (ubicación de las escenas), escrito como límite en `docs/ecostress.md`.
+- **Integrador.** I4, I5 e I6: corregidos en `README.md`, `LIMITATIONS.md`, `DATA_LICENSE.md`, `docs/pitch/textos_envio.md` y `data/recursos_reto.json`. I1, I2 e I3 (número de sobrevuelos y aviso a la vista en la ficha, nota en las parcelas sin cultivo en el mes mostrado, sin contraste con el modelo): en curso en la rama de integración. I7 (declarar las columnas adicionales en el esquema): abierto.
+

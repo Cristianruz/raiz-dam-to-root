@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/ensamblar.py; no se edita a mano. tipo «entrega»: archivo del buzón copiado sin modificar a esta carpeta (fuente, fecha y script de LEEME.md; url_o_api y fecha_consulta repiten fuente y fecha para motor/manifest.py). tipo «origen»: filas de los fuentes_<pieza>.csv entregados (kit K-ENS paso 6(a)).",
- "generado": "2026-11-15T06:05:34+00:00",
+ "generado": "2026-11-15T07:24:03+00:00",
  "fuentes": [
   {
    "archivo": "contexto_regional.csv",
@@ -15,7 +15,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "c5e7ee211e82587173cff97c506ba5378801891090568d14f78931c90540b17c",
    "ruta_buzon": "contexto_regional.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "cultivos_parcelas.csv",
@@ -29,7 +29,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "6f6fee58eb78e95f085ee17d66e80709a4d2ba811596e47d557e4c70bc2293b6",
    "ruta_buzon": "cultivos_parcelas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "demanda_cultivos.csv",
@@ -43,7 +43,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "43252e4d7f98863f57fd892e5db05a2caa1e16c9f55f349bd3dd675c52634bbb",
    "ruta_buzon": "demanda_cultivos.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -58,7 +58,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "a62944800eebed4089632410bbe3f3dc2ef43c65cfa506e9d8489695e1437a2b",
    "ruta_buzon": "demanda_cultivos_lazaro_cardenas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -66,14 +66,14 @@
    "tipo": "entrega",
    "pieza": "A12",
    "rol": null,
-   "fuente": "NASA ECOSTRESS ECO_L3T_JET.002; daily ET (ETdaily, integrated between sunrise and sunset) at 70 m, collection 2 (Hook and Halverson 2024, DOI 10.5067/ECOSTRESS/ECO_L3T_JET.002, LP DAAC), via AppEEARS v3.137 (point samples: requests raiz_ecostress_delicias_saucillo, ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, and raiz_ecostress_lazaro_cardenas, ID 520f1233-5eb1-4c4e-b243-2c43940f784b, Nov 14, 2026), one point inside each field, Oct 1, 2025 to Sep 30, 2026; et_mm_dia = median of the clear passes of the month (cloud = 0 and water = 0), n_escenas = clear passes in the month; units: mm/day, as the text of the ECOSTRESS collection 2 user guide states («daily ET estimate in millimeters per day»; its Table 10 and AppEEARS say W/m²), confirmed by the values (median 1.1, 99th percentile 3.7, maximum 5.8 over the clear passes); clear passes with data in Oct, Dec, Jan, May, Jul and Aug, none in Nov, Feb, Mar, Apr, Jun and Sep; extra columns zona, etc_modelo_mm (median, on the same days, of the A5 Kc times the NASA POWER ETo; classified fields within the crop cycle) and razon (et_mm_dia / etc_modelo_mm); satellite ET at 70 m on clear days, not a field measurement; raw AppEEARS output unchanged in data/raw/reto/ecostress_pasos_<zona>.csv",
-   "fecha": "2026-11-14",
+   "fuente": "NASA ECOSTRESS ECO_L3T_JET.002 («ECOSTRESS Tiled Evapotranspiration Instantaneous and Daytime L3 Global 70 m V002», Hook and Halverson 2024, DOI 10.5067/ECOSTRESS/ECO_L3T_JET.002, NASA LP DAAC); daily ET (ETdaily: median of four models of the instantaneous latent heat flux, scaled to the daylight hours, sunrise to sunset) at 70 m, collection 2, via AppEEARS v3.137 (AppEEARS Team 2026, «Application for Extracting and Exploring Analysis Ready Samples (AppEEARS). Ver. 3.137», NASA EOSDIS LP DAAC, USGS/EROS; point samples: requests raiz_ecostress_delicias_saucillo, ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, and raiz_ecostress_lazaro_cardenas, ID 520f1233-5eb1-4c4e-b243-2c43940f784b, Nov 14, 2026; the README.md of each request, with both citations, unchanged in data/raw/reto/ecostress_readme_<zona>.md), one point inside each field, Oct 1, 2025 to Sep 30, 2026; a pass is used when ETdaily has data with cloud = 0 and water = 0, when no more than 25 % of the area's points are cloudy in that scene and when the pass falls between 0.15 and 0.85 of the daylight hours (assumptions [S] in supuestos.json); scenes less than 5 minutes apart are one overpass and are averaged; et_mm_dia = median of the overpasses of the month, n_escenas = number of overpasses; units: mm/day (user guide text and JPL code; its Table 10 says W/m²); overpasses with data in Oct, Dec, Jan (Delicias–Saucillo) and Aug, none used in May and Jul; extra columns zona, etc_modelo_mm (median, on the same days, of the A5 Kc times the NASA POWER ETo; classified fields within the crop cycle and, for annual crops, months in which HLS sees the field green), razon (et_mm_dia / etc_modelo_mm; different quantities, not a validation), et_min_mm_dia and et_max_mm_dia (lowest and highest overpass of the month) and incertidumbre_w_m2 (median ETinstUncertainty, W/m²: standard deviation among the four models at the pass; 29 to 231 over all clear passes, 10th to 90th percentiles); satellite estimate at 70 m on clear days, not a field measurement; raw AppEEARS output unchanged in data/raw/reto/ecostress_pasos_<zona>.csv; independent review of Nov 15, 2026 (docs/revisiones/2026-11-15_ecostress.md)",
+   "fecha": "2026-11-15",
    "script": "datos/colab/E0_ecostress_solicitud.py + AppEEARS (browser) + datos/colab/E1_ecostress_parcelas.py",
-   "url_o_api": "NASA ECOSTRESS ECO_L3T_JET.002; daily ET (ETdaily, integrated between sunrise and sunset) at 70 m, collection 2 (Hook and Halverson 2024, DOI 10.5067/ECOSTRESS/ECO_L3T_JET.002, LP DAAC), via AppEEARS v3.137 (point samples: requests raiz_ecostress_delicias_saucillo, ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, and raiz_ecostress_lazaro_cardenas, ID 520f1233-5eb1-4c4e-b243-2c43940f784b, Nov 14, 2026), one point inside each field, Oct 1, 2025 to Sep 30, 2026; et_mm_dia = median of the clear passes of the month (cloud = 0 and water = 0), n_escenas = clear passes in the month; units: mm/day, as the text of the ECOSTRESS collection 2 user guide states («daily ET estimate in millimeters per day»; its Table 10 and AppEEARS say W/m²), confirmed by the values (median 1.1, 99th percentile 3.7, maximum 5.8 over the clear passes); clear passes with data in Oct, Dec, Jan, May, Jul and Aug, none in Nov, Feb, Mar, Apr, Jun and Sep; extra columns zona, etc_modelo_mm (median, on the same days, of the A5 Kc times the NASA POWER ETo; classified fields within the crop cycle) and razon (et_mm_dia / etc_modelo_mm); satellite ET at 70 m on clear days, not a field measurement; raw AppEEARS output unchanged in data/raw/reto/ecostress_pasos_<zona>.csv",
-   "fecha_consulta": "2026-11-14",
-   "sha256": "9367da367268b2c1d3e7455b06a047724234cf11252fda5552a5bd058fbd72b2",
+   "url_o_api": "NASA ECOSTRESS ECO_L3T_JET.002 («ECOSTRESS Tiled Evapotranspiration Instantaneous and Daytime L3 Global 70 m V002», Hook and Halverson 2024, DOI 10.5067/ECOSTRESS/ECO_L3T_JET.002, NASA LP DAAC); daily ET (ETdaily: median of four models of the instantaneous latent heat flux, scaled to the daylight hours, sunrise to sunset) at 70 m, collection 2, via AppEEARS v3.137 (AppEEARS Team 2026, «Application for Extracting and Exploring Analysis Ready Samples (AppEEARS). Ver. 3.137», NASA EOSDIS LP DAAC, USGS/EROS; point samples: requests raiz_ecostress_delicias_saucillo, ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, and raiz_ecostress_lazaro_cardenas, ID 520f1233-5eb1-4c4e-b243-2c43940f784b, Nov 14, 2026; the README.md of each request, with both citations, unchanged in data/raw/reto/ecostress_readme_<zona>.md), one point inside each field, Oct 1, 2025 to Sep 30, 2026; a pass is used when ETdaily has data with cloud = 0 and water = 0, when no more than 25 % of the area's points are cloudy in that scene and when the pass falls between 0.15 and 0.85 of the daylight hours (assumptions [S] in supuestos.json); scenes less than 5 minutes apart are one overpass and are averaged; et_mm_dia = median of the overpasses of the month, n_escenas = number of overpasses; units: mm/day (user guide text and JPL code; its Table 10 says W/m²); overpasses with data in Oct, Dec, Jan (Delicias–Saucillo) and Aug, none used in May and Jul; extra columns zona, etc_modelo_mm (median, on the same days, of the A5 Kc times the NASA POWER ETo; classified fields within the crop cycle and, for annual crops, months in which HLS sees the field green), razon (et_mm_dia / etc_modelo_mm; different quantities, not a validation), et_min_mm_dia and et_max_mm_dia (lowest and highest overpass of the month) and incertidumbre_w_m2 (median ETinstUncertainty, W/m²: standard deviation among the four models at the pass; 29 to 231 over all clear passes, 10th to 90th percentiles); satellite estimate at 70 m on clear days, not a field measurement; raw AppEEARS output unchanged in data/raw/reto/ecostress_pasos_<zona>.csv; independent review of Nov 15, 2026 (docs/revisiones/2026-11-15_ecostress.md)",
+   "fecha_consulta": "2026-11-15",
+   "sha256": "ee360cbdeff36ee9f2551de2bf7c31a6caaac270f925ab26d04d941c2c013336",
    "ruta_buzon": "ecostress_parcelas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "et_contraste.csv",
@@ -87,7 +87,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "12d26ab00b2503653926958fd2261b48a762576f402c8cb2cd5c7579c5b15677",
    "ruta_buzon": "et_contraste.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "eto_diaria.csv",
@@ -101,7 +101,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "89657914bad2e1be107ceb5a8d24833ccab0477cde570e160a683a5c56923046",
    "ruta_buzon": "eto_diaria.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -116,7 +116,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "16af45819b7f02190938043e4a2d67a878baae029fc4eebf1dbbf52a50d51563",
    "ruta_buzon": "eto_diaria_lazaro_cardenas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -131,7 +131,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "9a4a04678ac5b04409ac6a924bde53ddbb4769965c9406126d8c3b847372f5e0",
    "ruta_buzon": "gaez_zona.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "gedi_parcelas.csv",
@@ -145,7 +145,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "5897ac4f2ddce87e36c5c0f89642f445da76c86a93385522a900c8455c2e11ba",
    "ruta_buzon": "gedi_parcelas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "h3_series.csv",
@@ -159,7 +159,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "ef8579ef63bd2ca95735bbbb111dc6d0d7b42efda4ce424ff9e444d12537b303",
    "ruta_buzon": "h3_series.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "heladas.json",
@@ -173,7 +173,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "1a94266e2fe5d2a015660f42629d02cf1de04c2a52a64bd3fa2e29b2becc5c82",
    "ruta_buzon": "heladas.json",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "hls_mensual_parcelas.csv",
@@ -187,7 +187,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "fd97e0ade393c48a45f2b4c27acee672c592af4afbf56976f69cae36bf057fc9",
    "ruta_buzon": "hls_mensual_parcelas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "imerg_diaria.csv",
@@ -201,7 +201,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "b308b68fa304cf8caa71a8dd6bcdb9a5904429d98851c6277fa426186420104e",
    "ruta_buzon": "imerg_diaria.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -216,7 +216,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "7005e73d8e22b0a897dbf5de4cf512f0b1f09d0f6c723899ca85cc18f6b37197",
    "ruta_buzon": "imerg_diaria_lazaro_cardenas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -231,7 +231,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "132d19249f1b12e99fa3098794ee9980da7ac5b18d33118d158c80c6d46584f7",
    "ruta_buzon": "memoria_parcelas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "memoria_resumen.csv",
@@ -245,7 +245,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "ce1cd1b8ed962589ac1d545c569029e3c17aaf4a3982e09c1949cc22ff67a8f3",
    "ruta_buzon": "memoria_resumen.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "nasadem_zona_piloto.tif",
@@ -259,7 +259,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "7ec898b86c90f6360876589af9ebdabdf3469c0c30691f88ecd572a788e8b31e",
    "ruta_buzon": "nasadem_zona_piloto.tif",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -274,7 +274,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "1e4566efddc29e94996abc3b6f3663c4f80da8b7e693403e0ad271b87736562b",
    "ruta_buzon": "nasadem_zona_piloto_lazaro_cardenas.tif",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -289,7 +289,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "2a6e09e16b06313c32f8a6428a7b52ec47933af91c02f57475faf70f3de4819e",
    "ruta_buzon": "opciones_b3.json",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "parcelas_base.geojson",
@@ -303,7 +303,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "24d48ce8b9b82ffc76852a0c8d6a72ab88badf82a653af6676b4725571fa97ae",
    "ruta_buzon": "parcelas_base.geojson",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "relieve_meta.json",
@@ -317,7 +317,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "dc4e959ee72f347d43ea4f0941be299d6c703d830b51080741fe0d8cb5048c72",
    "ruta_buzon": "relieve_meta.json",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -332,7 +332,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "277657440c3a12f2352502b345ded3743932c1a5e77b9162ec01fd7a1db6191f",
    "ruta_buzon": "relieve_meta_lazaro_cardenas.json",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -347,7 +347,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "019ad831a6e2744a733bed8c51cb45b177e649a911a46096495e278be739dbb3",
    "ruta_buzon": "relieve_parcelas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "relieve_rutas.geojson",
@@ -361,7 +361,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "74a53c57d083b901b03a13d973e5392d8065c67af3f0e0c4ed1fc89c51a25674",
    "ruta_buzon": "relieve_rutas.geojson",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "rotaciones.json",
@@ -375,7 +375,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "7d23a84591f57450488b1e56699476b54a8212fad2765b650eb87c4ac30bbdb2",
    "ruta_buzon": "rotaciones.json",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -390,7 +390,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "62ac69593032533353e70e524e387a0ff43a70a08e63a57b34359e14381c16b9",
    "ruta_buzon": "rotaciones_lazaro_cardenas.json",
-   "ingreso": "2026-11-15T06:05:34+00:00",
+   "ingreso": "2026-11-15T07:24:03+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -405,7 +405,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "64b9dff72e7e2f335adeb68bfa93ff6cad3d61f23eb35ada106ca5cc89c4346f",
    "ruta_buzon": "suelo_desnudo.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "suelo_nutrientes_parcelas.csv",
@@ -419,7 +419,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "80c38ce365be84db64b8a008ae8fea57ff02705d9e661db9d949c323cb1ec8b5",
    "ruta_buzon": "suelo_nutrientes_parcelas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "suelo_parcelas.csv",
@@ -433,7 +433,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "f28dc9c7697ddf1ff53d22ac0d4539ab5201b7376ec7a9cc54615d67f41aaaab",
    "ruta_buzon": "suelo_parcelas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "suelo_reglas.json",
@@ -447,7 +447,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "47063f387cc33686b3848274763454f62acebdc065679c0b9594327b9bd3283e",
    "ruta_buzon": "suelo_reglas.json",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "suelo_requisitos.json",
@@ -461,7 +461,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "a94a22cc045f14b668eeff9e29709888e1df98a29acd614d0093fa66c9d4b33c",
    "ruta_buzon": "suelo_requisitos.json",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "suelo_tipos.json",
@@ -475,21 +475,21 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "537756d3d800d919d2cd24b0604313822223c8822f0de3df074e51cf9a5b0a7e",
    "ruta_buzon": "suelo_tipos.json",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "supuestos.json",
    "tipo": "entrega",
    "pieza": "B3",
    "rol": null,
-   "fuente": "Project assumptions (datos/supuestos.json): each with value, label and source; those marked assumption [S] have no local source. Includes ea_goteo = 0.90 and ea_superficial_referencia = 0.60, indicative values from FAO, Irrigation Water Management Training Manual No. 4 (1989), Annex I, Table 8 (not measured in DR-005); lamina_local_cm, irrigation depths recommended by INIFAP and applied in DR-005 in 2009–2016 (Villalobos-Cano et al. 2024, DOI 10.3390/su16051851), as a reference; cobertura_ndvi_relacion and nogal_referencia (a reference that the calculation does not use); suelo_margen_ph (0.5, assumption [S]) and suelo_coincidencia_textura (0.47, own analysis)",
-   "fecha": "2026-11-14",
-   "script": "datos/supuestos.json (read by A3, A4, A5 and A9)",
-   "url_o_api": "Project assumptions (datos/supuestos.json): each with value, label and source; those marked assumption [S] have no local source. Includes ea_goteo = 0.90 and ea_superficial_referencia = 0.60, indicative values from FAO, Irrigation Water Management Training Manual No. 4 (1989), Annex I, Table 8 (not measured in DR-005); lamina_local_cm, irrigation depths recommended by INIFAP and applied in DR-005 in 2009–2016 (Villalobos-Cano et al. 2024, DOI 10.3390/su16051851), as a reference; cobertura_ndvi_relacion and nogal_referencia (a reference that the calculation does not use); suelo_margen_ph (0.5, assumption [S]) and suelo_coincidencia_textura (0.47, own analysis)",
-   "fecha_consulta": "2026-11-14",
-   "sha256": "ce069cb7a0f05c79bf4986bcc4be6bdf28230901baca51aa1c15928b4d52160f",
+   "fuente": "Project assumptions (datos/supuestos.json): each with value, label and source; those marked assumption [S] have no local source. Includes ea_goteo = 0.90 and ea_superficial_referencia = 0.60, indicative values from FAO, Irrigation Water Management Training Manual No. 4 (1989), Annex I, Table 8 (not measured in DR-005); lamina_local_cm, irrigation depths recommended by INIFAP and applied in DR-005 in 2009–2016 (Villalobos-Cano et al. 2024, DOI 10.3390/su16051851), as a reference; cobertura_ndvi_relacion and nogal_referencia (a reference that the calculation does not use); suelo_margen_ph (0.5, assumption [S]) and suelo_coincidencia_textura (0.47, own analysis); ecostress_sobrevuelo_seg, ecostress_fraccion_luz and ecostress_nube_zona_max (assumptions [S] for the ECOSTRESS passes)",
+   "fecha": "2026-11-15",
+   "script": "datos/supuestos.json (read by the scripts of datos/colab/)",
+   "url_o_api": "Project assumptions (datos/supuestos.json): each with value, label and source; those marked assumption [S] have no local source. Includes ea_goteo = 0.90 and ea_superficial_referencia = 0.60, indicative values from FAO, Irrigation Water Management Training Manual No. 4 (1989), Annex I, Table 8 (not measured in DR-005); lamina_local_cm, irrigation depths recommended by INIFAP and applied in DR-005 in 2009–2016 (Villalobos-Cano et al. 2024, DOI 10.3390/su16051851), as a reference; cobertura_ndvi_relacion and nogal_referencia (a reference that the calculation does not use); suelo_margen_ph (0.5, assumption [S]) and suelo_coincidencia_textura (0.47, own analysis); ecostress_sobrevuelo_seg, ecostress_fraccion_luz and ecostress_nube_zona_max (assumptions [S] for the ECOSTRESS passes)",
+   "fecha_consulta": "2026-11-15",
+   "sha256": "2832d83782415412b76d1650fede19867d04edf19d9411cb8852bc1670ee6a4d",
    "ruta_buzon": "supuestos.json",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   },
   {
    "archivo": "tipo_suelo_parcelas.csv",
@@ -503,7 +503,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "c7978c5c82f0736170cb58c1c39a34c04f2dc51163c799f2fd678ecf7139865d",
    "ruta_buzon": "tipo_suelo_parcelas.csv",
-   "ingreso": "2026-11-15T06:05:34+00:00"
+   "ingreso": "2026-11-15T07:24:03+00:00"
   }
  ]
 }

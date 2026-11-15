@@ -21,6 +21,9 @@ De dónde sale cada parte:
   zona_inicial         zona con la que abre la página (params.gemelo.zona_inicial; decisión, punto 6);
                        null, con aviso, si falta o no es una zona de params.zona_piloto.zonas
   terreno.fuente, terreno.rotulo   textos fijos del contrato de la decisión
+  terreno.fuente_en, tiempo.destacados.<año>.fuente_en
+                       la misma cita en inglés (campo paralelo; la página la prefiere y, si falta, muestra la de
+                       español marcada lang="es"). La del año destacado es params.gemelo.anio_destacado.fuente_en
   tiempo.anios         [primer año, último año] de la memoria de web/data/parcelas.geojson
   ndvi                 archivo, fuente y meses de web/data/ndvi_mensual.json
 El archivo lleva además «_encabezado» y «_nota» (regla 4 de CLAUDE.md); la página no los usa.
@@ -48,6 +51,8 @@ ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 SALIDA = "gemelo.json"
 # Textos fijos del contrato (docs/decisiones/2026-11-14_gemelo_digital.md).
 FUENTE_TERRENO = "NASADEM (NASA/NASADEM_HGT/001), 30 m, vía Google Earth Engine"
+# El mismo texto en inglés (campo paralelo terreno.fuente_en): la interfaz es inglés y la página lo prefiere.
+FUENTE_TERRENO_EN = "NASADEM (NASA/NASADEM_HGT/001), 30 m, via Google Earth Engine"
 ROTULO_TERRENO = "regional, 30 m (NASADEM); vertical exaggeration applied"
 
 
@@ -171,7 +176,7 @@ def construir(web=RAIZ / "web/data", params_ruta=RAIZ / "data/params.json", proc
         terreno = {"encoding": dem_teselas.CODIFICACION, "tileSize": dem_teselas.LADO,
                    "minzoom": dem["minzoom"], "maxzoom": dem["maxzoom"], "zonas": zonas,
                    "exageracion": g["exageracion_vertical"]["valor"],
-                   "fuente": FUENTE_TERRENO, "rotulo": ROTULO_TERRENO}
+                   "fuente": FUENTE_TERRENO, "fuente_en": FUENTE_TERRENO_EN, "rotulo": ROTULO_TERRENO}
 
     # 3) Línea de tiempo.
     anios = _anios_de_la_memoria(web, avisos)
@@ -179,7 +184,11 @@ def construir(web=RAIZ / "web/data", params_ruta=RAIZ / "data/params.json", proc
     if anios and not anios[0] <= d["valor"] <= anios[1]:
         avisos.append(f"tiempo.destacados: {d['valor']} queda fuera de los años de la memoria {anios}")
     tiempo = {"anios": anios, "intervalo_ms": g["reproduccion_intervalo_ms"]["valor"],
-              "destacados": {str(d["valor"]): {"texto": d["texto"], "fuente": d["fuente"], "etiqueta": d["etiqueta"]}}}
+              # fuente_en: la cita en inglés de params (campo paralelo; null si params no la trae).
+              "destacados": {str(d["valor"]): {"texto": d["texto"], "fuente": d["fuente"],
+                                               "fuente_en": d.get("fuente_en"), "etiqueta": d["etiqueta"]}}}
+    if d.get("fuente") and not d.get("fuente_en"):
+        avisos.append("data/params.json no trae gemelo.anio_destacado.fuente_en: la página muestra la cita en español")
 
     m = g["metros_por_millar"]
     gemelo = {

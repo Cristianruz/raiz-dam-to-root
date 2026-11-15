@@ -22,7 +22,10 @@ y su ESTADO REAL, leído del repo en el momento de construir:
      pruebas automáticas: FAO-56 contra los ejemplos del manual (tests/test_fao*56*.py) y cierre
      del balance de La gota (validar_contrato.py, renglón «contrato» de la puerta).
 Además, la PUERTA AUTOMÁTICA: la tabla de docs/pruebas.md, que escribe `python construir.py`
-al terminar una corrida completa (se lee la última corrida registrada, con su fecha), y los DOCUMENTOS que «About &
+al terminar una corrida completa (se lee la última corrida registrada, con su fecha). Cada paso lleva su «detalle»
+(el de docs/pruebas.md, en español) y «detalle_en»: el mismo detalle en inglés, leído de la tabla de
+docs/en/test_results.md que construir.py escribe en la MISMA corrida con los mismos valores; null si esa tabla no
+existe, es de otra corrida o no trae el paso (la página muestra entonces el de español). Y los DOCUMENTOS que «About &
 Data» enlaza (docs/modelo_vs_practica.md y docs/revision_protagonistas.md), cada uno con su nota; la de la revisión de
 las protagonistas dice, leyéndolo del documento, si la hizo una sesión de IA y si falta la de una persona.
 
@@ -233,6 +236,32 @@ def estado_de_partes(partes):
 # ---------------------------------------------------------------------------
 # Puerta automática (docs/pruebas.md)
 # ---------------------------------------------------------------------------
+def filas_de_tabla(texto, encabezado):
+    """Renglones de una tabla de Markdown como listas de celdas, sin el encabezado ni la raya de separación."""
+    filas = []
+    for linea in (texto or "").splitlines():
+        celdas = [c.strip() for c in linea.strip().strip("|").split("|")] if linea.lstrip().startswith("|") else []
+        if len(celdas) < 2 or celdas[0] in (encabezado, "") or set(celdas[0]) <= set("-: "):
+            continue
+        filas.append(celdas)
+    return filas
+
+
+def detalles_en(raiz, corrida):
+    """{id del paso: detalle en inglés} de docs/en/test_results.md, la tabla que construir.py escribe junto a
+    docs/pruebas.md con los mismos valores. {} si no existe o si es de otra corrida (su «Run:» no es la «Corrida:»
+    de docs/pruebas.md): nunca se mezcla el detalle de una corrida con el de otra."""
+    texto = leer_texto(Path(raiz) / "docs/en/test_results.md")
+    if texto is None:
+        return {}
+    run = re.search(r"Run:\s*(\S+)", texto)
+    if (run.group(1) if run else None) != corrida:
+        return {}
+    id_de_nombre = {nombre: id_ for id_, nombre in NOMBRES_PASOS.items()}
+    return {id_de_nombre.get(celdas[0], celdas[0]): celdas[2]
+            for celdas in filas_de_tabla(texto, "Step") if len(celdas) > 2}
+
+
 def leer_puerta(raiz):
     ruta = Path(raiz) / "docs/pruebas.md"
     texto = leer_texto(ruta)
@@ -241,15 +270,15 @@ def leer_puerta(raiz):
         return {**base, "estado": NOT_RUN, "corrida": None, "pasos": [],
                 "nota": "docs/pruebas.md is not in the repo yet: python construir.py writes it after a full run."}
     corrida = re.search(r"Corrida:\s*(\S+)", texto)
+    en_ingles = detalles_en(raiz, corrida.group(1) if corrida else None)
     pasos = []
-    for linea in texto.splitlines():
-        celdas = [c.strip() for c in linea.strip().strip("|").split("|")] if linea.lstrip().startswith("|") else []
-        if len(celdas) < 2 or celdas[0] in ("Paso", "") or set(celdas[0]) <= set("-: "):
-            continue
+    for celdas in filas_de_tabla(texto, "Paso"):
         id_, original = celdas[0], celdas[1]
         pasos.append({"id": id_, "nombre": NOMBRES_PASOS.get(id_, id_),
                       "estado": ESTADOS_PASO.get(original, original.lower()),
-                      "estado_original": original, "detalle": celdas[2] if len(celdas) > 2 else ""})
+                      "estado_original": original, "detalle": celdas[2] if len(celdas) > 2 else "",
+                      # El mismo detalle en inglés (docs/en/test_results.md); null si esa tabla no lo trae.
+                      "detalle_en": en_ingles.get(id_)})
     estados = [p["estado"] for p in pasos]
     if not pasos:
         estado = NOT_RUN
@@ -311,10 +340,12 @@ def prueba_mapa(raiz):
                if (m := re.fullmatch(r"\s*\d+\s*/\s*(\d+)\s*", str(p.get("acuerdo_metodos") or "")))]
     if metodos and max(metodos) >= 2:
         partes.append(parte("random_forest", "Random Forest", RUN,
-                            "Fields report agreement between two methods (acuerdo_metodos).", fuente))
+                            "Fields report agreement between two methods.", fuente))
     elif props:
+        # Sin el nombre de la columna (acuerdo_metodos): la página dice qué método es el único y qué falta.
         partes.append(parte("random_forest", "Random Forest", NOT_RUN,
-                            "Pending: every field reports a single method in acuerdo_metodos.", fuente))
+                            "Pending: every field reports a single method (the phenological rules); "
+                            "the Random Forest has not been run.", fuente))
     else:
         partes.append(parte("random_forest", "Random Forest", NOT_RUN, "No fields to read yet."))
 

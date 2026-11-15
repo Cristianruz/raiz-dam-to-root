@@ -16,6 +16,7 @@
 // - relieve.js: capa «Terrain & runoff» y botón «Simulate a storm» en el panel (kit A9, parte web), y la
 //   línea de relieve del renglón Soil de cada tarjeta (S9 §4 bis);
 // - gota.js: «Follow the drop» dentro de la ficha, Sankey con d3-sankey (kit X3.1 y X3.2);
+// - beneficios.js: «Benefits» del «Why?» de cada tarjeta, la opción comparada con la rotación ACTUAL de la parcela (I10);
 // - mensaje.js: maqueta del mensaje de WhatsApp (en español) y ficha imprimible (kit C4);
 // - acerca.js: pantalla de inicio de tres pasos y sección «About & Data» (kit C5). pruebas.json se lee solo al
 //   abrir «About & Data» (carga perezosa); manifest.json se lee una vez al arrancar (la tarjeta «Twin status»
@@ -63,6 +64,7 @@ import {
 } from "./reglas.js";
 import { agregarCapaRelieve, htmlRelieveParcela, cargarRelieve, leerOpcional } from "./js/relieve.js";
 import { dibujarGota } from "./js/gota.js";
+import { beneficiosDeOpcion } from "./js/beneficios.js";
 import { htmlWhatsApp, imprimirFicha } from "./js/mensaje.js";
 import { montarInicio, montarAcerca, LLAVE_INICIO } from "./js/acerca.js";
 import { crearGemelo3D } from "./js/gemelo3d.js";
@@ -303,6 +305,15 @@ function fmtDato(v) {
 function fmtPct(fraccion) {
   if (fraccion == null || !Number.isFinite(fraccion)) return "—";
   return conMenos(formateador({ style: "percent", maximumFractionDigits: 0 }).format(fraccion));
+}
+/**
+ * Cobertura de la dotación, en porcentaje entero HACIA ABAJO: una cobertura de 0.996 no puede leerse «100%» junto a
+ * «the rest comes from wells» ni junto a unas hectáreas que no llegan al área (mismo criterio que formatoHectareas).
+ */
+function fmtCobertura(fraccion) {
+  if (fraccion == null || !Number.isFinite(fraccion)) return fmtPct(fraccion);
+  const CIEN = 100;
+  return fmtPct(Math.floor(fraccion * CIEN) / CIEN);
 }
 function fmtSigno(v) {
   return conMenos(formateador({ maximumFractionDigits: 3, signDisplay: "exceptZero" }).format(v));
@@ -809,6 +820,21 @@ function enEspanol(nodo, texto) {
 function textoEs(texto) {
   return `<span lang="es">${esc(texto)}</span>`;
 }
+/**
+ * Un texto de los datos con el idioma en que llegó: va marcado con su «lang» solo si no es el de la página (inglés).
+ * Sin idioma declarado se toma por español (los textos de data/params.json sin variante en inglés).
+ */
+function textoDato(texto, idioma = "es") {
+  return idioma === "en" ? esc(texto) : `<span lang="${esc(idioma || "es")}">${esc(texto)}</span>`;
+}
+/**
+ * Idioma de las citas que llegan del buzón dentro del cubo (filtros, referencias locales, por qué un cultivo no rota):
+ * cubo.meta.idioma_fuentes, que escribe motor/b4_cubo.py. Un cubo que no lo declare (los simulados) se toma en español.
+ */
+function idiomaBuzon() {
+  const idioma = estado.cubo?.meta?.idioma_fuentes;
+  return typeof idioma === "string" && idioma ? idioma : "es";
+}
 
 // Partes de las etiquetas de los datos que vienen en español («[P], por confirmar») y su lectura en la interfaz en
 // inglés. Sin cifras: solo palabras. Si la etiqueta trae otra cosa en español, va entera marcada lang="es".
@@ -820,16 +846,18 @@ function etiquetaEn(etiqueta) {
 }
 
 /**
- * Fuente de un dato (I5 de la revisión total). Las citas del cubo llegan en español y con códigos internos del proyecto
- * (S#, §, kit…); la interfaz es inglés y aquí no se traducen. Si el dato trae su versión en inglés (…_en), esa va a la
- * vista; si no, la cita completa queda plegada en un <details> «Source» con lang="es". La etiqueta de evidencia
- * ([V], [P], [S]) va siempre a la vista, en el rótulo. `etiqueta` undefined = este dato no lleva etiqueta.
+ * Fuente de un dato (I5 de la revisión total). Las citas de data/params.json están en español y con códigos internos
+ * del proyecto (S#, §, kit…); la interfaz es inglés y aquí no se traducen. Si el dato trae su versión en inglés
+ * (…_en, que el motor copia de params), esa va a la vista; si no, la cita completa queda plegada en un <details>
+ * «Source», marcada con el idioma en que llegó: `idioma` (español por omisión; las citas del buzón, el de
+ * cubo.meta.idioma_fuentes). La etiqueta de evidencia ([V], [P], [S]) va siempre a la vista, en el rótulo.
+ * `etiqueta` undefined = este dato no lleva etiqueta.
  */
-function htmlFuente(fuente, { en = null, etiqueta = undefined, rotulo = "Source" } = {}) {
+function htmlFuente(fuente, { en = null, etiqueta = undefined, rotulo = "Source", idioma = "es" } = {}) {
   const marca = etiqueta === undefined ? "" : etiquetaDato(etiqueta);
   if (en) return `<span class="fuente-en">${esc(rotulo)}: ${esc(en)}</span>${marca}`;
   if (!fuente) return `${esc(rotulo)}: not available${marca}`;
-  return `<details class="fuente-plegada"><summary>${esc(rotulo)}${marca}</summary><p class="fuente">${textoEs(fuente)}</p></details>`;
+  return `<details class="fuente-plegada"><summary>${esc(rotulo)}${marca}</summary><p class="fuente">${textoDato(fuente, idioma)}</p></details>`;
 }
 
 function leerControles() {
@@ -864,7 +892,8 @@ function actualizarValorDeslizador() {
     .filter(Boolean)
     .join(" · ");
   $("#info-marca-fuente").innerHTML = [
-    `Source: ${m.fuente ? textoEs(m.fuente) : "not available"}`,
+    // La fuente en inglés (fuente_en, copia de params); la de español, marcada, solo si no hay traducción.
+    `Source: ${m.fuente_en ? esc(m.fuente_en) : m.fuente ? textoEs(m.fuente) : "not available"}`,
     m.etiqueta ? `Label: ${etiquetaEn(m.etiqueta)}` : "",
     m.fecha_consulta ? `Accessed: ${esc(fmtFecha(m.fecha_consulta))}` : "",
     // La nota en inglés (nota_en, copia de params); la de español solo si no hay traducción.
@@ -872,8 +901,8 @@ function actualizarValorDeslizador() {
   ]
     .filter(Boolean)
     .join(" · ");
-  // «Source and note» queda plegado (punto 2 / I3): la fuente y la etiqueta de la marca están en español en params.json
-  // (no hay fuente_en ni etiqueta_en); se leen al abrirlo, con lang="es", y no se traducen aquí.
+  // «Source and note» queda plegado (punto 2 / I3): al abrirlo se leen la fuente y la nota en inglés (fuente_en y
+  // nota_en del cubo, copia de params.json) y la etiqueta con su parte en español leída en inglés (etiquetaEn).
   info.hidden = false;
 }
 
@@ -1605,7 +1634,9 @@ function pintarLocalidades() {
     })
     .join("");
   const fuentes = [...new Set(locs.map((l) => l.fuente).filter(Boolean))];
-  $("#localidades-fuente").innerHTML = htmlFuente(fuentes.join("; "));
+  // La cita en inglés (fuente_en, copia de params) va a la vista solo si TODAS las localidades con fuente la traen.
+  const fuentesEn = locs.every((l) => !l.fuente || l.fuente_en) ? [...new Set(locs.map((l) => l.fuente_en).filter(Boolean))] : [];
+  $("#localidades-fuente").innerHTML = htmlFuente(fuentes.join("; "), { en: fuentesEn.join("; ") || null });
 }
 
 function agregarLocalidades(mapa) {
@@ -1959,13 +1990,19 @@ function etiquetaDato(etiqueta) {
   return ` <span class="etiqueta-dato" title="${esc(titulo)}" aria-label="${esc(`${texto} (${titulo})`)}">${esc(texto)}</span>`;
 }
 
+/**
+ * Pie del panel (M6 de la revisión total): una línea con la fecha en que se generaron los datos y cuántos archivos los
+ * forman (cubo.meta.generado y cubo.meta.fuentes); la lista de fuentes se lee en «About & Data», no aquí.
+ */
 function pintarPie() {
   const meta = estado.cubo.meta ?? {};
   const partes = [];
   // Los archivos ocultos de la caché (p. ej. data/processed/.gitkeep) no son fuentes de datos.
   const archivos = (Array.isArray(meta.fuentes) ? meta.fuentes : []).filter((f) => !String(f).split("/").pop().startsWith("."));
-  if (archivos.length) partes.push(`Data files: ${archivos.join(", ")}`);
-  if (meta.generado) partes.push(`generated ${meta.generado}`);
+  const cuantos = archivos.length ? ` from ${fmtDato(archivos.length)} data ${archivos.length === 1 ? "file" : "files"}` : "";
+  const fechaValida = meta.generado && !Number.isNaN(new Date(meta.generado).getTime());
+  const cuando = !meta.generado ? "" : ` ${fechaValida ? fmtFecha(meta.generado) : String(meta.generado)}`;
+  if (meta.generado || cuantos) partes.push(`Built${cuando}${cuantos} — see About & Data`);
   if (meta.mock && Array.isArray(meta.mock_campos)) partes.push(`simulated blocks: ${meta.mock_campos.join(", ")}`);
   $("#pie-fuentes").textContent = partes.join(" · ");
 }
@@ -2118,6 +2155,7 @@ function pintarNDVI(p) {
       meses: n?.meses ?? [],
       umbrales: n?.umbrales ?? null,
       fuente: n?.fuente ?? null,
+      idiomaFuente: n?.idioma_fuentes ?? null,
       nivel: 3,
     });
   } catch (err) {
@@ -2131,7 +2169,7 @@ function htmlSinRotacion(sr) {
   return (
     '<div class="sin-rotacion" data-parte="sin-rotacion">' +
     `<p><strong>${esc(NOTA_SIN_ROTACION)}</strong> ${esc(sr.motivo ?? "")}</p>` +
-    `<div class="fuente">${htmlFuente(sr.fuente, { en: sr.fuente_en, etiqueta: sr.etiqueta || undefined })}</div>` +
+    `<div class="fuente">${htmlFuente(sr.fuente, { en: sr.fuente_en, etiqueta: sr.etiqueta || undefined, idioma: idiomaBuzon() })}</div>` +
     "</div>"
   );
 }
@@ -2156,7 +2194,13 @@ function htmlEvidencia(p) {
   const ctx = estado.contexto;
   let filas = [];
   try {
-    filas = ctx ? evidenciaDeParcela({ contexto: ctx, id: p.id }) : [];
+    // Calendario del modelo de la rotación actual (opción ACTUAL): para decir si el mes del valor de ECOSTRESS
+    // no tiene cultivo. Una parcela sin clasificar no tiene opción ACTUAL: no se dice nada.
+    const actual = (estado.cubo.parcelas?.[p.id]?.opciones ?? []).find((o) => o.id === "ACTUAL");
+    // Una huerta que no rota tiene árboles todo el año: en sus meses de reposo el calendario marca «sin cultivo», pero
+    // la nota de ECOSTRESS «field without a crop» no aplica (revisor del contrato, 15-nov). Sin calendario, sin nota.
+    const noRota = estado.cubo.opciones_catalogo?.[actual?.rotacion]?.letra_maestro === LETRA_NO_ROTA;
+    filas = ctx ? evidenciaDeParcela({ contexto: ctx, id: p.id, mesesCultivo: noRota ? null : actual?.meses_cultivo }) : [];
   } catch (err) {
     console.error("ROOT: the satellite evidence could not be read", err);
   }
@@ -2166,7 +2210,8 @@ function htmlEvidencia(p) {
       `<p><strong>${esc(f.etiqueta)}:</strong> ${esc(f.texto)}</p>` +
       (f.nota ? `<p class="evidencia-nota">${esc(f.nota)}</p>` : "") +
       `<p class="fuente">Source: ${f.archivo ? esc([f.archivo, f.fecha].filter(Boolean).join(", ")) : "not available"}</p>` +
-      (f.fuente ? `<details class="evidencia-fuente"><summary>Full source</summary><p class="fuente">${textoEs(f.fuente)}</p></details>` : "") +
+      // La cita completa es la línea de LEEME de la entrega, en el idioma que declara contexto.json (idioma_fuentes).
+      (f.fuente ? `<details class="evidencia-fuente"><summary>Full source</summary><p class="fuente">${textoDato(f.fuente, ctx?.idioma_fuentes || "es")}</p></details>` : "") +
       "</li>",
   );
   // ECOSTRESS sin dato: se dice con un texto neutro (no se rellena con nada). El motivo del motor («Requested from the
@@ -2259,7 +2304,30 @@ function htmlMemoria(p) {
     `<ol class="franja" style="--n: ${p.memoria.length}" aria-label="Agricultural years, from oldest to newest">${celdas}</ol>` +
     `<ul class="leyenda-memoria" aria-label="Legend">${leyenda}</ul>` +
     '<p class="nota-fija">Rule-based reading of monthly greenness; not a crop census.</p>' +
+    htmlNotaNogal(p) +
     "</section>"
+  );
+}
+
+// Estados de la memoria que la regla del nogal cuenta como años de huerta además de «perenne»
+// (datos/colab/A4_cultivos_reglas.py: la edad del nogal suma los años «verano», «doble» o «perenne»).
+const ESTADOS_NOGAL_NO_PERENNE = ["verano", "doble"];
+
+/**
+ * Nota bajo la memoria de una huerta de nogal (hallazgo 6 de la revisión cruzada de la sesión de datos, 14-nov):
+ * la franja puede decir «Summer crop» en algunos años junto a «Orchard pattern in satellite memory: ≥ N years», y
+ * parece una contradicción. El nogal pierde la hoja en invierno: un año con menos meses verdes se lee como cultivo
+ * de verano, y la edad de la huerta también cuenta esos años. Solo va si la parcela es nogal y su memoria trae al
+ * menos un año así; nombra los estados tal como los escribe la leyenda. Sin cifras.
+ */
+function htmlNotaNogal(p) {
+  if (p.cultivo_actual !== "nogal" || !Array.isArray(p.memoria)) return "";
+  const estados = ESTADOS_NOGAL_NO_PERENNE.filter((e) => p.memoria.some((m) => m.estado === e));
+  if (!estados.length) return "";
+  const nombres = estados.map((e) => `“${MEMORIA[e].texto}”`).join(" or ");
+  return (
+    `<p class="nota-fija" data-parte="nota-nogal">A pecan orchard loses its leaves in winter: in a year with fewer green ` +
+    `months the rules read its greenness as ${esc(nombres)}, and the orchard age counts those years too.</p>`
   );
 }
 
@@ -2277,14 +2345,13 @@ function circulo(clave, tabla) {
  * nombre. Los filtros se dibujan en actualizarFicha: dotacion_minima depende del deslizador.
  */
 function htmlTarjeta(o, relieve = "", p = {}) {
-  const esActual = o.id === "ACTUAL";
   const propuesta = o.origen_opcion === "team_proposal" && o.etiqueta_opcion
     ? `<span class="insignia-propuesta" data-parte="propuesta">${esc(o.etiqueta_opcion)}</span>`
     : "";
   return (
     `<article class="tarjeta" data-opcion="${esc(o.id)}">` +
+    // M4 de la revisión total: el nombre de la opción ACTUAL ya dice «Current rotation: …»; sin insignia encima.
     '<header class="tarjeta-cabeza">' +
-    (esActual ? '<span class="insignia-actual">Current rotation</span>' : "") +
     `<h4>${esc(o.nombre)}</h4>${propuesta}</header>` +
     '<div class="renglon renglon-agua" data-parte="agua"></div>' +
     htmlSuelo(o, relieve, p) +
@@ -2468,8 +2535,8 @@ function htmlFiltros(o, D = estado.D) {
           : "";
         return (
           `<li class="${clase}" data-estado="${esc(e)}" data-filtro="${esc(f.id ?? "")}"${f.vivo ? ' data-vivo="si"' : ""}>${marca} <span class="filtro-texto">${esc(f.motivo ?? f.filtro)}</span>${razon}${helada}${vivo}` +
-          // La cita de la tabla oficial (en español, con códigos internos) va plegada en «Source» (I5).
-          `${f.fuente ? htmlFuente(f.fuente, { en: f.fuente_en, etiqueta: f.etiqueta || undefined }) : ""}</li>`
+          // La cita de la tabla oficial (con códigos internos) va plegada en «Source» (I5), en el idioma del buzón.
+          `${f.fuente ? htmlFuente(f.fuente, { en: f.fuente_en, etiqueta: f.etiqueta || undefined, idioma: idiomaBuzon() }) : ""}</li>`
         );
       })
       .join("") +
@@ -2569,7 +2636,11 @@ function actualizarFicha() {
       : "";
     $('[data-parte="filtros"]', tarjeta).innerHTML = htmlFiltros(o, D);
 
-    $('[data-parte="respuestas"]', tarjeta).innerHTML = htmlRespuestas(o, ev);
+    // El motivo oficial trae su fuente plegada: si estaba abierta, sigue abierta al mover el deslizador.
+    const respuestas = $('[data-parte="respuestas"]', tarjeta);
+    const fuenteAbierta = Boolean($("details.fuente-plegada[open]", respuestas));
+    respuestas.innerHTML = htmlRespuestas(o, ev, p.area_ha, ops);
+    if (fuenteAbierta) $("details.fuente-plegada", respuestas)?.setAttribute("open", "");
   }
   pintarCoberturaGota();
   if (estado.whatsapp) pintarWhatsApp(); // el mensaje dice cuántas hectáreas alcanzan con la dotación elegida
@@ -2636,7 +2707,7 @@ function htmlLaminaLocal(o, L, areaHa, D) {
     `<strong>${esc(lamina)}</strong> thousand m³/ha · ` +
     `<span class="lamina-local-alcanza">${alcanzaLocal}</span> ` +
     `<span class="lamina-local-limite">— ${esc(t.limite)}</span>${ll.etiqueta ? ` <span class="lamina-local-etiqueta">${esc(ll.etiqueta)}</span>` : ""}</p>` +
-    `<details class="lamina-local-fuente"><summary>Source of the local reference</summary><p class="fuente">${textoEs(ll.fuente)}` +
+    `<details class="lamina-local-fuente"><summary>Source of the local reference</summary><p class="fuente">${textoDato(ll.fuente, idiomaBuzon())}` +
     `${ll.nota ? ` ${esc(ll.nota)}` : ""}</p></details></div>` +
     // En papel, una línea corta (la hoja cabe en una carta): la misma cifra y sus hectáreas, rotulada como promedio del
     // distrito (o la guía regional de INIFAP); el texto completo y la fuente se leen en la ficha en línea.
@@ -2645,19 +2716,85 @@ function htmlLaminaLocal(o, L, areaHa, D) {
   );
 }
 
-function htmlRespuestas(o, ev) {
+// «Why it's suggested» de una opción sin motivo en la tabla oficial (I10 de la revisión total): se dice; no se inventa.
+const TEXTO_SIN_MOTIVO = "The official rotation table gives no reason for this option.";
+// Final de la frase del agua de explicaciones.json («… enough for {{ha}} hectares.»): se escribe como en la tarjeta.
+const MARCADOR_ALCANZA = /enough for \{\{ha\}\} hectares/;
+// Valores de opciones_catalogo[rotación].letra_maestro con que la tabla oficial describe lo que la parcela YA tiene
+// (su rotación actual o una huerta que no rota). Con cualquier otro, la tabla habla de una alternativa.
+const LETRA_NO_ROTA = "nogal_no_rota";
+const LETRAS_DE_ESTADO_ACTUAL = ["ACTUAL", LETRA_NO_ROTA];
+const TEXTO_ESTADO_ACTUAL =
+  "This is the field's current state. The official rotation table describes it as an alternative for a cropped field, so it gives no reason for a field that is already in it.";
+
+/**
+ * Motivo oficial de una opción (I10): cubo.opciones_catalogo[rotación].por_que_en, con su etiqueta de evidencia y su
+ * fuente plegada (htmlFuente). Una propuesta del equipo (origen_opcion = team_proposal) no tiene motivo en la tabla
+ * oficial: el texto del catálogo para esa rotación habla de otro uso («Current rotation…», «Suggested for an old
+ * alfalfa stand…»), así que no se muestra ni se inventa otro; va la etiqueta de la opción.
+ */
+function htmlMotivo(o) {
+  const d = estado.cubo.opciones_catalogo?.[o.rotacion];
+  // La tarjeta ACTUAL de una parcela que hoy está en un estado que la tabla ofrece como ALTERNATIVA (el descanso: 219
+  // parcelas) no toma prestado ese motivo: «the field rests with standing stubble…» describe la alternativa, no una
+  // parcela que ya descansa y cuyo suelo desnudo se midió (hallazgo H1 del revisor de cifras, 15-nov).
+  if (o.id === "ACTUAL" && d && !LETRAS_DE_ESTADO_ACTUAL.includes(d.letra_maestro)) {
+    return `<p data-parte="motivo" data-motivo="estado">${esc(TEXTO_ESTADO_ACTUAL)}</p>`;
+  }
+  if (o.origen_opcion !== "team_proposal" && d?.por_que_en) {
+    return (
+      `<p data-parte="motivo">${esc(d.por_que_en)}</p>` +
+      `<div class="fuente">${htmlFuente(d.fuente, { en: d.fuente_en, etiqueta: d.etiqueta || undefined, idioma: idiomaBuzon() })}</div>`
+    );
+  }
+  const etiqueta = o.etiqueta_opcion || d?.etiqueta;
+  return `<p data-parte="motivo" data-motivo="sin">${esc(TEXTO_SIN_MOTIVO)}${etiqueta ? etiquetaDato(etiqueta) : ""}</p>`;
+}
+
+/**
+ * Las cinco respuestas del «Why?» (explicaciones.json). Dos se arman además con los datos de la parcela:
+ * - «Why it's suggested» (I10 y C2 de la revisión total): primero el motivo de la tabla oficial (htmlMotivo) y después
+ *   la frase del agua, con las hectáreas escritas como en la tarjeta (htmlAlcanza: formatoHectareas, nunca más que el
+ *   área, y «the whole field» cuando alcanza para toda la parcela);
+ * - «Benefits» (I10): la opción comparada con la rotación ACTUAL de la misma parcela (web/js/beneficios.js), con el
+ *   formato de las tarjetas; donde no hay con qué comparar (el nogal) se conserva la frase de explicaciones.json.
+ */
+function htmlRespuestas(o, ev, areaHa, ops = []) {
   const bloque = estado.explicaciones?.explicaciones?.[o.preguntas_ref];
   if (!bloque?.textos) return "<dt>Explanation</dt><dd>Not available yet for this option.</dd>";
   const dinamicos = { d: estado.D, ha: ev.hectareas.p50, cobertura: ev.cobertura };
+  // La lámina de la frase es la del escenario de lluvia elegido y con el formato de la tarjeta: antes decía «asks for
+  // 25.49» junto a «25.5» y, con la lluvia seca, la lámina de la lluvia base (hallazgo H3 del revisor de cifras).
+  // f1, f4 y f5 son la mediana, la baja y la alta de explicaciones.json; si la opción no trae esa lámina, quedan esas.
+  const LAMINA = { f1: ev.lamina?.p50, f4: ev.lamina?.p10, f5: ev.lamina?.p90 };
+  for (const [k, v] of Object.entries(LAMINA)) if (Number.isFinite(v)) dinamicos[k] = v;
+  const fh = formatoHectareas(areaHa);
   const formatear = (v, k) => {
-    if (k === "cobertura") return fmtPct(v);
-    if (k === "ha" || k === "d") return fmt(v);
+    if (k === "cobertura") return fmtCobertura(v);
+    if (k === "ha") return fh(v);
+    if (k === "d") return fmt(v);
+    if (k in LAMINA) return fmtMillares(v);
     return fmtDato(v);
   };
+  const alcanza = ev.cobertura >= 1
+    ? `enough for the whole field (${fmtDato(areaHa)} ha)`
+    : `enough for ${fh(ev.hectareas.p50)} of ${fh(areaHa)} ${hectareasTexto(areaHa)}`;
+  let beneficios = null;
+  try {
+    beneficios = beneficiosDeOpcion({ opcion: o, opciones: ops, llave: llaveLluvia(estado.r), formato: { millares: fmtMillares, dato: fmtDato } });
+  } catch (err) {
+    console.error("ROOT: the benefits comparison could not be built", err);
+  }
   return PREGUNTAS.map(([k, titulo]) => {
     const t = bloque.textos[k];
-    const texto = t ? rellenarMarcadores(t, bloque.valores, dinamicos, formatear) : "Not available yet.";
-    return `<dt>${esc(titulo)}</dt><dd>${esc(texto)}</dd>`;
+    const plantilla = t && k === "por_que" ? t.replace(MARCADOR_ALCANZA, () => alcanza) : t;
+    const texto = plantilla ? rellenarMarcadores(plantilla, bloque.valores, dinamicos, formatear) : "Not available yet.";
+    let cuerpo = esc(texto);
+    if (k === "por_que") cuerpo = `${htmlMotivo(o)}<p data-parte="frase-agua">${cuerpo}</p>`;
+    else if (k === "beneficios" && beneficios) {
+      cuerpo = beneficios.renglones.map((r) => `<p>${r.rotulo ? `<strong>${esc(r.rotulo)}:</strong> ` : ""}${esc(r.texto)}</p>`).join("");
+    }
+    return `<dt>${esc(titulo)}</dt><dd data-respuesta="${esc(k)}">${cuerpo}</dd>`;
   }).join("");
 }
 
@@ -2680,15 +2817,23 @@ function htmlGota(ops, p = {}) {
     const motivo = p.abstencion ? "Not available: this field is not classified." : "Not available for this field yet.";
     return `<section class="gota" id="seccion-gota" aria-labelledby="t-gota"><h3 id="t-gota" tabindex="-1">Follow the drop</h3><p>${motivo}</p></section>`;
   }
+  // Opciones sin bloque «gota» (el motor lo deja en null cuando falta la lámina neta: nunca toma la ET como cero).
+  // No entran al selector; la ficha dice cuáles son y que no se estima nada en su lugar (hallazgo H6 de la auditoría).
+  const sinGota = ops.filter((o) => !o.gota);
+  const sinDato = sinGota.length
+    ? `<p class="gota-nota" id="gota-sin-dato">No water-flow data for: ${esc(sinGota.map((o) => o.nombre).join("; "))}. Nothing is estimated in its place.</p>`
+    : "";
   return (
     '<section class="gota" id="seccion-gota" aria-labelledby="t-gota">' +
     '<h3 id="t-gota" tabindex="-1">Follow the drop</h3>' +
-    "<p>Where this option's water goes each year, from La Boquilla to the crop and the aquifer (m³ for this field).</p>" +
+    // I15 de la revisión total: el diagrama dibuja lo que la opción necesita, no lo que la presa entrega.
+    "<p>Where the water this option needs would go each year, counted from La Boquilla dam to the crop and the aquifer (m³ for this field).</p>" +
     '<div class="gota-controles">' +
     `<label>Option <select id="gota-opcion">${conGota.map((o) => `<option value="${esc(o.id)}">${esc(o.nombre)}</option>`).join("")}</select></label>` +
     "</div>" +
     '<div class="gota-contenedor" id="gota-modulo"></div>' +
     '<p class="gota-nota" id="gota-cobertura" hidden></p>' +
+    sinDato +
     "</section>"
   );
 }
@@ -2719,6 +2864,8 @@ function pintarGota() {
     locale: LOCALE,
     // Eficiencias del goteo con su etiqueta y su fuente, y si el retorno sin tope es una cota superior (cubo.meta.goteo).
     metaGoteo: estado.cubo.meta?.goteo ?? null,
+    // Idioma de las citas de los supuestos y de las eficiencias (cubo.meta.idioma_fuentes).
+    idiomaFuentes: estado.cubo.meta?.idioma_fuentes ?? null,
     goteo: estado.gota.goteo,
     tope: estado.gota.tope,
     alCambiar: (e) => {
@@ -2728,7 +2875,12 @@ function pintarGota() {
   });
 }
 
-/** Línea de cobertura de La gota: depende del deslizador. */
+/**
+ * Línea de cobertura de La gota: depende del deslizador. El diagrama dibuja lo que la opción NECESITA, contado desde
+ * La Boquilla (bloque gota del cubo, con el riego actual); esta nota dice cuánto de eso cubre la dotación elegida (I15
+ * de la revisión total): la cobertura de evaluarOpcion (web/reglas.js, la misma de la tarjeta) y esa fracción de los
+ * m³ del primer nodo. Sin ese dato en el bloque, solo la cobertura.
+ */
 function pintarCoberturaGota() {
   const nodo = $("#gota-cobertura");
   const o = opcionGota();
@@ -2736,7 +2888,16 @@ function pintarCoberturaGota() {
   if (!nodo || !o || !f) return;
   const ev = evaluarOpcion(o, f.properties.area_ha, estado.D, estado.r, Boolean(f.properties.abstencion));
   nodo.hidden = !(ev.cobertura < 1);
-  nodo.textContent = "The allocation covers part of this need; the rest comes from wells or stays unmet.";
+  // Los m³ del diagrama (gota.m3_salen_presa) se calculan con la lluvia base. Con la lluvia seca la cobertura es la
+  // del escenario seco, así que no se multiplica por esos m³: se da el porcentaje y se dice a qué lluvia corresponde
+  // el diagrama (hallazgo del revisor de código, 15-nov).
+  const lluviaBase = estado.r === estado.rBase;
+  const necesita = o.gota?.m3_salen_presa;
+  const cuanto = lluviaBase && Number.isFinite(necesita) && necesita > 0
+    ? `: about ${fmt(ev.cobertura * necesita, 0)} of the ${fmt(necesita, 0)} m³ this option needs with the current irrigation, counted from La Boquilla (canal losses included)`
+    : "";
+  const seca = lluviaBase ? "" : " in the drier-rain scenario; the amounts in the diagram are for the base rainfall";
+  nodo.textContent = `With ${fmt(estado.D)} thousand m³/ha, the allocation covers ${fmtCobertura(ev.cobertura)} of this need${cuanto}${seca}. The rest comes from wells or stays unmet.`;
 }
 
 // ---------------------------------------------------------------------------

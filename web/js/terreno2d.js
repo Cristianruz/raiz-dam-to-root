@@ -317,7 +317,7 @@ export function resolucionDelModelo(texto) {
 
 /**
  * Leyenda del bloque: rótulo, interruptor, rampa con los extremos de cada zona, velo y fuente.
- * @param gemelo     gemelo.json (se usa terreno.fuente)
+ * @param gemelo     gemelo.json (se usa terreno.fuente_en, la cita en inglés, o terreno.fuente si no la trae)
  * @param extremos   resultado de extremosDeElevacion (solo las zonas que se dibujan)
  * @param hayVelo    true si el mapa lleva el velo fuera de las zonas piloto
  * @param nombreZona función(id) -> nombre
@@ -325,7 +325,8 @@ export function resolucionDelModelo(texto) {
  * @param encendido  estado inicial del interruptor
  */
 export function htmlLeyendaTerreno({ gemelo, extremos, hayVelo, nombreZona = nombrePorOmision, ids, encendido = true }) {
-  const fuente = gemelo?.terreno?.fuente ?? null;
+  // La interfaz es inglés: la cita en inglés del motor (terreno.fuente_en); si el archivo no la trae, la de español.
+  const fuente = gemelo?.terreno?.fuente_en ?? gemelo?.terreno?.fuente ?? null;
   const resolucion = resolucionDelModelo(fuente);
   const titulo =
     `<p class="terreno2d-titulo"${ids?.titulo ? ` id="${esc(ids.titulo)}"` : ""}>` +

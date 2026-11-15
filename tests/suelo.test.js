@@ -637,6 +637,9 @@ test("htmlPerfilDeSuelo: barra de textura accesible con sus porcentajes en texto
     assert.ok(texto.includes(`${LLENO.rotulo}. Mean of ${p.n_celdas} map cells inside the field.`), texto);
     assert.ok(texto.includes(`Source: ${LLENO.perfil.fuente} (${LLENO.perfil.archivo}, ${LLENO.perfil.fecha})`));
     assert.ok(html.includes(`<span lang="${LLENO.idioma_fuentes}">`), "la fuente (línea de LEEME) va marcada con su idioma");
+    // Ninguna cita de las entregas queda marcada como español si el archivo declara otro idioma (las dos de la
+    // textura, «Source» y «Groups», iban con lang="es" fijo).
+    if (LLENO.idioma_fuentes !== "es") assert.ok(!html.includes('lang="es"'), `${id}: quedó una cita marcada lang="es"`);
     assert.ok(texto.includes(`Soil profile (${formatoCapa(LLENO.perfil.profundidad_cm)} layer)`));
   }
 });

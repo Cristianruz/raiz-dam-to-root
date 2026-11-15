@@ -321,6 +321,8 @@ export function modeloEstado({ manifest, cubo, gemelo, zonaId } = {}) {
     reconstruido: instante(cubo?.meta?.generado),
     simulado: Boolean(cubo?.meta?.mock || manifest?.mock),
     fuentesDisponibles,
+    // Idioma del texto «fuente» de cada archivo (manifest.idioma_fuentes); null si el manifest no lo declara.
+    idiomaFuentes: typeof manifest?.idioma_fuentes === "string" && manifest.idioma_fuentes ? manifest.idioma_fuentes : null,
     zonas: filasZonas,
     total,
     grupos: GRUPOS.map((g) => ({
@@ -384,8 +386,11 @@ function htmlEspejo(modelo, sub) {
   return `<div class="estado-gemelo-espejo">${titulo}<ul class="estado-gemelo-zonas">${zonas}${total}</ul></div>`;
 }
 
-function htmlArchivos(fila) {
+function htmlArchivos(fila, idioma) {
   if (!fila.archivos.length) return "";
+  // La fuente se muestra tal como se registró. Solo se marca su idioma si no es el de la página (inglés); un
+  // manifest que no lo declare se toma por español, como antes de la reentrega en inglés del buzón.
+  const lang = idioma === "en" ? "" : ` lang="${esc(idioma || "es")}"`;
   const items = fila.archivos
     .map(
       (a) =>
@@ -393,8 +398,7 @@ function htmlArchivos(fila) {
         `<span class="estado-gemelo-archivo">${esc(a.archivo)}</span>` +
         (a.fecha ? ` · ${htmlTiempo(a.fecha)}` : "") +
         (a.zona ? ` · ${esc(a.zona)}` : "") +
-        // La fuente se muestra tal como se registró (en español); la interfaz va en inglés.
-        (a.fuente ? `<span class="estado-gemelo-registrada" lang="es">${esc(a.fuente)}</span>` : "") +
+        (a.fuente ? `<span class="estado-gemelo-registrada"${lang}>${esc(a.fuente)}</span>` : "") +
         "</li>",
     )
     .join("");
@@ -427,7 +431,7 @@ function htmlFila(fila, modelo, escenario) {
     fecha = `<span class="estado-gemelo-fecha estado-gemelo-fecha--falta">${esc(fila.archivos.length ? `${TEXTO_FECHA}: ${TEXTO_NO_DISPONIBLE}` : TEXTO_SIN_ARCHIVO)}</span>`;
   }
   // La etiqueta y la fecha comparten renglón si caben; si no, la fecha baja (en el teléfono o en el panel).
-  return `<li class="estado-gemelo-fila" data-fila="${esc(fila.clave)}"><span class="estado-gemelo-fila-cabeza">${etiqueta}${fecha}</span>${fuente}${detalles}${htmlArchivos(fila)}</li>`;
+  return `<li class="estado-gemelo-fila" data-fila="${esc(fila.clave)}"><span class="estado-gemelo-fila-cabeza">${etiqueta}${fecha}</span>${fuente}${detalles}${htmlArchivos(fila, modelo.idiomaFuentes)}</li>`;
 }
 
 function htmlGrupo(grupo, modelo, escenario, sub, id) {

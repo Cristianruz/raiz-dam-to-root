@@ -10,9 +10,11 @@
 //
 // Qué dibuja (reemplaza el contenido del contenedor; el título «Follow the drop», el selector de opción y la
 // línea de cobertura que depende del deslizador se quedan en app.js):
-// - un diagrama Sankey con d3-sankey (window.d3.sankey): La Boquilla (dam) → Canal losses / Field →
+// - un diagrama Sankey con d3-sankey (window.d3.sankey): Needed from La Boquilla → Canal losses / Field →
 //   Crop (ET) / Back to aquifer / Other losses. Los números y los altos salen del bloque «gota» de la opción
-//   (m³), con UNA escala común a las tres variantes: con goteo, la presa se ve más corta;
+//   (m³), con UNA escala común a las tres variantes: con goteo, la presa se ve más corta. El primer nodo es el
+//   agua que la opción NECESITA, contada desde La Boquilla, no lo que la presa entrega (I15 de la revisión total);
+//   cuánto de eso cubre la dotación elegida lo dice app.js en la línea de cobertura;
 // - gotas (círculos) que recorren las bandas UNA sola vez (~3 s) cuando el diagrama entra en pantalla;
 //   nada se anima con prefers-reduced-motion (ni en el modo estático de la ficha imprimible);
 // - el botón «What if this field switches to drip?» y el conmutador «Consumption cap: on/off» SOLO si el
@@ -103,9 +105,10 @@ const FLUJOS = {
 
 // Nodos del Sankey en el orden en que se apilan dentro de cada columna (nodeSort(null) respeta este orden).
 // «tipo» elige el color en gota.css: agua (flujo), et (Brote), acuifero (Tierra), perdidas (Ámbar).
-// «id» es la clave de FLUJOS.
+// «id» es la clave de FLUJOS. El primer nodo es la necesidad de la opción contada desde la presa (I15): su rótulo lo
+// dice, para que no se lea como agua que la presa entrega.
 const NODOS = [
-  { id: "presa", nombre: "La Boquilla (dam)", corto: "La Boquilla", tipo: "agua" },
+  { id: "presa", nombre: "Needed from La Boquilla", corto: "Water needed", tipo: "agua" },
   { id: "parcela", nombre: "Field", corto: "Field", tipo: "agua" },
   { id: "canal", nombre: "Canal losses", corto: "Canal losses", tipo: "perdidas" },
   { id: "et", nombre: "Crop (ET)", corto: "Crop (ET)", tipo: "et" },
@@ -115,7 +118,7 @@ const NODOS = [
 
 // Renglones de la tabla para lectores de pantalla y de la leyenda con valores del plan B.
 const FILAS = [
-  { flujo: "presa", texto: "Released from La Boquilla (dam)", tipo: "agua" },
+  { flujo: "presa", texto: "Water this option needs, counted from La Boquilla (dam)", tipo: "agua" },
   { flujo: "canal", texto: "Canal losses", tipo: "perdidas" },
   { flujo: "parcela", texto: "Reaches the field", tipo: "agua" },
   { flujo: "et", texto: "Crop consumption (ET)", tipo: "et" },
@@ -133,7 +136,7 @@ const CLAVE_COLORES = [
 
 // Filas del plan B (barras apiladas): mismo mensaje que el Sankey con menos código.
 const FILAS_BARRAS = [
-  { id: "presa", rotulo: "Leaves La Boquilla", segmentos: [["presa", "agua"]] },
+  { id: "presa", rotulo: "Needed from La Boquilla", segmentos: [["presa", "agua"]] },
   { id: "canal", rotulo: "Along the canal", segmentos: [["canal", "perdidas"], ["parcela", "agua"]] },
   { id: "destino", rotulo: "Where it ends up", segmentos: [["et", "et"], ["acuifero", "acuifero"], ["otras", "perdidas"]] },
 ];
@@ -195,6 +198,8 @@ const instancias = new WeakMap();
  *   alCambiar          función que recibe estado() cada vez que el usuario cambia la variante;
  *   metaGoteo          cubo.meta.goteo: { ea_goteo, ea_superficial_referencia: { valor, etiqueta, fuente },
  *                      retorno_sin_tope_es_cota_superior } (opcional; sin él, no hay rótulo de eficiencias);
+ *   idiomaFuentes      idioma de las citas de los datos (cubo.meta.idioma_fuentes): la del coeficiente de retorno
+ *                      (en gota.supuestos) y la de las eficiencias. Sin él se toman por español y van con lang="es";
  *   planB              true = fuerza las barras apiladas (pruebas).
  * @returns {{estado: Function, mostrar: Function, destruir: Function}}
  */
@@ -409,6 +414,9 @@ function crearGota(contenedor, opcion, ctx) {
   raiz.append(el("div", { class: "gota-mod-vivo", "aria-live": "polite" }, [cifras, alerta]));
   // Rótulo de las eficiencias del goteo (cubo.meta.goteo): a la vista junto a las cifras, solo con una variante de goteo.
   const meta = ctx.metaGoteo && typeof ctx.metaGoteo === "object" ? ctx.metaGoteo : null;
+  // Atributo «lang» de las citas de los datos: null (no se escribe) si llegan en inglés, el idioma de la página.
+  const idiomaDatos = typeof ctx.idiomaFuentes === "string" && ctx.idiomaFuentes ? ctx.idiomaFuentes : "es";
+  const langDeDatos = idiomaDatos === "en" ? null : idiomaDatos;
   const rotuloGoteo = el("p", { class: "gota-mod-etiqueta", id: `${pre}-etiqueta-goteo`, hidden: true });
   const notaCota = el("p", { class: "gota-mod-cota", id: `${pre}-cota`, hidden: true }, TEXTOS.cotaSuperiorNota);
   raiz.append(rotuloGoteo, notaCota);
@@ -418,10 +426,11 @@ function crearGota(contenedor, opcion, ctx) {
   const leyenda = el("ul", { class: "gota-mod-leyenda", id: `${pre}-leyenda` });
   const tabla = el("table", { class: "gota-mod-tabla", id: `${pre}-tabla` });
   const supRetorno = (base.supuestos ?? []).find((s) => typeof s === "string" && /return|retorno/i.test(s));
-  // La fuente del coeficiente viene de los datos, en español: lang="es" para el lector de pantalla.
+  // La fuente del coeficiente viene de los datos: se marca con su idioma para el lector de pantalla, salvo que sea el
+  // de la página (inglés). Sin idioma declarado se toma por español.
   const fuente = el("p", { class: "gota-mod-fuente", id: `${pre}-fuente` }, [
     `${TEXTOS.fuenteRetorno} `,
-    supRetorno ? el("span", { lang: "es" }, entreParentesis(supRetorno)) : TEXTOS.fuenteFalta,
+    supRetorno ? el("span", { lang: langDeDatos }, entreParentesis(supRetorno)) : TEXTOS.fuenteFalta,
   ]);
   const listaSupuestos = el("ul", { id: `${pre}-supuestos` });
   raiz.append(
@@ -487,7 +496,7 @@ function crearGota(contenedor, opcion, ctx) {
       el("span", {}, valores.join(", ")),
       " ",
       ea.etiqueta ? el("strong", { class: "gota-mod-etiqueta-texto" }, ea.etiqueta) : null,
-      ea.fuente ? el("span", { class: "gota-mod-etiqueta-fuente" }, [` ${TEXTOS.fuenteEficiencias} `, el("span", { lang: "es" }, fuenteCorta(ea.fuente))]) : null,
+      ea.fuente ? el("span", { class: "gota-mod-etiqueta-fuente" }, [` ${TEXTOS.fuenteEficiencias} `, el("span", { lang: langDeDatos }, fuenteCorta(ea.fuente))]) : null,
     );
   }
 

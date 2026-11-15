@@ -12,6 +12,8 @@ Decisión y contrato: docs/decisiones/2026-11-14_gemelo_digital.md.
 - Hay una serie por cada parcela de web/data/parcelas.geojson (las que la página dibuja); si ese
   archivo aún no existe, por cada parcela del CSV.
 - fuente: la que declara data/processed/fuentes.json para hls_mensual_parcelas.csv; null si no está.
+- idioma_fuentes: idioma del texto de «fuente» (la línea de LEEME.md del buzón), para que la página lo marque
+  con su atributo «lang» (el mismo campo que contexto.json y suelo.json).
 - umbrales: las dos líneas de referencia de la gráfica de la ficha, {"verde": {...} | null, "desnudo": {...} |
   null}, cada una {valor, etiqueta, fuente, archivo}. Salen de data/processed/supuestos.json
   (umbral_verde_ndvi y umbral_desnudo_ndvi: los que usó la sesión de datos para la memoria y los días de suelo
@@ -36,6 +38,9 @@ SALIDA = "ndvi_mensual.json"
 BANDA = "ndvi"
 DECIMALES = 3
 ARCHIVO_SUPUESTOS = "supuestos.json"
+# Las líneas de LEEME.md del buzón (el texto de «fuente» de cada entrega) llegan en inglés desde la reentrega
+# del 15-nov (buzón v11); antes iban en español. La página marca ese texto con este idioma.
+IDIOMA_FUENTES = "en"
 # Umbral de la gráfica -> (llave de data/processed/supuestos.json, ruta en data/params.json).
 UMBRALES = {
     "verde": ("umbral_verde_ndvi", ("memoria", "ndvi_verde")),
@@ -160,7 +165,8 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
               f' "meses": {js(meses)},',
               ' "parcelas": {']
     lineas += [f'  {js(pid)}: {js(serie)}' + ("," if i < len(ids) - 1 else "") for i, (pid, serie) in enumerate(parcelas.items())]
-    lineas += [" },", f' "umbrales": {js(lineas_umbral)},', f' "fuente": {js(fuente)}', "}"]
+    lineas += [" },", f' "umbrales": {js(lineas_umbral)},', f' "fuente": {js(fuente)},',
+               f' "idioma_fuentes": {js(IDIOMA_FUENTES)}', "}"]
     web.mkdir(parents=True, exist_ok=True)
     salida.write_text("\n".join(lineas) + "\n", encoding="utf-8")
 

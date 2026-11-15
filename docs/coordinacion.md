@@ -83,6 +83,15 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 00:09 | integrador | Buzón v12 de la sesión de datos, solo textos (fuentes de suelo en inglés, sin «only»): entraron 35, rechazados 0, sha256 comprobados (`db8d16f`). web_smoke 747/747, pwa 39/39 y sin conexión 22/22 sobre ese commit |
 | 00:12 | integrador | Revisión independiente de ECOSTRESS, «validado con correcciones» (`docs/revisiones/2026-11-15_ecostress.md`, `165236d`), y correcciones del revisor de cifras sobre la tercera ronda de textos (`45c411a`). Las correcciones del dato se le pasaron a la sesión de datos |
 | 00:20 | integrador | Reconstruido con los textos de ECOSTRESS y la fixture del contexto regenerada (el commit `165236d` falló en la CI por esa fixture). Integración en `64aff74` |
+| 00:36 | integrador | PR #5 fusionado en `main` (`d354010`, squash) con la CI en verde y los e2e sobre `f0dbf3b` (747/747, 39/39, 22/22). GitHub Pages publicó a las 00:38. `main` se fusionó de vuelta en la integración (`ab53a3b`) y se avisó a «Laptop», a diseño y a la sesión de datos |
+| 00:40 | integrador | En curso, cada uno en su copia: página en inglés dentro de los plegados y ECOSTRESS a la vista; «Why it's suggested», «Benefits», hectáreas del «Why?» y la gota (cierre de hallazgos C2, I10, I15, M4, M6) |
+| 01:27 | integrador | Buzón v13 de la sesión de datos: ECOSTRESS corregido (un sobrevuelo, un valor; sin pasos junto a la salida o la puesta del sol ni escenas nubladas) y fusión de `datos-satelite` (`a6f98cd`). Entraron 35, rechazados 0 (`75ceaac`). Cita textual de AppEEARS en README, DATA_LICENSE y textos de envío (`1235e3d`) |
+| 01:50 | integrador | Fusión de «Why it's suggested», «Benefits», hectáreas del «Why?» y la gota (`9b4b308`, en `2117a58`), con las correcciones del revisor de código |
+| 01:59 | integrador | Fusión de la página en inglés desde el origen, ECOSTRESS a la vista y el parche de GAEZ de la sesión de datos (`1984a5e`, en `0508a24`) |
+| 02:22 | integrador | Correcciones de cuatro revisores de contexto nuevo (código, cifras y lenguaje, contrato, código web) y decisiones de la ficha por escrito (`f13ec46`, `e380460`). 1182 pytest y 243 de Node; web_smoke 874/874, pwa 39/39 y sin conexión 22/22 sobre `f13ec46` |
+| 02:31 | integrador | Segundo PR a `main` abierto (#7). La otra conversación de diseño es la del PR #6 (prototipo de Claude Design, solo `docs/diseno/`): no es del integrador y lo decide Cristian |
+| 02:38 | integrador | Video de 29 s y diapositivas regenerados sobre la página final (`ae9d54e`) |
+| 02:50 | «Laptop» e integrador | La hoja impresa cita la fuente de la marca en inglés (`10f8be4`, fusionado en `bb44e04`). Revisión cruzada de «Laptop» sobre la mezcla: todo en verde. 1182 pytest y 243 de Node; web_smoke 875/875, pwa 39/39 y sin conexión 22/22 |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 
@@ -92,7 +101,7 @@ Revisión pedida por Cristian: cada chat, cada rama y la conversación del integ
 
 | Chat | Rama | Último commit | Frente a la integración | Lo que falta |
 |---|---|---|---|---|
-| «Revisión multiagente» (integrador) | `claude/keen-mayer-sp0vvm` | `64aff74` | Es la integración; PR #5 hacia `main` | Fusionar el PR #5; página en inglés también dentro de los plegados de fuentes y ECOSTRESS con su aviso a la vista (en curso); video y diapositivas sobre la página final |
+| «Revisión multiagente» (integrador) | `claude/keen-mayer-sp0vvm` | `ab53a3b` | Es la integración; el PR #5 ya está en `main` | Segundo PR antes de las 8:00: página en inglés también dentro de los plegados de fuentes y ECOSTRESS con su aviso a la vista (en curso); video y diapositivas sobre la página final |
 | «Laptop» | `claude/sleepy-heisenberg-pxyhtx` | `2346788` | Todo fusionado | Repetir su revisión cruzada sobre el commit que llegue a `main`. De sus tres observaciones: el texto del sorgo quedó resuelto con el buzón v12; el aviso de `suelo_tipos.json` (zona urbana y cuerpos de agua) es de la sesión de datos; `docs/pruebas.md` registra la versión del precache de la corrida anterior (menor, abierto) |
 | «Diseño de aplicación con agentes» | `claude/gallant-franklin-41s0vq` | `9ef46ba` | Todo fusionado (rediseño y prompt de Claude Design) | El pulido que sigue (mapa primero en teléfono, jerarquía de la ficha, tokens en cuatro hojas de estilo) no tiene dueño hasta que Cristian diga en qué conversación sigue el diseño |
 | Sesión de datos | `datos-satelite` y Drive `Raiz_entregas/` | `252efd8` | Todo fusionado; buzón v12 dentro | Correcciones de ECOSTRESS (`docs/revisiones/2026-11-15_ecostress.md`), el README de las solicitudes de AppEEARS con sus citas y su revisión programada de las 6:40 |
@@ -100,10 +109,10 @@ Revisión pedida por Cristian: cada chat, cada rama y la conversación del integ
 
 | Otras ramas | Estado |
 |---|---|
-| `main` | `e819b52` (PR #4), publicado en GitHub Pages. No trae nada de lo de esta noche hasta que entre el PR #5 |
+| `main` | `d354010` (PR #5), publicado en GitHub Pages a las 00:38. Trae todo lo auditado de la noche |
 | `ee-crudos` | Rásteres crudos por zona (31 archivos, 192 MiB). No se fusiona ni se borra: es el respaldo de `datos/colab/correr_todo.py` |
 | `revision/web-dos-zonas` | Un commit (`ad42dc3`) que no es ancestro de la integración, pero su contenido ya está: el clic con tolerancia (`web/app.js`) y la hoja impresa en una carta (la comprueba `web_smoke`). Se borra después del evento |
 | `dependabot/…` (PR #2 y #3) | Sin fusionar a propósito hasta después del envío; el #3 rompe la prueba que fija la versión con que se generaron las teselas |
-| `Milo`, `Milo2`, `Tena` | Iguales a `main` (`e819b52`), sin commits propios. Cuando entre el PR #5 hay que actualizarlas desde `main` antes de trabajar en ellas |
+| `Milo`, `Milo2`, `Tena` | Siguen en `e819b52` (el `main` anterior), sin commits propios. Hay que actualizarlas desde `main` (`d354010`) antes de trabajar en ellas |
 
 Hallazgos de las revisiones de anoche, uno por uno: `docs/revisiones/2026-11-15_cierre_hallazgos.md` (146 renglones: 73 resueltos, 31 parciales, 25 abiertos, 11 de persona y 6 para después del evento, comprobados contra `f0dbf3b`).

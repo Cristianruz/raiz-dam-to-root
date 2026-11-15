@@ -28,6 +28,13 @@ Auditoría de df97135 (kit §2.3 y B4, pasos 4 y 5):
   decimales del motor.
 - dotaciones.marcas[].valor es el punto medio de su rango [min, max].
 
+Textos en inglés (15-nov): campos paralelos OPCIONALES que no se validan aquí y no cambian ningún campo del contrato:
+- cubo.json: dotaciones.marcas[].fuente_en y nota_en, dotaciones.equivalencia_en y punto_medicion_en,
+  distrito.boquilla.fuente_namo_en y fuente_almacenamiento_en, distrito.acuifero_<clave>.fuente_en,
+  localidades[].fuente_en (copias de data/params.json) y meta.idioma_fuentes (idioma de las citas del buzón).
+  La página prefiere la variante en inglés y, si falta, muestra el texto original marcado con su idioma.
+  tests/test_textos_en.py comprueba que cada par trae las mismas cifras.
+
 Opciones y filtros oficiales (decisión docs/decisiones/2026-11-14_opciones_b3.md), también opcional:
 - opciones[].filtros[]: además de «motivo» y «fuente» (kit §2.3), si trae «estado» es uno de
   ESTADOS_FILTRO; «pasa», si viene, concuerda con él (true = passes, false = warning, null = sin

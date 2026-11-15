@@ -167,8 +167,10 @@ def test_una_zona_compatibilidad(una_zona):
 def test_localidades_de_params(una_zona):
     cubo = una_zona[2]
     loc = PARAMS["zona_piloto"]["localidades_equipo"]
+    # fuente_en: la misma cita en inglés (campo paralelo; la página la prefiere).
     assert cubo["localidades"] == [{"nombre": x["nombre"], "municipio": x["municipio"], "lat": x["lat"],
-                                    "lon": x["lon"], "fuente": loc["fuente"]} for x in loc["valor"]]
+                                    "lon": x["lon"], "fuente": loc["fuente"], "fuente_en": loc["fuente_en"]}
+                                   for x in loc["valor"]]
 
 
 # --- (b) fixture de dos zonas ----------------------------------------------------------

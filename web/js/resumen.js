@@ -38,7 +38,7 @@
 //   casoResumen({ parcela, opcionActual, evaluacion, D }) -> "parcial" | "completa" | "sin_riego" |
 //       "abstenida" | "sin_calculo"    (para un data-atributo o para las pruebas)
 //
-//   dibujarNDVI(contenedor, { serie, meses, umbrales, fuente, nivel }) -> controlador | null
+//   dibujarNDVI(contenedor, { serie, meses, umbrales, fuente, idiomaFuente, nivel }) -> controlador | null
 //       Gráfica SVG del NDVI mensual de UNA parcela. Reemplaza el contenido del contenedor.
 //         serie     lista de web/data/ndvi_mensual.json para la parcela (parcelas[id]): valores o null,
 //                   alineada a «meses». Si no es una lista (la parcela no está en el archivo), se dice
@@ -49,6 +49,8 @@
 //                   objeto con «valor» (el bloque de params tal cual). El que falte no se dibuja. También
 //                   se aceptan las llaves ndvi_verde, suelo_desnudo y ndvi_desnudo.
 //         fuente    opcional: texto de la fuente (ndvi_mensual.json → fuente); va bajo la gráfica.
+//         idiomaFuente  opcional: idioma de ese texto (ndvi_mensual.json → idioma_fuentes); sin él se toma por
+//                   español y va marcado lang="es".
 //         nivel     opcional: nivel del encabezado (por omisión, el de las secciones de la ficha).
 //       controlador: { elemento, fijarDatos({ serie, meses, umbrales, fuente }), elegir(i | null),
 //                      destruir() }. fijarDatos cambia solo lo que reciba; elegir marca un mes (null
@@ -593,12 +595,14 @@ function htmlTabla(modelo) {
   return `<div class="resumen-voz"><table class="resumen-ndvi-tabla"><caption>${esc(TITULO_NDVI)}</caption><thead><tr><th scope="col">Month</th><th scope="col">NDVI</th></tr></thead><tbody>${filas}</tbody></table></div>`;
 }
 
-function htmlFuente(fuente) {
+function htmlFuente(fuente, idioma) {
   const texto = String(fuente ?? "").trim();
-  // La fuente viene de los datos y está en español; la interfaz, en inglés: queda plegada en «Source» (I5 de la
+  // Solo se marca el idioma del texto si no es el de la página (inglés); sin idioma declarado se toma por español.
+  const lang = idioma === "en" ? "" : ` lang="${esc(typeof idioma === "string" && idioma ? idioma : "es")}"`;
+  // La fuente viene de los datos (la línea de LEEME de la entrega): queda plegada en «Source» (I5 de la
   // revisión total: la cita traía el proyecto de Earth Engine y notas internas a la vista).
   return texto
-    ? `<details class="resumen-ndvi-fuente"><summary>${esc(PREFIJO_FUENTE.replace(/:\s*$/, ""))}</summary><p lang="es">${esc(texto)}</p></details>`
+    ? `<details class="resumen-ndvi-fuente"><summary>${esc(PREFIJO_FUENTE.replace(/:\s*$/, ""))}</summary><p${lang}>${esc(texto)}</p></details>`
     : "";
 }
 
@@ -674,7 +678,7 @@ export function dibujarNDVI(contenedor, datos = {}) {
     const titulo = `<h${nivel} class="resumen-ndvi-titulo" id="${id}-titulo">${esc(TITULO_NDVI)}</h${nivel}>`;
     raiz.dataset.estado = m.conDatos ? "con_datos" : m.disponible ? "sin_datos" : "no_disponible";
     if (!m.conDatos) {
-      raiz.innerHTML = `${titulo}<p class="resumen-ndvi-aviso">${esc(m.disponible ? TEXTO_SIN_SERIE : TEXTO_NO_DISPONIBLE)}</p>${htmlFuente(estado.fuente)}`;
+      raiz.innerHTML = `${titulo}<p class="resumen-ndvi-aviso">${esc(m.disponible ? TEXTO_SIN_SERIE : TEXTO_NO_DISPONIBLE)}</p>${htmlFuente(estado.fuente, estado.idiomaFuente)}`;
       return;
     }
     if (estado.elegido != null && !m.puntos[estado.elegido]) estado.elegido = null;
@@ -685,7 +689,7 @@ export function dibujarNDVI(contenedor, datos = {}) {
       htmlClaves(m, id) +
       `<p class="resumen-ndvi-ayuda">${esc(TEXTO_AYUDA)}</p>` +
       htmlTabla(m) +
-      htmlFuente(estado.fuente);
+      htmlFuente(estado.fuente, estado.idiomaFuente);
     pintarGrafica();
   }
 
@@ -771,7 +775,7 @@ export function dibujarNDVI(contenedor, datos = {}) {
     elemento: raiz,
     fijarDatos(nuevos = {}) {
       if (!estado.vivo) return;
-      for (const k of ["serie", "meses", "umbrales", "fuente", "nivel"]) if (k in nuevos) estado[k] = nuevos[k];
+      for (const k of ["serie", "meses", "umbrales", "fuente", "idiomaFuente", "nivel"]) if (k in nuevos) estado[k] = nuevos[k];
       pintar();
     },
     elegir(i) {

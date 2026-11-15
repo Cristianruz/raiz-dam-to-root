@@ -274,3 +274,24 @@ No los ve el jurado: H6, código 9, 23:35-b, 23:35-c, M5, M7, M8, M9, M20, UX 11
 ## Después del evento
 
 M19 (NASADEM con su proyección nativa), M21 (acciones por SHA), M22 (CSP), el umbral por parcela de I18, el método de rutas de I20, la versión única del service worker (M20), `enlace()` con esquema validado, la licencia de Leaflet en `prototipos/`, los ids de sesión y la prueba de la auditoría, código 9.
+
+## Seguimiento (15-nov, 02:25, hora de Chihuahua)
+
+Anotado por el integrador; las tablas de arriba describen `f0dbf3b` y no se cambiaron. Estado en la rama de integración (`e380460`), comprobado con `python construir.py` (1182 pytest, 243 de Node) y las tres pruebas con navegador:
+
+| Renglón | Estado ahora | Dónde |
+|---|---|---|
+| C1 (PR #5 sin fusionar) | Resuelto: en `main` (`d354010`) y publicado a las 00:38 | — |
+| C2 («Why?» con hectáreas imposibles) | Resuelto | `web/app.js` (`htmlRespuestas`); `web_smoke` compara el «Why?» con la tarjeta |
+| I10 («Why it's suggested» y «Benefits») | Resuelto | `web/app.js` (`htmlMotivo`), `web/js/beneficios.js` |
+| I15 («Follow the drop») | Resuelto | `web/js/gota.js`, `web/app.js` (`pintarCoberturaGota`) |
+| I5 e I3 (español y códigos internos) | Resuelto en lo que sale del repo: quedan nombres de lugar y de publicación, y dos citas textuales con su traducción | `data/params.json` (`fuente_en`), `tests/test_textos_en.py` |
+| 22:20-5 (ECOSTRESS en P0632) | Resuelto: nota de «sin cultivo» en el mes mostrado; sin contraste con el modelo | `web/js/contexto.js` |
+| 22:20-6, 22:20-10, 22:20-11 | Resueltos | nota bajo la memoria del nogal; «About & Data» |
+| 22:20-15 (GAEZ) | Resuelto con el parche de la sesión de datos | `web/js/contexto.js`, `motor/contexto_web.py` |
+| H6 (caso de `gota` vacía en `web_smoke`) | Resuelto | `tests/e2e/web_smoke.mjs` |
+| M4 y M6 | Resueltos | `web/app.js` |
+| Cita de AppEEARS (guía C4, en parte) | Resuelto | `data/raw/reto/ecostress_readme_*.md`; README, DATA_LICENSE, textos de envío |
+
+Siguen abiertos de lo que ve el jurado: I7 (largo de la ficha, de diseño), I8 en parte (decimales del rango de hectáreas), M1, M2, M10, L0175 con «Summer crop», H3 como «pilot area», la atribución de OSM sin liga, la fuente de la marca en español en la hoja impresa (`web/js/mensaje.js`, de «Laptop») y, de la sesión de datos, «best pH range» en dos notas de nutrientes y «Worst-case option» en el motivo del descanso. Los pendientes de persona no cambian.
+

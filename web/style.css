@@ -636,16 +636,19 @@ button, input, select { font: inherit; color: inherit; }
 }
 
 .porque { padding: 8px 12px 12px; margin-top: auto; }
-.porque summary {
+/* Solo el <summary> propio del «Why?» es el botón: dentro va plegada la fuente del motivo oficial (app.js, htmlMotivo). */
+.porque > summary {
   cursor: pointer; font-weight: 700; color: var(--agua-osc);
   border: 1px solid var(--agua); border-radius: var(--radio-pildora); padding: 6px var(--sp-4); display: inline-flex; align-items: center;
   min-height: 40px; list-style: none;
 }
-.porque summary::-webkit-details-marker { display: none; }
-.porque[open] summary { background: var(--agua); color: var(--blanco); }
+.porque > summary::-webkit-details-marker { display: none; }
+.porque[open] > summary { background: var(--agua); color: var(--blanco); }
 .porque dl { margin: 8px 0 0; display: grid; gap: 6px; }
 .porque dt { font-weight: 700; font-size: var(--fs-2); }
 .porque dd { margin: 0; font-size: var(--fs-2); }
+/* La etiqueta de evidencia del motivo oficial puede ser una frase («[V] …; assumption [S] …»): que parta renglón. */
+.porque .etiqueta-dato { white-space: normal; }
 
 /* La gota: la sección y el selector de opción; el diagrama y sus controles viven en css/gota.css */
 .gota { border: 1px solid var(--linea); border-radius: var(--radio-l); padding: var(--sp-4); background: var(--fondo-renglon); }

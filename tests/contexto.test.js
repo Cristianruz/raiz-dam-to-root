@@ -19,15 +19,20 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import {
+  AVISO_ECOSTRESS,
+  NOTA_ECOSTRESS_SIN_CULTIVO,
   NOTA_GEDI,
   NOTA_GEDI_SIN_DISPAROS,
   NOTA_REGIONAL,
+  sinCultivoEnElMes,
+  textoEcostress,
   anioPorOmision,
   cargarContexto,
   citasDeTarjeta,
   climaDelAnio,
   contarEstados,
   criteriosGedi,
+  cultivoDeGaez,
   diasIncompletos,
   diferenciaLluvia,
   escalaY,
@@ -44,6 +49,7 @@ import {
   modeloTarjetas,
   montarContextoRegional,
   montarRecursosReto,
+  notasDeGaez,
   num,
   ordenarRecursos,
   puntosAnuales,
@@ -53,6 +59,7 @@ import {
   textoMascon,
   ultimoMesConDato,
   valorAnual,
+  valorGaez,
 } from "../web/js/contexto.js";
 
 const leer = (ruta) => JSON.parse(readFileSync(new URL(ruta, import.meta.url), "utf8"));
@@ -551,6 +558,32 @@ test("formatoNumero y etiquetaMes", () => {
   assert.equal(etiquetaMes(null), "");
 });
 
+test("GAEZ: la clase por su nombre, el factor de la unidad de FAO aparte y el cultivo con que GAEZ evalúa la clase", () => {
+  // Filas como las de gaez_zona.csv (pieza G1): «unidad» es la cadena de FAO. Valores de prueba.
+  const nombres = { alfalfa: "Alfalfa", maiz_forrajero: "Forage maize" };
+  assert.equal(valorGaez({ cultivo: "alfalfa", valor: 2, unidad: "Class", clase_nombre: "High" }), "High");
+  assert.equal(valorGaez({ valor: 1678.5, unidad: "10kg DW/ha" }), `${formatoNumero(1678.5)} × 10 kg DW/ha`);
+  assert.equal(valorGaez({ valor: 913, unidad: "kg lint/ha" }), `${formatoNumero(913)} kg lint/ha`);
+  assert.equal(valorGaez({ valor: 7778, unidad: "Index (0–10000)" }), `${formatoNumero(7778)} Index (0–10000)`);
+  assert.equal(valorGaez({ valor: 2, unidad: "Class" }), `${formatoNumero(2)} Class`, "sin clase_nombre, número y unidad");
+  assert.equal(valorGaez(null), "—");
+  assert.deepEqual(cultivoDeGaez({ cultivo: "maiz_forrajero", cultivo_gaez: "Maize" }, nombres), { nombre: "Forage maize", gaez: "Maize" });
+  assert.deepEqual(cultivoDeGaez({ cultivo: "alfalfa", cultivo_gaez: "Alfalfa" }, nombres), { nombre: "Alfalfa", gaez: null });
+  assert.deepEqual(cultivoDeGaez({ cultivo: "alfalfa" }, nombres), { nombre: "Alfalfa", gaez: null });
+  const nota = "nota de prueba";
+  assert.deepEqual(notasDeGaez([{ unidad: "10kg DW/ha" }, { nota }, { nota }]), [nota, "DW: dry weight."]);
+  assert.deepEqual(notasDeGaez([{ unidad: "kg lint/ha" }]), []);
+  assert.deepEqual(notasDeGaez(null), []);
+});
+
+test("GAEZ de hoy (web/data/contexto.json): cada fila de clase trae su nombre y el maíz dice con qué cultivo lo evalúa GAEZ", { skip: !(REAL && REAL.gaez) && "sin gaez en web/data/contexto.json" }, () => {
+  for (const filas of Object.values(REAL.gaez.zonas)) {
+    for (const f of filas.filter((x) => x.unidad === "Class")) assert.ok(f.clase_nombre, `${f.cultivo}: clase sin nombre`);
+    for (const f of filas.filter((x) => x.cultivo === "maiz_forrajero")) assert.ok(cultivoDeGaez(f).gaez, "maíz sin cultivo de GAEZ");
+    if (filas.some((x) => x.cultivo === "maiz_forrajero")) assert.ok(notasDeGaez(filas).some((n) => n !== "DW: dry weight."), "falta la nota del maíz");
+  }
+});
+
 test("ordenarRecursos y contarEstados: en uso, pedidas, no aplica; conteos calculados de la lista", () => {
   for (const [nombre, contexto] of [["fixture", LLENO], ["sin entregas", SIN_ENTREGAS], ["real", REAL]]) {
     if (!contexto) continue;
@@ -622,15 +655,132 @@ test("evidenciaDeParcela: lectura de GEDI con su nota y ET de ECOSTRESS del últ
   assert.deepEqual([filas[1].archivo, filas[1].fecha], [LLENO.ecostress.archivo, LLENO.ecostress.fecha]);
   for (const f of filas) assert.deepEqual(Object.keys(f), CLAVES_EVIDENCIA, "los dos renglones traen las mismas llaves");
   const ultimo = ultimoMesConDato(LLENO.ecostress.meses, LLENO.ecostress.parcelas[id]);
-  assert.equal(filas[1].texto, `${formatoNumero(ultimo.valor)} mm/day, median of the clear scenes of ${etiquetaMes(ultimo.mes)}`);
+  // El valor, su mes y de cuántas escenas despejadas sale (ecostress.escenas_parcelas, alineada a los meses).
+  const escenas = LLENO.ecostress.escenas_parcelas[id][LLENO.ecostress.meses.indexOf(ultimo.mes)];
+  assert.ok(escenas > 1, "la parcela de la fixture trae varias escenas en su último mes");
+  assert.equal(filas[1].texto, `${formatoNumero(ultimo.valor)} mm/day in ${etiquetaMes(ultimo.mes)}, from ${escenas} clear-sky scenes`);
   assert.equal(filas[1].fuente, LLENO.ecostress.fuente);
-  assert.deepEqual([filas[1].nota, filas[1].lectura], [null, null], "ECOSTRESS no lleva nota ni lectura");
+  // La nota va a la vista junto al valor: el rótulo de la propia entrega (con su resolución), no un texto fijo.
+  assert.equal(filas[1].nota, `${LLENO.ecostress.aviso}.`);
+  assert.match(filas[1].nota, /not a field measurement\.$/);
+  assert.equal(filas[1].lectura, null, "ECOSTRESS no lleva lectura");
   // Un solo disparo: singular.
   const [unoId] = Object.entries(LLENO.gedi.parcelas).find(([, q]) => q.n_disparos === 1);
   assert.ok(evidenciaDeParcela({ contexto: LLENO, id: unoId })[0].texto.includes(" from 1 shot;"));
   // Sin el criterio de la sesión de datos, el texto es la medida sola (no se clasifica nada).
   assert.equal(evidenciaDeParcela({ contexto: SIN_CRITERIOS, id })[0].texto, medidaDeGedi(p));
   assert.equal(evidenciaDeParcela({ contexto: SIN_CRITERIOS, id })[0].lectura, null);
+});
+
+test("ECOSTRESS: escenas detrás del valor, aviso a la vista y nota de «sin cultivo» (revisión del 15-nov)", () => {
+  const eco = LLENO.ecostress;
+  // Una parcela cuyo último mes con dato sale de UNA escena: singular y sin la palabra «median».
+  const [unaId] = Object.keys(eco.parcelas).filter((id) => {
+    const u = ultimoMesConDato(eco.meses, eco.parcelas[id]);
+    return u && eco.escenas_parcelas[id][eco.meses.indexOf(u.mes)] === 1;
+  });
+  assert.ok(unaId, "la fixture trae una parcela con una sola escena en su último mes con dato");
+  const una = evidenciaDeParcela({ contexto: LLENO, id: unaId }).at(-1);
+  assert.match(una.texto, / from 1 clear-sky scene$/);
+  // Ningún renglón dice «median», ni compara con el modelo, ni trae un cociente o un porcentaje (I3 de la revisión).
+  for (const id of Object.keys(eco.parcelas)) {
+    const fila = evidenciaDeParcela({ contexto: LLENO, id, mesesCultivo: Array(12).fill(0) }).at(-1);
+    assert.doesNotMatch(`${fila.texto} ${fila.nota ?? ""}`, /\b(median|model|ratio)\b|%|same days|validat/i, id);
+  }
+  // textoEcostress: sin el número de escenas (un contexto.json anterior), solo el valor y el mes.
+  assert.equal(textoEcostress(2.5, "2026-08", null), `${formatoNumero(2.5)} mm/day in ${etiquetaMes("2026-08")}`);
+  assert.equal(textoEcostress(2.5, "2026-08", 3), `${formatoNumero(2.5)} mm/day in ${etiquetaMes("2026-08")}, from 3 clear-sky scenes`);
+  assert.equal(textoEcostress(2.5, "2026-08", { n: 3, conteo: "escenas", minimo: 1, maximo: 4 }), `${formatoNumero(2.5)} mm/day in ${etiquetaMes("2026-08")}, from 3 clear-sky scenes`,
+    "el archivo anterior cuenta escenas: ni «overpasses» ni intervalo");
+  const sinEscenas = { ...LLENO, ecostress: { ...eco, escenas_parcelas: undefined } };
+  assert.doesNotMatch(evidenciaDeParcela({ contexto: sinEscenas, id: unaId }).at(-1).texto, /scene/);
+  // Sin el rótulo de la entrega (ecostress.aviso null): el aviso fijo, que no lleva ninguna cifra.
+  const sinAviso = { ...LLENO, ecostress: { ...eco, aviso: null } };
+  assert.equal(evidenciaDeParcela({ contexto: sinAviso, id: unaId }).at(-1).nota, AVISO_ECOSTRESS);
+  assert.doesNotMatch(AVISO_ECOSTRESS + NOTA_ECOSTRESS_SIN_CULTIVO, /\d/, "los textos fijos no llevan cifras");
+  // Sin cultivo en el mes del valor según el calendario del modelo (meses_cultivo de la opción ACTUAL): se dice.
+  const u = ultimoMesConDato(eco.meses, eco.parcelas[unaId]);
+  const indice = Number(u.mes.slice(5)) - 1;
+  const conCultivo = Array(12).fill(0).map((_, i) => (i === indice ? 1 : 0));
+  const sinCultivo = conCultivo.map((v) => 1 - v);
+  assert.equal(evidenciaDeParcela({ contexto: LLENO, id: unaId, mesesCultivo: sinCultivo }).at(-1).nota, `${eco.aviso}. ${NOTA_ECOSTRESS_SIN_CULTIVO}`);
+  assert.equal(evidenciaDeParcela({ contexto: LLENO, id: unaId, mesesCultivo: conCultivo }).at(-1).nota, `${eco.aviso}.`);
+  // Sin calendario (parcela no clasificada) o con un calendario que no trae los doce meses: no se dice nada.
+  for (const calendario of [undefined, null, [], [0, 0, 0]]) {
+    assert.equal(evidenciaDeParcela({ contexto: LLENO, id: unaId, mesesCultivo: calendario }).at(-1).nota, `${eco.aviso}.`);
+  }
+  assert.equal(sinCultivoEnElMes(sinCultivo, u.mes), true);
+  assert.equal(sinCultivoEnElMes(conCultivo, u.mes), false);
+  assert.equal(sinCultivoEnElMes(sinCultivo, "sin-mes"), false);
+  // El mes NO cambia: sigue siendo el último con dato (no se elige otro mes para «mejorar» la lectura).
+  assert.ok(evidenciaDeParcela({ contexto: LLENO, id: unaId, mesesCultivo: sinCultivo }).at(-1).texto.includes(etiquetaMes(u.mes)));
+});
+
+// Dos contextos pequeños DE PRUEBA con el bloque de ECOSTRESS como lo escribe el motor con cada forma del archivo:
+// el anterior (n_escenas cuenta escenas; sin intervalo) y el de la entrega corregida del 15-nov (cuenta sobrevuelos y
+// trae el menor y el mayor de cada mes). Los valores no son datos.
+const ECO_ANTERIOR = {
+  ecostress: {
+    archivo: "ecostress_parcelas.csv", fuente: "prueba", fecha: "prueba", aviso: "Satellite estimate at 70 m on clear days, not a field measurement",
+    meses: ["2026-01", "2026-08"], conteo: "escenas",
+    parcelas: { A: [0.9, 2.11], B: [0.9, null], C: [null, 0.66] },
+    escenas_parcelas: { A: [1, 2], B: [1, 0], C: [0, 3] },
+  },
+};
+const ECO_CORREGIDO = {
+  ecostress: {
+    ...ECO_ANTERIOR.ecostress, conteo: "sobrevuelos",
+    minimos_parcelas: { A: [0.9, 1.57], B: [0.9, null], C: [null, 0.14] },
+    maximos_parcelas: { A: [0.9, 2.66], B: [0.9, null], C: [null, 1.17] },
+  },
+};
+
+test("ECOSTRESS con la entrega corregida: «clear overpasses» y el intervalo con dos o más; con el archivo anterior, «scenes» y sin intervalo", () => {
+  const fila = (contexto, id) => evidenciaDeParcela({ contexto, id }).at(-1).texto;
+  const ago = etiquetaMes("2026-08");
+  const ene = etiquetaMes("2026-01");
+  // Entrega corregida: dos o más sobrevuelos, con su intervalo; uno solo, sin intervalo y en singular.
+  assert.equal(fila(ECO_CORREGIDO, "A"), `${formatoNumero(2.11)} mm/day in ${ago}, from 2 clear overpasses (${formatoNumero(1.57)} to ${formatoNumero(2.66)})`);
+  assert.equal(fila(ECO_CORREGIDO, "C"), `${formatoNumero(0.66)} mm/day in ${ago}, from 3 clear overpasses (${formatoNumero(0.14)} to ${formatoNumero(1.17)})`);
+  assert.equal(fila(ECO_CORREGIDO, "B"), `${formatoNumero(0.9)} mm/day in ${ene}, from 1 clear overpass`, "el último mes con dato; un sobrevuelo: sin intervalo");
+  // Archivo anterior: los mismos valores, contados como escenas y sin intervalo.
+  assert.equal(fila(ECO_ANTERIOR, "A"), `${formatoNumero(2.11)} mm/day in ${ago}, from 2 clear-sky scenes`);
+  assert.equal(fila(ECO_ANTERIOR, "B"), `${formatoNumero(0.9)} mm/day in ${ene}, from 1 clear-sky scene`);
+  // Entrega corregida sin uno de los extremos en ese mes: sin intervalo (no se inventa el que falta).
+  const sinMaximo = { ecostress: { ...ECO_CORREGIDO.ecostress, maximos_parcelas: { A: [0.9, null] } } };
+  assert.equal(fila(sinMaximo, "A"), `${formatoNumero(2.11)} mm/day in ${ago}, from 2 clear overpasses`);
+  // En los dos casos: sin «median», sin contraste con el modelo, y el aviso de la entrega en la nota.
+  for (const contexto of [ECO_ANTERIOR, ECO_CORREGIDO]) {
+    for (const id of ["A", "B", "C"]) {
+      const f = evidenciaDeParcela({ contexto, id }).at(-1);
+      assert.doesNotMatch(`${f.texto} ${f.nota}`, /\b(median|model|ratio)\b|%|same days|validat/i);
+      assert.equal(f.nota, `${contexto.ecostress.aviso}.`);
+    }
+  }
+  // textoEcostress con el detalle: lo mismo, sin pasar por el bloque.
+  assert.equal(textoEcostress(2.11, "2026-08", { n: 2, conteo: "sobrevuelos", minimo: 1.57, maximo: 2.66 }), fila(ECO_CORREGIDO, "A"));
+  assert.equal(textoEcostress(2.11, "2026-08", { n: 1, conteo: "sobrevuelos", minimo: 2.11, maximo: 2.11 }), `${formatoNumero(2.11)} mm/day in ${ago}, from 1 clear overpass`);
+});
+
+test("ECOSTRESS con los datos reales: P0757 con cultivo en el mes; P0632 sin cultivo, con su nota", { skip: REAL?.ecostress ? false : "sin ecostress en contexto.json" }, () => {
+  const cubo = JSON.parse(readFileSync(new URL("../web/data/cubo.json", import.meta.url), "utf-8"));
+  const eco = REAL.ecostress;
+  const actual = (id) => (cubo.parcelas[id]?.opciones ?? []).find((o) => o.id === "ACTUAL");
+  for (const id of ["P0757", "P0632", "L0175"].filter((x) => eco.parcelas[x] && actual(x))) {
+    const u = ultimoMesConDato(eco.meses, eco.parcelas[id]);
+    const i = eco.meses.indexOf(u.mes);
+    const n = eco.escenas_parcelas[id][i];
+    const fila = evidenciaDeParcela({ contexto: REAL, id, mesesCultivo: actual(id).meses_cultivo }).at(-1);
+    // Con el archivo de hoy o con la entrega corregida (la que declara conteo «sobrevuelos» y trae el intervalo).
+    const [minimo, maximo] = [eco.minimos_parcelas?.[id]?.[i], eco.maximos_parcelas?.[id]?.[i]];
+    const esperado = eco.conteo === "sobrevuelos"
+      ? `${formatoNumero(u.valor)} mm/day in ${etiquetaMes(u.mes)}, from ${n} clear ${n === 1 ? "overpass" : "overpasses"}${n > 1 && minimo != null && maximo != null ? ` (${formatoNumero(minimo)} to ${formatoNumero(maximo)})` : ""}`
+      : `${formatoNumero(u.valor)} mm/day in ${etiquetaMes(u.mes)}, from ${n} clear-sky ${n === 1 ? "scene" : "scenes"}`;
+    assert.equal(fila.texto, esperado, id);
+    assert.ok(fila.nota.startsWith(`${eco.aviso}.`), `${id}: aviso a la vista`);
+    const sinCultivo = !actual(id).meses_cultivo[Number(u.mes.slice(5)) - 1];
+    assert.equal(fila.nota.endsWith(NOTA_ECOSTRESS_SIN_CULTIVO), sinCultivo, `${id}: nota de sin cultivo ${sinCultivo ? "presente" : "ausente"}`);
+  }
 });
 
 test("lecturaDeGedi: dosel alto, sin dosel alto, pocos disparos, sin disparos; null sin criterio", () => {
@@ -762,7 +912,7 @@ test("evidenciaDeParcela: sin dato se dice (no es cero) y sin bloques devuelve [
   const [idHueco, valores] = Object.entries(LLENO.ecostress.parcelas).find(([, v]) => v.at(-1) === null && v.some((x) => x != null));
   const ultimo = ultimoMesConDato(LLENO.ecostress.meses, valores);
   assert.notEqual(ultimo.mes, LLENO.ecostress.meses.at(-1));
-  assert.ok(evidenciaDeParcela({ contexto: LLENO, id: idHueco })[1].texto.endsWith(etiquetaMes(ultimo.mes)));
+  assert.ok(evidenciaDeParcela({ contexto: LLENO, id: idHueco })[1].texto.includes(` in ${etiquetaMes(ultimo.mes)}, from `));
   // Parcela sin ninguna escena, y parcela que ni siquiera viene en los archivos.
   const sinEscenas = Object.entries(LLENO.ecostress.parcelas).find(([, v]) => v.every((x) => x === null))[0];
   assert.equal(evidenciaDeParcela({ contexto: LLENO, id: sinEscenas })[1].texto, "ECOSTRESS: no clear scene over this field");

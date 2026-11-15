@@ -638,8 +638,9 @@ function htmlLeyenda(gemelo, zonaId) {
     `<li>${muestra("sin-riego")}<span>Flat with a green outline: the current rotation asks for no irrigation</span></li>` +
     "</ul>" +
     escala.map((t) => `<p class="gemelo-leyenda-escala">${t}</p>`).join("") +
-    // La fuente viene de los datos en español («vía Google Earth Engine»): va marcada lang="es", como en la ficha.
-    `<p class="gemelo-leyenda-fuente">Source: ${terreno.fuente ? `<span lang="es">${esc(terreno.fuente)}</span>` : "not available"}</p>` +
+    // La cita en inglés del motor (terreno.fuente_en); si el archivo no la trae, la de español («vía Google Earth
+    // Engine») marcada lang="es", como en la ficha.
+    `<p class="gemelo-leyenda-fuente">Source: ${terreno.fuente_en ? esc(terreno.fuente_en) : terreno.fuente ? `<span lang="es">${esc(terreno.fuente)}</span>` : "not available"}</p>` +
     "</div>"
   );
 }

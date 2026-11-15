@@ -516,7 +516,10 @@ def validar_csv(ruta, esq, ctx):
         res.motivo(f"faltan columnas obligatorias: {', '.join(faltan)}; trae: {', '.join(encabezado)}"
                    + pista_columnas(encabezado, faltan))
         return res
-    extra = [c for c in encabezado if c not in columnas]
+    # Columnas opcionales (esq["columnas_opcionales"]): pueden faltar del todo (una entrega anterior no las trae);
+    # si vienen, se validan como las demás y entran a las reglas de fila.
+    opcionales = {c: campo for c, campo in (esq.get("columnas_opcionales") or {}).items() if c in encabezado}
+    extra = [c for c in encabezado if c not in columnas and c not in opcionales]
     if extra and columnas:
         res.aviso(f"columnas adicionales (se copian sin validar): {', '.join(extra)}")
 
@@ -544,7 +547,7 @@ def validar_csv(ruta, esq, ctx):
     ids_vistos = set()
     for n, celdas in datos:
         fila = {}
-        for col, campo in columnas.items():
+        for col, campo in {**columnas, **opcionales}.items():
             crudo = celdas[col]
             if crudo.strip() in (campo.get("alias") or {}):
                 alias_usados[(col, crudo.strip(), campo["alias"][crudo.strip()])] += 1
