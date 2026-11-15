@@ -65,6 +65,9 @@
 //   deslizador y «no local reference» donde toca; propuesta del equipo rotulada; nogal sin rotación con su motivo;
 //   dotacion_minima que cambia de estado con el deslizador; GEDI con su nota junto al valor; riesgo de helada junto a
 //   la siembra; la hoja de P0757 en una carta y una A4; suelo.json y contexto.json en HTTP 500 se dicen;
+//   prioridades del productor (web/js/prioridades.js): el grupo «What matters most to you?» encima de las tarjetas de
+//   P0757, las desactivadas con «no data in ROOT yet», y «Less water» con el teclado marca las tarjetas de mediana menor
+//   que la ACTUAL (calculado aquí desde cubo.json) sin reordenar; captura en el teléfono con la prioridad activa;
 // - paneles y registro (etapa 3 de la integración): «Regional context» plegable en el panel (cerrado al abrir la
 //   página; al abrirlo, la zona y el año de la línea de tiempo, el clima del año, una tarjeta por grupo de series y la
 //   nota de que no describen una parcela; las advertencias de la sesión de datos a la vista; la malla de GRACE con sus
@@ -91,6 +94,7 @@ import { fraseResumen } from "../../web/js/resumen.js";
 import { ESTADOS_APTITUD, ROTULO_APTITUD, grupoDeTextura } from "../../web/js/suelo.js";
 import { NOTA_GEDI, NOTA_REGIONAL, riesgoDeHelada, climaDelAnio, contarEstados, diasIncompletos, formatoNumero, textoMascon } from "../../web/js/contexto.js";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
+import { TEXTO_TITULO, TEXTO_NOTA, TEXTO_SIN_DATO, prioridadesDeParcela } from "../../web/js/prioridades.js";
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -1359,6 +1363,87 @@ function fraseEsperada(id, D) {
 }
 
 /**
+ * Prioridades del productor (web/js/prioridades.js, hallazgo I24) en la ficha abierta de P0757: el grupo
+ * «What matters most to you?» va encima de las tarjetas, con la nota fija; las prioridades sin dato van desactivadas
+ * con «no data in ROOT yet»; con el teclado, «Less water» marca (✓ y texto) las tarjetas cuya mediana es menor que la
+ * de la ACTUAL en todas las variantes de lluvia (calculado aquí desde cubo.json) y deja igual las demás, sin reordenar;
+ * la selección sigue al abrir otra vez la ficha; al terminar se desactiva (no toca las pruebas que siguen).
+ */
+async function pruebaPrioridades(page, prefijo, telefono) {
+  const sufijo = telefono ? "telefono" : "escritorio";
+  const ops = opcionesDe(P0757);
+  const act = actualDe(P0757);
+  const grupo = page.locator('#ficha [role="group"][aria-labelledby="prioridades-titulo"]');
+  check(`${prefijo}prioridades: un grupo «What matters most to you?» en la ficha de ${P0757}`,
+    (await grupo.count()) === 1 && (await page.locator("#prioridades-titulo").innerText()).trim() === TEXTO_TITULO);
+  if (!(await grupo.count())) return;
+  const encima = await page.evaluate(() => {
+    const g = document.querySelector("#ficha .prioridades");
+    const t = document.querySelector("#ficha .tarjetas");
+    return Boolean(g && t && g.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+  check(`${prefijo}prioridades: el grupo va encima de las tarjetas`, encima);
+  check(`${prefijo}prioridades: la nota fija «${TEXTO_NOTA}» bajo los interruptores`, (await page.locator("#ficha .prioridades-nota").innerText()).trim() === TEXTO_NOTA);
+  // Lo que se ofrece y lo que va desactivado: la función pura de la página (tests/prioridades.test.js la prueba aparte).
+  const filas = prioridadesDeParcela(ops);
+  const botones = await grupo.locator("button[data-prioridad]").evaluateAll((bs) =>
+    bs.map((b) => ({ id: b.dataset.prioridad, disabled: b.disabled, pressed: b.getAttribute("aria-pressed"), alto: b.getBoundingClientRect().height, texto: b.textContent })));
+  const ofrecidas = botones.filter((b) => !b.disabled).map((b) => b.id);
+  check(`${prefijo}prioridades: ofrecidas con dato = ${filas.filter((f) => f.disponible).map((f) => f.id).join(", ")}`,
+    JSON.stringify(ofrecidas) === JSON.stringify(filas.filter((f) => f.disponible).map((f) => f.id)), ofrecidas.join(", "));
+  const sinDato = botones.filter((b) => b.disabled);
+  check(`${prefijo}prioridades: valor forrajero, materia orgánica y mercado desactivadas con «${TEXTO_SIN_DATO}»`,
+    ["valor_forrajero", "materia_organica", "mercado"].every((id) => sinDato.some((b) => b.id === id)) && sinDato.every((b) => b.texto.includes(TEXTO_SIN_DATO)),
+    sinDato.map((b) => b.texto).join(" | "));
+  check(`${prefijo}prioridades: todas empiezan sin activar (aria-pressed="false")`, botones.every((b) => b.pressed === "false"), botones.map((b) => `${b.id}=${b.pressed}`).join(" "));
+  const bajos = botones.filter((b) => !b.disabled && b.alto < 44);
+  check(`${prefijo}prioridades: cada interruptor mide al menos 44 px de alto`, bajos.length === 0, bajos.map((b) => `${b.id}: ${b.alto}`).join(", "));
+  check(`${prefijo}prioridades: sin activar, ninguna tarjeta lleva marca`, (await page.locator("#ficha .prioridad-marcas:not([hidden])").count()) === 0);
+
+  // «Less water» calculado aquí, sin el módulo: P50 menor que la de la ACTUAL en todas las variantes de lluvia del cubo.
+  const llaves = Object.keys(act?.agua?.lamina_bruta ?? {});
+  const menos = ops.filter((o) => o.id !== "ACTUAL" && llaves.length && llaves.every((k) => o.agua?.lamina_bruta?.[k]?.p50 < act.agua.lamina_bruta[k].p50)).map((o) => o.id);
+  const boton = grupo.locator('button[data-prioridad="menos_agua"]');
+  if (!(await boton.count()) || (await boton.isDisabled())) {
+    omitir(`${prefijo}prioridades: «Less water» en ${P0757}`, "la parcela no la ofrece con estos datos");
+    return;
+  }
+  const orden = () => page.locator("#ficha .tarjeta").evaluateAll((ts) => ts.map((t) => t.dataset.opcion));
+  const antes = await orden();
+  await boton.focus();
+  await page.keyboard.press("Enter");
+  check(`${prefijo}prioridades: Enter activa «Less water» (aria-pressed="true" y ✓)`, (await boton.getAttribute("aria-pressed")) === "true" && (await boton.innerText()).includes("✓"));
+  const marcadas = await page.locator("#ficha .tarjeta").evaluateAll((ts) =>
+    ts.filter((t) => { const l = t.querySelector(".prioridad-marcas"); return l && !l.hidden && l.getBoundingClientRect().height > 0; }).map((t) => t.dataset.opcion));
+  check(`${prefijo}prioridades: «Less water» marca al menos una tarjeta, exactamente las de mediana menor (${menos.join(", ") || "ninguna"})`,
+    marcadas.length >= 1 && JSON.stringify(marcadas) === JSON.stringify(menos), marcadas.join(", "));
+  if (marcadas.length) {
+    const tm = (await tarjeta(page, marcadas[0]).locator(".prioridad-marcas").innerText()).trim();
+    check(`${prefijo}prioridades: la marca lleva símbolo y texto («✓ Less water…»)`, tm.startsWith("✓") && tm.includes("Less water"), tm);
+  }
+  check(`${prefijo}prioridades: la ACTUAL no se marca en una comparación`, !marcadas.includes("ACTUAL"));
+  check(`${prefijo}prioridades: activar no reordena las tarjetas`, JSON.stringify(await orden()) === JSON.stringify(antes) && JSON.stringify(antes) === JSON.stringify(ops.map((o) => o.id)), antes.join(", "));
+  const estadoTxt = (await page.locator("#ficha .prioridades-estado").innerText()).trim();
+  check(`${prefijo}prioridades: la línea de estado dice cuántas resalta`, estadoTxt.startsWith(`Less water: highlighted on ${menos.length} of ${ops.length} options`), estadoTxt);
+  check(`${prefijo}prioridades: la ficha no dice «best» ni da puntaje`, !/\bbest\b|\bscore\b/i.test(await page.locator("#ficha .prioridades").innerText()));
+  if (telefono) {
+    await page.locator("#ficha .prioridades").scrollIntoViewIfNeeded();
+    await esperarAnimaciones(page);
+    await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_prioridades.png`) });
+    check(`${prefijo}prioridades: sin desplazamiento horizontal con una prioridad activa`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  }
+  // La selección sigue al volver a abrir la ficha; Espacio la desactiva y las marcas se van.
+  await abrirDesdeLista(page, P0757);
+  const otraVez = page.locator('#ficha button[data-prioridad="menos_agua"]');
+  check(`${prefijo}prioridades: al abrir otra vez la ficha, «Less water» sigue activa y marcando`,
+    (await otraVez.getAttribute("aria-pressed")) === "true" && (await page.locator("#ficha .prioridad-marcas:not([hidden])").count()) === menos.length);
+  await otraVez.focus();
+  await page.keyboard.press(" ");
+  check(`${prefijo}prioridades: Espacio la desactiva y no queda ninguna marca`,
+    (await otraVez.getAttribute("aria-pressed")) === "false" && (await page.locator("#ficha .prioridad-marcas:not([hidden])").count()) === 0);
+}
+
+/**
  * Ficha completa: frase resumen (tres casos), NDVI con umbrales, aptitud y perfil de suelo, lámina local, propuesta del
  * equipo, nogal sin rotación, dotacion_minima en vivo, GEDI con su nota, riesgo de helada y la advertencia con plazo.
  */
@@ -1511,6 +1596,7 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
       }
     }
     await fijarDeslizador(page, D2);
+    await pruebaPrioridades(page, prefijo, telefono);
     await cerrarFicha(page);
   } else {
     omitir(`${prefijo}ficha completa`, "ninguna parcela con opciones en estos datos");
