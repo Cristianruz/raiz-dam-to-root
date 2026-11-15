@@ -1115,7 +1115,7 @@ De mi lado solo queda D4, escrito como límite.
   - Cambiar «Raíz» por «ROOT» en el encabezado de 35 scripts de `datos/` (28 de `colab`, 5 de `earthengine` y 2 de
     `navegador`). Solo es el comentario; ninguna salida cambia.
 
-## 15-nov 06:59 — Revisión cruzada programada sobre la integración `6166757` (igual a `main` `c5f102a`, PR #10)
+## 15-nov 06:58 — Revisión cruzada programada sobre la integración `6166757` (igual a `main` `c5f102a`, PR #10)
 En una copia limpia, con mi buzón v14:
 - **Construcción y pruebas:** `construir.py` entraron 35, rechazados 0; CONTRATO y VERIFICADOR OK; 1251 pytest (más 1
   omitida) y 278 de Node. `web_smoke` 878/878.
