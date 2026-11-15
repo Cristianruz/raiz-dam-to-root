@@ -1923,6 +1923,11 @@ async function pruebasEscritorio(page, peticiones) {
     const info = await page.locator("#info-marca").textContent();
     const pulsado = await page.locator(`.boton-marca[data-marca="${m.id}"]`).getAttribute("aria-pressed");
     check(`marca ${m.id} lleva el deslizador a ${m.valor} y muestra fuente`, v === m.valor && info.includes(m.fuente) && pulsado === "true", `valor ${v}`);
+    // Punto 2 / I3: la fuente (en español en params.json) queda dentro de «Source and note», plegado; no se ve en la franja.
+    const franja = await page.locator("#controles").innerText();
+    check(`marca ${m.id}: «Source and note» y «Units and measuring point» plegados en escritorio; la fuente no se ve en la franja fija`,
+      !(await page.locator("#info-marca-detalle").evaluate((d) => d.open)) && !(await page.locator("#unidades").evaluate((d) => d.open)) && !franja.includes(m.fuente),
+      franja.replace(/\s+/g, " ").slice(0, 160));
   }
 
   // El indicador cambia al mover el deslizador (con el teclado)
@@ -2000,7 +2005,7 @@ async function pruebasEscritorio(page, peticiones) {
 
   // Segunda cifra: X de Y parcelas
   const segunda = await texto(page, "#indicador-segunda");
-  check("segunda cifra «… of … fields don't have enough water…»", /fields don't have enough water for their current rotation/.test(segunda), segunda);
+  check("segunda cifra «… of … classified fields don't have enough water…» (I4: el total son las clasificadas)", /\d of [\d,]+ classified fields don't have enough water for their current rotation/.test(segunda), segunda);
 
   // Capas solo si están en capas_disponibles
   const capas = await page.locator("#capas input").evaluateAll((xs) => xs.map((x) => x.value));
@@ -2552,7 +2557,8 @@ async function pruebasDosZonas(page, v) {
     const ind = await indicador(page);
     check(
       `dos zonas (${etiqueta}): el indicador usa su bloque de zona (${pct(ac.p50)}, rango ${pct(ac.p10)}–${pct(ac.p90)})`,
-      ind.includes(pct(ac.p50)) && ind.includes(`Likely range: ${pct(ac.p10)} to ${pct(ac.p90)}`) && ind.includes("at least") === ac.alMenos,
+      ind.includes(pct(ac.p50)) && ind.includes("at least") === ac.alMenos &&
+        ind.includes(ac.alMenos ? `Likely range for the classified area: ${pct(ac.p10)} to ${pct(ac.p90)}; unclassified fields can raise it, not lower it` : `Likely range: ${pct(ac.p10)} to ${pct(ac.p90)}`),
       `${await texto(page, "#indicador-cifra")} · ${await texto(page, "#indicador-rango")}`,
     );
     const segunda = await texto(page, "#indicador-segunda");

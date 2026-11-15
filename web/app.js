@@ -711,7 +711,8 @@ function iniciarControles() {
   else enEspanol($("#equivalencia"), equivalencia);
   if (puntoEn) $("#punto-medicion").textContent = puntoEn;
   else enEspanol($("#punto-medicion"), punto_medicion);
-  if (esAncho()) $("#unidades").open = true;
+  // «Units and measuring point» queda plegado (revisión con Playwright, 2026-11-15, punto 2; I3 de la revisión total):
+  // abierto, la franja fija ocupaba un tercio de la pantalla con notas internas.
 
   // Lluvia: la variante base es 0 y la seca es la otra llave del cubo (kit §2.3).
   const lluvias = (estado.cubo.lluvia_pct ?? []).map(Number);
@@ -777,7 +778,8 @@ function actualizarValorDeslizador() {
   ]
     .filter(Boolean)
     .join(" · ");
-  if (info.hidden && esAncho()) $("#info-marca-detalle").open = true;
+  // «Source and note» queda plegado (punto 2 / I3): la fuente y la etiqueta de la marca están en español en params.json
+  // (no hay fuente_en ni etiqueta_en); se leen al abrirlo, con lang="es", y no se traducen aquí.
   info.hidden = false;
 }
 
@@ -857,7 +859,11 @@ function actualizarIndicador(conteos) {
       `${ac.alMenos ? '<span class="al-menos">at least </span>' : ""}` +
       `${esc(fmtPct(ac.p50))} <span class="de-dotacion">of the allocation</span>`;
     rango.hidden = false;
-    rango.textContent = `Likely range: ${fmtPct(ac.p10)} to ${fmtPct(ac.p90)}`;
+    // Con superficie sin clasificar el porcentaje es un mínimo («at least»): el rango es el de la superficie clasificada
+    // y lo sin clasificar puede subirlo, no bajarlo (I4 de la revisión total: «at least 125%» junto a «101% to 155%»).
+    rango.textContent = ac.alMenos
+      ? `Likely range for the classified area: ${fmtPct(ac.p10)} to ${fmtPct(ac.p90)}; unclassified fields can raise it, not lower it`
+      : `Likely range: ${fmtPct(ac.p10)} to ${fmtPct(ac.p90)}`;
     if (ac.excede) {
       partes.push(
         "<p>Perennial crops alone ask for more than the allocation; the gap comes from wells or stays unmet.</p>" +
@@ -876,8 +882,9 @@ function actualizarIndicador(conteos) {
   mensaje.classList.toggle("alerta", ac.sinDotacion || ac.excede);
 
   $("#indicador-segunda").innerHTML =
-    `With ${esc(fmt(D))} thousand m³/ha, <strong>${esc(fmt(conteos.rojo, 0))} of ${esc(fmt(conteos.clasificadas, 0))}</strong> ` +
-    "fields don't have enough water for their current rotation." +
+    // «of N classified fields»: N son las clasificadas, no todas las del mapa (I4).
+    `With ${esc(fmt(D))} thousand m³/ha, <strong>${esc(fmt(conteos.rojo, 0))} of ${esc(fmt(conteos.clasificadas, 0))} classified fields</strong> ` +
+    "don't have enough water for their current rotation." +
     (conteos.sin_calculo
       ? ` ${esc(fmt(conteos.sin_calculo, 0))} classified ${conteos.sin_calculo === 1 ? "field is" : "fields are"} not counted: ${conteos.sin_calculo === 1 ? "its" : "their"} options are not computed yet.`
       : "");
