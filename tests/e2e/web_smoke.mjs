@@ -1350,6 +1350,75 @@ const conSinRotacion = [...protagonistas, ...candidatos].find((id) => cubo.parce
 const conDotMin = opcionesTodas.find(({ pid, o }) => pid === P0757 && (o.filtros ?? []).some((f) => f.tipo === "dotacion_minima")) ??
   opcionesTodas.find(({ o }) => (o.filtros ?? []).some((f) => f.tipo === "dotacion_minima"));
 
+// Tipo de suelo (suelo.json → tipo_suelo) y notas de nutrientes (suelo.json → nutrientes) de la ficha. L0175 es la
+// protagonista de nogal; si estos datos no la traen, la primera parcela con una nota de nutrientes menos disponibles.
+const notasDeSuelo = (id) => suelo?.nutrientes?.conjuntos?.[suelo?.nutrientes?.parcelas?.[id]]?.notas ?? [];
+const NOGAL_NUTRIENTES = porId.has("L0175") && notasDeSuelo("L0175").length ? "L0175"
+  : Object.keys(suelo?.nutrientes?.parcelas ?? {}).find((id) => porId.has(id) && notasDeSuelo(id).some((n) => n.estado === "less_available")) ?? null;
+
+/** El tipo de suelo de la parcela en una línea (gran grupo y orden de suelo.json) y, plegados, los suelos del municipio. */
+async function pruebaTipoDeSuelo(page, id, prefijo) {
+  const tipo = suelo?.tipo_suelo;
+  const p = tipo?.parcelas?.[id];
+  if (!p) {
+    omitir(`${prefijo}tipo de suelo de ${id}`, suelo && "tipo_suelo" in suelo ? "la parcela no tiene tipo de suelo en el mapa" : "suelo.json no trae tipo_suelo");
+    return;
+  }
+  const g = tipo.grupos[p.gran_grupo];
+  const linea = (await texto(page, "#seccion-evidencia .suelo-tipo-linea")).replace(/\s+/g, " ");
+  check(`${prefijo}tipo de suelo de ${id}: «Soil type: ${p.gran_grupo} (${g.orden})» en una línea, con la descripción del catálogo`,
+    linea.startsWith(`Soil type: ${p.gran_grupo} (${g.orden})`) && (!g.descripcion_en || linea.toLowerCase().includes(g.descripcion_en.toLowerCase())), linea);
+  check(`${prefijo}tipo de suelo de ${id}: «${tipo.explica_en}» a la vista`, await page.locator("#seccion-evidencia .suelo-tipo-explica").isVisible());
+  const detalle = page.locator("#seccion-evidencia .suelo-tipo-detalle");
+  await detalle.locator(":scope > summary").click();
+  const td = (await detalle.innerText()).replace(/\s+/g, " ");
+  const z = tipo.zonas?.[p.zona];
+  check(`${prefijo}tipo de suelo de ${id}: plegado, el texto de la entrega${z ? " y los suelos del municipio (INEGI)" : ""}`,
+    td.includes(g.texto_en) && (!z || (td.includes(z.texto_en) && td.includes(tipo.no_coinciden_en))), td.slice(0, 300));
+  await detalle.locator(":scope > summary").click();
+}
+
+/** Notas de nutrientes de una parcela: plegables, cada una con su estado en texto y símbolo y la escala del mapa. */
+async function pruebaNotasDeNutrientes(page, id, prefijo, sufijo) {
+  if (!id) {
+    omitir(`${prefijo}notas de nutrientes`, suelo && "nutrientes" in suelo ? "ninguna parcela con notas" : "suelo.json no trae nutrientes");
+    return;
+  }
+  const nut = suelo.nutrientes;
+  const notas = notasDeSuelo(id);
+  await abrirDesdeLista(page, id);
+  const bloque = page.locator("#seccion-evidencia details.suelo-nutrientes");
+  check(`${prefijo}${id}: «Nutrient notes» plegada en la sección de suelo (una vez)`, (await bloque.count()) === 1 && (await bloque.getAttribute("open")) === null);
+  await bloque.locator(":scope > summary").click();
+  const t = (await bloque.innerText()).replace(/\s+/g, " ");
+  const menos = notas.find((n) => n.estado === "less_available");
+  const nombres = (menos?.elementos ?? []).map((s) => nut.nombres_en?.[s]).filter(Boolean);
+  check(`${prefijo}${id}: nutrientes menos disponibles (${nombres.join(", ")})`, nombres.length > 0 && nombres.every((n) => t.includes(n)), t.slice(0, 300));
+  if (id === "L0175") {
+    check(`${prefijo}L0175: salen hierro, zinc, cobre, manganeso y boro`, ["iron", "zinc", "copper", "manganese", "boron"].every((n) => t.includes(n)), t.slice(0, 300));
+  }
+  const items = bloque.locator(".suelo-nutrientes-lista > li");
+  check(`${prefijo}${id}: una entrada por nota de suelo.json (${notas.length})`, (await items.count()) === notas.length);
+  const res = nut.resolucion_m?.valor;
+  const escala = res != null ? `Regional soil map (${nfFicha(res, 0)} m), not a lab test — needs a local check` : "Regional soil map, not a lab test — needs a local check";
+  let todas = true;
+  for (let i = 0; i < notas.length; i += 1) {
+    const li = (await items.nth(i).innerText()).replace(/\s+/g, " ");
+    const e = { less_available: ["▼", "Less available"], near_limit: ["◇", "Near the limit"], possible_toxicity: ["⚠", "Possible toxicity"], within_range: ["✓", "Within range"] }[notas[i].estado];
+    todas &&= li.includes(notas[i].texto_en) && li.includes(escala) && (!e || (li.includes(e[0]) && li.includes(e[1])));
+  }
+  check(`${prefijo}${id}: cada nota con su estado (símbolo y texto), su texto y «${escala}»`, todas, t.slice(0, 400));
+  check(`${prefijo}${id}: el aviso de la sesión de datos («${nut.aviso_en}»)`, t.includes(nut.aviso_en));
+  await pruebaTipoDeSuelo(page, id, prefijo);
+  await bloque.scrollIntoViewIfNeeded();
+  await esperarAnimaciones(page).catch(() => null);
+  await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_suelo_nutrientes_${id}.png`) });
+  if (sufijo === "telefono") {
+    check(`${prefijo}${id}: notas de nutrientes sin desplazamiento horizontal`, await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+  }
+  await cerrarFicha(page);
+}
+
 /** Frase resumen esperada (la misma función de web/js/resumen.js con la evaluación de web/reglas.js). */
 function fraseEsperada(id, D) {
   const p = porId.get(id);
@@ -1459,6 +1528,7 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
       const faltan = [["Total nitrogen", perfil.nitrogeno_g_kg], ["Salinity (electrical conductivity)", perfil.salinidad_ce_ds_m]].filter(([, v]) => v == null);
       check(`${prefijo}perfil: lo que el mapa no trae dice «not in the map» (${faltan.map(([k]) => k).join(", ")})`, faltan.every(([k]) => t.includes(`${k}: not in the map`) || t.includes(`${k} not in the map`)), t.slice(0, 400));
       check(`${prefijo}perfil: «Phosphorus, potassium, iron, zinc: needs a soil test»`, t.includes("Phosphorus, potassium, iron, zinc: needs a soil test"));
+      await pruebaTipoDeSuelo(page, P0757, prefijo);
       const zona = zonaDeProp(porId.get(P0757));
       const alc = suelo.alcalinidad_zona?.[zona];
       if (alc?.mayoria) {
@@ -1515,6 +1585,8 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
   } else {
     omitir(`${prefijo}ficha completa`, "ninguna parcela con opciones en estos datos");
   }
+  // --- Notas de nutrientes de L0175 (nogal): hierro, zinc, cobre, manganeso y boro, con la escala del mapa ---
+  await pruebaNotasDeNutrientes(page, NOGAL_NUTRIENTES, prefijo, sufijo);
   // --- Frase en lámina cero y en una abstenida ---
   if (conLaminaCero) {
     await abrirDesdeLista(page, conLaminaCero);

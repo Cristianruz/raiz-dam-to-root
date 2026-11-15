@@ -4,8 +4,8 @@
  "generado": "2026-11-15",
  "mock": false,
  "resumen": {
-  "cifras": 113526,
-  "patrones": 572,
+  "cifras": 113541,
+  "patrones": 579,
   "simuladas": 0,
   "fuentes_de_origen": 35,
   "avisos": 59
@@ -4523,6 +4523,30 @@
    "etiqueta": "Cálculo",
    "mock": false
   },
+  "suelo.json:tipo_suelo.zonas.*.suelos[*].pct": {
+   "clave": "tipo_suelo.zonas.*.suelos[*].pct",
+   "archivo": "web/data/suelo.json",
+   "n": 9,
+   "min": 0.02,
+   "max": 29.25,
+   "fuente": "Plan Municipal de Desarrollo de Delicias 2024–2027, anexo del Periódico Oficial del Estado de Chihuahua (2025), que cita a INEGI, Diccionario de Datos Edafológicos escala 1:250 000 (versión 4), 2016 (https://chihuahua.gob.mx/sites/default/atach2/periodico-oficial/anexos/2025-01/ANEXO%2003-2025%20ACUERDO%20N%C2%B0%20203-2024%20PMD%20DELICIAS.pdf), leído el 14-nov-2026",
+   "fecha": "2026-11-14",
+   "script": "datos/colab/B7_suelo_tipos.py; motor/suelo_web.py",
+   "etiqueta": "[V]",
+   "mock": false
+  },
+  "suelo.json:nutrientes.resolucion_m.valor": {
+   "clave": "nutrientes.resolucion_m.valor",
+   "archivo": "web/data/suelo.json",
+   "n": 1,
+   "min": 250,
+   "max": 250,
+   "fuente": "ISRIC SoilGrids 2.0 (250 m, CC-BY 4.0; Poggio et al. 2021, DOI 10.5194/soil-7-217-2021; Earth Engine: projects/soilgrids-isric/<propiedad>_mean con propiedad = sand, silt, clay, phh2o, soc, cec; capas 0–5, 5–15 y 15–30 cm promediadas con peso 5, 10 y 15; factores de ISRIC: g/kg ÷ 10 = %, pH × 10 ÷ 10, dg/kg ÷ 10 = g/kg, mmol(c)/kg ÷ 10 = cmol(c)/kg); valor de la parcela = promedio de las celdas con centro dentro o, si no hay ninguna (n_celdas = 0), la celda más cercana al centroide; clase_textura calculada con el triángulo del USDA; nitrogeno_g_kg vacío (el mapa da una relación C:N cercana a 1, no creíble) y salinidad_ce_ds_m vacío (sin producto); columnas adicionales: zona, clase_textura_olm (OpenLandMap SOL_TEXTURE-CLASS_USDA-TT_M v02 a 0 cm, Hengl 2018, DOI 10.5281/zenodo.1475451, CC-BY-SA 4.0) y distancia_celda_m; estimación regional de un modelo global, no un análisis de suelo",
+   "fecha": "2026-11-14",
+   "script": "datos/earthengine/suelo.js + datos/colab/A13_suelo_parcelas.py; motor/suelo_web.py",
+   "etiqueta": "Cálculo",
+   "mock": false
+  },
   "suelo.json:perfil.fecha": {
    "clave": "perfil.fecha",
    "archivo": "web/data/suelo.json",
@@ -4626,6 +4650,81 @@
    "mock": false,
    "textos": [
     "Soil tests from pecan orchards in this irrigation district (2018–2021) found most soils low in nitrogen, phosphorus, zinc, iron and copper, and most soils alkaline. This is a district-wide finding, not a measurement of this field: it needs a soil test."
+   ]
+  },
+  "suelo.json:tipo_suelo.fecha": {
+   "clave": "tipo_suelo.fecha",
+   "archivo": "web/data/suelo.json",
+   "n": 1,
+   "min": null,
+   "max": null,
+   "fuente": "OpenLandMap, grandes grupos del USDA (Predicted USDA soil great groups at 250 m, Hengl y Nauman 2018, v01, DOI 10.5281/zenodo.1476844, CC-BY-SA 4.0), Earth Engine OpenLandMap/SOL/SOL_GRTGROUP_USDA-SOILTAX_C/v01, banda grtgroup; gran grupo de la parcela = clase más frecuente de las celdas con centro dentro (o la más cercana a 250 m o menos); orden por el elemento formativo del nombre (Moorberg y Crouse 2017) y elementos formativos presentes (SSSA, Tabla A2); dos zonas; predicción de un modelo mundial, no un levantamiento de suelos; archivo nuevo, no está en la tabla 0.4-B",
+   "fecha": "2026-11-14",
+   "script": "datos/earthengine/suelo.js + datos/colab/B8_tipo_suelo_parcelas.py; motor/suelo_web.py",
+   "etiqueta": "Cálculo",
+   "mock": false,
+   "textos": [
+    "2026-11-14"
+   ]
+  },
+  "suelo.json:tipo_suelo.catalogo.fecha": {
+   "clave": "tipo_suelo.catalogo.fecha",
+   "archivo": "web/data/suelo.json",
+   "n": 1,
+   "min": null,
+   "max": null,
+   "fuente": "Catálogo de suelos WRB y USDA; 32 grupos de la WRB (30 con ficha resumida de Driessen et al. 2001, Lecture Notes on the Major Soils of the World, FAO World Soil Resources Reports 94; Technosols y Stagnosols sin ficha), 12 órdenes de la Soil Taxonomy del USDA (elemento formativo de Moorberg y Crouse 2017; definición y fertilidad de University of Idaho y Lancaster University [P]), 19 prefijos de gran grupo (SSSA, Glossary of Soil Science Terms, Tabla A2) y suelos del municipio de Delicias (Plan Municipal de Desarrollo 2024–2027, que cita INEGI 2016); todo leído el 14-nov-2026, cada bloque con su liga; es contexto del paisaje, no dice qué nutrientes tiene una parcela; segunda entrega (14-nov 20:30) con las correcciones de la revisión independiente del integrador: Calcisols sin «pobre en Fe y Zn», Vertisols con el Al como fijación de P (no toxicidad), Gypsisols sin «rico en Ca», fijacion_p como texto o null en todos los grupos; Kastanozems conserva 2–4 % de MO (está en «Genesis of Kastanozems»); tercera entrega (14-nov 20:56): entrada «arg» en usda_prefijos_gran_grupo (elemento del suborden Argids y raíz del prefijo «argi»; Moorberg y Crouse 2017, Tabla 4.3), que tipo_suelo_parcelas.csv usa en 39 parcelas; archivo nuevo, no está en la tabla 0.4-B",
+   "fecha": "2026-11-14",
+   "script": "datos/colab/B7_suelo_tipos.py; motor/suelo_web.py",
+   "etiqueta": "Cálculo",
+   "mock": false,
+   "textos": [
+    "2026-11-14"
+   ]
+  },
+  "suelo.json:tipo_suelo.zonas.*.texto_en": {
+   "clave": "tipo_suelo.zonas.*.texto_en",
+   "archivo": "web/data/suelo.json",
+   "n": 1,
+   "min": null,
+   "max": null,
+   "fuente": "Plan Municipal de Desarrollo de Delicias 2024–2027, anexo del Periódico Oficial del Estado de Chihuahua (2025), que cita a INEGI, Diccionario de Datos Edafológicos escala 1:250 000 (versión 4), 2016 (https://chihuahua.gob.mx/sites/default/atach2/periodico-oficial/anexos/2025-01/ANEXO%2003-2025%20ACUERDO%20N%C2%B0%20203-2024%20PMD%20DELICIAS.pdf), leído el 14-nov-2026",
+   "fecha": "2026-11-14",
+   "script": "datos/colab/B7_suelo_tipos.py; motor/suelo_web.py",
+   "etiqueta": "[V]",
+   "mock": false,
+   "textos": [
+    "Soils of the municipality (INEGI soil map): Cambisols 29.25%, Calcisols 27.81%, Kastanozems 25.72%, Chernozems 10.47%, Luvisols 2.38%, Phaeozems 0.35%, Leptosols 0.27%, Vertisols 0.26%, Regosols 0.02%."
+   ]
+  },
+  "suelo.json:nutrientes.fecha": {
+   "clave": "nutrientes.fecha",
+   "archivo": "web/data/suelo.json",
+   "n": 1,
+   "min": null,
+   "max": null,
+   "fuente": "ISRIC SoilGrids 2.0; reglas de suelo_reglas.json aplicadas a cada parcela con las propiedades de suelo_parcelas.csv (0–30 cm): clase de pH, nutrientes menos disponibles y cerca del límite según el pH, toxicidad posible, materia orgánica estimada (C orgánico × 1.724) y su clase, CIC y su clase, grupo de textura; riesgo por regla, no diagnóstico; P0316 sin dato; archivo nuevo, no está en la tabla 0.4-B",
+   "fecha": "2026-11-14",
+   "script": "datos/colab/B7_suelo_tipos.py; motor/suelo_web.py",
+   "etiqueta": "Cálculo",
+   "mock": false,
+   "textos": [
+    "2026-11-14"
+   ]
+  },
+  "suelo.json:nutrientes.reglas.fecha": {
+   "clave": "nutrientes.reglas.fecha",
+   "archivo": "web/data/suelo.json",
+   "n": 1,
+   "min": null,
+   "max": null,
+   "fuente": "NOM-021-SEMARNAT-2000 y guías de Montana State, NMSU e Illinois; reglas con fuente: clases de pH, materia orgánica, CIC, carbonatos y salinidad y tablas de interpretación de análisis de suelo de la NOM-021-SEMARNAT-2000; disponibilidad de nutrientes según el pH de Montana State University Extension (4449-8, marzo de 2017, https://landresources.montana.edu/nm/documents/soilmodulepdf/4449-8.pdf) con margen suelo_margen_ph [S]; avisos por cultivo de NMSU (H-657, H-658) e Illinois Agronomy Handbook (cap. 8) y evidencia local de Gutiérrez González et al. 2022; leído el 14-nov-2026; segunda entrega (14-nov 20:30) con las correcciones de la revisión del integrador: aviso de Fe del nogal con carbonatos de 10 % o más y sin «hard to correct», citas textuales de Illinois y de Gutiérrez González et al. 2022, MO redondeada a 0.1 antes de clasificar, huecos de la tabla de carbonatos [S], texto_aviso_en y textos_ficha_en (textos finales de la ficha para suelo, tipo de suelo y GAEZ; lista en docs/suelo_textos_ficha.md); archivo nuevo, no está en la tabla 0.4-B",
+   "fecha": "2026-11-14",
+   "script": "datos/colab/B7_suelo_tipos.py; motor/suelo_web.py",
+   "etiqueta": "Cálculo",
+   "mock": false,
+   "textos": [
+    "2026-11-14"
    ]
   },
   "contexto.json:clima_anual.zonas.*.umbral_faltantes": {
