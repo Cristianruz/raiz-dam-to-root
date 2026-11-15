@@ -54,7 +54,6 @@
 | 18:00 | Prueba de usabilidad | P6 |
 | **20:30** | **HITO: una parcela completa con datos reales, publicada.** Si no se logra, se aplica R3 (orden de corte) | Todos |
 | 21:00 | Cierre de puertas. Quien hace el turno de noche se queda dentro desde antes de las 21:00; los demás vuelven a las 7:00 | — |
-| 1:00–5:30 | Cristian duerme dentro de la sede. No se le despierta | — |
 
 **Domingo 15:**
 
