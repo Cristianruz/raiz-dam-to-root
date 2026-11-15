@@ -17,5 +17,5 @@
 - **Entregables ya enviados** (`entregables/`, anteproyecto v3) y `prototipos/`.
 
 ## Pendiente de personas
-- Confirmar con el Local Lead si el cambio de nombre se registra en la plataforma de Space Apps antes del envío de las 14:30.
+- ~~Registrar el nombre en la plataforma de Space Apps~~: hecho, lo confirmó Cristian el 14-nov a las 21:33.
 - Página del proyecto, video, póster y diapositivas con el nombre nuevo.

@@ -46,3 +46,4 @@
 | 14:10 | Validación | HECHO | Resultados de la sesión de datos traídos a esta rama: H3 **not supported**, contraste de ET (A8) y verdad de H1; README actualizado con la misma visibilidad | commits `187db3d`, `694000e` |
 | 14:10 | Datos | MENOR (para la sesión de datos) | 6 pares de parcelas con traslape mayor de 5 % en la entrega de dos zonas (p. ej. P0112/P0113, P0659/P0687) | revisión del integrador con shapely |
 | 21:35 | Nombre | DECISIÓN (Cristian) → HECHO | Proyecto **ROOT** (antes Raíz) y equipo **Orbital Farming** (antes Los Norteados), propuestos en la mentoría. `python construir.py` OK (1022 pytest, 162 node) | `docs/decisiones/2026-11-14_nombre_root.md` |
+| 21:33 | Nombre | HECHO (Cristian) | El nombre ROOT y el equipo Orbital Farming ya están registrados en la plataforma de Space Apps | `docs/decisiones/2026-11-14_nombre_root.md` |
