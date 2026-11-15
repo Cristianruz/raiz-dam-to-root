@@ -79,6 +79,15 @@
 //   desnudo de cubo.meta en la capa y en la ficha; leyenda del relieve con las rutas cortadas (rutas_depresiones);
 //   La gota con el rótulo y la fuente de las eficiencias del goteo a la vista y «upper bound» sin tope; contexto.json
 //   en HTTP 500 lo dicen «Regional context» y «Challenge data sources»;
+// - inglés en el origen (15-nov): con las citas en inglés en los datos (fuente_en, nota_en, detalle_en e
+//   idioma_fuentes), nada queda marcado lang="es" en el panel, en la ficha ni en «About & Data» (el mensaje de
+//   WhatsApp aparte); la puerta automática muestra el detalle de cada paso en inglés; ECOSTRESS dice de cuántas
+//   escenas sale el valor, lleva a la vista el aviso de la entrega y, si el calendario del modelo no tiene cultivo
+//   en ese mes, lo dice (P0757 y P0632), sin comparar con el modelo; GAEZ escribe la clase con su nombre, la unidad
+//   con multiplicador en toneladas y la nota de la entrega; la memoria de una huerta de nogal explica sus años
+//   «Summer crop»; y el caso de «gota» vacía (H6): con gota, los dos goteos y tope_consumo en null y el aviso del
+//   motor en meta.notas (variante en memoria que pasa validar_contrato.py), la ficha dice que no hay dato y no
+//   muestra NaN, undefined ni un ahorro;
 // - guarda capturas en tests/e2e/capturas/ (o en RAIZ_CAPTURAS).
 // No supone un juego de datos: los valores esperados y las parcelas de cada prueba se leen de los datos.
 // Las comprobaciones que cuentan TODAS las parcelas (las de antes del gemelo) pasan primero a «All areas».
@@ -87,13 +96,15 @@
 
 import http from "node:http";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { aguaComprometida, conteosZona, cobertura, evaluarOpcion } from "../../web/reglas.js";
 import { fraseResumen, formatoHectareas } from "../../web/js/resumen.js";
 import { ESTADOS_APTITUD, ROTULO_APTITUD, grupoDeTextura } from "../../web/js/suelo.js";
-import { NOTA_GEDI, NOTA_REGIONAL, riesgoDeHelada, climaDelAnio, contarEstados, diasIncompletos, formatoNumero, textoMascon } from "../../web/js/contexto.js";
+import { NOTA_GEDI, NOTA_REGIONAL, NOTA_ECOSTRESS_SIN_CULTIVO, riesgoDeHelada, climaDelAnio, contarEstados, diasIncompletos, formatoNumero, textoMascon, textoEcostress, ultimoMesConDato, sinCultivoEnElMes, valorGaez } from "../../web/js/contexto.js";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
 import { TEXTO_TITULO, TEXTO_NOTA, TEXTO_SIN_DATO, prioridadesDeParcela } from "../../web/js/prioridades.js";
 
@@ -137,6 +148,11 @@ const explicaciones = leerJSON("explicaciones.json");
 const params = JSON.parse(fs.readFileSync(path.join(RAIZ, "data", "params.json"), "utf-8"));
 
 // ---------------------------------------------------------------- lectura de los datos (nada escrito a mano)
+/**
+ * Texto que la página escribe de un campo de los datos que puede traer su variante en inglés («fuente» y
+ * «fuente_en», «detalle» y «detalle_en»…): la interfaz es inglés, así que va la de inglés y, si falta, la original.
+ */
+const enIngles = (obj, campo = "fuente") => obj?.[`${campo}_en`] ?? obj?.[campo];
 const props = parcelas.features.map((f) => f.properties);
 const porId = new Map(props.map((p) => [p.id, p]));
 const opcionesDe = (id, c = cubo) => c.parcelas?.[id]?.opciones ?? [];
@@ -617,7 +633,7 @@ async function pruebaRelieve(page, prefijo, reducida, captura = null) {
   const ley = await texto(page, "#capa-relieve .relieve-leyenda");
   check(
     `${prefijo}leyenda del relieve con el umbral (ha), el rótulo de escala y la fuente de relieve.json`,
-    zonasRel.every((z) => ley.includes(`${fmt3(z.umbral_ruta_ha)} ha`) && ley.includes(z.rotulo)) && ley.includes(relieve.fuente),
+    zonasRel.every((z) => ley.includes(`${fmt3(z.umbral_ruta_ha)} ha`) && ley.includes(z.rotulo)) && ley.includes(enIngles(relieve)),
     ley.replace(/\n/g, " ").slice(0, 160),
   );
 
@@ -725,9 +741,9 @@ async function pruebaTerreno2D(page, prefijo) {
     (await bloque.getAttribute("data-terreno2d")) === "listo" && capasDe(m) && visibles(m, true) && m.debajoDeLasParcelas, JSON.stringify(m.capas));
   // Leyenda: rótulo con la resolución que declara la fuente de los datos, extremos de cada zona y la fuente.
   const t = await bloque.innerText();
-  const resolucion = String(gemelo.terreno.fuente ?? "").match(/(\d+)\s*m\b/)?.[0];
+  const resolucion = String(enIngles(gemelo.terreno) ?? "").match(/(\d+)\s*m\b/)?.[0];
   check(`${prefijo}mapa plano: leyenda «Regional terrain, ${resolucion ?? ""} elevation model» con los extremos de gemelo.json y su fuente`,
-    t.includes(`Regional terrain, ${resolucion ? `${resolucion} ` : ""}elevation model`) && t.includes(gemelo.terreno.fuente) &&
+    t.includes(`Regional terrain, ${resolucion ? `${resolucion} ` : ""}elevation model`) && t.includes(enIngles(gemelo.terreno)) &&
       zonasDem.every(([zid, z]) => t.includes(`${nombreZonaCubo(zid)}: ${metros(z.elev_min_m)} to ${metros(z.elev_max_m)}`)),
     t.replace(/\n/g, " ").slice(0, 220));
   // El interruptor apaga el sombreado y la rampa (el velo sigue) y los vuelve a encender.
@@ -1034,6 +1050,25 @@ async function pruebaAcerca(page, peticiones, prefijo, telefono, captura) {
     check(`${prefijo}About & Data: renglones de las series del reto que registra el manifest (${esperadas.join(", ") || "ninguna"})`,
       esperadas.every((id) => nasa.some((r) => r.id === id)), nasa.map((r) => r.id).join(", "));
   }
+  // Puerta automática: el detalle de cada paso en inglés (detalle_en de pruebas.json: lo escribe construir.py con
+  // los mismos valores que el de español), sin marca de español.
+  const pasosPuerta = pruebasWeb?.puerta?.pasos ?? [];
+  if (pasosPuerta.length && pasosPuerta.every((x) => x.detalle_en != null)) {
+    const celdas = await page.locator("#acerca .acerca-tabla--pasos tbody tr").evaluateAll((xs) =>
+      xs.map((x) => ({ detalle: x.querySelector("td:last-child")?.textContent ?? "", lang: x.querySelector("td:last-child")?.getAttribute("lang") ?? null })));
+    check(`${prefijo}About & Data: la puerta automática lleva el detalle de cada paso en inglés (detalle_en), sin lang="es"`,
+      celdas.length === pasosPuerta.length && pasosPuerta.every((x, i) => celdas[i].detalle === x.detalle_en && celdas[i].lang === null),
+      celdas.map((c) => c.detalle).join(" | ").slice(0, 220));
+    const cifrasDe = (t) => (String(t).match(/\d+(?:[.,]\d+)*/g) ?? []).sort().join(" ");
+    check(`${prefijo}About & Data: cada detalle en inglés trae las mismas cifras que el de español`,
+      pasosPuerta.every((x) => cifrasDe(x.detalle) === cifrasDe(x.detalle_en)), pasosPuerta.filter((x) => cifrasDe(x.detalle) !== cifrasDe(x.detalle_en)).map((x) => x.id).join(", "));
+  } else if (pasosPuerta.length) {
+    omitir(`${prefijo}About & Data: detalle de la puerta en inglés`, "pruebas.json no trae detalle_en en todos los pasos (corrida anterior a esta pieza)");
+  }
+  if (manifestWeb?.idioma_fuentes === "en" && pasosPuerta.every((x) => x.detalle_en != null)) {
+    const marcados = await page.locator('#acerca [lang="es"]').evaluateAll((xs) => xs.map((x) => (x.textContent ?? "").trim().slice(0, 60)));
+    check(`${prefijo}About & Data: con las citas en inglés en los datos, nada queda marcado lang="es" (ni al abrir los plegados)`, marcados.length === 0, marcados.join(" | "));
+  }
   await pruebaRecursosReto(page, prefijo, telefono);
   await pruebaH1b(page, prefijo, telefono);
   if (telefono) {
@@ -1184,7 +1219,7 @@ async function pruebaLineaDeTiempo(page, prefijo, reducida) {
     const d = gemelo.tiempo.destacados[destacado];
     const nota = page.locator(`#linea-tiempo .tiempo-destacado[data-anio="${destacado}"]`);
     const textoNota = (await nota.isVisible()) ? await nota.innerText() : "";
-    check(`${prefijo}línea de tiempo en ${destacado}: nota destacada con su texto, fuente y etiqueta ${d.etiqueta}`, textoNota.includes(d.texto) && textoNota.includes(d.fuente) && textoNota.includes(d.etiqueta), textoNota.replace(/\n/g, " · "));
+    check(`${prefijo}línea de tiempo en ${destacado}: nota destacada con su texto, fuente y etiqueta ${d.etiqueta}`, textoNota.includes(d.texto) && textoNota.includes(enIngles(d)) && textoNota.includes(d.etiqueta), textoNota.replace(/\n/g, " · "));
     await page.locator("#bloque-tiempo").scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(CAPTURAS, `${reducida ? "telefono" : "escritorio"}_linea_tiempo_${destacado}.png`) });
   }
@@ -1411,7 +1446,7 @@ async function pruebaGemelo3D(page, prefijo, telefono) {
       g.cuenta.columna + g.cuenta.sin_riego === esp.clasificadas && mismasColumnas(g.columnas, esp), JSON.stringify(g.cuenta));
   const leyenda = await texto(page, "#bloque-gemelo3d");
   check(`${prefijo}3D: la leyenda aparece junto al mapa con la exageración (×${fmt3(exag)}), la escala y la fuente`,
-    (await page.locator("#bloque-gemelo3d").isVisible()) && leyenda.includes(`×${fmt3(exag)}`) && leyenda.includes(`${fmt3(gemelo.columnas.metros_por_millar)} m of height`) && leyenda.includes(gemelo.terreno.fuente));
+    (await page.locator("#bloque-gemelo3d").isVisible()) && leyenda.includes(`×${fmt3(exag)}`) && leyenda.includes(`${fmt3(gemelo.columnas.metros_por_millar)} m of height`) && leyenda.includes(enIngles(gemelo.terreno)));
   await page.locator("#mapa").scrollIntoViewIfNeeded();
   await page.screenshot({ path: path.join(CAPTURAS, `${telefono ? "telefono" : "escritorio"}_gemelo3d.png`) });
 
@@ -2159,6 +2194,252 @@ async function pruebaNDVIHuecos(navegador, base) {
   await ctxN.ctx.close();
 }
 
+// ---------------------------------------------------------------- inglés en el origen y hallazgos de la sesión de datos
+/** ¿Los datos traen en inglés todo lo que el panel y la ficha citan? (si no, la página cae al español marcado). */
+const citasEnIngles =
+  cubo.meta?.idioma_fuentes === "en" &&
+  marcas.every((m) => (!m.fuente || m.fuente_en) && (!m.nota || m.nota_en)) &&
+  Boolean(cubo.dotaciones.equivalencia_en && cubo.dotaciones.punto_medicion_en) &&
+  (cubo.localidades ?? []).every((l) => !l.fuente || l.fuente_en) &&
+  Boolean(!cubo.distrito?.boquilla || (cubo.distrito.boquilla.fuente_namo_en && cubo.distrito.boquilla.fuente_almacenamiento_en)) &&
+  (!gemelo?.terreno || Boolean(gemelo.terreno.fuente_en)) &&
+  Object.values(gemelo?.tiempo?.destacados ?? {}).every((d) => !d.fuente || d.fuente_en) &&
+  (!relieve || Boolean(relieve.fuente_en)) &&
+  (!contexto || contexto.idioma_fuentes === "en") && (!suelo || suelo.idioma_fuentes === "en") &&
+  (!ndviMensual || ndviMensual.idioma_fuentes === "en") && (!manifestWeb || manifestWeb.idioma_fuentes === "en");
+
+/** Textos marcados lang="es" dentro de un selector, sin contar la vista del mensaje de WhatsApp (español a propósito). */
+const marcadosEs = (page, selector) =>
+  page.locator(`${selector} [lang="es"]`).evaluateAll((xs) => xs.filter((x) => !x.closest("#vista-whatsapp")).map((x) => (x.textContent ?? "").trim().slice(0, 60)));
+
+/**
+ * Corre `accion` con la zona `zona` elegida en «Pilot area» ("" = «All areas», con las parcelas de todas las zonas en
+ * la lista) y vuelve a la que había. Sin selector (una sola zona), corre la acción tal cual.
+ */
+async function conZona(page, zona, accion) {
+  const hay = await page.locator("#selector-zona").isVisible();
+  const habia = hay ? await page.locator("#zona-sel").inputValue() : null;
+  if (hay && habia !== zona) await elegirZona(page, zona);
+  try {
+    await accion();
+  } finally {
+    if (hay && habia !== zona) await elegirZona(page, habia);
+  }
+}
+
+/** Con las citas en inglés en los datos: nada marcado como español en el panel ni en la ficha (plegados incluidos). */
+async function pruebaInglesEnElOrigen(page, prefijo) {
+  if (!citasEnIngles) {
+    omitir(`${prefijo}inglés en el origen`, "algún dato no trae su cita en inglés (la página la muestra en español, marcada)");
+    return;
+  }
+  await cerrarFicha(page);
+  // Cada marca del deslizador muestra su fuente y su nota al pulsarla.
+  const enPanel = [];
+  for (const m of marcas) {
+    await page.locator(`.boton-marca[data-marca="${m.id}"]`).click();
+    enPanel.push(...(await marcadosEs(page, "#controles")));
+  }
+  enPanel.push(...(await marcadosEs(page, "#principal")));
+  check(`${prefijo}inglés en el origen: nada marcado lang="es" en los controles ni en el panel (ni dentro de los plegados)`, enPanel.length === 0, enPanel.join(" | "));
+  const ids = [P0757, porId.has("P0632") ? "P0632" : null, porId.has("L0175") ? "L0175" : null].filter(Boolean);
+  // Con «All areas» la lista trae las parcelas de las dos zonas (L0175 es de otra zona que P0757).
+  await conZona(page, "", async () => {
+    for (const id of ids) {
+      await abrirDesdeLista(page, id);
+      const enFicha = await marcadosEs(page, "#ficha");
+      check(`${prefijo}inglés en el origen: ficha de ${id} sin textos marcados lang="es" (fuera del mensaje de WhatsApp)`, enFicha.length === 0, enFicha.join(" | "));
+      // Las citas de params que la ficha muestra en La gota: en inglés.
+      const g = cubo.parcelas[id]?.opciones?.find((o) => o.gota)?.gota;
+      const sup = (g?.supuestos ?? []).join(" ");
+      if (g) check(`${prefijo}inglés en el origen: los supuestos de La gota de ${id} no traen la cita en español`, !/acuífero|rango medido| de \d+ hm³\/año/.test(sup), sup.slice(0, 200));
+      await cerrarFicha(page);
+    }
+  });
+}
+
+/** ECOSTRESS en la ficha (revisión independiente del 15-nov): escenas, aviso a la vista y nota de «sin cultivo». */
+async function pruebaEcostress(page, prefijo) {
+  const eco = contexto?.ecostress;
+  if (!eco) {
+    omitir(`${prefijo}ECOSTRESS en la ficha`, "contexto.json sin el bloque ecostress");
+    return;
+  }
+  const ids = [P0757, porId.has("P0632") ? "P0632" : null].filter((id) => id && eco.parcelas?.[id]);
+  const vistos = [];
+  await conZona(page, "", async () => {
+  for (const id of ids) {
+    const u = ultimoMesConDato(eco.meses, eco.parcelas[id]);
+    if (!u) continue;
+    const n = eco.escenas_parcelas?.[id]?.[eco.meses.indexOf(u.mes)];
+    const actual = actualDe(id);
+    const sinCultivo = sinCultivoEnElMes(actual?.meses_cultivo, u.mes);
+    vistos.push(sinCultivo);
+    await abrirDesdeLista(page, id);
+    const li = page.locator('#seccion-evidencia li[data-evidencia="Evapotranspiration (ECOSTRESS)"]');
+    const t = (await li.innerText().catch(() => "")).replace(/\s+/g, " ");
+    const nota = li.locator(".evidencia-nota");
+    check(`${prefijo}ECOSTRESS de ${id}: «${textoEcostress(u.valor, u.mes, n)}» (valor, mes y ${n} escenas de contexto.json)`,
+      n > 0 && t.includes(`Evapotranspiration (ECOSTRESS): ${textoEcostress(u.valor, u.mes, n)}`) && new RegExp(` from ${n} clear-sky scenes?\\b`).test(t), t.slice(0, 160));
+    check(`${prefijo}ECOSTRESS de ${id}: el aviso de la entrega a la vista junto al valor (no plegado en «Full source»)`,
+      Boolean(eco.aviso) && (await nota.isVisible()) && (await nota.innerText()).includes(eco.aviso) && /not a field measurement/.test(await nota.innerText()) &&
+        (await nota.evaluate((el) => !el.closest("details"))), (await nota.innerText().catch(() => "")).slice(0, 160));
+    check(`${prefijo}ECOSTRESS de ${id}: ${sinCultivo ? "el calendario del modelo no tiene cultivo en ese mes y la ficha lo dice" : "con cultivo en ese mes según el calendario, sin la nota de «sin cultivo»"}`,
+      (await nota.innerText()).includes(NOTA_ECOSTRESS_SIN_CULTIVO) === sinCultivo, (await nota.innerText()).slice(-120));
+    // Lo que la ficha NO hace: comparar con el modelo, dar un cociente o un porcentaje, ni decir «median».
+    const visible = (await li.evaluate((el) => [...el.querySelectorAll(":scope > p")].map((x) => x.textContent).join(" "))).replace(/\s+/g, " ");
+    check(`${prefijo}ECOSTRESS de ${id}: sin contraste con el modelo, cociente, porcentaje ni «median» a la vista`, !/\b(model|ratio|median)\b|%|same days/i.test(visible), visible.slice(0, 200));
+    await cerrarFicha(page);
+  }
+  });
+  if (ids.length === 2 && vistos.length === 2) {
+    check(`${prefijo}ECOSTRESS: las dos protagonistas ejercitan los dos casos (con cultivo y sin cultivo en el mes mostrado)`, vistos.includes(true) && vistos.includes(false), JSON.stringify(vistos));
+  }
+}
+
+/** GAEZ en «Regional context» (hallazgo 15 de la sesión de datos): clase con su nombre, toneladas y nota de la entrega. */
+async function pruebaGaez(page, prefijo) {
+  const filas = contexto?.gaez?.zonas?.[zonaContexto] ?? [];
+  if (!filas.length) {
+    omitir(`${prefijo}GAEZ en el contexto regional`, "contexto.json sin filas de GAEZ para la zona");
+    return;
+  }
+  await conZona(page, zonaContexto, async () => {
+  await abrirContexto(page);
+  const tarjeta = page.locator('#contexto-regional [data-tarjeta="gaez"]');
+  const celdas = await tarjeta.locator("tbody tr").evaluateAll((xs) => xs.map((x) => (x.querySelector("td:last-child")?.textContent ?? "").replace(/\s+/g, " ").trim()));
+  check(`${prefijo}GAEZ: cada valor escrito como lo arma valorGaez con los datos (${filas.length} filas)`,
+    celdas.length === filas.length && filas.every((f, i) => celdas[i].startsWith(valorGaez(f))), celdas.slice(0, 3).join(" | "));
+  const conMultiplicador = filas.filter((f) => f.valor_mostrar != null);
+  if (conMultiplicador.length) {
+    check(`${prefijo}GAEZ: la unidad con multiplicador («${conMultiplicador[0].unidad}») se escribe en «${conMultiplicador[0].unidad_mostrar}», no pegada a la cifra`,
+      conMultiplicador.every((f) => celdas[filas.indexOf(f)] === `${formatoNumero(f.valor_mostrar)} ${f.unidad_mostrar}`) && celdas.every((c) => !/\d\s*10kg/.test(c)), celdas[filas.indexOf(conMultiplicador[0])]);
+  }
+  const clases = filas.filter((f) => f.clase_nombre);
+  if (clases.length) {
+    check(`${prefijo}GAEZ: cada clase con su nombre («${valorGaez(clases[0])}»), no «${formatoNumero(clases[0].valor)} ${clases[0].unidad}»`,
+      clases.every((f) => celdas[filas.indexOf(f)] === `${f.clase_nombre} (${String(f.unidad).toLowerCase()} ${formatoNumero(f.valor)})`), celdas[filas.indexOf(clases[0])]);
+  }
+  const notas = [...new Set(filas.filter((f) => f.nota).map((f) => f.nota))];
+  if (notas.length) {
+    const escritas = await tarjeta.locator(".contexto-gaez-nota").allInnerTexts();
+    check(`${prefijo}GAEZ: la nota de la entrega a la vista, una vez por cultivo (${notas.length})`,
+      escritas.length === new Set(filas.filter((f) => f.nota).map((f) => `${f.cultivo}|${f.nota}`)).size && notas.every((n) => escritas.some((e) => e.includes(n))), escritas.join(" | ").slice(0, 200));
+  }
+  await page.locator("#bloque-contexto > summary").click(); // se pliega de nuevo
+  });
+}
+
+/** Memoria de una huerta de nogal (hallazgo 6): si trae años «Summer crop» o «Double crop», la ficha explica por qué. */
+async function pruebaNotaNogal(page, prefijo) {
+  const esHuertaConVerano = (p) => p.cultivo_actual === "nogal" && (p.memoria ?? []).some((m) => m.estado === "verano" || m.estado === "doble");
+  const nogal = candidatos.find((id) => esHuertaConVerano(porId.get(id)));
+  if (!nogal) {
+    omitir(`${prefijo}nota de la memoria del nogal`, "ninguna huerta con años «verano» o «doble» en su memoria");
+    return;
+  }
+  await conZona(page, "", async () => {
+    await abrirDesdeLista(page, nogal);
+    const nota = page.locator('#ficha .memoria [data-parte="nota-nogal"]');
+    const t = (await nota.count()) ? await nota.innerText() : "";
+    check(`${prefijo}memoria de ${nogal} (nogal con años de verano): la ficha explica que la huerta pierde la hoja y que su edad cuenta esos años`,
+      /loses its leaves in winter/.test(t) && /orchard age counts those years too/.test(t) && !/\d/.test(t), t);
+    await cerrarFicha(page);
+    if (P0757 && porId.get(P0757).cultivo_actual !== "nogal") {
+      await abrirDesdeLista(page, P0757);
+      check(`${prefijo}memoria de ${P0757} (no es nogal): sin la nota del nogal`, (await page.locator('#ficha [data-parte="nota-nogal"]').count()) === 0);
+      await cerrarFicha(page);
+    }
+  });
+}
+
+/**
+ * «gota» vacía (hallazgo H6 de la auditoría). El motor deja en null «gota», los dos goteos y tope_consumo de las
+ * opciones de una rotación sin lámina neta en una zona (nunca toma la ET como cero) y lo declara en meta.notas con
+ * un aviso que validar_contrato.py exige. Los datos de hoy no traen el caso: se arma en memoria sobre la rotación
+ * ACTUAL de una protagonista, con el aviso que da el propio motor (motor/b4_cubo.py → aviso_sin_neta) y se comprueba
+ * con validar_contrato.py que esa variante cumple el contrato. La ficha debe decir que no hay dato, sin NaN,
+ * undefined ni un ahorro.
+ */
+async function pruebaGotaVacia(navegador, base) {
+  const id = P0757;
+  const op = id && actualDe(id);
+  if (!op?.gota || !op.rotacion) {
+    omitir("gota vacía", "sin una protagonista cuya opción actual traiga La gota");
+    return;
+  }
+  const zona = zonaDeProp(porId.get(id));
+  const c = structuredClone(cubo);
+  // Como el motor: falta la lámina neta de la ROTACIÓN en la ZONA, así que quedan en null todas sus opciones ahí.
+  let parcelasTocadas = 0;
+  for (const [pid, pc] of Object.entries(c.parcelas)) {
+    if (!porId.has(pid) || zonaDeProp(porId.get(pid)) !== zona) continue;
+    const suyas = (pc.opciones ?? []).filter((o) => o.rotacion === op.rotacion);
+    for (const o of suyas) Object.assign(o, { gota: null, gota_goteo_con_tope: null, gota_goteo_sin_tope: null, tope_consumo: null });
+    if (suyas.length) parcelasTocadas += 1;
+  }
+  // El aviso, tal como lo escribe el motor (no se copia aquí su texto).
+  let aviso = null;
+  try {
+    aviso = execFileSync("python3", ["-c", "import sys; sys.path.insert(0, '.'); from motor.b4_cubo import aviso_sin_neta; print(aviso_sin_neta(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4])))",
+      zona, op.rotacion, "rotaciones_de_prueba.json", String(parcelasTocadas)], { cwd: RAIZ, encoding: "utf-8" }).trim();
+  } catch (err) {
+    omitir("gota vacía", `no se pudo pedir el aviso a motor/b4_cubo.py (${String(err.message).split("\n")[0]})`);
+    return;
+  }
+  c.meta.notas = [...(c.meta.notas ?? []), aviso];
+  // La variante cumple el contrato (y sin el aviso, no): así el caso es el que el motor puede publicar.
+  const carpeta = fs.mkdtempSync(path.join(os.tmpdir(), "raiz-gota-vacia-"));
+  const validar = (cuboVariante) => {
+    fs.writeFileSync(path.join(carpeta, "cubo.json"), JSON.stringify(cuboVariante));
+    for (const f of ["parcelas.geojson", "explicaciones.json"]) fs.copyFileSync(path.join(DATOS, f), path.join(carpeta, f));
+    try {
+      return execFileSync("python3", ["validar_contrato.py", carpeta], { cwd: RAIZ, encoding: "utf-8" }).trim();
+    } catch (err) {
+      return String(err.stdout || err.message).trim();
+    }
+  };
+  const conAviso = validar(c);
+  check("gota vacía: la variante (gota, los dos goteos y tope_consumo en null, con el aviso del motor en meta.notas) cumple el contrato", conAviso === "CONTRATO OK", conAviso.split("\n").slice(0, 3).join(" | "));
+  const sinAviso = validar({ ...c, meta: { ...c.meta, notas: cubo.meta.notas ?? [] } });
+  check("gota vacía: sin el aviso del motor, validar_contrato.py rechaza el null", /gota en null sin el aviso del motor/.test(sinAviso), sinAviso.split("\n").slice(0, 2).join(" | "));
+  fs.rmSync(carpeta, { recursive: true, force: true });
+
+  const v = await abrir(navegador, base, { viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" }, "gota vacía", { "cubo.json": c }, { hash: `#${id}` });
+  const page = v.page;
+  await page.waitForSelector("#ficha:not([hidden])");
+  const ops = opcionesDe(id, c);
+  const sinGota = ops.filter((o) => !o.gota);
+  const conGota = ops.filter((o) => o.gota);
+  const ficha = await page.locator("#ficha").evaluate((el) => el.textContent);
+  check(`gota vacía: la ficha de ${id} no muestra NaN, undefined ni null`, !/NaN|undefined|\bnull\b/.test(ficha));
+  const seccion = (await texto(page, "#seccion-gota")).replace(/\s+/g, " ");
+  if (conGota.length) {
+    const aviso2 = (await page.locator("#gota-sin-dato").count()) ? await texto(page, "#gota-sin-dato") : "";
+    check(`gota vacía: «Follow the drop» dice que no hay dato de flujos para ${sinGota.map((o) => o.nombre).join("; ")}`,
+      /No water-flow data for:/.test(aviso2) && sinGota.every((o) => aviso2.includes(o.nombre)) && /Nothing is estimated/.test(aviso2), aviso2);
+    const enSelector = await page.locator("#gota-opcion option").evaluateAll((xs) => xs.map((x) => x.value));
+    check("gota vacía: el selector de La gota ofrece solo las opciones con flujos", JSON.stringify(enSelector) === JSON.stringify(conGota.map((o) => o.id)), enSelector.join(", "));
+  } else {
+    check("gota vacía: «Follow the drop» dice que no está disponible", /Not available for this field yet\./.test(seccion), seccion.slice(0, 160));
+  }
+  // Ningún ahorro atribuido a las opciones sin flujos: ni cifras de goteo, ni un flujo en cero, ni «−N%».
+  const cifrasGoteo = await page.locator("#gota-cifras .gota-mod-cifra").count();
+  check("gota vacía: al abrir no hay cifras de goteo (ningún ahorro) y ningún flujo se dibuja en cero",
+    cifrasGoteo === 0 && !/[−-]\d+\s*%/.test(seccion) && !/\b0 m³/.test(seccion), seccion.slice(0, 200));
+  // La tarjeta de la opción sin flujos sigue con su agua (la lámina no depende de La gota).
+  const agua = await tarjeta(page, sinGota[0].id).locator(".renglon-agua").innerText();
+  check("gota vacía: la tarjeta de la opción conserva su renglón Water (sin NaN)", /thousand m³\/ha/.test(agua) && !/NaN|undefined/.test(agua), agua.replace(/\s+/g, " ").slice(0, 120));
+  // El mensaje para el agricultor tampoco inventa nada.
+  await page.locator("#boton-whatsapp").click();
+  const mensaje = await page.locator("#vista-whatsapp").evaluate((el) => el.textContent);
+  check("gota vacía: el mensaje de WhatsApp sin NaN, undefined ni null", !/NaN|undefined|\bnull\b/.test(mensaje));
+  await page.locator("#seccion-gota").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(CAPTURAS, "escritorio_gota_vacia.png") });
+  check("gota vacía: sin errores de consola", v.errores.length === 0, v.errores.join(" | "));
+  await v.ctx.close();
+}
+
 // ---------------------------------------------------------------- paneles y registro (etapa 3 de la integración)
 const zonaContexto = zonaInicial ?? (zonasCubo.length === 1 ? zonasCubo[0] : null);
 // Frases que las advertencias de la sesión de datos deben poner a la vista (data/recursos_reto.json → tarjetas).
@@ -2348,8 +2629,14 @@ async function pruebaAuditoriaMotor(page, prefijo, telefono) {
     // I5: la cita está plegada en «Storage source» / «Capacity source»: se lee el contenido del nodo.
     const alm = await page.locator('#boquilla [data-dato="almacenamiento"]').textContent();
     const namo = await page.locator('#boquilla [data-dato="namo"]').textContent();
-    check(`${prefijo}La Boquilla: almacenamiento con su fuente y su etiqueta ${b.etiqueta_almacenamiento}`, alm.includes(b.fuente_almacenamiento) && alm.includes(b.etiqueta_almacenamiento), alm);
-    check(`${prefijo}La Boquilla: capacidad (NAMO) con su fuente y su etiqueta ${b.etiqueta_namo}`, namo.includes(b.fuente_namo) && namo.includes(b.etiqueta_namo), namo);
+    check(`${prefijo}La Boquilla: almacenamiento con su fuente y su etiqueta ${b.etiqueta_almacenamiento}`, alm.includes(enIngles(b, "fuente_almacenamiento")) && alm.includes(b.etiqueta_almacenamiento), alm);
+    check(`${prefijo}La Boquilla: capacidad (NAMO) con su fuente y su etiqueta ${b.etiqueta_namo}`, namo.includes(enIngles(b, "fuente_namo")) && namo.includes(b.etiqueta_namo), namo);
+    // Con la cita en inglés en los datos (…_en, copia de params), va a la vista y sin marca de español.
+    if (b.fuente_almacenamiento_en && b.fuente_namo_en) {
+      check(`${prefijo}La Boquilla: las dos citas en inglés, a la vista y sin lang="es"`,
+        (await page.locator('#boquilla .fuente-en').count()) === 2 && (await page.locator('#boquilla [lang="es"]').count()) === 0 &&
+          !alm.includes(b.fuente_almacenamiento) && !namo.includes(b.fuente_namo), `${alm} | ${namo}`);
+    }
     // I9: cada etiqueta de evidencia dice qué significa (title) y el glosario de la ficha trae la leyenda.
     const titulos = await page.locator("#boquilla .etiqueta-dato").evaluateAll((xs) => xs.map((x) => x.title));
     check(`${prefijo}La Boquilla: las etiquetas de evidencia llevan su significado en el title`, titulos.length > 0 && titulos.every((t) => /^Evidence label: (\[(V|P|S|NE)\] |an interface)/.test(t)), titulos.join(" | "));
@@ -2357,7 +2644,7 @@ async function pruebaAuditoriaMotor(page, prefijo, telefono) {
   const llave = Object.keys(d).find((k) => k.startsWith("acuifero_"));
   if (llave) {
     const a = await page.locator('#acuifero [data-dato="acuifero"]').textContent();
-    check(`${prefijo}acuífero: fuente y etiqueta ${d[llave].etiqueta}`, a.includes(d[llave].fuente) && a.includes(d[llave].etiqueta), a);
+    check(`${prefijo}acuífero: fuente y etiqueta ${d[llave].etiqueta}`, a.includes(enIngles(d[llave])) && a.includes(d[llave].etiqueta), a);
   }
   // Textos de las marcas, la equivalencia y el punto de medición en inglés (los del cubo, copia de params). En el
   // teléfono «Units and measuring point» está plegado: se lee el contenido del nodo (textContent), no lo pintado.
@@ -2407,6 +2694,10 @@ async function pruebasEscritorio(page, peticiones) {
   await pruebaGemelo3D(page, "", false);
   await verTodas(page);
   await pruebaAuditoriaMotor(page, "", false);
+  await pruebaInglesEnElOrigen(page, "");
+  await pruebaEcostress(page, "");
+  await pruebaGaez(page, "");
+  await pruebaNotaNogal(page, "");
 
   // Aviso de datos simulados: visible si y solo si algún archivo trae meta.mock = true
   const visibleMock = await page.locator("#aviso-simulado").isVisible();
@@ -2431,7 +2722,8 @@ async function pruebasEscritorio(page, peticiones) {
     const v = Number(await page.locator("#dotacion").inputValue());
     const info = await page.locator("#info-marca").textContent();
     const pulsado = await page.locator(`.boton-marca[data-marca="${m.id}"]`).getAttribute("aria-pressed");
-    check(`marca ${m.id} lleva el deslizador a ${m.valor} y muestra fuente`, v === m.valor && info.includes(m.fuente) && pulsado === "true", `valor ${v}`);
+    check(`marca ${m.id} lleva el deslizador a ${m.valor} y muestra fuente`, v === m.valor && info.includes(enIngles(m)) && pulsado === "true", `valor ${v}`);
+    if (m.fuente_en) check(`marca ${m.id}: la fuente va en inglés (fuente_en) y sin lang="es"`, (m.fuente === m.fuente_en || !info.includes(m.fuente)) && (await page.locator('#info-marca [lang="es"]').count()) === 0, info.slice(0, 160));
     // Punto 2 / I3: la fuente (en español en params.json) queda dentro de «Source and note», plegado; no se ve en la franja.
     const franja = await page.locator("#controles").innerText();
     check(`marca ${m.id}: «Source and note» y «Units and measuring point» plegados en escritorio; la fuente no se ve en la franja fija`,
@@ -2495,7 +2787,7 @@ async function pruebasEscritorio(page, peticiones) {
     const textoLoc = (await page.locator("#bloque-localidades").textContent()).replace(/\s+/g, " "); // I5: la fuente va plegada
     check(
       "localidades del equipo listadas en texto con su fuente",
-      (await page.locator("#lista-localidades li").count()) === locs.length && locs.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(locs[0].fuente),
+      (await page.locator("#lista-localidades li").count()) === locs.length && locs.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(enIngles(locs[0])),
       `${locs.length} localidades`,
     );
     check("la leyenda dice «Team reference localities (not fields)»", textoLoc.includes("Team reference localities (not fields)"));
@@ -2631,7 +2923,7 @@ async function pruebasEscritorio(page, peticiones) {
     if (Array.isArray(p.memoria)) {
       const estados = await page.locator(".leyenda-memoria li").evaluateAll((xs) => xs.map((x) => x.dataset.estado));
       check(`leyenda de la memoria de ${id} con los seis estados`, ["perenne", "verano", "invierno", "doble", "descanso", "sin_dato"].every((e) => estados.includes(e)), estados.join(","));
-      const nota = await page.locator(".nota-fija").innerText();
+      const nota = await page.locator(".nota-fija").first().innerText();
       check(`nota fija de la memoria en ${id}`, nota.includes("Rule-based reading of monthly greenness; not a crop census."));
     }
     const glosario = await page.locator("#ficha .glosario").textContent();
@@ -2815,6 +3107,9 @@ async function pruebasTelefono(page, peticiones) {
   await pruebaContextoRegional(page, "teléfono: ", true);
   await pruebaGemelo3D(page, "teléfono: ", true);
   await pruebaAuditoriaMotor(page, "teléfono: ", true);
+  await pruebaInglesEnElOrigen(page, "teléfono: ");
+  await pruebaEcostress(page, "teléfono: ");
+  await pruebaGaez(page, "teléfono: ");
   check("teléfono: con el gemelo conectado, sin desplazamiento horizontal", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   await page.evaluate(() => window.scrollTo(0, 0));
   await verTodas(page);
@@ -3194,7 +3489,7 @@ async function pruebasDosZonas(page, v) {
   const textoLoc = (await page.locator("#bloque-localidades").textContent()).replace(/\s+/g, " "); // I5: la fuente va plegada
   check(
     "dos zonas: localidades listadas en texto con la leyenda y su fuente",
-    textoLoc.includes("Team reference localities (not fields)") && c.localidades.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(c.localidades[0].fuente),
+    textoLoc.includes("Team reference localities (not fields)") && c.localidades.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(enIngles(c.localidades[0])),
   );
   check("dos zonas: una etiqueta en el mapa por localidad", (await page.locator(".etiqueta-localidad").count()) === c.localidades.length);
   // Los marcadores de las protagonistas quedan por encima de las etiquetas de localidad (no se tapa su símbolo).
@@ -3266,6 +3561,7 @@ async function main() {
     await pruebaEnlaceDirecto(navegador, base, "", { viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" });
     await pruebaEnlaceDirecto(navegador, base, "teléfono: ", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
     await pruebaNDVIHuecos(navegador, base);
+    await pruebaGotaVacia(navegador, base);
 
     // Pantalla de inicio de tres pasos (visitante nuevo): en escritorio se cierra con Escape; en teléfono, con el botón.
     await pruebaInicio(navegador, base, { viewport: { width: 1366, height: 860 } }, "inicio, escritorio", "", "Escape");

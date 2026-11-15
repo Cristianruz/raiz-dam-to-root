@@ -98,6 +98,8 @@ export const ESTADOS = Object.freeze([
   Object.freeze({ clave: SIN_DATO, texto: "No data", letra: "?", trama: "puntos" }),
 ]);
 const CLAVES = new Set(ESTADOS.map((e) => e.clave));
+// Etiqueta de evidencia que es solo su código entre corchetes («[P]», «[V]», «[S]», «[NE]»).
+const SOLO_CODIGO = /^\[[A-Za-z]+\]$/;
 
 // Textos de la interfaz (inglés; sin cifras: los años, los conteos y el intervalo salen de los datos).
 const TEXTOS = Object.freeze({
@@ -279,9 +281,12 @@ export function crearLineaDeTiempo({ contenedor, gemelo, alCambiar, reducirMovim
 
   const notasDestacadas = [...destacados]
     .map(([anio, d]) => {
-      const fuente = d.fuente ? `<span lang="es">${esc(d.fuente)}</span>` : esc(TEXTOS.sinFuente);
+      // La cita en inglés (fuente_en, copia de params); la de español, marcada, solo si no hay traducción.
+      const fuente = d.fuente_en ? esc(d.fuente_en) : d.fuente ? `<span lang="es">${esc(d.fuente)}</span>` : esc(TEXTOS.sinFuente);
+      // Una etiqueta de evidencia sola («[P]») es un código, no un texto en español: va sin marca de idioma.
       const etiqueta = d.etiqueta
-        ? ` · <span class="tiempo-destacado-etiqueta">${esc(TEXTOS.etiqueta)} <span lang="es">${esc(d.etiqueta)}</span></span>`
+        ? ` · <span class="tiempo-destacado-etiqueta">${esc(TEXTOS.etiqueta)} ` +
+          `${SOLO_CODIGO.test(String(d.etiqueta)) ? esc(d.etiqueta) : `<span lang="es">${esc(d.etiqueta)}</span>`}</span>`
         : "";
       return (
         `<div class="tiempo-destacado tiempo-oculto" role="note" data-anio="${esc(anio)}">` +

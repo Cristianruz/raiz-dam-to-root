@@ -46,6 +46,8 @@ SALIDA_JSON = AQUI / "contexto_lleno.json"
 ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
 ROTULO = "DE PRUEBA (tests/fixtures/contexto_reto/generar.py): no es un dato ni tiene fuente real"
 GENERADO_PRUEBA = "2026-11-14T00:00:00+00:00"
+# Rótulo DE PRUEBA de ECOSTRESS en su línea de fuente (la resolución no es la real: prueba que la página la lee).
+AVISO_ECOSTRESS_PRUEBA = "satellite ET at 99 m on clear days, not a field measurement"
 FECHA_PRUEBA = "2026-11-14"
 
 PARAMS = json.loads((RAIZ / "data/params.json").read_text(encoding="utf-8"))
@@ -222,10 +224,16 @@ def ecostress_parcelas():
 
 
 def gaez_zona():
-    lineas = ["zona,cultivo,variable,valor,unidad,resolucion_m"]
+    """Tres indicadores de prueba por zona y, como en la entrega real, columnas adicionales: clase_nombre (el
+    nombre de una clase) y nota. El primer cultivo lleva además una fila con una unidad con multiplicador
+    («10kg de prueba/ha»), una fila de clase con su nombre y una nota: lo que la página escribe distinto."""
+    lineas = ["zona,cultivo,variable,valor,unidad,resolucion_m,clase_nombre,nota"]
+    primero = esquemas.CULTIVOS_GAEZ[0]
     for zona in ZONAS:
         for i, cultivo in enumerate(esquemas.CULTIVOS_GAEZ[:3], start=1):
-            lineas.append(f"{zona},{cultivo},Indicador de prueba,{40 + 10 * i},indice de prueba,9000")
+            lineas.append(f"{zona},{cultivo},Indicador de prueba,{40 + 10 * i},indice de prueba,9000,,")
+        lineas.append(f"{zona},{primero},Rendimiento de prueba,1234.5,10kg de prueba/ha,9000,,Nota de prueba del cultivo")
+        lineas.append(f"{zona},{primero},Clase de prueba,2,Class,9000,Alta de prueba,Nota de prueba del cultivo")
     return lineas
 
 
@@ -257,6 +265,9 @@ def fuente_de_prueba(nombre):
     """Texto de «fuente» DE PRUEBA de una entrega (el de fuentes.json). El de contexto_regional.csv
     es largo a propósito: un producto de prueba por cada fuente del contrato, con sus variables."""
     base = f"{nombre}: {ROTULO}"
+    if nombre == "ecostress_parcelas.csv":
+        # Como la línea real de LEEME, termina con el rótulo que la ficha pone a la vista (la resolución es de prueba).
+        return f"{base}; {AVISO_ECOSTRESS_PRUEBA}"
     if nombre != "contexto_regional.csv":
         return base
     productos = "; ".join(

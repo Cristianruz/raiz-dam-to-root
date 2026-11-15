@@ -182,6 +182,19 @@ test("htmlLeyendaTerreno: rótulo con la resolución de los datos, interruptor, 
   assert.match(html, /Source: MODELO DE PRUEBA \(X\/Y\/001\), 30 m, vía un servicio/);
   assert.doesNotMatch(html, /\b(first|only)\b/i);
 
+  // Con la cita en inglés del motor (terreno.fuente_en), la leyenda escribe esa y no la de español; la resolución
+  // del rótulo sale de la cita que se muestra.
+  const enIngles = htmlLeyendaTerreno({
+    gemelo: { terreno: { ...gemelo.terreno, fuente_en: "MODELO DE PRUEBA (X/Y/001), 30 m, via a service" } },
+    extremos: extremosDeElevacion(gemelo),
+    hayVelo: false,
+    nombreZona: (id) => nombres[id],
+    ids: { interruptor: "t-int", leyenda: "t-ley" },
+  });
+  assert.match(enIngles, /Source: MODELO DE PRUEBA \(X\/Y\/001\), 30 m, via a service/);
+  assert.doesNotMatch(enIngles, /vía/);
+  assert.match(enIngles, /Regional terrain, 30 m elevation model/);
+
   // Sin resolución en la fuente el rótulo no inventa la cifra; sin velo no se anuncia.
   const sinCifra = htmlLeyendaTerreno({
     gemelo: { terreno: { ...gemelo.terreno, fuente: null } },

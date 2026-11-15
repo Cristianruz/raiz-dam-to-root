@@ -42,10 +42,14 @@
 //       Tabla «Challenge data sources» (Resource · Agency · Role in ROOT · Status · Files), con el
 //       estado en símbolo y texto, ordenada (en uso, pedidas, no aplica) y un resumen cuyos conteos
 //       se calculan de contexto.recursos.
-//   evidenciaDeParcela({ contexto, id }) -> [{ etiqueta, texto, nota, lectura, fuente, archivo, fecha }]
+//   evidenciaDeParcela({ contexto, id, mesesCultivo }) -> [{ etiqueta, texto, nota, lectura, fuente, archivo, fecha }]
 //       Renglones para la ficha: la lectura de altura de GEDI y la ET de ECOSTRESS del último mes con
 //       dato. [] si los dos bloques son null. GEDI (rh, altura relativa) NO marca cero sobre suelo
 //       desnudo: el renglón no se rotula «canopy height» ni se presenta como altura del cultivo.
+//       ECOSTRESS: el valor, el mes y de cuántas escenas despejadas sale (ecostress.escenas_parcelas); la nota, a la vista,
+//       dice que es una estimación satelital y no una medición en la parcela (ecostress.aviso) y, si el calendario
+//       del modelo (mesesCultivo, de la opción ACTUAL del cubo) no tiene cultivo en ese mes, que el valor es el
+//       del campo sin cultivo. No se compara con el modelo (docs/revisiones/2026-11-15_ecostress.md).
 //         texto    lo que GEDI vio. Si la sesión de datos entregó su criterio (gedi.criterios, de
 //                  supuestos.json), empieza con la lectura: «tall canopy seen», «no tall canopy seen»
 //                  o «too few shots to tell»; después, la mediana, los disparos y el decil alto.
@@ -109,6 +113,12 @@ export const NOTA_GEDI =
   "GEDI does not read zero on bare ground: a low value means low or no canopy. It tells an orchard from a low crop; it does not measure crop height.";
 export const NOTA_GEDI_SIN_DISPAROS =
   "GEDI samples the ground with separate laser shots, so many fields have none. This is no data, not zero.";
+// Aviso de ECOSTRESS cuando contexto.json no trae el rótulo de la entrega (ecostress.aviso, que dice la resolución):
+// el mismo sentido, sin la cifra (ninguna cifra se escribe aquí).
+export const AVISO_ECOSTRESS = "Satellite estimate on clear days, not a field measurement.";
+// Cuando el calendario del modelo de la rotación actual no tiene cultivo en el mes del valor mostrado.
+export const NOTA_ECOSTRESS_SIN_CULTIVO =
+  "The crop calendar has no crop on this field in that month: the value is for the field without a crop.";
 const TEXTO_NO_DISPONIBLE = "Not available yet";
 const TEXTO_SIN_CONTEXTO = "Regional context: not available yet.";
 const TEXTO_ELIJA_ZONA = "Choose one pilot area to see its regional context.";
@@ -153,6 +163,7 @@ const ALTO_CLAVE = 12;
 const RADIO_CLAVE = 3.5;
 const BORDE_TEXTO = 40; // a menos de esto del borde, el rótulo del año se alinea hacia adentro
 const METROS_POR_KM = 1000;
+const MESES_DEL_CALENDARIO = 12; // meses_cultivo del cubo: una marca por mes, de enero a diciembre
 const ANIO_DE_REFERENCIA = 2000; // un año bisiesto, para ordenar fechas «MM-DD» y admitir el 29 de febrero
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 const CERO = String(0);
@@ -790,11 +801,48 @@ export function lecturaDeGedi({ contexto, id } = {}) {
 }
 
 /**
+ * Índice (enero = cero) del mes de un texto «AAAA-MM»; null si no tiene esa forma.
+ */
+function indiceDeMes(mes) {
+  const m = /^\d{4}-(\d{2})$/.exec(String(mes ?? ""));
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isInteger(n) && n >= 1 && n <= MESES_DEL_CALENDARIO ? n - 1 : null;
+}
+
+/**
+ * ¿El calendario del modelo de la rotación actual (opción ACTUAL del cubo, meses_cultivo: una marca por mes, de enero
+ * a diciembre) NO tiene cultivo en ese mes? true solo si el calendario trae los doce meses y el del valor está en
+ * falso; sin calendario (parcela no clasificada) o con el mes con cultivo, false. No compara con ningún umbral.
+ */
+export function sinCultivoEnElMes(mesesCultivo, mes) {
+  const i = indiceDeMes(mes);
+  if (i == null || !Array.isArray(mesesCultivo) || mesesCultivo.length !== MESES_DEL_CALENDARIO) return false;
+  return !mesesCultivo[i];
+}
+
+/**
+ * Texto del valor de ECOSTRESS de un mes: «2.11 mm/day in Aug 2026, from 2 clear-sky scenes». Con una sola escena,
+ * «from 1 clear-sky scene» (un valor de una escena no es una mediana). Sin el número de escenas en los datos, solo
+ * el valor y el mes. Todas las cifras salen de contexto.json.
+ */
+export function textoEcostress(valor, mes, escenas) {
+  const base = `${formatoNumero(valor)} mm/day in ${etiquetaMes(mes)}`;
+  const n = num(escenas);
+  return n != null && n > 0 ? `${base}, from ${formatoNumero(n)} clear-sky ${plural(n, "scene", "scenes")}` : base;
+}
+
+/**
  * Renglones de evidencia de una parcela para la ficha; [] si GEDI y ECOSTRESS aún no llegan.
  * Cada renglón: { etiqueta, texto, nota, lectura, fuente, archivo, fecha }. «nota» (texto o null) va
- * siempre junto al valor: la de GEDI evita leer el piso del instrumento como la altura de un cultivo.
+ * siempre junto al valor: la de GEDI evita leer el piso del instrumento como la altura de un cultivo; la de
+ * ECOSTRESS dice que es una estimación satelital y no una medición en la parcela (el rótulo de la entrega,
+ * ecostress.aviso, con su resolución; si el archivo no lo trae, AVISO_ECOSTRESS, sin cifra).
+ * `mesesCultivo` (opcional): el calendario del modelo de la rotación actual de la parcela (opción ACTUAL del cubo,
+ * meses_cultivo). Si ese calendario no tiene cultivo en el mes del valor de ECOSTRESS, el renglón lo dice
+ * (NOTA_ECOSTRESS_SIN_CULTIVO, al final de la nota): el valor es el del campo sin cultivo. No se elige otro mes.
  */
-export function evidenciaDeParcela({ contexto, id } = {}) {
+export function evidenciaDeParcela({ contexto, id, mesesCultivo } = {}) {
   const lista = [];
   const gedi = contexto && contexto.gedi;
   if (gedi) {
@@ -818,12 +866,15 @@ export function evidenciaDeParcela({ contexto, id } = {}) {
   const eco = contexto && contexto.ecostress;
   if (eco) {
     const ultimo = ultimoMesConDato(eco.meses, (eco.parcelas || {})[id]);
+    // Escenas despejadas detrás del valor de ese mes (ecostress.escenas_parcelas, alineada a «meses» como los valores).
+    const escenas = ultimo ? ((eco.escenas_parcelas || {})[id] || [])[(eco.meses || []).indexOf(ultimo.mes)] : null;
+    const sinCultivo = Boolean(ultimo) && sinCultivoEnElMes(mesesCultivo, ultimo.mes);
+    const aviso = typeof eco.aviso === "string" && eco.aviso.trim() ? `${eco.aviso.trim().replace(/\.$/, "")}.` : AVISO_ECOSTRESS;
     lista.push({
       etiqueta: "Evapotranspiration (ECOSTRESS)",
-      texto: ultimo
-        ? `${formatoNumero(ultimo.valor)} mm/day, median of the clear scenes of ${etiquetaMes(ultimo.mes)}`
-        : "ECOSTRESS: no clear scene over this field",
-      nota: null,
+      texto: ultimo ? textoEcostress(ultimo.valor, ultimo.mes, escenas) : "ECOSTRESS: no clear scene over this field",
+      // A la vista junto al valor, como la nota de GEDI: estimación satelital, no una medición en la parcela.
+      nota: ultimo ? [aviso, sinCultivo ? NOTA_ECOSTRESS_SIN_CULTIVO : ""].filter(Boolean).join(" ") : null,
       lectura: null,
       fuente: eco.fuente || null,
       archivo: eco.archivo || null,
@@ -1263,8 +1314,15 @@ function htmlTarjetaGaez(contexto, zonaId, nivel, nombres) {
     .map((f) => {
       const resolucion = formatoResolucion(f.resolucion_m);
       const escala = !unaEscala && resolucion ? ` <span class="contexto-equivalente">${esc(resolucion)} grid</span>` : "";
-      return `<tr><th scope="row">${esc(nombreCultivo(f.cultivo, nombres))}</th><td>${esc(f.variable)}</td><td>${esc(conUnidad(formatoNumero(f.valor), f.unidad))}${escala}</td></tr>`;
+      return `<tr><th scope="row">${esc(nombreCultivo(f.cultivo, nombres))}</th><td>${esc(f.variable)}</td><td>${esc(valorGaez(f))}${escala}</td></tr>`;
     })
+    .join("");
+  // Notas de la entrega (columna «nota»; p. ej. que el maíz de GAEZ es de grano): una vez por cultivo, bajo la tabla.
+  const vistas = new Set();
+  const notasEntrega = filas
+    .filter((f) => typeof f.nota === "string" && f.nota.trim())
+    .filter((f) => !vistas.has(`${f.cultivo}|${f.nota}`) && vistas.add(`${f.cultivo}|${f.nota}`))
+    .map((f) => `<p class="contexto-tarjeta-nota contexto-gaez-nota" data-cultivo="${esc(f.cultivo)}"><b>${esc(nombreCultivo(f.cultivo, nombres))}:</b> ${esc(f.nota.trim())}</p>`)
     .join("");
   const escalaComun = unaEscala ? `<p class="contexto-meta"><span>Regional, ${esc(resoluciones[0])} grid</span></p>` : "";
   const fuente = htmlFuenteCorta(citasDeGaez(contexto, zonaId));
@@ -1274,8 +1332,24 @@ function htmlTarjetaGaez(contexto, zonaId, nivel, nombres) {
         <thead><tr><th scope="col">Crop</th><th scope="col">Indicator</th><th scope="col">Value</th></tr></thead>
         <tbody>${cuerpo}</tbody>
       </table>
-      ${escalaComun}${fuente}${nota}
+      ${notasEntrega}${escalaComun}${fuente}${nota}
     </article>`;
+}
+
+/**
+ * Valor de una fila de GAEZ como texto. Tres casos, todos con lo que trae contexto.json:
+ * - una clase con nombre (clase_nombre): «High (class 2)», el nombre y, entre paréntesis, la unidad y el número;
+ * - una unidad de FAO con multiplicador pegado («10kg DW/ha»), que el motor ya pasó a toneladas (valor_mostrar y
+ *   unidad_mostrar): «16.8 t DW/ha»;
+ * - lo demás, el valor con su unidad tal como los publica FAO.
+ */
+export function valorGaez(f) {
+  if (!f) return "—";
+  if (typeof f.clase_nombre === "string" && f.clase_nombre.trim()) {
+    return `${f.clase_nombre.trim()} (${conUnidad(String(f.unidad ?? "").toLowerCase(), formatoNumero(f.valor)).trim()})`;
+  }
+  if (num(f.valor_mostrar) != null && f.unidad_mostrar) return conUnidad(formatoNumero(f.valor_mostrar), f.unidad_mostrar);
+  return conUnidad(formatoNumero(f.valor), f.unidad);
 }
 
 /** Ancho en píxeles al que se dibuja la gráfica de un lienzo. */

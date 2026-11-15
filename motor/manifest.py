@@ -5,6 +5,9 @@ Contenido:
 - fuentes_de_origen[]: copia de data/processed/fuentes.json (lo escribe
   motor/ensamblar.py con archivo, URL o API, fecha de consulta y sha256).
   Si no existe, lista vacía.
+- idioma_fuentes: idioma del texto «fuente» de esas entregas (las líneas de
+  LEEME.md del buzón), para que «About & Data» y «Twin status» lo marquen con
+  su atributo «lang» (el mismo campo que contexto.json y suelo.json).
 - cifras{}: una entrada por cada número que muestra la web, con
   clave (ruta JSON dentro del archivo), archivo, valor, fuente, fecha,
   script, etiqueta y mock.
@@ -32,7 +35,8 @@ De dónde sale cada campo:
   registra igual (con la fuente del archivo) y se avisa en «avisos»: nunca se salta en silencio.
 - web/data/pruebas.json (motor/pruebas_web.py, paso 5c de construir.py): las cifras de «About & Data»
   (métricas de cada prueba, número de la prueba, criterios y textos con cifras), con la fuente citada en
-  cada una. construir.py vuelve a generar el manifest después del paso 5c para que entren las de la
+  cada una; el detalle de cada paso de la puerta en español (docs/pruebas.md) y en inglés (detalle_en,
+  docs/en/test_results.md). construir.py vuelve a generar el manifest después del paso 5c para que entren las de la
   corrida actual.
 - Escenario de goteo de La gota (gota_goteo_con_tope, gota_goteo_sin_tope y tope_consumo de cada
   opción; kit X3.1): la fuente y la etiqueta de las eficiencias de data/processed/supuestos.json
@@ -74,10 +78,10 @@ from pathlib import Path
 
 try:  # como módulo (construir.py, pruebas) o como script (python motor/manifest.py)
     from motor.relieve_web import ZONA_POR_OMISION
-    from motor.contexto_web import tramo_de_fuente
+    from motor.contexto_web import IDIOMA_FUENTES, tramo_de_fuente
 except ImportError:  # pragma: no cover - depende de cómo se llame
     from relieve_web import ZONA_POR_OMISION
-    from contexto_web import tramo_de_fuente
+    from contexto_web import IDIOMA_FUENTES, tramo_de_fuente
 
 RAIZ = Path(__file__).resolve().parent.parent
 ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
@@ -748,11 +752,12 @@ def tiene_digito(v):
 
 
 def textos_con_digitos(obj, ruta):
-    """[(ruta, texto)] de los textos que llevan algún dígito, sin contar fuentes ni etiquetas."""
+    """[(ruta, texto)] de los textos que llevan algún dígito, sin contar fuentes ni etiquetas (tampoco su
+    variante en inglés, fuente_en y etiqueta_en: es la misma cita, no una cifra de la página)."""
     salida = []
     if isinstance(obj, dict):
         for k, v in obj.items():
-            if k.endswith("fuente") or k.endswith("etiqueta"):
+            if k.endswith(("fuente", "etiqueta", "fuente_en", "etiqueta_en")):
                 continue
             salida += textos_con_digitos(v, f"{ruta}.{k}")
     elif isinstance(obj, list):  # p. ej. la secuencia de una opción del catálogo de B3
@@ -971,8 +976,13 @@ def cifras_de_una_prueba(m, p, base, fuente_criterios, fecha, script):
             m.agregar(ARCHIVO_PRUEBAS, f"{base}.nota", p["nota"], f_prueba, fecha, script, ETIQUETA_DOCUMENTO, False)
 
 
+# Tabla en inglés de la puerta (la escribe construir.py junto a docs/pruebas.md, con los mismos valores).
+FUENTE_PUERTA_EN = "docs/en/test_results.md"
+
+
 def cifras_de_puerta(m, pruebas, fecha, script):
-    """Puerta automática (docs/pruebas.md) y fecha de generación de pruebas.json."""
+    """Puerta automática (docs/pruebas.md; el detalle en inglés, docs/en/test_results.md) y fecha de generación
+    de pruebas.json."""
     puerta = pruebas.get("puerta") or {}
     f_puerta = puerta.get("fuente") or "docs/pruebas.md"
     if tiene_digito(puerta.get("corrida")):
@@ -981,6 +991,10 @@ def cifras_de_puerta(m, pruebas, fecha, script):
     for j, paso in enumerate(puerta.get("pasos") or []):
         if isinstance(paso, dict) and tiene_digito(paso.get("detalle")):
             m.agregar(ARCHIVO_PRUEBAS, f"puerta.pasos[{j}].detalle", paso["detalle"], f_puerta,
+                      puerta.get("corrida") or fecha, "construir.py", ETIQUETA_CORRIDA, False)
+        # El mismo detalle en inglés (el que muestra «About & Data»): la tabla en inglés de la misma corrida.
+        if isinstance(paso, dict) and tiene_digito(paso.get("detalle_en")):
+            m.agregar(ARCHIVO_PRUEBAS, f"puerta.pasos[{j}].detalle_en", paso["detalle_en"], FUENTE_PUERTA_EN,
                       puerta.get("corrida") or fecha, "construir.py", ETIQUETA_CORRIDA, False)
     if tiene_digito(fecha):
         m.agregar(ARCHIVO_PRUEBAS, "generado", fecha, ARCHIVO_PRUEBAS, fecha, script, ETIQUETA_CORRIDA, False)
@@ -1111,6 +1125,8 @@ def generar(raiz=RAIZ, escribir=True, hoy=None):
                     "fuentes_de_origen": len(fuentes_origen), "avisos": len(m.avisos)},
         "avisos": m.avisos,
         "fuentes_de_origen": fuentes_origen,
+        # Idioma del texto «fuente» de cada entrega (las líneas de LEEME.md del buzón): la página lo marca con «lang».
+        "idioma_fuentes": IDIOMA_FUENTES,
         "_nota_cifras": "Agrupadas por patrón de ruta: parcelas.<id> -> parcelas.*, zonas.<id> -> zonas.*, índices [n] -> [*]. Cada patrón lleva su fuente, fecha, script, etiqueta, número de valores y rango (los textos con cifras, en «textos»); así el manifiesto no crece con el número de parcelas ni de zonas.",
         "cifras": cifras,
     }

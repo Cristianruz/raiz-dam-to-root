@@ -562,16 +562,145 @@ def test_lleno_ecostress_alineado_a_los_meses(lleno):
     assert set(eco["parcelas"]["L0002"]) == {None}
 
 
+def test_ecostress_lleva_las_escenas_de_cada_valor(lleno):
+    """Revisión independiente de ECOSTRESS (docs/revisiones/2026-11-15_ecostress.md, I1): la ficha dice de cuántas
+    escenas sale cada valor. «escenas_parcelas» va alineada a «meses», como los valores, y es la columna n_escenas del CSV."""
+    eco = lleno["contexto"]["ecostress"]
+    assert set(eco["escenas_parcelas"]) == set(eco["parcelas"])
+    with (lleno["processed"] / "ecostress_parcelas.csv").open(encoding="utf-8", newline="") as f:
+        filas = list(csv.DictReader(f))
+    assert filas, "la fixture trae filas"
+    for fila in filas:
+        i = eco["meses"].index(fila["mes"])
+        assert eco["escenas_parcelas"][fila["id"]][i] == int(fila["n_escenas"]), (fila["id"], fila["mes"])
+        # Sin escenas no hay valor (regla del esquema): el cero se conserva, no se vuelve null.
+        if int(fila["n_escenas"]) == 0:
+            assert eco["parcelas"][fila["id"]][i] is None
+    assert any(n and n > 1 for serie in eco["escenas_parcelas"].values() for n in serie), "la fixture trae meses con varias escenas"
+    # El contraste con el modelo de la entrega no se lleva a la página (I3 de la revisión).
+    texto = json.dumps(eco, ensure_ascii=False)
+    assert "etc_modelo" not in texto and "razon" not in texto
+
+
+def test_ecostress_aviso_sale_de_la_linea_de_la_entrega(lleno):
+    """El aviso que la ficha pone a la vista es el rótulo de la propia entrega (el tramo de su línea de LEEME que
+    dice «not a field measurement»), con su resolución: ninguna cifra se escribe en el JavaScript ni en el motor."""
+    eco = lleno["contexto"]["ecostress"]
+    esperado = GEN.AVISO_ECOSTRESS_PRUEBA
+    assert eco["aviso"] == esperado[:1].upper() + esperado[1:]
+    assert cw.aviso_de_ecostress("producto; satellite ET at 70 m on clear days, not a field measurement; crudo") == \
+        "Satellite ET at 70 m on clear days, not a field measurement"
+    # Una línea que no trae el rótulo: null (la página usa su aviso sin resolución); nunca se inventa uno.
+    assert cw.aviso_de_ecostress("NASA ECOSTRESS ECO_L3T_JET.002 via AppEEARS") is None
+    assert cw.aviso_de_ecostress(None) is None
+
+
+def test_ecostress_sin_cultivo_del_calendario_coincide_con_la_entrega():
+    """La ficha dice «the crop calendar has no crop on this field in that month» cuando el calendario del modelo de
+    la rotación actual (cubo → opción ACTUAL → meses_cultivo) no tiene cultivo en el mes del valor de ECOSTRESS que
+    muestra (el último con dato). La entrega dice lo mismo por su lado: en esos meses no calcula la ETc del modelo
+    (etc_modelo_mm vacío; datos/colab/E1_ecostress_parcelas.py: «solo parcelas clasificadas y días dentro del
+    ciclo del cultivo»). Aquí se cruzan las dos lecturas con los datos reales: donde la ficha pone la nota, la
+    entrega no trae ETc del modelo. La página no lee etc_modelo_mm ni compara con él."""
+    ruta, cubo_ruta = RAIZ / "data/processed/ecostress_parcelas.csv", RAIZ / "web/data/cubo.json"
+    if not ruta.exists() or not cubo_ruta.exists():
+        pytest.skip("sin ecostress_parcelas.csv o sin cubo.json")
+    with ruta.open(encoding="utf-8", newline="") as f:
+        filas = list(csv.DictReader(f))
+    if "etc_modelo_mm" not in filas[0]:
+        pytest.skip("la entrega no trae la columna adicional etc_modelo_mm")
+    cubo = json.loads(cubo_ruta.read_text(encoding="utf-8"))
+    ultimo = {}   # id -> fila del último mes con dato (el que muestra la ficha)
+    for fila in filas:
+        if fila["et_mm_dia"].strip() and fila["mes"] >= ultimo.get(fila["id"], {"mes": ""})["mes"]:
+            ultimo[fila["id"]] = fila
+    con_nota, sin_nota = 0, 0
+    for pid, fila in ultimo.items():
+        actual = next((o for o in cubo["parcelas"].get(pid, {}).get("opciones", []) if o["id"] == "ACTUAL"), None)
+        meses = (actual or {}).get("meses_cultivo")
+        if not isinstance(meses, list) or len(meses) != cw.MESES_DEL_ANIO:
+            continue   # parcela sin clasificar: la ficha no dice nada del calendario
+        if not meses[int(fila["mes"][5:7]) - 1]:
+            con_nota += 1
+            assert fila["etc_modelo_mm"].strip() == "", \
+                f"{pid} {fila['mes']}: el calendario no tiene cultivo, pero la entrega trae ETc del modelo"
+        else:
+            sin_nota += 1
+    assert con_nota and sin_nota, "los datos reales ejercitan los dos casos (con y sin cultivo en el mes mostrado)"
+
+
+def test_ecostress_real_trae_escenas_y_aviso():
+    """Con la entrega real: cada valor con sus escenas (las del CSV) y el aviso con la resolución que dice la línea."""
+    ruta = RAIZ / "data/processed/ecostress_parcelas.csv"
+    web = RAIZ / "web/data/contexto.json"
+    if not ruta.exists() or not web.exists():
+        pytest.skip("sin ecostress_parcelas.csv o sin contexto.json")
+    eco = json.loads(web.read_text(encoding="utf-8"))["ecostress"]
+    with ruta.open(encoding="utf-8", newline="") as f:
+        filas = list(csv.DictReader(f))
+    for fila in filas:
+        i = eco["meses"].index(fila["mes"])
+        assert eco["escenas_parcelas"][fila["id"]][i] == int(fila["n_escenas"])
+        assert (eco["parcelas"][fila["id"]][i] is None) == (fila["et_mm_dia"].strip() == "")
+    assert eco["aviso"] and "not a field measurement" in eco["aviso"] and eco["aviso"] in eco["fuente"].replace(
+        eco["aviso"][:1].lower() + eco["aviso"][1:], eco["aviso"])
+
+
 def test_lleno_gaez_y_heladas(lleno):
     gaez = lleno["contexto"]["gaez"]
     assert set(gaez["zonas"]) == set(ZONAS) and gaez["fuente"]
+    base = {"cultivo", "variable", "valor", "unidad", "resolucion_m"}
+    # Campos opcionales: solo en las filas donde la entrega los trae (o donde la unidad lleva multiplicador).
+    opcionales = {"clase_nombre", "nota", "valor_mostrar", "unidad_mostrar"}
     for filas in gaez["zonas"].values():
-        assert [set(f) for f in filas] == [{"cultivo", "variable", "valor", "unidad", "resolucion_m"}] * len(filas)
+        assert all(base <= set(f) <= base | opcionales for f in filas)
         assert all(f["cultivo"] in esquemas.CULTIVOS_GAEZ and isinstance(f["valor"], float) for f in filas)
+        # Las tres filas sin columnas adicionales quedan como antes.
+        assert [set(f) for f in filas[:3]] == [base] * 3
+        # Unidad con multiplicador («10kg …/ha»): el mismo valor en toneladas, y el de FAO intacto.
+        [decenas] = [f for f in filas if f["unidad"].startswith("10kg")]
+        assert decenas["valor"] == 1234.5 and decenas["unidad"] == "10kg de prueba/ha"
+        assert decenas["valor_mostrar"] == pytest.approx(decenas["valor"] * 10 / cw.KG_POR_TONELADA)
+        assert decenas["unidad_mostrar"] == "t de prueba/ha" and decenas["nota"] == "Nota de prueba del cultivo"
+        # Clase con nombre: el nombre llega; el valor y la unidad no cambian ni se pasan a toneladas.
+        [clase] = [f for f in filas if f.get("clase_nombre")]
+        assert (clase["clase_nombre"], clase["valor"], clase["unidad"]) == ("Alta de prueba", 2.0, "Class")
+        assert "valor_mostrar" not in clase
     heladas = lleno["contexto"]["heladas"]
     original = json.loads((lleno["processed"] / "heladas.json").read_text(encoding="utf-8"))
     assert {k: v for k, v in heladas.items() if k != "entrega"} == original, "el contenido de heladas.json, tal cual"
     assert heladas["entrega"]["fuente"] and heladas["entrega"]["fecha"] == GEN.FECHA_PRUEBA
+
+
+def test_gaez_en_toneladas_solo_con_multiplicador():
+    """«10kg DW/ha» → t DW/ha con la definición del SI; una unidad sin multiplicador o un valor vacío no se tocan."""
+    assert cw.en_toneladas(1678.5, "10kg DW/ha") == {"valor_mostrar": 16.785, "unidad_mostrar": "t DW/ha"}
+    assert cw.en_toneladas(9341.0, "kg DW/ha") == {}
+    assert cw.en_toneladas(913.0, "kg lint/ha") == {}
+    assert cw.en_toneladas(2.0, "Class") == {}
+    assert cw.en_toneladas(None, "10kg DW/ha") == {}
+
+
+def test_gaez_real_lleva_clase_nota_y_toneladas():
+    """Hallazgo 15 de la sesión de datos (datos/PARA_INTEGRADOR.md, 14-nov 22:20): con la entrega real, la alfalfa
+    va en t DW/ha, cada clase con su nombre y el maíz con la nota de que GAEZ evalúa maíz de grano."""
+    ruta = RAIZ / "data/processed/gaez_zona.csv"
+    web = RAIZ / "web/data/contexto.json"
+    if not ruta.exists() or not web.exists():
+        pytest.skip("sin gaez_zona.csv o sin contexto.json")
+    gaez = json.loads(web.read_text(encoding="utf-8"))["gaez"]
+    with ruta.open(encoding="utf-8", newline="") as f:
+        filas = list(csv.DictReader(f))
+    for fila in filas:
+        [r] = [x for x in gaez["zonas"][fila["zona"]] if (x["cultivo"], x["variable"]) == (fila["cultivo"], fila["variable"].strip())]
+        assert r.get("clase_nombre", "") == fila["clase_nombre"].strip()
+        assert r.get("nota", "") == fila["nota"].strip()
+        assert (r["valor"], r["unidad"]) == (float(fila["valor"]), fila["unidad"].strip()), "valor y unidad de FAO, intactos"
+        if fila["unidad"].strip().startswith("10kg"):
+            assert r["unidad_mostrar"] == "t " + fila["unidad"].strip()[len("10kg"):].strip()
+            assert r["valor_mostrar"] == pytest.approx(float(fila["valor"]) * 10 / cw.KG_POR_TONELADA)
+        else:
+            assert "valor_mostrar" not in r and "unidad_mostrar" not in r
 
 
 def test_et_contraste_lleva_la_zona_del_archivo_sin_sufijo(lleno):

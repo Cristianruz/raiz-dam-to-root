@@ -94,16 +94,26 @@ test("leyenda: frases fijas y cifras solo de gemelo.json", { skip: gemelo ? fals
   const texto = html.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&");
   for (const frase of ["Column height = water the current rotation asks for per hectare", "Blue: covered by the chosen allocation · Red: not covered", "Flat grey: not classified"]) assert.ok(texto.includes(frase), frase);
   const fmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 3 });
-  assert.ok(texto.includes(gemelo.terreno.rotulo) && texto.includes(gemelo.terreno.fuente));
+  // La leyenda escribe la cita en inglés del motor (terreno.fuente_en) y, si el archivo no la trae, la de español.
+  const fuenteLeyenda = gemelo.terreno.fuente_en ?? gemelo.terreno.fuente;
+  assert.ok(texto.includes(gemelo.terreno.rotulo) && texto.includes(fuenteLeyenda));
   assert.ok(texto.includes(`×${fmt.format(gemelo.terreno.exageracion)}`));
   assert.ok(texto.includes(`${fmt.format(gemelo.columnas.metros_por_millar)} m of height`));
   let resto = texto;
-  for (const t of [gemelo.terreno.rotulo, gemelo.terreno.fuente, gemelo.columnas.nota, gemelo.columnas.etiqueta, `×${fmt.format(gemelo.terreno.exageracion)}`, `${fmt.format(gemelo.columnas.metros_por_millar)} m of height`]) if (t) resto = resto.split(t).join(" ");
+  for (const t of [gemelo.terreno.rotulo, fuenteLeyenda, gemelo.columnas.nota, gemelo.columnas.etiqueta, `×${fmt.format(gemelo.terreno.exageracion)}`, `${fmt.format(gemelo.columnas.metros_por_millar)} m of height`]) if (t) resto = resto.split(t).join(" ");
   assert.doesNotMatch(resto, /\d/, "todo dígito de la leyenda viene de gemelo.json");
   assert.doesNotMatch(texto, /\b(first|only)\b/i);
-  // La etiqueta de diseño se lee en inglés y la fuente, escrita en español, va marcada lang="es" (WCAG 3.1.2).
+  // La etiqueta de diseño se lee en inglés. La fuente: en inglés y sin marca si el archivo trae fuente_en; si no, la
+  // de español marcada lang="es" (WCAG 3.1.2).
   if (gemelo.columnas.etiqueta === "Diseño") assert.ok(texto.includes("Label: design choice") && !texto.includes("Diseño"), "etiqueta en inglés");
-  if (gemelo.terreno.fuente) assert.ok(html.includes(`<span lang="es">${gemelo.terreno.fuente}</span>`), "fuente con lang=es");
+  if (gemelo.terreno.fuente_en) {
+    assert.ok(html.includes(`Source: ${gemelo.terreno.fuente_en}</p>`) && !html.includes('lang="es"'), "fuente en inglés, sin lang=es");
+    assert.ok(gemelo.terreno.fuente === gemelo.terreno.fuente_en || !texto.includes(gemelo.terreno.fuente), "no la de español");
+  }
+  const soloEs = structuredClone(gemelo);
+  delete soloEs.terreno.fuente_en;
+  const htmlEs = crearGemelo3D({ mapa: null, gemelo: soloEs, reglas }).leyendaHTML();
+  if (gemelo.terreno.fuente) assert.ok(htmlEs.includes(`<span lang="es">${gemelo.terreno.fuente}</span>`), "sin fuente_en: la de español con lang=es");
 });
 
 test("leyenda por zona: cada zona con SU exageración; sin la suya, la general", { skip: gemelo?.terreno ? false : "gemelo.json sin terreno" }, () => {

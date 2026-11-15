@@ -147,6 +147,11 @@ UMBRAL_HELADA = "prob_helada_max"
 UMBRAL_EDAD = "edad_min_anios"
 # Llave opcional de un filtro de B3: {rotación: texto en inglés} que se suma al motivo SOLO en esa rotación.
 TEXTO_POR_OPCION = "texto_por_opcion_en"
+# Las líneas de LEEME.md del buzón y los textos de «fuente» de opciones_b3.json y supuestos.json llegan en inglés
+# desde la reentrega del 15-nov (buzón v11); antes iban en español. El cubo lo declara en meta.idioma_fuentes para
+# que la página marque esos textos con su idioma (el mismo campo que contexto.json y suelo.json). Los textos que
+# salen de data/params.json (en español) llevan aparte su variante en inglés (fuente_en, nota_en…).
+IDIOMA_FUENTES = "en"
 # Decisión docs/decisiones/2026-11-15_correcciones_motor.md §2: una opción solo lleva los filtros de los cultivos de
 # su secuencia PUBLICADA (la de A5, con la que se calculó su agua). B3 no dice de qué cultivo habla cada filtro; estos
 # dos hablan de la alfalfa que la tabla oficial vuelve a sembrar al final de avena_maiz y que A5 no cuenta.
@@ -261,8 +266,11 @@ def bloque_localidades(params, avisos):
     if not loc or not loc.get("valor"):
         avisos.append("params.zona_piloto.localidades_equipo no existe: «localidades» queda vacía")
         return []
+    if loc.get("fuente") and not loc.get("fuente_en"):
+        avisos.append("data/params.json no trae la variante en inglés de: zona_piloto.localidades_equipo.fuente_en; "
+                      "queda en null (la página muestra el texto en español)")
     return [{"nombre": x["nombre"], "municipio": x.get("municipio"), "lat": x["lat"], "lon": x["lon"],
-             "fuente": loc.get("fuente")} for x in loc["valor"]]
+             "fuente": loc.get("fuente"), "fuente_en": loc.get("fuente_en")} for x in loc["valor"]]
 
 
 # ---------------------------------------------------------------------------
@@ -372,10 +380,16 @@ def bloque_gota(area_ha, l50_millares, neta_mm, params, m3_millar, flujos=None):
     if f is None:
         return None
     return _bloque(f["salen"], f["llegan"], f["et"], f["ret"], [
-        f"Conduction efficiency: params.eficiencia.conduccion (mean; {params['eficiencia']['conduccion']['fuente']})",
-        f"Return coefficient applied to dam outflow: params.gota.c_retorno_superficial ({params['gota']['c_retorno_superficial']['fuente']})",
+        f"Conduction efficiency: params.eficiencia.conduccion (mean; {fuente_en(params['eficiencia']['conduccion'])})",
+        f"Return coefficient applied to dam outflow: params.gota.c_retorno_superficial ({fuente_en(params['gota']['c_retorno_superficial'])})",
         "Crop consumption = net irrigation requirement (ETc − effective rain) from A5",
     ])
+
+
+def fuente_en(entrada):
+    """La cita de una entrada de data/params.json para un texto en inglés: su «fuente_en» si la trae; si no,
+    su «fuente» (en español). Las cifras de las dos son las mismas (tests/test_textos_en.py)."""
+    return entrada.get("fuente_en") or entrada.get("fuente")
 
 
 # ---------------------------------------------------------------------------
@@ -770,19 +784,36 @@ def filtros_de_opcion(rot_ref, b3, bloque_heladas, edad=None, nombres_en=None):
 def completar_distrito_dotaciones(distrito, dotaciones, params, avisos):
     """Agrega a los bloques «distrito» y «dotaciones» (motor/simulados.py los arma desde params) lo que la
     página necesita para no escribir nada a mano: la etiqueta de La Boquilla y del acuífero tal como está
-    en params, y la variante en inglés de los textos en español (nota_en, equivalencia_en,
-    punto_medicion_en). Solo agrega campos; los que ya existen no cambian. Lo que params no traiga queda
-    en null y se avisa."""
+    en params, y la variante en inglés de los textos en español (nota_en, fuente_en, equivalencia_en,
+    punto_medicion_en; fuente_namo_en, fuente_almacenamiento_en y fuente_en del acuífero). Solo agrega campos; los
+    que ya existen no cambian. Lo que params no traiga queda en null y se avisa."""
     d = params["distrito"]
+    acuifero = params["acuifero"]["disponibilidad_hm3_anio"]
     distrito["boquilla"]["etiqueta_namo"] = d["namo_hm3"].get("etiqueta")
     distrito["boquilla"]["etiqueta_almacenamiento"] = d["almacenamiento_hm3"].get("etiqueta")
-    distrito["acuifero_0831"]["etiqueta"] = params["acuifero"]["disponibilidad_hm3_anio"].get("etiqueta")
+    distrito["acuifero_0831"]["etiqueta"] = acuifero.get("etiqueta")
     faltan = []
+    # La cita de cada cifra en inglés (campo paralelo; la de español queda igual).
+    distrito["boquilla"]["fuente_namo_en"] = d["namo_hm3"].get("fuente_en")
+    distrito["boquilla"]["fuente_almacenamiento_en"] = d["almacenamiento_hm3"].get("fuente_en")
+    distrito["acuifero_0831"]["fuente_en"] = acuifero.get("fuente_en")
+    for ruta, entrada in (("distrito.namo_hm3", d["namo_hm3"]), ("distrito.almacenamiento_hm3", d["almacenamiento_hm3"]),
+                          ("acuifero.disponibilidad_hm3_anio", acuifero)):
+        if entrada.get("fuente") and not entrada.get("fuente_en"):
+            faltan.append(f"{ruta}.fuente_en")
     dz = params["dotaciones"]
     for marca in dotaciones["marcas"]:
         marca["nota_en"] = dz[marca["id"]].get("nota_en")
         if marca.get("nota") and not marca["nota_en"]:
             faltan.append(f"dotaciones.{marca['id']}.nota_en")
+        marca["fuente_en"] = dz[marca["id"]].get("fuente_en")
+        if marca.get("fuente") and not marca["fuente_en"]:
+            faltan.append(f"dotaciones.{marca['id']}.fuente_en")
+    # Las dos citas de params que van dentro de los supuestos de La gota (bloque_gota).
+    for ruta, entrada in (("eficiencia.conduccion", params["eficiencia"]["conduccion"]),
+                          ("gota.c_retorno_superficial", params["gota"]["c_retorno_superficial"])):
+        if entrada.get("fuente") and not entrada.get("fuente_en"):
+            faltan.append(f"{ruta}.fuente_en")
     dotaciones["equivalencia_en"] = params["unidades"]["millar"].get("nota_en")
     # La constante de la equivalencia como número (para comparar en vivo una lámina en cm con el deslizador).
     mil = params["unidades"]["millar"]
@@ -800,6 +831,15 @@ def completar_distrito_dotaciones(distrito, dotaciones, params, avisos):
     if faltan:
         avisos.append("data/params.json no trae la variante en inglés de: " + ", ".join(faltan)
                       + "; quedan en null (la página muestra el texto en español)")
+
+
+def aviso_sin_neta(zona, rot_id, archivo, n):
+    """Aviso con que el cubo declara en meta.notas que a una rotación de una zona le falta la lámina neta, y por
+    eso su «gota», sus dos goteos y tope_consumo van en null. validar_contrato.py solo acepta ese null si este
+    aviso lo declara (PATRON_SIN_NETA): el texto no se cambia sin cambiar el patrón. La prueba con navegador
+    (tests/e2e/web_smoke.mjs, caso de «gota» vacía) lo pide a esta función en vez de copiarlo."""
+    return (f"Zona {zona}: la opción {rot_id} no trae lámina neta (neta_mm_p50) en {archivo}; La gota, los "
+            f"dos goteos y tope_consumo quedan en null en {n} parcelas (nunca se toma ET = 0)")
 
 
 def ventana_desnudo(params):
@@ -1171,8 +1211,7 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     for (z, rot_id), n in sorted(sin_neta.items()):
         dz_ = datos_zona[z]
         archivo = dz_["archivo_rot"] if rot_id in dz_["rotaciones"] else dz_["archivo_dem"]
-        avisos.append(f"Zona {z}: la opción {rot_id} no trae lámina neta (neta_mm_p50) en {archivo}; La gota, los "
-                      f"dos goteos y tope_consumo quedan en null en {n} parcelas (nunca se toma ET = 0)")
+        avisos.append(aviso_sin_neta(z, rot_id, archivo, n))
     avisos = list(dict.fromkeys(avisos))  # sin repetidos, en orden de aparición
 
     from simulados import bloques_distrito_dotaciones  # mismo armado que los simulados, desde params
@@ -1223,7 +1262,9 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     meta = {"version": "4.0", "generado": ahora, "mock": False, "mock_campos": [], "script": "motor/b4_cubo.py",
             "fuentes": [f"data/processed/{x}" for x in en_cache] + ["data/params.json", "data/opciones_b4.json"],
             "notas": notas + avisos, "opciones": meta_opciones, "goteo": meta_goteo,
-            "ventana_desnudo": ventana_desnudo(params)}
+            "ventana_desnudo": ventana_desnudo(params),
+            # Idioma de los textos de «fuente» que llegan del buzón (filtros, referencias locales, goteo).
+            "idioma_fuentes": IDIOMA_FUENTES}
     cubo = {"meta": meta, "distrito": distrito, "dotaciones": dotaciones, "lluvia_pct": params["lluvia_pct"]["valor"],
             "zona": zona, "zonas": zonas, "localidades": localidades}
     if b3 is not None:

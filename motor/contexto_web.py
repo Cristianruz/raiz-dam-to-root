@@ -58,9 +58,21 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                      no, null si tiene menos disparos que min_disparos o no hay criterio. Los tres
                      conteos (null sin criterio) suman n_con_dato.
   ecostress        null + ecostress_motivo, o {archivo, fuente, fecha, meses, parcelas: {id: [valores
-                   por mes]}}
+                   por mes]}, escenas_parcelas: {id: [n_escenas por mes]}, aviso}. «escenas_parcelas» va
+                   alineada a «meses» como «parcelas»: cuántas escenas despejadas hay detrás de cada valor
+                   (la ficha lo escribe junto a la cifra). El nombre termina en «parcelas» para que el
+                   manifiesto la agrupe por patrón (parcelas.*) y no crezca con el número de parcelas. «aviso» es el rótulo que la propia entrega trae en su línea
+                   de LEEME («satellite ET at 70 m on clear days, not a field measurement»), para que la
+                   ficha lo ponga a la vista; null si la línea no lo trae (la página usa entonces un aviso
+                   sin la resolución). El contraste con el modelo (etc_modelo_mm, razon) NO va a la página
+                   (docs/revisiones/2026-11-15_ecostress.md: se leería como validación o como déficit).
   gaez             null + gaez_motivo, o {archivo, fuente, fecha, zonas: {zona: [{cultivo, variable,
-                   valor, unidad, resolucion_m}]}}
+                   valor, unidad, resolucion_m}]}}. Campos opcionales de cada fila, solo si la entrega
+                   los trae: «clase_nombre» (el nombre de la clase de aptitud: «High», «Good»), «nota»
+                   (p. ej. que el maíz de GAEZ es de grano) y, cuando la unidad de FAO lleva un
+                   multiplicador pegado («10kg DW/ha»), «valor_mostrar» y «unidad_mostrar»: el mismo
+                   valor en toneladas («t DW/ha»), que es lo que la página escribe. «valor» y «unidad»
+                   quedan tal como los publica FAO.
   heladas          null + heladas_motivo, o el contenido de heladas.json más «entrega» {archivo,
                    fuente, fecha}
   et_contraste     null + et_contraste_motivo, o {zona, motivo_otras_zonas, archivo, fuente, fecha,
@@ -132,8 +144,18 @@ MARCAS_PARAMS_ANIO = ("1-oct", "30-sep")
 # idioma para los lectores de pantalla.
 IDIOMA_FUENTES = "en"
 
+# Frase con que la entrega de ECOSTRESS rotula su dato en la línea de LEEME («satellite ET at 70 m on clear days,
+# not a field measurement»): el tramo de la línea que la contiene va a la ficha como aviso a la vista.
+MARCA_AVISO_ECOSTRESS = "not a field measurement"
+# Definición del SI (no es un dato): 1 t = 1,000 kg. Para escribir en toneladas una unidad de GAEZ que trae un
+# multiplicador pegado («10kg DW/ha» = decenas de kilogramos de materia seca por hectárea).
+KG_POR_TONELADA = 1000
+# Unidad de GAEZ con multiplicador: «<entero>kg <resto>» (p. ej. «10kg DW/ha»).
+UNIDAD_CON_MULTIPLICADOR = re.compile(r"^(\d+)\s*kg\b\s*(.*)$")
+
 # Redondeos de presentación (no cambian el dato de origen).
 DECIMALES_MM = 1
+DECIMALES_TONELADAS = 3   # los del valor de GAEZ (un decimal) más los dos que agrega pasar de 10 kg a t
 DECIMALES_MEDIA = 4
 DECIMALES_ALTURA = 2   # los de la entrega de GEDI (metros con centésimas)
 # Unidades del contrato que se suman en el año (láminas y días); las demás se promedian.
@@ -615,16 +637,33 @@ def bloque_gedi(ruta, registro, criterios=None):
             "n_pocos_disparos": lecturas[None] if criterio else None}
 
 
+def aviso_de_ecostress(fuente):
+    """El rótulo con que la entrega describe su dato, tomado de su línea de LEEME: el tramo (entre «;») que
+    dice MARCA_AVISO_ECOSTRESS, con mayúscula inicial. None si la línea no lo trae: no se inventa un texto con
+    una resolución que el dato no dice."""
+    for tramo in str(fuente or "").split(";"):
+        tramo = tramo.strip().rstrip(".")
+        if MARCA_AVISO_ECOSTRESS in tramo.lower():
+            return tramo[:1].upper() + tramo[1:]
+    return None
+
+
 def bloque_ecostress(ruta, registro):
+    """ET de ECOSTRESS por parcela y mes, y cuántas escenas despejadas hay detrás de cada valor (n_escenas).
+    El contraste con el modelo de la entrega (etc_modelo_mm, razon) no se lleva a la página."""
     filas = leer_csv(ruta)
     meses = sorted({fila["mes"].strip() for fila in filas if _mes(fila["mes"]) is not None})
     indice = {m: i for i, m in enumerate(meses)}
-    parcelas = {}
+    parcelas, escenas = {}, {}
     for fila in filas:
         mes = fila["mes"].strip()
         if mes in indice:
-            parcelas.setdefault(fila["id"].strip(), [None] * len(meses))[indice[mes]] = numero(fila["et_mm_dia"])
-    return {**procedencia(registro), "meses": meses, "parcelas": parcelas}
+            pid = fila["id"].strip()
+            parcelas.setdefault(pid, [None] * len(meses))[indice[mes]] = numero(fila["et_mm_dia"])
+            escenas.setdefault(pid, [None] * len(meses))[indice[mes]] = entero(fila.get("n_escenas"))
+    procedencia_ = procedencia(registro)
+    return {**procedencia_, "meses": meses, "parcelas": parcelas, "escenas_parcelas": escenas,
+            "aviso": aviso_de_ecostress(procedencia_.get("fuente"))}
 
 
 def bloque_gaez(ruta, zonas, registro, avisos):
@@ -636,14 +675,33 @@ def bloque_gaez(ruta, zonas, registro, avisos):
                 avisos.append(f"{ARCHIVO_GAEZ}: zona «{zona}» que no está en data/params.json; sus filas no se usan")
             ajenas.add(zona)
             continue
-        por_zona.setdefault(zona, []).append({
+        renglon = {
             "cultivo": fila["cultivo"].strip(),
             "variable": fila["variable"].strip(),
             "valor": numero(fila["valor"]),
             "unidad": fila["unidad"].strip(),
             "resolucion_m": numero_limpio(fila["resolucion_m"]),
-        })
+        }
+        # Columnas adicionales de la entrega, solo si vienen con texto: el nombre de la clase y la nota.
+        for columna in ("clase_nombre", "nota"):
+            texto = (fila.get(columna) or "").strip()
+            if texto:
+                renglon[columna] = texto
+        renglon.update(en_toneladas(renglon["valor"], renglon["unidad"]))
+        por_zona.setdefault(zona, []).append(renglon)
     return {**procedencia(registro), "zonas": por_zona}
+
+
+def en_toneladas(valor, unidad):
+    """{valor_mostrar, unidad_mostrar} de un valor de GAEZ cuya unidad trae un multiplicador pegado
+    («10kg DW/ha»): el mismo valor en toneladas («t DW/ha»), para que la página no escriba «1,678.5 10kg».
+    {} si la unidad no tiene esa forma o no hay valor: entonces la página escribe valor y unidad tal cual."""
+    m = UNIDAD_CON_MULTIPLICADOR.match(unidad or "")
+    if valor is None or not m:
+        return {}
+    multiplicador, resto = int(m.group(1)), m.group(2).strip()
+    return {"valor_mostrar": round(valor * multiplicador / KG_POR_TONELADA, DECIMALES_TONELADAS),
+            "unidad_mostrar": f"t {resto}".strip()}
 
 
 def bloque_heladas(ruta, registro):

@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T06:09:17+00:00",
+ "generado": "2026-11-15T07:11:35+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -25,7 +25,7 @@
      "id": "random_forest",
      "nombre": "Random Forest",
      "estado": "not run",
-     "nota": "Pending: every field reports a single method in acuerdo_metodos.",
+     "nota": "Pending: every field reports a single method (the phenological rules); the Random Forest has not been run.",
      "fuente": "web/data/parcelas.geojson"
     },
     {
@@ -281,84 +281,95 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T06:09:17+00:00",
+  "corrida": "2026-11-15T07:11:35+00:00",
   "pasos": [
    {
     "id": "origen",
     "nombre": "Re-download of source data (optional)",
     "estado": "skipped",
     "estado_original": "OMITIDO",
-    "detalle": "no solicitado (use --origen)"
+    "detalle": "no solicitado (use --origen)",
+    "detalle_en": "not requested (use --origen)"
    },
    {
     "id": "ensamblar",
     "nombre": "Team deliveries validated against the data contract",
     "estado": "skipped",
     "estado_original": "OMITIDO",
-    "detalle": "sin RAIZ_BUZON: no se validaron entregas en esta corrida (se usa la caché previa de data/processed)"
+    "detalle": "sin RAIZ_BUZON: no se validaron entregas en esta corrida (se usa la caché previa de data/processed)",
+    "detalle_en": "RAIZ_BUZON is not set: no deliveries were validated in this run (the earlier cache in data/processed is used)"
    },
    {
     "id": "simulados",
     "nombre": "Cube engine",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "cubo REAL: 1239 parcelas, 458 clasificadas, 1267 opciones"
+    "detalle": "cubo REAL: 1239 parcelas, 458 clasificadas, 1267 opciones",
+    "detalle_en": "REAL cube: 1239 fields, 458 classified, 1267 options"
    },
    {
     "id": "relieve",
     "nombre": "Terrain & runoff layer",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "zonas: delicias_saucillo, lazaro_cardenas"
+    "detalle": "zonas: delicias_saucillo, lazaro_cardenas",
+    "detalle_en": "areas: delicias_saucillo, lazaro_cardenas"
    },
    {
     "id": "gemelo",
     "nombre": "Digital twin, regional context and soil",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "gemelo: OK · contexto: OK · suelo: OK"
+    "detalle": "gemelo: OK · contexto: OK · suelo: OK",
+    "detalle_en": "twin: OK · context: OK · soil: OK"
    },
    {
     "id": "pwa",
     "nombre": "Offline app (installable page)",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache 612494846df937d0"
+    "detalle": "precache f2ae7bc260155c14",
+    "detalle_en": "precache f2ae7bc260155c14"
    },
    {
     "id": "manifest",
     "nombre": "Manifest of every figure",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "112946 cifras (0 simuladas), 35 fuentes de origen, 59 avisos"
+    "detalle": "127828 cifras (0 simuladas), 35 fuentes de origen, 59 avisos",
+    "detalle_en": "127828 figures (0 simulated), 35 source files, 59 notices"
    },
    {
     "id": "contrato",
     "nombre": "Data contract, including the water balance of “Follow the drop”",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "CONTRATO OK"
+    "detalle": "CONTRATO OK",
+    "detalle_en": "CONTRACT OK"
    },
    {
     "id": "verificador",
     "nombre": "Figure checker on the page's explanations",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv"
+    "detalle": "VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv",
+    "detalle_en": "CHECKER OK; golden set in docs/figuras/llm_eval.csv"
    },
    {
     "id": "pytest",
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1134 passed, 30 warnings in 48.08s"
+    "detalle": "1159 passed, 30 warnings in 50.71s",
+    "detalle_en": "1159 passed, 30 warnings in 50.71s"
    },
    {
     "id": "node",
     "nombre": "JavaScript tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "223 pass, 0 fail, 0 skipped"
+    "detalle": "226 pass, 0 fail, 0 skipped",
+    "detalle_en": "226 pass, 0 fail, 0 skipped"
    }
   ],
   "nota": "Last full run recorded by python construir.py. The browser smoke test (tests/e2e/web_smoke.mjs) runs separately, before each release."

@@ -145,6 +145,11 @@ test("modeloEstado: sin manifest, sin cubo y con datos incompletos no rompe ni i
   assert.equal(filas.precipitacion.fechas, null); assert.equal(filas.precipitacion.fuente, null, "fuente no reconocida: no se afirma ninguna");
   assert.equal(filas.terreno.fechas.desde.iso, "2026-01-02"); assert.equal(filas.terreno.fuente, "NASADEM");
   assert.equal(typeof NOTA_GEMELO, "string");
+  // Idioma de las citas registradas: el que declara el manifest (idioma_fuentes); null si no lo declara (la tarjeta
+  // las marca entonces como español, como antes de la reentrega en inglés del buzón).
+  assert.equal(raro.idiomaFuentes, null); assert.equal(vacio.idiomaFuentes, null);
+  assert.equal(modeloEstado({ manifest: { idioma_fuentes: "en", fuentes_de_origen: [] } }).idiomaFuentes, "en");
+  assert.equal(modeloEstado({ manifest: { idioma_fuentes: 7, fuentes_de_origen: [] } }).idiomaFuentes, null);
 });
 
 test("fraseResumen: la aclaración final del nombre no se anida entre paréntesis", () => {

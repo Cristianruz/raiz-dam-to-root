@@ -195,6 +195,8 @@ const instancias = new WeakMap();
  *   alCambiar          función que recibe estado() cada vez que el usuario cambia la variante;
  *   metaGoteo          cubo.meta.goteo: { ea_goteo, ea_superficial_referencia: { valor, etiqueta, fuente },
  *                      retorno_sin_tope_es_cota_superior } (opcional; sin él, no hay rótulo de eficiencias);
+ *   idiomaFuentes      idioma de las citas de los datos (cubo.meta.idioma_fuentes): la del coeficiente de retorno
+ *                      (en gota.supuestos) y la de las eficiencias. Sin él se toman por español y van con lang="es";
  *   planB              true = fuerza las barras apiladas (pruebas).
  * @returns {{estado: Function, mostrar: Function, destruir: Function}}
  */
@@ -409,6 +411,9 @@ function crearGota(contenedor, opcion, ctx) {
   raiz.append(el("div", { class: "gota-mod-vivo", "aria-live": "polite" }, [cifras, alerta]));
   // Rótulo de las eficiencias del goteo (cubo.meta.goteo): a la vista junto a las cifras, solo con una variante de goteo.
   const meta = ctx.metaGoteo && typeof ctx.metaGoteo === "object" ? ctx.metaGoteo : null;
+  // Atributo «lang» de las citas de los datos: null (no se escribe) si llegan en inglés, el idioma de la página.
+  const idiomaDatos = typeof ctx.idiomaFuentes === "string" && ctx.idiomaFuentes ? ctx.idiomaFuentes : "es";
+  const langDeDatos = idiomaDatos === "en" ? null : idiomaDatos;
   const rotuloGoteo = el("p", { class: "gota-mod-etiqueta", id: `${pre}-etiqueta-goteo`, hidden: true });
   const notaCota = el("p", { class: "gota-mod-cota", id: `${pre}-cota`, hidden: true }, TEXTOS.cotaSuperiorNota);
   raiz.append(rotuloGoteo, notaCota);
@@ -418,10 +423,11 @@ function crearGota(contenedor, opcion, ctx) {
   const leyenda = el("ul", { class: "gota-mod-leyenda", id: `${pre}-leyenda` });
   const tabla = el("table", { class: "gota-mod-tabla", id: `${pre}-tabla` });
   const supRetorno = (base.supuestos ?? []).find((s) => typeof s === "string" && /return|retorno/i.test(s));
-  // La fuente del coeficiente viene de los datos, en español: lang="es" para el lector de pantalla.
+  // La fuente del coeficiente viene de los datos: se marca con su idioma para el lector de pantalla, salvo que sea el
+  // de la página (inglés). Sin idioma declarado se toma por español.
   const fuente = el("p", { class: "gota-mod-fuente", id: `${pre}-fuente` }, [
     `${TEXTOS.fuenteRetorno} `,
-    supRetorno ? el("span", { lang: "es" }, entreParentesis(supRetorno)) : TEXTOS.fuenteFalta,
+    supRetorno ? el("span", { lang: langDeDatos }, entreParentesis(supRetorno)) : TEXTOS.fuenteFalta,
   ]);
   const listaSupuestos = el("ul", { id: `${pre}-supuestos` });
   raiz.append(
@@ -487,7 +493,7 @@ function crearGota(contenedor, opcion, ctx) {
       el("span", {}, valores.join(", ")),
       " ",
       ea.etiqueta ? el("strong", { class: "gota-mod-etiqueta-texto" }, ea.etiqueta) : null,
-      ea.fuente ? el("span", { class: "gota-mod-etiqueta-fuente" }, [` ${TEXTOS.fuenteEficiencias} `, el("span", { lang: "es" }, fuenteCorta(ea.fuente))]) : null,
+      ea.fuente ? el("span", { class: "gota-mod-etiqueta-fuente" }, [` ${TEXTOS.fuenteEficiencias} `, el("span", { lang: langDeDatos }, fuenteCorta(ea.fuente))]) : null,
     );
   }
 

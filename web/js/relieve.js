@@ -527,7 +527,8 @@ function htmlLeyenda(relieve, bloques, nombreZona) {
     `filling small pits and flats of the elevation model; read the lines as approximate.</p>` +
     `<p class="relieve-escala">Scale: ${escala}</p>` +
     `<p class="fuente">Thicker lines: more runoff paths have joined. Zone context, not a field measurement.` +
-    `${relieve?.fuente ? ` Source: ${esc(relieve.fuente)}` : ""}</p>`
+    // La cita en inglés del motor (relieve.fuente_en); si relieve.json no la trae, la de español.
+    `${relieve?.fuente_en || relieve?.fuente ? ` Source: ${esc(relieve.fuente_en || relieve.fuente)}` : ""}</p>`
   );
 }
 
