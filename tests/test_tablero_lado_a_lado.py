@@ -17,7 +17,8 @@ PORTADA = (RAIZ / "web/index.html").read_text(encoding="utf-8")
 TABLERO = (RAIZ / "web/js/dashboard.js").read_text(encoding="utf-8")
 TEXTOS = (RAIZ / "web/js/textos_tablero.js").read_text(encoding="utf-8")
 CLAVES = ["ceja", "titulo", "enlace", "zonas", "zonas_nota", "zona_meta", "registro", "menos", "opciones",
-          "opciones_sin", "opciones_nota", "pide", "sin_riego", "ha", "ha_rango", "al_menos", "pct", "sin_opciones"]
+          "opciones_sin", "opciones_nota", "pide", "sin_riego", "ha", "ha_rango", "al_menos", "pct", "sin_opciones",
+          "excede", "gota"]
 
 
 def _funcion():
@@ -46,6 +47,12 @@ def test_la_funcion_usa_las_reglas_comunes_y_las_lluvias_del_cubo():
     assert "c.sinDotacion" in f and "tablero.compromiso.sin_dotacion" in f, "falta el caso sin dotación"
     assert "c.p10" in f and "c.p90" in f, "el agua comprometida va con su rango"
     assert "e.hectareas.bajo" in f and "e.hectareas.alto" in f, "las hectáreas van con su rango"
+    assert "c.excede" in f and "tablero.lado.excede" in f and "explorerLink(" in f, "falta decir de dónde sale la diferencia"
+
+
+def test_la_ficha_dice_que_no_necesita_riego_con_lamina_cero():
+    assert 'evalOp.lamina.p50 > 0' in TABLERO and 't("tablero.ficha.sin_riego")' in TABLERO
+    assert '"ficha.sin_riego": ["No irrigation needed"' in TEXTOS
     # se pinta con cada cambio de dotación, lluvia, zona (stats) y de parcela (fieldDetails)
     assert len(re.findall(r"\bladoALado\(\);", TABLERO)) >= 2
 

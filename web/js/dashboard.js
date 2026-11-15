@@ -349,6 +349,16 @@ function ladoALado() {
           .join("")}</button>`,
     )
     .join("");
+  // Kit §2.4: si los perennes piden más que la dotación, se dice de dónde sale la diferencia y se enlaza con
+  // «Follow the drop», que está en la ficha de la parcela del explorador.
+  const notaExcede = $("#lado-excede");
+  if (notaExcede) {
+    const pasa = zonas.some((x) => x.valores.some((c) => c.excede));
+    notaExcede.hidden = !pasa;
+    notaExcede.innerHTML = pasa
+      ? `${T("tablero.lado.excede")} <a href="${esc(explorerLink(state.field))}">${T("tablero.lado.gota")} <span>↗</span></a>`
+      : "";
+  }
   // Opciones de la parcela elegida: hectáreas que la dotación cubre con la necesidad mediana, con cada lluvia.
   const p = selected()?.properties;
   $("#lado-opciones-titulo").textContent = p
@@ -462,9 +472,12 @@ function fieldDetails() {
   const term = !p.abstencion && op?.agua?.plazo_anios;
   const termLabel = term ? years(term) : t("tablero.sin_dato");
   const sinCalculo = t("tablero.sin_calculo");
-  const demand = evalOp
-    ? `${fmt(evalOp.lamina.p50)} ${t("tablero.unidad")}`
-    : sinCalculo;
+  // Kit §2.4: una lámina cero (descanso) se dice «no necesita riego», no «0».
+  const demand = !evalOp
+    ? sinCalculo
+    : evalOp.lamina.p50 > 0
+      ? `${fmt(evalOp.lamina.p50)} ${t("tablero.unidad")}`
+      : t("tablero.ficha.sin_riego");
   // Porcentaje entero HACIA ABAJO, igual que el explorador (web/app.js, fmtCobertura): una dotación que no
   // alcanza no se lee con un punto de más, y las dos páginas dicen la misma cifra.
   const coverage = evalOp

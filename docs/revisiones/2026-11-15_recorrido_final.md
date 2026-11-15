@@ -2,7 +2,7 @@
 # Recorrido final de las dos páginas (15-nov-2026, 07:10–07:45, hora de Chihuahua)
 
 **Quién lo pidió:** Cristian («revisa todo otra vez… que se vean las recomendaciones y las zonas, por ejemplo si llueve o no»).
-**Cómo se hizo:** el integrador miró capturas de las cinco vistas del tablero (computadora y teléfono, con la lluvia del registro y con menos lluvia) y tres revisores de contexto nuevo, de solo lectura, recorrieron el sistema: uno el bloque nuevo contra las reglas y el contrato, uno el tablero como jurado y uno el explorador como jurado. Ninguno encontró un bloqueo en lo publicado.
+**Cómo se hizo:** el integrador miró capturas de las cinco vistas del tablero (computadora y teléfono, con la lluvia del registro y con menos lluvia) y tres revisores de contexto nuevo, de solo lectura, recorrieron el sistema: uno el bloque nuevo contra las reglas y el contrato, uno el tablero como jurado y uno el explorador como jurado. Un cuarto revisor confirmó las correcciones contra la sección 2.4 del kit («se puede publicar») y señaló los puntos 7a y 7b, que venían de antes. Ninguno encontró un bloqueo en lo publicado.
 
 ## Lo que se agregó
 
@@ -20,6 +20,8 @@
 | 5 | Tablero, búsqueda | Escribir el ID de una parcela filtraba la lista, pero la ficha seguía en la parcela anterior | Corregido: la búsqueda abre la primera coincidencia; el ID de una parcela de otra zona abre esa zona |
 | 6 | Tablero y explorador | La cobertura de una misma parcela se leía con un punto de diferencia: el explorador escribe el porcentaje hacia abajo y el tablero lo redondeaba | Corregido en el tablero (ficha y «Comparar opciones»): entero hacia abajo, como el explorador |
 | 7 | Tablero, ficha en laptop | El área que cubre la dotación quedaba bajo el desplazamiento interno de la ficha | Corregido: va antes de las características |
+| 7a | Tablero, zonas (kit §2.4) | Cuando los perennes piden más que la dotación, el tablero no decía de dónde sale la diferencia ni enlazaba con «Follow the drop» (el explorador sí) | Corregido: nota bajo las zonas, con la liga a la ficha de la parcela en el explorador |
+| 7b | Tablero, ficha (kit §2.4) | Con lámina cero (descanso), la ficha escribía un cero en lugar de «no irrigation needed» | Corregido: dice «no necesita riego» en los cuatro idiomas |
 | 8 | Tablero | La lámina se lee con un decimal en la ficha y en «Cultivos y opciones», y con dos en «Comparar opciones» y en el bloque nuevo | Abierto (menor): son la misma cifra con distinto redondeo |
 | 9 | Tablero, parcela sin clasificar | La ficha dice que no se calcula nada y «Cultivos y opciones» sí compara áreas con la superficie de la parcela | Abierto (menor): la comparación de área no usa el cultivo de la parcela; conviene decirlo en la ficha |
 | 10 | Explorador | El encabezado «Why it's suggested» puede leerse como recomendación | Abierto: es el término del reto, decidido en `docs/decisiones/2026-11-15_ficha_motivos_beneficios_ecostress.md` (§1); lo confirma Cristian |

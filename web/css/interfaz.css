@@ -3097,3 +3097,19 @@ button.lado-fila[aria-pressed="true"] {
 .field-card .coverage + .micro + .field-metrics {
   margin-top: 16px;
 }
+/* Nota bajo las zonas cuando los perennes piden más que la dotación (kit §2.4), con la liga a «Follow the drop». */
+.rain-card > .lado-excede {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f0907f14;
+  border: 1px solid #f0907f44;
+  color: #f2d2cb;
+}
+.lado-excede a {
+  color: #ffd9d0;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}

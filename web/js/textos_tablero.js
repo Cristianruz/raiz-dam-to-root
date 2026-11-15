@@ -344,6 +344,8 @@ const TABLA = {
     "Aucune parcelle disponible dans cette zone.",
   ],
   "ficha.parcela": ["Field {id} · {area} ha", "Parcela {id} · {area} ha", "Parcela {id} · {area} ha", "Parcelle {id} · {area} ha"],
+  // Kit §2.4: lámina cero (descanso) se dice con estas palabras, no con un cero.
+  "ficha.sin_riego": ["No irrigation needed", "No necesita riego", "Não precisa de irrigação", "Pas d'irrigation nécessaire"],
   "ficha.sin_clasificar": ["Crop not classified", "Cultivo sin clasificar", "Cultura não classificada", "Culture non classée"],
   "ficha.demanda": ["Yearly water need · median", "Demanda anual · mediana", "Demanda anual · mediana", "Besoin annuel · médiane"],
   "ficha.suelo": ["Soil · regional map", "Suelo · mapa regional", "Solo · mapa regional", "Sol · carte régionale"],
@@ -736,6 +738,20 @@ const TABLA = {
     "{rotulo} · no necesita riego",
     "{rotulo} · não precisa de irrigação",
     "{rotulo} · pas d'irrigation nécessaire",
+  ],
+  // Kit §2.4: si los perennes piden más que la dotación, se dice de dónde sale la diferencia y se enlaza con
+  // «Follow the drop» (nombre de esa sección del explorador, que está en inglés).
+  "lado.excede": [
+    "Where a bar passes the white mark, perennial crops ask for more than the allocation: the gap comes from wells or stays unmet.",
+    "Donde una barra pasa la marca blanca, los cultivos perennes piden más que la dotación: la diferencia sale de pozos o queda sin cubrir.",
+    "Onde uma barra passa a marca branca, as culturas perenes pedem mais do que a dotação: a diferença sai de poços ou fica sem cobertura.",
+    "Là où une barre dépasse le repère blanc, les cultures pérennes demandent plus que la dotation : l'écart vient des puits ou reste non couvert.",
+  ],
+  "lado.gota": [
+    "See “Follow the drop” in the field explorer",
+    "Ver «Follow the drop» en el explorador de parcelas",
+    "Ver «Follow the drop» no explorador de parcelas",
+    "Voir « Follow the drop » dans l'explorateur de parcelles",
   ],
   // Agua ya comprometida de la zona (kit §2.4): con su rango y, si hay superficie sin clasificar, como mínimo.
   "lado.al_menos": [
