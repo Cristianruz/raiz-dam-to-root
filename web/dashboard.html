@@ -1,10 +1,14 @@
 <!doctype html>
-<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; dashboard desarrollado con Codex. -->
-<html lang="es">
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex -->
+<!-- web/dashboard.html — Tablero (página secundaria). La página principal es index.html.
+     Regla: el texto visible de este archivo NO lleva cifras; los números los escribe js/dashboard.js
+     leyendo web/data/. Interfaz en inglés (regla 9); los identificadores (#resumen, data-panel…) siguen
+     en español porque las hojas de estilo y las pruebas dependen de ellos. -->
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Raíz · Tu territorio, en tus manos</title>
+    <title>ROOT – From Dam to Root · Water dashboard</title>
     <meta
       name="description"
       content="Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover."
@@ -21,58 +25,56 @@
     <script type="module" src="js/dashboard.js"></script>
   </head>
   <body>
-    <a class="skip" href="#contenido">Saltar al contenido</a>
+    <a class="skip" href="#contenido">Skip to content</a>
     <aside class="sidebar">
       <a class="brand" href="#resumen"
-        ><span class="brand-icon">✳</span> raíz<span class="brand-dot"
-          >.</span
-        ></a
+        ><span class="brand-icon">✳</span> ROOT</a
       >
       <div class="workspace">
         <span class="workspace-icon">⌘</span>
-        <div>Mi territorio<small>DR · Delicias, Chihuahua</small></div>
+        <div>
+          Pilot area<small>Irrigation District 005 · Delicias, Chihuahua</small>
+        </div>
         <span>⌄</span>
       </div>
-      <p class="nav-label">TU TERRITORIO</p>
-      <nav aria-label="Navegación principal">
+      <p class="nav-label">VIEWS</p>
+      <nav aria-label="Main navigation">
         <a class="active" href="#resumen" data-view="resumen"
-          ><span>◫</span> Resumen</a
+          ><span>◫</span> Overview</a
         >
-        <a href="#terreno" data-view="terreno"><span>⌘</span> Mi terreno</a>
+        <a href="#terreno" data-view="terreno"><span>⌘</span> My field</a>
         <a href="#cultivos" data-view="cultivos"
-          ><span>♧</span> Cultivos y opciones</a
+          ><span>♧</span> Crops and options</a
         >
         <a href="#recomendaciones" data-view="recomendaciones"
-          ><span>✧</span> Planificar</a
+          ><span>✧</span> Compare options</a
         >
         <a href="#predicciones" data-view="predicciones"
-          ><span>↗</span> Historia y predicciones</a
+          ><span>↗</span> History and rainfall range</a
         >
       </nav>
       <div class="sidebar-bottom">
-        <div class="research-mark">CIENCIA QUE ECHA RAÍCES</div>
-        <p>Decisiones de hoy.<br />Agua para mañana.</p>
-        <a href="#investigacion" data-view="investigacion"
-          >Fuentes y metodología <span>↗</span></a
-        ><a href="index.html">Abrir explorador técnico ↗</a>
+        <div class="research-mark">FROM DAM TO ROOT</div>
+        <p>Before you plant, see the water you are committing.</p>
+        <a href="index.html">Open the field explorer <span>↗</span></a>
       </div>
 
       <div class="profile">
         <span class="avatar">R</span>
-        <div>Productor local<small>Zona piloto · DR Delicias</small></div>
+        <div>Local grower<small>Pilot area · Delicias district</small></div>
       </div>
     </aside>
     <div class="main-shell">
       <header class="topbar">
         <div class="breadcrumb">
-          Mi territorio <span>/</span> <strong id="breadcrumb">Resumen</strong>
+          Pilot area <span>/</span> <strong id="breadcrumb">Overview</strong>
         </div>
         <div class="top-actions">
-          <span class="data-status"><i></i> Datos de investigación</span
+          <span class="data-status"><i></i> Research data</span
           ><a
             class="icon-button"
-            href="#investigacion"
-            aria-label="Consultar fuentes"
+            href="index.html"
+            aria-label="About &amp; Data, on the main page"
             >ⓘ</a
           ><span class="avatar small">R</span>
         </div>
@@ -80,38 +82,38 @@
       <main id="contenido">
         <div class="page-heading">
           <div>
-            <p class="eyebrow">RAÍZ · DE LA PRESA A TU PARCELA</p>
-            <h1 id="page-title">Tu territorio, en tus manos<span>.</span></h1>
+            <p class="eyebrow">ROOT – FROM DAM TO ROOT</p>
+            <h1 id="page-title">Water dashboard</h1>
             <p id="page-description">
-              Conoce el agua que comprometes, antes de sembrar.
+              Before you plant, see the water you are committing.
             </p>
           </div>
           <button class="button export" id="exportar">
-            ↓ <span>Descargar resumen</span>
+            ↓ <span>Download summary</span>
           </button>
         </div>
         <div class="context-bar">
           <span
-            ><i class="location-dot"></i> <strong>Mi zona piloto</strong></span
-          ><label class="sr-only" for="zona-dashboard">Zona piloto</label
+            ><i class="location-dot"></i> <strong>Pilot area</strong></span
+          ><label class="sr-only" for="zona-dashboard">Pilot area</label
           ><select id="zona-dashboard"></select
           ><a href="#resumen" id="scenario-label" class="scenario-label"></a
           ><span class="context-date" id="data-date"></span>
         </div>
-        <p id="load-status" role="status">Preparando tu territorio…</p>
+        <p id="load-status" role="status">Loading the dashboard…</p>
         <div id="app-content" hidden>
           <section data-panel="resumen">
             <div class="overview-grid">
               <article class="hero-card">
                 <div class="hero-content">
-                  <span class="pill light">CULTIVA CON INFORMACIÓN</span>
-                  <h2>Cada cultivo tiene su historia de agua.</h2>
+                  <span class="pill light">KNOW BEFORE YOU PLANT</span>
+                  <h2>Every crop has its own water story.</h2>
                   <p>
-                    Explora tu terreno y encuentra el equilibrio entre lo que
-                    siembras y el agua disponible.
+                    Look at your field and compare what you plant with the
+                    water in this scenario.
                   </p>
                   <a class="button lime" href="#terreno"
-                    >Explorar mi terreno <span>↗</span></a
+                    >Explore my field <span>↗</span></a
                   >
                 </div>
                 <div class="hero-land" aria-hidden="true">
@@ -123,309 +125,241 @@
                   <span class="field-pin">♧</span>
                 </div>
                 <span class="hero-caption"
-                  >RAÍZ · DISTRITO DE RIEGO DELICIAS</span
+                  >ROOT · DELICIAS IRRIGATION DISTRICT</span
                 >
               </article>
               <article class="water-card">
                 <div class="card-top">
                   <span class="mini-icon">♧</span
-                  ><span class="pill">ESCENARIO EXPLORABLE</span>
+                  ><span class="pill">SCENARIO TO EXPLORE</span>
                 </div>
-                <h2>Tu presupuesto de agua</h2>
-                <p>Define una dotación para explorar tus opciones.</p>
+                <h2>Water allocation</h2>
+                <p>Set an allocation to explore your options.</p>
                 <div class="allocation-value">
                   <output id="allocation-value" for="allocation"></output
-                  ><span>millares / ha</span>
+                  ><span>thousand m³ / ha</span>
                 </div>
                 <label class="sr-only" for="allocation"
-                  >Dotación de agua en millares por hectárea</label
+                  >Water allocation in thousand cubic meters per hectare</label
                 ><input type="range" id="allocation" />
                 <div class="range-labels" id="range-labels"></div>
                 <label class="rain-toggle"
-                  ><input type="checkbox" id="rain" /> Explorar con menos lluvia
+                  ><input type="checkbox" id="rain" /> Explore with less rain
                   <span id="rain-pct"></span
                 ></label>
                 <p class="micro">
-                  Es un escenario, no una dotación asignada ni un pronóstico.
+                  This is a scenario, not an assigned allocation and not a
+                  forecast.
                 </p>
               </article>
             </div>
             <div class="stats-grid" id="stats"></div>
             <div class="section-heading">
               <div>
-                <p class="eyebrow">UNA MIRADA A TU TERRITORIO</p>
-                <h2>Del mapa a la decisión</h2>
+                <p class="eyebrow">A LOOK AT THE PILOT AREA</p>
+                <h2>From the map to the field</h2>
               </div>
-              <a href="#terreno">Explorar el mapa ↗</a>
+              <a href="#terreno">Explore the map ↗</a>
             </div>
             <div class="map-detail-grid">
               <article class="card map-card">
                 <div class="card-heading">
                   <div>
-                    <h3>Mi terreno</h3>
-                    <span>Límites estimados · Fields of The World</span>
+                    <h3>My field</h3>
+                    <span>Estimated boundaries · Fields of The World</span>
                   </div>
-                  <button class="text-button" id="fit-map">Centrar ↗</button>
+                  <button class="text-button" id="fit-map">Center ↗</button>
                 </div>
-                <div id="map" aria-label="Mapa interactivo de parcelas"></div>
+                <div id="map" aria-label="Interactive map of fields"></div>
                 <div id="map-fallback" hidden></div>
                 <div class="map-legend">
-                  <span><i class="legend-green"></i> Clasificada</span
-                  ><span><i class="legend-gray"></i> Sin clasificar</span
-                  ><span><i class="legend-yellow"></i> Seleccionada</span>
+                  <span><i class="legend-green"></i> Classified</span
+                  ><span><i class="legend-gray"></i> Not classified</span
+                  ><span><i class="legend-yellow"></i> Selected</span>
                 </div>
                 <p class="map-note" id="map-note">
-                  Selecciona una parcela o usa el buscador.
+                  Select a field on the map or use the search box.
                 </p>
               </article>
               <article class="card field-card">
                 <div class="card-heading">
-                  <h3>Tu parcela, de cerca</h3>
+                  <h3>Your field, up close</h3>
                   <span class="leaf-badge">♧</span>
                 </div>
+                <p class="micro" id="field-notice">
+                  This tool supports, never replaces, the judgment of farmers
+                  and local experts.
+                </p>
                 <label class="sr-only" for="field-search"
-                  >Buscar parcela por ID o cultivo</label
+                  >Search field by ID or crop</label
                 ><input
                   id="field-search"
                   type="search"
-                  placeholder="Buscar parcela por ID o cultivo…"
+                  placeholder="Search field by ID or crop…"
                 /><label class="sr-only" for="field-select"
-                  >Seleccionar parcela</label
+                  >Select field</label
                 ><select id="field-select"></select>
                 <div id="field-detail" aria-live="polite"></div>
               </article>
             </div>
             <div class="section-heading">
               <div>
-                <p class="eyebrow">EL AGUA TAMBIÉN TIENE MEMORIA</p>
-                <h2>Entender el pasado, preparar el futuro</h2>
+                <p class="eyebrow">PAST SEASONS, FOR CONTEXT</p>
+                <h2>What earlier years looked like</h2>
               </div>
-              <a href="#predicciones">Explorar la historia ↗</a>
+              <a href="#predicciones">See the history ↗</a>
             </div>
             <div class="bottom-grid">
               <article class="card history-preview">
                 <div class="card-heading">
-                  <h3>Superficie regada en el distrito</h3>
-                  <span class="pill">CONAGUA · REFERENCIA SECUNDARIA</span>
+                  <h3>Irrigated area in the district</h3>
+                  <span class="pill">CONAGUA · SECONDARY REFERENCE</span>
                 </div>
                 <div id="history-chart"></div>
                 <p class="micro">
-                  Años seleccionados de la investigación. No es una serie
-                  continua ni una predicción.
+                  Selected years from the project research. Not a continuous
+                  series and not a forecast.
                 </p>
               </article>
               <article class="insight-card">
                 <span class="mini-icon">✧</span>
-                <p class="eyebrow">MÁS ALLÁ DE ESTA TEMPORADA</p>
-                <h3>Sembrar también es<br />comprometer agua.</h3>
+                <p class="eyebrow">BEYOND THIS SEASON</p>
+                <h3>Planting also<br />commits water.</h3>
                 <p>
-                  Una huerta permanece por años. Un cultivo anual permite
-                  replantear el siguiente ciclo.
+                  An orchard stays for years. An annual crop lets you rethink
+                  the next season.
                 </p>
-                <a href="#cultivos">Comparar mis opciones <span>↗</span></a>
+                <a href="#cultivos">Compare my options <span>↗</span></a>
               </article>
             </div>
           </section>
           <section data-panel="terreno" hidden>
             <div class="section-heading">
-              <h2>Explora tu parcela</h2>
-              <a href="index.html"
-                >Relieve, escurrimientos y vista del gemelo ↗</a
-              >
+              <h2>Explore your field</h2>
+              <a href="index.html">Open the field explorer ↗</a>
             </div>
             <p class="section-intro">
-              El mapa y el detalle de parcela están disponibles aquí. Cambia de
-              zona, busca una parcela o selecciona su polígono.
+              The map and the field detail are here. Change the pilot area,
+              search for a field or select its polygon. Terrain, runoff and
+              the twin view are in the field explorer.
             </p>
             <div id="terrain-slot"></div>
           </section>
           <section data-panel="cultivos" hidden>
             <div class="section-heading">
-              <h2>Elige qué comparar</h2>
-              <span class="pill">MODELO FAO · ESCENARIOS</span>
+              <h2>Choose what to compare</h2>
+              <span class="pill">FAO MODEL · SCENARIOS</span>
             </div>
             <p class="section-intro">
-              Demanda anual modelada para la zona seleccionada. La banda expresa
-              incertidumbre, no probabilidad de cosecha. El riego por gravedad
-              usa un rango de eficiencia supuesto; goteo necesita validación
-              local.
+              Modeled yearly water need for the selected pilot area. The range
+              expresses uncertainty, not the chance of a harvest. Surface
+              (gravity) irrigation uses an assumed efficiency range; drip
+              irrigation needs local validation.
             </p>
             <div id="crop-grid" class="crop-grid"></div>
             <article class="card formula">
-              <h3>¿De dónde sale el agua que pide cada cultivo?</h3>
+              <h3>Where does each crop's water need come from?</h3>
               <p>
-                ETc = Kc × ETo → Lámina neta mensual = ETc − lluvia efectiva,
-                sin valores negativos → Lámina bruta = neta ÷ eficiencia +
-                presiembra en cultivos anuales.
+                ETc = Kc × ETo → Monthly net depth = ETc − effective rain,
+                never below zero → Gross depth = net ÷ efficiency + pre-planting
+                irrigation for annual crops.
               </p>
               <p>
-                La ET representa el agua consumida por el cultivo. El agua que
-                se debe entregar también depende de la lluvia y del sistema de
-                riego.
+                ET is the water the crop consumes. The water that has to be
+                delivered also depends on rain and on the irrigation system.
               </p>
             </article>
           </section>
           <section data-panel="recomendaciones" hidden>
             <div class="section-heading">
-              <h2>Planificar con datos de tu parcela</h2>
-              <span class="pill">REGLAS Y CÁLCULOS AUDITABLES</span>
+              <h2>Compare options with your field data</h2>
+              <span class="pill">RULES AND CALCULATIONS YOU CAN AUDIT</span>
             </div>
             <p class="section-intro">
-              Confirma el cultivo y captura lo que conoces. El motor calcula
-              planes de agua por alternativa y muestra los impedimentos. Los
-              datos sin confirmar siguen identificados; no se convierten en
-              mediciones.
+              Confirm the crop and enter what you know. The page works out the
+              water each option asks for and shows the constraints it finds,
+              with their source. Unconfirmed data stays marked as unconfirmed;
+              it is not turned into measurements.
             </p>
             <div id="decision-inputs"></div>
             <div class="section-heading">
-              <h2>Evaluación de alternativas</h2>
+              <h2>Options side by side</h2>
               <button class="button" id="download-audit">
-                Descargar cálculo y evidencias
+                Download calculation and evidence
               </button>
             </div>
             <div id="decision-summary" role="status"></div>
             <div id="recommendations" class="decision-results"></div>
             <article class="card formula">
-              <h3>Comprueba el motor</h3>
+              <h3>Check the calculation</h3>
               <p>
-                Ejecuta verificaciones con los datos de esta parcela:
-                sensibilidad al agua y a la eficiencia, repetibilidad y
-                abstención cuando faltan entradas. Son pruebas de consistencia
-                del software, no ensayos agronómicos.
+                Run consistency checks with this field's data: sensitivity to
+                water and to efficiency, repeatability, and abstaining when
+                inputs are missing. These are software consistency tests, not
+                agronomic trials.
               </p>
-              <button class="button dark" id="run-checks">
-                Ejecutar comprobaciones
-              </button>
+              <button class="button dark" id="run-checks">Run checks</button>
               <div id="decision-checks" aria-live="polite"></div>
             </article>
             <article class="card formula">
-              <h3>Qué significan las categorías y los supuestos</h3>
+              <h3>What the categories and assumptions mean</h3>
               <p>
-                Cereal de invierno es una clase estacional; el modelo usa avena
-                forrajera como representante, sin identificación garantizada por
-                satélite. Barbecho significa aquí posible terreno sin cultivo:
-                la falta de verdor no prueba que se haya dejado descansar.
-                Confirma textura, salinidad, etapa del cultivo y eficiencia de
-                aplicación en campo. Un mapa regional de suelo no reemplaza un
-                análisis de laboratorio. Las alternativas del motor se consultan
-                en la ficha técnica de cada parcela.
+                Winter cereal is a seasonal class; the model uses forage oats
+                to represent it, and the satellite does not confirm which
+                cereal it is. Fallow here means land that may have no crop:
+                low greenness does not prove the land was rested on purpose.
+                Confirm texture, salinity, crop stage and application
+                efficiency in the field. A regional soil map does not replace
+                a laboratory analysis. The options computed for each field are
+                in its card in the field explorer.
               </p>
               <a
                 id="recommendation-link"
                 class="button dark"
                 href="index.html"
-                >Ver alternativas de la parcela ↗</a
+                >Open the field explorer ↗</a
               >
             </article>
           </section>
           <section data-panel="predicciones" hidden>
             <div id="forecast-analysis"></div>
             <div class="section-heading">
-              <h2>La historia también se cultiva</h2>
+              <h2>Past events in the region</h2>
               <button id="export-timeline" class="button">
-                ↓ Descargar cronología
+                ↓ Download timeline
               </button>
             </div>
             <p class="section-intro">
-              Eventos de la investigación adjunta. Sus cifras son referencias
-              secundarias pendientes de cotejo con las fuentes primarias. No
-              forman un conjunto de entrenamiento validado.
+              Events from the project research. Their figures are secondary
+              references still to be checked against primary sources. They are
+              context, not a validated data set, and this page does not
+              forecast the dam, yields or income.
             </p>
             <div
               class="timeline-filters"
               role="group"
-              aria-label="Filtrar eventos"
+              aria-label="Filter events"
             >
-              <button class="active" data-filter="todos">
-                Todos los eventos</button
-              ><button data-filter="sequia">Sequía</button
-              ><button data-filter="inundacion">Lluvia e inundación</button>
+              <button class="active" data-filter="todos">All events</button
+              ><button data-filter="sequia">Drought</button
+              ><button data-filter="inundacion">Rain and flooding</button>
             </div>
             <div id="timeline" class="timeline"></div>
-            <article class="ml-card">
-              <span class="pill">PRÓXIMA ETAPA</span>
-              <h3>Predicciones con evidencia, paso a paso.</h3>
-              <p>
-                La predicción de lluvia usa la distribución histórica de NASA
-                POWER y se contrasta por años que no participaron en su cálculo.
-                No hay un modelo validado de rendimiento o rentabilidad. La
-                cronología inferior es solo contexto.
-              </p>
-              <div class="ml-steps">
-                <span>Integrar lluvia SMN</span><b>→</b
-                ><span>Cruzar producción SIAP y presas</span><b>→</b
-                ><span>Validar por tiempo y localidad</span>
-              </div>
-              <p>
-                Se necesitan fechas, ubicación, cultivo, rendimiento y precio,
-                además de intervalos de confianza. Evitar usar datos futuros al
-                entrenar.
-              </p>
-            </article>
-          </section>
-          <section data-panel="investigacion" hidden>
-            <div class="section-heading">
-              <h2>Ciencia a la vista</h2>
-              <span class="pill">FUENTES Y ALCANCE</span>
-            </div>
-            <div class="research-grid">
-              <article class="card">
-                <span class="mini-icon">◎</span>
-                <h3>OpenET y FARMS</h3>
-                <p>
-                  OpenET estima el agua que ya consumieron los cultivos mediante
-                  modelos de evapotranspiración. FARMS acerca esos datos al
-                  productor con mapas, parcelas y reportes.
-                </p>
-                <p>
-                  Raíz toma como referencia la comparación por parcela, los
-                  rangos de incertidumbre y la trazabilidad. Esta página no está
-                  conectada a la API de OpenET ni muestra ET de OpenET por
-                  parcela en México.
-                </p>
-                <a href="https://openetdata.org/" target="_blank" rel="noopener"
-                  >Conocer OpenET ↗</a
-                >
-              </article>
-              <article class="card">
-                <span class="mini-icon">♧</span>
-                <h3>La pregunta de Raíz</h3>
-                <p>
-                  Antes de sembrar, ¿cuánta agua pide cada cultivo y por cuántos
-                  años se compromete? El modelo existente combina FAO, clima
-                  NASA POWER e información de la parcela.
-                </p>
-                <p>
-                  Datos satelitales e históricos, sin sensores en tiempo real.
-                  Las fronteras de parcela y las clasificaciones son
-                  estimaciones.
-                </p>
-              </article>
-            </div>
-            <div id="sources" class="sources"></div>
-            <article class="card formula">
-              <h3>¿Qué son los flujos Mermaid?</h3>
-              <p>
-                Son diagramas escritos como texto: describen pasos, decisiones y
-                conexiones. Sirven para explicar el recorrido del usuario y cómo
-                pasan los datos de una fuente a la pantalla.
-              </p>
-              <p>
-                Los diagramas de navegación, cálculo y futura preparación de
-                datos están implementados en la documentación del repositorio:
-                <code>docs/dashboard-flujos.md</code>. No son un motor de
-                predicción ni ejecutan el riego.
-              </p>
-            </article>
           </section>
         </div>
         <footer>
-          <span class="footer-brand">✳ raíz.</span>
+          <span class="footer-brand">ROOT – From Dam to Root</span>
           <p>
-            Apoya el juicio del productor y del técnico. Los escenarios no
-            asignan agua ni pronostican la presa.
+            <strong
+              >This tool supports, never replaces, the judgment of farmers and
+              local experts.</strong
+            >
+            It does not allocate, sell or trade water, and it does not
+            forecast the dam. Field boundaries are estimated. The legend of
+            the evidence tags [V] / [P] / [S], About &amp; Data and Tests in
+            sight are on the main page.
           </p>
-          <a href="#investigacion">Sobre los datos ↗</a>
+          <a href="index.html">Open the field explorer ↗</a>
           <div id="dashboard-install"></div>
         </footer>
       </main>

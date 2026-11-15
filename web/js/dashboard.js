@@ -1,5 +1,8 @@
-// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; dashboard desarrollado con Codex.
-// La interfaz lee las cifras publicadas. Los cálculos reutilizan reglas.js, sin otro modelo.
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex
+// web/js/dashboard.js — Tablero (página secundaria, web/dashboard.html).
+// La interfaz lee las cifras publicadas en web/data/. Los cálculos reutilizan reglas.js, sin otro modelo.
+// Textos visibles en inglés (regla 9); comentarios e identificadores, en español.
+// Todo texto que viene de los datos pasa por esc() antes de entrar a innerHTML.
 import { prepararInterfaz, icono } from "./interfaz.js";
 import { crearAsesor } from "./asesor.js";
 import { montarInstalacion } from "./instalar.js";
@@ -12,10 +15,10 @@ import {
 const $ = (s) => document.querySelector(s);
 const fmt = (n, digits = 1) =>
   Number.isFinite(n)
-    ? new Intl.NumberFormat("es-MX", { maximumFractionDigits: digits }).format(
+    ? new Intl.NumberFormat("en-US", { maximumFractionDigits: digits }).format(
         n,
       )
-    : "Sin dato";
+    : "No data";
 const esc = (s) =>
   String(s ?? "").replace(
     /[&<>"']/g,
@@ -28,18 +31,21 @@ const esc = (s) =>
         "'": "&apos;",
       })[c],
   );
+// Unidad de la dotación y de la demanda, como en la página principal.
+const UNIDAD = "thousand m³/ha";
+// Nombres de cultivo en inglés: los mismos de la página principal (web/app.js, CULTIVOS).
 const names = {
   alfalfa: "Alfalfa",
-  nogal: "Nogal",
-  chile: "Chile",
-  algodon: "Algodón",
-  maiz_forrajero: "Maíz forrajero",
-  sorgo: "Sorgo forrajero",
-  cereal_invierno: "Cereal de invierno",
-  barbecho: "Barbecho",
-  descanso: "Descanso",
-  anual: "Cultivo anual",
-  sin_clasificar: "Sin clasificar",
+  nogal: "Pecan orchard",
+  chile: "Chile pepper",
+  algodon: "Cotton",
+  maiz_forrajero: "Forage maize",
+  sorgo: "Sorghum",
+  cereal_invierno: "Winter cereal",
+  barbecho: "Fallow",
+  descanso: "Rest",
+  anual: "Annual crop",
+  sin_clasificar: "Not classified",
 };
 const icons = {
   alfalfa: "♧",
@@ -54,40 +60,37 @@ const icons = {
 };
 const years = (term) =>
   term.min === term.max
-    ? `${fmt(term.min, 0)} ${term.min === 1 ? "año" : "años"}`
-    : `${fmt(term.min, 0)}–${fmt(term.max, 0)} años`;
+    ? `${fmt(term.min, 0)} ${term.min === 1 ? "year" : "years"}`
+    : `${fmt(term.min, 0)}–${fmt(term.max, 0)} years`;
 const cropName = (id) =>
-  names[id] ?? String(id ?? "Sin clasificar").replaceAll("_", " ");
+  names[id] ?? String(id ?? "Not classified").replaceAll("_", " ");
+// Por vista: título, descripción y rótulo de la ruta. Las llaves son los identificadores de las vistas
+// (hash, data-view y data-panel), que usan las hojas de estilo y las pruebas.
 const labels = {
   resumen: [
-    "Tu territorio, en tus manos",
-    "Conoce el agua que comprometes, antes de sembrar.",
-    "Resumen",
+    "Water dashboard",
+    "Before you plant, see the water you are committing.",
+    "Overview",
   ],
   terreno: [
-    "Tu terreno, de cerca",
-    "Cada parcela cuenta una historia distinta.",
-    "Mi terreno",
+    "Your field, up close",
+    "Each field has its own crop, soil and water need.",
+    "My field",
   ],
   cultivos: [
-    "Lo que siembras importa",
-    "Compara agua, riego y compromiso a lo largo del tiempo.",
-    "Cultivos y opciones",
+    "What you plant matters",
+    "Compare water need, irrigation and how many years each crop commits.",
+    "Crops and options",
   ],
   recomendaciones: [
-    "Decidir con más contexto",
-    "Evidencia y preguntas para conversar con tu técnico.",
-    "Recomendaciones",
+    "Compare options",
+    "Evidence and questions to go over with your technician.",
+    "Compare options",
   ],
   predicciones: [
-    "Mirar atrás para avanzar",
-    "Lluvia con retroprueba temporal y contexto histórico.",
-    "Historia y predicciones",
-  ],
-  investigacion: [
-    "De dónde viene cada decisión",
-    "Investigación abierta, fuentes y límites a la vista.",
-    "Fuentes y metodología",
+    "History and rainfall range",
+    "Historical rainfall range with its back-test, and past events for context.",
+    "History and rainfall range",
   ],
 };
 const state = {
@@ -129,12 +132,16 @@ function zone() {
 }
 function fieldLabel(f) {
   const p = f.properties;
-  return `${p.id} · ${p.abstencion ? "Sin clasificar" : cropName(p.cultivo_actual)} · ${fmt(p.area_ha)} ha`;
+  return `${p.id} · ${p.abstencion ? "Not classified" : cropName(p.cultivo_actual)} · ${fmt(p.area_ha)} ha`;
+}
+// Enlace a la ficha de la parcela en la página principal (index.html#<id>).
+function explorerLink(id) {
+  return id ? `index.html#${encodeURIComponent(id)}` : "index.html";
 }
 
 function route() {
   let view = location.hash.slice(1) || "resumen";
-  // Conservar enlaces históricos a IDs de parcela de la antigua página principal.
+  // Un hash con el ID de una parcela abre esa parcela en la vista del terreno.
   const linked = geo?.features.find((f) => f.properties.id === view);
   if (linked) {
     $("#zona-dashboard").value = linked.properties.zona;
@@ -169,31 +176,32 @@ function stats() {
   const committed = aguaComprometida(z, state.allocation, state.rain);
   const percent =
     committed.p50 == null ? "—" : `${fmt(committed.p50 * 100, 0)}%`;
+  // Solo textos propios y números con formato: nada de esto viene como texto de los datos.
   const rows = [
     [
-      "Superficie de la zona",
+      "Size of the pilot area",
       `${fmt(z.superficie_total_ha, 0)} <small>ha</small>`,
-      "Área de polígonos estimados",
+      "Area of the estimated polygons",
       "⌘",
     ],
     [
-      "Parcelas identificadas",
+      "Fields identified",
       fmt(z.conteos.total, 0),
-      `${fmt(z.conteos.total - z.conteos.abstenida, 0)} con clasificación de cultivo`,
+      `${fmt(z.conteos.total - z.conteos.abstenida, 0)} with a crop classification`,
       "♧",
     ],
     [
-      "Agua comprometida",
+      "Water already committed",
       percent,
       committed.sinDotacion
-        ? "Sin dotación en este escenario"
-        : "Al menos · demanda de perennes / dotación",
+        ? "No allocation in this scenario"
+        : "At least · need of perennial crops / allocation",
       "◉",
     ],
     [
-      "Área sin clasificar",
+      "Area not classified",
       `${fmt(committed.fraccionSinClasificar * 100, 0)}%`,
-      "Necesita verificación en campo",
+      "Needs checking in the field",
       "↗",
     ],
   ];
@@ -205,7 +213,7 @@ function stats() {
     .join("");
   const commitment = $("#water-commitment");
   if (commitment)
-    commitment.innerHTML = `<span class="commitment-icon">${icono("drop")}</span><div><strong>${committed.sinDotacion ? "Sin dotación" : `Al menos ${percent} comprometido`}</strong><span>Demanda de cultivos perennes · escenario actual</span></div><a href="#recomendaciones" aria-label="Explorar planes de agua">${icono("arrow")}</a>`;
+    commitment.innerHTML = `<span class="commitment-icon">${icono("drop")}</span><div><strong>${committed.sinDotacion ? "No allocation" : `At least ${percent} committed`}</strong><span>Need of perennial crops · current scenario</span></div><a href="#recomendaciones" aria-label="Compare options for this field">${icono("arrow")}</a>`;
   document
     .querySelectorAll("[data-allocation]")
     .forEach((b) =>
@@ -217,13 +225,13 @@ function stats() {
   actualizarColoresMapa();
   $("#allocation-value").textContent = fmt(state.allocation);
   $("#scenario-label").textContent =
-    `Escenario: ${fmt(state.allocation)} millares/ha · lluvia ${fmt(state.rain, 0)}% ↗`;
+    `Scenario: ${fmt(state.allocation)} ${UNIDAD} · rain change ${fmt(state.rain, 0)}% ↗`;
 }
 
 function fieldList() {
-  const query = $("#field-search").value.trim().toLocaleLowerCase("es");
+  const query = $("#field-search").value.trim().toLocaleLowerCase("en");
   const list = features().filter((f) =>
-    fieldLabel(f).toLocaleLowerCase("es").includes(query),
+    fieldLabel(f).toLocaleLowerCase("en").includes(query),
   );
   $("#field-select").innerHTML = list.length
     ? list
@@ -232,15 +240,14 @@ function fieldList() {
             `<option value="${esc(f.properties.id)}">${esc(fieldLabel(f))}</option>`,
         )
         .join("")
-    : '<option value="">No hay coincidencias</option>';
+    : '<option value="">No matches</option>';
   if (list.some((f) => f.properties.id === state.field))
     $("#field-select").value = state.field;
 }
 function fieldDetails() {
   const p = selected()?.properties;
   if (!p) {
-    $("#field-detail").textContent =
-      "No hay parcelas disponibles en esta zona.";
+    $("#field-detail").textContent = "No fields available in this pilot area.";
     return;
   }
   const op = current();
@@ -249,46 +256,34 @@ function fieldDetails() {
       ? evaluarOpcion(op, p.area_ha, state.allocation, state.rain)
       : null;
   const profile = soil?.perfil?.parcelas?.[p.id];
-  const textureNames = {
-    "clay loam": "Franco arcilloso",
-    "sandy clay loam": "Franco arcilloarenoso",
-    "sandy loam": "Franco arenoso",
-  };
-  const texture = profile?.clase_textura
-    ? (textureNames[profile.clase_textura] ?? profile.clase_textura)
-    : soilError
-      ? "No se pudo cargar"
-      : "Sin dato";
+  const sinSuelo = soilError ? "Could not load" : "No data";
+  // La clase de textura se muestra como viene del perfil regional (suelo.json).
+  const texture = profile?.clase_textura ?? sinSuelo;
   const term = !p.abstencion && op?.agua?.plazo_anios;
-  const termLabel = term ? years(term) : "Sin dato";
-  const demand = evalOp
-    ? `${fmt(evalOp.lamina.p50)} millares/ha`
-    : "Sin cálculo";
+  const termLabel = term ? years(term) : "No data";
+  const demand = evalOp ? `${fmt(evalOp.lamina.p50)} ${UNIDAD}` : "Not computed";
   const coverage = evalOp
     ? `${fmt(evalOp.cobertura * 100, 0)}%`
-    : "Sin cálculo";
+    : "Not computed";
   const title = p.abstencion
-    ? "Cultivo sin clasificar"
+    ? "Crop not classified"
     : cropName(p.cultivo_actual);
+  const ancho = evalOp && Number.isFinite(evalOp.cobertura) ? evalOp.cobertura * 100 : 0;
   $("#field-detail").innerHTML =
-    `<div class="field-title"><span class="crop-symbol">${icons[p.cultivo_actual] ?? "♧"}</span><div><h4>${esc(title)}</h4><p>Parcela ${esc(p.id)} · ${fmt(p.area_ha)} ha</p></div></div>
-        <dl class="field-metrics"><div><dt>Demanda anual · mediana</dt><dd>${demand}</dd></div><div><dt>Suelo · mapa regional</dt><dd>${profile ? `pH ${fmt(profile.ph)}` : soilError ? "No se pudo cargar" : "Sin dato"}</dd></div><div><dt>Sistema de riego real</dt><dd id="field-irrigation">Sin registrar</dd></div><div><dt>Pendiente media</dt><dd>${Number.isFinite(p.relieve?.pendiente_media_pct) ? `${fmt(p.relieve.pendiente_media_pct)}%` : "Sin dato"}</dd></div><div><dt>Textura estimada · mapa</dt><dd>${esc(texture)}</dd></div><div><dt>Compromiso del modelo</dt><dd>${termLabel}</dd></div></dl>
-        <div class="coverage">Área cubierta por el escenario <strong>${coverage}</strong><div class="progress"><div style="width:${evalOp ? evalOp.cobertura * 100 : 0}%"></div></div></div>
-        <p class="micro">${evalOp ? `${fmt(evalOp.hectareas.p50)} de ${fmt(p.area_ha)} ha con agua a demanda mediana. Banda: ${fmt(evalOp.hectareas.bajo)}–${fmt(evalOp.hectareas.alto)} ha.` : "No se infiere una recomendación sin clasificación. Confirma el cultivo con tu técnico."}</p>
-        <a class="field-link" href="index.html#${encodeURIComponent(p.id)}">Ver ficha y opciones de parcela <span>↗</span></a>`;
-  $("#recommendation-link").href =
-    `index.html#${encodeURIComponent(p.id)}`;
-  recommendations(p, evalOp);
-  updateHighlight();
-}
-function recommendations() {
+    `<div class="field-title"><span class="crop-symbol">${icons[p.cultivo_actual] ?? "♧"}</span><div><h4>${esc(title)}</h4><p>Field ${esc(p.id)} · ${fmt(p.area_ha)} ha</p></div></div>
+        <dl class="field-metrics"><div><dt>Yearly water need · median</dt><dd>${demand}</dd></div><div><dt>Soil · regional map</dt><dd>${profile ? `pH ${fmt(profile.ph)}` : sinSuelo}</dd></div><div><dt>Actual irrigation system</dt><dd id="field-irrigation">Not recorded</dd></div><div><dt>Mean slope</dt><dd>${Number.isFinite(p.relieve?.pendiente_media_pct) ? `${fmt(p.relieve.pendiente_media_pct)}%` : "No data"}</dd></div><div><dt>Estimated texture · map</dt><dd>${esc(texture)}</dd></div><div><dt>Water term in the model</dt><dd>${termLabel}</dd></div></dl>
+        <div class="coverage">Area covered in this scenario <strong>${coverage}</strong><div class="progress"><div style="width:${ancho}%"></div></div></div>
+        <p class="micro">${evalOp ? `${fmt(evalOp.hectareas.p50)} of ${fmt(p.area_ha)} ha have water at the median need. Likely range: ${fmt(evalOp.hectareas.bajo)}–${fmt(evalOp.hectareas.alto)} ha.` : "Nothing is computed for a field without a crop classification. Confirm the crop with your technician."}</p>
+        <a class="field-link" href="${esc(explorerLink(p.id))}">Open the field explorer <span>↗</span></a>`;
+  $("#recommendation-link").href = explorerLink(p.id);
   asesor?.actualizar();
+  updateHighlight();
 }
 
 function crops() {
-  const rotations = research.rotaciones[state.zone];
+  const rotations = research.rotaciones?.[state.zone];
   if (!rotations) {
-    $("#crop-grid").textContent = "No hay datos de rotaciones para esta zona.";
+    $("#crop-grid").textContent = "No rotation data for this pilot area.";
     return;
   }
   $("#crop-grid").innerHTML = rotations
@@ -297,20 +292,36 @@ function crops() {
       const area = selected()?.properties.area_ha;
       const ha = hectareasQueAlcanzan(area, state.allocation, l);
       const crop = r.cultivos[0];
-      const kc = cube.opciones_catalogo[r.id]?.secuencia?.[0]?.siembra;
+      // Nombre en inglés del catálogo del cubo; si la opción no está en el catálogo, el nombre como viene.
+      const catalogo = cube.opciones_catalogo[r.id];
+      const nombre = catalogo?.nombre_en ?? r.nombre;
+      const kc = catalogo?.secuencia?.[0]?.siembra;
       const planting =
-        kc?.desde && kc?.hasta
-          ? `${kc.desde} a ${kc.hasta}`
-          : "Consultar ficha técnica";
-      return `<article class="card crop-card"><span class="crop-symbol">${icons[crop] ?? "♧"}</span><h3>${esc(r.nombre)}</h3><span class="pill">${r.plazo === "anual" ? "CULTIVO ANUAL" : r.plazo === "nogal" ? "HUERTA · HORIZONTE DEL MODELO" : "CULTIVO PERENNE"}</span><div class="water-number">${fmt(l.p50)} <small style="font-size:11px">millares/ha</small></div><p>Banda P10–P90: ${fmt(l.p10)}–${fmt(l.p90)}</p><div class="crop-meta"><span>Compromiso <strong>${years(r.plazo_anios)}</strong></span><span>Siembra · mes-día <strong>${esc(planting)}</strong></span><span>Base del cálculo A5 <strong>${l.p50 === 0 ? "Sin riego" : "Riego superficial modelado"}</strong></span></div><p class="micro">${state.field ? `Para el área de ${esc(state.field)}: ${fmt(ha.p50)} de ${fmt(area)} ha cubiertas a mediana. Comparación de área, no aptitud ni recomendación para esta parcela.` : "Selecciona una parcela para comparar superficie."}</p></article>`;
+        kc?.desde && kc?.hasta ? `${kc.desde} to ${kc.hasta}` : "Not in the data";
+      const plazo =
+        r.plazo === "anual"
+          ? "ANNUAL CROP"
+          : r.plazo === "nogal"
+            ? "ORCHARD · MODEL HORIZON"
+            : "PERENNIAL CROP";
+      return `<article class="card crop-card"><span class="crop-symbol">${icons[crop] ?? "♧"}</span><h3>${esc(nombre)}</h3><span class="pill">${plazo}</span><div class="water-number">${fmt(l.p50)} <small style="font-size:11px">${UNIDAD}</small></div><p>Likely range: ${fmt(l.p10)}–${fmt(l.p90)}</p><div class="crop-meta"><span>Water term <strong>${years(r.plazo_anios)}</strong></span><span>Planting · month-day <strong>${esc(planting)}</strong></span><span>Calculation basis <strong>${l.p50 === 0 ? "No irrigation" : "Modeled surface irrigation"}</strong></span></div><p class="micro">${state.field ? `For the area of ${esc(state.field)}: ${fmt(ha.p50)} of ${fmt(area)} ha covered at the median need. This compares area; it is not a suitability rating or advice for this field.` : "Select a field to compare area."}</p></article>`;
     })
     .join("");
 }
 function chart() {
-  const values = research.historia;
+  const values = research.historia ?? [];
+  if (!values.length) {
+    $("#history-chart").textContent = "No history data available.";
+    return;
+  }
   const max = Math.max(...values.map((x) => x.superficie_ha));
+  // El año y la fuente vienen de dashboard.json: se escapan. La altura es un número calculado.
+  const alto = (x) => {
+    const pct = (x.superficie_ha / max) * 75;
+    return Number.isFinite(pct) ? pct : 0;
+  };
   $("#history-chart").innerHTML =
-    `<div class="bars" role="img" aria-label="Superficie regada en hectáreas, por años seleccionados">${values.map((x) => `<div class="bar-group"><small>${fmt(x.superficie_ha, 0)}</small><div class="bar" style="height:${(x.superficie_ha / max) * 75}%" title="${x.anio}: ${fmt(x.superficie_ha, 0)} ha"></div><span>${x.anio}</span></div>`).join("")}</div><details class="micro"><summary>Fuente y valores accesibles</summary><p>${esc(research.historia_fuente)}</p><table><caption>Superficie regada, hectáreas</caption><tbody>${values.map((x) => `<tr><th scope="row">${x.anio}</th><td>${fmt(x.superficie_ha, 0)}</td></tr>`).join("")}</tbody></table></details>`;
+    `<div class="bars" role="img" aria-label="Irrigated area in hectares, for selected years">${values.map((x) => `<div class="bar-group"><small>${fmt(x.superficie_ha, 0)}</small><div class="bar" style="height:${alto(x)}%" title="${esc(x.anio)}: ${fmt(x.superficie_ha, 0)} ha"></div><span>${esc(x.anio)}</span></div>`).join("")}</div><details class="micro"><summary>Source and values as a table</summary><p>${esc(research.historia_fuente)}</p><table><caption>Irrigated area, hectares</caption><tbody>${values.map((x) => `<tr><th scope="row">${esc(x.anio)}</th><td>${fmt(x.superficie_ha, 0)}</td></tr>`).join("")}</tbody></table></details>`;
 }
 function timeline() {
   $("#timeline").innerHTML = research.eventos
@@ -327,13 +338,17 @@ function timeline() {
   });
 }
 function download(name, rows) {
-  // Evitar interpretación como fórmula de celdas de texto al abrir el CSV en una hoja de cálculo.
-  const cell = (value) =>
-    `"${String(value ?? "")
-      .replace(/^[=+@-]/, "'$&")
-      .replaceAll('"', '""')}"`;
+  // Los números se escriben tal cual (un −20 debe seguir siendo un número en la hoja de cálculo).
+  // A los textos que empiezan como fórmula se les antepone un apóstrofo para que la hoja no los ejecute.
+  const cell = (value) => {
+    if (typeof value === "number")
+      return Number.isFinite(value) ? String(value) : "";
+    const text = String(value ?? "");
+    const seguro = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+    return `"${seguro.replaceAll('"', '""')}"`;
+  };
   const csv =
-    "\uFEFF" + rows.map((row) => row.map(cell).join(",")).join("\r\n");
+    "﻿" + rows.map((row) => row.map(cell).join(",")).join("\r\n");
   const url = URL.createObjectURL(
     new Blob([csv], { type: "text/csv;charset=utf-8" }),
   );
@@ -346,38 +361,41 @@ function download(name, rows) {
 function exportSummary() {
   const p = selected()?.properties,
     op = current();
+  if (!p) return;
   const e =
     op && !p.abstencion
       ? evaluarOpcion(op, p.area_ha, state.allocation, state.rain)
       : null;
-  download(`raiz-${state.field}-resumen.csv`, [
+  download(`root-${state.field}-summary.csv`, [
     [
-      "zona",
-      "parcela",
-      "cultivo",
+      "pilot_area",
+      "field",
+      "crop",
       "area_ha",
-      "dotacion_millares_ha",
-      "lluvia_pct",
-      "demanda_p10",
-      "demanda_p50",
-      "demanda_p90",
-      "ha_cubiertas_p50",
-      "fuente",
-      "alcance",
+      "allocation_thousand_cubic_m_per_ha",
+      "rain_change_pct",
+      "water_need_low",
+      "water_need_median",
+      "water_need_high",
+      "water_need_unit",
+      "hectares_covered_median",
+      "source",
+      "scope",
     ],
     [
       zone().nombre_mostrar,
       p.id,
-      p.abstencion ? "sin_clasificar" : p.cultivo_actual,
+      p.abstencion ? "not_classified" : p.cultivo_actual,
       p.area_ha,
       state.allocation,
       state.rain,
       e?.lamina.p10,
       e?.lamina.p50,
       e?.lamina.p90,
+      "thousand cubic meters per hectare per year",
       e?.hectareas.p50,
       `cubo.json + parcelas.geojson; ${cube.meta.script}`,
-      "Escenario; no es pronostico ni recomendacion de siembra",
+      "Scenario; not a forecast and not planting advice",
     ],
   ]);
 }
@@ -475,12 +493,13 @@ function actualizarColoresMapa() {
       mapMode === "agua" ? agua : cultivos,
     );
   }
+  // Mismos rótulos del semáforo que la página principal (web/app.js, SEMAFORO).
   const legend = $(".map-legend");
   if (legend)
     legend.innerHTML =
       mapMode === "agua"
-        ? '<span><i class="legend-green"></i>Cubre banda alta</span><span><i class="legend-yellow"></i>Cubre mediana</span><span><i class="legend-red"></i>Falta agua</span><span><i class="legend-gray"></i>Sin clasificar</span>'
-        : '<span><i class="legend-green"></i>Cultivo clasificado</span><span><i class="legend-gray"></i>Sin clasificar</span>';
+        ? '<span><i class="legend-green"></i>Enough water</span><span><i class="legend-yellow"></i>Tight</span><span><i class="legend-red"></i>Not enough water</span><span><i class="legend-gray"></i>Not classified</span>'
+        : '<span><i class="legend-green"></i>Classified crop</span><span><i class="legend-gray"></i>Not classified</span>';
 }
 function accesosParcelas() {
   const box = $("#scene-parcels");
@@ -535,12 +554,13 @@ function updateHighlight() {
     );
 }
 
+// Modo local, sin teselas: los polígonos de la zona dibujados en SVG con los datos ya cargados.
 function drawFallback() {
   const [west, south, east, north] = zone().bbox;
   const project = ([x, y]) =>
     `${((x - west) / (east - west)) * 600},${((north - y) / (north - south)) * 320}`;
   $("#map-fallback").innerHTML =
-    `<svg viewBox="0 0 600 320" role="img" aria-label="Polígonos estimados de la zona, sin mapa base">${features()
+    `<svg viewBox="0 0 600 320" role="img" aria-label="Estimated field polygons of the pilot area, without a base map">${features()
       .map((f) => {
         const op = cube.parcelas[f.properties.id]?.opciones?.find(
           (o) => o.id === "ACTUAL",
@@ -556,12 +576,12 @@ function drawFallback() {
               ).semaforo;
         const color =
           mapMode === "agua"
-            ? {
+            ? ({
                 verde: "#8ed665",
                 ambar: "#f1c263",
                 rojo: "#ed8b78",
                 gris: "#73837b",
-              }[estado]
+              }[estado] ?? "#73837b")
             : f.properties.abstencion
               ? "#73837b"
               : "#8ed665";
@@ -583,12 +603,12 @@ function fallback(message) {
   $("#map-fallback").hidden = false;
   document.body.dataset.dashboardMap = "local";
   $("#map-note").textContent =
-    message + " Puedes elegir una parcela en el listado.";
+    message + " You can also choose a field from the list.";
   drawFallback();
 }
 function mapInit() {
   if (!window.maplibregl?.Map) {
-    fallback("Mapa base no disponible. Se muestran los polígonos locales.");
+    fallback("The base map is not available. The field polygons are drawn from local data.");
     return;
   }
   try {
@@ -597,13 +617,13 @@ function mapInit() {
       style: {
         version: 8,
         sources: {
-          imagery: {
+          // La misma fuente de teselas de la página principal (web/app.js, crearMapa): ningún dominio nuevo.
+          osm: {
             type: "raster",
-            tiles: [
-              "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-            ],
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
-            attribution: research.mapa_atribucion,
+            maxzoom: 19,
+            attribution: "© OpenStreetMap contributors",
           },
         },
         layers: [
@@ -613,10 +633,15 @@ function mapInit() {
             paint: { "background-color": "#12221a" },
           },
           {
-            id: "imagery",
+            id: "osm",
             type: "raster",
-            source: "imagery",
-            paint: { "raster-saturation": -0.35, "raster-opacity": 0.75 },
+            source: "osm",
+            // Atenuado para el fondo oscuro del tablero; los polígonos llevan el color.
+            paint: {
+              "raster-saturation": -0.6,
+              "raster-brightness-max": 0.6,
+              "raster-opacity": 0.8,
+            },
           },
         ],
       },
@@ -675,24 +700,25 @@ function mapInit() {
         state.map.getCanvas().style.cursor = "";
       });
     });
+    // Sin red no llegan las teselas: los polígonos siguen dibujados con los datos locales y se avisa una vez.
     let warned = false;
     state.map.on("error", () => {
       if (!warned) {
         warned = true;
         $("#map-note").textContent =
-          "No se pudo cargar parte del mapa. Los polígonos y el listado utilizan datos locales; la imagen base requiere conexión.";
+          "Part of the map could not load. The field polygons and the field list use local data; the base map needs a connection.";
       }
     });
     state.map
       .getCanvas()
       .addEventListener("webglcontextlost", () =>
         fallback(
-          "Se perdió el contexto gráfico. Se muestran los polígonos locales.",
+          "The graphics context was lost. The field polygons are drawn from local data.",
         ),
       );
   } catch (err) {
     fallback(
-      "No se pudo iniciar el mapa interactivo. Se muestran los polígonos locales.",
+      "The interactive map could not start. The field polygons are drawn from local data.",
     );
   }
 }
@@ -710,7 +736,7 @@ async function init() {
     soilError = true;
   }
   if (!cube.zonas || !Array.isArray(geo.features) || !research.eventos)
-    throw new Error("Los archivos no tienen la estructura de datos esperada.");
+    throw new Error("the data files do not have the expected structure");
   $("#zona-dashboard").innerHTML = Object.entries(cube.zonas)
     .map(
       ([id, z]) =>
@@ -728,19 +754,15 @@ async function init() {
       slider.min,
   });
   state.allocation = Number($("#allocation").value);
+  const menosLluvia = cube.lluvia_pct.find((v) => v < 0);
   $("#range-labels").innerHTML =
-    `<span>${fmt(slider.min)} millares/ha</span><span>${fmt(slider.max)} millares/ha</span>`;
-  $("#rain-pct").textContent = `(${cube.lluvia_pct.find((v) => v < 0)}%)`;
+    `<span>${fmt(slider.min)} ${UNIDAD}</span><span>${fmt(slider.max)} ${UNIDAD}</span>`;
+  $("#rain-pct").textContent = `(${fmt(menosLluvia, 0)}%)`;
+  // Fecha del corte en hora de Chihuahua (UTC−6 fijo; «America/Guatemala» tiene el mismo desfase sin horario de verano).
   $("#data-date").textContent =
-    `Corte de datos · ${cube.meta.generado && Number.isFinite(Date.parse(cube.meta.generado)) ? new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeZone: "America/Guatemala" }).format(new Date(cube.meta.generado)) : "Fecha no disponible"}`;
-  $("#sources").innerHTML = research.fuentes
-    .map(
-      (f) =>
-        `<article class="source"><div><h3>${esc(f.titulo)}</h3><p>${esc(f.descripcion)}</p></div><a href="${esc(f.archivo)}" target="_blank" rel="noopener">Consultar PDF ↗</a></article>`,
-    )
-    .join("");
+    `Data as of ${cube.meta.generado && Number.isFinite(Date.parse(cube.meta.generado)) ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "America/Guatemala" }).format(new Date(cube.meta.generado)) : "date not available"}`;
   mapBlock = $(".map-detail-grid");
-  mapAnchor = document.createComment("Posición original del mapa y ficha");
+  mapAnchor = document.createComment("map-anchor");
   mapBlock.before(mapAnchor);
   prepararInterfaz({
     cubo: cube,
@@ -763,7 +785,7 @@ async function init() {
     crops();
   });
   $("#rain").addEventListener("change", (e) => {
-    state.rain = e.target.checked ? cube.lluvia_pct.find((v) => v < 0) : 0;
+    state.rain = e.target.checked ? menosLluvia : 0;
     stats();
     fieldDetails();
     crops();
@@ -797,8 +819,8 @@ async function init() {
   );
   $("#exportar").addEventListener("click", exportSummary);
   $("#export-timeline").addEventListener("click", () =>
-    download("raiz-cronologia.csv", [
-      ["periodo", "tipo", "evento", "detalle", "fuente", "estado"],
+    download("root-timeline.csv", [
+      ["period", "type", "event", "detail", "source", "status"],
       ...research.eventos
         .filter((e) => state.filter === "todos" || e.tipo === state.filter)
         .map((e) => [
@@ -807,7 +829,7 @@ async function init() {
           e.titulo,
           e.detalle,
           e.fuente,
-          "Referencia secundaria; no es dataset validado",
+          "Secondary reference; not a validated data set",
         ]),
     ]),
   );
@@ -827,8 +849,14 @@ async function init() {
 }
 montarInstalacion($("#dashboard-install"));
 init().catch((err) => {
-  $("#load-status").className = "error";
-  $("#load-status").textContent =
-    `No se pudo cargar el dashboard: ${err.message}. Recarga la página o abre el explorador técnico desde el menú.`;
+  // El aviso de fallo ofrece el camino a la página principal, que no depende de este tablero.
+  const status = $("#load-status");
+  status.className = "error";
+  status.hidden = false;
+  status.textContent = `The dashboard could not load: ${err.message}. Reload the page or `;
+  const link = document.createElement("a");
+  link.href = "index.html";
+  link.textContent = "open the field explorer";
+  status.append(link, ".");
   document.body.dataset.dashboard = "error";
 });
