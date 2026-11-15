@@ -30,7 +30,7 @@ Depth in millares per hectare (1 millar/ha = 10 cm). Delicias–Saucillo zone, r
    (0.89): there, growers apply 161 cm, far more than the 92 cm recommended.
 2. **Alfalfa and pecan are 68 % of the area** of the crop pattern used in H1. That is why the model's excess in these
    two crops explains most of the H1 error.
-3. **For alfalfa the difference comes from ET, not only from efficiency.** The model gives 1,748 mm of ETc (Penman-Monteith with
+3. **For alfalfa the difference comes from ET, not just from efficiency.** The model gives 1,748 mm of ETc (Penman-Monteith with
    NASA POWER, Kc 0.95 all year); the local study, 1,139 mm. The kit already set 1,100–1,700 mm as a control: the model sits
    at the high edge. With the same applied depth (174 cm), the average regional yield is 14 t of dry matter per
    hectare against 24 of potential (INIFAP): the district's alfalfa is not irrigated to its potential.
@@ -51,5 +51,5 @@ Depth in millares per hectare (1 millar/ha = 10 cm). Delicias–Saucillo zone, r
 ## 4. What CANNOT be claimed
 - That the model "gets the level right": it does not in alfalfa, pecan, cotton or forage maize.
 - That the ET ÷ applied water ratio (65.6 % in alfalfa) is a measured field efficiency: the project's own file
-  marks it only as a contrast.
+  marks it solely as a contrast.
 - That it is known how much water each field applies: these are district averages for 2009–2016.

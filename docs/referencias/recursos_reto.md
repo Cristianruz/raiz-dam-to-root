@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Recursos oficiales del reto «Field Shift: Adapting Farms with NASA Data»
 
 **Origen:** https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/, pestañas Details y Resources.
@@ -20,9 +20,9 @@
   - mapas (líneas de tiempo, deslizadores de escenarios);
   - diseño para el agricultor (prioridades y restricciones).
 
-## Recursos de la lista oficial y su cruce con Raíz (criterio de pertinencia)
+## Recursos de la lista oficial y su cruce con ROOT (criterio de pertinencia)
 
-| Dato en Raíz | ¿Está en la lista oficial? | Renglón de la lista |
+| Dato en ROOT | ¿Está en la lista oficial? | Renglón de la lista |
 |---|---|---|
 | HLS v2 (Landsat 8/9 + Sentinel-2 armonizados) | Sí: Landsat y Copernicus Sentinel-2 (ESA). HLS es el producto de la NASA que los combina | Landsat; Copernicus Sentinel-2 |
 | NASA POWER (clima diario, ETo) | Sí | NASA POWER |

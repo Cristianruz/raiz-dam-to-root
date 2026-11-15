@@ -10,14 +10,14 @@ Team **Orbital Farming** · NASA Space Apps Challenge 2026, Chihuahua local even
 
 **Public link:** https://cristianruz.github.io/raiz-dam-to-root/. The repository is public and GitHub Pages publishes `main` (source: GitHub Actions); pull request #4, with the version described here, is merged. To run it locally, or as a single-file offline demo, see [How to run](#how-to-run).
 
-Three items depend on people and are not done:
+Three items depend on people and are not closed:
 
-- **Video.** Not yet: a video of 30 seconds or less, without voice, with English subtitles, recorded from the real app (kit v4, C7).
+- **Video.** A draft exists: [`docs/pitch/video_30s.mp4`](docs/pitch/video_30s.mp4), 30 s or less, without voice, with English subtitles (`docs/pitch/video_30s.srt`), recorded from the real app with `tests/e2e/grabar_video.mjs` (kit v4, C7). It will be recorded again on the final page, and its public link is still pending.
 - **Preregistration.** Not yet public: there is no OSF link in this repository (`docs/reparto_faltantes.md`, item H3). This README therefore says "declared before the analysis" and names where each criterion was fixed:
   - the five criteria, in S9 §6 (dated Nov 10, 2026; in this repository since commit `fa49050`, Nov 12), and the H3 text, in S9 Annex B;
   - the operating points that H1 left open, in [`docs/h1_especificacion_operativa.md`](docs/h1_especificacion_operativa.md) (commit `b9baced` of the `datos-satelite` branch, Nov 14, 14:11 Chihuahua time, before the model was run);
   - the follow-up H1-b, in [`docs/h1b_especificacion.md`](docs/h1b_especificacion.md) (commit `695caf8` of the same branch, Nov 14, 16:20, before computing).
-  - The page still titles H1 and H3 "preregistered" (`web/data/pruebas.json`).
+  - The page titles them "Back-test 2026 (H1, criterion declared before the analysis)" and "Natural experiment of 2025 (H3, criterion declared before the analysis)" (`web/data/pruebas.json`).
 - **Featured fields.** Not yet: the manual review, in true color, of the three featured fields P0757, P0632 and L0175 (`web/data/parcelas.geojson` → `protagonista`; `docs/reparto_faltantes.md`, item D3).
 
 Many linked documents are in Spanish. English translations of the ones the page links (results of H1, H1-b and H3, model against local practice, featured-field review) are in [`docs/en/`](docs/en/README.md); where a translation and its original differ, the Spanish original prevails.
@@ -86,6 +86,7 @@ In a non-exhaustive search (Nov 10, 2026) we did not find a tool that shows the 
    - **Soil and satellite evidence**: the soil profile from SoilGrids 2.0 (`web/data/suelo.json`), GEDI canopy height, always with its note, and ECOSTRESS ET on clear days (`contexto.json`).
    - The current rotation and its alternatives from the project's rotation table (master document §5.2; `data/processed/opciones_b3.json`), each with Water · Soil · Money rows. Established alfalfa gets three alternatives, one of them a summer irrigation cut. Where the table gives fewer than two (fallow and winter cereal), the engine completes them with a team proposal labeled "[S] team proposal, not from the agronomic guide" (`web/data/cubo.json` → `meta.opciones.completadas`).
    - The 105 pecan orchards show the current rotation alone, labeled "does not rotate", with its reason and source ([`docs/decisiones/2026-11-15_nogal_sin_alternativas.md`](docs/decisiones/2026-11-15_nogal_sin_alternativas.md)).
+   - **What matters most to you?**, a row of switches above the cards: it highlights options by the priority you pick (for example less water, a shorter water commitment, nitrogen fixing or less bare soil); it does not rank them. A priority the data cannot back is listed as "no data in ROOT yet" (`web/js/prioridades.js`).
    - Under the model's need, each card shows a local reference depth where one exists, with the hectares it would cover: the depth applied in the district for alfalfa and pecan (Villalobos-Cano et al. 2024) or INIFAP's recommendation for forage maize (`cubo.json` → `agua.lamina_local`). The traffic light keeps using the model's need.
    - The Soil row adds a suitability reading from published crop ranges (FAO ECOCROP); it never discards or reorders an option. Each option lists its filters and, next to its planting window, the frost probability for that date (NASA POWER). Most filters are "needs a local check": they need a field datum the tool does not have, or their source sets no threshold. One is decided from the field memory (the summer irrigation cut is for an established stand, never in its year of establishment), and the page evaluates the minimum allocation to establish alfalfa live against the slider.
    - **Follow the drop**, a Sankey diagram: dam → canal → field → crop → aquifer, with a drip scenario labeled "[V] indicative, not local" (`cubo.json` → `meta.goteo`), with and without a consumption cap.
@@ -130,7 +131,7 @@ Status: every product below is **in use** (the page or a published test reads it
 | HLS v2, Harmonized Landsat Sentinel-2 (`NASA/HLS/HLSL30/v002`, `NASA/HLS/HLSS30/v002`, via Google Earth Engine) | Monthly greenness per field: 2026 crop map (rules), field memory, bare-soil days, test H3 | 30 m (`docs/equipo/verificar_datos_nasa.md` §2). Agricultural years 2016–2026 | In use |
 | NASA POWER, Daily API, community AG | Daily climate for FAO-56 reference ET and crop water need, one file per area; climatology of test H1; contrast of the storm depth | One MERRA-2 cell of 0.5° × 0.625° per area. 1984-01-01 to 2026-11-09 (`data/processed/eto_diaria.csv`) | In use |
 | NASA POWER, `T2M_MIN` (frost dates, kit A2) | Dates of the last spring frost and of the earliest autumn frost; frost probability next to each planting window in the field sheet (it does not decide an option) | Same grid cells. 1984–2025, 42 complete years | In use |
-| NASADEM (`NASA/NASADEM_HGT/001`, via Earth Engine) | Runoff routes and "Simulate a storm" at area scale; three context indicators per field in the Soil row (mean slope, contributing area from outside the field, share inside closed depressions); relief of the 3D twin view | 30 m; each area plus 2 km | In use |
+| NASADEM (`NASA/NASADEM_HGT/001`, via Earth Engine) | Runoff routes and "Simulate a storm" at area scale; three context indicators per field in the Soil row (fitted slope, the largest single inflow from outside the field as a minimum, and the share of the field in closed pits of the elevation model, mostly within its noise); relief of the 3D twin view | 30 m; each area plus 2 km | In use |
 | GPM IMERG V07 (`NASA/GPM_L3/IMERG_V07`, via Earth Engine) | Daily rain per area; reference storm of "Simulate a storm" | Half-hourly values averaged per UTC day and over each area rectangle (grid size not recorded in `fuentes.json`). 2001-01-01 to 2026-11-13 | In use |
 | SSEBop VIIRS v6 monthly, a USGS product on VIIRS (`projects/usgs-ssebop/viirs_et_v6_monthly`, community catalog) | Regional contrast of the modeled ET (test 5), never per field | 1 km (`docs/resultado_A8.md`). Oct 2025–Sep 2026 | In use |
 | SMAP L4 v8 (`NASA/SMAP/SPL4SMGP/008`) | Regional context: surface and root-zone soil moisture, monthly | 9,000 m. 2015-04 to 2026-10 | In use (Regional context) |
@@ -155,13 +156,15 @@ Sources of the regional rows: `data/processed/fuentes.json` (product identifiers
 - **Conagua.** Technical report of aquifer 0831 (DR_0831; return-flow coefficients [V]). Dam storage, through the press [P]. **SIH** daily series of La Boquilla (downloaded Nov 14, 2026): the truth of the H1 back-test ([`docs/h1_verdad_sih.md`](docs/h1_verdad_sih.md)).
 - **INIFAP** crop water depths [V], **FIRA** alfalfa stand life [P] and **IMTA** canal conveyance efficiency [V], as cited in S9 and `data/params.json`. **Villalobos-Cano et al. (2024)**: depths applied in DR-005, 2009–2016 means [V], shown as the local reference of alfalfa and pecan (`cubo.json` → `agua.lamina_local`).
 - **FAO Irrigation Water Management Training Manual No. 4** (Brouwer, Prins and Heibloem 1989), Annex I, Table 8: indicative field application efficiencies of the drip scenario, 0.9 for drip and 0.6 for surface irrigation, labeled "[V] indicative, not local" (`data/processed/supuestos.json` → `ea_goteo`, `ea_superficial_referencia`; `cubo.json` → `meta.goteo`).
-- **GAEZ v4** (FAO and IIASA; 5′ cells, about 9 km; CC BY-NC-SA): crop suitability per pilot area, as regional context, never a value of a field. In use, in the regional context panel (`data/processed/gaez_zona.csv`). **WaPOR v3** (FAO, 300 m; S8, decision 4): second regional ET contrast, not run. OpenStreetMap base map.
+- **GAEZ v4** (FAO and IIASA; 5′ cells, about 9 km; CC BY-NC-SA): crop suitability per pilot area, as regional context, never a value of a field. In use, in the regional context panel (`data/processed/gaez_zona.csv`). **WaPOR v3** (FAO, 300 m; S8, decision 4): second regional ET contrast, not run.
+- **OpenStreetMap** base map: © OpenStreetMap contributors (ODbL), https://www.openstreetmap.org/copyright.
+- **Copernicus Sentinel-2** true color, in the figure of the featured-field review (`docs/figuras/protagonistas_sentinel2_2026.jpg`): contains modified Copernicus Sentinel data 2026.
 
 Licenses and terms of use of every source: [DATA_LICENSE.md](DATA_LICENSE.md).
 
 ## Validation
 
-**Five tests in sight** (S9 §6). Each criterion was declared before the analysis; the documents and commits that fix them are listed under *Preregistration* at the top of this page. There is no public OSF registration yet, so this table does not call them preregistered; the page does (`web/data/pruebas.json`). The status and summary are those of `web/data/pruebas.json`, which the page shows under About & Data. About & Data also lists every delivered file recorded in `manifest.json`.
+**Five tests in sight** (S9 §6). Each criterion was declared before the analysis; the documents and commits that fix them are listed under *Preregistration* at the top of this page. There is no public OSF registration yet, so neither this table nor the page calls them preregistered. The status and summary are those of `web/data/pruebas.json`, which the page shows under About & Data. About & Data also lists every delivered file recorded in `manifest.json`.
 
 | # | Test | Criterion (declared beforehand) | Current result |
 |---|---|---|---|
@@ -181,7 +184,7 @@ Licenses and terms of use of every source: [DATA_LICENSE.md](DATA_LICENSE.md).
 - The field (on-farm) efficiency is a declared range of 0.45–0.70 [S], with no measured value for DR-005 (`rotaciones.json` → `params.ea_gravedad`; `data/params.json` → `eficiencia.parcelaria` is still null).
 - H1 and the ET contrast point the same way: the district operates with less water than the model computes as full demand (`docs/resultado_H1.md`).
 - **H1-b (follow-up, declared before running; it does not change H1): does not hold.** Over the 1999–2024 cycles the seasonal shape of the demand model beats the two simple shapes in 6 of 26 years; its median error is 8.66 percentage points, against 3.34 for the NASA POWER reference-ET curve and 7.9 for the linear shape. The model places demand earlier than the dam releases it ([`docs/resultado_H1b.md`](docs/resultado_H1b.md), specification in [`docs/h1b_especificacion.md`](docs/h1b_especificacion.md)).
-- **Model against local practice.** The model's full crop requirement is higher than the depths recommended by INIFAP and those applied in the district for alfalfa, pecan, cotton and forage maize, and lower for chile; the comparison, crop by crop and with its sources, is in [`docs/modelo_vs_practica.md`](docs/modelo_vs_practica.md).
+- **Model against local practice.** The model's full crop requirement is higher than the depths recommended by INIFAP and those applied in the district for alfalfa, pecan, cotton and forage maize; for chile it is above INIFAP's recommendation (14.26 against 9.2 millares/ha) and below the depth applied in the district (16.1). The comparison, crop by crop and with its sources, is in [`docs/modelo_vs_practica.md`](docs/modelo_vs_practica.md) §1 (in English: [`docs/en/model_vs_practice.md`](docs/en/model_vs_practice.md)).
 - **Example fields checked on imagery.** A check of the three example fields on Sentinel-2 true color is in [`docs/revision_protagonistas.md`](docs/revision_protagonistas.md); it was done by an AI session and a person still has to confirm it.
 - We will ask a district technician which on-farm efficiency is realistic for gravity irrigation, and under which conditions the INIFAP depths apply. Until then, if the efficiency range is too low, hectares covered are understated and committed water is overstated.
 
@@ -217,7 +220,7 @@ Main open limitations today:
 - Crop options come from the project's rotation table (`opciones_b3.json`): 828 of the 1,282 options on the page are from that table and 454 are team proposals labeled [S], added where the table gives fewer than two alternatives. 824 options carry filters, 1,965 filter results in all: 1,847 are "needs a local check", and the 118 that the field memory decides are the established-stand rule of the summer irrigation cut (103 pass, 15 warn) (`web/data/cubo.json`). Pecan orchards show no alternatives ([`docs/decisiones/2026-11-15_nogal_sin_alternativas.md`](docs/decisiones/2026-11-15_nogal_sin_alternativas.md)).
 - The field-efficiency range is an assumption [S]; the model's alfalfa depth is above INIFAP's, and the crop ET weighs in that gap as well as the efficiency.
 - The drip scenario uses indicative FAO efficiencies, not measured in the district ("[V] indicative, not local"); the Money row has no data.
-- The challenge asks to combine the farmer's priorities. ROOT sets the options side by side, each with Water, Soil and Money rows, and the farmer weighs them: there are no weights and no "best" option, and the Money row shows "No verified data".
+- The challenge asks to combine the farmer's priorities. ROOT sets the options side by side, each with Water, Soil and Money rows, and "What matters most to you?" highlights options by the priority you pick; it does not rank them. There are no weights and no "best" option; forage value, organic matter and market are listed as "no data in ROOT yet", and the Money row shows "No verified data".
 - NASADEM at 30 m is used at area scale; runoff routes are not drawn inside closed depressions of the elevation model.
 - The twin has no field sensors and no real-time data; regional series do not describe a field.
 
@@ -227,7 +230,7 @@ Full list: [LIMITATIONS.md](LIMITATIONS.md).
 
 | Component | Tool | What the AI did | What the team did | How it is verified |
 |---|---|---|---|---|
-| Integration code (engine, validator, web, tests, CI) | Claude Code (integrator session, Cristian), with multi-agent workflows: implementer agents and independent reviewer agents with fresh context | Wrote code and documents from the kit prompts and the data contract. Reviewers report findings and do not edit | Design, specifications, acceptance tests and decisions. Claude Code commits in Cristian's session on a working branch; Cristian merges to `main` | `python construir.py` gate before publishing; review protocol in `docs/prompts/`; logs in `docs/revisiones/` and `docs/progreso.md` |
+| Integration code (engine, validator, web, tests, CI) | Claude Code (integrator session, Cristian), with multi-agent workflows: implementer agents and independent reviewer agents with fresh context | Wrote code and documents from the kit prompts and the data contract. Reviewers report findings and do not edit | Design, specifications, acceptance tests and decisions. Claude Code commits in Cristian's session on a working branch; changes reach `main` through pull requests that Cristian merges or asks to merge (`AI_USAGE.md`) | `python construir.py` gate before publishing; review protocol in `docs/prompts/`; logs in `docs/revisiones/` and `docs/progreso.md` |
 | Data scripts and Earth Engine runs | A separate Claude session in the browser | Wrote and ran Earth Engine (HLS, field memory, NASADEM, GPM IMERG, SSEBop, regional context, GEDI), the Fields of The World extraction, NASA POWER with FAO-56, frost dates, the rules crop map, water demand, relief, and the H1, H3 and ET analyses (`AI_USAGE.md`; scripts named in `data/processed/fuentes.json`) | Specification (kit v4), thresholds and review | Independent reviews of the data branch (`docs/revisiones/`); mailbox validator; sha256 of each delivery (`data/processed/fuentes.json`) |
 | Teammates' work (P2–P6) | Gemini in Google Colab or Claude in the browser | Scoped notebooks and data-verification cells | Running, checking and delivering | Fresh-context review (`docs/prompts/para_gemini.md`); mailbox validator. Their lines in `AI_USAGE.md` are filled in by each teammate |
 | Crop map 2026 | Phenological rules. Random Forest (machine learning): not run | No AI in the current map | Declared rules and thresholds | Abstention rule. Olofsson accuracy with 95 % CI: not run |
@@ -237,7 +240,7 @@ Full list: [LIMITATIONS.md](LIMITATIONS.md).
 | Prior research | Claude (incl. Research mode and agents), ChatGPT (incl. Deep Research), Gemini, DeepSeek and NotebookLM | Search and synthesis of sources | Each figure checked in its original source | Labels [V], [P], [S], [NE] |
 | Project documents before the event | Claude (project chat) | Drafted the project definition, approach, event plan, build kit v4 and proposal, without code | Review by the team | Labels [V], [P], [S], [NE]; `AI_USAGE.md` |
 | Page texts (this README, `LIMITATIONS.md`, `DATA_LICENSE.md`) | Claude Code: a drafting agent working from the repo files; a figure-review agent on an earlier version | Draft in English | Specification of the content; review before submission | Every figure cited inline with its source file |
-| Images or video | None generated with AI so far. The video is not made yet | — | Screen captures of the real app | — |
+| Images or video | No image or footage generated with AI. The video (`docs/pitch/video_30s.mp4`, 30 s or less) is a screen recording of the real app; Claude Code wrote the script that drives the page and records it (`tests/e2e/grabar_video.mjs`), and the template of the backup slides (`docs/pitch/diapositivas.html`) | Wrote the recording script and the slide template | The shot list and the on-screen lines (`docs/pitch/guion_video_30s.md`); screen captures of the real app | `tests/test_pitch.py`: the subtitles match the script, with no digits; the slide template has no hand-written figures |
 
 **Where AI is not used:**
 
@@ -272,6 +275,8 @@ Data:
 - Senay, G. B., Kagone, S. and Velpuri, N. M. (2020). Operational Global Actual Evapotranspiration using the SSEBop model. U.S. Geological Survey data release. https://doi.org/10.5066/P9OUVUUI
 - Senay, G. B., et al. (2023). Improving the Operational Simplified Surface Energy Balance Evapotranspiration Model Using the Forcing and Normalizing Operation. *Remote Sensing* 15(1): 260. https://doi.org/10.3390/rs15010260
 - Fields of The World global predictions (CC-BY-4.0), Source Cooperative, `source.coop/ftw/global-data`.
+- OpenStreetMap base map tiles: © OpenStreetMap contributors (ODbL), https://www.openstreetmap.org/copyright.
+- Copernicus Sentinel-2 L2A (`COPERNICUS/S2_SR_HARMONIZED`), true-color figure of the featured-field review: contains modified Copernicus Sentinel data 2026.
 - Poggio, L. et al. (2021). SoilGrids 2.0: producing soil information for the globe with quantified spatial uncertainty. *SOIL* 7, 217–240. https://doi.org/10.5194/soil-7-217-2021 (ISRIC – World Soil Information; CC-BY 4.0).
 - Hengl, T. (2018). Soil texture classes (USDA system) for 6 soil depths at 250 m (v02). Zenodo. https://doi.org/10.5281/zenodo.1475451 (OpenLandMap; CC-BY-SA 4.0).
 - FAO ECOCROP, crop sheets by species, ecocrop.apps.fao.org, read Nov 14, 2026 (`data/processed/suelo_requisitos.json`; citations as recorded in `docs/suelo_parcelas.md`).
@@ -330,7 +335,7 @@ node tests/e2e/offline_smoke.mjs # check the offline demo in Chromium with the n
 
 `python motor/demo_offline.py` reads the current `web/` and writes one HTML file with the styles, the libraries, the modules and the data inside it. It opens with a double click, without a server. The remote base-map tiles are not embedded: without a network the fields are drawn on a plain background. `dist/` is not versioned.
 
-The Earth Engine pieces run in a separate session, never in this repository. NASA POWER and Fields of The World arrive through the mailbox. Dependabot (`.github/dependabot.yml`) checks the actions and the Python dependencies weekly.
+The Earth Engine extractions are run in a separate session, not by `python construir.py`; their scripts are kept in `datos/earthengine/`. NASA POWER and Fields of The World arrive through the mailbox. Dependabot (`.github/dependabot.yml`) checks the actions and the Python dependencies weekly.
 
 ## Repository layout
 
@@ -343,12 +348,12 @@ The Earth Engine pieces run in a separate session, never in this repository. NAS
 | `data/opciones_b4.json` | The integrator's earlier design of crop options [S]. Options now come from `data/processed/opciones_b3.json`; the engine still reads this file to complete, with labeled team proposals, the crops for which that table gives fewer than two alternatives |
 | `data/recursos_reto.json` | Challenge data resources and their role in ROOT |
 | `data/processed/` | Validated cache of the team's deliveries, with sha256 in `fuentes.json` |
-| `data/raw/`, `data/simulados.json` | Untouched public data (empty on this branch); inputs of the simulated data used before real deliveries (not data) |
+| `data/raw/`, `data/simulados.json` | The unchanged inputs of the data scripts, 54 files: Earth Engine exports of HLS and NASADEM, NASA POWER responses, GPM IMERG, SSEBop, the regional series, GEDI shots, SoilGrids cells, Fields of The World polygons, the Conagua spreadsheets and the SIH series (sources and licenses in [DATA_LICENSE.md](DATA_LICENSE.md)); inputs of the simulated data used before real deliveries (not data) |
 | `motor/` | `ensamblar.py` and `esquemas.py` (mailbox), `b4_cubo.py` (cube and the drop), `relieve_web.py` (relief layer), `manifest.py`, `verificador.py` (figure checker), `pruebas_web.py` (tests in sight), `demo_offline.py` (single-file demo), `simulados.py`; twin pieces: `gemelo_web.py` and `dem_teselas.py` (3D view and timeline), `ndvi_web.py` (greenness chart), `contexto_web.py` (regional context, GEDI, frost), `suelo_web.py` (soil), `pwa.py` (installable app) |
 | `tests/` | pytest suites (`test_*.py`) and `node --test` suites (`*.test.js`); `e2e/web_smoke.mjs` and `e2e/offline_smoke.mjs` (browser smoke tests); `fixtures/` and `casos/` (S9 scale example and the checker's golden set) with their sources |
 | `web/` | Static site: `index.html`, `app.js`, `style.css`, `reglas.js`, `js/` and `css/` (modules of the page), `vendor/` (pinned libraries) and `data/` (generated files the page reads) |
 | `dist/` | Output of `motor/demo_offline.py` (not versioned) |
-| `datos/` | Placeholder; the data scripts live on the `datos-satelite` branch and in Drive |
+| `datos/` | The data session's scripts, 30 in all: `colab/` (Python: NASA POWER and FAO-56, field statistics from HLS, rules crop map, demand, H1, H1-b, H3, ET contrast, relief, regional context, GEDI, soil), `earthengine/` (5 Earth Engine scripts) and `navegador/` (Fields of The World extraction); `supuestos.json` (its assumptions, each with source or label) and `LEEME.md`. The ECOSTRESS and GAEZ scripts are on the `datos-satelite` branch |
 | `prototipos/front_lara/` | A teammate's front-end prototype, kept unchanged; not the published page (`docs/revisiones/2026-11-14_1445_front_lara.md`) |
 | `docs/sintesis/`, `docs/kit/` | Project definition (S9), decisions (S8), event plan (S10); build kit v4 |
 | `docs/decisiones/`, `docs/referencias/`, `docs/revisiones/` | Decisions (two pilot areas, digital twin, challenge resources, rotation table, soil, the name, pecan without alternatives); challenge resources and references; independent reviews |

@@ -19,6 +19,8 @@ de `gedi_parcelas.csv`.
 
 ![Protagonistas en Sentinel-2](figuras/protagonistas_sentinel2_2026.jpg)
 
+*Contains modified Copernicus Sentinel data 2026.*
+
 | Parcela | Lo que dice el sistema | Qué se ve | ¿Coincide? |
 |---|---|---|---|
 | **P0757** (7.95 ha, junto a Km 92) | Alfalfa de 3 años, «por vencer» | Una sola parcela rectangular, bien delimitada. Verde oscuro en febrero, verde pálido en mayo (aspecto de recién cortada) y verde irregular en agosto. NDVI entre 0.49 y 0.84 los 12 meses. GEDI: 11 disparos, mediana 2.9 m (sin árboles) | **Sí.** Cultivo verde todo el año, sin dosel alto: compatible con alfalfa. El contorno coincide con la parcela |

@@ -20,7 +20,7 @@ Script: `datos/colab/A6b_forma_historica.py`; data: `h1b_anios.csv`, `h1b_result
 
 - Condition 1 (the model beats both simple shapes in more than half of the years): **no**. It wins in 6 of 26.
 - Condition 2 (median error of the model lower than the other two): **no**.
-- Sign test, descriptive only: 0.9988.
+- Sign test, purely descriptive: 0.9988.
 
 ## What it says
 - On average, by 14 July 68.0 % of the cycle's water has already left. The demand model says 76.2 %: it **brings forward**
@@ -75,5 +75,5 @@ Script: `datos/colab/A6b_forma_historica.py`; data: `h1b_anios.csv`, `h1b_result
 ## Limits
 - The years are not independent (same climatology; the crop pattern changes slowly). Significance is not discussed.
 - The 1991–2025 climatology includes the evaluated years; it affects the model and L1-s equally.
-- The dam's output also responds to operating decisions (irrigation calendar, maintenance), not only to demand.
+- The dam's output also responds to operating decisions (irrigation calendar, maintenance), not just to demand.
 - The SIH series may contain zeros that are gaps (2022 has 12 days with zero from April to August).

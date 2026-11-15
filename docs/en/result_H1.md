@@ -28,7 +28,7 @@ already provided for applies. The integrated SIH output (296.31 hm³) is reporte
 ## Why it fails: the level, not the shape
 - The model computes the **full** crop demand: for the whole cycle it gives 1185.7 hm³ at the dam attributable to La Boquilla, almost double the 600 hm³ authorized. The resulting depth at the dam is around 2.8 m, against 1.514 m historical median in the Conagua series (27 years with delivery).
 - That is: the district operates with much less water than the FAO-56 ÷ field efficiency ÷ conveyance efficiency chain assumes necessary. It points in the same direction as the ET contrast (A8: the modelled ETc exceeds SSEBop ET by 53 %) and as Villalobos-Cano et al. 2024 (ET ÷ applied water = 65.6 % in alfalfa). It does not distinguish between irrigation below demand, real efficiencies higher than assumed, well water or reuse.
-- **"Anchored" variant (sensitivity declared before running; does not decide):** if the model's total is set equal to the total of L1 and only the shape within the cycle is compared, the model gives 457.7 hm³ on 14-Jul: it is 10.1 hm³ from the press figure, closer than L1-s (43.2) and than L1 (80.5). Against the SIH integral it does not improve on the baselines. In 2026 the shape came close to the press figure; the level did not. Whether the shape works in general was tested separately and does not hold (next point).
+- **"Anchored" variant (sensitivity declared before running; does not decide):** if the model's total is set equal to the total of L1 and just the shape within the cycle is compared, the model gives 457.7 hm³ on 14-Jul: it is 10.1 hm³ from the press figure, closer than L1-s (43.2) and than L1 (80.5). Against the SIH integral it does not improve on the baselines. In 2026 the shape came close to the press figure; the level did not. Whether the shape works in general was tested separately and does not hold (next point).
 
 - **The shape does not hold in other years either (H1-b, new test of 14-Nov, `docs/resultado_H1b.md`):** it was tested whether that
   shape describes the 1999–2024 cycles. It does not: the model beats the simple shapes in 6 of 26 years and brings demand forward (it gives
@@ -43,7 +43,7 @@ already provided for applies. The integrated SIH output (296.31 hm³) is reporte
 | End of cycle on 31-Oct | 904.6 (727.2–1131.4) | 368.7 | 318.1 | does not meet | does not meet |
 | Crop pattern 2024-25 | 969.9 (777.0–1217.8) | 404.5 | 367.2 | does not meet | does not meet |
 | Crop pattern 2016-17 | 894.4 (718.9–1118.8) | 404.5 | 367.2 | does not meet | does not meet |
-| Model anchored to the L1 total (shape only) | 457.7 (456.6–458.9) | 404.5 | 367.2 | meets | does not meet |
+| Model anchored to the L1 total (shape alone) | 457.7 (456.6–458.9) | 404.5 | 367.2 | meets | does not meet |
 
 ## How it was done
 - Script `datos/colab/A6_backtest.py`; outputs `h1_resultado.json`, `h1_series.csv`. Monte Carlo of 10,000 runs; NASA POWER climatology 1991–2025.
