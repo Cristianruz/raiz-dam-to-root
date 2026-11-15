@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T04:36:26+00:00",
+ "generado": "2026-11-15T04:55:07+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T04:36:26+00:00",
+  "corrida": "2026-11-15T04:55:07+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -313,17 +313,17 @@
    },
    {
     "id": "gemelo",
-    "nombre": "gemelo",
+    "nombre": "Digital twin, regional context and soil",
     "estado": "passed",
     "estado_original": "OK",
     "detalle": "gemelo: OK · contexto: OK · suelo: OK"
    },
    {
     "id": "pwa",
-    "nombre": "pwa",
+    "nombre": "Offline app (installable page)",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache 9490a45fb8e3536c"
+    "detalle": "precache 1d3d03a16021d087"
    },
    {
     "id": "manifest",
@@ -351,14 +351,14 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1065 passed, 30 warnings in 49.59s"
+    "detalle": "1080 passed, 30 warnings in 74.93s (0:01:14)"
    },
    {
     "id": "node",
     "nombre": "JavaScript tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "167 pass, 0 fail, 0 skipped"
+    "detalle": "181 pass, 0 fail, 0 skipped"
    }
   ],
   "nota": "Last full run recorded by python construir.py. The browser smoke test (tests/e2e/web_smoke.mjs) runs separately, before each release."

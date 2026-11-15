@@ -459,3 +459,20 @@ def test_la_pagina_no_dice_preregistered_sin_registro_publico():
     assert "preregist" not in texto.lower()
     assert pruebas_web.texto_publico("H1 meets the preregistered criterion") == \
         "H1 meets the criterion declared before the analysis"
+
+
+def test_texto_publico_no_distingue_mayusculas():
+    """Auditoría del 15-nov: «Preregistered» al inicio de una frase también se cambia y conserva la mayúscula."""
+    assert pruebas_web.texto_publico("Preregistered criterion: not met") == \
+        "Criterion declared before the analysis: not met"
+    assert pruebas_web.texto_publico("H1 (preregistered)") == "H1 (declared before the analysis)"
+    assert pruebas_web.texto_publico(None) is None
+
+
+def test_todos_los_pasos_del_comando_unico_tienen_nombre_en_ingles():
+    """La tabla en inglés (docs/en/test_results.md) y «About & Data» no deben mostrar ids en español:
+    cada paso que registra construir.py tiene su nombre en NOMBRES_PASOS."""
+    fuente = (RAIZ / "construir.py").read_text(encoding="utf-8")
+    pasos = set(re.findall(r'Paso\("([a-z_]+)"', fuente))
+    assert pasos, "no se encontraron pasos en construir.py"
+    assert pasos <= set(pruebas_web.NOMBRES_PASOS), sorted(pasos - set(pruebas_web.NOMBRES_PASOS))
