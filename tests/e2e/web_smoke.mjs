@@ -2135,6 +2135,10 @@ async function pruebasEscritorio(page, peticiones) {
     }
     const aviso = await page.locator("#ficha .aviso-juicio").innerText();
     check(`aviso de juicio local en ${id}`, aviso.includes("This tool supports, never replaces, the judgment of farmers and local experts."));
+    // I6 de la revisión total: la ficha no es bitácora (ninguna nota de proceso del equipo a la vista).
+    const vista = await page.locator("#ficha").innerText();
+    check(`ficha de ${id}: sin notas de proceso («not delivered yet», «Requested from the data team»)`, !/not delivered yet|requested from the data team/i.test(vista),
+      (vista.match(/.{0,60}(not delivered yet|requested from the data team).{0,20}/i) ?? [""])[0]);
     const sinMarcadores = await page.locator("#ficha").evaluate((el) => !/\{\{\w+\}\}/.test(el.innerText) && !/\{\{\w+\}\}/.test(el.textContent));
     check(`sin marcadores {{…}} sin rellenar en ${id}`, sinMarcadores);
     await page.keyboard.press("Escape");

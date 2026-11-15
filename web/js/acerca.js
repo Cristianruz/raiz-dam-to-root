@@ -417,9 +417,10 @@ function htmlDatosNasa(manifest, cubo, relieve, id, error) {
   const otrasHtml = otras.length
     ? `<details class="acerca-otras"><summary>Other sources in the build</summary><ul class="acerca-archivos">${otras
         .map(
-          (f) => `<li><details><summary><code>${esc(nombreArchivo(f.archivo))}</code> <span lang="es">${esc(productoCorto(f.fuente))}</span></summary>` +
-            `<p class="acerca-fuente-registrada" lang="es">${esc(f.fuente)}</p>` +
-            (f.fecha ? `<p class="acerca-pie">Date: ${esc(f.fecha)}</p>` : "") + `</details></li>`,
+          // Solo el archivo, el producto corto y la fecha: la fuente registrada completa es el registro de entregas del
+          // equipo (en español, con notas de proceso) y no va a la página (I6 de la revisión total). Está en manifest.json.
+          (f) => `<li><code>${esc(nombreArchivo(f.archivo))}</code> <span lang="es">${esc(productoCorto(f.fuente))}</span>` +
+            (f.fecha ? ` <span class="acerca-pie">· ${esc(f.fecha)}</span>` : "") + `</li>`,
         )
         .join("")}</ul></details>`
     : "";

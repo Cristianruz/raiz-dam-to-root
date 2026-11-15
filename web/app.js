@@ -2038,9 +2038,10 @@ function htmlEvidencia(p) {
       (f.fuente ? `<details class="evidencia-fuente"><summary>Full source</summary><p class="fuente">${textoEs(f.fuente)}</p></details>` : "") +
       "</li>",
   );
-  // ECOSTRESS pedido y no entregado: se dice (no se rellena con nada).
-  if (ctx && !ctx.ecostress && ctx.ecostress_motivo) {
-    items.push(`<li data-evidencia="ecostress"><p><strong>Evapotranspiration (ECOSTRESS):</strong> ${esc(ctx.ecostress_motivo)}</p></li>`);
+  // ECOSTRESS sin dato: se dice con un texto neutro (no se rellena con nada). El motivo del motor («Requested from the
+  // data team — not delivered yet») es una nota de proceso y no va a la ficha (I6 de la revisión total).
+  if (ctx && !ctx.ecostress) {
+    items.push('<li data-evidencia="ecostress"><p><strong>Field-scale evapotranspiration (ECOSTRESS):</strong> not included in this version.</p></li>');
   }
   const satelite = items.length
     ? `<ul class="evidencia-lista">${items.join("")}</ul>`
