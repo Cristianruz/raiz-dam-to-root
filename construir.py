@@ -343,7 +343,8 @@ def paso_gemelo():
                                           ("motor.contexto_web", "contexto", "context"),
                                           ("motor.suelo_web", "suelo", "soil"),
                                           ("motor.dashboard_web", "dashboard", "dashboard"),
-                                          ("motor.pronostico_web", "pronóstico", "forecast")):
+                                          # La lluvia del tablero es un rango histórico, no un pronóstico.
+                                          ("motor.pronostico_web", "rango de lluvia", "rainfall range")):
         try:
             rep = importar(modulo).construir()
         except Exception as ex:  # noqa: BLE001

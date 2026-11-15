@@ -102,6 +102,14 @@
    "motivo": "Clave del campo de mediana en la serie de validación; el gráfico obtiene todos sus valores del archivo de datos."
   },
   {
+   "patron": "\\bi18n\\b",
+   "archivos": [
+    "*.js",
+    "*.html"
+   ],
+   "motivo": "Nombre del módulo web/js/i18n.js (abreviatura de «internationalization»); «18» es parte del nombre, no una cifra de los datos"
+  },
+  {
    "patron": "\\bterreno2d\\b",
    "archivos": [
     "*.js"

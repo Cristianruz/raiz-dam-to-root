@@ -8,7 +8,7 @@ Team **Orbital Farming** · NASA Space Apps Challenge 2026, Chihuahua local even
 
 **Status (Nov 15, 2026).** The app reads real team deliveries (`web/data/cubo.json` → `meta.mock: false`): two pilot areas and 1,239 estimated fields. Every test result is published with the same visibility, favorable or not. What was not executed is labeled "not run".
 
-**Public link:** https://cristianruz.github.io/raiz-dam-to-root/. The repository is public and GitHub Pages publishes `main` (source: GitHub Actions); pull requests #4 and #5 carry the version described here. To run it locally, or as a single-file offline demo, see [How to run](#how-to-run).
+**Public link:** https://cristianruz.github.io/raiz-dam-to-root/ opens the **dashboard** (the home page, and what the installed app opens); the **field explorer** described under [How it works](#how-it-works) is at https://cristianruz.github.io/raiz-dam-to-root/explorer.html. The repository is public and GitHub Pages publishes `main` (source: GitHub Actions); pull requests #4 and #5 carry the field explorer, and the dashboard as home page arrives with the pull request that follows them (until it is merged, the link opens the field explorer). To run it locally, or as a single-file offline demo, see [How to run](#how-to-run).
 
 Three items depend on people and are not closed:
 
@@ -66,7 +66,12 @@ In a non-exhaustive search (Nov 10, 2026) we did not find a tool that shows the 
 
 ## How it works
 
-**Three screens** (S9 §3). All three are on the page today.
+**Two pages** ([`docs/decisiones/2026-11-15_tablero_principal_idiomas.md`](docs/decisiones/2026-11-15_tablero_principal_idiomas.md)).
+
+- **Dashboard** (`index.html`, the home page). A summary per pilot area; the map and one field at a time; crop cards under the chosen allocation, computed with the same slider rules as the field sheet (`web/reglas.js`); a context timeline from press notes [P]; and the historical rainfall range of NASA POWER with its back-test, favorable or not (see [Limitations](#limitations)). It is offered in English, Spanish, Portuguese and French: the browser's language if it is one of the four, English otherwise. The Portuguese and French texts are machine drafts awaiting review by a speaker. Its first version was written by a teammate with OpenAI Codex and corrected after an independent review ([`docs/revisiones/2026-11-15_rama_tena.md`](docs/revisiones/2026-11-15_rama_tena.md)).
+- **Field explorer** (`explorer.html`, in English, with a "Dashboard" link in its header). It holds the three screens below.
+
+**Three screens** (S9 §3). All three are in the field explorer today.
 
 1. **Control center.**
    - Map of the pilot areas with a *Pilot area* selector.
@@ -82,7 +87,7 @@ In a non-exhaustive search (Nov 10, 2026) we did not find a tool that shows the 
    - **Install app**: the page installs on a phone or a laptop and keeps working without a network, with the last synced copy (service worker `web/sw.js`). The single-file demo (`python motor/demo_offline.py`) stays as a second offline backup.
    - **About & Data**: the NASA data in use, the challenge data sources and their role, the five tests with their current result, and links to this repository.
 2. **Field sheet.**
-   - A one-line summary, field memory since 2016 and the field's monthly greenness chart (`web/data/ndvi_mensual.json`). A link such as `index.html#P0757` opens a field directly.
+   - A one-line summary, field memory since 2016 and the field's monthly greenness chart (`web/data/ndvi_mensual.json`). A link such as `explorer.html#P0757` opens a field directly.
    - **Soil and satellite evidence**: the soil profile from SoilGrids 2.0; the soil type of the field (USDA great group from OpenLandMap, "Regional soil type from a global map, not a soil test"); a folding list of "Nutrient notes" (published rules applied to the mapped properties: "Rule-based risk from a global soil map; needs a soil test") (`web/data/suelo.json`); GEDI canopy height, always with its note; and ECOSTRESS ET on clear days (`contexto.json`).
    - The current rotation and its alternatives from the project's rotation table (master document §5.2; `data/processed/opciones_b3.json`), each with Water · Soil · Money rows. An established alfalfa stand gets three alternatives, one of them a summer irrigation cut (103 fields); the 15 stands younger than 2 years get two, without that cut (`cubo.json` → `meta.notas`). Where the table gives fewer than two (fallow and winter cereal), the engine completes them with a team proposal labeled "[S] team proposal, not from the agronomic guide" (`web/data/cubo.json` → `meta.opciones.completadas`); in the 16 winter-cereal fields that proposal is "Oats (winter) + forage maize (summer)".
    - The 105 pecan orchards show the current rotation alone, labeled "does not rotate", with its reason and source ([`docs/decisiones/2026-11-15_nogal_sin_alternativas.md`](docs/decisiones/2026-11-15_nogal_sin_alternativas.md)).
@@ -118,7 +123,7 @@ In a non-exhaustive search (Nov 10, 2026) we did not find a tool that shows the 
 - `python construir.py` rebuilds the cube, the relief layer and the manifest from that cache. It runs the contract validator, the figure checker and every test, and writes the result table to [`docs/pruebas.md`](docs/pruebas.md).
 - GitHub Actions publishes `web/` when, and just when, those checks pass.
 - The page reads its figures from `web/data/`. No figure is written by hand in the HTML or the JavaScript (`tests/test_sin_cifras.py`).
-- The twin pieces have their own builders in the same command: `motor/gemelo_web.py` and `motor/dem_teselas.py` (3D view and timeline), `motor/ndvi_web.py` (greenness chart), `motor/contexto_web.py` (regional context, GEDI, frost), `motor/suelo_web.py` (soil) and `motor/pwa.py` (installable app).
+- The twin pieces have their own builders in the same command: `motor/gemelo_web.py` and `motor/dem_teselas.py` (3D view and timeline), `motor/ndvi_web.py` (greenness chart), `motor/contexto_web.py` (regional context, GEDI, frost), `motor/suelo_web.py` (soil) and `motor/pwa.py` (installable app). The dashboard has two more: `motor/dashboard_web.py` (references, irrigated area read from Conagua's statistics, rotations per area) and `motor/pronostico_web.py` (annual series, demand per rotation and the back-test of the historical rainfall range), checked by `motor/verificar_pronostico.py` inside pytest.
 
 **ECOSTRESS and GAEZ.** Both were delivered and passed the delivery checks (`data/processed/ecostress_parcelas.csv`, `data/processed/gaez_zona.csv`; how each was obtained: [`docs/ecostress.md`](docs/ecostress.md) and `datos/colab/G1_gaez_zona.py`). An independent review recomputed the ECOSTRESS file from the raw passes on Nov 15 and returned "validated with corrections": every delivered value matched the raw data, and the review asked for a stricter quality control of the passes ([`docs/revisiones/2026-11-15_ecostress.md`](docs/revisiones/2026-11-15_ecostress.md)). The file was then delivered again with those corrections: one value per overpass, no passes near sunrise or sunset and no scenes with the area under cloud (thresholds as assumptions [S] in `data/processed/supuestos.json`). The geolocation of the scenes remains unchecked ([`docs/ecostress.md`](docs/ecostress.md)). ECOSTRESS appears in the field sheet, under "Soil and satellite evidence", as the ET of the latest month with data, with the number of clear overpasses behind it and their range, labeled in view as a satellite estimate and not a field measurement; fields with no crop in that month say so; the sheet does not compare it with the modeled ET; GAEZ appears in the regional context panel as the agro-climatic suitability of the area by crop, "not of a single field" (`web/data/contexto.json` → `ecostress`, `gaez`). Frost dates are shown as a probability next to each planting window; no frost threshold decides an option (`docs/decisiones/2026-11-14_opciones_b3.md` §1).
 
@@ -225,6 +230,7 @@ Main open limitations today:
 - The challenge asks to combine the farmer's priorities. ROOT sets the options side by side, each with Water, Soil and Money rows, and "What matters most to you?" highlights options by the priority you pick; it does not rank them. There are no weights and no "best" option; forage value, organic matter and market are listed as "no data in ROOT yet", and the Money row shows "No verified data".
 - NASADEM at 30 m is used at area scale; runoff routes are not drawn inside closed depressions of the elevation model.
 - The twin has no field sensors and no real-time data; regional series do not describe a field.
+- The rainfall on the dashboard is a historical range of NASA POWER, not a forecast of the rain or of the dam. In its back-test (24 test years per area) the band contained 20 years in Delicias – Saucillo and 17 in Lázaro Cárdenas, below the 80 % it is built for in the second area (`web/data/pronostico.json` → `zonas.*.validacion_lluvia`).
 
 Full list: [LIMITATIONS.md](LIMITATIONS.md).
 
@@ -234,6 +240,7 @@ Full list: [LIMITATIONS.md](LIMITATIONS.md).
 |---|---|---|---|---|
 | Integration code (engine, validator, web, tests, CI) | Claude Code (integrator session, Cristian), with multi-agent workflows: implementer agents and independent reviewer agents with fresh context | Wrote code and documents from the kit prompts and the data contract. Reviewers report findings and do not edit | Design, specifications, acceptance tests and decisions. Claude Code commits in Cristian's session on a working branch; changes reach `main` through pull requests that Cristian merges or asks to merge (`AI_USAGE.md`) | `python construir.py` gate before publishing; review protocol in `docs/prompts/`; logs in `docs/revisiones/` and `docs/progreso.md` |
 | Data scripts and Earth Engine runs | A separate Claude session in the browser | Wrote and ran Earth Engine (HLS, field memory, NASADEM, GPM IMERG, SSEBop, regional context, GEDI), the Fields of The World extraction, NASA POWER with FAO-56, frost dates, the rules crop map, water demand, relief, and the H1, H3 and ET analyses (`AI_USAGE.md`; scripts named in `data/processed/fuentes.json`) | Specification (kit v4), thresholds and review | Independent reviews of the data branch (`docs/revisiones/`); mailbox validator; sha256 of each delivery (`data/processed/fuentes.json`) |
+| Dashboard (home page), first version: the page, its advisor and crop-comparison modules, and the rainfall back-test with its verifier | OpenAI Codex (teammate P4) | Wrote the first version of the page and of its data builders, in Spanish | Design direction and the prototype it follows. Three fresh-context reviewers read it (`docs/revisiones/2026-11-15_rama_tena.md`); the integrator session then corrected it with Claude Code: languages, sources of every figure, wording that describes instead of instructing | `tests/test_dashboard_web.py`, `tests/test_pronostico_web.py`, `tests/test_tablero_idiomas.py`, `tests/test_sin_cifras.py`; `python motor/verificar_pronostico.py`; `AI_USAGE.md` |
 | Teammates' work (P2–P6) | Gemini in Google Colab or Claude in the browser | Scoped notebooks and data-verification cells | Running, checking and delivering | Fresh-context review (`docs/prompts/para_gemini.md`); mailbox validator. Their lines in `AI_USAGE.md` are filled in by each teammate |
 | Crop map 2026 | Phenological rules. Random Forest (machine learning): not run | No AI in the current map | Declared rules and thresholds | Abstention rule. Olofsson accuracy with 95 % CI: not run |
 | Field memory | None (rules on monthly NDVI) | — | Declared rules and thresholds | H3: run, not supported (`docs/resultado_H3.md`) |
@@ -310,7 +317,8 @@ Requirements: Python 3.12 and Node 22, the versions pinned in `.github/workflows
 ```bash
 python -m pip install -r requirements.txt
 python construir.py              # rebuild everything from the cache (data/processed) and run every check
-node tests/e2e/web_smoke.mjs     # browser smoke test (needs Playwright and Chromium)
+node tests/e2e/web_smoke.mjs     # browser smoke test of the field explorer (needs Playwright and Chromium)
+node tests/e2e/pwa_smoke.mjs     # installed app: the dashboard and the field explorer open with the network cut
 python motor/demo_offline.py     # single-file demo that opens without a network: dist/raiz-offline.html
 ```
 
@@ -320,7 +328,7 @@ Other options:
 python construir.py --rapido     # same rebuild, without pytest and node (to iterate)
 python construir.py --origen     # re-download what has a public API (npm libraries), then rebuild
 RAIZ_BUZON=/path/to/Raiz_entregas python construir.py   # validate new team deliveries from the synced Drive folder
-python -m http.server --directory web                   # view the site locally
+python -m http.server --directory web                   # view the site locally: the dashboard at /, the field explorer at /explorer.html
 node tests/e2e/offline_smoke.mjs # check the offline demo in Chromium with the network cut
 ```
 
@@ -353,16 +361,17 @@ The Earth Engine extractions are run in a separate session, not by `python const
 | `data/params.json` | Every constant of the project, with value, unit, source and label |
 | `data/opciones_b4.json` | The integrator's earlier design of crop options [S]. Options now come from `data/processed/opciones_b3.json`; the engine still reads this file to complete, with labeled team proposals, the crops for which that table gives fewer than two alternatives |
 | `data/recursos_reto.json` | Challenge data resources and their role in ROOT |
+| `data/investigacion_dashboard.json` | Curated texts of the dashboard in four languages (English, Spanish, Portuguese, French), the years of its irrigated-area chart and the names of the rotations. It holds no typed figures: the areas are read from `data/raw/conagua/` |
 | `data/processed/` | Validated cache of the team's deliveries, with sha256 in `fuentes.json` |
 | `data/raw/`, `data/simulados.json` | The unchanged inputs of the data scripts, 63 files: Earth Engine exports of HLS and NASADEM, NASA POWER responses, GPM IMERG, SSEBop, the regional series, GEDI shots, SoilGrids cells and OpenLandMap soil classes, the ECOSTRESS passes from AppEEARS with their requests and the README of each request, the GAEZ cells, Fields of The World polygons, the Conagua spreadsheets and the SIH series (sources and licenses in [DATA_LICENSE.md](DATA_LICENSE.md)). The per-area Earth Engine rasters are on the `ee-crudos` branch; inputs of the simulated data used before real deliveries (not data) |
-| `motor/` | `ensamblar.py` and `esquemas.py` (mailbox), `b4_cubo.py` (cube and the drop), `relieve_web.py` (relief layer), `manifest.py`, `verificador.py` (figure checker), `pruebas_web.py` (tests in sight), `demo_offline.py` (single-file demo), `simulados.py`; twin pieces: `gemelo_web.py` and `dem_teselas.py` (3D view and timeline), `ndvi_web.py` (greenness chart), `contexto_web.py` (regional context, GEDI, frost), `suelo_web.py` (soil), `pwa.py` (installable app) |
-| `tests/` | pytest suites (`test_*.py`) and `node --test` suites (`*.test.js`); `e2e/web_smoke.mjs` and `e2e/offline_smoke.mjs` (browser smoke tests); `fixtures/` and `casos/` (S9 scale example and the checker's golden set) with their sources |
-| `web/` | Static site: `index.html`, `app.js`, `style.css`, `reglas.js`, `js/` and `css/` (modules of the page), `vendor/` (pinned libraries) and `data/` (generated files the page reads) |
+| `motor/` | `ensamblar.py` and `esquemas.py` (mailbox), `b4_cubo.py` (cube and the drop), `relieve_web.py` (relief layer), `manifest.py`, `verificador.py` (figure checker), `pruebas_web.py` (tests in sight), `demo_offline.py` (single-file demo), `simulados.py`; dashboard pieces: `dashboard_web.py`, `pronostico_web.py` and `verificar_pronostico.py`; twin pieces: `gemelo_web.py` and `dem_teselas.py` (3D view and timeline), `ndvi_web.py` (greenness chart), `contexto_web.py` (regional context, GEDI, frost), `suelo_web.py` (soil), `pwa.py` (installable app) |
+| `tests/` | pytest suites (`test_*.py`) and `node --test` suites (`*.test.js`); `e2e/web_smoke.mjs`, `e2e/pwa_smoke.mjs`, `e2e/offline_smoke.mjs`, `e2e/dashboard_smoke.mjs` and `e2e/recomendaciones_smoke.mjs` (browser smoke tests); `fixtures/` and `casos/` (S9 scale example and the checker's golden set) with their sources |
+| `web/` | Static site. `index.html` (dashboard, the home page) with `js/dashboard.js`, `js/asesor.js`, `js/recomendador.js`, `js/interfaz.js`, the language module `js/i18n.js` and its dictionaries (`js/textos_*.js`), and `css/dashboard.css`, `css/asesor.css`, `css/interfaz.css`; `explorer.html` (field explorer) with `app.js` and `style.css`; `reglas.js` (slider rules, shared by both pages); `js/` and `css/` (modules); `vendor/` (pinned libraries and the typeface) and `data/` (generated files the pages read, among them `dashboard.json` and `pronostico.json`) |
 | `dist/` | Output of `motor/demo_offline.py` (not versioned) |
 | `datos/` | The data session's scripts, 37 in all: `colab/` (30 Python scripts: NASA POWER and FAO-56, field statistics from HLS, rules crop map, demand, H1, H1-b, H3, ET contrast, relief, regional context, GEDI, soil, soil types and nutrient rules, GAEZ, ECOSTRESS, and `correr_todo.py`, which remakes every delivery), `earthengine/` (5 Earth Engine scripts) and `navegador/` (2 browser scripts: Fields of The World and GAEZ); `supuestos.json` (its assumptions, each with source or label), `LEEME.md` and `PARA_INTEGRADOR.md` (the working log between sessions) |
 | `prototipos/front_lara/` | A teammate's front-end prototype, kept unchanged; not the published page (`docs/revisiones/2026-11-14_1445_front_lara.md`) |
 | `docs/sintesis/`, `docs/kit/` | Project definition (S9), decisions (S8), event plan (S10); build kit v4 |
-| `docs/decisiones/`, `docs/referencias/`, `docs/revisiones/` | Decisions (two pilot areas, digital twin, challenge resources, rotation table, soil, the name, pecan without alternatives); challenge resources and references; independent reviews |
+| `docs/decisiones/`, `docs/referencias/`, `docs/revisiones/` | Decisions (two pilot areas, digital twin, challenge resources, rotation table, soil, the name, pecan without alternatives, the dashboard as home page and its four languages); challenge resources and references; independent reviews |
 | `docs/resultado_H1.md`, `docs/resultado_H1b.md`, `docs/resultado_H3.md`, `docs/resultado_A8.md`, `docs/modelo_vs_practica.md`, `docs/revision_protagonistas.md`, `docs/h1_verdad_sih.md`, `docs/h1_especificacion_operativa.md`, `docs/h1b_especificacion.md` | Results of the back-test, the natural experiment and the ET contrast, with their figures (`docs/*.png`); the SIH truth and the H1 operating specification |
 | `docs/equipo/`, `docs/prompts/` | Team guides by role; review protocol and prompts (implementer → reviewer → correction) |
 | `docs/ecostress.md`, `docs/suelo_parcelas.md`, `docs/suelo_tipos_y_nutrientes.md`, `docs/suelo_textos_ficha.md`, `docs/nogal_cobertura.md`, `docs/reproducir_datos.md` | The data session's notes: ECOSTRESS per field, soil per field, soil types and nutrient rules, the field-sheet texts for soil, pecan canopy cover, and how to remake the data from the raw files |
@@ -383,18 +392,12 @@ Code: Apache-2.0 (`LICENSE`). Third-party data and libraries keep their own lice
 
 ROOT muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa (S9 §1). Es un gemelo digital de dos zonas piloto del DR-005 Delicias, Chihuahua, con datos abiertos de la NASA (HLS, POWER, NASADEM y GPM IMERG). No tiene sensores en campo ni datos en tiempo real: se actualiza en cada corrida. La herramienta no reparte, vende ni intercambia agua, no pronostica la presa y apoya, sin sustituir, el juicio del agricultor y del técnico. Los resultados desfavorables se publican igual que los favorables, y las pruebas que no se han ejecutado aparecen como «not run».
 
-## Dashboard de la rama Tena
+## Tablero (portada)
 
-La entrada `web/index.html` presenta el dashboard Raíz en español: resumen, mapa y detalle de parcela, comparación de cultivos, recomendaciones para revisar con el técnico, cronología y fuentes de investigación. Es adaptable a celular. El explorador técnico anterior se conserva en `web/explorador.html`, con acceso desde el dashboard.
+La portada (`web/index.html`) es el tablero que hizo P4 (Tena) con OpenAI Codex, corregido después de la revisión del 15-nov ([`docs/revisiones/2026-11-15_rama_tena.md`](docs/revisiones/2026-11-15_rama_tena.md); decisión: [`docs/decisiones/2026-11-15_tablero_principal_idiomas.md`](docs/decisiones/2026-11-15_tablero_principal_idiomas.md)). Muestra un resumen por zona, el mapa y el detalle de una parcela, la comparación de cultivos con la dotación elegida, una cronología de contexto [P] y el rango histórico de lluvia de NASA POWER con su retroprueba. Está en inglés, español, portugués y francés; el portugués y el francés son borradores de máquina por revisar. La página anterior se conserva como explorador de parcelas en `web/explorer.html`, con un enlace «Dashboard» en su cabecera.
 
-Los PDF aportados se consultan desde la vista de investigación; las cifras transcritas llevan etiqueta de referencia secundaria. Los escenarios usan el motor existente. La sección de predicciones prepara el contexto para trabajo futuro: no hay aprendizaje automático entrenado ni probabilidades de cosecha. Los flujos Mermaid, su significado, los archivos y las limitaciones se explican en [docs/dashboard-flujos.md](docs/dashboard-flujos.md).
-
-Para verlo: `python -m http.server 8000 --directory web` y abrir `http://localhost:8000`. `python construir.py` también genera `web/data/dashboard.json`. La demo monolítica sin conexión continúa usando el explorador técnico. La prueba del nuevo dashboard es `node tests/e2e/dashboard_smoke.mjs` con el servidor activo y Playwright instalado.
-
-### Motor de recomendaciones y predicción de referencia
-
-La vista **Recomendaciones** ahora recalcula alternativas con históricos de demanda A5 y entradas manuales, emite impedimentos/condiciones y exporta la auditoría. **Historia y predicciones** incluye lluvia de referencia con retroprueba temporal por zona y descarga de cada año evaluado. Los ciclos incompletos se excluyen; no hay pronóstico de rendimiento, de presa ni riego diario. Método, fuentes, ejemplo de comprobación y pruebas en [docs/recomendador-validacion.md](docs/recomendador-validacion.md). `python construir.py` genera los datos nuevos con `motor/pronostico_web.py`.
-
-### Interfaz moderna
-
-La página principal adopta el diseño del prototipo adjunto: mapa central, controles flotantes, paneles oscuros y captura del plan por pasos. El motor de recomendaciones y la auditoría siguen disponibles. Diseño, accesibilidad y licencias: [docs/interfaz-moderna.md](docs/interfaz-moderna.md).
+- Los datos del tablero salen de `python construir.py`: `motor/dashboard_web.py` escribe `web/data/dashboard.json` y `motor/pronostico_web.py`, `web/data/pronostico.json`; `motor/verificar_pronostico.py` corre dentro de pytest.
+- La superficie regada de la gráfica de historia se lee de `data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv` [V]. La cronología viene de notas de prensa del equipo [P], sin cotejo con fuentes primarias.
+- La lluvia es un rango histórico, no un pronóstico de la lluvia ni de la presa; sus resultados, favorables o no, están en [`LIMITATIONS.md`](LIMITATIONS.md). No hay aprendizaje automático entrenado ni probabilidades de cosecha.
+- Las notas internas en PDF no se publican con la página. Diseño y flujos: [`docs/dashboard-flujos.md`](docs/dashboard-flujos.md), [`docs/interfaz-moderna.md`](docs/interfaz-moderna.md) y [`docs/recomendador-validacion.md`](docs/recomendador-validacion.md).
+- Para verlo: `python -m http.server 8000 --directory web` y abrir `http://localhost:8000` (el explorador, en `http://localhost:8000/explorer.html`). Pruebas con navegador: `node tests/e2e/pwa_smoke.mjs` (la aplicación instalada abre sin red en las dos páginas), `node tests/e2e/dashboard_smoke.mjs` y `node tests/e2e/recomendaciones_smoke.mjs`.

@@ -108,6 +108,7 @@ The HLS, NASADEM, GPM IMERG, SSEBop, regional context, GEDI, SoilGrids and OpenL
 | Library or tool | Where it is used | License | Where this statement is recorded |
 |---|---|---|---|
 | MapLibre GL JS 5.24.0, d3 7.9.0, d3-sankey 0.12.3 | `web/vendor/` | Their own licenses, copied next to each library: a BSD 3-clause text for MapLibre GL JS (`LICENSE.txt`) and for d3-sankey (`LICENSE`), an ISC text for d3 (`LICENSE`) | `web/vendor/VERSIONS.json`; the license files in each folder |
+| Atkinson Hyperlegible 5.3.0 (typeface; `@fontsource/atkinson-hyperlegible` from npm, weights 400 and 700, Latin subset) | `web/vendor/atkinson-hyperlegible-5.3.0/`; used by both pages (`web/style.css`, `web/css/interfaz.css`) | SIL Open Font License 1.1, copyright 2020 Braille Institute of America, Inc.; the license text is copied next to the files (`LICENSE`) | `web/vendor/VERSIONS.json` (sha384 of each file) |
 | pytest 9.1.0 | Python tests (`requirements.txt`) | **To be confirmed**: not recorded in this repository | `requirements.txt` |
 | Playwright with Chromium | Browser smoke tests, run locally (`tests/e2e/web_smoke.mjs`, `tests/e2e/offline_smoke.mjs`); not a dependency of the page | **To be confirmed**: neither its version nor its license is recorded in this repository | `README.md`, "Automated gate" |
 | Skills copied into `.claude/skills/` | Development | Apache-2.0 or MIT, license file next to each skill | `.claude/skills/README.md` |
@@ -131,7 +132,3 @@ Terms that are not recorded in this repository and that a team member has to con
 12. The license of the team's own derived tables in `data/processed/` and `web/data/` is not stated in the repository. The field polygons derive from Fields of The World and carry its attribution.
 13. Copernicus Sentinel data: the full license text behind the notice of the Sentinel-2 figure.
 14. AppEEARS software citation: closed on Nov 15, 2026. It is copied from the README that AppEEARS generates with each request (`data/raw/reto/ecostress_readme_*.md`).
-
-### Tipografía de la interfaz moderna
-
-Atkinson Hyperlegible, copyright 2020 Braille Institute of America, Inc., SIL Open Font License 1.1. Archivos originales extraídos sin modificar del prototipo HTML proporcionado por el usuario. Licencia completa y hashes de procedencia en `web/fonts/OFL.txt` y `web/fonts/ORIGEN.json`. No se reutilizan los datos de demostración del prototipo.

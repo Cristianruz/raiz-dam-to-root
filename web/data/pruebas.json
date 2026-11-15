@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T10:30:16+00:00",
+ "generado": "2026-11-15T10:37:55+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T10:30:15+00:00",
+  "corrida": "2026-11-15T10:37:55+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -320,16 +320,16 @@
     "nombre": "Digital twin, regional context and soil",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "gemelo: OK · contexto: OK · suelo: OK · dashboard: OK · pronóstico: OK",
-    "detalle_en": "twin: OK · context: OK · soil: OK · dashboard: OK · forecast: OK"
+    "detalle": "gemelo: OK · contexto: OK · suelo: OK · dashboard: OK · rango de lluvia: OK",
+    "detalle_en": "twin: OK · context: OK · soil: OK · dashboard: OK · rainfall range: OK"
    },
    {
     "id": "pwa",
     "nombre": "Offline app (installable page)",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache 5be76a61766fd826",
-    "detalle_en": "precache 5be76a61766fd826"
+    "detalle": "precache 01ec4b234166fd1d",
+    "detalle_en": "precache 01ec4b234166fd1d"
    },
    {
     "id": "manifest",
@@ -360,8 +360,8 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1241 passed, 30 warnings in 58.28s",
-    "detalle_en": "1241 passed, 30 warnings in 58.28s"
+    "detalle": "1244 passed, 30 warnings in 58.89s",
+    "detalle_en": "1244 passed, 30 warnings in 58.89s"
    },
    {
     "id": "node",

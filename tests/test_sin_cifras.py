@@ -313,6 +313,23 @@ def test_detector_lee_el_html_dentro_de_las_cadenas_js():
     assert malas == {"${…} of 12 fields", "img[alt]=Field 7"}, malas
 
 
+def test_la_excepcion_de_i18n_solo_cubre_el_nombre_del_modulo():
+    """«i18n» es el nombre del módulo de idiomas (web/js/i18n.js): su «18» no es una cifra. Una cifra de verdad en
+    la misma cadena sigue fallando, y un nombre parecido («i18n2») no queda cubierto."""
+    js = ('import { t, deDato } from "./i18n.js";\n'
+          'const a = "js/i18n.js";\n'
+          'const b = "i18n.js lists 12 fields";\n'
+          'const c = "i18n2";\n'
+          'const d = `<p title="i18n">ok</p><p>i18n: 3 languages</p>`;\n')
+    for archivo in ("js/dashboard.js", "app.js", "js/textos_es.js"):
+        malas = {t for _, t in cifras_sin_fuente(fragmentos_js(js), archivo)}
+        assert malas == {"i18n.js lists 12 fields", "i18n2", "i18n: 3 languages"}, (archivo, malas)
+    html = "<html><body><p>Module i18n</p><p>i18n has 4 languages</p></body></html>"
+    for pagina in ("index.html", "explorer.html"):
+        malas = {t for _, t in cifras_sin_fuente(texto_visible_html(html), pagina)}
+        assert malas == {"i18n has 4 languages"}, (pagina, malas)
+
+
 # --- Pruebas sobre la web real -------------------------------------------------------------
 def archivos_js():
     """Todos los módulos de la web: web/*.js y web/js/**/*.js (relieve, gota, mensaje, acerca…), como rutas
