@@ -114,6 +114,7 @@ PLAIN-LANGUAGE GLOSSARY
 - Frost risk: chance of a freezing night in the planting window, from NASA POWER temperatures.
 - Water balance: every cubic meter that leaves the dam ends up as crop consumption, aquifer recharge or other losses.
 - Consumption cap: a rule that drip irrigation may not raise the crop's water consumption above its historical level.
+- Crop roles in a rotation (general agronomy, not measured in these fields): a nitrogen-fixing legume such as alfalfa adds nitrogen to the soil; a deep-rooting crop such as alfalfa explores water and nutrients below annual crops; a winter cereal or standing stubble covers the soil in the windy season and reduces erosion; a drought-tolerant crop such as sorghum asks less of the allocation in a short year.
 
 COMMON ANALYSIS GRID
 The field is the unit of analysis. Each source is brought to it, or to its pilot area, without creating detail the data do not have:
@@ -176,14 +177,14 @@ Nota: las resoluciones de las series regionales son las de `data/processed/conte
 
 ```text
 - Copernicus Sentinel-2 (ESA), through the NASA HLS v2 product (HLSS30), which harmonizes it with Landsat. It is part of the monthly greenness of every field.
+- ERA5-Land (ECMWF/ERA5_LAND/DAILY_AGGR; ECMWF and the Copernicus Climate Change Service), listed by the challenge under Space Agency Partner Resources ("ERA5: ECMWF Reanalysis"). Monthly mean of the daily minimum temperature and frost days, about 11 km, 2000-01 to 2026-10, in the regional context panel. It is a reanalysis, not a NASA product.
 ```
 
-Nota: la Agencia Espacial Mexicana no es Space Agency Partner en 2026 y no se nombra aquí. ERA5-Land no es de una agencia espacial: va en la sección 8.
+Nota: la Agencia Espacial Mexicana no es Space Agency Partner en 2026 y no se nombra aquí. ERA5 va aquí porque la pestaña «Resources» del reto lo lista bajo «SPACE AGENCY PARTNER RESOURCES», junto a Sentinel-2 (leída en el navegador el 14-nov-2026, 23:20); el texto aclara que es de ECMWF y no de la NASA.
 
 ## 8. Other data
 
 ```text
-- ERA5-Land (ECMWF/ERA5_LAND/DAILY_AGGR; ECMWF and the Copernicus Climate Change Service; not a NASA product): monthly mean of the daily minimum temperature and frost days, about 11 km, 2000-01 to 2026-10, in the regional context panel.
 - Fields of The World 2025 global field-boundary predictions (Source Cooperative, CC-BY-4.0): field polygons and a confidence layer. Field boundaries are neural-network predictions outside the model's training domain, filtered by confidence.
 - ISRIC SoilGrids 2.0 (250 m, 0–30 cm; CC-BY 4.0): texture, pH, organic carbon and cation exchange capacity per field. It is a global model, not a soil sample.
 - OpenLandMap soil texture class (CC-BY-SA 4.0): used to report how often its class agrees with SoilGrids'.
