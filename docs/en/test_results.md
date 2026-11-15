@@ -3,7 +3,7 @@
 
 English version of [docs/pruebas.md](../pruebas.md); if they differ, the Spanish original prevails.
 
-Run: 2026-11-15T06:20:26+00:00 · duration 51.2 s
+Run: 2026-11-15T07:26:55+00:00 · duration 54.1 s
 
 | Step | Status | Detail |
 |---|---|---|
@@ -12,11 +12,11 @@ Run: 2026-11-15T06:20:26+00:00 · duration 51.2 s
 | Cube engine | passed | cubo REAL: 1239 parcelas, 458 clasificadas, 1267 opciones |
 | Terrain & runoff layer | passed | zonas: delicias_saucillo, lazaro_cardenas |
 | Digital twin, regional context and soil | passed | gemelo: OK · contexto: OK · suelo: OK |
-| Offline app (installable page) | passed | precache 70bc8502ae6e0ba6 |
-| Manifest of every figure | passed | 112946 cifras (0 simuladas), 35 fuentes de origen, 59 avisos |
+| Offline app (installable page) | passed | precache 462584b2672d6927 |
+| Manifest of every figure | passed | 111032 cifras (0 simuladas), 35 fuentes de origen, 59 avisos |
 | Data contract, including the water balance of “Follow the drop” | passed | CONTRATO OK |
 | Figure checker on the page's explanations | passed | VERIFICADOR OK; set dorado en docs/figuras/llm_eval.csv |
-| Python tests | passed | 1134 passed, 30 warnings in 46.87s |
+| Python tests | passed | 1134 passed, 30 warnings in 49.46s |
 | JavaScript tests | passed | 223 pass, 0 fail, 0 skipped |
 
 The browser test (`node tests/e2e/web_smoke.mjs`) runs separately, before each publication.

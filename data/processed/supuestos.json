@@ -1,5 +1,5 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Assumptions of the data pieces. Each value carries a source and a label; [S] = assumption. The scripts stop if a key is missing. Copy to the working folder (--dir).",
  "ea_gravedad": {
   "valor": [
@@ -278,5 +278,21 @@
   "valor": 0.47,
   "etiqueta": "own analysis (A13), estimate",
   "fuente": "Share of fields where the USDA texture class computed from SoilGrids 2.0 (0–30 cm) equals the OpenLandMap one (0 cm): 584 of 1,238 fields with data in the two pilot areas; in the others they differ by a neighboring class"
+ },
+ "ecostress_sobrevuelo_seg": {
+  "valor": 300,
+  "etiqueta": "assumption [S]",
+  "fuente": "Scenes of the same field less than 5 minutes apart are one overpass and are averaged before the monthly median (in these files, three pairs of scenes 52 s apart: Dec 16, 2025, Feb 26 and Aug 26, 2026); independent review of Nov 15, 2026 (docs/revisiones/2026-11-15_ecostress.md, D5)"
+ },
+ "ecostress_fraccion_luz": {
+  "min": 0.15,
+  "max": 0.85,
+  "etiqueta": "assumption [S]",
+  "fuente": "Passes are used when x, the fraction of the daylight hours elapsed at the pass (0 at sunrise, 1 at sunset), is between these limits. The product turns the instantaneous flux into a daily total with 1.6 · Rn / (π · sin(π · x)) (JPL, github.com/ECOSTRESS-Collection-2/ECOv002-L3T-L4T-JET, ECOv002_L3T_L4T_JET.py, daily_Rn_integration_verma, commit a785b14, read on Nov 15, 2026), so near sunrise or sunset it multiplies a small, noisy flux by more than 2.2 times the noon factor; limits from the independent review of Nov 15, 2026 (docs/revisiones/2026-11-15_ecostress.md, D1)"
+ },
+ "ecostress_nube_zona_max": {
+  "valor": 0.25,
+  "etiqueta": "assumption [S]",
+  "fuente": "A scene is left out for a pilot area if more than this fraction of the area's points have cloud = 1 in it (May 20 and Jul 2, 2026: 49 % to 99 %; every other scene with data: 4 % or less). The product leaves cloudy pixels empty, so cloud = 0 alone does not remove a pass with half of the area under cloud; independent review of Nov 15, 2026 (docs/revisiones/2026-11-15_ecostress.md, D2)"
  }
 }
