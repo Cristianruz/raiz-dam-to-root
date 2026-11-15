@@ -49,4 +49,21 @@
 | 21:33 | Nombre | HECHO (Cristian) | El nombre ROOT y el equipo Orbital Farming ya están registrados en la plataforma de Space Apps | `docs/decisiones/2026-11-14_nombre_root.md` |
 | 20:50 | Integración del gemelo a la página (etapas 1–3) | HECHO | Etapa 1: vista 3D, línea de tiempo, «Twin status», app instalable y apertura en Delicias–Saucillo. Etapa 2: ficha completa (frase, NDVI, #id, suelo, lámina local, opciones B3, evidencia GEDI y helada). Etapa 3: «Regional context» plegable ligado a zona y año con las advertencias de la sesión de datos a la vista, «Challenge data sources» y H1-b (does not hold, sin cambiar H1) en «About & Data», enlaces a `docs/modelo_vs_practica.md` y `docs/revision_protagonistas.md` (revisión de IA; falta la de una persona), pendientes de la auditoría del motor en la web (etiquetas del distrito, textos en inglés, ventana de suelo desnudo, rutas cortadas, rótulo del goteo y «upper bound») y regla 11 completa en `manifest.json` para gemelo, contexto, suelo y NDVI | sin commit; rama `claude/sleepy-heisenberg-pxyhtx` |
 | 20:50 | Integración (etapa 3) | MENOR (diferido) | Contrato a anotar en docs/decisiones (lo decide Cristian): `tarjetas[].advertencias` en `data/recursos_reto.json`, `malla_mascon` en las series de `contexto.json`, `complementos` (H1-b) y `documentos` en `pruebas.json` | reporte de la etapa 3 |
+
+## Domingo 15-nov-2026 (madrugada; integración en `claude/keen-mayer-sp0vvm`)
+
+| Hora | Pieza | Evento | Detalle | Enlace |
+|---|---|---|---|---|
+| 21:45 | Revisión integral | REVISIÓN | 9 agentes de contexto nuevo sobre `dda5abb`: contrato (2 IMPORTANTE que bloquean), cifras (6 que bloquean el envío), motor (5 IMPORTANTE), pruebas (todo pasa), web/UX (6 antes de las 13:00), plan y envío (publicación bloqueada) y 3 búsquedas (skills, tokens, diseño) | `docs/revisiones/2026-11-15_ux_web_y_diseno.md` |
+| 22:00 | Integración | DECISIÓN (Cristian) | La sesión «Revisión multiagente» toma la integración del buzón, el motor, la ficha, los textos, los materiales y el PR a main | conversación con Cristian |
+| 22:10 | CI | HECHO | Pillow fijo en `requirements.txt` (13.0.0; pip-audit marcaba 42 vulnerabilidades en 12.3.0) | `e6f382d` |
+| 22:15 | Buzón v10 | HECHO | 35 entran, 0 rechazados: ECOSTRESS, GAEZ, tipos, reglas y nutrientes de suelo, contraste de ET 1,139.5 | `0b3ddd0` |
+| 22:18 | main | HECHO | PR #4 fusionado a pedido de Cristian con la CI en verde; Pages publicado (run 134) | `e819b52` |
+| 22:20 | Ligas en inglés | HECHO | `docs/en/` (6 traducciones con cifras idénticas) y tabla de pruebas en inglés | `ac1d60e` |
+| 22:28 | Motor y validador | HECHO | 13 correcciones con prueba (gota null, sin_actual, abstenida, exención del nogal, secuencia de avena_maiz, filtro de edad por parcela, explicación, construir.py, ventana que cruza el año, corte de verano con edad por S9 §2) | `1c6619b` |
+| 22:33 | Textos públicos | HECHO | README, LIMITATIONS, DATA_LICENSE, textos del envío con la guía 2026, guion y preguntas; decisión del nogal | `c4dbbda`, `docs/decisiones/2026-11-15_nogal_sin_alternativas.md` |
+| 22:36 | Página | HECHO | «criterion declared before the analysis» en lugar de «preregistered» (I22) | `56009d2` |
+| 22:37 | Materiales | EN CURSO | Video de 29 s y diapositivas (borrador; se vuelve a grabar sobre la página final) | `cd900ae` |
+| 22:40 | Coordinación | DECISIÓN (Cristian) | Una rama de integración, cada chat en su rama, revisión cruzada; diseño en su chat | `docs/coordinacion.md` |
+| 22:33 | Diseño (fase 0) | HECHO | Diagramas del sistema actual, principios y sistema visual vigente, crítica de las capturas y revisión de escalabilidad: otras zonas del DR-005 y cualquier suelo sí; otro distrito todavía no (contrato con `distrito.boquilla` y `distrito.acuifero_0831`, cultivos y perennes fijos, calendario del hemisferio norte). Solo `docs/`; el cambio de contrato lo decide Cristian | `docs/diseno/` |
 | 23:10 | WhatsApp en cuatro idiomas | HECHO (pendiente: revisión de una persona hablante de inglés, portugués y francés) | Selector en la vista del mensaje, idioma del navegador por omisión, cifras con `Intl`, avisos en los cuatro y validador de lenguaje; prueba `tests/mensaje.test.js` (plantillas, números por idioma, idioma por omisión) y comprobaciones e2e por idioma | `docs/decisiones/2026-11-14_whatsapp_idiomas.md` |
