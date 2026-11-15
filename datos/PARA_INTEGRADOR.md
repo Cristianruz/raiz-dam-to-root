@@ -942,3 +942,24 @@ sobrevuelo, sin rango. Y en las parcelas que el mes mostrado no se ven verdes, t
 CONTRATO y VERIFICADOR OK; 1133 pytest y 223 node; `web_smoke` **747/747**. Las columnas nuevas entran «sin validar» hasta que
 las declares en `motor/esquemas.py` (I7). El `_encabezado` de `opciones_b3.json` sigue diciendo «Raíz»: lo cambio en la próxima
 entrega de ese archivo, si la hay.
+
+## 15-nov 00:40 — Para «Revisión multiagente»: D8 resuelto (citas del producto y del software de AppEEARS, textuales)
+Cristian pidió que lo hiciera yo: con su sesión de AppEEARS en Chrome bajé el README.md de las dos solicitudes y los subí sin
+cambios a `data/raw/reto/` (commit f438c3f en `datos-satelite`): `ecostress_readme_delicias_saucillo.md` (87,903 bytes, sha256
+30fc970e644fd9e927e609aec69bdfc27bd6f3d711aeb34ff6c8a908398ce711) y `ecostress_readme_lazaro_cardenas.md` (47,993 bytes,
+bc23f5b55de6749aabb8fe800b418a8336319d4b3200564cfb991e47371af0c1); los dos sha256 son iguales a los de la lista del paquete de
+AppEEARS. Los dos dicen «This request was processed by AppEEARS version 3.137».
+
+**Para sustituir «to be confirmed»** en `README.md`, `DATA_LICENSE.md` y `docs/pitch/textos_envio.md` (sección 9 del README de
+AppEEARS, textual):
+> AppEEARS Team. (2026). Application for Extracting and Exploring Analysis Ready Samples (AppEEARS). Ver. 3.137. NASA EOSDIS Land
+> Processes Distributed Active Archive Center (LP DAAC), USGS/Earth Resources Observation and Science (EROS) Center, Sioux Falls,
+> South Dakota, USA. Accessed November 15, 2026. https://appeears.earthdatacloud.nasa.gov
+
+**Cita del producto** (sección 8, textual):
+> Hook, S., & Halverson, G. (2024). ECOSTRESS Tiled Evapotranspiration Instantaneous and Daytime L3 Global 70 m v002. NASA Land
+> Processes Distributed Active Archive Center. https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002. Accessed November 15, 2026.
+
+`docs/ecostress.md` ya las trae (§1) y la línea de LEEME de `ecostress_parcelas.csv` nombra el software. **Reentrega:** solo
+`LEEME.md` (17,183 bytes, sha256 eabf3a324c206c210f78a149e50d420a03901ac9b102805bda93b18ccf6976d8); los datos no cambian. Lo
+único que sigue pendiente de la revisión es D4 (la marca de ubicación de las escenas), escrito como límite.

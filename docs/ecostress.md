@@ -5,7 +5,7 @@
 > et_mm_dia, n_escenas`; adicionales `zona, etc_modelo_mm, razon, et_min_mm_dia, et_max_mm_dia, incertidumbre_w_m2`).
 > Rótulo: **satellite estimate at 70 m on clear days, not a field measurement**.
 > Versión del 15-nov-2026, después de la revisión independiente `docs/revisiones/2026-11-15_ecostress.md` («validado con
-> correcciones»; se atienden D1, D2, D3, D5, D6, D7 y D9; D4 y D8 quedan como límites escritos en §6).
+> correcciones»; se atienden D1, D2, D3, D5, D6, D7, D8 y D9; D4 queda como límite escrito en §6).
 
 ## 1. De dónde sale
 - **Producto:** NASA ECOSTRESS **ECO_L3T_JET.002**, «ECOSTRESS Tiled Evapotranspiration Instantaneous and Daytime L3 Global
@@ -13,6 +13,14 @@
   Earthdata (https://www.earthdata.nasa.gov/data/catalog/lpcloud-eco-l3t-jet-002, leída el 15-nov-2026): «Hook, Simon, &
   Halverson, Gregory. (2024). ECOSTRESS Tiled Evapotranspiration Instantaneous and Daytime L3 Global 70 m v002 [Data set].
   NASA Land Processes Distributed Active Archive Center. https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002».
+- **Citas textuales** del README.md que AppEEARS generó con cada solicitud (secciones 8 y 9; guardados sin cambios en
+  `data/raw/reto/ecostress_readme_<zona>.md`, sha256 30fc970e… y bc23f5b5…, iguales a la lista del paquete):
+  - Producto: «Hook, S., & Halverson, G. (2024). ECOSTRESS Tiled Evapotranspiration Instantaneous and Daytime L3 Global 70 m
+    v002. NASA Land Processes Distributed Active Archive Center. https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002. Accessed
+    November 15, 2026.»
+  - Software: «AppEEARS Team. (2026). Application for Extracting and Exploring Analysis Ready Samples (AppEEARS). Ver. 3.137.
+    NASA EOSDIS Land Processes Distributed Active Archive Center (LP DAAC), USGS/Earth Resources Observation and Science (EROS)
+    Center, Sioux Falls, South Dakota, USA. Accessed November 15, 2026. https://appeears.earthdatacloud.nasa.gov»
 - **Cómo:** AppEEARS v3.137 (LP DAAC), muestra por puntos. Dos solicitudes del 14-nov-2026 con la cuenta de Earthdata del
   equipo (la sesión la inició Cristian): `raiz_ecostress_delicias_saucillo` (ID 8d53d4fe-9e3f-48ee-8947-84078f3f8c99, 940
   puntos) y `raiz_ecostress_lazaro_cardenas` (ID 520f1233-5eb1-4c4e-b243-2c43940f784b, 299 puntos). Un punto dentro de cada
@@ -112,9 +120,8 @@ Razón `et_mm_dia` / `etc_modelo_mm`, mediana por cultivo y mes (cuartiles entre
   (`github.com/nasa/ECOSTRESS-Data-Resources`, `extract_geolocation_flag`). Además, el punto de la solicitud queda a menos de
   35 m del lindero en 234 de 1,239 parcelas (revisión independiente): ahí el píxel de 70 m puede incluir al vecino, un camino
   o un canal. Revisar la marca de las 21 escenas con dato necesita la sesión de Earthdata del equipo.
-- **Cita del software AppEEARS (D8):** la da el README.md que AppEEARS genera con cada solicitud y todavía no está en
-  `data/raw/reto/`. Se baja de la página de la solicitud («Download») con la sesión de Earthdata; hasta entonces, la cita del
-  software queda «to be confirmed». La del producto ya está en el §1.
+- **Citas (D8): resuelto.** Los README.md de las dos solicitudes están en `data/raw/reto/` (leídos el 15-nov-2026 con la sesión
+  de Earthdata del equipo) y las citas del producto y del software están copiadas textualmente en el §1.
 - Con pocos sobrevuelos por mes, una parcela puede depender de uno o dos: el valor de enero sale de uno solo.
 
 ## 7. Cómo se rehace
