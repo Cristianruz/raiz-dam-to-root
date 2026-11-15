@@ -1608,6 +1608,36 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
   }
 }
 
+/**
+ * Punto 5 de la revisión con Playwright (5 a 10 s de página vacía en 3G/4G): con los datos retrasados, la página dice
+ * «Loading field data…» sin cifras, la pantalla de inicio ya está y el deslizador no se ve hasta tener su valor; al
+ * llegar los datos, el deslizador queda en la marca inicial sin haber mostrado otro valor.
+ */
+async function pruebaCargaLenta(navegador, base) {
+  const ctx = await navegador.newContext({ serviceWorkers: "block", viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  let soltar;
+  const espera = new Promise((ok) => { soltar = ok; });
+  await page.route("**/data/cubo.json", async (route) => { await espera; await route.continue(); });
+  await page.route((url) => esOpcional(url.href), (route) => route.abort());
+  await page.goto(`${base}/index.html`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector(".acerca-inicio", { timeout: 10000 }).catch(() => null);
+  const antes = await page.evaluate(() => ({
+    cifra: document.querySelector("#indicador-cifra").textContent.trim(),
+    inicio: Boolean(document.querySelector(".acerca-inicio")),
+    deslizador: getComputedStyle(document.querySelector("#dotacion")).visibility,
+    listo: document.body.dataset.listo ?? null,
+  }));
+  check("carga lenta: «Loading field data…» sin cifras, inicio a la vista y el deslizador oculto mientras llegan los datos",
+    antes.cifra === "Loading field data…" && !/\d/.test(antes.cifra) && antes.inicio && antes.deslizador === "hidden" && antes.listo === null, JSON.stringify(antes));
+  soltar();
+  await page.waitForSelector("body[data-listo='si']", { timeout: 20000 });
+  const despues = await page.evaluate(() => ({ valor: Number(document.querySelector("#dotacion").value), visible: getComputedStyle(document.querySelector("#dotacion")).visibility, cargando: Boolean(document.querySelector("#indicador-cifra .cargando")) }));
+  const inicial = marcas.find((m) => m.id === `como_${parcelas.meta?.anio_actual}`) ?? marcas[0];
+  check("carga lenta: con los datos, el deslizador aparece en la marca inicial y el indicador deja de decir «Loading…»", despues.visible === "visible" && despues.valor === inicial.valor && !despues.cargando, JSON.stringify(despues));
+  await ctx.close();
+}
+
 /** Enlace directo: #P0757 abre su ficha (sin pantalla de inicio), el hash sigue a la ficha, un id desconocido avisa. */
 async function pruebaEnlaceDirecto(navegador, base, prefijo, opciones) {
   if (!P0757) return;
@@ -1623,6 +1653,22 @@ async function pruebaEnlaceDirecto(navegador, base, prefijo, opciones) {
   }
   await cerrarFicha(page);
   check(`${prefijo}al cerrar la ficha el hash se quita`, (await page.evaluate(() => location.hash)) === "");
+  // Punto 4 de la revisión con Playwright: el botón Atrás cierra la ficha y la página sigue (no sale de la aplicación).
+  const largo0 = await page.evaluate(() => history.length);
+  await abrirDesdeLista(page, P0757);
+  check(`${prefijo}abrir una ficha agrega una entrada propia al historial (#${P0757})`,
+    (await page.evaluate(() => location.hash)) === `#${P0757}` && (await page.evaluate(() => history.state?.raizFicha)) === P0757);
+  await page.goBack({ waitUntil: "commit" }).catch(() => null);
+  await page.waitForSelector("#ficha", { state: "hidden", timeout: 5000 }).catch(() => null);
+  const trasAtras = await page.evaluate(() => ({ ficha: document.querySelector("#ficha").hidden, hash: location.hash, listo: document.body.dataset.listo, ruta: location.pathname }));
+  check(`${prefijo}botón Atrás con la ficha abierta: la cierra y la página sigue`, trasAtras.ficha && trasAtras.hash === "" && trasAtras.listo === "si" && trasAtras.ruta.endsWith("/index.html"), JSON.stringify(trasAtras));
+  await page.goForward({ waitUntil: "commit" }).catch(() => null);
+  await page.waitForSelector("#ficha:not([hidden])", { timeout: 5000 }).catch(() => null);
+  check(`${prefijo}botón Adelante vuelve a abrir la ficha`, (await page.locator("#ficha").isVisible()) && (await texto(page, "#ficha-titulo")) === `Field ${P0757}`);
+  await cerrarFicha(page);
+  await page.waitForFunction(() => !history.state?.raizFicha, null, { timeout: 5000 }).catch(() => null);
+  check(`${prefijo}cerrar con el botón vuelve a la entrada anterior (el historial no acumula fichas)`,
+    (await page.evaluate(() => history.state?.raizFicha ?? null)) === null && (await page.evaluate(() => location.hash)) === "", String(largo0));
   // Una parcela de otra zona por «hashchange»: la página pasa a su zona y abre la ficha.
   const deOtraZona = protagonistas.find((x) => zonaDeProp(porId.get(x)) !== zonaDeProp(porId.get(P0757)));
   if (deOtraZona && zonasCubo.length > 1) {
@@ -2358,6 +2404,34 @@ async function pruebasTelefono(page, peticiones) {
   });
   check("teléfono: la ficha se lee sin desplazamiento horizontal", ancho.cabe);
   check("teléfono: el deslizador queda visible con la ficha abierta", ancho.deslizadorVisible);
+  // Punto 3 de la revisión con Playwright: con la ficha abierta la franja se compacta (solo el deslizador) y la ficha
+  // ocupa al menos tres cuartos de la pantalla; también con el texto al 200 % (WCAG 1.4.4 / 1.4.10).
+  const alto = async () => page.evaluate(() => {
+    const f = document.querySelector("#ficha").getBoundingClientRect();
+    const oculto = (sel) => getComputedStyle(document.querySelector(sel)).display === "none";
+    return { fraccion: f.height / innerHeight, compacta: oculto(".marcas") && oculto(".control-extra") && oculto("#marca") };
+  });
+  const normal = await alto();
+  check("teléfono: con la ficha abierta la franja se compacta y la ficha ocupa ≥ 75 % del alto", normal.compacta && normal.fraccion >= 0.75, JSON.stringify(normal));
+  await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+  const doble = await alto();
+  check("teléfono: con el texto al 200 % la ficha sigue ocupando ≥ 60 % del alto", doble.fraccion >= 0.6, JSON.stringify(doble));
+  await page.evaluate(() => { document.documentElement.style.fontSize = ""; });
+  // Punto 7: ningún control de la página ni de la ficha mide menos de 44 px de alto en el teléfono (una casilla dentro
+  // de una etiqueta cuenta por su etiqueta).
+  const pequenos = await page.evaluate(() => {
+    const sel = "a[href], button, input, select, summary, [role=button], [role=switch]";
+    const out = [];
+    for (const el of document.querySelectorAll(sel)) {
+      if (el.closest("[hidden], [inert]") || el.matches(".solo-lector, .saltar")) continue;
+      const objetivo = el.matches("input[type=checkbox]") && el.closest("label") ? el.closest("label") : el;
+      const r = objetivo.getBoundingClientRect();
+      if (!r.width || !r.height || getComputedStyle(el).visibility === "hidden") continue;
+      if (r.height < 44 - 0.5) out.push(`${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""} «${(el.innerText || el.getAttribute("aria-label") || "").trim().slice(0, 30)}» ${Math.round(r.height)} px`);
+    }
+    return out;
+  });
+  check("teléfono: objetivos táctiles de al menos 44 px de alto con la ficha abierta (punto 7)", pequenos.length === 0, pequenos.slice(0, 6).join(" | "));
   if (await tarjeta(page, "ACTUAL").count()) {
     const alcanza = tarjeta(page, "ACTUAL").locator(".alcanza");
     await fijarDeslizador(page, D2);
@@ -2724,6 +2798,7 @@ async function main() {
     await tel.ctx.close();
 
     // Enlace directo #id (escritorio y teléfono) y NDVI con huecos (variante en memoria).
+    await pruebaCargaLenta(navegador, base);
     await pruebaEnlaceDirecto(navegador, base, "", { viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" });
     await pruebaEnlaceDirecto(navegador, base, "teléfono: ", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
     await pruebaNDVIHuecos(navegador, base);

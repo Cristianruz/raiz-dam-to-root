@@ -219,6 +219,7 @@ const estado = {
   r: null, // lluvia elegida (0 o la variante seca)
   rBase: null,
   rSeca: null,
+  atrasPropio: false, // cerrarFicha llamó a history.back(): el «popstate» que sigue no cierra ni abre nada
   colorear: "semaforo", // "semaforo" | "plazo" | id de capa
   capas: new Map(), // id de capa -> definición
   fichaId: null,
@@ -439,6 +440,12 @@ async function iniciar() {
   observarCabecera();
   // Antes de los datos: si la página abre desde una copia a medias y los datos no llegan, el rótulo lo dice.
   iniciarInstalacion();
+  // Pantalla de inicio ANTES de esperar los datos (punto 5: en 3G/4G eran 5 a 10 s de página vacía): se lee mientras
+  // llegan. Con un enlace directo a una parcela (#P0757) no se muestra: la ficha se abre al llegar los datos. Un «#»
+  // que es el id de un elemento de la página (p. ej. #principal) no es un enlace a una parcela.
+  const hashInicial = window.location.hash.replace(/^#/, "");
+  const posibleEnlace = Boolean(hashInicial) && !document.getElementById(decodeURIComponentSeguro(hashInicial));
+  const inicioTemprano = posibleEnlace ? null : montarInicio(document.body);
   try {
     // relieve.json es opcional: cargarRelieve nunca falla (null si no existe) y la ficha toma de ahí el
     // rótulo de escala de la línea de relieve aunque se abra antes que el mapa. gemelo.json también es opcional
@@ -495,9 +502,21 @@ async function iniciar() {
   // parcela no ve la pantalla de inicio encima de la ficha.
   const porEnlace = abrirDesdeHash();
   window.addEventListener("hashchange", () => abrirDesdeHash());
+  window.addEventListener("popstate", alVolverEnHistoria);
   document.body.dataset.listo = "si";
-  // Pantalla de inicio de tres pasos (kit C5): una vez por sesión; «How it works» la vuelve a abrir.
-  if (!porEnlace) montarInicio(document.body);
+  // Pantalla de inicio de tres pasos (kit C5): una vez por sesión; «How it works» la vuelve a abrir. Ya se mostró antes
+  // de los datos, salvo con un «#» que parecía un enlace a una parcela y no lo era: entonces se muestra ahora.
+  if (porEnlace) inicioTemprano?.cerrar?.();
+  else if (posibleEnlace) montarInicio(document.body);
+}
+
+/** decodeURIComponent que no lanza con un «%» suelto (devuelve el texto tal como llegó). */
+function decodeURIComponentSeguro(texto) {
+  try {
+    return decodeURIComponent(texto);
+  } catch {
+    return texto;
+  }
 }
 
 /**
@@ -532,9 +551,28 @@ function abrirDesdeHash() {
   return false;
 }
 
+/**
+ * Botón Atrás / Adelante (punto 4). Si la entrada a la que se llega no es de una ficha y hay una abierta, se cierra.
+ * Abrir una ficha al ir hacia adelante lo hace «hashchange» (abrirDesdeHash). El «popstate» que provoca cerrarFicha
+ * con history.back() se ignora; si mientras tanto se abrió otra ficha, su entrada se vuelve a poner.
+ */
+function alVolverEnHistoria() {
+  if (estado.atrasPropio) {
+    estado.atrasPropio = false;
+    if (estado.fichaId && window.location.hash !== hashDe(estado.fichaId)) {
+      window.history.pushState({ ...(window.history.state ?? {}), [LLAVE_HISTORIA]: estado.fichaId }, "", hashDe(estado.fichaId));
+    }
+    return;
+  }
+  if (estado.fichaId && !idDeHash(window.location.hash, estado.porId)) cerrarFicha({ desdeHistoria: true });
+}
+
 /** Aviso visible de que la página no pudo cargar o arrancar (y en la consola). */
 function mostrarErrorCarga(texto, err) {
   console.error(err ?? texto);
+  // El estado de carga del indicador no queda diciendo «Loading…» (punto 5).
+  const cifra = $("#indicador-cifra");
+  if (cifra?.querySelector(".cargando")) cifra.textContent = "Field data could not be loaded.";
   const aviso = document.createElement("p");
   aviso.className = "error-carga";
   aviso.setAttribute("role", "alert");
@@ -709,6 +747,7 @@ function iniciarControles() {
   const anioActual = estado.parcelas.meta?.anio_actual;
   const inicial = marcas.find((m) => anioActual != null && m.id === `como_${anioActual}`) ?? marcas[0];
   input.value = String(inicial ? inicial.valor : deslizador.min);
+  input.removeAttribute("data-cargando"); // ya con su valor: se muestra (punto 5)
 
   const lista = $("#dotacion-marcas");
   const contenedor = $("#marcas");
@@ -1904,18 +1943,32 @@ function opcionesDe(id) {
   return estado.cubo.parcelas?.[id]?.opciones ?? [];
 }
 
+// Historial (revisión con Playwright, 2026-11-15, punto 4): abrir una ficha agrega una entrada propia con «#id», así el
+// botón Atrás del teléfono cierra la ficha en lugar de salir de la aplicación. La entrada es nuestra si su estado lleva
+// LLAVE_HISTORIA; un enlace directo (#P0757 al cargar) o un «#id» escrito a mano no lo son.
+const LLAVE_HISTORIA = "raizFicha";
+const entradaPropia = () => Boolean(window.history.state && window.history.state[LLAVE_HISTORIA]);
+
 function abrirFicha(id, opciones = {}) {
   const f = estado.porId.get(id);
   if (!f) return;
+  const yaAbierta = Boolean(estado.fichaId);
   if (!estado.fichaId || !$("#ficha").contains(document.activeElement)) estado.disparador = document.activeElement;
   estado.fichaId = id;
   const ops = opcionesDe(id);
   estado.gota = { opcion: (ops.find((o) => o.id === "ACTUAL" && o.gota) ?? ops.find((o) => o.gota) ?? ops[0])?.id ?? null, goteo: false, tope: true };
   estado.whatsapp = false;
   construirFicha(f);
+  // Teléfono: con la ficha abierta la franja de controles se compacta (style.css, punto 3).
+  document.body.dataset.ficha = "abierta";
   fijarMedidas();
-  // Enlace directo: la barra de direcciones dice qué ficha está abierta (sin entrada nueva en el historial).
-  if (window.location.hash !== hashDe(id)) window.history.replaceState(window.history.state, "", hashDe(id));
+  // Enlace directo: la barra de direcciones dice qué ficha está abierta. Si la dirección aún no lo dice, entrada nueva
+  // en el historial (Atrás la cierra); si ya hay una ficha nuestra abierta, se reemplaza (una sola entrada por visita).
+  if (window.location.hash !== hashDe(id)) {
+    const entrada = { ...(window.history.state ?? {}), [LLAVE_HISTORIA]: id };
+    if (yaAbierta && entradaPropia()) window.history.replaceState(entrada, "", hashDe(id));
+    else window.history.pushState(entrada, "", hashDe(id));
+  }
   const avisoEnlace = $("#aviso-enlace");
   if (avisoEnlace) avisoEnlace.hidden = true;
   const ficha = $("#ficha");
@@ -1933,7 +1986,7 @@ function abrirFicha(id, opciones = {}) {
   }
 }
 
-function cerrarFicha({ devolverFoco = true } = {}) {
+function cerrarFicha({ devolverFoco = true, desdeHistoria = false } = {}) {
   if (!estado.fichaId) return;
   const id = estado.fichaId;
   estado.fichaId = null;
@@ -1942,12 +1995,24 @@ function cerrarFicha({ devolverFoco = true } = {}) {
   estado.ndviApi?.destruir();
   estado.ndviApi = null;
   estado.whatsapp = false;
-  // Sin ficha abierta, la dirección queda sin «#id» (replaceState no dispara «hashchange»).
-  if (idDeHash(window.location.hash, estado.porId)) {
-    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+  // Sin ficha abierta, la dirección queda sin «#id» (replaceState no dispara «hashchange»). Si la entrada es nuestra
+  // (la abrió abrirFicha), además se vuelve a la anterior: así el historial no acumula fichas cerradas. Si el cierre
+  // viene del botón Atrás (popstate), el navegador ya cambió de entrada y no se toca nada.
+  if (!desdeHistoria) {
+    const propia = entradaPropia();
+    if (idDeHash(window.location.hash, estado.porId) || propia) {
+      const { [LLAVE_HISTORIA]: _quitada, ...resto } = window.history.state ?? {};
+      window.history.replaceState(Object.keys(resto).length ? resto : null, "", window.location.pathname + window.location.search);
+    }
+    if (propia) {
+      estado.atrasPropio = true; // el «popstate» que sigue es nuestro: no cierra ni abre nada
+      window.history.back();
+    }
   }
   $("#ficha").hidden = true;
   $("#ficha-cuerpo").innerHTML = "";
+  delete document.body.dataset.ficha;
+  fijarMedidas();
   sincronizarInert(); // antes de devolver el foco a la lista o al mapa
   pintarColoreado();
   if (!devolverFoco) return;

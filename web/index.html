@@ -67,7 +67,9 @@
     <div class="control-dotacion">
       <label for="dotacion" class="etiqueta-control">Water allocation <span class="unidad">(thousand m³ per hectare)</span></label>
       <div class="fila-deslizador">
-        <input type="range" id="dotacion" list="dotacion-marcas" aria-describedby="punto-medicion">
+        <!-- data-cargando: oculto (sin mover el diseño) hasta que app.js le pone min, max y valor del cubo; así no salta
+             del valor por omisión del navegador al de los datos. -->
+        <input type="range" id="dotacion" list="dotacion-marcas" aria-describedby="punto-medicion" data-cargando>
         <datalist id="dotacion-marcas"></datalist>
         <output id="dotacion-valor" class="valor-dotacion" for="dotacion" aria-live="off"></output>
       </div>
@@ -102,7 +104,8 @@
         </div>
         <h1 class="indicador-titulo">Water already committed by perennial crops</h1>
         <div aria-live="polite" aria-atomic="true">
-          <p class="indicador-cifra" id="indicador-cifra"></p>
+          <!-- Estado de carga (sin cifras): app.js lo reemplaza con el indicador cuando llegan los datos. -->
+          <p class="indicador-cifra" id="indicador-cifra"><span class="cargando">Loading field data…</span></p>
           <p class="indicador-rango" id="indicador-rango"></p>
           <div class="indicador-mensaje" id="indicador-mensaje" hidden></div>
           <p class="indicador-segunda" id="indicador-segunda"></p>
