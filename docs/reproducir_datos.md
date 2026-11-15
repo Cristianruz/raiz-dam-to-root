@@ -3,7 +3,7 @@
 
 > Para el jurado o para quien quiera rehacer los datos. Un comando rehace, desde los crudos del repositorio, todos los
 > archivos que la sesión de datos entregó al buzón (`Raiz_entregas`) y los compara byte por byte con la entrega.
-> Comprobado el 14-nov-2026 en una carpeta vacía: **34 de 34 archivos idénticos** (sha256), en 1 min 40 s.
+> Comprobado el 14-nov-2026 en una carpeta vacía: **35 de 35 archivos idénticos** (sha256), con ECOSTRESS incluido.
 
 ## 1. Lo que se necesita
 - Python 3.11 o más reciente (probado con 3.13) y `pip install numpy rasterio shapely matplotlib`.

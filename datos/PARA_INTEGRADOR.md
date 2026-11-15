@@ -576,3 +576,5 @@ dentro de cada parcela (1,239: 940 y 299). Solicitudes guardadas en `data/raw/re
 - **Prueba con tu e560743 y el buzón completo:** `construir.py` OK, **entraron 35, rechazados 0** (los 4 de suelo ya con tu
   esquema y ECOSTRESS), 1026 pytest y 162 node.
 - `correr_todo.py` ya corre E0 (comprueba que las solicitudes rehechas son las mismas que se subieron) y E1.
+- Después de la entrega: `web_smoke` con tu e560743 y el buzón completo, **480/480**; `correr_todo.py` **35 de 35** idénticos
+  (con ECOSTRESS).
