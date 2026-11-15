@@ -16,8 +16,8 @@ How to read this file:
 |---|---|---|---|---|
 | Fields of The World global predictions, 2025 | Fields of The World project; distributed through Source Cooperative (`source.coop/ftw/global-data`) | `data/processed/parcelas_base.geojson`; field polygons in `web/data/parcelas.geojson` | **CC-BY-4.0.** Attribution is required. Attribution line: "Field boundaries: Fields of The World global predictions (CC-BY-4.0), source.coop/ftw/global-data" | `docs/verificacion_fuentes_datos.md`; kit v4, A4 and B1 |
 | HLS v2, Harmonized Landsat Sentinel-2 (`NASA/HLS/HLSL30/v002`, `NASA/HLS/HLSS30/v002`) | NASA (LP DAAC); built on Landsat and on Copernicus Sentinel-2 | `hls_mensual_parcelas.csv`, `memoria_parcelas.csv`, `memoria_resumen.csv`, `suelo_desnudo.csv`, `cultivos_parcelas.csv`, `h3_series.csv` | NASA open data. Catalog terms: "NASA promotes the full and open sharing of all data with research and applications communities, private industry, academia, and the general public." Cite the product (README → References) | `docs/equipo/verificar_datos_nasa.md` §2 |
-| NASADEM (`NASA/NASADEM_HGT/001`) | NASA (JPL; LP DAAC) | `nasadem_zona_piloto*.tif`, `relieve_parcelas.csv`, `relieve_rutas.geojson`, `relieve_meta*.json`; relief tiles in `web/data/dem/` (not on the page yet) | Catalog terms: "Unless otherwise noted, all NASA-produced data may be used for any purpose without prior permission." S9 §4 bis labels it public domain. Cite the product | `docs/equipo/verificar_datos_nasa.md` §3; S9 §4 bis |
-| NASA POWER, Daily API, community AG | NASA (Langley Research Center) | `eto_diaria*.csv`, `demanda_cultivos*.csv`, `rotaciones*.json`, `heladas.json` (not on the page yet) | NASA Earth science data: free and open; cite the product. The exact acknowledgment text asked by POWER: **terms to be confirmed** | General NASA policy; `docs/equipo/verificar_datos_nasa.md` §1 records the exact text as not verified |
+| NASADEM (`NASA/NASADEM_HGT/001`) | NASA (JPL; LP DAAC) | `nasadem_zona_piloto*.tif`, `relieve_parcelas.csv`, `relieve_rutas.geojson`, `relieve_meta*.json`; relief tiles of the 3D view in `web/data/dem/` | Catalog terms: "Unless otherwise noted, all NASA-produced data may be used for any purpose without prior permission." S9 §4 bis labels it public domain. Cite the product | `docs/equipo/verificar_datos_nasa.md` §3; S9 §4 bis |
+| NASA POWER, Daily API, community AG | NASA (Langley Research Center) | `eto_diaria*.csv`, `demanda_cultivos*.csv`, `rotaciones*.json`, `heladas.json` (frost probability in the field sheet) | NASA Earth science data: free and open; cite the product. The exact acknowledgment text asked by POWER: **terms to be confirmed** | General NASA policy; `docs/equipo/verificar_datos_nasa.md` §1 records the exact text as not verified |
 | GPM IMERG V07 (`NASA/GPM_L3/IMERG_V07`) | NASA, with JAXA | `imerg_diaria*.csv`; storm depth in `relieve_meta*.json` and `web/data/relieve.json` | NASA Earth science data: free and open; cite the product. Specific terms and formal citation: **terms to be confirmed** | General NASA policy; no specific statement recorded in the repo |
 | SSEBop VIIRS v6 monthly (`projects/usgs-ssebop/viirs_et_v6_monthly`) | U.S. Geological Survey (USGS), on VIIRS data | `et_contraste.csv` (test 5) | "USGS-authored or produced data and information are considered to be in the U.S. Public Domain." Cite Senay, Kagone and Velpuri (2020). It was read through the Earth Engine community catalog, which the community maintains, not USGS | `docs/equipo/verificar_datos_nasa.md` §5; `docs/resultado_A8.md` |
 | SIH, daily series of La Boquilla dam (`LBQCH.csv`, downloaded Nov 14, 2026) | Conagua (Comisión Nacional del Agua), Sistema de Información Hidrológica | Truth of the H1 back-test: `docs/h1_verdad_sih.md`, `docs/resultado_H1.md`. The raw file is not on this branch (`data/raw/` is empty here) | **Terms to be confirmed.** Cited as "Conagua, Sistema de Información Hidrológica (SIH), serie diaria de La Boquilla (LBQCH.csv)" with its download date | `docs/equipo/verificar_datos_nasa.md` §8 records the license as not verified |
@@ -30,47 +30,50 @@ How to read this file:
 |---|---|---|---|---|
 | SIAP crop statistics, read through the state reports of SDR Chihuahua | SIAP (Servicio de Información Agroalimentaria y Pesquera); Secretaría de Desarrollo Rural of Chihuahua | Reference for a future contrast of crop areas. No SIAP figure enters the tool: the figures read so far still have to be checked against the original PDF | **Terms to be confirmed** | `docs/referencias/ref_cultivos_sdr.md` |
 | INIFAP crop water depths; FIRA AGROCOSTOS 2025; IMTA, COMEII 2021 | INIFAP; FIRA; IMTA | Cited figures with labels [V] or [P] (`data/params.json`, S9 §5) | Citations of published figures. **Terms to be confirmed** | `data/params.json`; S9 |
+| Villalobos-Cano et al. (2024), *Sustainability* 16(5): 1851, Tables 2 and 3 | The authors (journal *Sustainability*) | Depths applied in DR-005, 2009–2016 means, shown as the local reference of alfalfa and pecan (`web/data/cubo.json` → `agua.lamina_local`; `data/processed/supuestos.json`) | Citations of published figures. **Terms to be confirmed** | `cubo.json` → `agua.lamina_local.fuente`; `docs/modelo_vs_practica.md` |
 | Press figures (allocations, dam storage, the 2025 cycle) | Each outlet named in README → References | Cited figures labeled [P] | Short citations with outlet and date | S8 §2; S9 §2 and Annex A |
 
-## Delivered on Nov 14, 2026; not on the page yet
+## Delivered on Nov 14, 2026; now on the page
 
-These files are validated in `data/processed/` (`data/processed/fuentes.json`). The page does not show them yet.
+These files are validated in `data/processed/` (`data/processed/fuentes.json`); ECOSTRESS and GAEZ arrived with mailbox v10. The page shows them in the regional context panel (`web/data/contexto.json`), in the field sheet ("Soil and satellite evidence" and the Soil row, `web/data/suelo.json`) and in "Follow the drop" (`web/data/cubo.json` → `meta.goteo`).
 
-| Source | Holder | File | License or terms of use |
+| Source | Holder | File and where the page shows it | License or terms of use |
 |---|---|---|---|
-| SMAP L4 v8 (`NASA/SMAP/SPL4SMGP/008`) | NASA | `contexto_regional.csv` | NASA Earth science data: free and open; cite the product. Formal citation: **terms to be confirmed** |
-| MODIS collection 6.1 (`MOD13Q1`, `MOD16A2GF`, `MOD11A2`) | NASA | `contexto_regional.csv` | Same as above |
-| GRACE / GRACE-FO mascons (`NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI`) | NASA, with the German centers DLR and GFZ | `contexto_regional.csv` | Same as above |
-| GLDAS-2.1 Noah (`NASA/GLDAS/V021/NOAH/G025/T3H`) | NASA | `contexto_regional.csv` | Same as above |
-| NLDAS-2 forcing (`NASA/NLDAS/FORA0125_H002`) | NASA and NOAA | `contexto_regional.csv` | Same as above |
-| GEDI L2A v2 (`LARSE/GEDI/GEDI02_A_002_MONTHLY`) | NASA | `gedi_parcelas.csv` | Same as above |
-| ERA5-Land (`ECMWF/ERA5_LAND/DAILY_AGGR`) | ECMWF, Copernicus Climate Change Service. Not a NASA product | `contexto_regional.csv` | **Terms to be confirmed** |
-| SoilGrids 2.0 (`projects/soilgrids-isric/*_mean`, 0–30 cm) | ISRIC – World Soil Information | `suelo_parcelas.csv` (texture, pH, organic carbon, CEC) | CC-BY 4.0, as recorded by the data session in `docs/suelo_parcelas.md` and `datos/LEEME.md`; cite ISRIC SoilGrids |
-| OpenLandMap soil texture class | OpenLandMap (OpenGeoHub) | Column `clase_textura_olm` of `suelo_parcelas.csv`, used to report how often the two maps agree | **CC-BY-SA 4.0**: this column and anything derived from it must be shared under the same license (`docs/suelo_parcelas.md`) |
-| FAO ECOCROP crop requirements, read online sheet by sheet | FAO | Published pH and texture ranges in `suelo_requisitos.json`, each with its citation and link | **Terms to be confirmed**: only cited ranges were transcribed, not the database (`docs/suelo_parcelas.md`) |
-| FAO Irrigation and Drainage Paper 29 (water quality), Table 4 | FAO | Salinity thresholds in `suelo_requisitos.json`, each cited | Cited figures |
-| FAO Irrigation Water Management Training Manual No. 4, Annex I, Table 8 | FAO | Indicative drip and surface field efficiencies in `supuestos.json` (La gota) | Cited figures |
+| SMAP L4 v8 (`NASA/SMAP/SPL4SMGP/008`) | NASA | `contexto_regional.csv`; Regional context | NASA Earth science data: free and open; cite the product. Formal citation: **terms to be confirmed** |
+| MODIS collection 6.1 (`MOD13Q1`, `MOD16A2GF`, `MOD11A2`) | NASA | `contexto_regional.csv`; Regional context | Same as above |
+| GRACE / GRACE-FO mascons (`NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI`) | NASA, with the German centers DLR and GFZ | `contexto_regional.csv`; Regional context | Same as above |
+| GLDAS-2.1 Noah (`NASA/GLDAS/V021/NOAH/G025/T3H`) | NASA | `contexto_regional.csv`; Regional context | Same as above |
+| NLDAS-2 forcing (`NASA/NLDAS/FORA0125_H002`) | NASA and NOAA | `contexto_regional.csv`; Regional context | Same as above |
+| GEDI L2A v2 (`LARSE/GEDI/GEDI02_A_002_MONTHLY`) | NASA | `gedi_parcelas.csv`; field sheet | Same as above |
+| ERA5-Land (`ECMWF/ERA5_LAND/DAILY_AGGR`) | ECMWF, Copernicus Climate Change Service. Not a NASA product | `contexto_regional.csv`; Regional context | **Terms to be confirmed** |
+| SoilGrids 2.0 (`projects/soilgrids-isric/*_mean`, 0–30 cm) | ISRIC – World Soil Information | `suelo_parcelas.csv` (texture, pH, organic carbon, CEC); field sheet | CC-BY 4.0, as recorded by the data session in `docs/suelo_parcelas.md` and `datos/LEEME.md`; cite Poggio et al. (2021) |
+| OpenLandMap soil texture class (Hengl 2018, v02) | OpenLandMap (OpenGeoHub) | Column `clase_textura_olm` of `suelo_parcelas.csv`, used to report how often the two maps agree (`suelo.json` → `coincidencia_textura`) | **CC-BY-SA 4.0**: this column and anything derived from it must be shared under the same license (`docs/suelo_parcelas.md`) |
+| FAO ECOCROP crop requirements, read online sheet by sheet | FAO | Published pH and texture ranges in `suelo_requisitos.json`, each with its citation and link; suitability in the Soil row | **Terms to be confirmed**: just cited ranges were transcribed, not the database (`docs/suelo_parcelas.md`) |
+| FAO Irrigation and Drainage Paper 29 (water quality), Table 4 | FAO | Salinity thresholds in `suelo_requisitos.json` and in the salinity filter, each cited | Cited figures |
+| FAO Irrigation Water Management Training Manual No. 4 (Brouwer, Prins and Heibloem 1989), Annex I, Table 8 | FAO | Indicative drip and surface field efficiencies in `supuestos.json`; drip scenario of "Follow the drop" | Cited figures |
+| ECOSTRESS (`ECO_L3T_JET.002`, through AppEEARS) | NASA (LP DAAC) | `ecostress_parcelas.csv` (mailbox v10, merged with pull request #4); field sheet, "Soil and satellite evidence" | NASA Earth science data: free and open; cite the product: Hook, S. and Halverson, G. (2024), https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002 (`docs/ecostress.md`, branch `datos-satelite`) |
+| GAEZ v4, theme res05 «Suitability and Attainable Yield» | FAO and IIASA | `gaez_zona.csv` (mailbox v10, merged with pull request #4); Regional context, "Agro-climatic suitability by crop" | **CC BY-NC-SA** (version 4.0 or 3.0 IGO, according to the FAO catalog record), as recorded by the data session in `datos/colab/G1_gaez_zona.py` (branch `datos-satelite`). NonCommercial and ShareAlike: GAEZ values and what derives from them cannot be used commercially and are shared under the same license; the Apache-2.0 license of the code does not cover them. Cite "FAO and IIASA, GAEZ v4, http://www.fao.org/gaez/" and the model, Fischer et al. (2021), https://doi.org/10.4060/cb4744en |
 
-Holders as listed in `data/recursos_reto.json`.
+Holders as listed in `data/recursos_reto.json`. ECOSTRESS was read through AppEEARS, with an Earthdata account, and GAEZ through FAO's GAEZ v4 image service (`docs/ecostress.md`; `datos/colab/G1_gaez_zona.py`).
 
-## Requested or not run
+## Not run or not used
 
 | Source | Holder | Status | License or terms of use |
 |---|---|---|---|
-| ECOSTRESS | NASA | Requested, not delivered yet | NASA Earth science data: free and open; cite the product |
-| GAEZ | FAO and IIASA | Requested, not delivered yet | **Terms to be confirmed** |
 | WaPOR v3 | FAO | Not run | CC-BY-4.0, as recorded in kit v4, A8; to be confirmed against FAO's own terms before any use |
 | INEGI LiDAR | INEGI | Not used: coverage of the pilot areas not confirmed [NE] | If it is added, its notice goes here: "Fuente: INEGI, nombre del producto", with a transformation notice (S9 §4 bis) |
 
 ## Access platform
 
-The HLS, NASADEM, GPM IMERG, SSEBop, regional context and GEDI extractions were run in Google Earth Engine, on a non-commercial project of the Community tier (`docs/ee_uso.md`). Earth Engine is the access route, not the holder of the data.
+The HLS, NASADEM, GPM IMERG, SSEBop, regional context, GEDI, SoilGrids and OpenLandMap extractions were run in Google Earth Engine, on a non-commercial project of the Community tier (`docs/ee_uso.md`). Earth Engine is the access route, not the holder of the data.
 
 ## Libraries and development tools
 
 | Library or tool | Where it is used | License | Where this statement is recorded |
 |---|---|---|---|
-| MapLibre GL JS 5.24.0, d3 7.9.0, d3-sankey 0.12.3 | `web/vendor/` | Their own licenses, copied next to each library (`LICENSE` or `LICENSE.txt` in each folder) | `web/vendor/VERSIONS.json` |
+| MapLibre GL JS 5.24.0, d3 7.9.0, d3-sankey 0.12.3 | `web/vendor/` | Their own licenses, copied next to each library: a BSD 3-clause text for MapLibre GL JS (`LICENSE.txt`) and for d3-sankey (`LICENSE`), an ISC text for d3 (`LICENSE`) | `web/vendor/VERSIONS.json`; the license files in each folder |
+| pytest 9.1.0 | Python tests (`requirements.txt`) | **To be confirmed**: not recorded in this repository | `requirements.txt` |
+| Playwright with Chromium | Browser smoke tests, run locally (`tests/e2e/web_smoke.mjs`, `tests/e2e/offline_smoke.mjs`); not a dependency of the page | **To be confirmed**: neither its version nor its license is recorded in this repository | `README.md`, "Automated gate" |
 | Skills copied into `.claude/skills/` | Development | Apache-2.0 or MIT, license file next to each skill | `.claude/skills/README.md` |
 | Reviewer agents copied into `.claude/agents/` | Development | Apache-2.0 | `.claude/agents/README.md` |
 
@@ -80,11 +83,12 @@ Terms that are not recorded in this repository and that a team member has to con
 
 1. NASA POWER: the exact acknowledgment and citation text.
 2. GPM IMERG V07: the formal citation and any product-specific terms.
-3. SMAP, MODIS, GRACE/GRACE-FO, GLDAS, NLDAS and GEDI: the formal citation of each product, before the page shows them.
+3. SMAP, MODIS, GRACE/GRACE-FO, GLDAS, NLDAS and GEDI: the formal citation of each product, now that the page shows them.
 4. ERA5-Land: the Copernicus license and its attribution text.
 5. Conagua: terms of use of the SIH series and of the cited publications.
 6. SIAP and SDR Chihuahua: terms of use; and the figures themselves, which still have to be checked against the original PDF.
 7. INIFAP, FIRA and IMTA: full bibliographic entries.
 8. OpenStreetMap: tile usage terms for the public site.
-9. GAEZ and WaPOR v3: terms, if they are ever used.
-10. The license of the team's own derived tables in `data/processed/` and `web/data/` is not stated in the repository. The field polygons derive from Fields of The World and carry its attribution.
+9. GAEZ: which version of CC BY-NC-SA (4.0 or 3.0 IGO) the FAO catalog record gives for the layers read. WaPOR v3: terms, if it is ever used.
+10. FAO ECOCROP: terms of use of the online sheets.
+11. The license of the team's own derived tables in `data/processed/` and `web/data/` is not stated in the repository. The field polygons derive from Fields of The World and carry its attribution.

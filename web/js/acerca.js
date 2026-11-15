@@ -93,9 +93,9 @@ const ESTADOS_PASO = {
 // conjunto (la fuente lo menciona); «producto» reconoce la entrada cuya fuente EMPIEZA con el producto
 // (de ahí sale el nombre del producto que se muestra). Una entrada puede pertenecer a dos conjuntos
 // (p. ej., relieve_meta.json: NASADEM y la lluvia de la tormenta). «ids» (opcional) saca de la fuente
-// los identificadores de catálogo del producto cuando la fuente no empieza con él (contexto_regional.csv
-// empieza con la plataforma, «Earth Engine (…)», y lista un producto por serie): así la columna Product
-// nunca muestra la plataforma.
+// los identificadores de catálogo del producto (contexto_regional.csv empieza con la plataforma, «Earth
+// Engine (…)», y lista un producto por serie; la de GEDI trae detalles en español): así la columna Product
+// nunca muestra la plataforma ni texto en español.
 const FAMILIAS = [
   { id: "hls", patron: /\bHLS\b/, producto: /^NASA HLS\b/, dato: "Satellite imagery: Harmonized Landsat and Sentinel (HLS)" },
   { id: "power", patron: /\bPOWER\b/, producto: /^NASA POWER\b/, dato: "Daily weather: NASA POWER" },
@@ -108,6 +108,7 @@ const FAMILIAS = [
   { id: "gldas", patron: /\bGLDAS\b/, producto: /^(NASA )?GLDAS\b/, ids: /\bNASA\/GLDAS\/[\w/]+/g, dato: "Land surface model: GLDAS" },
   { id: "nldas", patron: /\bNLDAS\b/, producto: /^(NASA )?NLDAS\b/, ids: /\bNASA\/NLDAS\/[\w/]+/g, dato: "Second climate source: NLDAS" },
   { id: "gedi", patron: /\bGEDI L2A\b|\bLARSE\/GEDI\b/, producto: /^GEDI\b/, ids: /\bLARSE\/GEDI\/\w+/g, dato: "Laser height reading: GEDI" },
+  { id: "ecostress", patron: /\bECOSTRESS\b/, producto: /^(NASA )?ECOSTRESS\b/, dato: "Field evapotranspiration: ECOSTRESS" },
 ];
 // Remite a la tabla del reto, que dice el papel de cada serie regional y su estado.
 const VER_RECURSOS = "see “Challenge data sources” below";
@@ -139,6 +140,10 @@ const USOS = {
     "*": `Regional context series (${VER_RECURSOS})`,
   },
   gedi_parcelas: `Laser height reading of each field, evidence in the field card (${VER_RECURSOS})`,
+  ecostress_parcelas: {
+    power: "Weather behind the crop water need that ECOSTRESS is set against",
+    "*": `Evapotranspiration of each field, month by month, evidence in the field card (${VER_RECURSOS})`,
+  },
 };
 const USO_IMERG_TORMENTA = "Storm depth of “Simulate a storm”";
 const USO_IMERG_RESERVA = "Daily rainfall over the pilot area; not used in the calculation yet";
@@ -320,16 +325,20 @@ export function montarInicio(contenedor = typeof document !== "undefined" ? docu
 // ---------------------------------------------------------------------------
 // About & Data: datos NASA
 // ---------------------------------------------------------------------------
-/** Primer tramo de la fuente registrada, antes de « vía », «;» o «,» fuera de paréntesis. */
+// Paréntesis que hablan de la plataforma o del proceso, no del producto («(vía Google Earth Engine, memoria A3-M)»).
+const PARENTESIS_DE_PLATAFORMA = /\s*\((?:[^()]*\b(?:vía|via|Earth Engine|proyecto|memoria)\b[^()]*)\)/gi;
+
+/** Primer tramo de la fuente registrada, antes de « vía », « y », «;» o «,» fuera de paréntesis;
+ *  sin los paréntesis que nombran la plataforma (la columna Product nunca muestra «Earth Engine»). */
 function productoCorto(fuente) {
-  const s = String(fuente ?? "").trim();
+  const s = String(fuente ?? "").trim().replace(PARENTESIS_DE_PLATAFORMA, "");
   let prof = 0;
   for (let i = 0; i < s.length; i += 1) {
     const c = s[i];
     if (c === "(") prof += 1;
     else if (c === ")") prof = Math.max(0, prof - 1);
     else if (prof === 0 && (c === ";" || c === ",")) return s.slice(0, i).trim();
-    else if (prof === 0 && /^ (vía|via) /i.test(s.slice(i, i + 5))) return s.slice(0, i).trim();
+    else if (prof === 0 && /^ (vía|via|y) /i.test(s.slice(i, i + 5))) return s.slice(0, i).trim();
   }
   return s;
 }
@@ -373,11 +382,12 @@ function filasNasa(manifest, cubo, relieve) {
     if (!miembros.length) continue;
     miembros.forEach((f) => usadas.add(f));
     const cortos = miembros.map((f) => productoCorto(f.fuente));
-    let productos = sinPrefijos(unicos(cortos.filter((p) => familia.producto.test(p))));
-    // Sin una fuente que empiece con el producto: sus identificadores de catálogo, leídos de la fuente.
-    if (!productos.length && familia.ids) {
-      productos = unicos(miembros.flatMap((f) => String(f.fuente ?? "").match(familia.ids) ?? []).map((x) => x.replace(/\/+$/, "")));
-    }
+    // Con «ids», los identificadores de catálogo leídos de la fuente (la frase de la fuente trae detalles en español,
+    // como «rasterizado a 25 m», que no van en la columna Product); si no hay, el producto con que empieza la fuente.
+    let productos = familia.ids
+      ? unicos(miembros.flatMap((f) => String(f.fuente ?? "").match(familia.ids) ?? []).map((x) => x.replace(/\/+$/, "")))
+      : [];
+    if (!productos.length) productos = sinPrefijos(unicos(cortos.filter((p) => familia.producto.test(p))));
     if (!productos.length) productos = unicos(cortos).slice(0, 1);
     const escala = familia.id === "nasadem" ? unicos(zonasRelieve.map((z) => z?.rotulo)) : [];
     filas.push({

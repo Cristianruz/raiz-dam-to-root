@@ -1,0 +1,285 @@
+<!doctype html>
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
+<!-- docs/pitch/diapositivas.html — Diapositivas de respaldo del envío (kit C8): 7 diapositivas de 1280 × 720 px, en inglés.
+     Contenido: docs/pitch/diapositivas.md. Portada: proyecto, equipo, reto y sede (guía de envío de Space Apps).
+     ESTE ARCHIVO ES UNA PLANTILLA SIN CIFRAS: cada [data-cifra] y [data-texto] lo llena tests/e2e/diapositivas_pdf.mjs con
+     web/data/*.json (y web/reglas.js) en el momento de generar el PDF; la lista de pruebas la arma con web/data/pruebas.json.
+     Las imágenes de docs/pitch/capturas/ las toma el mismo script de la página real. Sin logotipos de la NASA ni
+     imágenes generadas con IA. Regenerar: node tests/e2e/diapositivas_pdf.mjs -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ROOT – From Dam to Root · backup slides</title>
+  <style>
+    /* Tamaño de cada diapositiva = tamaño de la hoja del PDF. */
+    @page { size: 1280px 720px; margin: 0; }
+    :root {
+      --tinta: #14202E;        /* texto principal */
+      --suave: #4A5563;        /* texto secundario */
+      --azul: #1F6FB2;         /* color de la página (theme-color) */
+      --azul-osc: #174F80;
+      --fondo: #FBF8F3;        /* papel cálido, como la página */
+      --tarjeta: #FFFFFF;
+      --linea: #DDD5C8;
+      --rojo: #B3261E;
+      --ambar: #8A5A00;
+      --verde: #2E6B1F;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #DAD4CA; }
+    body {
+      font-family: "Atkinson Hyperlegible", Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: var(--tinta);
+      counter-reset: diapositiva;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .diapositiva {
+      counter-increment: diapositiva;
+      position: relative;
+      width: 1280px; height: 720px;
+      overflow: hidden;
+      background: var(--fondo);
+      padding: 44px 56px 64px;
+      page-break-after: always; break-after: page;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      row-gap: 22px;
+    }
+    .diapositiva:last-child { page-break-after: auto; break-after: auto; }
+    @media screen { .diapositiva { margin: 24px auto; box-shadow: 0 4px 18px rgba(0,0,0,.18); } }
+
+    /* Encabezado y pie */
+    .tema { margin: 0 0 6px; font-size: 17px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--azul); }
+    h1, h2 { margin: 0; line-height: 1.12; }
+    h2 { font-size: 40px; font-weight: 800; }
+    .pie {
+      position: absolute; left: 56px; right: 56px; bottom: 22px;
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-size: 15px; color: var(--suave); border-top: 1px solid var(--linea); padding-top: 10px;
+    }
+    .pie::after { content: counter(diapositiva); font-weight: 700; color: var(--tinta); }
+
+    /* Cuerpo en dos columnas: texto y captura */
+    .cuerpo { display: grid; grid-template-columns: 1fr 1.25fr; column-gap: 36px; min-height: 0; }
+    .cuerpo.ancha { grid-template-columns: 1fr 1.55fr; }
+    .cuerpo.angosta { grid-template-columns: 1.35fr 1fr; }
+    /* Apilada: una fila de datos arriba y la captura completa debajo, a todo lo ancho. */
+    .apilada { display: grid; grid-template-rows: auto 1fr; row-gap: 14px; min-height: 0; }
+    .fila-datos { display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 18px; align-items: start; }
+    .fila-datos .idea { font-size: 24px; }
+    .fila-datos .dato { font-size: 18px; line-height: 1.35; }
+    .fila-datos .dato strong { font-size: 22px; }
+    .texto { display: flex; flex-direction: column; gap: 14px; font-size: 22px; line-height: 1.35; min-height: 0; }
+    .texto p { margin: 0; }
+    .texto ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 10px; }
+    .texto li::marker { color: var(--azul); }
+    .idea { font-size: 26px; font-weight: 700; line-height: 1.25; }
+    .dato {
+      background: var(--tarjeta); border: 1px solid var(--linea); border-left: 6px solid var(--azul);
+      border-radius: 8px; padding: 12px 16px; font-size: 20px;
+    }
+    .dato strong { font-size: 24px; }
+    .fuente { font-size: 15px; color: var(--suave); line-height: 1.35; }
+    .etiqueta { font-size: .85em; color: var(--suave); white-space: nowrap; }
+
+    /* Capturas reales de la página */
+    /* La imagen ocupa el alto que deja el pie de foto (flex) y se recorta desde arriba a la izquierda (cover). */
+    figure { margin: 0; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+    figure img {
+      display: block; flex: 1 1 0; width: 100%; min-height: 0; object-fit: cover; object-position: top left;
+      border: 1px solid #BFB6A8; border-radius: 10px; box-shadow: 0 6px 20px rgba(20, 32, 46, .16); background: #fff;
+    }
+    figure.contener img { object-fit: contain; object-position: center top; background: transparent; border: 0; box-shadow: none; border-radius: 0;
+      filter: drop-shadow(0 4px 14px rgba(20, 32, 46, .22)); }
+    figure.derecha img { object-position: top right; } /* lo importante de la captura está a la derecha (el panel) */
+    figure.telefono { align-items: center; }
+    figure.telefono img { width: 400px; object-position: top center; border-radius: 22px; border: 8px solid #20262E; }
+    figcaption { font-size: 14px; color: var(--suave); }
+
+    /* Portada */
+    .portada { grid-template-rows: 1fr; padding: 0; }
+    .portada .cuerpo { grid-template-columns: 1fr 1.1fr; column-gap: 0; height: 720px; }
+    .portada .texto { padding: 64px 40px 72px 64px; justify-content: center; gap: 22px; }
+    .portada h1 { font-size: 88px; font-weight: 800; letter-spacing: -.01em; color: var(--azul-osc); }
+    .portada h1 span { display: block; font-size: 38px; font-weight: 600; letter-spacing: 0; color: var(--tinta); margin-top: 6px; }
+    .portada .lema { font-size: 30px; font-weight: 700; line-height: 1.25; }
+    .portada dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-size: 20px; }
+    .portada dt { font-weight: 700; color: var(--suave); }
+    .portada dd { margin: 0; }
+    .portada figure { height: 720px; }
+    .portada figure img { border-radius: 0; border: 0; box-shadow: none; object-position: 30% 60%; }
+    .portada .pie { left: 64px; right: auto; width: calc(47.6% - 104px); }
+    .marcador { background: #FFF3C4; padding: 0 6px; border-radius: 4px; }
+
+    /* Pruebas a la vista (lista armada con pruebas.json) */
+    .pruebas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+    .pruebas li { background: var(--tarjeta); border: 1px solid var(--linea); border-radius: 8px; padding: 9px 14px; font-size: 17px; line-height: 1.3; }
+    .pruebas .cabeza { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; font-weight: 700; font-size: 18px; }
+    .insignia { flex: none; font-size: 14px; font-weight: 700; border-radius: 999px; padding: 2px 10px; border: 2px solid currentColor; white-space: nowrap; }
+    .insignia[data-estado="failed"] { color: var(--rojo); }
+    .insignia[data-estado="partial"] { color: var(--ambar); }
+    .insignia[data-estado="passed"] { color: var(--verde); }
+    .insignia[data-estado="not run"] { color: var(--suave); border-style: dashed; }
+    .pruebas .detalle { color: var(--tinta); margin-top: 2px; }
+    .pruebas .no-corrio { color: var(--suave); font-size: 15px; }
+
+    /* Cierre */
+    .vision { border: 2px dashed var(--azul); border-radius: 10px; padding: 10px 14px; font-size: 20px; }
+    .vision b { color: var(--azul-osc); }
+    .ligas { font-size: 16px; color: var(--suave); line-height: 1.5; }
+    .ligas b { color: var(--tinta); }
+    .aviso { font-size: 24px; font-weight: 700; color: var(--azul-osc); }
+    .flujo { font-size: 24px; font-weight: 700; letter-spacing: .01em; }
+  </style>
+</head>
+<body>
+
+  <!-- 1 · Portada: nombre, lema, equipo, reto y sede -->
+  <section class="diapositiva portada" id="d1">
+    <div class="cuerpo">
+      <div class="texto">
+        <h1>ROOT<span>From Dam to Root</span></h1>
+        <p class="lema">Before you plant, see the water you are committing.</p>
+        <dl>
+          <dt>Team</dt><dd>Orbital Farming</dd>
+          <dt>Members</dt><dd><span class="marcador">[INTEGRANTES]</span></dd>
+          <dt>Challenge</dt><dd>Field Shift: Adapting Farms with NASA Data</dd>
+          <dt>Local event</dt><dd>Chihuahua, Mexico · NASA Space Apps Challenge</dd>
+        </dl>
+      </div>
+      <figure><img src="capturas/portada_gemelo3d.png" alt="ROOT web page: three-dimensional twin of the Delicias – Saucillo pilot area with one water column per field"></figure>
+    </div>
+    <footer class="pie"><span>ROOT – From Dam to Root · Orbital Farming</span></footer>
+  </section>
+
+  <!-- 2 · El problema -->
+  <section class="diapositiva" id="d2">
+    <header>
+      <p class="tema">The problem</p>
+      <h2><span data-cifra="s2.anio"></span>: the district received no dam water</h2>
+    </header>
+    <!-- Apilada: la captura es ancha (indicador, vista 3D y línea de tiempo) y va completa, debajo del texto. -->
+    <div class="apilada">
+      <div class="fila-datos">
+        <p class="idea">Annual crops could be skipped. Orchards and alfalfa still needed water.</p>
+        <p class="dato"><span data-texto="s2.marca"></span>: <strong data-cifra="s2.dotacion"></strong> thousand m³/ha, <span data-texto="s2.marca_nota"></span> <span class="etiqueta" data-texto="s2.marca_etiqueta"></span></p>
+        <p class="dato">At that allocation, perennial crops alone ask for <strong>at least <span data-cifra="s2.comprometida"></span></strong> of it (likely range <span data-cifra="s2.rango"></span>) in <span data-texto="s2.zona"></span>.</p>
+      </div>
+      <figure class="contener">
+        <img src="capturas/problema_anio_sin_presa.png" alt="ROOT web page: the timeline stopped at the year without dam water, the 3D view and the committed-water indicator">
+        <figcaption>The page, with the timeline at the year without dam water. Sources — the year: <span data-texto="s2.destacado_fuente"></span> <span data-texto="s2.destacado_etiqueta"></span>; the allocation: <span data-texto="s2.marca_fuente"></span>.</figcaption>
+      </figure>
+    </div>
+    <footer class="pie"><span>ROOT – From Dam to Root · Orbital Farming</span></footer>
+  </section>
+
+  <!-- 3 · El plazo del agua -->
+  <section class="diapositiva" id="d3">
+    <header>
+      <p class="tema">The water term</p>
+      <h2>Every crop is a water commitment with a term</h2>
+    </header>
+    <div class="cuerpo ancha">
+      <div class="texto">
+        <p class="idea">Three answers per option, field by field:</p>
+        <ul>
+          <li>How much water per year</li>
+          <li>For how many years</li>
+          <li>How many hectares the allocation covers</li>
+        </ul>
+        <p class="dato">Field <span data-texto="s3.id"></span>, <span data-texto="s3.cultivo"></span>, allocation «<span data-texto="s3.marca"></span>» (<span data-cifra="s3.dotacion"></span> thousand m³/ha): needs <strong data-cifra="s3.lamina"></strong> thousand m³/ha per year, commits water for <span data-cifra="s3.plazo"></span> years, enough for <strong data-cifra="s3.hectareas"></strong> of <span data-cifra="s3.area"></span> hectares.</p>
+        <p class="fuente">ROOT shows every option side by side and does not mark one as the best.</p>
+      </div>
+      <figure>
+        <img src="capturas/ficha_alfalfa_tarjetas.png" alt="ROOT field sheet: current rotation and alternatives, one card per option">
+        <figcaption>The field sheet: the current rotation and its alternatives.</figcaption>
+      </figure>
+    </div>
+    <footer class="pie"><span>ROOT – From Dam to Root · Orbital Farming</span></footer>
+  </section>
+
+  <!-- 4 · La gota -->
+  <section class="diapositiva" id="d4">
+    <header>
+      <p class="tema">Follow the drop</p>
+      <h2>Follow the drop: count what is consumed</h2>
+    </header>
+    <div class="cuerpo ancha">
+      <div class="texto">
+        <p class="flujo">Dam → canal → field → crop → aquifer</p>
+        <p class="dato">Field <span data-texto="s4.id"></span>, current rotation, per year: <strong data-cifra="s4.presa"></strong> leave the dam; <strong data-cifra="s4.cultivo"></strong> are consumed by the crop; <strong data-cifra="s4.acuifero"></strong> return to the aquifer.</p>
+        <p class="idea">More efficient irrigation reduces dam withdrawals. It can also reduce aquifer recharge.</p>
+        <p class="fuente">We count the water consumed, not just the water withdrawn (Grafton et al., Science 2018).</p>
+      </div>
+      <figure>
+        <img src="capturas/ficha_alfalfa_gota.png" alt="ROOT field sheet: Follow the drop diagram from La Boquilla dam to the crop and the aquifer">
+        <figcaption>«Follow the drop» in the field sheet.</figcaption>
+      </figure>
+    </div>
+    <footer class="pie"><span>ROOT – From Dam to Root · Orbital Farming</span></footer>
+  </section>
+
+  <!-- 5 · Gemelo digital con datos abiertos de la NASA -->
+  <section class="diapositiva" id="d5">
+    <header>
+      <p class="tema">How it works, with NASA data</p>
+      <h2>A digital twin of <span data-cifra="s5.zonas"></span> pilot areas</h2>
+    </header>
+    <div class="cuerpo ancha">
+      <div class="texto">
+        <ul>
+          <li><b>Replica:</b> <span data-cifra="s5.parcelas"></span> estimated fields and their terrain (NASADEM)</li>
+          <li><b>Observed:</b> field memory and greenness, <span data-cifra="s5.anios"></span> (NASA HLS)</li>
+          <li><b>Model:</b> crop water need (FAO-56 with NASA POWER)</li>
+          <li><b>Scenarios:</b> allocation, rain <span data-cifra="s5.lluvia"></span>, a storm (GPM IMERG)</li>
+        </ul>
+        <p class="dato">No field sensors. No real-time data. Updated on each rebuild from satellite and climate data.</p>
+      </div>
+      <figure class="derecha">
+        <img src="capturas/gemelo_estado.png" alt="ROOT web page: 3D twin view and the Twin status card">
+        <figcaption>3D twin view and the «Twin status» card.</figcaption>
+      </figure>
+    </div>
+    <footer class="pie"><span>ROOT – From Dam to Root · Orbital Farming</span></footer>
+  </section>
+
+  <!-- 6 · Pruebas a la vista -->
+  <section class="diapositiva" id="d6">
+    <header>
+      <p class="tema">Tests in sight</p>
+      <h2><span data-texto="s6.cuantas"></span> tests, published whatever the result</h2>
+    </header>
+    <div class="cuerpo angosta">
+      <ol class="pruebas" id="lista-pruebas"></ol>
+      <figure>
+        <img src="capturas/pruebas.png" alt="ROOT About and Data: Tests in sight, with each test and its status">
+        <figcaption>Criteria declared before the results. Unfavorable results get the same space.</figcaption>
+      </figure>
+    </div>
+    <footer class="pie"><span>ROOT – From Dam to Root · Orbital Farming</span></footer>
+  </section>
+
+  <!-- 7 · Cierre -->
+  <section class="diapositiva" id="d7">
+    <header>
+      <p class="tema">Closing</p>
+      <h2>The farmer decides</h2>
+    </header>
+    <div class="cuerpo angosta">
+      <div class="texto">
+        <p class="aviso">Supports, never replaces, the judgment of farmers and local experts.</p>
+        <p>It does not allocate, sell or trade water. It does not forecast the dam.</p>
+        <p><b>We ask:</b> a district technician to check field efficiency; farmers to correct their fields.</p>
+        <p class="vision"><b>Next phase / vision:</b> conversational agent · field sensors · optimizer</p>
+        <p class="ligas"><b>Page:</b> <span data-texto="s7.pagina"></span><br><b>Repository:</b> <span data-texto="s7.repo"></span><br><b>Video:</b> <span data-texto="s7.video"></span></p>
+      </div>
+      <figure class="telefono">
+        <img src="capturas/telefono_whatsapp.png" alt="ROOT on a phone: the WhatsApp message preview for the farmer, in Spanish">
+        <figcaption>The message to the farmer, in Spanish (a preview: nothing is sent).</figcaption>
+      </figure>
+    </div>
+    <footer class="pie"><span>ROOT – From Dam to Root · Orbital Farming</span></footer>
+  </section>
+
+</body>
+</html>

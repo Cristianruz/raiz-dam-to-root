@@ -5,36 +5,12 @@
 
 **Qué manda:** si esta guía y el kit dicen cosas distintas, mandan las decisiones del 14-nov (§6) y el validador del repo (`motor/esquemas.py` y `motor/ensamblar.py`). Después, en orden: S9, el kit v4 y S8.
 
-## Estado a las 10:30 (sábado 14-nov)
+## Estado al domingo 15-nov
 
-**Lo que ya está hecho.** Lo hizo la «sesión de datos» (otra sesión de Claude en el Chrome de Cristian, rama `datos-satelite`, scripts `datos/colab/*.py`) y el integrador lo validó. **No se rehace: se usa.** Los archivos están en la carpeta de Drive `Raiz_entregas`.
-
-| Pieza | Archivos en `Raiz_entregas` | Qué traen |
-|---|---|---|
-| B1 · parcelas | `parcelas_base.geojson` | 338 campos de Fields of The World, 5,794 ha, `id` de `P0001` en adelante, de norte a sur. Las 3 protagonistas aún no están marcadas: las propone P2 |
-| A1 · clima | `eto_diaria.csv` | NASA POWER y ETo FAO-56, del 1984-01-01 al 2026-11-09 |
-| A3 y A3-M · satélite | `hls_mensual_parcelas.csv` (bandas `ndvi`, `lswi` y `bsi`), `suelo_desnudo.csv`, `memoria_parcelas.csv`, `memoria_resumen.csv` | Año agrícola 2026 y memoria 2016–2026 por parcela |
-| A4 · cultivos, solo reglas | `cultivos_parcelas.csv` | Reglas fenológicas: `acuerdo_metodos` = «1/1 (reglas)» y `prob_max` vacío; además `edad_perenne_anios`, `estado_plazo` y `grupo_fenologico`. Deja **218 de 338 campos abstenidos**: 132 son anuales de verano que las reglas no separan |
-| A5 · demanda | `rotaciones.json`, `demanda_cultivos.csv` | Lámina por rotación y por cultivo (FAO-56 + POWER, Monte Carlo) |
-| A9 · relieve | `relieve_parcelas.csv`, `relieve_rutas.geojson`, `relieve_meta.json`, `nasadem_zona_piloto.tif` | Pendiente, rutas de escurrimiento y tormenta de referencia |
-| Rásteres de Earth Engine | `hls_mensual_2025_10_a_2026_09.tif`, `hls_reflect_2025_10_a_2026_09.tif` y los `hls_ndvi_memoria_<año>.tif` (12 rásteres en total) | Insumos para quien los necesite (P2 en el Random Forest). Earth Engine lo corre **solo** la sesión de datos |
-
-**La web** ya muestra en local los 338 campos reales. Se publica cuando estén los arreglos que faltan.
-
-**Lo que falta, por rol:**
-
-| Rol | Pendiente | Su guía |
-|---|---|---|
-| P2 | A4.2: Random Forest y comparación con las reglas → `cultivos_parcelas.csv` con `acuerdo_metodos` «2/2» o «1/2» y `prob_max`. Proponer las 3 protagonistas, revisadas en color verdadero | [P2](P2_hls_memoria.md) |
-| P3 | A4.1: `etiquetas_unidas.csv` (**urgente**: P2 la necesita para entrenar). A4.3: Olofsson. A7: H3 | [P3](P3_etiquetas_h3.md) |
-| P4 | A2: `heladas.json`. A6: back-test H1. A8: queda «not run» por ahora. Llevar a las mentorías la pregunta de la lámina frente a INIFAP | [P4](P4_clima_demanda.md) |
-| P5 | B2: `dotaciones.json`. B3: `opciones_b3.json`. `propuesta_supuestos.md`. `cifras.csv` | [P5](P5_dotaciones_rotaciones.md) |
-| P6 | Textos (`textos_ui.md`, `plantillas_explicaciones.md`, `whatsapp_plantilla.md`), mentorías, página C6, video, People's Choice y #MejorMeme | [P6](P6_textos_pagina.md) |
-
-**Próximos hitos** (kit §0.1, regla 10; S10 §7):
-- **14:30:** las 3 pantallas navegables.
-- **16:00 y 17:00:** mentorías obligatorias. Faltar descalifica.
-- **20:30:** una parcela real completa, publicada.
+- La página pública, https://cristianruz.github.io/raiz-dam-to-root/, publica `main` con el PR #4 ya fusionado. Muestra datos reales de dos zonas piloto: 1,239 parcelas estimadas, 458 clasificadas y 781 sin clasificar (`web/data/cubo.json` → `zona.conteos`).
+- Ya están en la página: el gemelo digital (vista 3D, línea de tiempo, tarjeta «Twin status», app instalable y contexto regional), las opciones oficiales de rotación (`data/processed/opciones_b3.json`), el suelo, GEDI, ECOSTRESS, GAEZ y el escenario de goteo con eficiencias indicativas de la FAO.
+- Las protagonistas son P0757, P0632 y L0175 (`web/data/parcelas.geojson` → `protagonista`).
+- **Lo que falta y quién lo hace está en [`docs/reparto_faltantes.md`](../reparto_faltantes.md).** Las tareas por rol de las secciones 3 y siguientes son las del sábado: lo ya entregado no se rehace.
 
 ## 1. Qué es ROOT (S9 §1)
 
@@ -53,13 +29,14 @@
 | **16:00 y 17:00** | **Mentorías obligatorias.** Faltar descalifica. Preguntas clave: dónde se mide el millar y qué eficiencia parcelaria es realista (vea [P4](P4_clima_demanda.md#pregunta-para-las-mentorías-de-las-1600-y-las-1700)) | Cristian y uno más; P6 hace la prueba de pasillo |
 | 18:00 | Prueba de usabilidad | P6 |
 | **20:30** | **HITO: una parcela completa con datos reales, publicada.** Si no se logra, se aplica R3 (orden de corte) | Todos |
-| 21:00 | Cierre de puertas. Quien hace el turno de noche se queda dentro desde antes de las 21:00; los demás vuelven a las 7:00 | — |
+| 21:00 | Cierre de puertas de la sede | — |
+| 1:00–5:30 | Descanso del integrador | — |
 
 **Domingo 15:**
 
 | Hora | Qué pasa |
 |---|---|
-| 7:00 | Regreso. Una tarea C solo si todo lo A y lo B está listo |
+| 7:00 | Inicio del domingo. Una tarea C solo si todo lo A y lo B está listo |
 | **8:00** | **Funciones congeladas** |
 | 9:00 | Verificación final de inscripción (todos) |
 | **11:00** | **Código congelado** |
@@ -77,7 +54,7 @@
 | Persona | Responsable de (S9 §10) | Piezas que le quedan | Su guía |
 |---|---|---|---|
 | Cristian | Repositorio, motor, web, pruebas automáticas y envío | Integra las entregas (K-ENS), motor (B4, X3.1), web, explicaciones (C3) y pruebas (K-TEST). Es el único que hace commits | — |
-| Sesión de datos (Claude en el Chrome de Cristian, rama `datos-satelite`) | Earth Engine y todo lo que necesita red | Ya entregó B1, A1, A3, A3-M, A4 (reglas), A5 y A9. Es la **única dueña** de `rotaciones.json` y de `supuestos.json`. Si hace falta algo de Earth Engine, se le pide a Cristian | — |
+| Sesión de datos (Claude en el navegador del integrador, rama `datos-satelite`) | Earth Engine y todo lo que necesita red | Ya entregó B1, A1, A3, A3-M, A4 (reglas), A5 y A9. Es la **única dueña** de `rotaciones.json` y de `supuestos.json`. Si hace falta algo de Earth Engine, se le pide a Cristian | — |
 | P2 | Series de HLS de 2026 y memoria | A4.2 (Random Forest, con P3) y las 3 protagonistas | [P2_hls_memoria.md](P2_hls_memoria.md) |
 | P3 | Etiquetas, exactitud del mapa y H3 | A4.1, A4.3 (Olofsson) y A7 (H3) | [P3_etiquetas_h3.md](P3_etiquetas_h3.md) |
 | P4 | Clima, demanda y back-test H1 | A2, A6 (H1) y A8 (por ahora «not run»); pregunta para las mentorías | [P4_clima_demanda.md](P4_clima_demanda.md) |

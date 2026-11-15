@@ -85,6 +85,7 @@ Si una tarea no cabe en un bloque corto de trabajo, se divide antes de lanzarla.
 | cualquier código | `code-reviewer` (no tiene Bash: hay que pasarle el diff) |
 | manejo de errores (ensamblador, carga de datos en la web) | además, `silent-failure-hunter` en solo lectura |
 | pruebas (K-TEST, `web/reglas.js`, La gota) | además, `pr-test-analyzer` en solo lectura |
+| comentarios, docstrings o documentación en el diff | además, `comment-analyzer` en solo lectura (revisor de comentarios y documentación; no declara `tools`) |
 
 **Dos veredictos:**
 1. **Cumplimiento del kit, «nada más, nada menos»:** CUMPLE / NO CUMPLE / NO VERIFICABLE, con lo que **falta**, lo que **sobra** (funciones no pedidas o fuera del alcance de S9 §8) y lo **mal entendido**.
@@ -152,9 +153,9 @@ Una línea por evento, con la hora local de Chihuahua:
 **Cuándo:** antes de Q1 (dom 8:00–11:00) y antes de cada pull request a `main`. Base: `git merge-base main HEAD`.
 
 **Pasos:**
-1. **Revisores en paralelo**, cada uno con contexto nuevo y en solo lectura:
+1. **Revisores en paralelo**, cada uno con contexto nuevo y en solo lectura (el método de despacho: skill `dispatching-parallel-agents`: un agente por dominio independiente, todos en la misma respuesta):
    - `revisor-contrato`, `revisor-cifras` y `code-reviewer`;
-   - `silent-failure-hunter` y `pr-test-analyzer`;
+   - `silent-failure-hunter`, `pr-test-analyzer` y `comment-analyzer` (comentarios y documentación);
    - un revisor de alcance contra S9 §8 (núcleo, segunda línea, fuera) y §11 (límites que se declaran).
    - Reciben también la lista de «MENOR (diferido)» y de «DECISIÓN:» de la bitácora.
 2. **Consolidación:** el integrador quita duplicados.

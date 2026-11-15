@@ -18,8 +18,7 @@
 - Una idea por diapositiva. El texto es poco: lo demás lo dice la captura.
 - Las capturas salen de `tests/e2e/capturas/` (las genera `node tests/e2e/web_smoke.mjs`) o de la página.
 - **Las cifras del texto deben ser las mismas que se ven en la captura.** Las capturas actuales de la ficha se tomaron con la marca «Normal year»; si se vuelven a tomar con otra marca, cambie el texto.
-- «[SI ESTÁ CONECTADO]» marca la captura que depende del gemelo; debajo va su «[ALTERNATIVA]».
-- «[SI EL GOTEO ESTÁ CONECTADO]» y «[SI EL GOTEO NO ESTÁ]» marcan lo que cambia según si el escenario de goteo ya está en «Follow the drop». Se dice una de las dos.
+- Hoy todas las piezas del gemelo y el escenario de goteo están en la página (`web/app.js`; `web/data/cubo.json` → `meta.goteo.disponible`: true): use las capturas y frases «[SI ESTÁ CONECTADO]» y «[SI EL GOTEO ESTÁ CONECTADO]». Sus alternativas quedan de respaldo.
 - Liga del PDF: [LINK: pendiente — responsable de presentación y pitch].
 
 ## 3. Las siete diapositivas
@@ -55,7 +54,7 @@
 | Text on slide | How much water per year · For how many years · How many hectares the allocation covers |
 | Capture | `tests/e2e/capturas/escritorio_ficha_tarjetas.png` (Field P0757, alfalfa, marca «Normal year») |
 | Cifra y fuente | Las de la captura: lámina de 28.4 millares/ha y «Enough for 2.7 of 7.95 hectares» con 9.5 millares/ha (`web/data/cubo.json` → `parcelas.P0757`; cálculo de `web/reglas.js`) |
-| Nota del orador | La alfalfa obliga de 3 a 4 años [P]; el nogal se calcula a 10 años [S]. Esta parcela tiene tres años: su plazo está por vencer y es el momento de comparar. ROOT no marca una opción como la mejor. Las alternativas son provisionales (`data/opciones_b4.json`). |
+| Nota del orador | La alfalfa obliga de 3 a 4 años [P]; el nogal se calcula a 10 años [S]. Esta parcela tiene tres años: su plazo está por vencer y es el momento de comparar. ROOT no marca una opción como la mejor. Las alternativas salen de la tabla oficial de rotaciones (`data/processed/opciones_b3.json`, maestro §5.2); donde faltan, van propuestas del equipo rotuladas [S]. |
 
 ### Slide 4 · Follow the drop
 
@@ -77,7 +76,7 @@
 | Text on slide | Replica: 1,239 estimated fields and terrain (NASADEM) · Observed: greenness 2016–2026 (HLS) · Model: crop water need (FAO-56 with NASA POWER) · Scenarios: allocation, rain −20 %, a storm (GPM IMERG) · No field sensors. No real-time data. |
 | Capture | **[SI ESTÁ CONECTADO]** captura nueva de la vista 3D con la tarjeta «Twin status». **[ALTERNATIVA]** `tests/e2e/capturas/escritorio_relieve_tormenta.png` |
 | Cifra y fuente | 1,239 parcelas (`web/data/cubo.json` → `zona.conteos.total`). Partes del gemelo y lo que no es: `docs/decisiones/2026-11-14_gemelo_digital.md`; `README.md`, «Summary» |
-| Nota del orador | El gemelo se actualiza en cada reconstrucción con datos de satélite y de clima. **[SI ESTÁ CONECTADO]** mencione el contexto regional: SMAP, MODIS, GRACE, GLDAS, NLDAS y GEDI. Si no está conectado, diga que esos datos ya se entregaron y aún no se ven en la página. |
+| Nota del orador | El gemelo se actualiza en cada reconstrucción con datos de satélite y de clima. Mencione el contexto regional (SMAP, MODIS, GRACE, GLDAS, NLDAS y GAEZ) y la evidencia por parcela (GEDI y ECOSTRESS): las dos ya están en la página. |
 
 ### Slide 6 · Tests in sight
 
@@ -85,10 +84,10 @@
 |---|---|
 | Title | Five tests, published whatever the result |
 | One idea | Unfavorable results are shown with the same visibility |
-| Text on slide | Back-test 2026 (H1): does not meet its preregistered criterion; follow-up shape test (H1-b): does not hold either · 2025 natural experiment (H3): not supported · Crop map: 781 of 1,239 fields not classified · Figure checker: 30 of 30 cases correct, 0 numbers altered (tested on templates) · ET contrast: +53 % against SSEBop, a regional comparison |
+| Text on slide | Back-test 2026 (H1): does not meet its criterion, declared before the analysis; follow-up shape test (H1-b): does not hold either · 2025 natural experiment (H3): not supported · Crop map: 781 of 1,239 fields not classified · Figure checker: 30 of 30 cases correct, 0 numbers altered (tested on templates) · ET contrast: +53 % against SSEBop, a regional comparison |
 | Capture | Captura nueva de «About & Data» → «Tests in sight» (no está en `tests/e2e/capturas/`: `escritorio_acerca.png` muestra la parte de «NASA data»). Como apoyo, `docs/h1_backtest.png` |
-| Cifra y fuente | H1 (`docs/resultado_H1.md`). H1-b, sin cifra en la diapositiva: el modelo gana en 6 de 26 años, de 1999 a 2024 (`docs/resultado_H1b.md`). H3 (`docs/resultado_H3.md`). 781 de 1,239 (`web/data/pruebas.json`). 30 de 30 y 0 de 71 (`docs/figuras/llm_eval.csv`). +53 %: 1,139.3 mm frente a 746.3 mm (`docs/resultado_A8.md`) |
-| Nota del orador | Los criterios se declararon antes de ver los resultados (S9 §6). Lo que no se corrió dice «not run»: Random Forest, exactitud del mapa, WaPOR y el verificador sobre texto de un modelo de lenguaje. El verificador se probó con plantillas. Diga por qué esto da confianza: se sabe hacia dónde falla el modelo; calcula más agua de la que el distrito usa. H1-b es una prueba posterior de cómo se reparte el agua dentro del ciclo en los años anteriores: tampoco se sostiene, y no cambia H1. No presente la variante «anclada» de 2026 como punto a favor: fue un año, no una regla. La captura de «Tests in sight» no muestra H1-b; está en el `README.md`. |
+| Cifra y fuente | H1 (`docs/resultado_H1.md`). H1-b, sin cifra en la diapositiva: el modelo gana en 6 de 26 años, de 1999 a 2024 (`docs/resultado_H1b.md`). H3 (`docs/resultado_H3.md`). 781 de 1,239 (`web/data/pruebas.json`). 30 de 30 y 0 de 71 (`docs/figuras/llm_eval.csv`). +53 %: 1,139.5 mm frente a 746.3 mm, con el cereal sembrado el 1-dic (`data/processed/et_contraste.csv`; `docs/resultado_A8.md`) |
+| Nota del orador | Los criterios se declararon antes de ver los resultados (S9 §6). Lo que no se corrió dice «not run»: Random Forest, exactitud del mapa, WaPOR y el verificador sobre texto de un modelo de lenguaje. El verificador se probó con plantillas. Diga por qué esto da confianza: se sabe hacia dónde falla el modelo; calcula más agua de la que el distrito usa. H1-b es una prueba posterior de cómo se reparte el agua dentro del ciclo en los años anteriores: tampoco se sostiene, y no cambia H1. No presente la variante «anclada» de 2026 como punto a favor: fue un año, no una regla. «Tests in sight» muestra H1-b junto a H1 (`web/data/pruebas.json`). |
 
 ### Slide 7 · Closing
 
@@ -99,7 +98,7 @@
 | Text on slide | Supports, never replaces, the judgment of farmers and local experts. · It does not allocate, sell or trade water. It does not forecast the dam. · We ask: a district technician to check field efficiency; farmers to correct their fields. · Next phase / vision: conversational agent · field sensors · optimizer |
 | Capture | `tests/e2e/capturas/telefono_ficha_whatsapp.png` (mensaje al agricultor, en español) |
 | Cifra y fuente | Ninguna. Límites: S9 §11. Fuera del alcance: S9 §8 |
-| Nota del orador | Cierre con la petición: un técnico de módulo, agricultores que revisen su parcela y que el jurado abra la página. Ligas en la diapositiva: página [LINK: pendiente — integrador], repositorio [LINK: pendiente — integrador] y video [LINK: pendiente — responsable de video (P6)]. |
+| Nota del orador | Cierre con la petición: un técnico de módulo, agricultores que revisen su parcela y que el jurado abra la página. Ligas en la diapositiva: página https://cristianruz.github.io/raiz-dam-to-root/, repositorio https://github.com/Cristianruz/raiz-dam-to-root y video [LINK: pendiente — responsable de video (P6)]. |
 
 ## 4. Lista de comprobación
 
@@ -116,6 +115,6 @@
 
 - Tomar las capturas nuevas: vista 3D, línea de tiempo en 2025 y «Tests in sight».
 - Decidir si las capturas de la ficha se quedan con la marca «Normal year» o se vuelven a tomar con «Like 2026», como en la exposición. Con «Like 2026» la página mostraría «Enough for 1 of 7.95 hectares» (`web/reglas.js` con `cubo.json`).
-- **Goteo (diapositiva 4).** La eficiencia del goteo ya tiene fuente (`data/processed/supuestos.json` → `ea_goteo`, valor indicativo de la FAO) y, desde las 22:46 del 14-nov, `web/data/cubo.json` trae el escenario, con el motor en revisión. La captura actual (`escritorio_ficha_gota.png`, de las 21:09) es anterior: muestra la nota «Drip scenario not available yet». Vuelva a tomarla de la página final. Si se toma con el botón «What if this field switches to drip?» pulsado, las cifras del texto deben ser las de esa captura. `README.md` y `LIMITATIONS.md` todavía dicen que no hay escenario de goteo: quedaron atrasados y los corrige el integrador.
-- Las diapositivas usan a P0757. Si se agrega una captura de la parcela «libre», debe ser de P0632 (`docs/decisiones/2026-11-14_opciones_b3.md` §2), no de P0244.
+- **Goteo (diapositiva 4).** La captura actual (`escritorio_ficha_gota.png`, de las 21:09 del 14-nov) es anterior al escenario de goteo: muestra la nota «Drip scenario not available yet». Vuelva a tomarla de la página final. Si se toma con el botón «What if this field switches to drip?» pulsado, las cifras del texto deben ser las de esa captura.
+- Las diapositivas usan a P0757. Si se agrega una captura de la parcela «libre», debe ser de P0632 (`web/data/parcelas.geojson` → `protagonista`).
 - Poner las ligas cuando existan.

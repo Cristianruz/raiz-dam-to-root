@@ -884,7 +884,7 @@ async function pruebaAcerca(page, peticiones, prefijo, telefono, captura) {
     const nasa = await page.locator("#acerca .acerca-tabla tbody tr[data-familia]").evaluateAll((xs) =>
       xs.map((x) => ({ id: x.dataset.familia, producto: x.querySelector('[data-etiqueta="Product"]')?.textContent ?? "", uso: x.querySelector('[data-etiqueta="What ROOT uses it for"]')?.textContent ?? "" })));
     check(`${prefijo}About & Data: «Product» sin la plataforma (Earth Engine) y usos sin «Input of kit piece»`,
-      nasa.every((r) => !/Earth Engine|proyecto/i.test(r.producto) && !/Input of kit piece/.test(r.uso)), JSON.stringify(nasa.filter((r) => /Earth Engine|proyecto/i.test(r.producto) || /Input of kit piece/.test(r.uso))).slice(0, 200));
+      nasa.every((r) => !/Earth Engine|proyecto|rasterizado/i.test(r.producto) && !/Input of kit piece/.test(r.uso)), JSON.stringify(nasa.filter((r) => /Earth Engine|proyecto|rasterizado/i.test(r.producto) || /Input of kit piece/.test(r.uso))).slice(0, 200));
     const fuentesManifest = (manifestWeb?.fuentes_de_origen ?? []).map((f) => String(f.fuente ?? ""));
     const esperadas = [["smap", /\bSMAP\b/], ["grace", /\bGRACE\b/], ["gldas", /\bGLDAS\b/], ["nldas", /\bNLDAS\b/], ["gedi", /\bGEDI L2A\b|LARSE\/GEDI/]].filter(([, re]) => fuentesManifest.some((t) => re.test(t))).map(([id]) => id);
     check(`${prefijo}About & Data: renglones de las series del reto que registra el manifest (${esperadas.join(", ") || "ninguna"})`,
@@ -1327,9 +1327,14 @@ async function pruebaGemelo3D(page, prefijo, telefono) {
     const locBoton = page.locator(".boton-localidad").first();
     if ((await locBoton.count()) && (await locBoton.isVisible())) {
       const antes = await gemelo3d(page);
+      // Sin animación (movimiento reducido): una animación de zoom con relieve deja peticiones de teselas canceladas
+      // a medio camino («requestfailed»), que no son errores de la página pero ensucian la cuenta de la consola.
+      const reducida = await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches);
+      await page.emulateMedia({ reducedMotion: "reduce" });
       await locBoton.click();
       await quieto(page);
       const tras = await gemelo3d(page);
+      await page.emulateMedia({ reducedMotion: reducida ? "reduce" : "no-preference" });
       check(`${prefijo}3D: «Show on map» de una localidad conserva la inclinación y el rumbo de la vista`,
         tras.activo && Math.abs(tras.pitch - antes.pitch) < 0.5 && Math.abs(tras.bearing - antes.bearing) < 0.5, `${antes.pitch}/${antes.bearing} → ${tras.pitch}/${tras.bearing}`);
       await boton.scrollIntoViewIfNeeded();

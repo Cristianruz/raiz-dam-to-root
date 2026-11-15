@@ -14,6 +14,11 @@ de una sola zona y los simulados sigan pasando:
 - cubo.json «localidades»: [{nombre, municipio, lat, lon, fuente}].
 - cubo.json parcelas.<id>.sin_opciones: motivo (código) de una parcela clasificada sin opciones.
 
+Revisión de dda5abb:
+- «sin_rotacion» exime del mínimo ACTUAL + 2 solo al nogal cuya rotación ACTUAL el catálogo de B3 declara
+  que no rota (opciones_catalogo.<rotación>.letra_maestro = LETRA_NO_ROTA), como hace motor/b4_cubo.py.
+- Una opción sin lámina neta (ET) lleva «gota» en null, y entonces también los dos goteos y tope_consumo.
+
 Opciones y filtros oficiales (decisión docs/decisiones/2026-11-14_opciones_b3.md), también opcional:
 - opciones[].filtros[]: además de «motivo» y «fuente» (kit §2.3), si trae «estado» es uno de
   ESTADOS_FILTRO; «pasa», si viene, concuerda con él (true = passes, false = warning, null = sin
@@ -40,7 +45,10 @@ CONTEOS = ("total", "libre", "por_vencer", "comprometida", "abstenida")
 # Parcela sin propiedad «zona» = zona sin sufijo (decisión 2026-11-14; igual que motor/b4_cubo.py).
 ZONA_SIN_SUFIJO = "delicias_saucillo"
 # Motivos (códigos) por los que una parcela clasificada puede quedar sin opciones (motor/b4_cubo.py).
-MOTIVOS_SIN_OPCIONES = {"sin_clima_zona"}
+# «sin_actual»: la opción ACTUAL no se pudo armar con los archivos de la zona.
+MOTIVOS_SIN_OPCIONES = {"sin_clima_zona", "sin_actual"}
+# Cultivo que no rota (maestro §5.2; decisión de opciones B3, §1): el único exento de ACTUAL + 2.
+CULTIVO_NO_ROTA, LETRA_NO_ROTA = "nogal", "nogal_no_rota"
 # Estados de un filtro de B3 (decisión del 14-nov) y el valor de «pasa» que corresponde a cada uno.
 ESTADOS_FILTRO = {"passes": True, "warning": False, "needs_local_check": None}
 
@@ -115,6 +123,7 @@ class Validador:
             self.error(d, "no hay features")
         ids = set()
         self.abstenidas = set()
+        self.cultivo_de = {}  # cultivo_actual de cada parcela (para la exención de «sin_rotacion»)
         for i, f in enumerate(feats):
             p = f.get("properties") or {}
             w = f"{d}[{p.get('id', i)}]"
@@ -144,8 +153,10 @@ class Validador:
                 self.error(w, "abstencion debe ser bool")
             elif p["abstencion"]:
                 self.abstenidas.add(pid)
-            elif p["abstencion"] and p.get("estado_plazo") is not None:
-                self.error(w, "parcela abstenida debe tener estado_plazo null")
+                # Comprobación aparte (antes era un «elif» que nunca se alcanzaba).
+                if p.get("estado_plazo") is not None:
+                    self.error(w, "parcela abstenida debe tener estado_plazo null")
+            self.cultivo_de[pid] = p.get("cultivo_actual")
             self.num(p.get("dias_suelo_desnudo_feb_abr"), f"{w}.dias_suelo_desnudo_feb_abr", 0, 90, nulo=True, entero=True)
             self.num(p.get("ndvi_ultimo_mes"), f"{w}.ndvi_ultimo_mes", -1, 1, nulo=True)
             mem = p.get("memoria")
@@ -365,6 +376,10 @@ class Validador:
                     self.error(w0, "sin_rotacion debe traer motivo y fuente")
                 elif [o.get("id") for o in ops] != ["ACTUAL"]:
                     self.error(w0, "con sin_rotacion la parcela lleva solo la opción ACTUAL")
+                if not self.no_rota(pid, ops, c):
+                    self.error(w0, f"sin_rotacion es del nogal que no rota (cultivo_actual = {CULTIVO_NO_ROTA} y "
+                                   f"opciones_catalogo.<rotación ACTUAL>.letra_maestro = {LETRA_NO_ROTA}); "
+                                   f"esta parcela no la tiene y pide ACTUAL + 2 alternativas")
             elif len(ops) < 3:
                 self.error(w0, f"mínimo ACTUAL + 2 alternativas; hay {len(ops)}")
             for o in ops:
@@ -410,6 +425,13 @@ class Validador:
                 if not o.get("preguntas_ref"):
                     self.error(w, "falta preguntas_ref")
                 llaves.add(o.get("preguntas_ref"))
+                if o.get("gota") is None:
+                    # Sin lámina neta (ET) no hay La gota (motor/b4_cubo.py lo avisa): sin ella tampoco hay goteo.
+                    con_goteo = [b for b in ("gota_goteo_con_tope", "gota_goteo_sin_tope", "tope_consumo")
+                                 if o.get(b) is not None]
+                    if con_goteo:
+                        self.error(w, f"gota en null pide también en null {', '.join(con_goteo)}")
+                    continue
                 for bloque in ("gota", "gota_goteo_con_tope", "gota_goteo_sin_tope"):
                     if bloque != "gota" and o.get(bloque) is None:
                         continue  # escenario de goteo no disponible (sin eficiencia de goteo con fuente)
@@ -429,6 +451,13 @@ class Validador:
                 if not isinstance(t.get("cumple_sin_tope"), bool):
                     self.error(w, "tope_consumo.cumple_sin_tope debe ser bool")
         return llaves
+
+    def no_rota(self, pid, ops, c):
+        """True si la parcela es nogal y el catálogo de B3 declara que su rotación ACTUAL no rota."""
+        if self.cultivo_de.get(pid) != CULTIVO_NO_ROTA:
+            return False
+        rot = next((o.get("rotacion") for o in ops if o.get("id") == "ACTUAL"), None)
+        return ((c.get("opciones_catalogo") or {}).get(rot) or {}).get("letra_maestro") == LETRA_NO_ROTA
 
     # --- §2.5 explicaciones.json -------------------------------------------
     def explicaciones(self, e, llaves):
