@@ -154,6 +154,40 @@ function fieldLabel(f) {
 function explorerLink(id) {
   return id ? `explorer.html#${encodeURIComponent(id)}` : "explorer.html";
 }
+// Todos los enlaces «Abrir el explorador» llevan la parcela elegida (el de «Acerca y datos» no es de una parcela).
+function enlacesAlExplorador() {
+  const destino = explorerLink(selected()?.properties.id);
+  document
+    .querySelectorAll('a[href^="explorer.html"]:not(.icon-button)')
+    .forEach((a) => a.setAttribute("href", destino));
+}
+
+// Zona, parcela, dotación y lluvia se conservan entre visitas de la misma sesión (ida y vuelta al explorador,
+// recarga). Si el navegador no deja usar sessionStorage (navegación privada), se sigue sin él.
+const LLAVE_ESTADO = "root.tablero.estado";
+function leerEstadoGuardado() {
+  try {
+    const guardado = JSON.parse(sessionStorage.getItem(LLAVE_ESTADO) ?? "null");
+    return guardado && typeof guardado === "object" ? guardado : {};
+  } catch {
+    return {};
+  }
+}
+function recordarEstado() {
+  try {
+    sessionStorage.setItem(
+      LLAVE_ESTADO,
+      JSON.stringify({
+        zona: state.zone,
+        parcela: state.field,
+        dotacion: state.allocation,
+        lluvia: state.rain,
+      }),
+    );
+  } catch {
+    // sin almacenamiento: el estado vale para esta visita
+  }
+}
 
 // Título, descripción y ruta de la vista en uso, y el título de la pestaña del navegador.
 function pintarCabecera() {
@@ -275,6 +309,7 @@ function texturaDe(clase) {
 }
 function fieldDetails() {
   const p = selected()?.properties;
+  enlacesAlExplorador();
   if (!p) {
     $("#field-detail").textContent = t("tablero.ficha.sin_parcelas");
     return;
@@ -318,7 +353,6 @@ function fieldDetails() {
         <div class="coverage">${T("tablero.ficha.cobertura")} <strong>${esc(coverage)}</strong><div class="progress"><div style="width:${ancho}%"></div></div></div>
         <p class="micro">${nota}</p>
         <a class="field-link" href="${esc(explorerLink(p.id))}">${T("tablero.abrir_explorador")} <span>↗</span></a>`;
-  $("#recommendation-link").href = explorerLink(p.id);
   asesor?.actualizar();
   updateHighlight();
 }
@@ -480,6 +514,7 @@ function paddingMapa() {
 function chooseField(id) {
   if (!features().some((f) => f.properties.id === id)) return;
   state.field = id;
+  recordarEstado();
   fieldDetails();
   crops();
   const f = selected();
@@ -501,6 +536,7 @@ function changeZone() {
     fs[0]
   )?.properties.id;
   $("#field-search").value = "";
+  recordarEstado();
   fieldList();
   accesosParcelas();
   stats();
@@ -858,17 +894,36 @@ async function init() {
         `<option value="${esc(id)}">${esc(z.nombre_mostrar)}</option>`,
     )
     .join("");
+  // Lo elegido antes en esta sesión (zona, parcela, dotación y lluvia) vuelve a su lugar; lo que falte o ya no
+  // exista en los datos se toma de los controles y de las referencias del cubo, sin suponerlo.
+  const guardado = leerEstadoGuardado();
+  if (Object.hasOwn(cube.zonas, guardado.zona ?? ""))
+    $("#zona-dashboard").value = guardado.zona;
   state.zone = $("#zona-dashboard").value;
   const slider = cube.dotaciones.deslizador;
+  const dotacionGuardada =
+    typeof guardado.dotacion === "number" &&
+    guardado.dotacion >= slider.min &&
+    guardado.dotacion <= slider.max
+      ? guardado.dotacion
+      : null;
   Object.assign($("#allocation"), {
     min: slider.min,
     max: slider.max,
     step: slider.paso,
     value:
+      dotacionGuardada ??
       cube.dotaciones.marcas.find((m) => m.id === "como_2026")?.valor ??
       slider.min,
   });
   state.allocation = Number($("#allocation").value);
+  // La casilla de lluvia: la guardada en la sesión o, si no hay, como la deje el navegador al volver a la página.
+  const menosLluvia = cube.lluvia_pct.find((v) => v < 0);
+  if (typeof guardado.lluvia === "number")
+    $("#rain").checked = guardado.lluvia < 0 && menosLluvia != null;
+  const lluviaDeLaCasilla = () =>
+    $("#rain").checked && menosLluvia != null ? menosLluvia : 0;
+  state.rain = lluviaDeLaCasilla();
   mapBlock = $(".map-detail-grid");
   mapAnchor = document.createComment("map-anchor");
   mapBlock.before(mapAnchor);
@@ -883,16 +938,19 @@ async function init() {
     },
   });
   changeZone();
+  if (guardado.parcela) chooseField(guardado.parcela); // solo si sigue en la zona
   pintarDatos();
   $("#zona-dashboard").addEventListener("change", changeZone);
   $("#allocation").addEventListener("input", (e) => {
     state.allocation = Number(e.target.value);
+    recordarEstado();
     stats();
     fieldDetails();
     crops();
   });
-  $("#rain").addEventListener("change", (e) => {
-    state.rain = e.target.checked ? cube.lluvia_pct.find((v) => v < 0) : 0;
+  $("#rain").addEventListener("change", () => {
+    state.rain = lluviaDeLaCasilla();
+    recordarEstado();
     stats();
     fieldDetails();
     crops();
@@ -928,6 +986,12 @@ async function init() {
   $("#export-timeline").addEventListener("click", exportTimeline);
   $("#app-content").hidden = false;
   $("#load-status").hidden = true;
+  // La navegación y el mapa se montan ANTES de esperar al asesor: con un archivo lento (pronostico.json) la
+  // vista de la liga, las pestañas y el mapa ya responden; el asesor se dibuja cuando llegue.
+  route();
+  mapInit();
+  window.addEventListener("hashchange", route);
+  document.body.dataset.dashboardNav = "lista";
   // El asesor recibe el cubo ya leído (no lo vuelve a pedir) y el estado vigente en cada llamada.
   asesor = await crearAsesor(() => ({
     cubo: cube,
@@ -937,9 +1001,6 @@ async function init() {
     dotacion: state.allocation,
     lluvia: state.rain,
   }));
-  route();
-  mapInit();
-  window.addEventListener("hashchange", route);
   document.body.dataset.dashboard = "listo";
 }
 
