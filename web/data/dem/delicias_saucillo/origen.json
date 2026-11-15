@@ -17,7 +17,14 @@
   28.19
  ],
  "paso_vertical_m": 0.25,
- "remuestreo": "bilinear (rasterio.warp.reproject a EPSG:3857); fuera del ráster se extiende el borde",
+ "remuestreo": "bilinear (rasterio.warp.reproject a EPSG:3857); fuera del ráster, valor plano con rampa (ver fuera_del_raster)",
+ "fuera_del_raster": {
+  "valor_m": 1204.0,
+  "regla": "mediana del anillo de celdas del borde del ráster",
+  "rampa_m": 2000.0,
+  "rampa_unidad": "metros de Web Mercator, lineal desde el borde del ráster",
+  "etiqueta": "Diseño"
+ },
  "generado_con": {
   "rasterio": "1.4.3",
   "gdal": "3.9.3",
@@ -49,5 +56,5 @@
   "12/849/1714.png",
   "12/849/1715.png"
  ],
- "sha256_teselas": "e802d66711a6c1eba654f415a7840021dc753dcfea9d13601d1478642c893348"
+ "sha256_teselas": "2324e5bf1965bc044df78efb52c04e08ef6d3d732cc45ee1fe68aeab03d81420"
 }
