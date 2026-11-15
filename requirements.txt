@@ -9,4 +9,4 @@ pluggy==1.7.0
 Pygments==2.21.0
 # Pillow: solo lo usan pruebas (teselas PNG del relieve, íconos de la app instalable);
 # sin él la CI se salta 15 pruebas de tests/test_ensamblar.py, test_gemelo_motor.py y test_pwa.py.
-Pillow==12.3.0
+Pillow==13.0.0
