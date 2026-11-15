@@ -61,7 +61,7 @@
  },
  "ndvi": {
   "archivo": "data/ndvi_mensual.json",
-  "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) vía Google Earth Engine, proyecto iondroplet; dos zonas",
+  "fuente": "NASA HLS v2 (HLSL30/HLSS30 v002) via Google Earth Engine; monthly median inside each field; two pilot areas",
   "meses": [
    "2025-10",
    "2025-11",

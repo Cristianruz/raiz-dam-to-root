@@ -565,7 +565,8 @@ def test_textos_fijos_sin_cifras_y_sin_promesas(lleno):
         assert not re.search(r"\d", texto), texto
         assert not re.search(r"\b(first|only|best|recommended|sav(e|es|ed|ing|ings))\b", texto, re.I), texto
     assert re.search(r"\d+ m\b", suelo["perfil"]["fuente"]), "la resolución está en la línea de fuente de la entrega"
-    assert suelo["idioma_fuentes"] == "es"
+    # Las líneas de LEEME.md del buzón llegan en inglés desde la reentrega del 15-nov (buzón v11).
+    assert sw.IDIOMA_FUENTES == "en" and suelo["idioma_fuentes"] == "en"
 
 
 def test_fixture_suelo_lleno_esta_al_dia(tmp_path):

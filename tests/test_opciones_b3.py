@@ -429,7 +429,8 @@ def test_secuencia_de_b3_con_un_cultivo_que_a5_no_cuenta_publica_la_de_a5_con_no
     """Revisión de dda5abb, punto 5 (caso real de avena_maiz: B3 cereal → maíz → alfalfa; A5 calcula la lámina y el
     plazo de una temporada con cereal → maíz). La opción publica la secuencia con que se calculó su agua (la de A5) y
     la de B3 queda como texto en agua.nota_plazo (campo que ya existe) y, completa, en opciones_catalogo. Los
-    filtros siguen siendo los que B3 asigna a la rotación (avisan del paso que la tabla oficial agrega)."""
+    filtros son los que B3 asigna a la rotación, menos los del cultivo que la secuencia publicada no siembra
+    (test_avena_maiz_solo_lleva_los_filtros_de_su_secuencia_publicada)."""
     paso_alfalfa = json.loads(json.dumps(B3["opciones"]["alfalfa"]["secuencia"][0]))  # el paso de alfalfa de la fixture
     b3 = alterado(lambda o: o["opciones"]["avena_maiz"]["secuencia"].append(paso_alfalfa))
     rep, geo, cubo, _, web = correr(procesados(tmp_path, b3=b3), tmp_path)
@@ -456,6 +457,130 @@ def test_secuencia_de_b3_con_un_cultivo_que_a5_no_cuenta_publica_la_de_a5_con_no
     aviso = [a for a in rep["avisos"] if "la secuencia de avena_maiz" in a]
     assert aviso and "se publica la de A5" in aviso[0] and aviso[0] in cubo["meta"]["notas"], rep["avisos"]
     assert validar_contrato.validar(web) == []
+
+
+# Decisión docs/decisiones/2026-11-15_correcciones_motor.md §2 (auditoría del contrato, H2): una opción solo lleva
+# los filtros de los cultivos de su secuencia PUBLICADA. DATOS DE PRUEBA con los ids de los dos filtros reales de B3
+# que hablan de la alfalfa que la tabla oficial siembra al final de avena_maiz y A5 no cuenta.
+def filtro_de_alfalfa(fid, tipo, necesita):
+    return {"id": fid, "tipo": tipo, "aplica_a": ["avena_maiz"], "regla": {"valor_de_prueba": True},
+            "necesita": necesita, "texto_en": f"TEST DATA: {fid.replace('_', ' ')}.",
+            "fuente": "PRUEBA: fixture de tests/test_opciones_b3.py", "etiqueta": "[prueba]"}
+
+
+def b3_como_el_real_para_avena_maiz():
+    """La fixture con el caso real: B3 da avena_maiz a la alfalfa (cereal → maíz → alfalfa; A5 solo cuenta cereal
+    → maíz), el cereal de invierno solo trae «descanso» (se completa con avena_maiz del diseño del equipo) y la
+    rotación lleva los dos filtros de la alfalfa."""
+    def cambio(o):
+        o["opciones"]["avena_maiz"]["secuencia"].append(json.loads(json.dumps(o["opciones"]["alfalfa"]["secuencia"][0])))
+        o["por_cultivo_actual"]["alfalfa"] = ["alfalfa_corte_verano", "avena_maiz", "descanso"]
+        o["por_cultivo_actual"]["cereal_invierno"] = ["descanso"]
+        o["filtros"] += [filtro_de_alfalfa("alfalfa_no_en_anio_seco", "dotacion_minima", []),
+                         filtro_de_alfalfa("alfalfa_tras_alfalfa", "intervalo", ["memoria"])]
+    return alterado(cambio)
+
+
+def test_avena_maiz_solo_lleva_los_filtros_de_su_secuencia_publicada(tmp_path):
+    """(a) el filtro de establecer alfalfa no va en una secuencia publicada sin alfalfa; (b) el del intervalo entre
+    rodales va solo si el cultivo actual es alfalfa (es la razón de la opción); el catálogo los conserva."""
+    b3 = b3_como_el_real_para_avena_maiz()
+    _, geo, cubo, _, web = correr(procesados(tmp_path, b3=b3), tmp_path)
+    de_la_rotacion = [f["id"] for f in b3["filtros"] if "avena_maiz" in f["aplica_a"]]
+    assert {"alfalfa_no_en_anio_seco", "alfalfa_tras_alfalfa"} < set(de_la_rotacion)
+    vistos = set()
+    for p, ops in parcelas_con_opciones(geo, cubo):
+        for o in ops:
+            if o["rotacion"] != "avena_maiz":
+                continue
+            assert "alfalfa" not in o["secuencia"], "la secuencia publicada es la de A5"
+            ids = [f["id"] for f in o["filtros"]]
+            fuera = {"alfalfa_no_en_anio_seco"} | (set() if p["cultivo_actual"] == "alfalfa" else {"alfalfa_tras_alfalfa"})
+            assert ids == [x for x in de_la_rotacion if x not in fuera], (p["id"], p["cultivo_actual"], ids)
+            vistos.add(p["cultivo_actual"])
+    assert vistos == {"alfalfa", "cereal_invierno"}, vistos
+    assert {"alfalfa_no_en_anio_seco", "alfalfa_tras_alfalfa"} <= set(cubo["filtros_catalogo"])
+    assert validar_contrato.validar(web) == []
+
+
+def test_filtro_de_un_cultivo_va_si_la_secuencia_publicada_lo_siembra():
+    """La regla, sola: con el cultivo en la secuencia publicada van los dos; sin él, el de intervalo va solo con ese
+    cultivo actual; un filtro que no está en la tabla va siempre."""
+    va = b4_cubo.filtro_va_en_la_opcion
+    for fid in ("alfalfa_no_en_anio_seco", "alfalfa_tras_alfalfa"):
+        assert fid in b4_cubo.FILTROS_DE_CULTIVO
+        assert va(fid, ["cereal_invierno", "maiz_forrajero", "alfalfa"], "cereal_invierno")
+    assert not va("alfalfa_no_en_anio_seco", ["cereal_invierno", "maiz_forrajero"], "alfalfa")
+    assert va("alfalfa_tras_alfalfa", ["cereal_invierno", "maiz_forrajero"], "alfalfa")
+    assert not va("alfalfa_tras_alfalfa", ["cereal_invierno", "maiz_forrajero"], "cereal_invierno")
+    assert va("helada_siembra", ["cereal_invierno"], "cereal_invierno") and va("salinidad", [], "barbecho")
+
+
+def test_opcion_propuesta_por_el_equipo_lleva_su_nombre_y_no_la_nota_de_la_tabla_oficial(tmp_path):
+    """(c) avena_maiz en un cereal de invierno la agrega el equipo (team_proposal): nombre del diseño del equipo
+    (data/opciones_b4.json), sin la nota «official table…» y con su propia explicación; en la alfalfa sigue
+    siendo la de la tabla oficial, con su nombre y su nota."""
+    b3 = b3_como_el_real_para_avena_maiz()
+    rep, geo, cubo, expl, web = correr(procesados(tmp_path, b3=b3), tmp_path)
+    oficial, del_equipo = b3["opciones"]["avena_maiz"]["nombre_en"], CFG["nombres_en"]["avena_maiz"]
+    assert oficial != del_equipo
+    vistos = {}
+    for p, ops in parcelas_con_opciones(geo, cubo):
+        for o in ops:
+            if o["rotacion"] != "avena_maiz":
+                continue
+            por_que = expl["explicaciones"][o["preguntas_ref"]]["textos"]["por_que"]
+            if p["cultivo_actual"] == "alfalfa":
+                assert o["origen_opcion"] == b4_cubo.ORIGEN_OPCION_B3 and o["nombre"] == oficial
+                assert o["agua"]["nota_plazo"].startswith("official table: ")
+                assert por_que.startswith(oficial)
+            else:
+                assert (o["origen_opcion"], o["etiqueta_opcion"]) == (b4_cubo.ORIGEN_OPCION_PROPUESTA,
+                                                                    b4_cubo.ETIQUETA_PROPUESTA)
+                assert o["nombre"] == del_equipo, "no el nombre de la tabla oficial"
+                assert o["agua"]["nota_plazo"] is None, "sin la nota de la tabla oficial"
+                assert por_que.startswith(del_equipo), "la explicación no usa el nombre de la tabla oficial"
+            vistos.setdefault(p["cultivo_actual"], set()).add((p["zona"], o["preguntas_ref"]))
+    assert set(vistos) == {"alfalfa", "cereal_invierno"}, vistos
+    assert not {ref for _, ref in vistos["alfalfa"]} & {ref for _, ref in vistos["cereal_invierno"]}
+    # El agua es la misma: cambia cómo se llama la opción, no su lámina ni su plazo.
+    por_zona = {}
+    for cultivo, refs in vistos.items():
+        for zona, ref in refs:
+            por_zona.setdefault(zona, {})[cultivo] = expl["explicaciones"][ref]["valores"]
+    assert any(len(v) == 2 for v in por_zona.values()), "la fixture debe tener las dos variantes en una zona"
+    assert all(v["alfalfa"] == v["cereal_invierno"] for v in por_zona.values() if len(v) == 2)
+    assert verificador.verificar_archivo(web / "explicaciones.json") == {}
+    assert validar_contrato.validar(web) == []
+
+
+def test_real_avena_maiz_y_las_opciones_del_equipo_en_el_cubo_publicado():
+    """Cubo publicado (auditoría del contrato, H2): ninguna opción lleva un filtro de un cultivo que su secuencia
+    no siembra, salvo el del intervalo cuando ese es el cultivo actual; una opción del equipo cuya rotación está
+    en la tabla oficial lleva el nombre del equipo y no la nota «official table…»."""
+    if not (WEB / "cubo.json").exists():
+        pytest.skip("web/data/cubo.json aún no existe")
+    cubo, geo = leer(WEB, "cubo.json"), leer(WEB, "parcelas.geojson")
+    if not cubo.get("filtros_catalogo"):
+        pytest.skip("el cubo publicado no trae filtros de B3")
+    cultivo_de = {f["properties"]["id"]: f["properties"]["cultivo_actual"] for f in geo["features"]}
+    vistas = 0
+    for pid, pc in cubo["parcelas"].items():
+        for o in pc["opciones"]:
+            ids = {f["id"] for f in o["filtros"]}
+            for fid, (cultivo, vale_por_actual) in b4_cubo.FILTROS_DE_CULTIVO.items():
+                if o["rotacion"] not in (cubo["filtros_catalogo"].get(fid) or {}).get("aplica_a", []):
+                    continue
+                esperado = cultivo in o["secuencia"] or (vale_por_actual and cultivo_de[pid] == cultivo)
+                assert (fid in ids) == esperado, (pid, o["id"], fid)
+                vistas += 1
+            del_equipo = o["origen_opcion"] == b4_cubo.ORIGEN_OPCION_PROPUESTA and o["id"] != "ACTUAL"
+            if del_equipo and o["rotacion"] in CFG["nombres_en"]:
+                assert o["nombre"] == CFG["nombres_en"][o["rotacion"]], (pid, o["id"], o["nombre"])
+                assert "official table" not in (o["agua"].get("nota_plazo") or ""), (pid, o["id"])
+    for fid in b4_cubo.FILTROS_DE_CULTIVO:
+        assert fid in cubo["filtros_catalogo"], f"{fid}: la tabla del motor nombra un filtro que B3 ya no trae"
+    assert vistas, "el cubo publicado debe ofrecer una rotación con estos filtros"
 
 
 # Filtro de edad del rodal (revisión de dda5abb, punto 6): DATOS DE PRUEBA con la forma del filtro real
@@ -485,25 +610,68 @@ def test_filtro_de_edad_del_rodal_se_evalua_con_la_edad_de_cada_parcela(tmp_path
     (processed / ARCHIVO).write_text(json.dumps(alterado(lambda o: o["filtros"].append(filtro_de_edad(umbral))),
                                                 ensure_ascii=False), encoding="utf-8")
     rep, geo, cubo, _, web = correr(processed, tmp_path)
-    vistos = set()
+    vistos, jovenes = set(), 0
     for p, ops in parcelas_con_opciones(geo, cubo):
+        edad = p["edad_perenne_anios"]
+        if p["cultivo_actual"] == "alfalfa" and edad is not None and edad < umbral:
+            # Kit B4, paso 1: solo entran las alternativas que aprueban los filtros. Un rodal más joven que la
+            # edad mínima no recibe la opción (antes la recibía con el filtro en «warning»); la ACTUAL sigue.
+            assert "alfalfa_corte_verano" not in [o["rotacion"] for o in ops], p["id"]
+            assert ops[0]["id"] == "ACTUAL" and len(ops) >= 3, (p["id"], [o["id"] for o in ops])
+            jovenes += 1
+            vistos.add("joven")
         for o in ops:
             f = next((x for x in o["filtros"] if x["id"] == "edad_rodal_prueba"), None)
             assert (f is not None) == (o["rotacion"] == "alfalfa_corte_verano"), (p["id"], o["id"])
             if f is None:
                 continue
-            edad = p["edad_perenne_anios"]
             if edad is None:
                 assert (f["estado"], f["pasa"], f["razon"]) == (NEEDS, None, b4_cubo.RAZON_DATO_LOCAL), p["id"]
                 vistos.add("sin_edad")
-            elif edad < umbral:
-                assert (f["estado"], f["pasa"]) == (WARNING, False) and "razon" not in f, p["id"]
-                vistos.add("joven")
             else:
+                assert edad >= umbral, "ninguna opción publicada lleva el filtro de edad reprobado"
                 assert (f["estado"], f["pasa"]) == (PASSES, True) and "razon" not in f, p["id"]
                 vistos.add("establecida")
     assert vistos == {"sin_edad", "joven", "establecida"}, vistos
+    # meta.notas dice cuántas parcelas quedaron sin la opción y por qué (filtro, edad mínima y la regla del kit).
+    avisos = [a for a in rep["avisos"] if "sin la opción alfalfa_corte_verano" in a]
+    assert len(avisos) == 1 and avisos[0].startswith(f"{jovenes} parcelas"), rep["avisos"]
+    assert "edad_rodal_prueba" in avisos[0] and f"menos de {umbral} años" in avisos[0] and "kit B4" in avisos[0]
+    assert avisos[0] in cubo["meta"]["notas"]
     assert validar_contrato.validar(web) == []
+
+
+def test_real_corte_de_verano_no_se_ofrece_a_un_rodal_joven():
+    """Cubo publicado: ninguna alfalfa más joven que la edad mínima del filtro lleva la opción; con edad null
+    se ofrece con «needs_local_check»; ningún filtro de edad queda reprobado y meta.notas dice cuántas son."""
+    if not (WEB / "cubo.json").exists():
+        pytest.skip("web/data/cubo.json aún no existe")
+    cubo, geo = leer(WEB, "cubo.json"), leer(WEB, "parcelas.geojson")
+    minimos = {fid: b4_cubo.umbral_edad(d.get("regla")) for fid, d in (cubo.get("filtros_catalogo") or {}).items()}
+    minimos = {fid: (m, cubo["filtros_catalogo"][fid]["aplica_a"]) for fid, m in minimos.items() if m is not None}
+    if not minimos:
+        pytest.skip("el cubo publicado no trae filtros de edad del rodal")
+    sin_opcion = {}
+    for f in geo["features"]:
+        p = f["properties"]
+        ops = cubo["parcelas"][p["id"]]["opciones"]
+        for o in ops:
+            for e in o["filtros"]:
+                if e["id"] in minimos:
+                    assert e["pasa"] is not False, f"{p['id']} {o['id']}: filtro de edad reprobado en una opción publicada"
+                    assert (e["estado"] == NEEDS) == (p["edad_perenne_anios"] is None), (p["id"], o["id"])
+        edad = p["edad_perenne_anios"]
+        if not ops or p["cultivo_actual"] != "alfalfa" or edad is None:
+            continue
+        for fid, (minimo, rotaciones) in minimos.items():
+            if edad < minimo:
+                assert not [o["id"] for o in ops if o["id"] != "ACTUAL" and o["rotacion"] in rotaciones], p["id"]
+                assert len(ops) >= 3, f"{p['id']}: sigue con ACTUAL + 2 alternativas"
+                for rot in rotaciones:
+                    sin_opcion[rot] = sin_opcion.get(rot, 0) + 1
+    for rot, n in sin_opcion.items():
+        assert any(nota.startswith(f"{n} parcelas") and f"sin la opción {rot}" in nota
+                   for nota in cubo["meta"]["notas"]), (rot, n)
 
 
 def test_filtro_de_edad_que_ademas_pide_un_dato_local_no_decide(tmp_path):
@@ -554,6 +722,96 @@ def test_cada_opcion_lleva_los_filtros_que_le_aplican(con_b3):
             assert e["estado"] in (PASSES, WARNING, NEEDS)
             assert e["pasa"] is validar_contrato.ESTADOS_FILTRO[e["estado"]]
             assert ("razon" in e) == (e["estado"] == NEEDS), "la razón va solo cuando no se decide"
+
+
+# Texto que un filtro trae SOLO para una rotación (filtros[].texto_por_opcion_en, buzón v11). DATOS DE PRUEBA.
+NOTA_POR_OPCION = "TEST DATA: note shown for this option alone."
+CAMPOS_FILTRO = {"id", "tipo", "estado", "pasa", "motivo", "fuente", "etiqueta", "prob_helada", "evidencia", "razon"}
+
+
+def con_texto_por_opcion(valor, filtro="helada_siembra"):
+    """La fixture de B3 con texto_por_opcion_en = valor en un filtro."""
+    def cambio(o):
+        next(x for x in o["filtros"] if x["id"] == filtro)["texto_por_opcion_en"] = valor
+    return alterado(cambio)
+
+
+def motivos_del_filtro(geo, cubo, filtro="helada_siembra"):
+    """{rotación: {motivos}} del filtro en las opciones del cubo, comprobando que no gana campos."""
+    salida = {}
+    for (_, rot), filtros in filtros_por_zona(geo, cubo).items():
+        for f in filtros:
+            if f["id"] == filtro:
+                assert set(f) <= CAMPOS_FILTRO, f"el filtro por opción no gana campos: {sorted(set(f) - CAMPOS_FILTRO)}"
+                salida.setdefault(rot, set()).add(f["motivo"])
+    return salida
+
+
+def test_texto_por_opcion_se_agrega_al_motivo_de_esa_opcion(tmp_path):
+    """filtros[].texto_por_opcion_en.<rotación> se suma al motivo del filtro SOLO en esa rotación; en las demás
+    rotaciones del mismo filtro el motivo sigue siendo texto_en. El catálogo lo lleva tal como llegó."""
+    texto = next(f for f in B3["filtros"] if f["id"] == "helada_siembra")["texto_en"]
+    b3 = con_texto_por_opcion({"sorgo": NOTA_POR_OPCION, "rotacion_que_no_existe": "TEST DATA: unused."})
+    rep, geo, cubo, _, web = correr(procesados(tmp_path, b3=b3), tmp_path)
+    motivos = motivos_del_filtro(geo, cubo)
+    assert motivos.pop("sorgo") == {f"{texto} {NOTA_POR_OPCION}"}
+    assert motivos and all(m == {texto} for m in motivos.values()), motivos
+    assert cubo["filtros_catalogo"]["helada_siembra"]["texto_por_opcion_en"]["sorgo"] == NOTA_POR_OPCION
+    assert cubo["filtros_catalogo"]["helada_siembra"]["texto_en"] == texto
+    assert not [a for a in rep["avisos"] if "texto_por_opcion_en" in a], rep["avisos"]
+    assert fuera_de_regla(textos_de_la_ficha(cubo, con_notas=True)) == []
+    assert validar_contrato.validar(web) == []
+
+
+def test_texto_por_opcion_con_lenguaje_que_la_ficha_no_admite_no_se_publica(tmp_path):
+    """CLAUDE.md, regla 10: un texto por opción con «only», «first» o promesas no llega al motivo; se avisa
+    (filtro y opción) y el aviso no repite la palabra."""
+    texto = next(f for f in B3["filtros"] if f["id"] == "helada_siembra")["texto_en"]
+    b3 = con_texto_por_opcion({"sorgo": "TEST DATA: this rule covers only the winter cereal.",
+                               "chile": NOTA_POR_OPCION})
+    rep, geo, cubo, _, web = correr(procesados(tmp_path, b3=b3), tmp_path)
+    motivos = motivos_del_filtro(geo, cubo)
+    assert motivos["sorgo"] == {texto}, "el texto con lenguaje no admitido no se agrega"
+    assert motivos["chile"] == {f"{texto} {NOTA_POR_OPCION}"}, "el de otra opción, sí"
+    avisos = [a for a in rep["avisos"] if "texto_por_opcion_en" in a]
+    assert len(avisos) == 1 and "helada_siembra" in avisos[0] and "sorgo" in avisos[0], rep["avisos"]
+    assert "regla 10" in avisos[0] and palabras_prohibidas(avisos[0]) == []
+    assert avisos[0] in cubo["meta"]["notas"]
+    assert fuera_de_regla(textos_de_la_ficha(cubo, con_notas=True)) == []
+    assert validar_contrato.validar(web) == []
+
+
+@pytest.mark.parametrize("valor", [None, {}, {"sorgo": ""}, {"sorgo": "   "}, {"sorgo": None}, {"sorgo": 5},
+                                   "TEST DATA: not an object.", ["sorgo"]])
+def test_texto_por_opcion_vacio_o_mal_formado_no_cambia_el_motivo(valor):
+    """Sin texto para la rotación (o con una forma que no es {rotación: texto}), el motivo es texto_en."""
+    b3 = con_texto_por_opcion(valor)
+    for rot in ("sorgo", "chile"):
+        f = next(x for x in b4_cubo.filtros_de_opcion(rot, b3, None) if x["id"] == "helada_siembra")
+        assert f["motivo"] == next(x for x in B3["filtros"] if x["id"] == "helada_siembra")["texto_en"], (valor, rot)
+    assert b4_cubo.avisos_texto_por_opcion(b3) == []
+
+
+def test_real_motivo_de_cada_filtro_sale_del_catalogo():
+    """Cubo publicado: el motivo de cada filtro por opción es el texto_en del catálogo más, si el catálogo lo
+    trae para ESA rotación y no trae lenguaje que la ficha no admite, su texto por opción."""
+    if not (WEB / "cubo.json").exists():
+        pytest.skip("web/data/cubo.json aún no existe")
+    cubo = leer(WEB, "cubo.json")
+    catalogo = cubo.get("filtros_catalogo") or {}
+    if not catalogo:
+        pytest.skip("el cubo publicado no trae filtros de B3")
+    vistos = 0
+    for pid, pc in cubo["parcelas"].items():
+        for o in pc["opciones"]:
+            for f in o.get("filtros") or []:
+                d = catalogo[f["id"]]
+                por_opcion = d.get("texto_por_opcion_en")
+                nota = por_opcion.get(o.get("rotacion")) if isinstance(por_opcion, dict) else None
+                usable = isinstance(nota, str) and nota.strip() and not palabras_prohibidas(nota)
+                assert f["motivo"] == (f"{d['texto_en']} {nota.strip()}" if usable else d["texto_en"]), (pid, o["id"], f["id"])
+                vistos += 1
+    assert vistos, "el cubo publicado debe traer filtros por opción"
 
 
 def test_helada_usa_la_probabilidad_de_la_zona_y_el_umbral_de_la_regla(con_b3):

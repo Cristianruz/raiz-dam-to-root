@@ -595,11 +595,17 @@ def fuentes_registradas(raiz):
     return {str(f.get("archivo")): str(f.get("fuente") or "") for f in filas or [] if isinstance(f, dict)}
 
 
+# El rectángulo del contraste de ET en la línea de LEEME de la entrega, en español o en inglés.
+RECTANGULO_ORIGINAL = re.compile(
+    r"(?:rect[áa]ngulo original|original\s+(?:pilot\s+)?rectangle)\s*(\[[^\]]+\])", re.I)
+
+
 def ambito_et(fuente, zona):
     """Área que cubre el contraste, tal como la dice la fuente registrada (no se supone):
-    «rectángulo original [o, s, e, n]» -> «original pilot rectangle [o, s, e, n]». Si la fuente no lo dice,
-    la zona del sufijo del archivo; si tampoco, «area of the delivered file»."""
-    m = re.search(r"rect[áa]ngulo original\s*(\[[^\]]+\])", fuente or "", re.I)
+    «rectángulo original [o, s, e, n]» (línea de LEEME en español) u «original rectangle [o, s, e, n]» (en
+    inglés, desde el buzón v11) -> «original pilot rectangle [o, s, e, n]». Si la fuente no lo dice, la zona
+    del sufijo del archivo; si tampoco, «area of the delivered file»."""
+    m = RECTANGULO_ORIGINAL.search(fuente or "")
     if m:
         return f"original pilot rectangle {m.group(1)}"
     if zona:
