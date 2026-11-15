@@ -12,12 +12,17 @@ Pasos (en este orden; si uno falla, se reporta y se sigue con los demás):
   (a) motor/ensamblar.py: valida las entregas del buzón (variable RAIZ_BUZON) y las
       copia a data/processed. Si el archivo aún no existe, queda «pendiente». Sin RAIZ_BUZON
       no se valida ninguna entrega: el paso queda OMITIDO (se usa la caché previa), no «OK».
+      Un archivo rechazado cuya copia validada anterior sigue en data/processed deja el paso en
+      ADVERTENCIA con la lista de esos archivos (la web sigue con la copia vieja); no cambia el
+      código de salida (no hay modo estricto).
   (b) motor/b4_cubo.py con datos reales o motor/simulados.py mientras no los haya. Si faltan
       entradas de B4 pero web/data ya tiene un cubo REAL (meta.mock = false), el paso FALLA y NO
       reemplaza la web con simulados (un archivo renombrado o rechazado no debe pasar en silencio).
   (b2) motor/relieve_web.py: relieve.json y relieve_rutas.geojson para la web.
   (b3) motor/gemelo_web.py, motor/contexto_web.py y motor/suelo_web.py: gemelo.json, ndvi_mensual.json,
-       contexto.json y suelo.json; motor/pwa.py: lista de precarga de la app sin conexión.
+       contexto.json y suelo.json (si uno falla, los demás se construyen igual y el paso FALLA);
+       motor/pwa.py: lista de precarga de la app sin conexión (otra vez al final, después del último
+       manifest, también con --rapido).
   (c) motor/manifest.py: genera web/data/manifest.json.
   (d) python validar_contrato.py: debe imprimir «CONTRATO OK».
   (d2) motor/verificador.py: cifras de las explicaciones (set dorado).
@@ -54,6 +59,9 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
 OK, FALLA, PENDIENTE, OMITIDO = "OK", "FALLA", "PENDIENTE", "OMITIDO"
+# Paso que terminó pero deja algo a la vista (p. ej. una entrega rechazada que conserva su copia anterior):
+# se ve en el reporte final y NO cambia el código de salida.
+ADVERTENCIA = "ADVERTENCIA"
 
 # Piezas de Earth Engine: las corre otra sesión (CLAUDE.md, «Operación»). Orden del kit §0.3.
 PIEZAS_EARTH_ENGINE = (
@@ -189,8 +197,22 @@ def paso_ensamblar():
         # Sin buzón no se validó ninguna entrega: decir «OK — buzón validado» sería falso.
         return Paso("ensamblar", OMITIDO, "sin RAIZ_BUZON: no se validaron entregas en esta corrida "
                                           "(se usa la caché previa de data/processed)"), reporte
-    return Paso("ensamblar", OK, f"buzón validado: entraron {contar(reporte.get('entraron'))}, "
-                                 f"rechazados {contar(reporte.get('rechazados'))}"), reporte
+    detalle = f"buzón validado: entraron {contar(reporte.get('entraron'))}, rechazados {contar(reporte.get('rechazados'))}"
+    conservan = rechazados_con_copia_anterior(reporte)
+    if conservan:
+        # La entrega nueva no entró y la web sigue con la copia anterior: no es «OK» (no cambia el código de salida).
+        print(f"  ADVERTENCIA: rechazados que conservan la copia anterior en data/processed: {', '.join(conservan)}")
+        return Paso("ensamblar", ADVERTENCIA, f"{detalle}; rechazados que conservan la copia anterior en "
+                                              f"data/processed (se sigue usando): {', '.join(conservan)}"), reporte
+    return Paso("ensamblar", OK, detalle), reporte
+
+
+def rechazados_con_copia_anterior(reporte):
+    """Archivos rechazados en esta corrida cuya copia validada anterior sigue en la carpeta de salida del
+    ensamblador (motor/ensamblar.py la conserva y el cubo la seguirá usando)."""
+    salida = Path(reporte.get("salida") or RAIZ / "data/processed")
+    nombres = [x.get("archivo") for x in reporte.get("rechazados") or [] if isinstance(x, dict)]
+    return sorted({n for n in nombres if n and (salida / n).is_file()})
 
 
 def contar(x):
@@ -283,14 +305,17 @@ def paso_gemelo():
     página lo dice; una excepción es FALLA. Las teselas de relieve no se regeneran aquí (necesitan rasterio:
     python motor/dem_teselas.py)."""
     titulo("(b3) Gemelo digital, bases del reto y suelo (gemelo_web, contexto_web, suelo_web)")
-    detalles = []
+    detalles, fallas = [], []
     for modulo, etiqueta in (("motor.gemelo_web", "gemelo"), ("motor.contexto_web", "contexto"),
                              ("motor.suelo_web", "suelo")):
         try:
             rep = importar(modulo).construir()
         except Exception as ex:  # noqa: BLE001
+            # Se anota y se sigue con los demás módulos: si no, sus JSON quedarían de la corrida anterior.
             print(f"  {modulo}.construir() falló: {type(ex).__name__}: {ex}")
-            return Paso("gemelo", FALLA, f"{modulo}: {type(ex).__name__}: {ex}")
+            fallas.append(f"{modulo}: {type(ex).__name__}: {ex}")
+            detalles.append(f"{etiqueta}: FALLA")
+            continue
         for a in rep.get("avisos") or []:
             print(f"  aviso ({etiqueta}): {a}")
         if rep.get("ejecutado") is False:
@@ -299,6 +324,8 @@ def paso_gemelo():
         else:
             detalles.append(f"{etiqueta}: OK")
     print("  " + " · ".join(detalles))
+    if fallas:
+        return Paso("gemelo", FALLA, " · ".join(detalles) + " — " + "; ".join(fallas))
     return Paso("gemelo", OK, " · ".join(detalles))
 
 
@@ -533,11 +560,13 @@ def main(argv=None):
         # (c2) El manifest otra vez, ahora con las cifras de pruebas.json de esta corrida (regla 11).
         if web.estado == OK and man.estado == OK:
             man = paso_manifest("(c2) Manifest con las cifras de pruebas.json (motor/manifest.py)")
-    if not args.rapido:
-        pwa = paso_pwa()  # otra vez, con pruebas.json y manifest.json de esta corrida
+    # Otra vez al final, también con --rapido: la versión de la precarga es la huella de lo que carga la página,
+    # manifest.json (y, en la corrida completa, pruebas.json) incluido.
+    pwa = paso_pwa()
     todos = (origen, ens, sim, rel, gem, pwa, man, con, ver, py, js, web)
     fallas = [p.nombre for p in todos if p.estado == FALLA]
     pendientes = [p.nombre for p in todos if p.estado == PENDIENTE]
+    advertencias = [p.nombre for p in todos if p.estado == ADVERTENCIA]
     if reporte:
         entregas = (f"entraron {contar(reporte.get('entraron'))} · rechazados {contar(reporte.get('rechazados'))} · "
                     f"retenidos {contar(reporte.get('retenidos'))} · fuentes {contar(reporte.get('fuentes'))}")
@@ -551,7 +580,9 @@ def main(argv=None):
         final = "OK: todo pasa"
     if pendientes:
         final += f" · pendiente: {', '.join(pendientes)}"
-    codigo = 1 if fallas else 0
+    if advertencias:
+        final += f" · advertencia: {', '.join(advertencias)} (ver su renglón)"
+    codigo = 1 if fallas else 0  # una ADVERTENCIA no cambia el código de salida
 
     titulo("REPORTE")
     lineas = (

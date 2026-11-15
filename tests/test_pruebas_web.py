@@ -242,6 +242,19 @@ def test_puerta_lee_docs_pruebas_md(tmp_path):
     assert pruebas_web.calcular(tmp_path)["puerta"]["estado"] == "failed"
 
 
+def test_puerta_lee_la_advertencia_del_ensamblado(tmp_path):
+    """construir.py marca ADVERTENCIA el ensamblado con un rechazo que conserva la copia anterior (revisión de
+    dda5abb, punto 8): la web la recibe en inglés («warning») y la puerta no se da por fallida."""
+    if str(RAIZ) not in sys.path:
+        sys.path.insert(0, str(RAIZ))
+    import construir
+    pruebas_md(tmp_path, [("ensamblar", construir.ADVERTENCIA, "rechazados con copia anterior: x.csv"),
+                          ("pytest", "OK", "1 passed")])
+    p = pruebas_web.calcular(tmp_path)["puerta"]
+    assert [(s["id"], s["estado"]) for s in p["pasos"]] == [("ensamblar", "warning"), ("pytest", "passed")]
+    assert p["estado"] == "passed"
+
+
 # --- Criterios: cada cifra sale de S9 §6 ------------------------------------------------------
 def renglones_s9():
     texto = (RAIZ / "docs/sintesis/S9_proyecto_definitivo.md").read_text(encoding="utf-8")

@@ -30,7 +30,8 @@ Estados (en inglés: la web los muestra tal cual con su rótulo):
   "passed"  cumple su criterio        "failed"  no lo cumple
   "partial" una parte corrió y otra no "not run" no se ejecutó
   "run"     corrió, pero no tiene criterio propio de aprobación (p. ej., las reglas del mapa)
-Pasos de la puerta: "passed", "failed", "pending" (la pieza aún no existe) y "skipped" (omitido).
+Pasos de la puerta: "passed", "failed", "pending" (la pieza aún no existe), "skipped" (omitido) y
+"warning" (ADVERTENCIA de construir.py: terminó, pero deja algo a la vista; no hace fallar la puerta).
 Un resultado desfavorable o no ejecutado se publica con la misma visibilidad (S9 §6; kit C6).
 
 Cifras: los criterios son el texto de S9 §6 (y del Anexo B para H3) traducido al inglés; la prueba
@@ -81,7 +82,8 @@ MARCAS_FALTA_PERSONA = ("falta la de una persona", "sigue pendiente")
 # Vocabulario de estados (ver el docstring).
 PASSED, FAILED, PARTIAL, NOT_RUN, RUN = "passed", "failed", "partial", "not run", "run"
 ESTADOS = (PASSED, FAILED, PARTIAL, NOT_RUN, RUN)
-ESTADOS_PASO = {"OK": PASSED, "FALLA": FAILED, "PENDIENTE": "pending", "OMITIDO": "skipped"}
+# ADVERTENCIA (construir.py): el paso terminó pero deja algo a la vista; no es una falla de la puerta.
+ESTADOS_PASO = {"OK": PASSED, "FALLA": FAILED, "PENDIENTE": "pending", "OMITIDO": "skipped", "ADVERTENCIA": "warning"}
 
 # Nombres en inglés de los pasos de construir.py (la web los muestra); el id es el de docs/pruebas.md.
 NOMBRES_PASOS = {
