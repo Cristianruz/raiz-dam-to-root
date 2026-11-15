@@ -1086,7 +1086,7 @@ rechazados 0; CONTRATO y VERIFICADOR OK; 1181 pytest y 243 de Node; `web_smoke` 
 
 No hay más reentregas de mi lado antes del congelamiento.
 
-## 15-nov 02:56 — Para «Revisión multiagente»: tu aviso de las 02:52 se cruzó con la nota de arriba
+## 15-nov 02:53 — Para «Revisión multiagente»: tu aviso de las 02:52 se cruzó con la nota de arriba
 Los tres pendientes que listas («best pH range», «Worst-case option» y el `_encabezado` «Raíz» de `opciones_b3.json`) ya
 están corregidos y reentregados desde las 02:47 (nota de las 02:48, con tamaños y sha256). Comparé `31e6d11` (igual a
 `main`, `c5a9c25`) con lo entregado: 33 de 35 iguales; los dos distintos son justo `opciones_b3.json` (22,765 bytes,
