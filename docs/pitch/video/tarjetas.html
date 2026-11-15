@@ -1,7 +1,10 @@
 <!doctype html>
 <!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 <!-- docs/pitch/video/tarjetas.html — Tarjetas y banda de subtítulos del video de 30 s o menos (kit C7).
-     No es parte de la aplicación: tests/e2e/grabar_video.mjs la abre con Playwright y la captura como imagen.
+     No es parte de la aplicación: tests/e2e/grabar_video.mjs la abre con Playwright y la captura CUADRO POR CUADRO.
+     Las tres tarjetas son animadas: cada animación CSS nace en pausa y el grabador la lleva al instante de cada
+     cuadro con window.__tarjetaIr(ms), así el video sale igual en cualquier máquina. Con ?animar=si corre sola,
+     para verla en el navegador. La banda de las tomas no se anima aquí: la mueve ffmpeg al montarla.
      Una sola página con tres vistas, según ?vista=
        apertura   título, lema (?lema=, que el grabador lee del guion), equipo y reto;
        como       «How it works»: tres pasos en una línea, con iconos dibujados aquí (sin logotipos). Los nombres
@@ -28,12 +31,13 @@
     src: url("../../../web/vendor/atkinson-hyperlegible-5.3.0/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
   }
   :root {
-    /* Los mismos tonos de web/style.css (:root) */
-    --agua: #1F6FB2;
-    --agua-clara: #DCEAF6;
-    --ambar: #D98E04;
-    --arena: #F5EFE6;
-    --tinta: #1D2329;
+    /* Los tonos del tablero, la portada (web/css/interfaz.css): fondo verde muy oscuro, texto claro y lima de acento;
+       el azul es el del agua. Los nombres de las variables se conservan. */
+    --agua: #4E9BD8;
+    --agua-clara: #C9DDBE;
+    --ambar: #B9ED87;
+    --arena: #EDF3ED;
+    --tinta: #0B100E;
     --blanco: #FFFFFF;
     /* Medidas del lienzo del video (las fija el grabador con el tamaño de la ventana) */
     --margen: 168px;
@@ -50,13 +54,14 @@
 
   /* ---------- Tarjetas a pantalla completa ---------- */
   .tarjeta {
+    background: radial-gradient(1500px 900px at 34% 42%, #17281D 0%, #0F1A13 46%, var(--tinta) 100%);
     position: absolute; inset: 0; padding: 0 var(--margen);
     display: flex; flex-direction: column; justify-content: center;
   }
   /* La raya de agua a la izquierda: la misma seña de la frase principal de la ficha (.resumen-frase) */
   .tarjeta-cuerpo { border-left: 10px solid var(--agua); padding-left: 56px; }
   .tarjeta-pie {
-    position: absolute; left: var(--margen); right: var(--margen); bottom: 96px;
+    position: absolute; left: var(--margen); right: var(--margen); bottom: 84px;
     padding-top: 30px; border-top: 2px solid rgba(245, 239, 230, 0.22);
     display: flex; justify-content: space-between; align-items: baseline; gap: 48px;
     font-size: 34px; color: var(--agua-clara);
@@ -68,13 +73,13 @@
   .lema { margin-top: 36px; max-width: 1380px; font-size: 96px; line-height: 1.12; font-weight: 700; color: var(--arena); }
 
   .frase { font-size: 148px; line-height: 1.04; font-weight: 700; color: var(--arena); }
-  .aviso { margin-top: 44px; max-width: 1320px; font-size: 48px; line-height: 1.3; color: var(--blanco); }
+  .aviso { margin-top: 34px; max-width: 1320px; font-size: 48px; line-height: 1.3; color: var(--blanco); }
   .liga { color: var(--arena); font-weight: 700; overflow-wrap: anywhere; }
   .app { color: var(--agua-clara); white-space: nowrap; }
 
   /* ---------- «How it works»: tres pasos en una línea ---------- */
-  .como-titulo { position: absolute; left: var(--margen); top: 176px; font-size: 44px; font-weight: 700; color: var(--ambar); letter-spacing: 0.01em; }
-  .pasos { position: absolute; left: 96px; right: 96px; top: 346px; display: grid; grid-template-columns: 1fr 84px 1fr 84px 1fr; align-items: start; }
+  .como-titulo { position: absolute; left: var(--margen); top: 112px; font-size: 44px; font-weight: 700; color: var(--ambar); letter-spacing: 0.01em; }
+  .pasos { position: absolute; left: 96px; right: 96px; top: 262px; display: grid; grid-template-columns: 1fr 84px 1fr 84px 1fr; align-items: start; }
   .paso { text-align: center; padding: 0 12px; }
   .paso svg { width: 190px; height: 190px; fill: none; stroke: var(--arena); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
   .paso svg .agua { stroke: #6FB1E6; }
@@ -85,6 +90,70 @@
   .paso p { margin-top: 22px; font-size: 36px; line-height: 1.28; color: var(--agua-clara); text-wrap: balance; }
   .flecha { align-self: start; margin-top: 62px; }
   .flecha svg { width: 84px; height: 64px; fill: none; stroke: var(--ambar); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ---------- Animación (todas en pausa: el grabador fija el instante de cada cuadro) ---------- */
+  @keyframes sube { from { opacity: 0; transform: translateY(44px); } to { opacity: 1; transform: none; } }
+  @keyframes aparece { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes crece-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  @keyframes descubre { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes traza { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes corre { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -880; } }
+  @keyframes brota { 0% { opacity: 0; transform: scale(0.6); } 70% { opacity: 1; transform: scale(1.06); } 100% { opacity: 1; transform: none; } }
+  @keyframes late { 0%, 100% { transform: none; } 50% { transform: scale(1.08); } }
+  @keyframes cae { 0% { opacity: 0; transform: translateY(-46px); } 60% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+  .anim { animation-play-state: paused; animation-fill-mode: both; animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1); }
+  body[data-animar="si"] .anim { animation-play-state: running; }
+
+  /* La raya de agua crece de arriba abajo en lugar de estar fija */
+  .tarjeta-cuerpo { position: relative; border-left: 0; }
+  .tarjeta-cuerpo::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: var(--agua);
+    transform-origin: top; animation: crece-y 520ms both paused cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  body[data-animar="si"] .tarjeta-cuerpo::before { animation-play-state: running; }
+  .marca.anim { animation-name: sube; animation-duration: 460ms; animation-delay: 120ms; }
+  /* El lema y la frase entran palabra por palabra (el guion las pone; aquí se parten) */
+  .palabra { display: inline-block; animation: sube 460ms both paused cubic-bezier(0.2, 0.7, 0.2, 1); animation-delay: calc(var(--antes, 200ms) + var(--i) * 55ms); }
+  body[data-animar="si"] .palabra { animation-play-state: running; }
+  .tarjeta-pie.anim { animation-name: sube; animation-duration: 440ms; animation-delay: 820ms; }
+
+  /* «De la presa a la raíz»: una línea de agua que corre de la presa (izquierda) a la planta (derecha) */
+  .cauce { position: absolute; left: var(--margen); right: var(--margen); bottom: 172px; height: 120px; }
+  .cauce svg { width: 100%; height: 100%; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .cauce .riel { stroke: rgba(245, 239, 230, 0.2); stroke-width: 3; }
+  .cauce .agua-corre { stroke: #6FB1E6; stroke-width: 7; stroke-dasharray: 34 22; animation: corre 12s linear both paused; }
+  body[data-animar="si"] .cauce .agua-corre { animation-play-state: running; }
+  .cauce .descubre { animation-name: descubre; animation-duration: 950ms; animation-delay: 250ms; animation-timing-function: cubic-bezier(0.3, 0.1, 0.2, 1); }
+  .cauce .trazo { stroke: var(--arena); stroke-width: 5; stroke-dasharray: 1; animation-name: traza; animation-duration: 520ms; }
+  .cauce .presa { animation-delay: 100ms; }
+  .cauce .planta { animation-delay: 950ms; }
+  .cauce .raiz { stroke: var(--ambar); animation-delay: 1150ms; }
+
+  /* «How it works»: los pasos llegan uno tras otro y la flecha se traza hacia el siguiente */
+  .como-titulo.anim { animation-name: sube; animation-duration: 420ms; animation-delay: 60ms; }
+  .paso.anim { animation-name: sube; animation-duration: 480ms; animation-delay: calc(200ms + var(--n) * 600ms); }
+  .paso svg.anim { animation-name: brota; animation-duration: 520ms; animation-delay: calc(200ms + var(--n) * 600ms); transform-origin: 50% 60%; }
+  .paso .senal.anim { animation-name: aparece; animation-duration: 280ms; animation-delay: calc(560ms + var(--k) * 120ms); }
+  .paso .gota.anim { animation-name: cae; animation-duration: 480ms; animation-delay: 1120ms; transform-box: fill-box; }
+  .paso .marca-parcela.anim { animation-name: cae; animation-duration: 480ms; animation-delay: 1720ms; transform-box: fill-box; }
+  .flecha path { stroke-dasharray: 1; }
+  .flecha path.anim { animation-name: traza; animation-duration: 340ms; animation-delay: calc(640ms + var(--n) * 600ms); }
+  /* Cómo está hecha: una fila de señas que entran al final */
+  .hecho { position: absolute; left: 96px; right: 96px; bottom: 104px; display: flex; justify-content: center; gap: 22px; flex-wrap: wrap; }
+  .hecho span {
+    padding: 14px 30px; border-radius: 999px; border: 2px solid rgba(185, 237, 135, 0.45); background: rgba(185, 237, 135, 0.1);
+    font-size: 32px; font-weight: 700; color: var(--agua-clara); white-space: nowrap;
+  }
+  .hecho span.anim { animation-name: brota; animation-duration: 400ms; animation-delay: calc(2050ms + var(--n) * 100ms); }
+
+  /* Cierre: la frase, una línea de agua que la subraya, el aviso y el pie */
+  .subraya { display: block; margin-top: 26px; width: 620px; height: 26px; overflow: visible; fill: none; stroke: #6FB1E6; stroke-width: 8; stroke-linecap: round; }
+  .subraya path { stroke-dasharray: 1; }
+  .subraya path.anim { animation-name: traza; animation-duration: 620ms; animation-delay: 380ms; }
+  .aviso.anim { animation-name: sube; animation-duration: 460ms; animation-delay: 420ms; }
+  [data-vista="cierre"] .tarjeta-pie.anim { animation-delay: 760ms; }
+  /* La última palabra de la frase de cierre, en el acento (la pone el guion; aquí solo se colorea) */
+  [data-vista="cierre"] .frase .palabra:last-of-type { color: var(--ambar); }
 
   /* ---------- Banda inferior de una toma ---------- */
   .banda {
@@ -101,61 +170,74 @@
 <body>
   <section class="tarjeta" data-vista="apertura" hidden>
     <div class="tarjeta-cuerpo">
-      <p class="marca"><b>ROOT</b> – From Dam to Root</p>
-      <h1 class="lema" data-campo="lema"></h1>
+      <p class="marca anim"><b>ROOT</b> – From Dam to Root</p>
+      <h1 class="lema" data-campo="lema" data-palabras></h1>
     </div>
-    <p class="tarjeta-pie"><strong>Orbital Farming</strong><span>Field Shift: Adapting Farms with NASA Data</span></p>
+    <!-- De la presa (izquierda) a la raíz (derecha): la línea de agua se descubre y sigue corriendo -->
+    <div class="cauce" aria-hidden="true">
+      <svg viewBox="0 0 1584 120" preserveAspectRatio="none">
+        <path class="trazo presa anim" pathLength="1" d="M8 104 L26 22 H62 L80 104 Z M-6 104 H96"/>
+        <path class="riel" d="M96 76 H1470"/>
+        <g class="descubre anim"><path class="agua-corre" d="M96 76 H1470"/></g>
+        <path class="trazo planta anim" pathLength="1" d="M1516 76 V30 M1516 54 C1494 54 1484 42 1484 28 C1504 28 1516 38 1516 54 Z M1516 44 C1516 26 1528 14 1546 14 C1546 32 1536 44 1516 44 Z"/>
+        <path class="trazo raiz anim" pathLength="1" d="M1516 76 V112 M1516 86 L1496 106 M1516 86 L1538 108 M1516 98 L1506 116"/>
+      </svg>
+    </div>
+    <p class="tarjeta-pie anim"><strong>Orbital Farming</strong><span>Field Shift: Adapting Farms with NASA Data</span></p>
   </section>
 
   <section class="tarjeta" data-vista="como" hidden>
-    <p class="como-titulo">How it works</p>
+    <p class="como-titulo anim">How it works</p>
     <div class="pasos">
-      <div class="paso">
+      <div class="paso anim" style="--n: 0">
         <!-- satélite: cuerpo, dos paneles y la señal hacia abajo -->
-        <svg viewBox="0 0 120 120" aria-hidden="true">
+        <svg class="anim" style="--n: 0" viewBox="0 0 120 120" aria-hidden="true">
           <rect x="48" y="30" width="24" height="30" rx="4"/>
           <rect x="12" y="34" width="28" height="22" rx="3"/><line x1="26" y1="34" x2="26" y2="56"/>
           <rect x="80" y="34" width="28" height="22" rx="3"/><line x1="94" y1="34" x2="94" y2="56"/>
           <line x1="40" y1="45" x2="48" y2="45"/><line x1="72" y1="45" x2="80" y2="45"/>
-          <path class="agua" d="M46 76 Q60 66 74 76"/><path class="agua" d="M38 90 Q60 74 82 90"/><path class="agua" d="M30 104 Q60 82 90 104"/>
+          <path class="agua senal anim" style="--k: 0" d="M46 76 Q60 66 74 76"/><path class="agua senal anim" style="--k: 1" d="M38 90 Q60 74 82 90"/><path class="agua senal anim" style="--k: 2" d="M30 104 Q60 82 90 104"/>
         </svg>
         <h2>NASA data</h2>
         <p>Satellite and climate records:<br><span data-producto="HLS">HLS</span> · <span data-producto="NASA POWER">POWER</span> · <span data-producto="IMERG">IMERG</span></p>
       </div>
-      <div class="flecha"><svg viewBox="0 0 84 64" aria-hidden="true"><path d="M8 32 H72"/><path d="M50 12 L74 32 L50 52"/></svg></div>
-      <div class="paso">
+      <div class="flecha"><svg viewBox="0 0 84 64" aria-hidden="true"><path class="anim" style="--n: 0" pathLength="1" d="M8 32 H72"/><path class="anim" style="--n: 0" pathLength="1" d="M50 12 L74 32 L50 52"/></svg></div>
+      <div class="paso anim" style="--n: 1">
         <!-- planta con una gota: el agua que pide el cultivo -->
-        <svg viewBox="0 0 120 120" aria-hidden="true">
+        <svg class="anim" style="--n: 1" viewBox="0 0 120 120" aria-hidden="true">
           <path d="M60 108 V58"/>
           <path d="M60 80 C38 80 28 66 28 52 C48 52 60 62 60 80 Z"/>
           <path d="M60 66 C60 46 72 34 90 34 C90 52 80 66 60 66 Z"/>
-          <path class="agua-llena" d="M60 8 C68 20 73 26 73 33 A13 13 0 0 1 47 33 C47 26 52 20 60 8 Z"/>
+          <path class="agua-llena gota anim" d="M60 8 C68 20 73 26 73 33 A13 13 0 0 1 47 33 C47 26 52 20 60 8 Z"/>
           <line class="ambar" x1="24" y1="108" x2="96" y2="108"/>
         </svg>
         <h2>A <span class="junto">crop-water</span> model</h2>
         <p>The water each crop asks for, with its likely range</p>
       </div>
-      <div class="flecha"><svg viewBox="0 0 84 64" aria-hidden="true"><path d="M8 32 H72"/><path d="M50 12 L74 32 L50 52"/></svg></div>
-      <div class="paso">
+      <div class="flecha"><svg viewBox="0 0 84 64" aria-hidden="true"><path class="anim" style="--n: 1" pathLength="1" d="M8 32 H72"/><path class="anim" style="--n: 1" pathLength="1" d="M50 12 L74 32 L50 52"/></svg></div>
+      <div class="paso anim" style="--n: 2">
         <!-- parcela con surcos y su marca -->
-        <svg viewBox="0 0 120 120" aria-hidden="true">
+        <svg class="anim" style="--n: 2" viewBox="0 0 120 120" aria-hidden="true">
           <path d="M14 96 L34 50 H86 L106 96 Z"/>
           <line x1="48" y1="50" x2="40" y2="96"/><line x1="60" y1="50" x2="60" y2="96"/><line x1="72" y1="50" x2="80" y2="96"/>
-          <path class="ambar" d="M60 44 C50 30 46 25 46 19 A14 14 0 0 1 74 19 C74 25 70 30 60 44 Z"/>
-          <circle class="ambar" cx="60" cy="19" r="4"/>
+          <g class="marca-parcela anim"><path class="ambar" d="M60 44 C50 30 46 25 46 19 A14 14 0 0 1 74 19 C74 25 70 30 60 44 Z"/>
+          <circle class="ambar" cx="60" cy="19" r="4"/></g>
         </svg>
         <h2>An answer per field</h2>
         <p>Water per year, years committed, hectares the allocation covers</p>
       </div>
     </div>
+    <!-- Cómo está hecha (README: código abierto, web estática, aplicación instalable, pruebas a la vista) -->
+    <p class="hecho"><span class="anim" style="--n: 0">Open source</span><span class="anim" style="--n: 1">Static web app</span><span class="anim" style="--n: 2">Works offline</span><span class="anim" style="--n: 3">Every figure with its source</span></p>
   </section>
 
   <section class="tarjeta" data-vista="cierre" hidden>
     <div class="tarjeta-cuerpo">
-      <h1 class="frase" data-campo="frase"></h1>
-      <p class="aviso">This tool supports, never replaces, the judgment of farmers and local experts.</p>
+      <h1 class="frase" data-campo="frase" data-palabras style="--antes: 80ms"></h1>
+      <svg class="subraya" viewBox="0 0 620 26" aria-hidden="true"><path class="anim" pathLength="1" d="M6 14 Q82 -6 160 14 T314 14 T468 14 T614 14"/></svg>
+      <p class="aviso anim">This tool supports, never replaces, the judgment of farmers and local experts.</p>
     </div>
-    <p class="tarjeta-pie"><span class="liga" data-campo="liga"></span><span class="app" data-campo="app" hidden>Installs as an app · opens offline</span></p>
+    <p class="tarjeta-pie anim"><span class="liga" data-campo="liga"></span><span class="app" data-campo="app" hidden>Installs as an app · opens offline</span></p>
   </section>
 
   <section class="banda" data-vista="banda" hidden>
@@ -175,7 +257,25 @@
       else if (valor) nodo.textContent = valor;
       else nodo.hidden = true;
     }
+    // El lema y la frase entran palabra por palabra: cada palabra en su caja, con un espacio de texto entre ellas
+    // (así el texto que lee el grabador es el mismo del guion).
+    for (const nodo of vista.querySelectorAll("[data-palabras]")) {
+      const palabras = nodo.textContent.trim().split(/\s+/).filter(Boolean);
+      nodo.textContent = "";
+      palabras.forEach((palabra, i) => {
+        const caja = document.createElement("span");
+        caja.className = "palabra";
+        caja.style.setProperty("--i", i);
+        caja.textContent = palabra;
+        nodo.append(caja, i < palabras.length - 1 ? " " : "");
+      });
+    }
   }
+  // El grabador fija el instante de cada cuadro: todas las animaciones van al mismo milisegundo.
+  window.__tarjetaIr = (ms) => {
+    for (const a of document.getAnimations()) a.currentTime = ms;
+  };
+  if (p.get("animar") === "si") document.body.dataset.animar = "si";
   // El grabador espera esta marca (con la tipografía ya cargada) antes de capturar.
   document.fonts.ready.then(() => { document.body.dataset.tarjeta = "lista"; });
 </script>

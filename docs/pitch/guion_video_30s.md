@@ -3,6 +3,8 @@
 
 **Video diseñado (15-nov).** Lo graba y lo monta `tests/e2e/grabar_video.mjs`, que LEE los subtítulos de la sección 5 de este archivo. Todo lo que se ve de la aplicación es la página real con sus datos; lo que se agrega (tarjetas, rótulos, subtítulos, puntero y resaltado) va en inglés y sin cifras escritas a mano.
 
+**Movimiento (15-nov, a pedido de Cristian: «usa motion, animaciones, transiciones»).** Las tres tarjetas son animadas, las tomas se unen con transiciones, la banda de cada toma sube y aparece, una barra avanza bajo la página mientras duran los golpes y cada tramo de la página se acerca despacio. El detalle está en la sección 6 («Movimiento del montaje»).
+
 ## 1. Qué fija el kit (pieza C7) y qué pidió Cristian
 
 | Punto | Lo que dice | Dónde |
@@ -45,7 +47,7 @@ Duración total: **29.0 segundos**. Diez tomas: tres tarjetas y siete golpes de 
 | 10 · Cierre | 26.4 | 29.0 | Tarjeta de cierre: «The farmer decides.», el aviso de juicio, la liga pública y «Installs as an app · opens offline» | Cuadro completo | — | — | The farmer decides. |
 
 Notas de la tabla:
-- **Tarjetas (tomas 1, 2 y 10).** Son `docs/pitch/video/tarjetas.html`, capturadas con Playwright a 1920 × 1080, con los colores de `web/style.css` (`:root`) y la tipografía de `web/vendor/`. El lema de la apertura y la frase del cierre salen de los subtítulos 1 y 10 de la sección 5. El subtítulo de las tarjetas va solo en el `.srt` (la tarjeta ya lo dice). La línea «Installs as an app · opens offline» sale solo si existen `web/manifest.webmanifest` (con `display: standalone`) y `web/sw.js`. La liga se lee de `RAIZ_LIGA_PAGINA`; si no viene, es la del proyecto.
+- **Tarjetas (tomas 1, 2 y 10).** Son `docs/pitch/video/tarjetas.html`, **animadas** y capturadas con Playwright cuadro por cuadro a 1920 × 1080, con los tonos del tablero (la portada: verde muy oscuro, texto claro y lima de acento) y la tipografía de `web/vendor/`. En la apertura el lema entra palabra por palabra y una línea de agua corre de la presa a la planta; en «How it works» los tres pasos llegan uno tras otro, la flecha se traza hacia el siguiente y al final entran cuatro señas de cómo está hecha («Open source», «Static web app», «Works offline», «Every figure with its source»); en el cierre la frase entra palabra por palabra y una línea de agua la subraya. El lema de la apertura y la frase del cierre salen de los subtítulos 1 y 10 de la sección 5. El subtítulo de las tarjetas va solo en el `.srt` (la tarjeta ya lo dice). La línea «Installs as an app · opens offline» sale solo si existen `web/manifest.webmanifest` (con `display: standalone`) y `web/sw.js`. La liga se lee de `RAIZ_LIGA_PAGINA`; si no viene, es la del proyecto.
 - **Toma 2.** Los tres productos que nombra («HLS», «POWER», «IMERG») se comprueban contra `web/data/manifest.json` antes de usar la tarjeta.
 - **Tomas 4 y 5: corte en el clic.** Abrir la ficha y abrir «Why?» tardan en dibujarse; por eso el tramo del clic termina en el clic y el siguiente empieza con el resultado ya dibujado. Al abrir «Why?» la página conserva en su sitio las otras tarjetas y la vista salta al final del texto abierto: el tramo siguiente se coloca en «Why it's suggested».
 - **Toma 5.** «Break the old alfalfa…» es una de las alternativas de P0757 en la tabla oficial. Si la parcela dejara de traerla, el grabador abre el «Why?» de su primera alternativa y lo avisa.
@@ -131,7 +133,14 @@ Necesita Node con Playwright (Chromium) y `ffmpeg`/`ffprobe`. Escribe `docs/pitc
 - Ventana de 1366 × 768 (el acomodo de la página no cambia) con escala de dispositivo 1.5: la grabación sale a 2050 × 1152 y los acercamientos casi no pierden nitidez. La escala se pide al navegador (`--force-device-scale-factor`); si no se aplica, el grabador lo nota y recorta a escala 1.
 - **Sin** movimiento reducido: con él no hay gotas animadas ni reproducción de la línea de tiempo. Pantalla de inicio cerrada con la llave `LLAVE_INICIO` de `web/js/acerca.js` en `sessionStorage`. Sin *service worker*.
 - Cada toma se graba en uno o más tramos, con su preparación fuera de cámara. Los tramos se graban en el orden que conviene a la página y se montan en el orden de la sección 3. Una marca de color que el grabador muestra un instante, fuera de cámara, da la correspondencia exacta entre el reloj y la grabación. Si una acción tarda más que su tramo, el tramo se recorre para terminar con el resultado a la vista.
-- Montaje con `ffmpeg`: cada tramo se recorta a su encuadre y se escala a 1920 × 890; la banda de cada toma es una imagen de `tarjetas.html`. Cortes limpios; un fundido de 0.2 s solo al entrar y salir de las tarjetas.
+- Montaje con `ffmpeg`: cada tramo se recorta a su encuadre y se escala a 1920 × 890; la banda de cada toma es una imagen de `tarjetas.html`.
+- **Movimiento del montaje** (constantes `TRANSICION`, `ACERCAR_POR_S`, `BANDA_ENTRA_S` y `BARRA` del grabador; son medidas de diseño, no datos):
+  - **Tarjetas animadas.** Cada animación CSS de `tarjetas.html` nace en pausa; el grabador la lleva al instante de cada cuadro (`window.__tarjetaIr(ms)`) y captura la tarjeta cuadro por cuadro. El video sale igual en cualquier máquina. Para verlas correr en el navegador: `tarjetas.html?vista=apertura&animar=si`.
+  - **Transiciones entre tomas** (`xfade`): entre las dos primeras tarjetas, un barrido hacia arriba; al entrar a la página, un círculo que se abre; entre golpes, la toma siguiente entra deslizándose desde la derecha; al cierre, un círculo que se cierra. La toma que entra espera en su primer cuadro lo que dura la transición (una tarjeta ya se está animando), así cada acción sigue empezando en el instante de su subtítulo y el video dura lo mismo.
+  - **Dentro de una toma**, los tramos siguen unidos con cortes limpios: son la acción y su resultado.
+  - **La banda** de cada toma aparece y sube a su lugar al empezar la toma.
+  - **Barra de avance**: una línea del color de acento crece bajo la página del primer golpe al último.
+  - **Acercamiento lento**: cada tramo de la página se acerca un poco hacia el centro de su encuadre (se calcula al doble de tamaño para que no tiemble).
 - Con red, el mapa base carga; sin red a veces el mapa del explorador no se da por listo (el grabador vuelve a cargar la página, hasta tres veces) y sale el aviso «Base map tiles are unavailable…» en todas las tomas (es válido, pero el video final debe grabarse con red).
 
 **Selectores que usa (todos por estructura, ninguno por texto ni por su lugar en la cabecera)**

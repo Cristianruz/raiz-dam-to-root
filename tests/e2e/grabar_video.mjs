@@ -3,8 +3,9 @@
 //
 // Uso:   node tests/e2e/grabar_video.mjs
 //        RAIZ_URL=https://<liga pública>/ node tests/e2e/grabar_video.mjs   (graba la página publicada, no la local)
-//        RAIZ_VIDEO=recorrido node tests/e2e/grabar_video.mjs   (el recorrido largo, de 60 a 90 s: las mismas tomas con
-//                                     más calma y tres golpes más: el idioma de la portada, las otras dos parcelas y la
+//        RAIZ_VIDEO=recorrido node tests/e2e/grabar_video.mjs   (el recorrido largo, de uno a dos minutos: las mismas
+//                                     tomas con más calma y siete golpes más: el idioma, menos lluvia, las zonas piloto
+//                                     y el registro de lluvia en la portada; el suelo, las otras dos parcelas y la
 //                                     vista 3D; guion docs/pitch/guion_video_recorrido.md → video_recorrido.mp4 y .srt)
 //        RAIZ_LIGA_PAGINA=<liga>      liga pública que se escribe en la tarjeta de cierre (por omisión, la del proyecto)
 //        RAIZ_FOTOGRAMAS=<carpeta>    dónde dejar un fotograma de cada tramo para revisarlo (por omisión, una temporal)
@@ -12,8 +13,8 @@
 // No forma parte de `node --test tests/` (necesita Chromium y ffmpeg). Termina con 0 si todo pasa y 1 si algo falla.
 //
 // El video (guion: docs/pitch/guion_video_30s.md) tiene cuatro partes:
-//   qué es            tarjeta de apertura (docs/pitch/video/tarjetas.html, vista «apertura»);
-//   cómo funciona     tarjeta «How it works» (vista «como»): tres pasos en una línea;
+//   qué es            tarjeta de apertura animada (docs/pitch/video/tarjetas.html, vista «apertura»);
+//   cómo funciona     tarjeta «How it works» animada (vista «como»): tres pasos y cuatro señas de cómo está hecha;
 //   se ve que funciona siete golpes cortos sobre la página REAL, cada uno con su acción y su consecuencia;
 //   cierre            tarjeta de cierre (vista «cierre») con el aviso de juicio y la liga pública.
 //
@@ -43,9 +44,11 @@
 //    cámara) da la correspondencia exacta entre el reloj y la grabación; el tramo de la vista 3D, que la grabación
 //    recibe con retraso, se coloca buscando en el .webm el instante en que aparece su anillo. Los tramos se graban
 //    en el orden que conviene a la página y se montan en el orden del guion.
-// 6. ffmpeg recorta y escala cada tramo a la zona de página (1920 × 890), pone abajo la banda de la toma (rótulo y
-//    subtítulo, capturada de tarjetas.html con la tipografía de la página) y une tarjetas y tramos con cortes limpios
-//    (un fundido corto solo al entrar y salir de las tarjetas). Sale MP4 H.264 yuv420p, 1920 × 1080, 25 fps, con una
+// 6. ffmpeg recorta y escala cada tramo a la zona de página (1920 × 890), con un acercamiento lento, y pone abajo la
+//    banda de la toma (rótulo y subtítulo, capturada de tarjetas.html), que sube y aparece. Las tarjetas son
+//    animadas: se capturan cuadro por cuadro, llevando sus animaciones al instante de cada cuadro. Las tomas se unen
+//    con transiciones (xfade) y una barra avanza bajo la página mientras duran los golpes; dentro de una toma, los
+//    tramos van con cortes limpios (son la acción y su resultado). Sale MP4 H.264 yuv420p, 1920 × 1080, 25 fps, con una
 //    pista de audio en silencio, sin música. Revisa con ffprobe que dure de 28 a 29 s (guía de envío: más de 30 s
 //    deja fuera el proyecto) y que pese menos de 10 MB.
 // 7. Extrae un fotograma de cada tarjeta y de cada tramo en RAIZ_FOTOGRAMAS para revisarlo a ojo.
@@ -72,7 +75,7 @@ const WEB = path.join(RAIZ, "web");
 // la exposición (RAIZ_VIDEO=recorrido). Cada uno tiene su guion, sus salidas y sus límites de duración y de peso.
 const VIDEOS = {
   oficial: { guion: "guion_video_30s.md", salida: "video_30s", maxima: 30.0, objetivo: [28.0, 29.0], megas: 10 },
-  recorrido: { guion: "guion_video_recorrido.md", salida: "video_recorrido", maxima: 90.0, objetivo: [60.0, 90.0], megas: 25 },
+  recorrido: { guion: "guion_video_recorrido.md", salida: "video_recorrido", maxima: 120.0, objetivo: [60.0, 120.0], megas: 30 },
 };
 const RECORRIDO = process.env.RAIZ_VIDEO === "recorrido";
 const VIDEO = VIDEOS[RECORRIDO ? "recorrido" : "oficial"];
@@ -102,9 +105,26 @@ const LIENZO = { ancho: 1920, alto: 1080 }; // 16:9, apto para YouTube y redes
 const BANDA = 190; // banda inferior: rótulo y subtítulo
 const PAGINA = { ancho: LIENZO.ancho, alto: LIENZO.alto - BANDA }; // zona donde se ve la página
 const ASPECTO = PAGINA.ancho / PAGINA.alto;
-const FONDO = "0x1D2329"; // --tinta de web/style.css: fondo de la banda y de las tarjetas
+const FONDO = "0x0B100E"; // --tinta de las tarjetas (el fondo del tablero): fondo de la banda y del lienzo
 const FPS = 25;
-const FUNDIDO_S = 0.2; // al entrar y salir de las tarjetas; lo demás son cortes limpios
+// Movimiento del montaje (medidas de diseño, no datos):
+// - transiciones entre tomas (xfade de ffmpeg): entre tarjetas, al entrar a la página, entre golpes y al cierre;
+// - cada tramo de la página se acerca despacio (ACERCAR_POR_S por segundo), calculado al doble de tamaño para que
+//   no tiemble; la banda de la toma sube y aparece; una barra del acento avanza bajo la página durante los golpes.
+const TRANSICION = {
+  tarjetas: { tipo: "smoothup", dur: 0.44 },
+  entrar: { tipo: "circleopen", dur: 0.52 },
+  golpes: { tipo: "slideleft", dur: 0.36 },
+  salir: { tipo: "circleclose", dur: 0.52 },
+};
+const ACERCAR_POR_S = 0.011;
+const SUPERMUESTREO = 2;
+const BANDA_ENTRA_S = 0.34;
+const BANDA_SUBE_PX = 38;
+const BARRA = { alto: 4, color: "0xB9ED87" };
+const ENTRADA_S = 0.3; // el video abre con un fundido desde el fondo
+// Una tarjeta que entra por una transición empieza a animarse durante ella: se capturan estos cuadros de más.
+const ANTICIPO_CUADROS = 14;
 // Video del formulario: 30 s es regla del kit (C7) y de la guía de envío (más deja fuera el proyecto); se apunta a
 // 28–29 s (margen pedido por el coordinador) y a menos de 10 MB.
 const DURACION_MAX_S = VIDEO.maxima;
@@ -121,6 +141,9 @@ const CIERRE = { tipo: "tarjeta", vista: "cierre" };
 const GOLPES = {
   dotacion: { tipo: "pagina", clave: "dotacion", rotulo: "Set the water" },
   idioma: { tipo: "pagina", clave: "idioma", rotulo: "Your language" },
+  lluvia: { tipo: "pagina", clave: "lluvia", rotulo: "Less rain" },
+  zonas: { tipo: "pagina", clave: "zonas", rotulo: "Pilot areas" },
+  historia: { tipo: "pagina", clave: "historia", rotulo: "Rainfall record" },
   parcela: { tipo: "pagina", clave: "parcela", rotulo: "Pick a field" },
   porque: { tipo: "pagina", clave: "porque", rotulo: "Ask why" },
   gota: { tipo: "pagina", clave: "gota", rotulo: "Follow the drop" },
@@ -133,7 +156,7 @@ const GOLPES = {
 };
 const G = GOLPES;
 const TOMAS = RECORRIDO
-  ? [APERTURA, COMO, G.dotacion, G.idioma, G.parcela, G.porque, G.gota, G.evidencia, G.suelo, G.otras, G.anios, G.compartir, G.pruebas, CIERRE]
+  ? [APERTURA, COMO, G.dotacion, G.idioma, G.lluvia, G.zonas, G.historia, G.parcela, G.porque, G.gota, G.evidencia, G.suelo, G.otras, G.anios, G.compartir, G.pruebas, CIERRE]
   : [APERTURA, COMO, G.dotacion, G.parcela, G.porque, G.gota, G.evidencia, G.compartir, G.pruebas, CIERRE];
 // Las otras dos parcelas de ejemplo (solo en el recorrido): una con el plazo libre y un nogal comprometido.
 const OTRAS_PARCELAS = ["P0632", "L0175"];
@@ -1047,6 +1070,7 @@ function tramosDelTablero() {
       return { tarjeta: caja(t), deslizador: caja(d), libre: libre ? caja(libre) : null, valor: d.value };
     });
   const lista = [];
+  let dotacionInicial = null; // la dotación con que abre la portada: las tomas que siguen vuelven a ella
 
   lista.push({
     toma: "dotacion", parte: 1, nombre: "tablero (portada, en inglés): una marca de la dotación; cambian el mapa y el indicador",
@@ -1069,6 +1093,7 @@ function tramosDelTablero() {
         await verPuntero(page, false);
         return { encuadre: encuadre({ ancho: VIEWPORT.width, x: 0, y: 0 }), resaltado: "no" };
       }
+      dotacionInicial = antes.valor;
       const t = antes.tarjeta;
       const ancho = Math.max(900, t.w * 2.4);
       const e = encuadre({ ancho, x: t.x - 26, y: t.y + t.h + 14 - ancho / ASPECTO });
@@ -1171,6 +1196,222 @@ function tramosDelTablero() {
       await page.waitForTimeout(400);
     },
   });
+  // ---- Less rain, Pilot areas y Rainfall record (solo en el recorrido): lo que el tablero hace con la lluvia y
+  //      con las dos zonas piloto. Los tres golpes dejan la portada como estaba.
+  const caja = (page, selector) =>
+    page.evaluate((sel) => {
+      const n = document.querySelector(sel);
+      if (!n) return null;
+      const r = n.getBoundingClientRect();
+      return { x: r.left, y: r.top, w: r.width, h: r.height };
+    }, selector);
+  /** Deja la portada en el resumen, con la dotación con que abrió, la lluvia del registro y la zona pedida. */
+  const dejarComoAbrio = (page, { lluvia = false, zona = null } = {}) =>
+    page.evaluate(
+      ([dotacion, conMenosLluvia, zonaPedida]) => {
+        window.__grabacionQuitarResaltado();
+        const evento = (n, tipo) => n.dispatchEvent(new Event(tipo, { bubbles: true }));
+        if (location.hash && location.hash !== "#resumen") location.hash = "#resumen";
+        const d = document.querySelector("#allocation");
+        if (d && dotacion != null && d.value !== dotacion) {
+          d.value = dotacion;
+          evento(d, "input");
+          evento(d, "change");
+        }
+        const c = document.querySelector("#rain");
+        if (c && c.checked !== conMenosLluvia) c.click();
+        const z = document.querySelector("#zona-dashboard");
+        if (z && zonaPedida && z.value !== zonaPedida) {
+          z.value = zonaPedida;
+          evento(z, "change");
+        }
+        window.scrollTo(0, 0);
+      },
+      [dotacionInicial, lluvia, zona],
+    );
+  let zonaInicial = null;
+
+  lista.push({
+    toma: "lluvia", parte: 0.5, nombre: "tablero: la casilla de menos lluvia; cambia el indicador del agua comprometida",
+    async prep(page) {
+      zonaInicial = await page.evaluate(() => document.querySelector("#zona-dashboard")?.value ?? null);
+      await dejarComoAbrio(page);
+      await page.evaluate((alto) => {
+        const d = document.querySelector("#allocation");
+        if (!d) return;
+        const t = d.closest("article") ?? d.parentElement;
+        window.scrollBy(0, t.getBoundingClientRect().bottom - (alto - 110));
+      }, VIEWPORT.height);
+      await page.waitForTimeout(900);
+      const e = await estructura(page);
+      if (e) await moverPuntero(page, e.tarjeta.x + e.tarjeta.w + 140, e.tarjeta.y + 60, 0);
+    },
+    async accion(page, reloj) {
+      const antes = await estructura(page);
+      const casilla = await caja(page, "#rain");
+      if (!antes || !casilla) {
+        check("tablero: la portada trae la casilla de menos lluvia (#rain)", false);
+        return { encuadre: encuadre({ ancho: VIEWPORT.width, x: 0, y: 0 }), resaltado: "no" };
+      }
+      const t = antes.tarjeta;
+      const ancho = Math.max(900, t.w * 2.4);
+      const e = encuadre({ ancho, x: t.x - 26, y: t.y + t.h + 14 - ancho / ASPECTO });
+      await page.evaluate(() => {
+        const c = document.querySelector("#rain");
+        window.__grabacionResaltarElementos([[c.closest("label") ?? c]], { margen: 8 });
+      });
+      await reloj.hasta(0.18);
+      await moverPuntero(page, casilla.x + casilla.w / 2, casilla.y + casilla.h / 2, 380);
+      await pulsar(page);
+      const dice = await page.evaluate(() => document.querySelector("#water-commitment")?.innerText ?? "");
+      await page.mouse.click(casilla.x + casilla.w / 2, casilla.y + casilla.h / 2);
+      const cambio = await page
+        .waitForFunction((a) => (document.querySelector("#water-commitment")?.innerText ?? "") !== a, dice, { timeout: 5000 })
+        .then(() => true)
+        .catch(() => false);
+      check("tablero: con menos lluvia cambia el indicador del agua comprometida", cambio && (await page.evaluate(() => document.querySelector("#rain").checked)));
+      await page.evaluate(() => {
+        const c = document.querySelector("#rain");
+        const w = document.querySelector("#water-commitment");
+        window.__grabacionResaltarElementos([[c.closest("label") ?? c], ...(w ? [[w]] : [])], { margen: 8 });
+      });
+      await page.mouse.move(1, VIEWPORT.height - 1);
+      await moverPuntero(page, t.x + t.w + 150, t.y + t.h * 0.5, 420);
+      return { encuadre: e, resaltado: "si" };
+    },
+  });
+
+  /** Lleva el bloque «lado a lado» del resumen arriba de la ventana y devuelve su encuadre (null si la página no lo trae). */
+  const encuadrarBloque = async (page) => {
+    await page.evaluate(() => {
+      window.__grabacionQuitarResaltado();
+      const b = document.querySelector(".rain-compare");
+      if (b) window.scrollBy(0, b.getBoundingClientRect().top - 64);
+    });
+    await page.waitForTimeout(700);
+    const b = await caja(page, ".rain-compare");
+    return b ? { bloque: b, e: encuadre({ ancho: Math.min(VIEWPORT.width, b.w + 56), x: b.x - 28, y: b.y - 14 }) } : null;
+  };
+  let delBloque = null;
+  lista.push({
+    toma: "lluvia", parte: 0.5, nombre: "tablero: zonas y opciones lado a lado; la barra de menos lluvia va resaltada",
+    async prep(page) {
+      delBloque = await encuadrarBloque(page);
+      const z = await caja(page, "#lado-zonas");
+      if (z) await moverPuntero(page, z.x + z.w * 0.5, z.y + 30, 0);
+    },
+    async accion(page, reloj) {
+      if (!delBloque) {
+        check("tablero: el resumen trae el bloque de zonas y opciones lado a lado (.rain-compare)", false);
+        return { encuadre: encuadre({ ancho: VIEWPORT.width, x: 0, y: 0 }), resaltado: "no" };
+      }
+      // Primero, la zona en uso con su barra de menos lluvia; después, las opciones de la parcela con la suya.
+      await page.evaluate(() => {
+        const zona = document.querySelector('#lado-zonas [data-zona][aria-pressed="true"]');
+        window.__grabacionResaltarElementos([[...zona.querySelectorAll(".lado-barra")]], { margen: 8 });
+      });
+      await reloj.hasta(0.5);
+      const o = await caja(page, "#lado-opciones");
+      if (o) await moverPuntero(page, o.x + o.w * 0.45, o.y + 70, 520);
+      await page.evaluate(() => {
+        const fila = document.querySelector("#lado-opciones .lado-fila");
+        if (fila) window.__grabacionResaltarElementos([[...fila.querySelectorAll(".lado-barra")]], { margen: 8 });
+      });
+      return { encuadre: delBloque.e, resaltado: "si" };
+    },
+  });
+
+  lista.push({
+    toma: "zonas", parte: 1, nombre: "tablero: elegir la otra zona piloto en el bloque; cambian las opciones de la parcela",
+    async prep(page) {
+      await dejarComoAbrio(page, { zona: zonaInicial });
+      await page.waitForTimeout(500);
+      delBloque = await encuadrarBloque(page);
+      const z = await caja(page, "#lado-zonas");
+      if (z) await moverPuntero(page, z.x + z.w + 60, z.y + 40, 0);
+    },
+    async accion(page, reloj) {
+      const otra = await caja(page, '#lado-zonas [data-zona][aria-pressed="false"]');
+      if (!delBloque || !otra) {
+        check("tablero: el bloque lado a lado ofrece otra zona piloto para elegir", false);
+        return { encuadre: encuadre({ ancho: VIEWPORT.width, x: 0, y: 0 }), resaltado: "no" };
+      }
+      await page.evaluate(() => {
+        window.__grabacionResaltarElementos([[document.querySelector('#lado-zonas [data-zona][aria-pressed="false"]')]], { margen: 6 });
+      });
+      await reloj.hasta(0.2);
+      const punto = { x: otra.x + otra.w * 0.62, y: otra.y + 34 };
+      await moverPuntero(page, punto.x, punto.y, 420);
+      await pulsar(page);
+      const titulo = await page.evaluate(() => document.querySelector("#lado-opciones-titulo")?.textContent ?? "");
+      await page.mouse.click(punto.x, punto.y);
+      const cambio = await page
+        .waitForFunction((t) => (document.querySelector("#lado-opciones-titulo")?.textContent ?? "") !== t, titulo, { timeout: 6000 })
+        .then(() => true)
+        .catch(() => false);
+      check("tablero: al elegir la otra zona en el bloque cambian las opciones de la parcela", cambio);
+      // El anillo pasa a la zona elegida y a las opciones de su parcela.
+      await page.evaluate(() => {
+        const zona = document.querySelector('#lado-zonas [data-zona][aria-pressed="true"]');
+        const fila = document.querySelector("#lado-opciones .lado-fila");
+        window.__grabacionResaltarElementos([[zona], [document.querySelector("#lado-opciones-titulo"), ...(fila ? [fila] : [])]], { margen: 6 });
+      });
+      const o = await caja(page, "#lado-opciones");
+      if (o) await moverPuntero(page, o.x + o.w * 0.4, o.y + 90, 480);
+      return { encuadre: delBloque.e, resaltado: "si" };
+    },
+    async despues(page) {
+      await dejarComoAbrio(page, { zona: zonaInicial });
+      await page.waitForTimeout(500);
+    },
+  });
+
+  lista.push({
+    toma: "historia", parte: 1, nombre: "tablero: el rango histórico de lluvia de NASA POWER y su comprobación año por año",
+    async prep(page) {
+      await page.evaluate(() => {
+        window.__grabacionQuitarResaltado();
+        location.hash = "#predicciones";
+      });
+      await page.waitForSelector(".climate-chart", { timeout: 15000 }).catch(() => {});
+      await page.evaluate(() => {
+        window.scrollTo(0, 0);
+        const a = document.querySelector("#forecast-analysis");
+        if (a) window.scrollBy(0, a.getBoundingClientRect().top - 56);
+      });
+      await page.waitForTimeout(800);
+      await moverPuntero(page, VIEWPORT.width * 0.55, 150, 0);
+    },
+    async accion(page, reloj) {
+      const a = await caja(page, "#forecast-analysis");
+      if (!a || !(await caja(page, ".climate-chart"))) {
+        check("tablero: la vista de la historia trae la gráfica de la comprobación de lluvia", false);
+        return { encuadre: encuadre({ ancho: VIEWPORT.width, x: 0, y: 0 }), resaltado: "no" };
+      }
+      const e = encuadre({ ancho: Math.min(VIEWPORT.width, a.w + 56), x: a.x - 28, y: 30 });
+      // Primero, las tres cifras del registro; después la página baja a la gráfica y el anillo pasa a ella.
+      await page.evaluate(() => {
+        const cifras = [...document.querySelectorAll(".forecast-metrics .card")];
+        if (cifras.length) window.__grabacionResaltarElementos(cifras.map((n) => [n]), { margen: 4 });
+      });
+      await reloj.hasta(0.42);
+      await page.evaluate(() => {
+        window.__grabacionQuitarResaltado();
+        const g = document.querySelector(".climate-chart");
+        window.scrollBy({ top: g.getBoundingClientRect().top - 110, behavior: "smooth" });
+      });
+      await page.waitForTimeout(750);
+      await page.evaluate(() => window.__grabacionResaltarElementos([[document.querySelector(".climate-chart")]], { margen: 4 }));
+      const g = await caja(page, ".climate-chart");
+      await moverPuntero(page, g.x + g.w * 0.2, g.y + g.h * 0.5, 0);
+      await moverPuntero(page, g.x + g.w * 0.8, g.y + g.h * 0.45, 900);
+      return { encuadre: e, resaltado: "si" };
+    },
+    async despues(page) {
+      await dejarComoAbrio(page, { zona: zonaInicial });
+      await page.waitForTimeout(400);
+    },
+  });
   return lista;
 }
 
@@ -1206,7 +1447,7 @@ async function capturarTarjetas(navegador, baseLocal, cues) {
       v.querySelectorAll('[data-campo="liga"], [hidden], svg').forEach((n) => n.remove());
       return v.textContent.replace(/\s+/g, " ").trim();
     });
-  const imagenes = {};
+  const imagenes = { secuencias: {} };
   const manifiesto = fs.readFileSync(path.join(WEB, "data", "manifest.json"), "utf-8");
   for (const [i, toma] of TOMAS.entries()) {
     const c = cues[i];
@@ -1216,6 +1457,8 @@ async function capturarTarjetas(navegador, baseLocal, cues) {
       if (toma.vista === "apertura") parametros.lema = c.texto;
       if (toma.vista === "cierre") Object.assign(parametros, { frase: c.texto, liga: LIGA.replace(/^https?:\/\//, "").replace(/\/$/, ""), app: esAplicacionInstalable() ? "si" : "no" });
       await abrir(parametros, LIENZO.alto);
+      // Para leer el texto y medir si cabe: el estado final de la animación.
+      await page.evaluate(() => window.__tarjetaIr(600000));
       const t = await texto();
       const problemas = problemasDeTexto(t);
       // Nada se sale de la tarjeta.
@@ -1232,6 +1475,19 @@ async function capturarTarjetas(navegador, baseLocal, cues) {
         const liga = await page.locator('[data-vista="cierre"] [data-campo="liga"]').innerText();
         check("tarjeta «cierre»: frase del guion, aviso de juicio y liga pública", t.includes(c.texto) && t.includes(AVISO_JUICIO) && LIGA.includes(liga.trim()), liga.trim());
       }
+      // La tarjeta es animada: se captura cuadro por cuadro, llevando sus animaciones al instante de cada cuadro.
+      const cuadros = Math.round(c.fin * FPS) - Math.round(c.ini * FPS) + ANTICIPO_CUADROS;
+      const carpeta = path.join(TEMPORAL, `tarjeta_${i + 1}`);
+      fs.mkdirSync(carpeta, { recursive: true });
+      const animaciones = await page.evaluate(() => document.getAnimations().length);
+      for (let f = 0; f < cuadros; f += 1) {
+        await page.evaluate((ms) => window.__tarjetaIr(ms), (f * 1000) / FPS);
+        await page.screenshot({ path: path.join(carpeta, `c_${String(f).padStart(4, "0")}.jpg`), type: "jpeg", quality: 96 });
+      }
+      const primero = fs.statSync(path.join(carpeta, "c_0000.jpg")).size;
+      const ultimo = fs.statSync(path.join(carpeta, `c_${String(cuadros - 1).padStart(4, "0")}.jpg`)).size;
+      check(`tarjeta «${toma.vista}»: animada (${animaciones} animaciones) y capturada cuadro por cuadro`, animaciones > 0 && primero !== ultimo, `${cuadros} cuadros`);
+      imagenes.secuencias[i] = path.join(carpeta, "c_%04d.jpg");
     } else {
       await abrir({ vista: "banda", rotulo: toma.rotulo, texto: c.texto }, BANDA);
       const medida = await page.evaluate(() => {
@@ -1259,72 +1515,114 @@ function duracion(archivo) {
 const par = (v) => Math.round(v / 2) * 2;
 
 /**
- * Montaje: en el orden del guion, cada tarjeta dura su subtítulo y cada toma de la página se arma con sus tramos,
- * recortados a su encuadre y escalados a la zona de página; encima, la banda de la toma. Devuelve el tamaño en MB y
- * la lista de piezas con su lugar en el video (para los fotogramas).
+ * Montaje: en el orden del guion. Cada tarjeta es su secuencia de cuadros (animada) y dura su subtítulo; cada toma de
+ * la página se arma con sus tramos (cortes limpios entre ellos: son la acción y su resultado), recortados a su
+ * encuadre, con un acercamiento lento, sobre el lienzo y con su banda, que sube y aparece. Las tomas se unen con
+ * transiciones: la que entra espera en su primer cuadro mientras dura la transición, así cada acción sigue empezando
+ * en el instante de su subtítulo y el video dura lo mismo. Devuelve el tamaño en MB y la lista de piezas con su lugar
+ * en el video (para los fotogramas).
  */
 function exportar(webm, cues, tramos, imagenes, crf, escala) {
   const entradas = [];
   const filtros = [];
   const piezas = []; // { nombre, ini, dur }
-  const bandas = [];
+  const tomas = []; // { etiqueta, ini, cuadros, tipo }
+  const cuantas = () => entradas.filter((a) => a === "-i").length;
+  // Lo que dura la transición con que entra cada toma (0 en la primera): en cuadros enteros.
+  const transicionDe = (a, b) =>
+    a.tipo === "tarjeta" && b.tipo === "tarjeta" ? TRANSICION.tarjetas : a.tipo === "tarjeta" ? TRANSICION.entrar : b.tipo === "tarjeta" ? TRANSICION.salir : TRANSICION.golpes;
+  const cuadrosDe = (i) => Math.round(cues[i].fin * FPS) - Math.round(cues[i].ini * FPS);
+  const entra = TOMAS.map((toma, i) => {
+    if (i === 0) return { tipo: null, cuadros: 0 };
+    const tr = transicionDe(TOMAS[i - 1], toma);
+    return { tipo: tr.tipo, cuadros: Math.min(Math.round(tr.dur * FPS), Math.floor(cuadrosDe(i - 1) / 2), ANTICIPO_CUADROS) };
+  });
   let cuadrosAntes = 0;
-  const ultimaPagina = TOMAS.map((t) => t.tipo).lastIndexOf("pagina");
-  const primeraPagina = TOMAS.findIndex((t) => t.tipo === "pagina");
   for (const [i, toma] of TOMAS.entries()) {
     const c = cues[i];
     const cuadros = Math.round(c.fin * FPS) - Math.round(c.ini * FPS);
+    const ini = cuadrosAntes / FPS;
     if (toma.tipo === "tarjeta") {
-      const dur = cuadros / FPS;
-      entradas.push("-loop", "1", "-framerate", String(FPS), "-t", (dur + 0.5).toFixed(3), "-i", imagenes[i]);
-      const k = entradas.filter((a) => a === "-i").length - 1;
-      const fundidos = [
-        `fade=t=in:st=0:d=${FUNDIDO_S}:color=${FONDO}`,
-        ...(i < TOMAS.length - 1 ? [`fade=t=out:st=${(dur - FUNDIDO_S).toFixed(3)}:d=${FUNDIDO_S}:color=${FONDO}`] : []),
-      ];
-      filtros.push(`[${k}:v]fps=${FPS},scale=${LIENZO.ancho}:${LIENZO.alto},setsar=1,trim=end_frame=${cuadros},setpts=PTS-STARTPTS,${fundidos.join(",")},format=yuv420p[p${piezas.length}]`);
-      piezas.push({ nombre: `toma_${i + 1}_${toma.vista}`, ini: cuadrosAntes / FPS, dur });
+      // La tarjeta que entra por una transición trae al principio los cuadros de esa transición: ya se está animando.
+      const conAnticipo = cuadros + entra[i].cuadros;
+      entradas.push("-framerate", String(FPS), "-i", imagenes.secuencias[i]);
+      const k = cuantas() - 1;
+      filtros.push(
+        `[${k}:v]fps=${FPS},scale=${LIENZO.ancho}:${LIENZO.alto},setsar=1,tpad=stop_mode=clone:stop_duration=1,` +
+          `trim=end_frame=${conAnticipo},setpts=PTS-STARTPTS,format=yuv420p,fps=${FPS}[t${i}]`,
+      );
+      piezas.push({ nombre: `toma_${i + 1}_${toma.vista}`, ini, dur: cuadros / FPS });
+      tomas.push({ etiqueta: `t${i}`, ini, cuadros, tipo: "tarjeta" });
       cuadrosAntes += cuadros;
       continue;
     }
     const suyos = tramos.filter((t) => t.toma === toma.clave);
     if (!suyos.length) throw new Error(`la toma «${toma.clave}» no tiene tramos grabados`);
     let usados = 0;
+    const partes = [];
     for (const [j, t] of suyos.entries()) {
       // El último tramo de la toma se lleva los cuadros que falten: la toma dura exactamente su subtítulo.
       const n = j === suyos.length - 1 ? cuadros - usados : Math.round((cuadros * t.parte) / suyos.reduce((s, x) => s + x.parte, 0));
       usados += n;
       const dur = n / FPS;
       entradas.push("-ss", t.inicio.toFixed(3), "-t", (dur + 0.4).toFixed(3), "-i", webm);
-      const k = entradas.filter((a) => a === "-i").length - 1;
+      const k = cuantas() - 1;
       const e = t.encuadre;
       const w = Math.min(par(e.w * escala), Math.floor((VIEWPORT.width * escala) / 2) * 2);
       const h = Math.min(par(e.h * escala), Math.floor((VIEWPORT.height * escala) / 2) * 2);
       const x = limitar(Math.round(e.x * escala), 0, Math.floor(VIEWPORT.width * escala) - w);
       const y = limitar(Math.round(e.y * escala), 0, Math.floor(VIEWPORT.height * escala) - h);
-      const fundidos = [
-        ...(i === primeraPagina && j === 0 ? [`fade=t=in:st=0:d=${FUNDIDO_S}:color=${FONDO}`] : []),
-        ...(i === ultimaPagina && j === suyos.length - 1 ? [`fade=t=out:st=${(dur - FUNDIDO_S).toFixed(3)}:d=${FUNDIDO_S}:color=${FONDO}`] : []),
-      ];
+      // Acercamiento lento hacia el centro del encuadre (al doble de tamaño y de vuelta: movimiento sin temblor).
+      const acercar = (ACERCAR_POR_S * dur).toFixed(4);
       filtros.push(
-        `[${k}:v]fps=${FPS},crop=${w}:${h}:${x}:${y},scale=${PAGINA.ancho}:${PAGINA.alto}:flags=lanczos,setsar=1,` +
+        `[${k}:v]fps=${FPS},crop=${w}:${h}:${x}:${y},scale=${PAGINA.ancho * SUPERMUESTREO}:${PAGINA.alto * SUPERMUESTREO}:flags=lanczos,setsar=1,` +
           `tpad=stop_mode=clone:stop_duration=1,trim=end_frame=${n},setpts=PTS-STARTPTS,` +
-          `${fundidos.length ? `${fundidos.join(",")},` : ""}pad=${LIENZO.ancho}:${LIENZO.alto}:0:0:color=${FONDO},format=yuv420p[p${piezas.length}]`,
+          `zoompan=z='1+${acercar}*on/${n}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${PAGINA.ancho}x${PAGINA.alto}:fps=${FPS},` +
+          `setsar=1,format=yuv420p[g${i}_${j}]`,
       );
+      partes.push(`[g${i}_${j}]`);
       piezas.push({ nombre: `toma_${i + 1}_${toma.clave}_${String.fromCharCode(97 + j)}`, ini: cuadrosAntes / FPS, dur });
       cuadrosAntes += n;
     }
-    bandas.push({ imagen: imagenes[i], ini: Math.round(c.ini * FPS) / FPS, fin: Math.round(c.fin * FPS) / FPS });
+    // La toma completa sobre el lienzo, con su banda: la banda aparece y sube a su lugar al empezar la toma.
+    entradas.push("-loop", "1", "-framerate", String(FPS), "-t", (cuadros / FPS + 1).toFixed(3), "-i", imagenes[i]);
+    const kb = cuantas() - 1;
+    filtros.push(`${partes.join("")}concat=n=${partes.length}:v=1:a=0,pad=${LIENZO.ancho}:${LIENZO.alto}:0:0:color=${FONDO}[pg${i}]`);
+    filtros.push(`[${kb}:v]fps=${FPS},format=rgba,fade=t=in:st=0.04:d=${BANDA_ENTRA_S}:alpha=1[b${i}]`);
+    filtros.push(
+      `[pg${i}][b${i}]overlay=x=0:y='${PAGINA.alto}+${BANDA_SUBE_PX}*(1-min(t/${(BANDA_ENTRA_S + 0.04).toFixed(2)},1))*(1-min(t/${(BANDA_ENTRA_S + 0.04).toFixed(2)},1))':eof_action=repeat,` +
+        `trim=end_frame=${cuadros},setpts=PTS-STARTPTS,format=yuv420p,fps=${FPS}[t${i}]`,
+    );
+    tomas.push({ etiqueta: `t${i}`, ini, cuadros, tipo: "pagina" });
   }
-  filtros.push(`${piezas.map((_, i) => `[p${i}]`).join("")}concat=n=${piezas.length}:v=1:a=0[base0]`);
-  for (const [i, b] of bandas.entries()) {
-    entradas.push("-i", b.imagen);
-    const k = entradas.filter((a) => a === "-i").length - 1;
-    filtros.push(`[base${i}][${k}:v]overlay=0:${PAGINA.alto}:enable='gte(t,${b.ini.toFixed(3)})*lt(t,${b.fin.toFixed(3)})'[base${i + 1}]`);
+  // Transiciones entre tomas. Una toma de la página espera en su primer cuadro lo que dura la transición; una
+  // tarjeta ya trae esos cuadros al principio (su animación corre mientras entra).
+  let actual = tomas[0].etiqueta;
+  let salida = 0; // lo que dura la última transición (hacia el cierre)
+  for (let i = 1; i < tomas.length; i += 1) {
+    const d = entra[i].cuadros / FPS;
+    if (tomas[i].tipo === "tarjeta") filtros.push(`[${tomas[i].etiqueta}]fps=${FPS}[r${i}]`);
+    else filtros.push(`[${tomas[i].etiqueta}]tpad=start_mode=clone:start_duration=${d.toFixed(3)},fps=${FPS}[r${i}]`);
+    filtros.push(`[${actual}][r${i}]xfade=transition=${entra[i].tipo}:duration=${d.toFixed(3)}:offset=${(tomas[i].ini - d).toFixed(3)}[x${i}]`);
+    actual = `x${i}`;
+    if (tomas[i].tipo === "tarjeta" && tomas[i - 1].tipo === "pagina") salida = d;
   }
-  filtros.push(`[base${bandas.length}]format=yuv420p[v]`);
+  // Barra de avance: crece bajo la página mientras duran los golpes (del primero al último).
+  const deLaPagina = tomas.filter((t) => t.tipo === "pagina");
   const total = cuadrosAntes / FPS;
-  const audio = entradas.filter((a) => a === "-i").length;
+  if (deLaPagina.length) {
+    const t0 = deLaPagina[0].ini;
+    const ultima = deLaPagina.at(-1);
+    const t1 = ultima.ini + ultima.cuadros / FPS - salida;
+    entradas.push("-f", "lavfi", "-i", `color=c=${BARRA.color}:s=${LIENZO.ancho}x${BARRA.alto}:r=${FPS}`);
+    const kbarra = cuantas() - 1;
+    filtros.push(
+      `[${actual}][${kbarra}:v]overlay=x='-w+w*(t-${t0.toFixed(3)})/${(t1 - t0).toFixed(3)}':y=${PAGINA.alto}:enable='between(t,${t0.toFixed(3)},${t1.toFixed(3)})':shortest=1[conbarra]`,
+    );
+    actual = "conbarra";
+  }
+  filtros.push(`[${actual}]fade=t=in:st=0:d=${ENTRADA_S}:color=${FONDO},format=yuv420p[v]`);
+  const audio = cuantas();
   correr(FFMPEG, [
     "-hide_banner", "-loglevel", "error", "-y",
     ...entradas,
@@ -1337,7 +1635,7 @@ function exportar(webm, cues, tramos, imagenes, crf, escala) {
     "-t", total.toFixed(3), "-movflags", "+faststart",
     MP4,
   ]);
-  console.log(`Montaje: ${piezas.length} piezas, ${bandas.length} bandas; CRF ${crf}.`);
+  console.log(`Montaje: ${piezas.length} piezas en ${tomas.length} tomas, ${tomas.length - 1} transiciones; CRF ${crf}.`);
   return { tam: fs.statSync(MP4).size / 1e6, piezas };
 }
 

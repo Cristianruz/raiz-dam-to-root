@@ -15,41 +15,53 @@ Set the water allocation. The map and the indicator respond.
 The app speaks the farmer's language.
 
 5
-00:00:21,000 --> 00:00:30,000
-Each option: water asked, hectares covered, years committed.
+00:00:21,000 --> 00:00:27,000
+Explore a drier year. Every option needs more irrigation water.
 
 6
-00:00:30,000 --> 00:00:40,000
-Every option says why, and what changes from today.
+00:00:27,000 --> 00:00:32,000
+The pilot areas, side by side. Tap one to open.
 
 7
-00:00:40,000 --> 00:00:46,000
-From the dam to the crop and the aquifer.
+00:00:32,000 --> 00:00:37,400
+The rainfall record from NASA POWER, checked year by year.
 
 8
-00:00:46,000 --> 00:00:52,000
-What satellites saw on this field, year by year.
+00:00:37,400 --> 00:00:46,400
+Each option: water asked, hectares covered, years committed.
 
 9
-00:00:52,000 --> 00:00:57,000
-Soil and satellite evidence, each with its source.
+00:00:46,400 --> 00:00:56,400
+Every option says why, and what changes from today.
 
 10
-00:00:57,000 --> 00:01:05,000
-A free field can choose. An orchard stays committed.
+00:00:56,400 --> 00:01:02,400
+From the dam to the crop and the aquifer.
 
 11
-00:01:05,000 --> 00:01:11,000
-The year the dam delivered no water.
+00:01:02,400 --> 00:01:08,400
+What satellites saw on this field, year by year.
 
 12
-00:01:11,000 --> 00:01:17,000
-A message for the farmer, in their language.
+00:01:08,400 --> 00:01:13,400
+Soil and satellite evidence, each with its source.
 
 13
-00:01:17,000 --> 00:01:23,000
-Five tests, published whatever the result.
+00:01:13,400 --> 00:01:21,400
+A free field can choose. An orchard stays committed.
 
 14
-00:01:23,000 --> 00:01:27,000
+00:01:21,400 --> 00:01:27,400
+The year the dam delivered no water.
+
+15
+00:01:27,400 --> 00:01:33,400
+A message for the farmer, in their language.
+
+16
+00:01:33,400 --> 00:01:39,400
+Five tests, published whatever the result.
+
+17
+00:01:39,400 --> 00:01:43,400
 The farmer decides.
