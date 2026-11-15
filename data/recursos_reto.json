@@ -117,7 +117,7 @@
    "id": "ecostress",
    "nombre": "ECOSTRESS",
    "organismo": "NASA",
-   "papel": "Field-scale contrast of evapotranspiration (the other contrasts are regional)",
+   "papel": "Satellite estimate of evapotranspiration per field on clear days; not a field measurement and not a validation of the model",
    "entregas": ["ecostress_parcelas.csv"],
    "aplica": true
   },
