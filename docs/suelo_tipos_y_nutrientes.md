@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Tipos de suelo y nutrientes, escalable a cualquier región
 
 > Pieza B7 (14-nov-2026). Script: `datos/colab/B7_suelo_tipos.py`. Entregas: `suelo_tipos.json`, `suelo_reglas.json` y

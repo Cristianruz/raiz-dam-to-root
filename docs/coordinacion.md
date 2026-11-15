@@ -57,3 +57,24 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | Hora | Quién | Qué |
 |---|---|---|
 | 22:40 | integrador | Se crea este archivo. Integración en `981c39c` (main publicado en `e819b52`) |
+| 22:37 | integrador | Fusión de `claude/sleepy-heisenberg-pxyhtx` («Laptop») (`fb53a8c`) |
+| 22:38 | integrador | Revisión de UX de la web y principios de diseño con fuente, para el chat de diseño (`faff5cd`) |
+| 22:39 | integrador | Bitácora y uso de IA de la noche del 14 al 15 de noviembre (`09bdafd`) |
+| 22:45 | integrador | Fusiones de `claude/sleepy-heisenberg-pxyhtx` (`9f08dda`) y de `claude/gallant-franklin-41s0vq`, diseño (`dd03843`) |
+| 22:51 | integrador | Fusión del relieve: la página dice solo lo que sostiene el DEM de 30 m (`32aa58c`, en `a50197d`) y de las prioridades del productor, «What matters most to you?» (`e375fba`, en `c8e2c4c`) |
+| 22:54 | integrador | Auditoría del código nuevo: correcciones con prueba (`b7bbc7d`) |
+| 22:55 | integrador | Reconstruido con relieve, prioridades y las correcciones de la auditoría: 1080 pytest y 181 de Node (`4c3cd54`) |
+| 22:59 | integrador | Preguntas difíciles: OpenET cubre los 48 estados contiguos y FARMS (`654c1ea`) |
+| 23:03 | integrador | Decisión: reglas del motor tras la revisión (`fdb3659`) |
+| 23:10 | integrador | Fusión del validador del contrato: huecos de la auditoría (`f071651`, en `c94b810`) |
+| 23:14 | integrador | La gota describe el escenario de goteo y no lo recomienda, decisión de Cristian (`987b561`); fusión de `a5f6dfd`, web_smoke en el teléfono (`4931ce0`) |
+| 23:15 | integrador | Reconstruido con las correcciones de la ficha, la frase del goteo y el validador: 1089 pytest (`16c905d`) |
+| 23:19 | integrador | Fusión de los textos públicos con las correcciones de la auditoría (`bf4a9b9` y `57fecbe`, en `58d5a86`) |
+| 23:25 | integrador | web_smoke: un control desactivado no cuenta como objetivo táctil (`932b5a4`); fusión de la ficha con el tipo de suelo y las notas de nutrientes, entregas B7 y B8 (`073dfc3`, en `966eff3`) |
+| 23:26 | integrador | Reconstruido con el tipo de suelo y los nutrientes por parcela: 1102 pytest y 200 de Node (`3239d82`) |
+| 23:40 | integrador | Diapositivas regeneradas sobre la página actual (`40c01ec`) |
+| 23:42 | integrador | Fusión de la auditoría del contrato: filtros de la secuencia publicada y rodal joven sin corte de verano (`272fa71`, en `9e5e386`) |
+| 23:43 | integrador | Reconstruido con el buzón v11 (fuentes en inglés): 1,267 opciones, 1129 pytest y 200 de Node (`2148e81`); fusiones de `claude/revision-spaceapps-guia` (`837155d`) y de `datos-satelite` (`743d302`) |
+| 23:45 | integrador | Reconstruido tras fusionar `datos-satelite` y la revisión contra la guía de Space Apps. Integración en `d5de13f` |
+
+Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.

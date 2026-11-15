@@ -52,14 +52,14 @@ These files are validated in `data/processed/` (`data/processed/fuentes.json`); 
 | FAO ECOCROP crop requirements, read online sheet by sheet | FAO | Published pH and texture ranges in `suelo_requisitos.json`, each with its citation and link; suitability in the Soil row | **Terms to be confirmed**: just cited ranges were transcribed, not the database (`docs/suelo_parcelas.md`) |
 | FAO Irrigation and Drainage Paper 29 (water quality), Table 4 | FAO | Salinity thresholds in `suelo_requisitos.json` and in the salinity filter, each cited | Cited figures |
 | FAO Irrigation Water Management Training Manual No. 4 (Brouwer, Prins and Heibloem 1989), Annex I, Table 8 | FAO | Indicative drip and surface field efficiencies in `supuestos.json`; drip scenario of "Follow the drop" | Cited figures |
-| ECOSTRESS (`ECO_L3T_JET.002`, through AppEEARS) | NASA (LP DAAC) | `ecostress_parcelas.csv` (mailbox v10, merged with pull request #4); field sheet, "Soil and satellite evidence" | NASA Earth science data: free and open; cite the product: Hook, S. and Halverson, G. (2024), https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002 (`data/processed/fuentes.json`, entry `ecostress_parcelas.csv`) |
-| GAEZ v4, theme res05 «Suitability and Attainable Yield» | FAO and IIASA | `gaez_zona.csv` (mailbox v10, merged with pull request #4); Regional context, "Agro-climatic suitability by crop" | **CC BY-NC-SA**, as recorded in `data/processed/fuentes.json` (entry `gaez_zona.csv`); the data script adds "version 4.0 or 3.0 IGO, according to the FAO catalog record" (`datos/colab/G1_gaez_zona.py`, branch `datos-satelite`). NonCommercial and ShareAlike: GAEZ values and what derives from them cannot be used commercially and are shared under the same license; the Apache-2.0 license of the code does not cover them. Cite "FAO and IIASA, GAEZ v4, http://www.fao.org/gaez/" and the model, Fischer et al. (2021), https://doi.org/10.4060/cb4744en |
+| ECOSTRESS (`ECO_L3T_JET.002`, through AppEEARS) | NASA (LP DAAC) | `ecostress_parcelas.csv` (mailbox v10, merged with pull request #4); field sheet, "Soil and satellite evidence" | NASA Earth science data: free and open; cite the product: Hook, S. and Halverson, G. (2024), https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002 (`data/processed/fuentes.json`, entry `ecostress_parcelas.csv`). Requested through AppEEARS, version 3.137 (`docs/ecostress.md`); the software citation that AppEEARS asks for is not recorded in this repository: **to be confirmed** |
+| GAEZ v4, theme res05 «Suitability and Attainable Yield» | FAO and IIASA | `gaez_zona.csv` (mailbox v10, merged with pull request #4); Regional context, "Agro-climatic suitability by crop" | **CC BY-NC-SA**, as recorded in `data/processed/fuentes.json` (entry `gaez_zona.csv`); the data script adds "version 4.0 or 3.0 IGO, according to the FAO catalog record" (`datos/colab/G1_gaez_zona.py`). NonCommercial and ShareAlike: GAEZ values and what derives from them cannot be used commercially and are shared under the same license; the Apache-2.0 license of the code does not cover them. Cite "FAO and IIASA, GAEZ v4, http://www.fao.org/gaez/" and the model, Fischer et al. (2021), https://doi.org/10.4060/cb4744en |
 
 Holders as listed in `data/recursos_reto.json`. ECOSTRESS was read through AppEEARS, with an Earthdata account, and GAEZ through FAO's GAEZ v4 image service (`data/processed/fuentes.json`, entries `ecostress_parcelas.csv` and `gaez_zona.csv`).
 
-## Delivered and validated; listed under About & Data, not drawn on the page
+## Soil type and nutrient notes (shown in the field sheet)
 
-These four soil files entered with mailbox v10 (`data/processed/fuentes.json`). `web/data/manifest.json` lists them among the delivered files; no module of the page reads them yet.
+These four soil files (`data/processed/fuentes.json`) feed the "Soil type" line and the "Nutrient notes" of the field sheet, under "Soil and satellite evidence" (`motor/suelo_web.py`; `web/data/suelo.json` → `tipo_suelo`, `nutrientes`). How they were made: `docs/suelo_tipos_y_nutrientes.md`.
 
 | File | Source and holder | License or terms of use |
 |---|---|---|
@@ -70,7 +70,7 @@ These four soil files entered with mailbox v10 (`data/processed/fuentes.json`). 
 
 ## Raw files redistributed in `data/raw/`
 
-`data/raw/` holds 54 files (`git ls-files data/raw`, without `.gitkeep`): the unchanged inputs of the data scripts. Each keeps the license of its source.
+`data/raw/` holds 61 files (`git ls-files data/raw`, without `.gitkeep`): the unchanged inputs of the data scripts. Each keeps the license of its source. How each was obtained is in `docs/reproducir_datos.md`.
 
 | Folder and files | Source | License or terms of use |
 |---|---|---|
@@ -82,10 +82,15 @@ These four soil files entered with mailbox v10 (`data/processed/fuentes.json`). 
 | `data/raw/reto/ctx_*.csv` (16 CSV) | Regional series from Earth Engine: SMAP, MODIS, GRACE/GRACE-FO, GLDAS and NLDAS (NASA); ERA5-Land (ECMWF, Copernicus) | NASA open data; ERA5-Land: **terms to be confirmed** |
 | `data/raw/reto/gedi_disparos_*.csv` (2 CSV) | GEDI L2A v2 shots from Earth Engine | NASA open data; formal citation: **terms to be confirmed** |
 | `data/raw/reto/suelo_soilgrids_*.csv` (2 CSV) | ISRIC SoilGrids 2.0 cells, with OpenLandMap texture columns (`olm_tex_0`, `olm_tex_10`, `olm_tex_30`) | SoilGrids: CC-BY 4.0. The `olm_tex_*` columns are OpenLandMap data: **CC-BY-SA 4.0**, shared under the same license |
+| `data/raw/reto/suelo_clases_*.csv` (2 CSV) | OpenLandMap, predicted USDA soil great groups at 250 m (Hengl and Nauman 2018, v01, https://doi.org/10.5281/zenodo.1476844), cells read in Earth Engine (`datos/earthengine/suelo.js`) | **CC-BY-SA 4.0**, as recorded in `data/processed/fuentes.json` (entry `tipo_suelo_parcelas.csv`): shared under the same license |
+| `data/raw/reto/ecostress_pasos_*.csv` (2 CSV) and `data/raw/reto/ecostress_solicitud_*.json` (2 JSON) | ECOSTRESS `ECO_L3T_JET.002` point samples, the output of AppEEARS (version 3.137) kept unchanged, and the two request files that produced it (`docs/ecostress.md`) | NASA Earth science data: free and open; cite Hook, S. and Halverson, G. (2024), https://doi.org/10.5067/ECOSTRESS/ECO_L3T_JET.002. AppEEARS software citation: **to be confirmed**. The request files are the team's own |
+| `data/raw/reto/gaez_celdas.csv` (1 CSV) | GAEZ v4 (FAO and IIASA), theme res05, values read cell by cell from FAO's image service (`datos/navegador/gaez_leer.js`) | **CC BY-NC-SA**, as recorded in `data/processed/fuentes.json` (entry `gaez_zona.csv`): NonCommercial and ShareAlike |
 | `data/raw/sih/` (`LBQCH.csv`, `FIMCH.csv`) | Conagua, Sistema de Información Hidrológica | **Terms to be confirmed** |
 | `data/raw/conagua/` (2 XLSX and 2 CSV extracts) | Conagua, agricultural statistics by crop and irrigated areas and volumes, 1998–2025 | **Terms to be confirmed** |
 
-The 30 data scripts in `datos/` (24 in `datos/colab/`, 5 in `datos/earthengine/`, 1 in `datos/navegador/`) are code of this repository, under Apache-2.0. `datos/supuestos.json` holds the data session's assumptions, each with its source or labeled as an assumption.
+The Earth Engine raw files of the two pilot areas (monthly HLS per area, the NDVI memory rasters, GPM IMERG and NASADEM per area: 31 files, about 192 MiB, that is 201 MB, in `data/raw/ee_zonas/`) are on the `ee-crudos` branch of this repository, with the same sources and terms as `data/raw/ee/` and `data/raw/imerg/`; `datos/colab/correr_zonas.py` needs them. `data/raw/ee/` on the main branch holds the original rectangle.
+
+The 37 data scripts in `datos/` (30 in `datos/colab/`, 5 in `datos/earthengine/`, 2 in `datos/navegador/`) are code of this repository, under Apache-2.0. `datos/supuestos.json` holds the data session's assumptions, each with its source or labeled as an assumption.
 
 ## Not run or not used
 
@@ -125,3 +130,4 @@ Terms that are not recorded in this repository and that a team member has to con
 11. Sources of the soil catalog and of the nutrient rules (`suelo_tipos.json`, `suelo_reglas.json`): terms of each text that is summarized.
 12. The license of the team's own derived tables in `data/processed/` and `web/data/` is not stated in the repository. The field polygons derive from Fields of The World and carry its attribution.
 13. Copernicus Sentinel data: the full license text behind the notice of the Sentinel-2 figure.
+14. AppEEARS: the software citation it asks for (the repository records the version, 3.137, and the request identifiers; `docs/ecostress.md`).

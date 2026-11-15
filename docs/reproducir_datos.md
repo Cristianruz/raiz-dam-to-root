@@ -1,5 +1,5 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
-# Cómo reproducir los datos de Raíz desde cero
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
+# Cómo reproducir los datos de ROOT desde cero
 
 > Para el jurado o para quien quiera rehacer los datos. Un comando rehace, desde los crudos del repositorio, todos los
 > archivos que la sesión de datos entregó al buzón (`Raiz_entregas`) y los compara byte por byte con la entrega.
