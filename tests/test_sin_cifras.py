@@ -2,16 +2,19 @@
 """K-TEST 7 (versión inicial): «ninguna cifra en la página que no venga de los datos».
 
 Revisa:
-- el texto visible de web/index.html (más los atributos que se leen o se anuncian:
-  alt, title, placeholder, aria-label…, y min/max/step/value de los controles);
-- las cadenas literales ('…', "…" y el texto de las plantillas `…`) de web/app.js y de
-  los demás web/*.js; si una cadena trae marcado HTML, cuenta su texto visible.
+- el texto visible de las DOS páginas, web/index.html (la portada: el tablero) y web/explorer.html (el
+  explorador de parcelas), más los atributos que se leen o se anuncian (alt, title, placeholder,
+  aria-label…, y min/max/step/value de los controles);
+- las cadenas literales ('…', "…" y el texto de las plantillas `…`) de web/app.js y de todos los
+  demás módulos de web/ (también los del tablero: js/dashboard.js, js/asesor.js, js/recomendador.js,
+  js/interfaz.js, el módulo de idiomas js/i18n.js y los diccionarios js/textos_*.js); si una cadena
+  trae marcado HTML, cuenta su texto visible.
 Falla si queda un dígito que no esté en tests/excepciones_cifras.json (cada
 excepción con su motivo). Las cifras deben llegar de cubo.json, parcelas.geojson,
 explicaciones.json, params.json o manifest.json, nunca escritas a mano.
 
-Si web/index.html o web/app.js aún no existen, su prueba se marca «skip» (los
-escribe la pieza web). Las pruebas del detector corren siempre, con ejemplos.
+Las dos páginas y los módulos del tablero deben existir: si falta uno, la prueba FALLA (no se marca «skip»:
+una página sin revisar no cuenta como revisada). Las pruebas del detector corren siempre, con ejemplos.
 """
 import fnmatch
 import json
@@ -330,12 +333,41 @@ def test_archivos_js_incluye_los_modulos_de_web_js():
     assert not [n for n in nombres if n.startswith("vendor/")]
 
 
-def test_index_html_sin_cifras():
-    ruta = WEB / "index.html"
-    if not ruta.exists():
-        pytest.skip("pendiente: web/index.html aún no existe (lo escribe la pieza web)")
-    malas = cifras_sin_fuente(texto_visible_html(ruta.read_text(encoding="utf-8")), "index.html")
-    assert not malas, mensaje("index.html", malas)
+# Las páginas de la aplicación: la portada (el tablero) y el explorador de parcelas. Las dos se revisan.
+PAGINAS = ("index.html", "explorer.html")
+# Módulos del tablero y de los idiomas que la lista de archivos_js() debe traer (no basta con que «si están, se revisan»).
+MODULOS_DEL_TABLERO = ("js/dashboard.js", "js/asesor.js", "js/recomendador.js", "js/interfaz.js", "js/i18n.js")
+ENCABEZADO_HTML = "<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
+
+
+@pytest.mark.parametrize("pagina", PAGINAS)
+def test_paginas_html_sin_cifras(pagina):
+    ruta = WEB / pagina
+    assert ruta.exists(), f"falta web/{pagina}: las dos páginas de la aplicación deben existir y revisarse"
+    malas = cifras_sin_fuente(texto_visible_html(ruta.read_text(encoding="utf-8")), pagina)
+    assert not malas, mensaje(pagina, malas)
+
+
+@pytest.mark.parametrize("pagina", PAGINAS)
+def test_paginas_html_con_encabezado(pagina):
+    """Regla 4: el encabezado va en las primeras líneas (después de <!doctype html>)."""
+    inicio = (WEB / pagina).read_text(encoding="utf-8")[:400]
+    assert ENCABEZADO_HTML in inicio, f"web/{pagina} sin el encabezado de la regla 4"
+
+
+def test_ninguna_otra_pagina_html_queda_sin_revisar():
+    """Si aparece otra página en web/ (fuera de vendor/), debe entrar a PAGINAS para que se revisen sus cifras."""
+    otras = sorted(p.relative_to(WEB).as_posix() for p in WEB.rglob("*.html")
+                   if "vendor" not in p.relative_to(WEB).parts and p.relative_to(WEB).as_posix() not in PAGINAS)
+    assert not otras, f"páginas de web/ que ninguna prueba revisa: {otras}"
+
+
+def test_la_lista_de_js_trae_los_modulos_del_tablero_y_los_idiomas():
+    nombres = archivos_js()
+    for modulo in MODULOS_DEL_TABLERO:
+        assert modulo in nombres, f"web/{modulo} debe existir y revisarse (cifras, palabras vetadas y encabezado)"
+    for diccionario in (WEB / "js").glob("textos_*.js"):
+        assert f"js/{diccionario.name}" in nombres, f"el diccionario web/js/{diccionario.name} no lo revisa ninguna prueba"
 
 
 @pytest.mark.parametrize("nombre", archivos_js())

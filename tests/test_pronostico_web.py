@@ -1,9 +1,11 @@
-# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; Codex.
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex
+"""Rango histórico de lluvia y demanda del tablero (motor/pronostico_web.py) y su verificador."""
 import datetime as dt
 import json
+import re
 from pathlib import Path
 import pytest
-from motor.pronostico_web import cuantil, retroprueba, anios_completos, leer_clima, cargar_a5
+from motor.pronostico_web import cuantil, retroprueba, anios_completos, leer_clima, cargar_a5, leer_supuestos
 
 RAIZ = Path(__file__).resolve().parent.parent
 
@@ -84,3 +86,71 @@ def test_verificador_detecta_manipulacion_de_la_prediccion(tmp_path):
     reporte=verificar(tmp_path)
     assert any('mediana anterior' in f for f in reporte['fallos'])
     assert any('MAE' in f for f in reporte['fallos'])
+
+
+# --- Supuestos de diseño en data/params.json (regla 2) y verificador dentro del comando único -----------------
+def test_verificador_pasa_con_lo_publicado():
+    """motor/verificar_pronostico.py corre dentro de pytest (y por eso de `python construir.py`): hashes de los
+    archivos de origen, lluvia de cada ciclo contra el archivo diario, retroprueba sin años posteriores."""
+    from motor.verificar_pronostico import verificar
+    reporte = verificar(RAIZ)
+    assert reporte['total'] > 0 and reporte['fallos'] == [], reporte['fallos'][:10]
+    assert reporte['correctas'] == reporte['total']
+
+
+def test_metodo_publica_los_supuestos_de_params_y_no_cifras_del_codigo():
+    params = json.loads((RAIZ / 'data/params.json').read_text(encoding='utf-8'))
+    tablero, millar = params['tablero'], params['unidades']['millar']['valor']
+    metodo = json.loads((RAIZ / 'web/data/pronostico.json').read_text(encoding='utf-8'))['metodo']
+    assert metodo['minimo_entrenamiento'] == tablero['minimo_ciclos']['valor']
+    assert metodo['niveles_plan'] == tablero['niveles_plan']['valor']
+    assert metodo['nivel_plan'] == tablero['nivel_plan']['valor']
+    assert metodo['intervalo'] == tablero['intervalo_lluvia']['valor']
+    assert (metodo['conversion_mm_millares_ha'], metodo['cm_por_millar'], metodo['m3_por_millar']) == (
+        millar['lamina_mm'], millar['lamina_cm'], millar['m3_por_ha'])
+    for entrada in tablero.values():
+        assert entrada['etiqueta'] == '[S]' and entrada['fuente'] and entrada['fuente_en'] and entrada['nota']
+        assert 'valor' in entrada and entrada['unidad']
+
+
+def test_supuestos_incoherentes_detienen_el_motor(tmp_path):
+    params = json.loads((RAIZ / 'data/params.json').read_text(encoding='utf-8'))
+    params['tablero']['cobertura_nominal']['valor'] = 0.5
+    (tmp_path / 'data').mkdir()
+    (tmp_path / 'data/params.json').write_text(json.dumps(params), encoding='utf-8')
+    with pytest.raises(ValueError):
+        leer_supuestos(tmp_path)
+    del params['tablero']
+    (tmp_path / 'data/params.json').write_text(json.dumps(params), encoding='utf-8')
+    with pytest.raises(KeyError):
+        leer_supuestos(tmp_path)
+
+
+def test_la_variante_de_lluvia_sale_de_params_lluvia_pct():
+    params = json.loads((RAIZ / 'data/params.json').read_text(encoding='utf-8'))
+    sup = leer_supuestos(RAIZ)
+    assert [k for k, _ in sup['lluvia']] == [str(p) for p in params['lluvia_pct']['valor']]
+    assert all(f == pytest.approx(1 + p / 100) for (_, f), p in zip(sup['lluvia'], params['lluvia_pct']['valor']))
+    publicado = json.loads((RAIZ / 'web/data/pronostico.json').read_text(encoding='utf-8'))
+    fila = publicado['zonas']['delicias_saucillo']['rotaciones']['alfalfa']['serie'][0]
+    assert list(fila['lluvia']) == [k for k, _ in sup['lluvia']]
+
+
+def test_el_motor_no_trae_los_supuestos_escritos_en_el_codigo():
+    """Ni el mínimo de ciclos, ni los niveles, ni los cuantiles, ni la cobertura nominal, ni el factor de lluvia."""
+    codigo = (RAIZ / 'motor/pronostico_web.py').read_text(encoding='utf-8')
+    sin_comentarios = '\n'.join(l.split('#')[0] for l in codigo.split('\n'))
+    assert not re.search(r'(?<![\w.])0?\.(1|8|9|95)\b', sin_comentarios), 'quedan cuantiles o factores escritos en el código'
+    assert 'minimo=10' not in sin_comentarios and "'minimo_entrenamiento': 10" not in sin_comentarios
+
+
+def test_la_retroprueba_publica_el_resultado_sea_favorable_o_no():
+    """Lo que LIMITATIONS.md cita: error medio contra «repetir el año anterior» y años dentro del rango, por zona."""
+    zonas = json.loads((RAIZ / 'web/data/pronostico.json').read_text(encoding='utf-8'))['zonas']
+    for zona in zonas.values():
+        v = zona['validacion_lluvia']
+        dentro = sum(c['p10_mm'] <= c['observado_mm'] <= c['p90_mm'] for c in v['casos'])
+        assert v['cobertura'] == pytest.approx(dentro / v['n'])
+        assert v['mae_persistencia_mm'] == pytest.approx(
+            sum(abs(c['observado_mm'] - c['persistencia_mm']) for c in v['casos']) / v['n'])
+        assert v['cobertura_nominal'] == leer_supuestos(RAIZ)['cobertura_nominal']

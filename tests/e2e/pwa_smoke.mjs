@@ -8,9 +8,11 @@
 //
 // Qué hace:
 // - copia web/ a una carpeta temporal y trabaja SOLO sobre esa copia (no toca el repo);
-// - prueba la PÁGINA REAL, sin inyectar nada: comprueba que index.html enlaza el manifest y css/instalar.css y que
-//   app.js importa js/instalar.js y llama a montarInstalacion (el indicador va en la barra de la marca); si falta
-//   una pieza, la prueba falla (antes, cuando la aplicación aún no lo conectaba, se agregaba a la copia);
+// - prueba las DOS PÁGINAS REALES, sin inyectar nada y cada una con SUS selectores (sin alternativas del tipo
+//   «#a, #b», que dejan pasar la página equivocada): la PORTADA (index.html, el tablero; es lo que abre la
+//   aplicación instalada) y el EXPLORADOR de parcelas (explorer.html, la página anterior). Comprueba que las dos
+//   enlazan el manifest y css/instalar.css y que su módulo de entrada importa instalar.js y llama a
+//   montarInstalacion; si falta una pieza, la prueba falla;
 // - sirve la copia en localhost (http.createServer, sin dependencias) y abre la página con red;
 // - verifica con red: el listado data/precache.json corresponde a lo que hay en web/, el service worker queda
 //   activo y al mando de la página, el indicador dice «Online» y «Ready to work offline», la caché
@@ -18,9 +20,11 @@
 //   cargan, RED PRIMERO (un archivo que cambia en el servidor llega nuevo, no la copia guardada) y el botón
 //   «Install app» (aparece con beforeinstallprompt, se pulsa con el teclado, abre el diálogo y desaparece);
 // - CORTA LA RED de verdad: context.setOffline(true) y además apaga el servidor (nada puede contestar);
-// - verifica sin red: el indicador pasa a «Offline — showing the last synced copy», la página RECARGA y
-//   arranca desde la copia, el mapa tiene su lienzo y las parcelas están dibujadas o listadas, el deslizador
-//   cambia el indicador, cada archivo del listado sale de la copia con los mismos octetos que en disco
+// - verifica sin red: el indicador pasa a «Offline — showing the last synced copy», la portada RECARGA y
+//   arranca desde la copia, el mapa tiene su lienzo y las parcelas están DIBUJADAS (con el mapa listo no basta
+//   que estén en una lista: «0 dibujadas» es una falla; solo sin mapa cuenta la lista), el deslizador
+//   cambia los indicadores; el EXPLORADOR también abre sin red, con su lienzo, sus parcelas dibujadas (o
+//   listadas si no hay mapa) y su deslizador; cada archivo del listado sale de la copia con los mismos octetos que en disco
 //   (incluidas las teselas de relieve y el archivo renovado con red primero), una petición a otro origen
 //   falla sin romper nada y no hay errores de página; lo mismo en un teléfono de 390 × 844 sin
 //   desplazamiento horizontal;
@@ -63,6 +67,11 @@ const LISTADO = "data/precache.json";
 const MARCA = "<!-- pwa_smoke: este texto llegó por la red después de guardarse la copia -->";
 const SONDA = "data/archivo_que_no_existe.json"; // la prueba lo pide sin red a propósito: su falla es la esperada
 const ESPERA_COPIA_MS = 90000; // tope de la prueba para que el service worker guarde todos los archivos
+const ESPERA_DIBUJO_MS = 20000; // para que el mapa pinte las parcelas después de arrancar
+// Las dos páginas de la aplicación: la portada (el tablero) y el explorador de parcelas.
+const PORTADA = "index.html";
+const EXPLORADOR = "explorer.html";
+const PAGINAS = [PORTADA, EXPLORADOR];
 const ESPERA_ARRANQUE_MS = 60000; // holgado: la máquina puede estar corriendo otras pruebas con navegador a la vez
 
 const TIPOS = {
@@ -110,15 +119,25 @@ function recorrer(carpeta) {
  * app.js, el import de js/instalar.js y la llamada a montarInstalacion. No toca la copia.
  */
 function piezasQueFaltan() {
-  const html = fs.readFileSync(path.join(COPIA, "index.html"), "utf-8");
-  const entrada = html.includes("js/dashboard.js") ? "js/dashboard.js" : "app.js";
-  const app = fs.existsSync(path.join(COPIA, entrada)) ? fs.readFileSync(path.join(COPIA, entrada), "utf-8") : "";
   const faltan = [];
-  if (!/<link\b[^>]*rel=["']?manifest\b[^>]*href=["']?manifest\.webmanifest/i.test(html)) faltan.push('<link rel="manifest">');
-  if (!html.includes("css/instalar.css")) faltan.push("css/instalar.css");
-  if (!/<meta\b[^>]*name=["']?theme-color/i.test(html)) faltan.push('<meta name="theme-color">');
-  if (!/from\s+["']\.\/(?:js\/)?instalar\.js["']/.test(app)) faltan.push("import de js/instalar.js en app.js");
-  if (!/montarInstalacion\(/.test(app)) faltan.push("montarInstalacion() en app.js");
+  for (const pagina of PAGINAS) {
+    if (!fs.existsSync(path.join(COPIA, pagina))) {
+      faltan.push(`${pagina} (no existe)`);
+      continue;
+    }
+    const html = fs.readFileSync(path.join(COPIA, pagina), "utf-8");
+    // El módulo de entrada es el que la propia página carga (<script type="module" src="…">).
+    const entrada = (html.match(/<script\b[^>]*type=["']module["'][^>]*src=["']([^"']+)["']/i) ?? [])[1] ?? "";
+    const app = entrada && fs.existsSync(path.join(COPIA, entrada)) ? fs.readFileSync(path.join(COPIA, entrada), "utf-8") : "";
+    // instalar.js vive en js/: desde app.js es «./js/instalar.js» y desde un módulo de js/, «./instalar.js».
+    const importa = entrada.startsWith("js/") ? /from\s+["']\.\/instalar\.js["']/ : /from\s+["']\.\/js\/instalar\.js["']/;
+    if (!/<link\b[^>]*rel=["']?manifest\b[^>]*href=["']?manifest\.webmanifest/i.test(html)) faltan.push(`${pagina}: <link rel="manifest">`);
+    if (!html.includes("css/instalar.css")) faltan.push(`${pagina}: css/instalar.css`);
+    if (!/<meta\b[^>]*name=["']?theme-color/i.test(html)) faltan.push(`${pagina}: <meta name="theme-color">`);
+    if (!entrada) faltan.push(`${pagina}: <script type="module" src="…">`);
+    else if (!importa.test(app)) faltan.push(`${pagina}: import de instalar.js en ${entrada}`);
+    if (entrada && !/montarInstalacion\(/.test(app)) faltan.push(`${pagina}: montarInstalacion() en ${entrada}`);
+  }
   return faltan;
 }
 
@@ -180,23 +199,50 @@ function servidor(retener = () => false) {
 }
 
 // ---------------------------------------------------------------- utilidades de página
-/** Texto del indicador: la cifra grande y todo el bloque (rango y mensajes incluidos). */
+// Cada página con SUS selectores. La portada (index.html) es el tablero: indicadores en #stats, deslizador
+// #allocation, mapa #map y lista #field-select; avisa que arrancó con body[data-dashboard="listo"] y el estado
+// de su mapa en body[data-dashboard-map] («listo», o «local» si no hay mapa y dibuja su esquema).
+// El explorador (explorer.html): #indicador-cifra, #dotacion, #mapa, .boton-parcela; body[data-listo="si"] y
+// body[data-mapa] («listo» o «sin-mapa»).
+/** Portada: texto de los indicadores del resumen (cambian con la dotación). */
 const indicador = (page) =>
+  page.evaluate(() => {
+    const todo = document.querySelector("#stats").innerText.replace(/\s+/g, " ").trim();
+    return { cifra: todo, todo };
+  });
+/** Explorador: la cifra grande del indicador y todo el bloque (rango y mensajes incluidos). */
+const indicadorExplorador = (page) =>
   page.evaluate(() => ({
-    cifra: document.querySelector("#indicador-cifra, #stats .stat:nth-child(3) .stat-value").innerText.replace(/\s+/g, " ").trim(),
-    todo: document.querySelector("#indicador, #stats").innerText,
+    cifra: document.querySelector("#indicador-cifra").innerText.replace(/\s+/g, " ").trim(),
+    todo: document.querySelector("#indicador").innerText,
   }));
-async function fijarDeslizador(page, valor) {
-  await page.evaluate((v) => {
-    const s = document.querySelector("#dotacion, #allocation");
+async function fijarDeslizador(page, valor, selector = "#allocation") {
+  await page.evaluate(([v, sel]) => {
+    const s = document.querySelector(sel);
     s.value = String(v);
     s.dispatchEvent(new Event("input", { bubbles: true }));
-  }, valor);
+  }, [valor, selector]);
 }
+/** Portada: espera a que arranque y devuelve el estado de su mapa («listo» o «local»). */
 async function esperarArranque(page) {
-  await page.waitForSelector("body[data-listo='si'], body[data-dashboard='listo']", { timeout: ESPERA_ARRANQUE_MS });
-  await page.waitForFunction(() => ["listo", "sin-mapa", "local"].includes(document.body.dataset.mapa || document.body.dataset.dashboardMap), null, { timeout: ESPERA_ARRANQUE_MS });
-  return page.evaluate(() => document.body.dataset.mapa || document.body.dataset.dashboardMap);
+  await page.waitForSelector("body[data-dashboard='listo']", { timeout: ESPERA_ARRANQUE_MS });
+  await page.waitForFunction(() => ["listo", "local"].includes(document.body.dataset.dashboardMap), null, { timeout: ESPERA_ARRANQUE_MS });
+  return page.evaluate(() => document.body.dataset.dashboardMap);
+}
+/** Explorador: espera a que arranque y devuelve el estado de su mapa («listo» o «sin-mapa»). */
+async function esperarExplorador(page) {
+  await page.waitForSelector("body[data-listo='si']", { timeout: ESPERA_ARRANQUE_MS });
+  await page.waitForFunction(() => ["listo", "sin-mapa"].includes(document.body.dataset.mapa), null, { timeout: ESPERA_ARRANQUE_MS });
+  return page.evaluate(() => document.body.dataset.mapa);
+}
+/** Portada: ¿el mapa ya dibujó parcelas? (web/js/dashboard.js lo anota cuando la capa tiene polígonos a la vista). */
+async function portadaDibujoParcelas(page) {
+  try {
+    await page.waitForFunction(() => document.body.dataset.dashboardMapRendered === "si", null, { timeout: ESPERA_DIBUJO_MS });
+    return true;
+  } catch {
+    return false;
+  }
 }
 /** Oyentes de errores de una página: solo cuentan los de la propia aplicación (no las teselas de otro origen). */
 function vigilar(page, base, errores) {
@@ -493,7 +539,7 @@ async function main() {
 
   // La página real, tal cual: si no conecta el módulo, la prueba falla (no se inyecta nada en la copia).
   const faltanPiezas = piezasQueFaltan();
-  check("la página real conecta la aplicación instalable (manifest, theme-color, css/instalar.css y montarInstalacion en app.js)",
+  check("las dos páginas reales (portada y explorador) conectan la aplicación instalable (manifest, theme-color, css/instalar.css y montarInstalacion)",
     faltanPiezas.length === 0, faltanPiezas.length ? `faltan: ${faltanPiezas.join(", ")}` : "se prueba tal cual, sin inyectar nada");
   if (faltanPiezas.length) return terminar();
 
@@ -736,11 +782,16 @@ async function main() {
     }
     check("sin red, la página recarga y arranca desde la copia", true, `mapa: ${estadoMapa}`);
 
-    const lienzos = await page.locator("#mapa canvas, #map canvas").count();
-    const dibujadas = estadoMapa === "listo" ? await page.evaluate(() => window.raizDepuracion?.parcelasDibujadas?.() ?? 0) : 0;
-    const listadas = await page.locator(".boton-parcela[data-id], #field-select option").count();
-    check("sin red: el mapa tiene su lienzo", lienzos > 0 && estadoMapa === "listo", `${lienzos} lienzo(s) · mapa: ${estadoMapa}`);
-    check("sin red: las parcelas están dibujadas en el mapa o listadas", dibujadas > 0 || listadas > 0, `${dibujadas} dibujadas · ${listadas} en la lista`);
+    const lienzos = await page.locator("#map canvas").count();
+    const dibujadas = estadoMapa === "listo" ? await portadaDibujoParcelas(page) : false;
+    const listadas = await page.locator("#field-select option").count();
+    check("sin red, portada: el mapa tiene su lienzo", lienzos > 0 && estadoMapa === "listo", `${lienzos} lienzo(s) · mapa: ${estadoMapa}`);
+    // Con el mapa listo las parcelas deben estar DIBUJADAS; la lista sola solo cuenta cuando no hay mapa.
+    check(
+      "sin red, portada: las parcelas están dibujadas en el mapa (sin mapa: listadas) y el selector de parcela las trae",
+      (estadoMapa === "listo" ? dibujadas : listadas > 0) && listadas > 0,
+      `mapa: ${estadoMapa} · dibujadas: ${dibujadas ? "sí" : "no"} · ${listadas} en la lista`,
+    );
 
     const marcas = await page.evaluate(async () => (await (await fetch("data/cubo.json")).json()).dotaciones.marcas.map((m) => m.valor));
     await fijarDeslizador(page, marcas[0]);
@@ -748,9 +799,9 @@ async function main() {
     await fijarDeslizador(page, marcas[marcas.length - 1]);
     const indicadorB = await indicador(page);
     check(
-      "sin red: el deslizador cambia el indicador",
+      "sin red, portada: el deslizador cambia los indicadores",
       indicadorA.cifra !== indicadorB.cifra && indicadorA.cifra !== "" && indicadorA.todo !== indicadorB.todo,
-      `dotación ${marcas[0]}: ${indicadorA.cifra} → dotación ${marcas[marcas.length - 1]}: ${indicadorB.cifra}`,
+      `dotación ${marcas[0]}: ${indicadorA.cifra.slice(0, 80)} → dotación ${marcas[marcas.length - 1]}: ${indicadorB.cifra.slice(0, 80)}`,
     );
 
     const cajaSinRed = page.locator(".instalar");
@@ -792,7 +843,7 @@ async function main() {
     const ajenas = await page.evaluate(async (sonda) => {
       const otroOrigen = await fetch("https://example.invalid/otra/cosa.json").then(() => "respondió", () => "falló");
       const noGuardado = await fetch(sonda).then((r) => `estado ${r.status}`, () => "falló");
-      return { otroOrigen, noGuardado, viva: document.body.dataset.listo || (document.body.dataset.dashboard === "listo" ? "si" : "no") };
+      return { otroOrigen, noGuardado, viva: document.body.dataset.dashboard === "listo" ? "si" : "no" };
     }, SONDA);
     check(
       "sin red: una petición a otro origen y una a un archivo que no está en la copia fallan sin romper la página",
@@ -800,6 +851,50 @@ async function main() {
       `otro origen: ${ajenas.otroOrigen} · no guardado: ${ajenas.noGuardado}`,
     );
     await page.screenshot({ path: path.join(CAPTURAS, "pwa_offline.png") });
+
+    // ---------------------------------------------------------- sin red: el explorador de parcelas
+    // La otra página de la aplicación también debe abrir desde la copia, con sus parcelas a la vista.
+    const explorador = await ctx.newPage();
+    vigilar(explorador, base, errores);
+    let mapaExplorador = "";
+    let abrioExplorador = true;
+    try {
+      await explorador.goto(`${base}${EXPLORADOR}`, { waitUntil: "load" });
+      mapaExplorador = await esperarExplorador(explorador);
+    } catch (err) {
+      abrioExplorador = false;
+      const aviso = await explorador.locator(".error-carga").allInnerTexts().catch(() => []);
+      check(`sin red: ${EXPLORADOR} abre y arranca desde la copia`, false, [String(err.message).split("\n")[0], ...aviso].join(" | "));
+    }
+    if (abrioExplorador) {
+      check(`sin red: ${EXPLORADOR} abre y arranca desde la copia`, true, `mapa: ${mapaExplorador}`);
+      const lienzosExp = await explorador.locator("#mapa canvas").count();
+      const dibujadasExp = mapaExplorador === "listo" ? await explorador.evaluate(() => window.raizDepuracion?.parcelasDibujadas?.() ?? 0) : 0;
+      const listadasExp = await explorador.locator(".boton-parcela[data-id]").count();
+      check(`sin red, ${EXPLORADOR}: el mapa tiene su lienzo`, lienzosExp > 0 && mapaExplorador === "listo", `${lienzosExp} lienzo(s) · mapa: ${mapaExplorador}`);
+      // «0 dibujadas» con el mapa listo es una falla; la lista de parcelas solo cuenta cuando la página avisa «sin-mapa».
+      check(
+        `sin red, ${EXPLORADOR}: las parcelas están dibujadas en el mapa (sin mapa: listadas)`,
+        mapaExplorador === "listo" ? dibujadasExp > 0 : listadasExp > 0,
+        `mapa: ${mapaExplorador} · ${dibujadasExp} dibujadas · ${listadasExp} en la lista`,
+      );
+      await fijarDeslizador(explorador, marcas[0], "#dotacion");
+      const expA = await indicadorExplorador(explorador);
+      await fijarDeslizador(explorador, marcas[marcas.length - 1], "#dotacion");
+      const expB = await indicadorExplorador(explorador);
+      check(
+        `sin red, ${EXPLORADOR}: el deslizador cambia el indicador`,
+        expA.cifra !== expB.cifra && expA.cifra !== "" && expA.todo !== expB.todo,
+        `dotación ${marcas[0]}: ${expA.cifra} → dotación ${marcas[marcas.length - 1]}: ${expB.cifra}`,
+      );
+      await explorador.waitForSelector(".instalar[data-red='offline']", { timeout: 5000 }).catch(() => {});
+      const textoExp = (await explorador.locator(".instalar").count()) ? (await explorador.locator(".instalar").innerText()).replace(/\s+/g, " ").trim() : "(sin .instalar)";
+      check(`sin red, ${EXPLORADOR}: el indicador «${TEXTOS.sinConexion}» está a la vista`, textoExp.includes(TEXTOS.sinConexion) && !textoExp.includes(TEXTOS.enLinea), textoExp);
+      const enlace = await explorador.locator("#enlace-tablero").getAttribute("href").catch(() => null);
+      check(`${EXPLORADOR}: la cabecera enlaza la portada («Dashboard» → ${PORTADA})`, enlace === PORTADA, String(enlace));
+      await explorador.screenshot({ path: path.join(CAPTURAS, "pwa_explorador_offline.png") });
+    }
+    await explorador.close();
 
     // ---------------------------------------------------------- sin red, en el teléfono
     const telefono = await ctx.newPage();

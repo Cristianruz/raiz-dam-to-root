@@ -2,92 +2,227 @@
   "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex",
   "fecha": "2026-11-14",
   "etiqueta": "[P] team research notes (press compilation); not checked against primary sources",
-  "fuente": "Team research notes received on Nov 14, 2026: «Cultivos y riego en el DR-005» (Crops and irrigation in DR-005), «Investigación OpenET y FARMS» (OpenET and FARMS research) and «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region). They are internal notes and are not published with the page; they are used as references, not as instructions.",
+  "etiqueta_es": "[P] notas de investigación del equipo (compilación de prensa); cotejo con fuentes primarias pendiente",
+  "etiqueta_pt": "[P] notas de pesquisa da equipe (compilação de imprensa); sem conferência com fontes primárias",
+  "etiqueta_fr": "[P] notes de recherche de l'équipe (compilation de presse) ; non vérifiées auprès des sources primaires",
+  "fuente": "Team research notes received on Nov 14, 2026: «Cultivos y riego en el DR-005» (Crops and irrigation in the district), «Investigación OpenET y FARMS» (OpenET and FARMS research) and «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region). They are internal notes and are not published with the page; they are used as references, not as instructions.",
+  "fuente_es": "Notas de investigación del equipo recibidas el 14-nov-2026: «Cultivos y riego en el DR-005», «Investigación OpenET y FARMS» y «Clima y siembras en la región de Delicias». Son notas internas y no se publican con la página; se usan como referencias, no como instrucciones.",
+  "fuente_pt": "Notas de pesquisa da equipe recebidas em 14-nov-2026: «Cultivos y riego en el DR-005» (Cultivos e irrigação no distrito), «Investigación OpenET y FARMS» (Pesquisa OpenET e FARMS) e «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias). São notas internas e não são publicadas com a página; são usadas como referências, não como instruções.",
+  "fuente_fr": "Notes de recherche de l'équipe reçues le 14 nov. 2026 : «Cultivos y riego en el DR-005» (Cultures et irrigation dans le district), «Investigación OpenET y FARMS» (Recherche OpenET et FARMS) et «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias). Ce sont des notes internes, non publiées avec la page ; elles servent de références, pas d'instructions.",
   "fuentes": [
     {
       "titulo": "Conagua: irrigated area and volumes in DR-005, 1998–2025",
+      "titulo_es": "Conagua: superficies regadas y volúmenes del DR-005, 1998–2025",
+      "titulo_pt": "Conagua: áreas irrigadas e volumes do DR-005, 1998–2025",
+      "titulo_fr": "Conagua : superficies irriguées et volumes du DR-005, 1998–2025",
       "descripcion": "Total irrigated area per agricultural year. The history chart reads it from the copy kept in this repository: data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, column sup_total_ha.",
+      "descripcion_es": "Superficie regada total por año agrícola. La gráfica de historia la lee de la copia guardada en este repositorio: data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, columna sup_total_ha.",
+      "descripcion_pt": "Área irrigada total por ano agrícola. O gráfico de histórico a lê da cópia guardada neste repositório: data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, coluna sup_total_ha.",
+      "descripcion_fr": "Superficie irriguée totale par année agricole. Le graphique d'historique la lit dans la copie conservée dans ce dépôt : data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, colonne sup_total_ha.",
       "archivo": null
     },
     {
       "titulo": "NASA POWER: daily rainfall and reference evapotranspiration",
+      "titulo_es": "NASA POWER: lluvia diaria y evapotranspiración de referencia",
+      "titulo_pt": "NASA POWER: chuva diária e evapotranspiração de referência",
+      "titulo_fr": "NASA POWER : pluie quotidienne et évapotranspiration de référence",
       "descripcion": "Regional grid cell, not a weather station or a rain gauge in the field. The historical rainfall range and its back-test are computed from this series.",
+      "descripcion_es": "Celda regional, no una estación meteorológica ni un pluviómetro en la parcela. El rango histórico de lluvia y su retroprueba se calculan con esta serie.",
+      "descripcion_pt": "Célula regional, não uma estação meteorológica nem um pluviômetro na parcela. A faixa histórica de chuva e o seu teste retrospectivo são calculados com esta série.",
+      "descripcion_fr": "Maille régionale, et non une station météorologique ni un pluviomètre dans la parcelle. La plage historique de pluie et son test rétrospectif sont calculés à partir de cette série.",
       "archivo": null
     },
     {
       "titulo": "FAO-56: crop water demand",
-      "descripcion": "Water demand per crop comes from the project's demand model (FAO Irrigation and Drainage Paper 56). The dashboard reads the same figures as the field sheet of the main page.",
+      "titulo_es": "FAO-56: demanda de agua de los cultivos",
+      "titulo_pt": "FAO-56: demanda de água das culturas",
+      "titulo_fr": "FAO-56 : besoins en eau des cultures",
+      "descripcion": "Water demand per crop comes from the project's demand model (FAO Irrigation and Drainage Paper 56) run with the NASA POWER series.",
+      "descripcion_es": "La demanda de agua por cultivo sale del modelo de demanda del proyecto (FAO, Estudio de Riego y Drenaje 56) corrido con la serie de NASA POWER.",
+      "descripcion_pt": "A demanda de água por cultura vem do modelo de demanda do projeto (FAO, Estudo de Irrigação e Drenagem 56) executado com a série da NASA POWER.",
+      "descripcion_fr": "Les besoins en eau par culture proviennent du modèle de demande du projet (FAO, Bulletin d'irrigation et de drainage 56) exécuté avec la série NASA POWER.",
       "archivo": null
     },
     {
       "titulo": "Team research notes (not published)",
+      "titulo_es": "Notas de investigación del equipo (no publicadas)",
+      "titulo_pt": "Notas de pesquisa da equipe (não publicadas)",
+      "titulo_fr": "Notes de recherche de l'équipe (non publiées)",
       "descripcion": "Press compilation behind the timeline. Each event names where it comes from; none has been checked against a primary source yet.",
+      "descripcion_es": "Compilación de prensa de la que sale la cronología. Cada evento dice de dónde viene; ninguno se ha cotejado todavía con una fuente primaria.",
+      "descripcion_pt": "Compilação de imprensa de onde vem a cronologia. Cada evento indica a sua origem; nenhum foi conferido ainda com uma fonte primária.",
+      "descripcion_fr": "Compilation de presse à l'origine de la chronologie. Chaque événement indique d'où il vient ; aucun n'a encore été vérifié auprès d'une source primaire.",
       "archivo": null
     }
   ],
   "historia_archivo": "data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv",
   "historia_columna": "sup_total_ha",
   "historia_etiqueta": "[V] Conagua, agricultural statistics of DR-005",
+  "historia_etiqueta_es": "[V] Conagua, estadísticas agrícolas del DR-005",
+  "historia_etiqueta_pt": "[V] Conagua, estatísticas agrícolas do DR-005",
+  "historia_etiqueta_fr": "[V] Conagua, statistiques agricoles du DR-005",
   "historia_fuente": "Conagua, irrigated areas and volumes of Irrigation District 005 Delicias, 1998–2025: total irrigated area per agricultural year (data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, column sup_total_ha). Selected years; the file has every year.",
+  "historia_fuente_es": "Conagua, superficies regadas y volúmenes del Distrito de Riego 005 Delicias, 1998–2025: superficie regada total por año agrícola (data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, columna sup_total_ha). Años seleccionados; el archivo trae todos los años.",
+  "historia_fuente_pt": "Conagua, áreas irrigadas e volumes do Distrito de Irrigação 005 Delicias, 1998–2025: área irrigada total por ano agrícola (data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, coluna sup_total_ha). Anos selecionados; o arquivo traz todos os anos.",
+  "historia_fuente_fr": "Conagua, superficies irriguées et volumes du District d'irrigation 005 Delicias, 1998–2025 : superficie irriguée totale par année agricole (data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, colonne sup_total_ha). Années sélectionnées ; le fichier contient toutes les années.",
   "eventos": [
     {
       "periodo": "2011–2012",
+      "periodo_es": "2011–2012",
+      "periodo_pt": "2011–2012",
+      "periodo_fr": "2011–2012",
       "tipo": "sequia",
       "titulo": "Nationwide drought",
-      "detalle": "The note lists it among the most widespread and severe droughts on record. It gives no local figures by crop.",
-      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 1; attributed to SMN, without a primary link."
+      "titulo_es": "Sequía de alcance nacional",
+      "titulo_pt": "Seca de alcance nacional",
+      "titulo_fr": "Sécheresse d'ampleur nationale",
+      "detalle": "The note describes it as one of the most widespread and severe droughts. It gives no local figures by crop.",
+      "detalle_es": "La nota la describe entre las sequías de mayor extensión y severidad. No aporta cifras locales por cultivo.",
+      "detalle_pt": "A nota a descreve entre as secas de maior extensão e severidade. Não traz números locais por cultura.",
+      "detalle_fr": "La note la décrit parmi les sécheresses les plus étendues et les plus sévères. Elle ne donne pas de chiffres locaux par culture.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 1; attributed to SMN, without a primary link.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 1; atribución al SMN, sin enlace primario.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 1; atribuída ao SMN, sem link primário.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 1 ; attribuée au SMN, sans lien primaire."
     },
     {
       "periodo": "2017",
+      "periodo_es": "2017",
+      "periodo_pt": "2017",
+      "periodo_fr": "2017",
       "tipo": "inundacion",
       "titulo": "Hail and flooding in Meoqui",
+      "titulo_es": "Granizada e inundación en Meoqui",
+      "titulo_pt": "Granizo e inundação em Meoqui",
+      "titulo_fr": "Grêle et inondation à Meoqui",
       "detalle": "A levee broke and watermelon, chile, cotton, maize and alfalfa were damaged, according to the note.",
-      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending."
+      "detalle_es": "Ruptura de bordo y afectaciones a sandía, chile, algodón, maíz y alfalfa, según la nota.",
+      "detalle_pt": "Rompimento de um dique e danos a melancia, pimenta chile, algodão, milho e alfafa, segundo a nota.",
+      "detalle_fr": "Rupture d'une digue et dégâts sur la pastèque, le piment, le coton, le maïs et la luzerne, selon la note.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; compilación de prensa, cotejo pendiente.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; compilação de imprensa, conferência pendente.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; compilation de presse, vérification en attente."
     },
     {
       "periodo": "2021",
+      "periodo_es": "2021",
+      "periodo_pt": "2021",
+      "periodo_fr": "2021",
       "tipo": "sequia",
       "titulo": "An irrigation season under restrictions",
+      "titulo_es": "Un ciclo de riego restringido",
+      "titulo_pt": "Um ciclo de irrigação com restrições",
+      "titulo_fr": "Une campagne d'irrigation sous restrictions",
       "detalle": "Drought limited the agricultural cycle. Dam storage also decides whether planting is possible, even with local rain.",
-      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending."
+      "detalle_es": "La sequía limitó el ciclo agrícola. La disponibilidad en presas también determina si se puede sembrar, aunque haya lluvia local.",
+      "detalle_pt": "A seca limitou o ciclo agrícola. A disponibilidade nas barragens também determina se é possível plantar, mesmo com chuva local.",
+      "detalle_fr": "La sécheresse a limité le cycle agricole. La disponibilité dans les barrages détermine aussi s'il est possible de semer, même avec de la pluie locale.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; compilación de prensa, cotejo pendiente.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; compilação de imprensa, conferência pendente.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; compilation de presse, vérification en attente."
     },
     {
       "periodo": "2022",
+      "periodo_es": "2022",
+      "periodo_pt": "2022",
+      "periodo_fr": "2022",
       "tipo": "inundacion",
       "titulo": "September floods",
+      "titulo_es": "Inundaciones de septiembre",
+      "titulo_pt": "Inundações de setembro",
+      "titulo_fr": "Inondations de septembre",
       "detalle": "The note reports flooded farmland across the state. It is not a measurement of the pilot areas.",
-      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; municipalities cited: Camargo, La Cruz, Saucillo and San Francisco de Conchos."
+      "detalle_es": "La nota reporta superficie agrícola afectada a escala estatal. No corresponde a una medición de las zonas piloto.",
+      "detalle_pt": "A nota relata área agrícola afetada em escala estadual. Não corresponde a uma medição das zonas piloto.",
+      "detalle_fr": "La note signale des terres agricoles touchées à l'échelle de l'État. Il ne s'agit pas d'une mesure des zones pilotes.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; municipalities cited: Camargo, La Cruz, Saucillo and San Francisco de Conchos.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; municipios citados: Camargo, La Cruz, Saucillo y San Francisco de Conchos.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; municípios citados: Camargo, La Cruz, Saucillo e San Francisco de Conchos.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; communes citées : Camargo, La Cruz, Saucillo et San Francisco de Conchos."
     },
     {
       "periodo": "2023",
+      "periodo_es": "2023",
+      "periodo_pt": "2023",
+      "periodo_fr": "2023",
       "tipo": "contexto",
       "titulo": "Water for a full season",
+      "titulo_es": "Agua para un ciclo completo",
+      "titulo_pt": "Água para um ciclo completo",
+      "titulo_fr": "De l'eau pour un cycle complet",
       "detalle": "According to the note, the storage recovered in the previous season allowed a full cycle.",
-      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; it refers to dam storage in September 2022."
+      "detalle_es": "La recuperación de almacenamiento de la temporada anterior permitió completar el ciclo, según la nota.",
+      "detalle_pt": "A recuperação do armazenamento da temporada anterior permitiu completar o ciclo, segundo a nota.",
+      "detalle_fr": "Selon la note, la reconstitution du stockage de la saison précédente a permis de mener le cycle à terme.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; it refers to dam storage in September 2022.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; referencia a almacenamiento de septiembre de 2022.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; refere-se ao armazenamento de setembro de 2022.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; se réfère au stockage de septembre 2022."
     },
     {
       "periodo": "2024–2025",
+      "periodo_es": "2024–2025",
+      "periodo_pt": "2024–2025",
+      "periodo_fr": "2024–2025",
       "tipo": "sequia",
       "titulo": "Exceptional drought and unplanted land",
+      "titulo_es": "Sequía excepcional y superficie sin sembrar",
+      "titulo_pt": "Seca excepcional e área sem plantar",
+      "titulo_fr": "Sécheresse exceptionnelle et terres non semées",
       "detalle": "The note links low dam storage with a sharp drop in plantings and damage to alfalfa.",
-      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending."
+      "detalle_es": "La nota relaciona el bajo almacenamiento con una fuerte reducción de siembras y afectación a la alfalfa.",
+      "detalle_pt": "A nota relaciona o baixo armazenamento com uma forte redução dos plantios e danos à alfafa.",
+      "detalle_fr": "La note relie le faible stockage à une forte baisse des semis et à des dégâts sur la luzerne.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; compilación de prensa, cotejo pendiente.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; compilação de imprensa, conferência pendente.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; compilation de presse, vérification en attente."
     },
     {
       "periodo": "2026",
+      "periodo_es": "2026",
+      "periodo_pt": "2026",
+      "periodo_fr": "2026",
       "tipo": "sequia",
       "titulo": "Reduced season and pressure on perennial crops",
+      "titulo_es": "Ciclo reducido y presión sobre los perennes",
+      "titulo_pt": "Ciclo reduzido e pressão sobre as culturas perenes",
+      "titulo_fr": "Cycle réduit et pression sur les cultures pérennes",
       "detalle": "The note describes risk for alfalfa and job losses. This is regional context, not an observation per field.",
-      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending."
+      "detalle_es": "La nota describe riesgo para la alfalfa y pérdidas de empleo. Estas referencias son contexto regional, no observaciones por parcela.",
+      "detalle_pt": "A nota descreve risco para a alfafa e perdas de emprego. Estas referências são contexto regional, não observações por parcela.",
+      "detalle_fr": "La note décrit un risque pour la luzerne et des pertes d'emplois. Ces références sont un contexte régional, pas des observations par parcelle.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; compilación de prensa, cotejo pendiente.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; compilação de imprensa, conferência pendente.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; compilation de presse, vérification en attente."
     },
     {
       "periodo": "November 2026",
+      "periodo_es": "Noviembre 2026",
+      "periodo_pt": "Novembro de 2026",
+      "periodo_fr": "Novembre 2026",
       "tipo": "inundacion",
       "titulo": "Late rain during the peanut harvest",
+      "titulo_es": "Lluvia tardía durante la cosecha de cacahuate",
+      "titulo_pt": "Chuva tardia durante a colheita de amendoim",
+      "titulo_fr": "Pluie tardive pendant la récolte d'arachide",
       "detalle": "The note reports damage to peanuts already pulled from the ground and a drop in their price. Price belongs in any study of how climate relates to planted area.",
-      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), pp. 2–3; report included in the note of Nov 14, 2026, not independently verified."
+      "detalle_es": "La nota reporta daño al cacahuate ya arrancado y una caída en su precio. El precio forma parte de cualquier estudio de la relación entre clima y superficie sembrada.",
+      "detalle_pt": "A nota relata danos ao amendoim já arrancado e uma queda no seu preço. O preço faz parte de qualquer estudo da relação entre clima e área plantada.",
+      "detalle_fr": "La note signale des dégâts sur l'arachide déjà arrachée et une baisse de son prix. Le prix fait partie de toute étude de la relation entre climat et superficie semée.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), pp. 2–3; report included in the note of Nov 14, 2026, not independently verified.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», pp. 2–3; reporte incluido en la nota del 14-nov-2026, no verificado de forma independiente.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), pp. 2–3; relato incluído na nota de 14-nov-2026, não verificado de forma independente.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), pp. 2–3 ; rapport inclus dans la note du 14 nov. 2026, non vérifié de manière indépendante."
     }
   ],
   "mapa_atribucion": "© OpenStreetMap contributors. Field boundaries: Fields of The World (CC BY 4.0).",
+  "mapa_atribucion_es": "© Colaboradores de OpenStreetMap. Límites de parcelas: Fields of The World (CC BY 4.0).",
+  "mapa_atribucion_pt": "© Colaboradores do OpenStreetMap. Limites das parcelas: Fields of The World (CC BY 4.0).",
+  "mapa_atribucion_fr": "© Contributeurs d'OpenStreetMap. Limites des parcelles : Fields of The World (CC BY 4.0).",
   "historia": [
     {
       "anio": 2016,
@@ -122,7 +257,7 @@
     "delicias_saucillo": [
       {
         "id": "alfalfa",
-        "nombre": "Alfalfa",
+        "nombre": "Alfalfa (perennial)",
         "cultivos": [
           "alfalfa"
         ],
@@ -147,11 +282,13 @@
             "etc_mm_p50": 1748
           }
         },
-        "nombre_es": "Alfalfa (perenne)"
+        "nombre_es": "Alfalfa (perenne)",
+        "nombre_pt": "Alfafa (perene)",
+        "nombre_fr": "Luzerne (pérenne)"
       },
       {
         "id": "alfalfa_corte_verano",
-        "nombre": "Keep the alfalfa and skip two to three summer irrigations",
+        "nombre": "Alfalfa with an irrigation cut in summer",
         "cultivos": [
           "alfalfa"
         ],
@@ -177,11 +314,13 @@
             "etc_mm_p50": 1748
           }
         },
-        "nombre_es": "Alfalfa con corte de riego en verano"
+        "nombre_es": "Alfalfa con corte de riego en verano",
+        "nombre_pt": "Alfafa com corte de irrigação no verão",
+        "nombre_fr": "Luzerne avec coupure d'irrigation en été"
       },
       {
         "id": "nogal",
-        "nombre": "Pecan orchard (does not rotate)",
+        "nombre": "Pecan (orchard)",
         "cultivos": [
           "nogal"
         ],
@@ -206,7 +345,9 @@
             "etc_mm_p50": 1198
           }
         },
-        "nombre_es": "Nogal (huerta)"
+        "nombre_es": "Nogal (huerta)",
+        "nombre_pt": "Nogueira-pecã (pomar)",
+        "nombre_fr": "Pacanier (verger)"
       },
       {
         "id": "algodon",
@@ -235,7 +376,9 @@
             "etc_mm_p50": 824
           }
         },
-        "nombre_es": "Algodón"
+        "nombre_es": "Algodón",
+        "nombre_pt": "Algodão",
+        "nombre_fr": "Coton"
       },
       {
         "id": "chile",
@@ -264,7 +407,9 @@
             "etc_mm_p50": 765
           }
         },
-        "nombre_es": "Chile"
+        "nombre_es": "Chile",
+        "nombre_pt": "Pimenta chile",
+        "nombre_fr": "Piment"
       },
       {
         "id": "maiz_forrajero",
@@ -293,7 +438,9 @@
             "etc_mm_p50": 587
           }
         },
-        "nombre_es": "Maíz forrajero"
+        "nombre_es": "Maíz forrajero",
+        "nombre_pt": "Milho forrageiro",
+        "nombre_fr": "Maïs fourrager"
       },
       {
         "id": "sorgo",
@@ -322,7 +469,9 @@
             "etc_mm_p50": 645
           }
         },
-        "nombre_es": "Sorgo forrajero"
+        "nombre_es": "Sorgo forrajero",
+        "nombre_pt": "Sorgo forrageiro",
+        "nombre_fr": "Sorgho fourrager"
       },
       {
         "id": "cereal_invierno",
@@ -351,11 +500,13 @@
             "etc_mm_p50": 353
           }
         },
-        "nombre_es": "Cereal de invierno"
+        "nombre_es": "Cereal de invierno",
+        "nombre_pt": "Cereal de inverno",
+        "nombre_fr": "Céréale d'hiver"
       },
       {
         "id": "avena_maiz",
-        "nombre": "Break the old alfalfa: winter cereal, then forage maize",
+        "nombre": "Oats (winter) + forage maize (summer)",
         "cultivos": [
           "cereal_invierno",
           "maiz_forrajero"
@@ -381,11 +532,13 @@
             "etc_mm_p50": 943
           }
         },
-        "nombre_es": "Avena (invierno) + maíz forrajero (verano)"
+        "nombre_es": "Avena (invierno) + maíz forrajero (verano)",
+        "nombre_pt": "Aveia (inverno) + milho forrageiro (verão)",
+        "nombre_fr": "Avoine (hiver) + maïs fourrager (été)"
       },
       {
         "id": "cereal_algodon",
-        "nombre": "Break the chile cycle: winter cereal, then cotton",
+        "nombre": "Winter cereal + cotton (summer)",
         "cultivos": [
           "cereal_invierno",
           "algodon"
@@ -411,11 +564,13 @@
             "etc_mm_p50": 1176
           }
         },
-        "nombre_es": "Cereal de invierno + algodón (verano)"
+        "nombre_es": "Cereal de invierno + algodón (verano)",
+        "nombre_pt": "Cereal de inverno + algodão (verão)",
+        "nombre_fr": "Céréale d'hiver + coton (été)"
       },
       {
         "id": "cereal_sorgo",
-        "nombre": "Break the chile cycle: winter cereal, then forage sorghum",
+        "nombre": "Winter cereal + forage sorghum (summer)",
         "cultivos": [
           "cereal_invierno",
           "sorgo"
@@ -441,11 +596,13 @@
             "etc_mm_p50": 1002
           }
         },
-        "nombre_es": "Cereal de invierno + sorgo forrajero (verano)"
+        "nombre_es": "Cereal de invierno + sorgo forrajero (verano)",
+        "nombre_pt": "Cereal de inverno + sorgo forrageiro (verão)",
+        "nombre_fr": "Céréale d'hiver + sorgho fourrager (été)"
       },
       {
         "id": "descanso",
-        "nombre": "Do not plant / standing stubble",
+        "nombre": "Rest with standing stubble",
         "cultivos": [],
         "plazo": "anual",
         "plazo_anios": {
@@ -468,13 +625,15 @@
             "etc_mm_p50": 0
           }
         },
-        "nombre_es": "Descanso con rastrojo en pie"
+        "nombre_es": "Descanso con rastrojo en pie",
+        "nombre_pt": "Descanso com restolho em pé",
+        "nombre_fr": "Repos avec chaumes sur pied"
       }
     ],
     "lazaro_cardenas": [
       {
         "id": "alfalfa",
-        "nombre": "Alfalfa",
+        "nombre": "Alfalfa (perennial)",
         "cultivos": [
           "alfalfa"
         ],
@@ -499,11 +658,13 @@
             "etc_mm_p50": 1712
           }
         },
-        "nombre_es": "Alfalfa (perenne)"
+        "nombre_es": "Alfalfa (perenne)",
+        "nombre_pt": "Alfafa (perene)",
+        "nombre_fr": "Luzerne (pérenne)"
       },
       {
         "id": "alfalfa_corte_verano",
-        "nombre": "Keep the alfalfa and skip two to three summer irrigations",
+        "nombre": "Alfalfa with an irrigation cut in summer",
         "cultivos": [
           "alfalfa"
         ],
@@ -529,11 +690,13 @@
             "etc_mm_p50": 1712
           }
         },
-        "nombre_es": "Alfalfa con corte de riego en verano"
+        "nombre_es": "Alfalfa con corte de riego en verano",
+        "nombre_pt": "Alfafa com corte de irrigação no verão",
+        "nombre_fr": "Luzerne avec coupure d'irrigation en été"
       },
       {
         "id": "nogal",
-        "nombre": "Pecan orchard (does not rotate)",
+        "nombre": "Pecan (orchard)",
         "cultivos": [
           "nogal"
         ],
@@ -558,7 +721,9 @@
             "etc_mm_p50": 1177
           }
         },
-        "nombre_es": "Nogal (huerta)"
+        "nombre_es": "Nogal (huerta)",
+        "nombre_pt": "Nogueira-pecã (pomar)",
+        "nombre_fr": "Pacanier (verger)"
       },
       {
         "id": "algodon",
@@ -587,7 +752,9 @@
             "etc_mm_p50": 818
           }
         },
-        "nombre_es": "Algodón"
+        "nombre_es": "Algodón",
+        "nombre_pt": "Algodão",
+        "nombre_fr": "Coton"
       },
       {
         "id": "chile",
@@ -616,7 +783,9 @@
             "etc_mm_p50": 744
           }
         },
-        "nombre_es": "Chile"
+        "nombre_es": "Chile",
+        "nombre_pt": "Pimenta chile",
+        "nombre_fr": "Piment"
       },
       {
         "id": "maiz_forrajero",
@@ -645,7 +814,9 @@
             "etc_mm_p50": 579
           }
         },
-        "nombre_es": "Maíz forrajero"
+        "nombre_es": "Maíz forrajero",
+        "nombre_pt": "Milho forrageiro",
+        "nombre_fr": "Maïs fourrager"
       },
       {
         "id": "sorgo",
@@ -674,7 +845,9 @@
             "etc_mm_p50": 640
           }
         },
-        "nombre_es": "Sorgo forrajero"
+        "nombre_es": "Sorgo forrajero",
+        "nombre_pt": "Sorgo forrageiro",
+        "nombre_fr": "Sorgho fourrager"
       },
       {
         "id": "cereal_invierno",
@@ -703,11 +876,13 @@
             "etc_mm_p50": 343
           }
         },
-        "nombre_es": "Cereal de invierno"
+        "nombre_es": "Cereal de invierno",
+        "nombre_pt": "Cereal de inverno",
+        "nombre_fr": "Céréale d'hiver"
       },
       {
         "id": "avena_maiz",
-        "nombre": "Break the old alfalfa: winter cereal, then forage maize",
+        "nombre": "Oats (winter) + forage maize (summer)",
         "cultivos": [
           "cereal_invierno",
           "maiz_forrajero"
@@ -733,11 +908,13 @@
             "etc_mm_p50": 923
           }
         },
-        "nombre_es": "Avena (invierno) + maíz forrajero (verano)"
+        "nombre_es": "Avena (invierno) + maíz forrajero (verano)",
+        "nombre_pt": "Aveia (inverno) + milho forrageiro (verão)",
+        "nombre_fr": "Avoine (hiver) + maïs fourrager (été)"
       },
       {
         "id": "cereal_algodon",
-        "nombre": "Break the chile cycle: winter cereal, then cotton",
+        "nombre": "Winter cereal + cotton (summer)",
         "cultivos": [
           "cereal_invierno",
           "algodon"
@@ -763,11 +940,13 @@
             "etc_mm_p50": 1159
           }
         },
-        "nombre_es": "Cereal de invierno + algodón (verano)"
+        "nombre_es": "Cereal de invierno + algodón (verano)",
+        "nombre_pt": "Cereal de inverno + algodão (verão)",
+        "nombre_fr": "Céréale d'hiver + coton (été)"
       },
       {
         "id": "cereal_sorgo",
-        "nombre": "Break the chile cycle: winter cereal, then forage sorghum",
+        "nombre": "Winter cereal + forage sorghum (summer)",
         "cultivos": [
           "cereal_invierno",
           "sorgo"
@@ -793,11 +972,13 @@
             "etc_mm_p50": 986
           }
         },
-        "nombre_es": "Cereal de invierno + sorgo forrajero (verano)"
+        "nombre_es": "Cereal de invierno + sorgo forrajero (verano)",
+        "nombre_pt": "Cereal de inverno + sorgo forrageiro (verão)",
+        "nombre_fr": "Céréale d'hiver + sorgho fourrager (été)"
       },
       {
         "id": "descanso",
-        "nombre": "Do not plant / standing stubble",
+        "nombre": "Rest with standing stubble",
         "cultivos": [],
         "plazo": "anual",
         "plazo_anios": {
@@ -820,7 +1001,9 @@
             "etc_mm_p50": 0
           }
         },
-        "nombre_es": "Descanso con rastrojo en pie"
+        "nombre_es": "Descanso con rastrojo en pie",
+        "nombre_pt": "Descanso com restolho em pé",
+        "nombre_fr": "Repos avec chaumes sur pied"
       }
     ]
   }

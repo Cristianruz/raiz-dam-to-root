@@ -7,7 +7,9 @@ No estima rendimiento ni valida la demanda contra riegos observados. La lluvia q
 Los supuestos de diseño (mínimo de ciclos de la retroprueba, niveles del plan, cuantiles del rango y su cobertura
 nominal) se leen de data/params.json → tablero; la variante de lluvia, de params.lluvia_pct, y las conversiones
 de unidades, de params.unidades.millar. Aquí no se escribe ninguna de esas cifras (regla 2).
-Los textos que el tablero muestra salen en inglés (regla 9); las llaves no cambian (las lee web/js/).
+Los textos que el tablero muestra salen de data/investigacion_dashboard.json (textos_pronostico y
+nombres_rotaciones): la llave de siempre en inglés y, al lado, <llave>_es, <llave>_pt y <llave>_fr. Las llaves no
+cambian ni se quitan (las lee web/js/). Los textos que vienen de las entregas de datos se quedan en inglés.
 Uso: python motor/pronostico_web.py · Verificación: python motor/verificar_pronostico.py · Pruebas: tests/test_pronostico_web.py
 """
 import calendar
@@ -23,7 +25,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 if str(RAIZ) not in sys.path:  # para correrlo como «python motor/pronostico_web.py»
     sys.path.insert(0, str(RAIZ))
-from motor.dashboard_web import en_ingles, nombres_en  # noqa: E402 - nombre en inglés de cada rotación (catálogo B3)
+from motor.dashboard_web import en_idiomas, leer_curado, nombres_rotaciones  # noqa: E402 - textos por idioma
 
 
 def cuantil(valores, q):
@@ -136,16 +138,17 @@ def construir(raiz=RAIZ):
     archivos = ['opciones_b3.json', 'suelo_requisitos.json', 'supuestos.json', 'fuentes.json']
     sup = leer_supuestos(raiz)
     millar = sup['millar']
+    curado = leer_curado(raiz)
+    textos = curado['textos_pronostico']  # sin él se detiene: el motor no trae textos de repuesto
+    nombres = nombres_rotaciones(curado)
     out = {'_encabezado': 'AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex',
-           'metodo': {'nombre': 'Historical rainfall range (NASA POWER) and FAO-56 crop water demand (A5 model)',
+           # nombre, etiqueta y fuente (con sus _es, _pt y _fr) vienen del archivo curado; las cifras, de params.json.
+           'metodo': {**{k: x for k, x in textos['metodo'].items() if k.startswith('nombre')},
                       'minimo_entrenamiento': sup['minimo_ciclos'], 'niveles_plan': sup['niveles_plan'],
                       'intervalo': sup['intervalo'], 'nivel_plan': sup['nivel_plan'],
                       'conversion_mm_millares_ha': millar['lamina_mm'], 'cm_por_millar': millar['lamina_cm'],
                       'm3_por_millar': millar['m3_por_ha'],
-                      'etiqueta': '[S] planning method: not a yield estimate and not a projection of dam water',
-                      'fuente': 'FAO-56 and datos/colab/A5_demanda_plazo.py for the demand; back-test of the annual '
-                                'rainfall with an expanding window that uses no later years. Design assumptions: '
-                                'data/params.json, block tablero'},
+                      **{k: x for k, x in textos['metodo'].items() if not k.startswith(('nombre', '_'))}},
            'catalogo': json.loads((proc / 'opciones_b3.json').read_text(encoding='utf-8')),
            'requisitos': json.loads((proc / 'suelo_requisitos.json').read_text(encoding='utf-8')),
            'supuestos': json.loads((proc / 'supuestos.json').read_text(encoding='utf-8')), 'zonas': {}}
@@ -161,7 +164,6 @@ def construir(raiz=RAIZ):
         # Mantener el inicio climático del modelo; incluir solo nuevos ciclos completamente observados.
         inicio = rot['params']['periodo_clima']['valor'][0]
         serie = [x for x in serie if x['anio'] > inicio]
-        nombres = nombres_en(raiz)
         modelo = cargar_a5(raiz)
         modelo.CULTIVOS = rot['cultivos']
         modelo._CACHE.clear()
@@ -187,7 +189,7 @@ def construir(raiz=RAIZ):
                     fijo = c.get('presiembra_fija')
                     margen = [fijo,fijo] if fijo is not None else rot['params']['presiembra_mm']['valor']
                     pres = [a+b for a,b in zip(pres,margen)]
-            demandas[r['id']] = {**en_ingles(r, nombres), 'presiembra_mm': pres, 'serie': filas,
+            demandas[r['id']] = {**en_idiomas(r, nombres), 'presiembra_mm': pres, 'serie': filas,
                                   'fecha_base': {c: rot['cultivos'][c].get('siembra') for c in r['cultivos']}}
         # Frecuencia histórica exacta desde cada fecha de primavera; sin interpolar semanas.
         heladas = {}
@@ -210,7 +212,7 @@ def construir(raiz=RAIZ):
                              'frecuencia':sum(casos_helada)/len(casos_helada) if casos_helada else None}
         lluvia = [x['lluvia_mm'] for x in serie]
         out['zonas'][zona] = {'fuente_clima': f'data/processed/{nombre_clima}',
-            'heladas_primavera':heladas, 'clima_origen': 'NASA POWER (regional grid cell); ETo by FAO-56. Not an SMN weather station and not a rain gauge in the field.',
+            'heladas_primavera':heladas, **{k: x for k, x in textos['zona'].items() if not k.startswith('_')},
             'fecha_corte': str(max(clima)) if clima else None,
             'anios': serie, 'rotaciones': demandas, 'parametros': rot['params'],
             'ciclos_excluidos': [
@@ -222,13 +224,11 @@ def construir(raiz=RAIZ):
             'pronostico_lluvia': {'anio': max(serie[-1]['anio']+1,max(clima).year+int(max(clima).month>=10)) if serie else None,
                                   'p10_mm': cuantil(lluvia, sup['intervalo'][0]), 'p50_mm': mediana(lluvia),
                                   'p90_mm': cuantil(lluvia, sup['intervalo'][1]), 'n': len(serie),
-                                  # Lo que este bloque es, en palabras (la llave se conserva porque web/js la lee).
-                                  'titulo': 'Historical rainfall range (NASA POWER)',
+                                  # Ciclos de los que sale el rango (del primero al último completo).
                                   'periodo': [serie[0]['anio'], serie[-1]['anio']] if serie else None,
-                                  'nota': 'Range of the rainfall of the complete October–September cycles on '
-                                          'record: lower and upper quantiles and the median. It describes past '
-                                          'years; it does not say what a coming year will bring, and it says '
-                                          'nothing about dam water.'}}
+                                  # Lo que este bloque es, en palabras: titulo y nota con sus _es, _pt y _fr
+                                  # (la llave «pronostico_lluvia» se conserva porque web/js la lee).
+                                  **{k: x for k, x in textos['pronostico_lluvia'].items() if not k.startswith('_')}}}
     archivos += ['../params.json']
     out['fuentes'] = [{'archivo': str((proc/a).resolve().relative_to(raiz)),
                        'sha256': hashlib.sha256((proc/a).read_bytes()).hexdigest()}

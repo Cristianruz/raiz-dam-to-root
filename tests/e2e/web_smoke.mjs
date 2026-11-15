@@ -1008,6 +1008,22 @@ async function pruebaInicio(navegador, base, opciones, etiqueta, prefijo, cerrar
   check(`${prefijo}«How it works» vuelve a abrir los tres pasos`, await dialogo.isVisible());
   await page.locator(".acerca-inicio-x").click();
   check(`${prefijo}la «×» cierra la pantalla de inicio`, (await page.locator(".acerca-inicio").count()) === 0);
+  // La portada es el tablero (index.html): la cabecera del explorador lleva un enlace «Dashboard» con la misma
+  // forma que «How it works» y «About & Data» (en el teléfono, de 44 px de alto como ellos).
+  const enlaceTablero = await page.evaluate(() => {
+    const a = document.querySelector(".marca-acciones a#enlace-tablero");
+    const b = document.querySelector("#boton-acerca");
+    if (!a || !b) return null;
+    const ra = a.getBoundingClientRect();
+    return { href: a.getAttribute("href"), clase: a.className, texto: a.innerText.trim(), alto: Math.round(ra.height),
+      altoBoton: Math.round(b.getBoundingClientRect().height), subrayado: getComputedStyle(a).textDecorationLine };
+  });
+  check(
+    `${prefijo}la cabecera enlaza la portada: «Dashboard» → index.html, con la forma de los botones de la cabecera`,
+    enlaceTablero && enlaceTablero.href === "index.html" && enlaceTablero.clase.split(" ").includes("boton-cabecera") && enlaceTablero.texto === "Dashboard" &&
+      enlaceTablero.alto === enlaceTablero.altoBoton && enlaceTablero.subrayado === "none" && (!opciones.isMobile || enlaceTablero.alto >= 44),
+    JSON.stringify(enlaceTablero),
+  );
   check(`${prefijo}inicio: sin errores de consola`, ini.errores.length === 0, ini.errores.join(" | "));
   await ini.ctx.close();
 }
