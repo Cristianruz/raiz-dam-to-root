@@ -92,27 +92,29 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 02:31 | integrador | Segundo PR a `main` abierto (#7). La otra conversación de diseño es la del PR #6 (prototipo de Claude Design, solo `docs/diseno/`): no es del integrador y lo decide Cristian |
 | 02:38 | integrador | Video de 29 s y diapositivas regenerados sobre la página final (`ae9d54e`) |
 | 02:50 | «Laptop» e integrador | La hoja impresa cita la fuente de la marca en inglés (`10f8be4`, fusionado en `bb44e04`). Revisión cruzada de «Laptop» sobre la mezcla: todo en verde. 1182 pytest y 243 de Node; web_smoke 875/875, pwa 39/39 y sin conexión 22/22 |
+| 02:51 | integrador | PR #7 fusionado en `main` (`c5a9c25`, squash) con la CI en verde sobre `028c785`. `main` se fusionó de vuelta en la integración (`31e6d11`) y se avisó a «Laptop», a las dos conversaciones de diseño y a la sesión de datos |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 
-## Estado de cada chat y de cada rama (15-nov, 00:20, hora de Chihuahua)
+## Estado de cada chat y de cada rama (15-nov, 02:55, hora de Chihuahua)
 
 Revisión pedida por Cristian: cada chat, cada rama y la conversación del integrador. Cada fila se comprobó contra `git` y contra la transcripción del chat.
 
 | Chat | Rama | Último commit | Frente a la integración | Lo que falta |
 |---|---|---|---|---|
-| «Revisión multiagente» (integrador) | `claude/keen-mayer-sp0vvm` | `ab53a3b` | Es la integración; el PR #5 ya está en `main` | Segundo PR antes de las 8:00: página en inglés también dentro de los plegados de fuentes y ECOSTRESS con su aviso a la vista (en curso); video y diapositivas sobre la página final |
-| «Laptop» | `claude/sleepy-heisenberg-pxyhtx` | `2346788` | Todo fusionado | Repetir su revisión cruzada sobre el commit que llegue a `main`. De sus tres observaciones: el texto del sorgo quedó resuelto con el buzón v12; el aviso de `suelo_tipos.json` (zona urbana y cuerpos de agua) es de la sesión de datos; `docs/pruebas.md` registra la versión del precache de la corrida anterior (menor, abierto) |
+| «Revisión multiagente» (integrador) | `claude/keen-mayer-sp0vvm` | `31e6d11` | Es la integración; los PR #5 y #7 ya están en `main` | Lo que entreguen los otros chats antes de las 6:30; los abiertos del «Seguimiento» de `docs/revisiones/2026-11-15_cierre_hallazgos.md` |
+| «Laptop» | `claude/sleepy-heisenberg-pxyhtx` | `36ecda7` | Todo fusionado (hoja impresa con la fuente de la marca en inglés) | Repetir su revisión cruzada sobre el commit que llegue a `main`. De sus tres observaciones: el texto del sorgo quedó resuelto con el buzón v12; el aviso de `suelo_tipos.json` (zona urbana y cuerpos de agua) es de la sesión de datos; `docs/pruebas.md` registra la versión del precache de la corrida anterior (menor, abierto) |
 | «Diseño de aplicación con agentes» | `claude/gallant-franklin-41s0vq` | `9ef46ba` | Todo fusionado (rediseño y prompt de Claude Design) | El pulido que sigue (mapa primero en teléfono, jerarquía de la ficha, tokens en cuatro hojas de estilo) no tiene dueño hasta que Cristian diga en qué conversación sigue el diseño |
-| Sesión de datos | `datos-satelite` y Drive `Raiz_entregas/` | `252efd8` | Todo fusionado; buzón v12 dentro | Correcciones de ECOSTRESS (`docs/revisiones/2026-11-15_ecostress.md`), el README de las solicitudes de AppEEARS con sus citas y su revisión programada de las 6:40 |
+| Sesión de datos | `datos-satelite` y Drive `Raiz_entregas/` | `a6f98cd` | Todo fusionado; buzón v13 dentro (ECOSTRESS corregido, citas de AppEEARS, parche de GAEZ) | «best pH range» en dos notas de nutrientes y «Worst-case option» en el motivo del descanso; ubicación de las escenas de ECOSTRESS (escrita como límite); su revisión programada de las 6:40 |
 | «Extracción del sitio Spaceapps» | `claude/revision-spaceapps-guia` | `5daf315` | Fusionada | Nada |
+| Segunda conversación de diseño (prototipo de Claude Design) | `claude/prototipo-app-diseno` | `a727b03` | PR #6 abierto hacia `main`; solo agrega `docs/diseno/prototipo_claude_design/` | No es del integrador: lo decide Cristian. Si lleva el prototipo a `web/`, debe partir de la integración y entregar antes de las 6:30 |
 
 | Otras ramas | Estado |
 |---|---|
-| `main` | `d354010` (PR #5), publicado en GitHub Pages a las 00:38. Trae todo lo auditado de la noche |
+| `main` | `c5a9c25` (PR #7), publicado en GitHub Pages. Trae todo lo auditado de la noche y la ficha con motivos y beneficios |
 | `ee-crudos` | Rásteres crudos por zona (31 archivos, 192 MiB). No se fusiona ni se borra: es el respaldo de `datos/colab/correr_todo.py` |
 | `revision/web-dos-zonas` | Un commit (`ad42dc3`) que no es ancestro de la integración, pero su contenido ya está: el clic con tolerancia (`web/app.js`) y la hoja impresa en una carta (la comprueba `web_smoke`). Se borra después del evento |
 | `dependabot/…` (PR #2 y #3) | Sin fusionar a propósito hasta después del envío; el #3 rompe la prueba que fija la versión con que se generaron las teselas |
-| `Milo`, `Milo2`, `Tena` | Siguen en `e819b52` (el `main` anterior), sin commits propios. Hay que actualizarlas desde `main` (`d354010`) antes de trabajar en ellas |
+| `Milo`, `Milo2`, `Tena` | Siguen en `e819b52` (el `main` anterior), sin commits propios. Hay que actualizarlas desde `main` (`c5a9c25`) antes de trabajar en ellas |
 
 Hallazgos de las revisiones de anoche, uno por uno: `docs/revisiones/2026-11-15_cierre_hallazgos.md` (146 renglones: 73 resueltos, 31 parciales, 25 abiertos, 11 de persona y 6 para después del evento, comprobados contra `f0dbf3b`).
