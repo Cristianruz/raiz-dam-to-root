@@ -97,6 +97,8 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 03:40 | integrador | Revisión de la rama `Tena` (`351bbf5`, tablero y recomendador) con tres revisores de contexto nuevo, a pedido de Cristian. No se fusiona nada de esa rama sin su decisión |
 | 03:41 | integrador | PR #8 fusionado en `main` (`5394463`): buzón v14, solo textos. GitHub Pages publicó a las 03:42. Integración en `c916605` |
 | 04:05 | integrador | Revisión de la rama `Tena` terminada (`docs/revisiones/2026-11-15_rama_tena.md`): construye y es estable, pero cuatro hallazgos impiden publicarla tal cual (idioma y nombre, tres PDF internos, órdenes al agricultor y un segundo modelo con otras hectáreas). No se fusionó; lo decide Cristian |
+| 04:05 | Cristian | DECISIÓN: el tablero de `Tena` se corrige completo y se publica como página secundaria (`web/dashboard.html`); la portada publicada no cambia. También pide diseñar el video de 30 s |
+| 04:10 | integrador | Base local `1db7dd5` (rama `Tena` fusionada con la integración; el tablero en `dashboard.html`; 1205 pytest y 255 de Node) y tres agentes en paralelo con entrega a las 5:30: plan y asesor con las cifras de la ficha y sin órdenes; página del tablero en inglés y con el nombre ROOT; motor, datos, pruebas comunes y documentos (fuera los PDF, OpenAI Codex declarado). Un cuarto agente diseña el video. Corte: si a las 7:30 no está todo en verde, el tablero no se publica |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 
@@ -120,6 +122,6 @@ Revisión pedida por Cristian: cada chat, cada rama y la conversación del integ
 | `revision/web-dos-zonas` | Un commit (`ad42dc3`) que no es ancestro de la integración, pero su contenido ya está: el clic con tolerancia (`web/app.js`) y la hoja impresa en una carta (la comprueba `web_smoke`). Se borra después del evento |
 | `dependabot/…` (PR #2 y #3) | Sin fusionar a propósito hasta después del envío; el #3 rompe la prueba que fija la versión con que se generaron las teselas |
 | `Milo`, `Milo2` | Siguen en `e819b52` (el `main` de hace dos PR), sin commits propios. Hay que actualizarlas desde `main` antes de trabajar en ellas |
-| `Tena` | `351bbf5`: un commit con un tablero nuevo en `web/index.html`, un asesor y un recomendador, hecho sobre `e819b52`. Revisado en `docs/revisiones/2026-11-15_rama_tena.md`; no se fusiona sin la decisión de Cristian |
+| `Tena` | `351bbf5`: un commit con un tablero nuevo en `web/index.html`, un asesor y un recomendador, hecho sobre `e819b52`. Revisado en `docs/revisiones/2026-11-15_rama_tena.md`. Cristian decidió corregirlo y publicarlo como página secundaria (04:05); en curso |
 
 Hallazgos de las revisiones de anoche, uno por uno: `docs/revisiones/2026-11-15_cierre_hallazgos.md` (146 renglones: 73 resueltos, 31 parciales, 25 abiertos, 11 de persona y 6 para después del evento, comprobados contra `f0dbf3b`).
