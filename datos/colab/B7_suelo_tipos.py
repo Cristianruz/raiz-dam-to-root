@@ -5,7 +5,7 @@ Salidas (en --dir):
   suelo_tipos.json                 Catálogo: los 32 grupos de suelo de la WRB (30 con ficha de FAO), los 12 órdenes de la
                                    Soil Taxonomy del USDA, los prefijos de gran grupo y los suelos del municipio de Delicias.
   suelo_reglas.json                Reglas con fuente: clases de pH, materia orgánica, CIC, carbonatos y salinidad
-                                   (NOM-021-SEMARNAT-2000), disponibilidad de nutrientes según el pH (MSU Extension),
+                                   (NOM-021-SEMARNAT-2000), disponibilidad de nutrientes según el pH (Montana State University Extension),
                                    tablas para interpretar un análisis de suelo y avisos por cultivo (NMSU, Illinois).
   suelo_nutrientes_parcelas.csv    Las reglas aplicadas a cada parcela con las propiedades de suelo_parcelas.csv (A13).
 Uso: python B7_suelo_tipos.py --dir data/reto --suelo data/reto/suelo_parcelas.csv --supuestos datos/supuestos.json
@@ -29,8 +29,9 @@ SET = {1: "y1899e04", 2: "y1899e05", 3: "y1899e06", 4: "y1899e07", 5: "y1899e08"
 f_dri = lambda s: f"{DRI}, Set {s} (https://www.fao.org/4/y1899e/{SET[s]}.htm), {LEIDO}"
 NOM = ("NOM-021-SEMARNAT-2000, que establece las especificaciones de fertilidad, salinidad y clasificación de suelos "
        "(DOF 31-dic-2002), texto en https://www.norlexinternacional.com/arch/N021ST00.htm, " + LEIDO)
-MSU = ("McCauley, A., Jones, C. y Olson-Rutz, K. Soil pH and Organic Matter. Nutrient Management Module 8 (4449-8), "
-       f"Montana State University Extension (https://apps.msuextension.org/publications/pub.html?sku=4449-8), {LEIDO}")
+MSU = ("McCauley, A., Jones, C. y Olson-Rutz, K. 2017 (marzo). Soil pH and Organic Matter. Nutrient Management Module 8 "
+       "(4449-8), Montana State University Extension (PDF: https://landresources.montana.edu/nm/documents/soilmodulepdf/4449-8.pdf; "
+       f"ficha: https://apps.msuextension.org/publications/pub.html?sku=4449-8), {LEIDO}")
 NMSU657 = ("NMSU, Guide H-657 «Diseases and Other Disorders of Pecan in New Mexico» (rev. 2026) "
            f"(https://pubs.nmsu.edu/_h/H657/index.html), {LEIDO}")
 NMSU658 = ("NMSU, Guide H-658 «Diagnosing Nutrient Disorders of New Mexico Pecan Trees» (R. Heerema, rev. 2025) "
@@ -39,7 +40,9 @@ ILL = ("Illinois Agronomy Handbook, cap. 8 «Managing Soil pH and Crop Nutrients
        f"(http://extension.cropsciences.illinois.edu/handbook/pdfs/chapter08.pdf), {LEIDO}")
 GUT = ("Gutiérrez González, L.S. et al. 2022. Análisis del suelo y su importancia en el cultivo del nogal pecanero en el "
        "Distrito de Riego 05 Delicias. Rev. Biológico Agropecuaria Tuxpan 10(1), DOI 10.47808/revistabioagro.v10i1.395 "
-       f"(resumen en https://agris.fao.org/search/en/records/67598d78c7a957febdfbf098), {LEIDO}")
+       "(resumen en https://agris.fao.org/search/en/records/67598d78c7a957febdfbf098: análisis de 2018 a mayo de 2021 en huertas de "
+       "Delicias, Saucillo, Meoqui, Rosales y Julimes; «la mayoría de los suelos presentan concentraciones bajas de nitrógeno, "
+       f"fosforo, zinc, hierro y cobre»; «solo el 14% de los suelos tienen un pH de 6.7 a 7.3»), {LEIDO}")
 PMD = ("Plan Municipal de Desarrollo de Delicias 2024–2027, anexo del Periódico Oficial del Estado de Chihuahua (2025), que cita "
        "a INEGI, Diccionario de Datos Edafológicos escala 1:250 000 (versión 4), 2016 "
        "(https://chihuahua.gob.mx/sites/default/atach2/periodico-oficial/anexos/2025-01/ANEXO%2003-2025%20ACUERDO%20N%C2%B0%20203-2024%20PMD%20DELICIAS.pdf), "
@@ -53,6 +56,12 @@ UIDAHO = f"University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho
 LANC = ("Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) "
         f"(https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), {LEIDO}")
 EXPLICA = "Regional soil type from a global map, not a soil test."
+AVISO = "Rule-based risk from a global soil map; needs a soil test."
+GAEZ_FAQ = ("FAO e IIASA, GAEZ v4 Frequently Asked Questions, versión 2.0, noviembre de 2022 "
+            "(https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf), pregunta 13: «should be treated "
+            "in a conservative manner» … «appropriate aggregation levels, which are commensurate with the resolution of basic data»; "
+            "pregunta 16: «It is generally not recommended to calculate statistics at finer administrative levels with this version of "
+            f"the database.» (después de hablar del primer nivel subnacional), {LEIDO}")
 
 
 def g(nombre_es, s, rasgo, textura, ph, cic, mo, ricos, pobres, nota, tox, fija_p, limita, cultivos, ext, texto_en, ph_rango=None):
@@ -99,7 +108,7 @@ WRB = {
     "Vertisols": g("Vertisol", 3, "Arcillas pesadas que se agrietan al secarse (30 % o más de arcilla, horizonte vértico)", "arcilla pesada",
                    "6.0–8.0; 8.0–9.5 con mucho sodio", [30, 80], "baja (el perfil de ejemplo tiene 0.4–0.9 % de C orgánico)", ["Ca", "Mg"], ["N", "P", "S", "Zn"],
                    "Calcio y magnesio ocupan más del 90 % del complejo de cambio; muchos tienen poco N y poco P disponible; S y/o Zn bajos en algunos sitios",
-                   ["Al en los Vertisoles ácidos"], None,
+                   [], "Vertisoles ácidos (álicos y crómicos): mucho Al intercambiable que inactiva el P del fertilizante",
                    ["muy duros en seco y pegajosos en húmedo", "encharcamiento", "infiltración muy lenta", "salinización y sodificación"],
                    ["algodón", "trigo", "cebada", "sorgo", "garbanzo", "caña de azúcar", "mijo"], 335,
                    "Heavy cracking clay, rich in calcium and magnesium but often low in nitrogen and available phosphorus.", [6.0, 8.0]),
@@ -114,7 +123,7 @@ WRB = {
                   "Waterlogged soil: lack of oxygen is the main limit; once drained it can be productive."),
     "Andosols": g("Andosol", 3, "Suelos de ceniza volcánica (horizonte ándico o vítrico)", None, "estable de ligeramente ácido a neutro (mayor que 5)",
                   None, "cerca de 8 % en superficie; hasta 30 %", [], ["P"], "Generalmente fértiles; fijan fósforo por el aluminio activo",
-                  [], True, ["fijación de fósforo", "pendientes fuertes", "poca capacidad de carga"],
+                  [], "fijan P por el aluminio activo", ["fijación de fósforo", "pendientes fuertes", "poca capacidad de carga"],
                   ["caña de azúcar", "tabaco", "camote", "té", "hortalizas", "trigo", "frutales", "arroz"], 110,
                   "Volcanic ash soil, generally fertile, that locks up phosphorus."),
     "Podzols": g("Podzol", 9, "Suelos con horizonte espódico (acumulación de humus con Al y Fe)", "arenosa", "3.5–4.5 en superficie", None,
@@ -132,12 +141,12 @@ WRB = {
     "Stagnosols": None,
     "Nitisols": g("Nitisol", 6, "Suelos tropicales rojos, profundos y arcillosos (horizonte nítico)", "arcillosa (más de 30 % de arcilla)", "5.0–6.5",
                   "alta para un suelo tropical", "varios por ciento en superficie bajo bosque", ["Fe"], ["P"],
-                  "P disponible bajo y bases normalmente bajas; fijan P, pero la deficiencia aguda es rara", [], True, ["sorción alta de P"],
+                  "P disponible bajo y bases normalmente bajas; fijan P, pero la deficiencia aguda es rara", [], "sorción alta de P; la deficiencia aguda es rara", ["sorción alta de P"],
                   ["cacao", "café", "hule", "piña", "cultivos alimentarios"], 200,
                   "Deep red tropical clay, rich in iron, that holds phosphorus tightly.", [5.0, 6.5]),
     "Ferralsols": g("Ferralsol", 6, "Suelos tropicales muy meteorizados, ricos en óxidos de Fe y Al (horizonte ferrálico)", "arcillosa", "bajo", [3, 4],
                     None, ["Fe"], ["N", "K", "Ca", "Mg", "S"], "Químicamente pobres y bajos en muchos micronutrientes; Mn y Zn pueden ser tóxicos o deficientes; fijación fuerte de P",
-                    ["Al", "Mn", "Zn"], True, ["baja fertilidad natural", "fijación de P", "sequía"],
+                    ["Al", "Mn", "Zn"], "fijación fuerte de P", ["baja fertilidad natural", "fijación de P", "sequía"],
                     ["cultivos anuales y perennes con cal y fertilización completa"], 750,
                     "Deeply weathered tropical soil, chemically poor, that fixes phosphorus; it needs lime and full fertilization."),
     "Chernozems": g("Chernozem", 8, "Capa superficial gruesa, negra y rica en humus (mólica) con carbonatos secundarios", "loess limoso",
@@ -146,7 +155,7 @@ WRB = {
                     ["Na (en los del sur)"], None, ["erosión", "veranos secos", "sodio en los del sur"], ["trigo", "cebada", "maíz", "hortalizas"], 230,
                     "Deep black, humus-rich steppe soil, rich in nitrogen, calcium and magnesium; phosphorus is partly available.", [6.5, 7.5]),
     "Kastanozems": g("Kastañozem", 8, "Capa superficial parda y rica en humus, con carbonatos secundarios a menos de 100 cm", None,
-                     "cerca de 7 en superficie, hasta cerca de 8.5 en profundidad", [25, 30], "2–4 %", ["Ca", "Mg"], [],
+                     "cerca de 7 en superficie, hasta cerca de 8.5 en profundidad", [25, 30], "2–4 % en el horizonte Ah; rara vez más de 5 %", ["Ca", "Mg"], [],
                      "Químicamente ricos; Ca y Mg dominan el complejo de cambio; cal y yeso en el subsuelo; sodio intercambiable de 4 a 20 %",
                      ["sales solubles en algunos sitios"], None, ["falta de humedad", "erosión", "salinización secundaria con riego"],
                      ["granos pequeños", "cultivos alimentarios y hortalizas con riego", "pastoreo"], 465,
@@ -163,17 +172,17 @@ WRB = {
                   ["capa cementada que frena raíces y agua", "erosión", "sales en partes bajas"], ["pastoreo; cultivo con riego tras romper la capa"], None,
                   "Soil with a silica-cemented layer that stops roots and water; often high in sodium.", [7.5, 9.0]),
     "Gypsisols": g("Gypsisol", 7, "Suelos con acumulación secundaria de yeso (horizonte gípsico)", "franca o arcillosa en superficie", None, [10, 20],
-                   "baja", ["Ca"], ["N", "P", "K"], "Totales bajos de N, P y K (necesitan fertilizante); con más de 25 % de yeso bajan el P, el K y el Mg disponibles",
+                   "baja", [], ["N", "P", "K"], "Complejo de cambio saturado de bases; totales bajos de N, P y K (necesitan fertilizante); con más de 25 % de yeso bajan el P, el K y el Mg disponibles",
                    [], None, ["horizonte petrogípsico somero", "hundimientos por disolución del yeso", "encostramiento"],
                    ["granos pequeños", "algodón", "alfalfa", "trigo", "maíz", "vid", "dátil"], 100,
                    "Gypsum-rich soil, low in nitrogen, phosphorus and potassium; with much gypsum, phosphorus, potassium and magnesium are less available."),
     "Calcisols": g("Calcisol", 7, "Suelos con acumulación secundaria de carbonato de calcio (horizonte cálcico o petrocálcico a menos de 100 cm)",
                    "media o fina, con buena retención de agua", "cerca de neutro en superficie, más alto en profundidad (25 % o más de carbonatos)",
-                   [10, 25], "1–2 %", ["Ca", "Mg"], ["Fe", "Zn"],
-                   "Muchos son ricos en nutrientes; Ca y Mg forman más del 90 % de los cationes adsorbidos; Fe y Zn figuran entre las necesidades de fertilizante de las hortalizas; los cítricos son sensibles al carbonato activo",
+                   [10, 25], "1–2 %", ["Ca", "Mg"], [],
+                   "Muchos son ricos en nutrientes; Ca y Mg forman más del 90 % de los cationes adsorbidos; con riego, drenaje y fertilización pueden ser muy productivos; las hortalizas con riego se han cultivado con éxito fertilizando con N, P y micronutrientes (Fe, Zn); sorgo, pasto Rhodes y alfalfa toleran el calcio alto; los cítricos son sensibles al carbonato activo",
                    [], None, ["sequedad", "pedregosidad", "horizonte petrocálcico somero", "encostramiento", "salinización donde drena mal"],
                    ["trigo de invierno con riego", "melón", "algodón", "sorgo", "pasto Rhodes", "alfalfa", "hortalizas", "girasol de temporal"], 1000,
-                   "Lime-rich soil of dry regions, rich in calcium and magnesium; iron and zinc are common fertilizer needs."),
+                   "Lime-rich soil of dry regions, rich in calcium and magnesium; it can be highly productive when irrigated, drained and fertilized."),
     "Retisols": dict(g("Retisol (Albeluvisol en Driessen et al. 2001)", 9, "Horizonte árgico con lenguas de material blanqueado (albelúvicas)",
                        "capa eluvial arenosa", "moderada a fuertemente ácido", [10, 20], "1–10 % de C en superficie", [], [],
                        "Nutrientes bajos; bases muy bajas en la capa eluvial; mucho aluminio intercambiable en los háplicos", ["Al"], None,
@@ -181,7 +190,7 @@ WRB = {
                        "Acid, leached soil with low nutrient status and high aluminium."),
                      nota="Driessen et al. 2001 describe los Albeluvisols (WRB 1998); en la WRB 2022 el grupo equivalente se llama Retisols [P] (correspondencia sin verificar en la WRB 2022)"),
     "Acrisols": g("Acrisol", 6, "Suelos ácidos con horizonte árgico de arcillas de baja actividad y saturación de bases menor que 50 %", None, "ácido", None, None,
-                  [], [], "Nutrientes escasos; sorción fuerte de P", ["Al"], True, ["pocos nutrientes", "toxicidad por Al", "sorción de P", "erosión"],
+                  [], [], "Nutrientes escasos; sorción fuerte de P", ["Al"], "sorción fuerte de P", ["pocos nutrientes", "toxicidad por Al", "sorción de P", "erosión"],
                   ["piña", "marañón", "palma de aceite", "hule"], 1000, "Acid, nutrient-poor soil with aluminium toxicity; it needs lime and full fertilization."),
     "Lixisols": g("Lixisol", 6, "Horizonte árgico de arcillas de baja actividad con saturación de bases moderada a alta", None,
                   "más alto que en Ferralsols y Acrisols", None, None, [], [], "Reservas de nutrientes bajas; bases intercambiables de 2 cmol(+)/kg o menos",
@@ -287,10 +296,12 @@ def clase(v, tabla):
 def reglas(margen):
     t = lambda tabla: [{"clase": n, "min": a, "max": b} for n, a, b in tabla]
     return {
-        "fuente": "NOM-021-SEMARNAT-2000 (México) para clases e interpretación; MSU Extension para la disponibilidad según el pH; "
+        "fuente": "NOM-021-SEMARNAT-2000 (México) para clases e interpretación; Montana State University Extension para la disponibilidad según el pH; "
                   "NMSU e Illinois Agronomy Handbook para los avisos por cultivo; " + LEIDO,
         "nota": "Reglas generales: valen en cualquier región con el pH, la materia orgánica y la CIC de un mapa mundial (SoilGrids) "
                 "o de un análisis. Un «riesgo» es una regla, no un diagnóstico; los nutrientes disponibles se miden con análisis de suelo.",
+        "texto_aviso_en": AVISO,
+        "textos_ficha_en": textos_ficha(),
         "margen_ph": {"valor": margen, "fuente": "supuestos.json → suelo_margen_ph", "etiqueta": "assumption [S]"},
         "ph_clases": {"tabla": t(PH_CLASES), "metodo": "pH en agua, relación 1:2", "fuente": f"{NOM}, AS-02", "etiqueta": "[V]"},
         "disponibilidad_ph": {
@@ -302,6 +313,8 @@ def reglas(margen):
         "materia_organica": {"factor_c_a_mo": 1.724, "no_volcanicos": t(MO_NO_VOLC), "volcanicos": t(MO_VOLC), "unidad": "%",
                              "nota": "materia orgánica = carbono orgánico × 1.724 (Van Bemmelen, como en la norma). La CIC y el C orgánico "
                                      "de SoilGrids son estimaciones de un modelo; la norma usa Walkley y Black",
+                             "clasificacion": "la MO estimada se redondea a 0.1 % antes de buscar su clase, porque la tabla impresa salta "
+                                              "de 0.5 a 0.6, de 1.5 a 1.6 y de 3.5 a 3.6; mo_pct_estimada se entrega con 2 decimales",
                              "fuente": f"{NOM}, AS-07", "etiqueta": "[V]"},
         "cic": {"tabla": t(CIC), "unidad": "cmol(+)/kg", "nota": "la copia de la norma imprime «Muy baja: > 5»; se lee «< 5»",
                 "fuente": f"{NOM}, AS-12", "etiqueta": "[V]"},
@@ -309,7 +322,9 @@ def reglas(margen):
                        "efecto": "altos contenidos pueden inducir deficiencias de fósforo, zinc, hierro y/o manganeso en los cultivos",
                        "texto_en": "High lime content can induce phosphorus, zinc, iron and manganese deficiencies.",
                        "dato_por_parcela": None, "necesita": ["análisis de suelo (carbonatos)"],
-                       "fuente": f"{NOM}, AS-30 (Horton y Newson)", "etiqueta": "[V]"},
+                       "huecos": "la tabla impresa salta de 2.0 a 2.2 y de 15 a 17 %: un valor en un hueco va a la clase de abajo si está a 0.1 "
+                                 "o menos de su máximo y, si no, a la de arriba (2.1 → bajo; 16 → alto) [S]",
+                       "fuente": f"{NOM}, AS-30 (Horton y Newson)", "etiqueta": "[V] tabla; huecos assumption [S]"},
         "salinidad": {"tabla_ce": t(CE), "unidad": "dS/m a 25 °C, extracto de saturación",
                       "definiciones": {"salino": "CE de la pasta de saturación de 4 dS/m o más",
                                        "salino_sodico": "PSI mayor que 15 y CE mayor que 4 dS/m", "sodico": "PSI de 15 o más"},
@@ -336,9 +351,13 @@ def reglas(margen):
                 {"elemento": "Zn", "condicion": {"ph_mayor_que": 7.0},
                  "texto_en": "Zinc is poorly available to pecan roots in alkaline soils; orchards in such soils usually get foliar zinc sprays each spring. Confirm with a leaf analysis.",
                  "fuente": f"{NMSU658} («Zinc availability for root uptake is low in soils with pH above 7.0»); {NMSU657}", "etiqueta": "[V]"},
-                {"elemento": "Fe", "condicion": {"carbonatos_pct_entre": [10, 25]}, "necesita": ["análisis de suelo (carbonatos)"],
-                 "texto_en": "Iron deficiency is common in pecan orchards on very limy soils and is hard to correct.",
-                 "fuente": NMSU658, "etiqueta": "[V]"},
+                {"elemento": "Fe", "condicion": {"carbonatos_pct_mayor_o_igual": 10}, "necesita": ["análisis de suelo (carbonatos)"],
+                 "texto_en": "Iron deficiency symptoms occur regularly in pecan orchards on soils with very high lime content; the lime content needs a soil test.",
+                 "nota": "La fuente cita 10–25 % de cal (cuenca del Pecos); la condición usa 10 % o más para que el aviso no se apague con más "
+                         "cal. La misma guía dice que con menos de 10 % de cal los síntomas de Fe del nogal suelen deberse a riego excesivo "
+                         "(sobre todo por inundación), lluvia excesiva o mal drenaje, y que con mucha cal se trata con quelatos de Fe",
+                 "fuente": f"{NMSU658} («Iron deficiency symptoms occur regularly in pecan orchards with very high lime content (10–25%), as in the Pecos Basin»)",
+                 "etiqueta": "[V]"},
                 {"elemento": "Mn", "condicion": None,
                  "texto_en": "Orchards may benefit from one or two foliar manganese sprays each spring or early summer.",
                  "fuente": NMSU658, "etiqueta": "[V]"},
@@ -348,17 +367,65 @@ def reglas(margen):
             "maiz_forrajero": [
                 {"elemento": "Zn", "condicion": {"ph_mayor_que": 7.3},
                  "texto_en": "Maize is prone to zinc deficiency on soils with high pH, low organic matter, coarse texture or very high phosphorus.",
-                 "fuente": ILL, "etiqueta": "[V]"}],
+                 "fuente": f"{ILL} (zinc, maíz joven: «High pH (>7.3)», «Low in organic matter», «Coarse-textured (sandy) soils», «Very high phosphorus»)",
+                 "etiqueta": "[V]"}],
             "alfalfa": [
                 {"elemento": "B", "condicion": {"materia_organica_pct_menor_que": 2.0},
                  "texto_en": "Alfalfa on soils with little organic matter, high pH or sandy texture is prone to boron deficiency, mostly in dry periods.",
-                 "fuente": f"{ILL} (aplicar B en suelos con menos de 2 % de materia orgánica en zonas de alta producción de alfalfa)", "etiqueta": "[V]"}],
+                 "fuente": f"{ILL} (boro, alfalfa: «Low organic matter», «High pH», «Coarse-textured (sandy) soils», con «Drought»; y «Application of B on "
+                           "soils with less than 2% organic matter is recommended for areas of high alfalfa production.»)", "etiqueta": "[V]"}],
             "cereal_invierno": [
                 {"elemento": "Mn", "condicion": {"ph_clase_minima": "medianamente alcalino"},
                  "texto_en": "Oats are prone to manganese deficiency on high-pH soils, mostly in cool, wet weather.",
-                 "fuente": ILL, "etiqueta": "[V] fuente («high pH», sin cifra); umbral por clase de pH assumption [S]"}],
+                 "fuente": f"{ILL} (manganeso, soya y avena: «High pH», «Organic soils», «Restricted root zone», con «Cool, wet»)", "etiqueta": "[V] fuente («high pH», sin cifra); umbral por clase de pH assumption [S]"}],
             "chile": None, "algodon": None, "sorgo": None,
             "nota": "chile, algodón y sorgo: sin fuente encontrada para avisos de micronutrientes (14-nov-2026); la ficha no muestra ninguno"},
+    }
+
+
+def textos_ficha():
+    """Textos finales en inglés para el renglón de suelo de la ficha (uno por caso), para que la web no redacte otros.
+    {marcadores}: los llena la web con los datos; no hay cifras escritas en los textos."""
+    caso = lambda texto, cuando, **extra: {"texto_en": texto, "cuando": cuando, **extra}
+    return {
+        "nota": "Un texto por caso; los {marcadores} salen de suelo_nutrientes_parcelas.csv, tipo_suelo_parcelas.csv, suelo_tipos.json y "
+                "gaez_zona.csv. Nombres de nutrientes en inglés: nombres_nutrientes_en.",
+        "nombres_nutrientes_en": NOMBRE_EN,
+        "suelo": {
+            "aviso": caso(AVISO, "siempre que se muestre el renglón de suelo"),
+            "menos_disponibles": caso("Less available at this soil pH: {nutrientes}.", "menos_disponibles no está vacío"),
+            "cerca_del_limite": caso("Near the edge of their best pH range: {nutrientes}.",
+                                     "solo en el detalle, con cerca_del_limite sin N, K, Ca, Mg ni S (decisión del integrador)"),
+            "sin_aviso_ph": caso("At this estimated pH, no nutrient falls outside its best availability range.",
+                                 "menos_disponibles y cerca_del_limite vacíos"),
+            "toxicidad": caso("Below pH {ph_toxico}, aluminium and manganese can reach toxic levels.", "toxicidad_posible no está vacío",
+                              marcadores={"ph_toxico": "disponibilidad_ph.toxicidad_ph_menor_que.valor"}),
+            "hierro": caso("Iron becomes nearly insoluble as soil pH nears eight; chelated forms raise its availability.",
+                           "Fe está en menos_disponibles (es disponibilidad_ph.texto_fe)"),
+            "materia_organica": caso("Organic matter (estimated): {clase}.", "siempre que haya dato",
+                                     clases_en={"muy bajo": "very low", "bajo": "low", "medio": "medium", "alto": "high", "muy alto": "very high"}),
+            "cic": caso("Capacity to hold nutrients (CEC, estimated): {clase}.", "siempre que haya dato",
+                        clases_en={"muy baja": "very low", "baja": "low", "media": "medium", "alta": "high", "muy alta": "very high"}),
+            "sin_dato": caso("No soil estimate for this field.", "ph vacío en suelo_nutrientes_parcelas.csv"),
+        },
+        "tipo_suelo": {
+            "zona": caso("Soils of the municipality (INEGI soil map): {lista}.", "zona delicias_saucillo; {lista} = suelo_tipos.json → "
+                         "zona.municipio_delicias_pct, de mayor a menor"),
+            "parcela": caso("Predicted soil great group for this field (OpenLandMap, global map): {gran_grupo} ({orden}).",
+                            "gran_grupo_usda no está vacío en tipo_suelo_parcelas.csv"),
+            "no_coinciden": caso("The two differ because they come from different maps; neither is a field survey.",
+                                 "cuando se muestren los dos"),
+            "explica": caso(EXPLICA, "debajo del tipo de suelo"),
+        },
+        "gaez": {
+            "rotulo": caso("Regional ({km} km cells), FAO GAEZ v4; not field-level.", "siempre con un valor de GAEZ",
+                           marcadores={"km": "gaez_zona.csv → resolucion_m / 1000, redondeado"}),
+            "no_evaluado": caso("Not assessed by GAEZ.", "chile y nogal (GAEZ v4 no los evalúa)"),
+            "maiz_grano": caso("GAEZ value for grain maize; no silage-maize layer was available for these settings.",
+                               "maiz_forrajero (gaez_zona.csv → nota)"),
+            "cautela": caso("FAO advises treating these results in a conservative manner, at aggregation levels that match the "
+                            "resolution of the basic data.", "en el detalle de GAEZ", fuente=GAEZ_FAQ),
+        },
     }
 
 

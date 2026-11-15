@@ -385,8 +385,9 @@ Cristian ya vio) y la pieza B7. **Necesito que la valides tú**: esquema en tu v
      cic_clase, textura_grupo`. Listas separadas por «;» (símbolos). P0316: todo vacío salvo `id` y `zona`, igual que en suelo_parcelas.
   Contra tu 3f938ad: entran 29 y estas 3 salen «no está en la tabla 0.4-B» (lo esperado). Pasé todos los textos `*_en` de los
   dos JSON por tu `lenguaje_prohibido` (motor/ensamblar.py): 80 textos, **0** con lenguaje prohibido; sin cifras en `texto_en`.
-- **Resultado:** en 1,118 parcelas (pH 8.1–8.2) quedan menos disponibles P, B, Cu, Fe, Mn, Ni y Zn; en 93 (pH 8.0) los mismos
-  sin P (P cerca del límite); 27 con pH 7.5 o menos no salen del margen. Concuerda con la evidencia local (Gutiérrez González et
+- **Resultado:** en 1,118 parcelas (pH 8.1–8.3) quedan menos disponibles P, B, Cu, Fe, Mn, Ni y Zn; en 93 (pH 7.6–8.0) los
+  mismos sin P (P cerca del límite); 27 con pH 7.1–7.5 no salen del margen. [Corregido a las 20:18 por la revisión del
+  integrador: decía «8.1–8.2» y «8.0»; los datos no cambian.] Concuerda con la evidencia local (Gutiérrez González et
   al. 2022: la mayoría de los suelos de huertas del DR-05, bajos en N, P, Zn, Fe y Cu). Protagonistas: P0757 y P0632 → P, B, Cu,
   Fe, Mn, Ni y Zn; L0175 (pH 7.6) → B, Cu, Fe, Mn, Ni y Zn, P cerca del límite; al nogal de L0175 le aplica el aviso de Zn.
 - **Qué te recomiendo mostrar en la ficha** (tú decides):
@@ -473,3 +474,51 @@ Daba **290/291**: fallaba «impresión: la ficha de P0757 (4 tarjetas) cabe en u
   formatear con `timeZone: "UTC"`. Puede pasar en cualquier otro lugar que formatee una fecha AAAA-MM-DD.
 - Sigue en pie: esquema y revisión independiente de `suelo_tipos.json`, `suelo_reglas.json`,
   `suelo_nutrientes_parcelas.csv` y `tipo_suelo_parcelas.csv` (notas de las 19:23 y 19:34).
+
+## 14-nov 20:22 — Tu revisión de las 20:15: correcciones hechas y reentregadas (dos puntos traen la cita que tu revisor no pudo abrir)
+Reentregué a Drive `suelo_tipos.json`, `suelo_reglas.json`, `gaez_zona.csv` y `LEEME.md`. `suelo_nutrientes_parcelas.csv`
+y `tipo_suelo_parcelas.csv` no cambian (byte a byte). Punto por punto:
+1. **Calcisols:** hecho. `pobres_en: []`. Nota: con riego, las hortalizas se han cultivado con éxito fertilizando con N, P y
+   micronutrientes (Fe, Zn); con riego, drenaje y fertilización pueden ser muy productivos; sorgo, pasto Rhodes y alfalfa toleran
+   el calcio alto («Fodder crops such as `el sabeem' (sorghum bicolor), Rhodes grass and alfalfa, are tolerant of high calcium
+   levels.»). `texto_en`: «Lime-rich soil of dry regions, rich in calcium and magnesium; it can be highly productive when
+   irrigated, drained and fertilized.»
+2. **Vertisols:** hecho. `toxicidades: []` y `fijacion_p` con tu texto. Para que el campo tenga un solo tipo, `fijacion_p` es
+   ahora texto o null en todos los grupos (Andosols, Nitisols, Ferralsols y Acrisols pasaron de `true` a su texto).
+3. **Kastanozems: no lo cambié, la cifra sí está** en y1899e11, sección «Genesis of Kastanozems»: «The organic matter content of
+   the Ah-horizon of Kastanozems is typically 2 to 4 percent and seldom exceeds 5 percent.» (busca «seldom exceeds 5 percent»).
+   Precisé el campo: «2–4 % en el horizonte Ah; rara vez más de 5 %».
+4. **Gypsisols:** hecho. `ricos_en: []`; la nota dice «complejo de cambio saturado de bases».
+5. **Nogal, Fe:** hecho. `condicion: {"carbonatos_pct_mayor_o_igual": 10}`, sin «hard to correct»: «Iron deficiency symptoms occur
+   regularly in pecan orchards on soils with very high lime content; the lime content needs a soil test.» La `nota` guarda el
+   10–25 % de la fuente y lo que H-658 dice para menos de 10 % de cal (riego excesivo, sobre todo por inundación, o mal drenaje).
+6. **Montana State University:** hecho: liga del PDF (landresources.montana.edu), edición de marzo de 2017 y el nombre completo en
+   el JSON, el LEEME y el doc. Comprobé también `texto_fe`: «Iron, for instance, becomes nearly insoluble as soil pH nears 8 and
+   chelation can greatly increase availability».
+7. **GAEZ, maíz:** consulté el catálogo de res05 con `name LIKE '%Hg_mz%'`: solo `suHg_mze`, `scHg_mze` e `ycHg_mze` (tres
+   periodos). **No hay `*Hg_mzs`.** Queda Maize (grano) como sustituto, con columna nueva `nota` al final de `gaez_zona.csv`
+   (tu validador la acepta como adicional) y el texto corregido en G1, LEEME y docs.
+8. **FAQ de GAEZ: sí dice eso; la abrí.** FAQ versión 2.0 (nov-2022),
+   https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf. Pregunta 13: «should be treated in a
+   conservative manner» … «appropriate aggregation levels, which are commensurate with the resolution of basic data». Pregunta 16:
+   «It is generally not recommended to calculate statistics at finer administrative levels with this version of the database.»
+   (justo después de «…at the first sub-national level»). Ya va textual y con su liga en G1, LEEME, docs y
+   `textos_ficha_en.gaez.cautela.fuente`. Si tu red ya abre ese host, compruébalo.
+9. **Nota de las 19:23:** corregida (1,118 con pH 8.1–8.3; 93 con 7.6–8.0; 27 con 7.1–7.5).
+10. **Hecho:** `materia_organica.clasificacion` (la MO se redondea a 0.1 antes de clasificar), `carbonatos.huecos` (2.0–2.2 y
+    15–17 %, [S]) y `texto_aviso_en` en la raíz de `suelo_reglas.json`.
+- **Lo que tu revisor no pudo abrir, lo abrí yo y dejé la cita en cada fuente:** Illinois, Tabla 8.10 (zinc, maíz joven: «High pH
+  (>7.3)», «Low in organic matter», «Coarse-textured (sandy) soils», «Very high phosphorus»; boro, alfalfa: «Low organic matter»,
+  «High pH», «Coarse-textured (sandy) soils», con «Drought», y «Application of B on soils with less than 2% organic matter is
+  recommended for areas of high alfalfa production.»; manganeso, soya y avena: «High pH», con «Cool, wet»). Gutiérrez González et
+  al. 2022, resumen en AGRIS: «la mayoría de los suelos presentan concentraciones bajas de nitrógeno, fosforo, zinc, hierro y
+  cobre» y «solo el 14% de los suelos tienen un pH de 6.7 a 7.3» (análisis de 2018 a mayo de 2021; Delicias, Saucillo, Meoqui,
+  Rosales y Julimes).
+- **Textos de la ficha (lo que pediste a las 19:50):** `suelo_reglas.json → textos_ficha_en`, 17 casos (suelo, tipo de suelo y
+  GAEZ), con `{marcadores}` y sin cifras escritas; lista legible en `docs/suelo_textos_ficha.md`. Pasé 142 textos por tu
+  `lenguaje_prohibido`: 0.
+- **Pruebas con tu 4b58210 y esta entrega:** `construir.py` OK (30 entran; los 4 nuevos de suelo esperan esquema; 851 pytest y
+  116 node), `web_smoke` 291/291 y `correr_todo.py` 34 de 34 idénticos con la entrega nueva.
+- Si tu revisor confirma los puntos 3 y 8 con estas citas, ya se puede decir «validado». Pendiente tuyo: los esquemas de los 4.
+- ECOSTRESS: Cristian está activando su cuenta de Earthdata. En cuanto entre, pido ET de ECOSTRESS por AppEEARS y te propongo
+  el archivo y sus columnas antes de entregarlo.

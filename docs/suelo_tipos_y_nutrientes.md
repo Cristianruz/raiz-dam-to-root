@@ -10,7 +10,7 @@
 1. **Tipo de suelo = contexto del paisaje.** Catálogo mundial: los 32 grupos de la WRB y los 12 órdenes de la Soil Taxonomy
    del USDA. Dice cómo suele ser un suelo de ese tipo; no dice qué nutrientes tiene una parcela concreta.
 2. **Propiedades de la parcela → reglas con fuente.** Con el pH, el carbono orgánico, la CIC y la textura que da SoilGrids para
-   cada parcela, unas reglas publicadas (NOM-021-SEMARNAT-2000 y MSU Extension) dicen qué nutrientes suelen estar menos
+   cada parcela, unas reglas publicadas (NOM-021-SEMARNAT-2000 y Montana State University Extension) dicen qué nutrientes suelen estar menos
    disponibles y en qué clase cae cada propiedad.
 3. **Cultivo → avisos.** Avisos de nutrientes con fuente para nogal, maíz forrajero, alfalfa y avena (NMSU, Illinois). Los
    rangos de pH, textura y salinidad de cada cultivo ya están en `suelo_requisitos.json` (FAO ECOCROP, FAO-29).
@@ -37,14 +37,14 @@ Resumen del catálogo (lo que la fuente nombra; cada grupo trae más en el archi
 
 | Grupo WRB | Rico en | Pobre en | Toxicidad o limitación principal |
 |---|---|---|---|
-| Calcisol | Ca, Mg | Fe, Zn (necesidades de fertilizante en hortalizas) | sequedad, capa petrocálcica, costra |
+| Calcisol | Ca, Mg; muchos ricos en nutrientes | — (con riego, las hortalizas se fertilizan con N, P, Fe y Zn) | sequedad, capa petrocálcica, costra |
 | Cambisol | fertilidad química satisfactoria | — | poca profundidad o pendiente en algunos |
-| Kastañozem | Ca, Mg (químicamente rico) | — | falta de humedad; salinización con riego |
+| Kastañozem | Ca, Mg (químicamente rico); 2–4 % de MO en el horizonte Ah | — | falta de humedad; salinización con riego |
 | Chernozem | N, Ca, Mg | P (solo en parte disponible) | erosión, veranos secos |
 | Feozem | fértil | — | sequías, erosión |
 | Luvisol | fértil, bases altas | — | superficies limosas que se degradan |
-| Vertisol | Ca, Mg | N, P; S y Zn en partes | arcilla que se agrieta, encharcamiento |
-| Gypsisol | Ca | N, P, K; con mucho yeso, menos P, K y Mg | hundimientos, costra |
+| Vertisol | Ca, Mg | N, P; S y Zn en partes; los ácidos inactivan el P del fertilizante (Al) | arcilla que se agrieta, encharcamiento |
+| Gypsisol | — (complejo de cambio saturado de bases) | N, P, K; con mucho yeso, menos P, K y Mg | hundimientos, costra |
 | Solonchak | — | las sales bajan la disponibilidad | Na, Cl |
 | Solonetz | — | el sodio estorba la absorción | Na; horizonte denso |
 | Durisol | — | Fe extraíble | capa cementada; Na |
@@ -79,7 +79,7 @@ Resumen del catálogo (lo que la fuente nombra; cada grupo trae más en el archi
 | Carbonatos | clases de muy bajo (< 0.5 %) a muy alto (> 40 %); «altos contenidos pueden inducir deficiencias de fósforo, zinc, hierro y/o manganeso» | NOM-021, AS-30 |
 | Salinidad | clases de CE y definiciones de suelo salino (CE ≥ 4 dS/m), sódico (PSI ≥ 15) y salino-sódico | NOM-021, AS-18 y 4.8–4.10 |
 | Análisis de suelo | clases de P Olsen y Bray, Ca, Mg y K intercambiables, Fe, Zn, Cu y Mn DTPA, boro y N inorgánico, para cuando el usuario capture un análisis | NOM-021 |
-| Nogal | Zn poco disponible con pH mayor que 7.0 (aspersiones foliares cada primavera); Fe en suelos con 10–25 % de cal; Mn foliar; evidencia local de N, P, Zn, Fe y Cu bajos | NMSU H-658 y H-657; Gutiérrez González et al. 2022 |
+| Nogal | Zn poco disponible con pH mayor que 7.0 (aspersiones foliares cada primavera); Fe en suelos con mucha cal (la fuente cita 10–25 %; la regla usa 10 % o más); Mn foliar; evidencia local de N, P, Zn, Fe y Cu bajos | NMSU H-658 y H-657; Gutiérrez González et al. 2022 |
 | Maíz forrajero | Zn: pH mayor que 7.3, poca materia orgánica, textura gruesa o mucho P | Illinois Agronomy Handbook, Tabla 8.10 |
 | Alfalfa | B: menos de 2 % de materia orgánica, pH alto, arena, sequía | Illinois Agronomy Handbook |
 | Avena | Mn: pH alto, frío y humedad (la fuente no da cifra; se usa la clase «medianamente alcalino» [S]) | Illinois Agronomy Handbook |
@@ -107,7 +107,7 @@ Resumen del catálogo (lo que la fuente nombra; cada grupo trae más en el archi
 ## 5. Cómo escala a otra región
 1. Earth Engine: `datos/earthengine/suelo.js` con el rectángulo nuevo (SoilGrids y OpenLandMap son mundiales, 250 m).
 2. `A13_suelo_parcelas.py` → propiedades por parcela; `B7_suelo_tipos.py` → reglas aplicadas y catálogo.
-3. Las reglas de MSU y los requisitos de FAO (ECOCROP, FAO-29) son generales. Las clases de la NOM-021 son la norma mexicana:
+3. Las reglas de Montana State University y los requisitos de FAO (ECOCROP, FAO-29) son generales. Las clases de la NOM-021 son la norma mexicana:
    en otro país se usa su norma, y el archivo dice de dónde sale cada clase.
 4. **Tipo de suelo por parcela (hecho el 14-nov por la noche, pieza B8):** gran grupo USDA de OpenLandMap
    (`OpenLandMap/SOL/SOL_GRTGROUP_USDA-SOILTAX_C/v01`, 250 m, CC-BY-SA 4.0) → `tipo_suelo_parcelas.csv`. El orden y los
@@ -139,15 +139,19 @@ Resumen del catálogo (lo que la fuente nombra; cada grupo trae más en el archi
 | Alfalfa | 77.8 | High | 16.8 / 16.7 t de materia seca/ha |
 | Algodón (Cotton) | 77.8 | High | 913 / 910 kg de fibra/ha |
 | Sorgo (Sorghum) | 77.8 | High | 7.5 / 7.5 t de materia seca/ha |
-| Maíz (Maize, de grano; sustituto del forrajero) | 55.6 | Good | 9.3 / 9.3 t de materia seca/ha |
+| Maíz (Maize, de grano: res05 no tiene capa de maíz para ensilaje) | 55.6 | Good | 9.3 / 9.3 t de materia seca/ha |
 | Avena (Oat) | 55.6 | Good | 2.9 / 2.9 t de materia seca/ha |
 | Chile, nogal | GAEZ v4 no los evalúa | — | — |
 
 - Índice: la variable de FAO va de 0 a 10000 (7778 = 77.8). Clase: código del servicio leído por el orden de su leyenda; los
   umbrales que imprime esa leyenda no cuadran con los índices (77.78 llega como clase 2), por eso se entrega también el índice.
-- FAO pide tratar los resultados «in a conservative manner at appropriate aggregation levels» y no calcular estadísticas por
-  debajo del primer nivel subnacional (GAEZ v4, FAQ 2.0): es contexto de la región, nunca de la parcela. Los suelos de GAEZ v4
-  son de HWSD v1.21.
+- FAQ de GAEZ v4 (versión 2.0, nov-2022, https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf):
+  pregunta 13, «should be treated in a conservative manner» … «appropriate aggregation levels, which are commensurate with the
+  resolution of basic data»; pregunta 16, «It is generally not recommended to calculate statistics at finer administrative levels
+  with this version of the database.» Es contexto de la región, nunca de la parcela. Los suelos de GAEZ v4 son de HWSD v1.21.
+- Maíz: el modelo GAEZ v4 tiene maíz para ensilaje (mzs), pero el tema res05 del servicio no tiene esa capa con insumos altos y
+  riego por gravedad (consulta del 14-nov-2026: solo maíz de grano, mze). El valor de `maiz_forrajero` es de grano; lo dice la
+  columna `nota` de `gaez_zona.csv`.
 
 ## 6. Límites (deben ir a la vista)
 - **Riesgo por regla, no diagnóstico.** P, K, Zn, Fe, Mn, Cu y B disponibles, carbonatos y salinidad de una parcela solo se
@@ -165,8 +169,9 @@ Resumen del catálogo (lo que la fuente nombra; cada grupo trae más en el archi
 - Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. *Lecture Notes on the Major Soils of the World*.
   World Soil Resources Reports 94, FAO. https://www.fao.org/4/y1899e/y1899e00.htm
 - NOM-021-SEMARNAT-2000 (DOF 31-dic-2002). https://www.norlexinternacional.com/arch/N021ST00.htm
-- McCauley, A., Jones, C. y Olson-Rutz, K. *Soil pH and Organic Matter* (4449-8). MSU Extension.
-  https://apps.msuextension.org/publications/pub.html?sku=4449-8
+- McCauley, A., Jones, C. y Olson-Rutz, K. 2017 (marzo). *Soil pH and Organic Matter* (4449-8). Montana State University
+  Extension. https://landresources.montana.edu/nm/documents/soilmodulepdf/4449-8.pdf (ficha:
+  https://apps.msuextension.org/publications/pub.html?sku=4449-8)
 - NMSU, Guide H-657 (rev. 2026), https://pubs.nmsu.edu/_h/H657/index.html, y Guide H-658 (rev. 2025), https://pubs.nmsu.edu/_h/H658.pdf
 - *Illinois Agronomy Handbook*, cap. 8. http://extension.cropsciences.illinois.edu/handbook/pdfs/chapter08.pdf
 - Gutiérrez González, L.S. et al. 2022. *Rev. Biológico Agropecuaria Tuxpan* 10(1), DOI 10.47808/revistabioagro.v10i1.395.
