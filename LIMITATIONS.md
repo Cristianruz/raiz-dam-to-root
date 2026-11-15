@@ -100,10 +100,22 @@ ROOT is presented as a digital twin of the pilot areas: a replica, an observed s
 - **GAEZ describes the area, not the field.** Its cells are about 9 km (`data/processed/gaez_zona.csv`); FAO recommends treating the results conservatively, at aggregation levels that match the resolution of the base data (`datos/colab/G1_gaez_zona.py`). GAEZ v4 does not assess chile or pecan, and its maize layer is grain maize, used as a stand-in for forage maize.
 - **None of these series forecasts the dam.**
 
+## Dashboard and historical rainfall range
+
+- **The rainfall on the dashboard is a historical range, not a forecast.** It is the band between the 10th and 90th percentiles, with the median, of the rainfall of the complete October–September cycles in the NASA POWER series: 34 cycles per area, 1992–2025 (`web/data/pronostico.json` → `zonas.*.pronostico_lluvia`). It describes past years. It does not say what a coming year will bring, and it is not a forecast of the dam.
+- **Its back-test, favorable or not.** For each of 24 test years (2002–2025) the band was computed with the earlier years alone (`zonas.*.validacion_lluvia`; recomputed by `python motor/verificar_pronostico.py`, which runs inside pytest).
+  - Delicias – Saucillo: the median missed the observed rainfall by 90.7 mm on average, against 112.3 mm for repeating the previous year's rainfall. The band contained 20 of 24 years (83 %; it is built for 80 %).
+  - Lázaro Cárdenas: 80.1 mm against 96.9 mm. The band contained 17 of 24 years (71 %), below the 80 % it is built for.
+  - This back-test was not declared before the analysis, and the build runs no significance test on the difference with repeating the previous year; the independent review judged that advantage not statistically clear (`docs/revisiones/2026-11-15_rama_tena.md`).
+- **One grid cell per area.** The series is a regional NASA POWER cell, not a station or a rain gauge in the field. The 2026 cycle is left out because one day is missing (`zonas.*.ciclos_excluidos`).
+- **Design assumptions [S].** The minimum of 10 earlier cycles, the two percentiles of the band and the planning levels of the crop comparison are the team's design assumptions, with no external source (`data/params.json` → `tablero`).
+- **The timeline is press context [P].** Its events come from the team's research notes, a press compilation not checked against primary sources. The irrigated-area chart is read from Conagua's statistics [V] (`data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv`, column `sup_total_ha`).
+- **Translations.** The dashboard is offered in English, Spanish, Portuguese and French. The Portuguese and French texts are machine drafts awaiting review by a speaker. The field explorer and the texts that come from the data deliveries (sources, labels, reasons of each option) stay in English (`docs/decisiones/2026-11-15_tablero_principal_idiomas.md`).
+
 ## Pilot areas and data status
 
 - **Pilot rectangles are design choices [S].** The module boundary is not public [NE]. The two areas are `delicias_saucillo` (940 fields, 19,145.19 ha) and `lazaro_cardenas` (299 fields, 5,847.82 ha) (`web/data/cubo.json` → `zonas`; `docs/decisiones/2026-11-14_dos_zonas.md`). They may not represent the whole district.
 - **The team's reference localities are points, not fields.**
 - **The web reads real deliveries** (`web/data/cubo.json` → `meta.mock: false`). Still missing from the team: the allocation table (`dotaciones.json`) and the figure table (`cifras.csv`) (`docs/reparto_faltantes.md`, items D4 and I7).
-- **Public site.** https://cristianruz.github.io/raiz-dam-to-root/ publishes `main` (GitHub Pages); pull request #4, with the version described here, is merged.
+- **Public site.** https://cristianruz.github.io/raiz-dam-to-root/ publishes `main` (GitHub Pages); pull request #4, with the field explorer described here, is merged. Once the pull request that makes the dashboard the home page is merged, that link opens the dashboard and the field explorer is at `explorer.html`.
 - With few fields in a group, its shares rest on few fields.

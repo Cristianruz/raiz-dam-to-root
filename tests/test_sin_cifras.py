@@ -2,16 +2,19 @@
 """K-TEST 7 (versión inicial): «ninguna cifra en la página que no venga de los datos».
 
 Revisa:
-- el texto visible de web/index.html (más los atributos que se leen o se anuncian:
-  alt, title, placeholder, aria-label…, y min/max/step/value de los controles);
-- las cadenas literales ('…', "…" y el texto de las plantillas `…`) de web/app.js y de
-  los demás web/*.js; si una cadena trae marcado HTML, cuenta su texto visible.
+- el texto visible de las DOS páginas, web/index.html (la portada: el tablero) y web/explorer.html (el
+  explorador de parcelas), más los atributos que se leen o se anuncian (alt, title, placeholder,
+  aria-label…, y min/max/step/value de los controles);
+- las cadenas literales ('…', "…" y el texto de las plantillas `…`) de web/app.js y de todos los
+  demás módulos de web/ (también los del tablero: js/dashboard.js, js/asesor.js, js/recomendador.js,
+  js/interfaz.js, el módulo de idiomas js/i18n.js y los diccionarios js/textos_*.js); si una cadena
+  trae marcado HTML, cuenta su texto visible.
 Falla si queda un dígito que no esté en tests/excepciones_cifras.json (cada
 excepción con su motivo). Las cifras deben llegar de cubo.json, parcelas.geojson,
 explicaciones.json, params.json o manifest.json, nunca escritas a mano.
 
-Si web/index.html o web/app.js aún no existen, su prueba se marca «skip» (los
-escribe la pieza web). Las pruebas del detector corren siempre, con ejemplos.
+Las dos páginas y los módulos del tablero deben existir: si falta uno, la prueba FALLA (no se marca «skip»:
+una página sin revisar no cuenta como revisada). Las pruebas del detector corren siempre, con ejemplos.
 """
 import fnmatch
 import json
@@ -310,6 +313,23 @@ def test_detector_lee_el_html_dentro_de_las_cadenas_js():
     assert malas == {"${…} of 12 fields", "img[alt]=Field 7"}, malas
 
 
+def test_la_excepcion_de_i18n_solo_cubre_el_nombre_del_modulo():
+    """«i18n» es el nombre del módulo de idiomas (web/js/i18n.js): su «18» no es una cifra. Una cifra de verdad en
+    la misma cadena sigue fallando, y un nombre parecido («i18n2») no queda cubierto."""
+    js = ('import { t, deDato } from "./i18n.js";\n'
+          'const a = "js/i18n.js";\n'
+          'const b = "i18n.js lists 12 fields";\n'
+          'const c = "i18n2";\n'
+          'const d = `<p title="i18n">ok</p><p>i18n: 3 languages</p>`;\n')
+    for archivo in ("js/dashboard.js", "app.js", "js/textos_es.js"):
+        malas = {t for _, t in cifras_sin_fuente(fragmentos_js(js), archivo)}
+        assert malas == {"i18n.js lists 12 fields", "i18n2", "i18n: 3 languages"}, (archivo, malas)
+    html = "<html><body><p>Module i18n</p><p>i18n has 4 languages</p></body></html>"
+    for pagina in ("index.html", "explorer.html"):
+        malas = {t for _, t in cifras_sin_fuente(texto_visible_html(html), pagina)}
+        assert malas == {"i18n has 4 languages"}, (pagina, malas)
+
+
 # --- Pruebas sobre la web real -------------------------------------------------------------
 def archivos_js():
     """Todos los módulos de la web: web/*.js y web/js/**/*.js (relieve, gota, mensaje, acerca…), como rutas
@@ -330,12 +350,41 @@ def test_archivos_js_incluye_los_modulos_de_web_js():
     assert not [n for n in nombres if n.startswith("vendor/")]
 
 
-def test_index_html_sin_cifras():
-    ruta = WEB / "index.html"
-    if not ruta.exists():
-        pytest.skip("pendiente: web/index.html aún no existe (lo escribe la pieza web)")
-    malas = cifras_sin_fuente(texto_visible_html(ruta.read_text(encoding="utf-8")), "index.html")
-    assert not malas, mensaje("index.html", malas)
+# Las páginas de la aplicación: la portada (el tablero) y el explorador de parcelas. Las dos se revisan.
+PAGINAS = ("index.html", "explorer.html")
+# Módulos del tablero y de los idiomas que la lista de archivos_js() debe traer (no basta con que «si están, se revisan»).
+MODULOS_DEL_TABLERO = ("js/dashboard.js", "js/asesor.js", "js/recomendador.js", "js/interfaz.js", "js/i18n.js")
+ENCABEZADO_HTML = "<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
+
+
+@pytest.mark.parametrize("pagina", PAGINAS)
+def test_paginas_html_sin_cifras(pagina):
+    ruta = WEB / pagina
+    assert ruta.exists(), f"falta web/{pagina}: las dos páginas de la aplicación deben existir y revisarse"
+    malas = cifras_sin_fuente(texto_visible_html(ruta.read_text(encoding="utf-8")), pagina)
+    assert not malas, mensaje(pagina, malas)
+
+
+@pytest.mark.parametrize("pagina", PAGINAS)
+def test_paginas_html_con_encabezado(pagina):
+    """Regla 4: el encabezado va en las primeras líneas (después de <!doctype html>)."""
+    inicio = (WEB / pagina).read_text(encoding="utf-8")[:400]
+    assert ENCABEZADO_HTML in inicio, f"web/{pagina} sin el encabezado de la regla 4"
+
+
+def test_ninguna_otra_pagina_html_queda_sin_revisar():
+    """Si aparece otra página en web/ (fuera de vendor/), debe entrar a PAGINAS para que se revisen sus cifras."""
+    otras = sorted(p.relative_to(WEB).as_posix() for p in WEB.rglob("*.html")
+                   if "vendor" not in p.relative_to(WEB).parts and p.relative_to(WEB).as_posix() not in PAGINAS)
+    assert not otras, f"páginas de web/ que ninguna prueba revisa: {otras}"
+
+
+def test_la_lista_de_js_trae_los_modulos_del_tablero_y_los_idiomas():
+    nombres = archivos_js()
+    for modulo in MODULOS_DEL_TABLERO:
+        assert modulo in nombres, f"web/{modulo} debe existir y revisarse (cifras, palabras vetadas y encabezado)"
+    for diccionario in (WEB / "js").glob("textos_*.js"):
+        assert f"js/{diccionario.name}" in nombres, f"el diccionario web/js/{diccionario.name} no lo revisa ninguna prueba"
 
 
 @pytest.mark.parametrize("nombre", archivos_js())

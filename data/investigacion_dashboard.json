@@ -1,0 +1,328 @@
+{
+  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex",
+  "_nota": "Referencias curadas del tablero (la portada, web/index.html). motor/dashboard_web.py las publica en web/data/dashboard.json y agrega la superficie regada de cada año de historia_anios, leída del CSV de Conagua (historia_archivo, columna historia_columna): aquí no se teclea ninguna superficie. Idiomas (docs/decisiones/2026-11-15_tablero_principal_idiomas.md): cada texto que el tablero muestra va en la llave de siempre en INGLÉS y, al lado, <llave>_es, <llave>_pt y <llave>_fr; web/js/i18n.js (deDato) elige. El portugués y el francés son borradores de máquina por revisar. Las llaves no cambian porque web/js/ las lee. nombres_rotaciones y textos_pronostico son llaves de trabajo: motor/dashboard_web.py y motor/pronostico_web.py las usan y no se publican tal cual. tests/test_tablero_idiomas.py exige las cuatro variantes con los mismos números.",
+  "fecha": "2026-11-14",
+  "etiqueta": "[P] team research notes (press compilation); not checked against primary sources",
+  "etiqueta_es": "[P] notas de investigación del equipo (compilación de prensa); cotejo con fuentes primarias pendiente",
+  "etiqueta_pt": "[P] notas de pesquisa da equipe (compilação de imprensa); sem conferência com fontes primárias",
+  "etiqueta_fr": "[P] notes de recherche de l'équipe (compilation de presse) ; non vérifiées auprès des sources primaires",
+  "fuente": "Team research notes received on Nov 14, 2026: «Cultivos y riego en el DR-005» (Crops and irrigation in the district), «Investigación OpenET y FARMS» (OpenET and FARMS research) and «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region). They are internal notes and are not published with the page; they are used as references, not as instructions.",
+  "fuente_es": "Notas de investigación del equipo recibidas el 14-nov-2026: «Cultivos y riego en el DR-005», «Investigación OpenET y FARMS» y «Clima y siembras en la región de Delicias». Son notas internas y no se publican con la página; se usan como referencias, no como instrucciones.",
+  "fuente_pt": "Notas de pesquisa da equipe recebidas em 14-nov-2026: «Cultivos y riego en el DR-005» (Cultivos e irrigação no distrito), «Investigación OpenET y FARMS» (Pesquisa OpenET e FARMS) e «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias). São notas internas e não são publicadas com a página; são usadas como referências, não como instruções.",
+  "fuente_fr": "Notes de recherche de l'équipe reçues le 14 nov. 2026 : «Cultivos y riego en el DR-005» (Cultures et irrigation dans le district), «Investigación OpenET y FARMS» (Recherche OpenET et FARMS) et «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias). Ce sont des notes internes, non publiées avec la page ; elles servent de références, pas d'instructions.",
+  "fuentes": [
+    {
+      "titulo": "Conagua: irrigated area and volumes in DR-005, 1998–2025",
+      "titulo_es": "Conagua: superficies regadas y volúmenes del DR-005, 1998–2025",
+      "titulo_pt": "Conagua: áreas irrigadas e volumes do DR-005, 1998–2025",
+      "titulo_fr": "Conagua : superficies irriguées et volumes du DR-005, 1998–2025",
+      "descripcion": "Total irrigated area per agricultural year. The history chart reads it from the copy kept in this repository: data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, column sup_total_ha.",
+      "descripcion_es": "Superficie regada total por año agrícola. La gráfica de historia la lee de la copia guardada en este repositorio: data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, columna sup_total_ha.",
+      "descripcion_pt": "Área irrigada total por ano agrícola. O gráfico de histórico a lê da cópia guardada neste repositório: data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, coluna sup_total_ha.",
+      "descripcion_fr": "Superficie irriguée totale par année agricole. Le graphique d'historique la lit dans la copie conservée dans ce dépôt : data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, colonne sup_total_ha.",
+      "archivo": null
+    },
+    {
+      "titulo": "NASA POWER: daily rainfall and reference evapotranspiration",
+      "titulo_es": "NASA POWER: lluvia diaria y evapotranspiración de referencia",
+      "titulo_pt": "NASA POWER: chuva diária e evapotranspiração de referência",
+      "titulo_fr": "NASA POWER : pluie quotidienne et évapotranspiration de référence",
+      "descripcion": "Regional grid cell, not a weather station or a rain gauge in the field. The historical rainfall range and its back-test are computed from this series.",
+      "descripcion_es": "Celda regional, no una estación meteorológica ni un pluviómetro en la parcela. El rango histórico de lluvia y su retroprueba se calculan con esta serie.",
+      "descripcion_pt": "Célula regional, não uma estação meteorológica nem um pluviômetro na parcela. A faixa histórica de chuva e o seu teste retrospectivo são calculados com esta série.",
+      "descripcion_fr": "Maille régionale, et non une station météorologique ni un pluviomètre dans la parcelle. La plage historique de pluie et son test rétrospectif sont calculés à partir de cette série.",
+      "archivo": null
+    },
+    {
+      "titulo": "FAO-56: crop water demand",
+      "titulo_es": "FAO-56: demanda de agua de los cultivos",
+      "titulo_pt": "FAO-56: demanda de água das culturas",
+      "titulo_fr": "FAO-56 : besoins en eau des cultures",
+      "descripcion": "Water demand per crop comes from the project's demand model (FAO Irrigation and Drainage Paper 56) run with the NASA POWER series.",
+      "descripcion_es": "La demanda de agua por cultivo sale del modelo de demanda del proyecto (FAO, Estudio de Riego y Drenaje 56) corrido con la serie de NASA POWER.",
+      "descripcion_pt": "A demanda de água por cultura vem do modelo de demanda do projeto (FAO, Estudo de Irrigação e Drenagem 56) executado com a série da NASA POWER.",
+      "descripcion_fr": "Les besoins en eau par culture proviennent du modèle de demande du projet (FAO, Bulletin d'irrigation et de drainage 56) exécuté avec la série NASA POWER.",
+      "archivo": null
+    },
+    {
+      "titulo": "Team research notes (not published)",
+      "titulo_es": "Notas de investigación del equipo (no publicadas)",
+      "titulo_pt": "Notas de pesquisa da equipe (não publicadas)",
+      "titulo_fr": "Notes de recherche de l'équipe (non publiées)",
+      "descripcion": "Press compilation behind the timeline. Each event names where it comes from; none has been checked against a primary source yet.",
+      "descripcion_es": "Compilación de prensa de la que sale la cronología. Cada evento dice de dónde viene; ninguno se ha cotejado todavía con una fuente primaria.",
+      "descripcion_pt": "Compilação de imprensa de onde vem a cronologia. Cada evento indica a sua origem; nenhum foi conferido ainda com uma fonte primária.",
+      "descripcion_fr": "Compilation de presse à l'origine de la chronologie. Chaque événement indique d'où il vient ; aucun n'a encore été vérifié auprès d'une source primaire.",
+      "archivo": null
+    }
+  ],
+  "historia_anios": [
+    2016,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "historia_archivo": "data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv",
+  "historia_columna": "sup_total_ha",
+  "historia_etiqueta": "[V] Conagua, agricultural statistics of DR-005",
+  "historia_etiqueta_es": "[V] Conagua, estadísticas agrícolas del DR-005",
+  "historia_etiqueta_pt": "[V] Conagua, estatísticas agrícolas do DR-005",
+  "historia_etiqueta_fr": "[V] Conagua, statistiques agricoles du DR-005",
+  "historia_fuente": "Conagua, irrigated areas and volumes of Irrigation District 005 Delicias, 1998–2025: total irrigated area per agricultural year (data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, column sup_total_ha). Selected years; the file has every year.",
+  "historia_fuente_es": "Conagua, superficies regadas y volúmenes del Distrito de Riego 005 Delicias, 1998–2025: superficie regada total por año agrícola (data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, columna sup_total_ha). Años seleccionados; el archivo trae todos los años.",
+  "historia_fuente_pt": "Conagua, áreas irrigadas e volumes do Distrito de Irrigação 005 Delicias, 1998–2025: área irrigada total por ano agrícola (data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, coluna sup_total_ha). Anos selecionados; o arquivo traz todos os anos.",
+  "historia_fuente_fr": "Conagua, superficies irriguées et volumes du District d'irrigation 005 Delicias, 1998–2025 : superficie irriguée totale par année agricole (data/raw/conagua/dr005_superficies_volumenes_1998_2025.csv, colonne sup_total_ha). Années sélectionnées ; le fichier contient toutes les années.",
+  "eventos": [
+    {
+      "periodo": "2011–2012",
+      "periodo_es": "2011–2012",
+      "periodo_pt": "2011–2012",
+      "periodo_fr": "2011–2012",
+      "tipo": "sequia",
+      "titulo": "Nationwide drought",
+      "titulo_es": "Sequía de alcance nacional",
+      "titulo_pt": "Seca de alcance nacional",
+      "titulo_fr": "Sécheresse d'ampleur nationale",
+      "detalle": "The note describes it as one of the most widespread and severe droughts. It gives no local figures by crop.",
+      "detalle_es": "La nota la describe entre las sequías de mayor extensión y severidad. No aporta cifras locales por cultivo.",
+      "detalle_pt": "A nota a descreve entre as secas de maior extensão e severidade. Não traz números locais por cultura.",
+      "detalle_fr": "La note la décrit parmi les sécheresses les plus étendues et les plus sévères. Elle ne donne pas de chiffres locaux par culture.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 1; attributed to SMN, without a primary link.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 1; atribución al SMN, sin enlace primario.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 1; atribuída ao SMN, sem link primário.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 1 ; attribuée au SMN, sans lien primaire."
+    },
+    {
+      "periodo": "2017",
+      "periodo_es": "2017",
+      "periodo_pt": "2017",
+      "periodo_fr": "2017",
+      "tipo": "inundacion",
+      "titulo": "Hail and flooding in Meoqui",
+      "titulo_es": "Granizada e inundación en Meoqui",
+      "titulo_pt": "Granizo e inundação em Meoqui",
+      "titulo_fr": "Grêle et inondation à Meoqui",
+      "detalle": "A levee broke and watermelon, chile, cotton, maize and alfalfa were damaged, according to the note.",
+      "detalle_es": "Ruptura de bordo y afectaciones a sandía, chile, algodón, maíz y alfalfa, según la nota.",
+      "detalle_pt": "Rompimento de um dique e danos a melancia, pimenta chile, algodão, milho e alfafa, segundo a nota.",
+      "detalle_fr": "Rupture d'une digue et dégâts sur la pastèque, le piment, le coton, le maïs et la luzerne, selon la note.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; compilación de prensa, cotejo pendiente.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; compilação de imprensa, conferência pendente.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; compilation de presse, vérification en attente."
+    },
+    {
+      "periodo": "2021",
+      "periodo_es": "2021",
+      "periodo_pt": "2021",
+      "periodo_fr": "2021",
+      "tipo": "sequia",
+      "titulo": "An irrigation season under restrictions",
+      "titulo_es": "Un ciclo de riego restringido",
+      "titulo_pt": "Um ciclo de irrigação com restrições",
+      "titulo_fr": "Une campagne d'irrigation sous restrictions",
+      "detalle": "Drought limited the agricultural cycle. Dam storage also decides whether planting is possible, even with local rain.",
+      "detalle_es": "La sequía limitó el ciclo agrícola. La disponibilidad en presas también determina si se puede sembrar, aunque haya lluvia local.",
+      "detalle_pt": "A seca limitou o ciclo agrícola. A disponibilidade nas barragens também determina se é possível plantar, mesmo com chuva local.",
+      "detalle_fr": "La sécheresse a limité le cycle agricole. La disponibilité dans les barrages détermine aussi s'il est possible de semer, même avec de la pluie locale.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; compilación de prensa, cotejo pendiente.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; compilação de imprensa, conferência pendente.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; compilation de presse, vérification en attente."
+    },
+    {
+      "periodo": "2022",
+      "periodo_es": "2022",
+      "periodo_pt": "2022",
+      "periodo_fr": "2022",
+      "tipo": "inundacion",
+      "titulo": "September floods",
+      "titulo_es": "Inundaciones de septiembre",
+      "titulo_pt": "Inundações de setembro",
+      "titulo_fr": "Inondations de septembre",
+      "detalle": "The note reports flooded farmland across the state. It is not a measurement of the pilot areas.",
+      "detalle_es": "La nota reporta superficie agrícola afectada a escala estatal. No corresponde a una medición de las zonas piloto.",
+      "detalle_pt": "A nota relata área agrícola afetada em escala estadual. Não corresponde a uma medição das zonas piloto.",
+      "detalle_fr": "La note signale des terres agricoles touchées à l'échelle de l'État. Il ne s'agit pas d'une mesure des zones pilotes.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; municipalities cited: Camargo, La Cruz, Saucillo and San Francisco de Conchos.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; municipios citados: Camargo, La Cruz, Saucillo y San Francisco de Conchos.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; municípios citados: Camargo, La Cruz, Saucillo e San Francisco de Conchos.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; communes citées : Camargo, La Cruz, Saucillo et San Francisco de Conchos."
+    },
+    {
+      "periodo": "2023",
+      "periodo_es": "2023",
+      "periodo_pt": "2023",
+      "periodo_fr": "2023",
+      "tipo": "contexto",
+      "titulo": "Water for a full season",
+      "titulo_es": "Agua para un ciclo completo",
+      "titulo_pt": "Água para um ciclo completo",
+      "titulo_fr": "De l'eau pour un cycle complet",
+      "detalle": "According to the note, the storage recovered in the previous season allowed a full cycle.",
+      "detalle_es": "La recuperación de almacenamiento de la temporada anterior permitió completar el ciclo, según la nota.",
+      "detalle_pt": "A recuperação do armazenamento da temporada anterior permitiu completar o ciclo, segundo a nota.",
+      "detalle_fr": "Selon la note, la reconstitution du stockage de la saison précédente a permis de mener le cycle à terme.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; it refers to dam storage in September 2022.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; referencia a almacenamiento de septiembre de 2022.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; refere-se ao armazenamento de setembro de 2022.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; se réfère au stockage de septembre 2022."
+    },
+    {
+      "periodo": "2024–2025",
+      "periodo_es": "2024–2025",
+      "periodo_pt": "2024–2025",
+      "periodo_fr": "2024–2025",
+      "tipo": "sequia",
+      "titulo": "Exceptional drought and unplanted land",
+      "titulo_es": "Sequía excepcional y superficie sin sembrar",
+      "titulo_pt": "Seca excepcional e área sem plantar",
+      "titulo_fr": "Sécheresse exceptionnelle et terres non semées",
+      "detalle": "The note links low dam storage with a sharp drop in plantings and damage to alfalfa.",
+      "detalle_es": "La nota relaciona el bajo almacenamiento con una fuerte reducción de siembras y afectación a la alfalfa.",
+      "detalle_pt": "A nota relaciona o baixo armazenamento com uma forte redução dos plantios e danos à alfafa.",
+      "detalle_fr": "La note relie le faible stockage à une forte baisse des semis et à des dégâts sur la luzerne.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; compilación de prensa, cotejo pendiente.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; compilação de imprensa, conferência pendente.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; compilation de presse, vérification en attente."
+    },
+    {
+      "periodo": "2026",
+      "periodo_es": "2026",
+      "periodo_pt": "2026",
+      "periodo_fr": "2026",
+      "tipo": "sequia",
+      "titulo": "Reduced season and pressure on perennial crops",
+      "titulo_es": "Ciclo reducido y presión sobre los perennes",
+      "titulo_pt": "Ciclo reduzido e pressão sobre as culturas perenes",
+      "titulo_fr": "Cycle réduit et pression sur les cultures pérennes",
+      "detalle": "The note describes risk for alfalfa and job losses. This is regional context, not an observation per field.",
+      "detalle_es": "La nota describe riesgo para la alfalfa y pérdidas de empleo. Estas referencias son contexto regional, no observaciones por parcela.",
+      "detalle_pt": "A nota descreve risco para a alfafa e perdas de emprego. Estas referências são contexto regional, não observações por parcela.",
+      "detalle_fr": "La note décrit un risque pour la luzerne et des pertes d'emplois. Ces références sont un contexte régional, pas des observations par parcelle.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), p. 2; press compilation, check pending.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», p. 2; compilación de prensa, cotejo pendiente.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), p. 2; compilação de imprensa, conferência pendente.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), p. 2 ; compilation de presse, vérification en attente."
+    },
+    {
+      "periodo": "November 2026",
+      "periodo_es": "Noviembre 2026",
+      "periodo_pt": "Novembro de 2026",
+      "periodo_fr": "Novembre 2026",
+      "tipo": "inundacion",
+      "titulo": "Late rain during the peanut harvest",
+      "titulo_es": "Lluvia tardía durante la cosecha de cacahuate",
+      "titulo_pt": "Chuva tardia durante a colheita de amendoim",
+      "titulo_fr": "Pluie tardive pendant la récolte d'arachide",
+      "detalle": "The note reports damage to peanuts already pulled from the ground and a drop in their price. Price belongs in any study of how climate relates to planted area.",
+      "detalle_es": "La nota reporta daño al cacahuate ya arrancado y una caída en su precio. El precio forma parte de cualquier estudio de la relación entre clima y superficie sembrada.",
+      "detalle_pt": "A nota relata danos ao amendoim já arrancado e uma queda no seu preço. O preço faz parte de qualquer estudo da relação entre clima e área plantada.",
+      "detalle_fr": "La note signale des dégâts sur l'arachide déjà arrachée et une baisse de son prix. Le prix fait partie de toute étude de la relation entre climat et superficie semée.",
+      "fuente": "Team note «Clima y siembras en la región de Delicias» (Climate and plantings in the Delicias region), pp. 2–3; report included in the note of Nov 14, 2026, not independently verified.",
+      "fuente_es": "Nota del equipo «Clima y siembras en la región de Delicias», pp. 2–3; reporte incluido en la nota del 14-nov-2026, no verificado de forma independiente.",
+      "fuente_pt": "Nota da equipe «Clima y siembras en la región de Delicias» (Clima e plantios na região de Delicias), pp. 2–3; relato incluído na nota de 14-nov-2026, não verificado de forma independente.",
+      "fuente_fr": "Note de l'équipe «Clima y siembras en la región de Delicias» (Climat et semis dans la région de Delicias), pp. 2–3 ; rapport inclus dans la note du 14 nov. 2026, non vérifié de manière indépendante."
+    }
+  ],
+  "nombres_rotaciones": {
+    "_nota": "Nombre de cada rotación en inglés, portugués y francés. El español es el «nombre» de data/processed/rotaciones*.json (la entrega), que el motor publica en nombre_es.",
+    "alfalfa": {
+      "en": "Alfalfa (perennial)",
+      "pt": "Alfafa (perene)",
+      "fr": "Luzerne (pérenne)"
+    },
+    "alfalfa_corte_verano": {
+      "en": "Alfalfa with an irrigation cut in summer",
+      "pt": "Alfafa com corte de irrigação no verão",
+      "fr": "Luzerne avec coupure d'irrigation en été"
+    },
+    "nogal": {
+      "en": "Pecan (orchard)",
+      "pt": "Nogueira-pecã (pomar)",
+      "fr": "Pacanier (verger)"
+    },
+    "algodon": {
+      "en": "Cotton",
+      "pt": "Algodão",
+      "fr": "Coton"
+    },
+    "chile": {
+      "en": "Chile pepper",
+      "pt": "Pimenta chile",
+      "fr": "Piment"
+    },
+    "maiz_forrajero": {
+      "en": "Forage maize",
+      "pt": "Milho forrageiro",
+      "fr": "Maïs fourrager"
+    },
+    "sorgo": {
+      "en": "Forage sorghum",
+      "pt": "Sorgo forrageiro",
+      "fr": "Sorgho fourrager"
+    },
+    "cereal_invierno": {
+      "en": "Winter cereal",
+      "pt": "Cereal de inverno",
+      "fr": "Céréale d'hiver"
+    },
+    "avena_maiz": {
+      "en": "Oats (winter) + forage maize (summer)",
+      "pt": "Aveia (inverno) + milho forrageiro (verão)",
+      "fr": "Avoine (hiver) + maïs fourrager (été)"
+    },
+    "cereal_algodon": {
+      "en": "Winter cereal + cotton (summer)",
+      "pt": "Cereal de inverno + algodão (verão)",
+      "fr": "Céréale d'hiver + coton (été)"
+    },
+    "cereal_sorgo": {
+      "en": "Winter cereal + forage sorghum (summer)",
+      "pt": "Cereal de inverno + sorgo forrageiro (verão)",
+      "fr": "Céréale d'hiver + sorgho fourrager (été)"
+    },
+    "descanso": {
+      "en": "Rest with standing stubble",
+      "pt": "Descanso com restolho em pé",
+      "fr": "Repos avec chaumes sur pied"
+    }
+  },
+  "textos_pronostico": {
+    "_nota": "Textos de web/data/pronostico.json (motor/pronostico_web.py los copia a metodo, a cada zona y a pronostico_lluvia). La lluvia es un rango histórico: ningún texto la llama pronóstico ni nombra un año futuro.",
+    "metodo": {
+      "nombre": "Historical rainfall range (NASA POWER) and FAO-56 crop water demand (A5 model)",
+      "nombre_es": "Rango histórico de lluvia (NASA POWER) y demanda de agua de los cultivos FAO-56 (modelo A5)",
+      "nombre_pt": "Faixa histórica de chuva (NASA POWER) e demanda de água das culturas FAO-56 (modelo A5)",
+      "nombre_fr": "Plage historique de pluie (NASA POWER) et besoins en eau des cultures FAO-56 (modèle A5)",
+      "etiqueta": "[S] planning method: not a yield estimate and not a projection of dam water",
+      "etiqueta_es": "[S] método de planificación: no estima rendimiento ni proyecta el agua de la presa",
+      "etiqueta_pt": "[S] método de planejamento: não estima rendimento nem projeta a água da barragem",
+      "etiqueta_fr": "[S] méthode de planification : n'estime pas le rendement et ne projette pas l'eau du barrage",
+      "fuente": "FAO-56 and datos/colab/A5_demanda_plazo.py for the demand; back-test of the annual rainfall with an expanding window that uses no later years. Design assumptions: data/params.json, block tablero",
+      "fuente_es": "FAO-56 y datos/colab/A5_demanda_plazo.py para la demanda; retroprueba de la lluvia anual con ventana expansiva, sin años posteriores. Supuestos de diseño: data/params.json, bloque tablero",
+      "fuente_pt": "FAO-56 e datos/colab/A5_demanda_plazo.py para a demanda; teste retrospectivo da chuva anual com janela expansiva, sem anos posteriores. Premissas de projeto: data/params.json, bloco tablero",
+      "fuente_fr": "FAO-56 et datos/colab/A5_demanda_plazo.py pour la demande ; test rétrospectif de la pluie annuelle avec fenêtre croissante, sans années postérieures. Hypothèses de conception : data/params.json, bloc tablero"
+    },
+    "zona": {
+      "clima_origen": "NASA POWER (regional grid cell); ETo by FAO-56. Not an SMN weather station and not a rain gauge in the field.",
+      "clima_origen_es": "NASA POWER (celda regional); ETo FAO-56. No es una estación del SMN ni un pluviómetro de parcela.",
+      "clima_origen_pt": "NASA POWER (célula regional); ETo pela FAO-56. Não é uma estação do SMN nem um pluviômetro de parcela.",
+      "clima_origen_fr": "NASA POWER (maille régionale) ; ETo selon FAO-56. Ce n'est ni une station du SMN ni un pluviomètre de parcelle."
+    },
+    "pronostico_lluvia": {
+      "titulo": "Historical rainfall range (NASA POWER)",
+      "titulo_es": "Rango histórico de lluvia (NASA POWER)",
+      "titulo_pt": "Faixa histórica de chuva (NASA POWER)",
+      "titulo_fr": "Plage historique de pluie (NASA POWER)",
+      "nota": "Range of the rainfall of the complete October–September cycles on record: lower and upper quantiles and the median. It describes past years; it does not say what a coming year will bring, and it says nothing about dam water.",
+      "nota_es": "Rango de la lluvia de los ciclos completos de octubre a septiembre que hay en el registro: cuantiles inferior y superior y la mediana. Describe años pasados; no dice cómo vendrá un año próximo ni dice nada del agua de la presa.",
+      "nota_pt": "Faixa da chuva dos ciclos completos de outubro a setembro que há no registro: quantis inferior e superior e a mediana. Descreve anos passados; não diz como virá um próximo ano nem diz nada sobre a água da barragem.",
+      "nota_fr": "Plage de la pluie des cycles complets d'octobre à septembre présents dans le relevé : quantiles inférieur et supérieur et médiane. Elle décrit des années passées ; elle ne dit pas ce qu'apportera une année à venir et ne dit rien de l'eau du barrage."
+    }
+  }
+}

@@ -5,7 +5,7 @@
 
 ## Antes de pegar (Cristian)
 
-Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que se pegan: los bloques están completos y en inglés. Los únicos textos «to be confirmed» que llevan son los de las licencias de «References» (punto 10).
+Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que se pegan: los bloques están completos y en inglés. Los únicos textos «to be confirmed» que llevan son los de las licencias de «References» (punto 11).
 
 1. **Liga del video.** El archivo es `docs/pitch/video_30s.mp4` (30 s o menos; se vuelve a grabar sobre la página final con `node tests/e2e/grabar_video.mjs`). Súbalo, pruebe la liga en incógnito y póngala en la sección 2.
 2. **Liga del PDF de las diapositivas.** El archivo es `docs/pitch/diapositivas.pdf` (lo genera `node tests/e2e/diapositivas_pdf.mjs` de `docs/pitch/diapositivas.html`). Antes de exportarlo, cambie el marcador «[INTEGRANTES]» de la portada por los nombres.
@@ -14,9 +14,10 @@ Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que s
 5. **Nombre exacto y límite de caracteres de cada campo** del formulario real, incluido «Use of Super Intelligence (SI)» (secciones 3 a 10). Si un campo es más corto, recorte desde el final del bloque.
 6. **Cómo surgió la idea (hallazgo C2 de `docs/revisiones/2026-11-14_2300_revision_vs_guia_spaceapps.md`).** La guía 2026 indica que la SI no debe usarse para concebir la idea. Lo que el repo registra es esto: del 10 al 13 de noviembre, Cristian usó a Claude, en el chat del proyecto, para redactar la documentación previa (proyecto definitivo S9, enfoque, kit, plan del evento y anteproyecto), sin código, y el equipo la revisó (`AI_USAGE.md`, primera fila). El bloque de SI (sección 9) dice ese hecho y nada más: no afirma que la idea sea del equipo ni lo contrario. **Falta una frase suya, con sus palabras, sobre cómo surgió la idea**, para ponerla al final del primer apartado del bloque. La revisión propone esta; úsela solo si puede sostener cada parte, porque el repo respalda la del medio (Claude ayudó a estructurar y a escribir) y no dice de dónde salió la idea ni quién tomó cada decisión de diseño: `The problem, the district, the data and the goal of showing each crop as a multi-year water commitment came from the team's research and the challenge; Claude helped us structure and write the concept, and the team chose and owns every design decision.` No borre la fila de `AI_USAGE.md`.
 7. **Investigación previa con otras herramientas.** `README.md` («SI/AI tools used») nombra a ChatGPT, Gemini, DeepSeek y NotebookLM para la búsqueda y la síntesis previas; `AI_USAGE.md` no lo registra, y por eso el bloque de SI no lo dice. Si se usaron, agregue una línea a `AI_USAGE.md` y esta frase al bloque: `Prior research: Claude, ChatGPT, Gemini, DeepSeek and NotebookLM for search and synthesis; each figure was checked in its original source.`
-8. **Líneas de cada integrante en `AI_USAGE.md`.** El renglón de P2 a P6 (Gemini en Colab o Claude en el navegador) sigue «por llenar». Si nadie usó esas herramientas, quite del bloque de SI el renglón «Notebooks».
-9. **Cita de software de AppEEARS.** AppEEARS pide que se cite la herramienta. El repo registra la versión (3.137) y los identificadores de las dos solicitudes (`docs/ecostress.md`; `data/processed/fuentes.json`), y, desde el 15-nov, el texto de la cita: está en el README que AppEEARS genera con cada solicitud (`data/raw/reto/ecostress_readme_*.md`) y ya va copiado, textual, en «References». **Resuelto: no hay nada que hacer.**
-10. **Licencias sin confirmar en «References».** El bloque lleva cinco «terms to be confirmed», de licencias o términos de uso: SIH/Conagua; INIFAP, FIRA e IMTA; ERA5-Land; el catálogo de suelo y las reglas de nutrientes; y ECOCROP. Se dejan a propósito, porque el repo no tiene el texto de esos términos: no los complete de memoria.
+8. **OpenAI Codex en el formulario.** El tablero (la portada) lo hizo P4 (Tena) con OpenAI Codex y se corrigió después con Claude Code (`AI_USAGE.md`, filas del 15-nov; `README.md` → «SI/AI tools used»). El bloque de SI de la sección 9 ya lo nombra: declárelo también en el campo del formulario, con ese nombre, y no lo quite al recortar.
+9. **Líneas de cada integrante en `AI_USAGE.md`.** El renglón de P2 a P6 (Gemini en Colab o Claude en el navegador) sigue «por llenar». Si nadie usó esas herramientas, quite del bloque de SI el renglón «Notebooks».
+10. **Cita de software de AppEEARS.** AppEEARS pide que se cite la herramienta. El repo registra la versión (3.137) y los identificadores de las dos solicitudes (`docs/ecostress.md`; `data/processed/fuentes.json`), y, desde el 15-nov, el texto de la cita: está en el README que AppEEARS genera con cada solicitud (`data/raw/reto/ecostress_readme_*.md`) y ya va copiado, textual, en «References». **Resuelto: no hay nada que hacer.**
+11. **Licencias sin confirmar en «References».** El bloque lleva cinco «terms to be confirmed», de licencias o términos de uso: SIH/Conagua; INIFAP, FIRA e IMTA; ERA5-Land; el catálogo de suelo y las reglas de nutrientes; y ECOCROP. Se dejan a propósito, porque el repo no tiene el texto de esos términos: no los complete de memoria.
 
 ## 1. Qué piden el plan, el kit y la guía de envío 2026
 
@@ -38,20 +39,20 @@ Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que s
 - Lo que va dentro de los bloques `text` se pega en el formulario. Lo de fuera son notas internas: no se pegan.
 - **Nombres de los campos por confirmar.** Los títulos de las secciones 3 a 9 siguen la guía de envío 2026 que trajo Cristian. Antes de pegar, confirme en el formulario real el texto exacto de cada campo y su límite de caracteres; si un campo es más corto, recorte desde el final de cada bloque.
 - **Idioma de las ligas.** Los bloques solo enlazan `README.md`, `LIMITATIONS.md`, `DATA_LICENSE.md` y las traducciones de `docs/en/` (índice en `docs/en/README.md`: `result_H1.md`, `result_H1b.md`, `H1b_specification.md`, `result_H3.md`, `model_vs_practice.md`, `story_fields_review.md`). Nunca enlace un `docs/*.md` en español desde el formulario.
-- «[LINK: pendiente — quién la da]» marca una liga que falta. Los pendientes que solo resuelve Cristian están arriba, en «Antes de pegar (Cristian)»; fuera de las licencias de «References» (punto 10), ningún bloque lleva marcadores.
+- «[LINK: pendiente — quién la da]» marca una liga que falta. Los pendientes que solo resuelve Cristian están arriba, en «Antes de pegar (Cristian)»; fuera de las licencias de «References» (punto 11), ningún bloque lleva marcadores.
 - Si el `README.md` o los datos cambian después de la última corrida, vuelva a leer las cifras contra la sección 12.
 
 ## 2. Ligas
 
 | Campo | Liga |
 |---|---|
-| Live project (web) | https://cristianruz.github.io/raiz-dam-to-root/ (GitHub Pages publica `main`, origen GitHub Actions; el PR #4 ya está fusionado) |
+| Live project (web) | https://cristianruz.github.io/raiz-dam-to-root/ (GitHub Pages publica `main`, origen GitHub Actions; el PR #4 ya está fusionado). Con el tablero como portada (decisión del 15-nov), esta liga abre el tablero y el explorador de parcelas queda en https://cristianruz.github.io/raiz-dam-to-root/explorer.html; una parcela se abre con `explorer.html#P0757` |
 | Repository | https://github.com/Cristianruz/raiz-dam-to-root (público; la misma liga está en `motor/pruebas_web.py` → `REPOSITORIO`) |
 | Demo video (30 s or less) | [LINK: pendiente — responsable de video (P6)] |
 | Backup slides (PDF, 7 or fewer) | [LINK: pendiente — responsable de presentación y pitch] |
 | Preregistration (OSF) | No hay liga de OSF en el repo (`docs/reparto_faltantes.md`, H3). Si el formulario la pide, escriba: `Criteria declared before the analysis; documents and commits listed in README.md → Status → Preregistration.` |
 
-Antes de pegar la liga de la web, ábrala en incógnito y compruebe que muestra la versión completa (por ejemplo, el botón «3D twin view»).
+Antes de pegar la liga de la web, ábrala en incógnito y compruebe que muestra la versión completa: la portada es el tablero y, en `explorer.html`, está el botón «3D twin view».
 
 ## 3. Project Name
 
@@ -212,6 +213,7 @@ Where and how we used them
 - Project documents before the event (November 10 to 13): a team member used Claude, in a project chat, to write the pre-event documents, without code: the project definition, the approach, the event plan, the build kit and the proposal. The team reviewed them.
 - Code, tests and reviews: Claude Code wrote the integration code (data engine, contract validator, web page, tests and the build-and-publish workflow) from our specifications and the data contract. It worked with implementer agents and independent reviewer agents with fresh context; reviewers report findings and do not edit. Changes reach the main branch through pull requests, merged at the request of the team's integrator.
 - Data scripts and Earth Engine runs: a separate Claude session in the browser wrote and ran the Google Earth Engine extractions (HLS, NASADEM, GPM IMERG, SSEBop, the regional context series and GEDI), the Fields of The World extraction, the NASA POWER and FAO-56 scripts, the frost dates, the rules crop map and the H1, H3 and ET analyses. Its work was reviewed by independent agents and checked by the mailbox validator, with a checksum for each delivered file.
+- Dashboard (home page): a teammate wrote its initial version with OpenAI Codex: the page, its advisor and crop-comparison modules, and the back-test of the historical rainfall range with its verifier. Three independent reviewer agents read it, and Claude Code then corrected it: four languages, the source of every figure, and wording that describes instead of instructing.
 - Notebooks: the team's guides assign Gemini in Google Colab, or Claude in the browser, to scoped notebooks and data-verification cells; each teammate logs that use in AI_USAGE.md.
 - Writing: Claude Code drafted the page texts, the pitch scripts and these submission texts in English, and translated into English the project documents that the page links. The team reviews them before submission.
 - Video and slides: Claude Code wrote the script that drives the real app and records its screen, and the template of the backup slides. No image or footage was generated with SI.

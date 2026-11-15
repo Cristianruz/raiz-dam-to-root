@@ -78,3 +78,17 @@
 | 01:27 | Datos | HECHO | Buzón v13: ECOSTRESS corregido; cita textual de AppEEARS en los textos | `75ceaac`, `1235e3d` |
 | 01:59 | Ficha | HECHO | «Why it's suggested» con el motivo de la tabla oficial, «Benefits» como comparación contra la rotación actual, la gota con la parte que cubre la dotación, ECOSTRESS con sobrevuelos y aviso a la vista, GAEZ legible, citas en inglés desde el origen | `2117a58`, `0508a24` |
 | 02:22 | Revisión | HECHO | Cuatro revisores de contexto nuevo sobre las dos entregas; correcciones aplicadas; decisiones por escrito | `docs/decisiones/2026-11-15_ficha_motivos_beneficios_ecostress.md` |
+
+| 2026-11-14 | Dashboard Tena | EN CURSO | Entrada en español solicitada por el usuario, referencias adjuntas, escenarios del motor y cronología; explorador técnico preservado. | docs/dashboard-flujos.md |
+
+| 2026-11-14 | Dashboard Tena | HECHO | Dashboard adaptable, investigación trazable y Mermaid. Construcción completa correcta; 53 comprobaciones del dashboard, 39 PWA y 53 dirigidas del explorador correctas. Corrida extensa y limitaciones documentadas. Cambios locales, sin publicación. | docs/dashboard-flujos.md |
+
+| 2026-11-15 | Recomendador y pronóstico | EN CURSO | Motor trazable por parcela con captura manual y restricciones; A5 por ciclos completos, lluvia con retroprueba temporal y helada regional. | docs/recomendador-validacion.md |
+
+| 2026-11-15 | Recomendador y pronóstico | HECHO | Balance hídrico y restricciones trazables, captura y auditoría, retroprueba de lluvia y frecuencia de helada; construcción completa y verificaciones dirigidas correctas. Paquete con fuentes y verificador reproducible. | docs/recomendador-validacion.md |
+
+| 2026-11-15 | Interfaz moderna | HECHO | Rediseño oscuro con mapa protagonista, controles de agua, captura por pasos y gráfico de validación; 77 comprobaciones del planificador y 71 de mapa/dashboard correctas. Resultados numéricos conservados. | docs/interfaz-moderna.md |
+
+| 2026-11-15 | Publicación en Tena | PUBLICACIÓN | El usuario solicita subir a GitHub el dashboard, el motor verificable y la interfaz moderna. Se prepara el commit sobre la rama remota Tena, conservando el historial existente. | docs/interfaz-moderna.md |
+
+| 2026-11-15 | Tablero como portada (frente de motor, datos, pruebas y documentos) | HECHO | Decisión de Cristian tras la revisión de la rama `Tena`: el tablero es `web/index.html` y la página anterior, `web/explorer.html`, con enlace «Dashboard». Fuera `web/research/` y `web/fonts/`; superficie regada leída del CSV de Conagua; supuestos del tablero en `data/params.json` (`tablero`); manifest con la etiqueta de origen; textos de los datos en inglés, español, portugués y francés con su prueba; `pwa_smoke` prueba las dos páginas sin red. | docs/decisiones/2026-11-15_tablero_principal_idiomas.md |

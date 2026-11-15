@@ -147,7 +147,7 @@ def test_no_quedan_scripts_ni_hojas_que_apunten_a_archivos(copia):
 
 
 def test_cada_hoja_y_cada_biblioteca_de_index_va_incrustada(copia):
-    original = Leida((copia["web"] / "index.html").read_text(encoding="utf-8"))
+    original = Leida((copia["web"] / ("explorer.html" if (copia["web"] / "explorer.html").exists() else "index.html")).read_text(encoding="utf-8"))
     estilos = {e["attrs"].get("data-origen"): e["texto"] for e in copia["leida"].estilos}
     hojas = [at["href"] for at in original.de("link") if "stylesheet" in at.get("rel", "").lower()]
     assert hojas, "index.html ya no enlaza hojas de estilos: revise esta prueba"
@@ -166,7 +166,7 @@ def test_cada_hoja_y_cada_biblioteca_de_index_va_incrustada(copia):
 
 def test_todos_los_modulos_alcanzables_van_incrustados_y_en_orden(copia):
     web, paquete = copia["web"], copia["leida"].paquete()
-    original = Leida((web / "index.html").read_text(encoding="utf-8"))
+    original = Leida((web / ("explorer.html" if (web / "explorer.html").exists() else "index.html")).read_text(encoding="utf-8"))
     entradas = [s["attrs"]["src"] for s in original.scripts if s["attrs"].get("type") == "module"]
     assert paquete["entradas"] == entradas and entradas
     incrustados = set(paquete["modulos"])
@@ -250,6 +250,20 @@ def test_nota_visible_y_sin_recursos_remotos_que_detengan_la_pagina(copia):
     resumen = demo_offline.texto_informe(informe)
     for esperado in ("Módulos ES incrustados", "Datos JSON/GeoJSON incrustados", "Tamaño total", "URL remotas que quedan"):
         assert esperado in resumen
+
+
+def test_el_enlace_a_la_portada_no_queda_roto_en_el_archivo_suelto(copia):
+    """explorer.html enlaza la portada («Dashboard» → index.html). Esa página no viaja en la copia de un solo archivo:
+    el enlace va oculto y el informe lo dice, en lugar de llevar a un archivo que no está."""
+    if not (copia["web"] / "explorer.html").exists():
+        pytest.skip("esta web no trae explorer.html")
+    informe, texto = copia["informe"], copia["texto"]
+    assert informe["paginas_ocultas"] == ["index.html"]
+    assert "index.html" not in informe["enlaces_locales"]
+    enlace = re.search(r'<a\b[^>]*id="enlace-tablero"[^>]*>', texto)
+    assert enlace and demo_offline.ATRIBUTO_OTRA_PAGINA in enlace.group(0)
+    assert '[data-raiz-sin-red="otra-pagina"] { display: none !important; }' in texto
+    assert "ocultos en la copia" in demo_offline.texto_informe(informe)
 
 
 def test_la_orden_escribe_la_copia_con_el_commit_de_git(tmp_path):
