@@ -85,6 +85,7 @@ const ESTADOS_PASO = {
   passed: { texto: "Passed", simbolo: "✓" },
   failed: { texto: "Failed", simbolo: "✕" },
   pending: { texto: "Pending", simbolo: "…" },
+  warning: { texto: "Warning", simbolo: "⚠" }, // construir.py: ADVERTENCIA → «warning»
   skipped: { texto: "Skipped", simbolo: "–" },
   "not run": { texto: "Not run", simbolo: "○" },
 };

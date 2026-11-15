@@ -1406,6 +1406,19 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
       const esperado = plazo.max <= 1 ? "ties up water for one season" : `ties up water for ${plazo.min === plazo.max ? nfFicha(plazo.min, 3) : `${nfFicha(plazo.min, 3)}–${nfFicha(plazo.max, 3)}`} years`;
       check(`${prefijo}frase resumen de ${P0757}: lleva el plazo del agua de la opción actual («${esperado}»)`, fraseP.includes(esperado), fraseP);
     }
+    // Pendientes de web del motor (1c6619b): «Remaining term» en todas las tarjetas con plazo restante, y la ventana de
+    // siembra solo de los cultivos de la secuencia publicada (avena_maiz sin la alfalfa del catálogo).
+    for (const o of opcionesDe(P0757)) {
+      const t = tarjeta(page, o.id);
+      if (o.agua?.plazo_restante) {
+        const agua = (await t.locator('[data-parte="agua"]').innerText()).replace(/\s+/g, " ");
+        check(`${prefijo}${P0757}/${o.id}: «Remaining term» también en las alternativas`, agua.includes("Remaining term:"), agua.slice(-160));
+      }
+      const pasos = (cubo.opciones_catalogo?.[o.rotacion]?.secuencia ?? []).filter((x) => x?.siembra?.desde);
+      const esperados = pasos.filter((x) => !Array.isArray(o.secuencia) || !o.secuencia.length || o.secuencia.includes(x.cultivo)).length;
+      const vistos = await t.locator(".siembra-cultivo").count();
+      check(`${prefijo}${P0757}/${o.id}: ventanas de siembra solo de los cultivos de la secuencia publicada (${esperados})`, vistos === esperados, `${vistos} vistas · secuencia ${JSON.stringify(o.secuencia)}`);
+    }
     const frase = await texto(page, "#ficha-resumen");
     check(`${prefijo}frase resumen: describe, sin «best», «recommended» ni pesos`, !/\b(best|recommended|weight|score)\b/i.test(frase));
     // --- NDVI mensual con sus umbrales (leídos de ndvi_mensual.json) ---

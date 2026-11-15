@@ -2239,7 +2239,12 @@ function fmtMesDia(texto) {
  */
 function htmlSiembra(o, p = {}) {
   const cat = estado.cubo.opciones_catalogo?.[o.rotacion];
-  const pasos = (Array.isArray(cat?.secuencia) ? cat.secuencia : []).filter((x) => x?.siembra?.desde);
+  // Solo los cultivos de la secuencia que publica la opción (o.secuencia): si el motor calculó el agua con otra
+  // secuencia que la del catálogo (avena_maiz sin la alfalfa), no se muestra la ventana de un cultivo que no está.
+  const publicados = Array.isArray(o.secuencia) && o.secuencia.length ? new Set(o.secuencia) : null;
+  const pasos = (Array.isArray(cat?.secuencia) ? cat.secuencia : [])
+    .filter((x) => x?.siembra?.desde)
+    .filter((x) => !publicados || publicados.has(x.cultivo));
   if (!pasos.length) return "";
   let fuente = null;
   const partes = pasos.map((x) => {
@@ -2407,7 +2412,8 @@ function actualizarFicha() {
       banda +
       htmlLaminaLocal(o, L, p.area_ha, D) +
       `<p>${esc(textoPlazo(o.agua?.plazo_anios))}${o.agua?.nota_plazo ? ` <span class="fuente">(${esc(o.agua.nota_plazo)})</span>` : ""}</p>` +
-      (o.id === "ACTUAL" && rest ? `<p>Remaining term: ${esc(fmtRango(rest.min, rest.max))} ${anios(rest.max)}</p>` : "") +
+      // «Remaining term» en todas las tarjetas (el motor descuenta la edad observada en las que conservan el alfalfar).
+      (rest ? `<p>Remaining term: ${esc(fmtRango(rest.min, rest.max))} ${anios(rest.min === rest.max ? rest.max : null)}</p>` : "") +
       (comp ? `<p>Water committed over the remaining term: ${esc(fmtRango(comp.min, comp.max, fmtMillares))} thousand m³/ha</p>` : "") +
       "</div>";
 
