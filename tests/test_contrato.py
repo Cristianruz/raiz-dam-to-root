@@ -157,6 +157,55 @@ def localidad_sin_fuente(cubo, geo, expl):
     cubo["localidades"][0]["fuente"] = ""
 
 
+# Revisión de dda5abb (puntos 1–4): lo que el validador dejaba pasar o rechazaba sin motivo.
+def propiedades(geo):
+    return {f["properties"]["id"]: f["properties"] for f in geo["features"]}
+
+
+def parcela_que_rota(cubo, geo):
+    """Id de la primera parcela clasificada que NO es nogal y lleva ACTUAL + 2 o más opciones."""
+    props = propiedades(geo)
+    for pid, pc in cubo["parcelas"].items():
+        if props[pid]["cultivo_actual"] != "nogal" and len(pc["opciones"]) >= 3:
+            return pid
+    pytest.skip("el cubo actual no trae una parcela que rote con ACTUAL + 2 opciones")
+
+
+def nogal_sin_rotacion(cubo):
+    """(id, bloque) de la primera parcela con «sin_rotacion»; si el cubo no la trae, la prueba se omite."""
+    for pid, pc in cubo["parcelas"].items():
+        if pc.get("sin_rotacion"):
+            return pid, pc
+    pytest.skip("el cubo actual no trae parcelas con sin_rotacion")
+
+
+def abstenida_con_estado_plazo(cubo, geo, expl):
+    p = next((f["properties"] for f in geo["features"] if f["properties"]["abstencion"]), None)
+    if p is None:
+        pytest.skip("el cubo actual no trae parcelas abstenidas")
+    p["estado_plazo"] = "libre"
+
+
+def sin_rotacion_en_cultivo_que_rota(cubo, geo, expl):
+    """La exención de ACTUAL + 2 es del nogal que no rota: otra parcela con «sin_rotacion» no la tiene."""
+    _, nogal = nogal_sin_rotacion(cubo)
+    pc = cubo["parcelas"][parcela_que_rota(cubo, geo)]
+    pc["opciones"] = [o for o in pc["opciones"] if o["id"] == "ACTUAL"]
+    pc["sin_rotacion"] = dict(nogal["sin_rotacion"])
+
+
+def sin_rotacion_con_letra_que_no_es_no_rota(cubo, geo, expl):
+    """El nogal queda exento porque el catálogo dice letra_maestro = nogal_no_rota; sin esa letra, no."""
+    _, nogal = nogal_sin_rotacion(cubo)
+    rot = next(o["rotacion"] for o in nogal["opciones"] if o["id"] == "ACTUAL")
+    cubo["opciones_catalogo"][rot]["letra_maestro"] = "ACTUAL"
+
+
+def gota_en_null_con_goteo(cubo, geo, expl):
+    """Sin La gota (lámina neta null) no puede haber escenario de goteo: los cuatro bloques van juntos."""
+    opcion_con_goteo(cubo)["gota"] = None
+
+
 ALTERACIONES = {
     "P50 > P90": (p50_mayor_que_p90, "P10 ≤ P50 ≤ P90"),
     "semáforo de agua guardado": (semaforo_de_agua_guardado, "semáforo de agua"),
@@ -172,6 +221,11 @@ ALTERACIONES = {
     "demanda de zona con P50 > P90": (demanda_de_zona_p50_mayor_que_p90, "P10 ≤ P50 ≤ P90"),
     "localidad con latitud fuera de rango": (localidad_con_latitud_fuera_de_rango, "localidades[0].lat"),
     "localidad sin fuente": (localidad_sin_fuente, "falta la fuente"),
+    "abstenida con estado_plazo": (abstenida_con_estado_plazo, "parcela abstenida debe tener estado_plazo null"),
+    "sin_rotacion en un cultivo que rota": (sin_rotacion_en_cultivo_que_rota, "sin_rotacion es del nogal que no rota"),
+    "sin_rotacion sin la letra nogal_no_rota": (sin_rotacion_con_letra_que_no_es_no_rota,
+                                               "sin_rotacion es del nogal que no rota"),
+    "gota en null con escenario de goteo": (gota_en_null_con_goteo, "gota en null"),
 }
 
 
@@ -181,6 +235,32 @@ def test_cubo_alterado_da_error(tmp_path, nombre):
     errores = validar_contrato.validar(copia_alterada(tmp_path, alterar))
     assert errores, f"el validador aceptó un contrato con «{nombre}»"
     assert any(mensaje in e for e in errores), f"se esperaba un error con «{mensaje}»: {errores}"
+
+
+def test_sin_actual_es_un_motivo_de_sin_opciones(tmp_path):
+    """motor/b4_cubo.py escribe sin_opciones = «sin_actual» cuando no puede armar la opción ACTUAL; el
+    validador lo acepta con las opciones vacías (como «sin_clima_zona») y lo rechaza con opciones."""
+    assert "sin_actual" in validar_contrato.MOTIVOS_SIN_OPCIONES
+    for sub in ("vacia", "con"):
+        (tmp_path / sub).mkdir()
+
+    def vacia(cubo, geo, expl):
+        cubo["parcelas"][parcela_que_rota(cubo, geo)] = {"opciones": [], "sin_opciones": "sin_actual"}
+    assert validar_contrato.validar(copia_alterada(tmp_path / "vacia", vacia)) == []
+
+    def con_opciones(cubo, geo, expl):
+        cubo["parcelas"][parcela_que_rota(cubo, geo)]["sin_opciones"] = "sin_actual"
+    errores = validar_contrato.validar(copia_alterada(tmp_path / "con", con_opciones))
+    assert any("solo con opciones vacías" in e for e in errores), errores
+
+
+def test_opcion_sin_lamina_neta_lleva_los_cuatro_bloques_en_null(tmp_path):
+    """Sin lámina neta (ET) La gota no se puede cerrar: gota, los dos goteos y el tope van en null y pasa."""
+    def sin_neta(cubo, geo, expl):
+        op = primera_opcion(cubo)
+        for b in ("gota", "gota_goteo_con_tope", "gota_goteo_sin_tope", "tope_consumo"):
+            op[b] = None
+    assert validar_contrato.validar(copia_alterada(tmp_path, sin_neta)) == []
 
 
 # --- 3) manifest.json (§2.5) -----------------------------------------------------

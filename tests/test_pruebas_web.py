@@ -139,7 +139,7 @@ def test_resumen_usa_el_rotulo_para_la_pagina(tmp_path):
              "es mayor.\n\nRótulo para la página: \"H1 does not meet the preregistered criterion (partial back-test)\".\n")
     h1 = por_id(pruebas_web.calcular(tmp_path))["backtest_h1"]
     assert h1["estado"] == "failed"
-    assert h1["resumen"] == "H1 does not meet the preregistered criterion (partial back-test)"
+    assert h1["resumen"] == "H1 does not meet the criterion declared before the analysis (partial back-test)"
 
 
 def test_resumen_sin_rotulo_toma_solo_la_frase_en_negrita(tmp_path):
@@ -240,6 +240,19 @@ def test_puerta_lee_docs_pruebas_md(tmp_path):
     assert p["pasos"][1]["nombre"] == "Python tests" and p["pasos"][1]["detalle"] == "322 passed"
     pruebas_md(tmp_path, [("pytest", "FALLA", "1 failed")])
     assert pruebas_web.calcular(tmp_path)["puerta"]["estado"] == "failed"
+
+
+def test_puerta_lee_la_advertencia_del_ensamblado(tmp_path):
+    """construir.py marca ADVERTENCIA el ensamblado con un rechazo que conserva la copia anterior (revisión de
+    dda5abb, punto 8): la web la recibe en inglés («warning») y la puerta no se da por fallida."""
+    if str(RAIZ) not in sys.path:
+        sys.path.insert(0, str(RAIZ))
+    import construir
+    pruebas_md(tmp_path, [("ensamblar", construir.ADVERTENCIA, "rechazados con copia anterior: x.csv"),
+                          ("pytest", "OK", "1 passed")])
+    p = pruebas_web.calcular(tmp_path)["puerta"]
+    assert [(s["id"], s["estado"]) for s in p["pasos"]] == [("ensamblar", "warning"), ("pytest", "passed")]
+    assert p["estado"] == "passed"
 
 
 # --- Criterios: cada cifra sale de S9 §6 ------------------------------------------------------
@@ -413,3 +426,36 @@ def test_h1b_y_documentos_del_repo_real():
         assert not ESPANOL.search(h1b["resumen"]) and not ESPANOL.search(h1b.get("nota") or "")
     for doc in d["documentos"]:
         assert doc["existe"] == (RAIZ / doc["ruta"]).exists()
+
+
+def test_documentos_enlazan_la_traduccion_en_ingles(tmp_path):
+    """La guía de envío de Space Apps pide que todo lo enlazado esté en inglés: si existe la traducción en
+    docs/en/, la liga apunta a ella; el contenido (la nota de la revisión) se sigue leyendo del original."""
+    escribir(tmp_path, "docs/modelo_vs_practica.md", "# El modelo frente a la práctica\n")
+    escribir(tmp_path, "docs/revision_protagonistas.md",
+             "**Quién revisó:** la sesión de datos (asistente de IA). La revisión de una persona sigue pendiente.\n")
+    escribir(tmp_path, "docs/en/model_vs_practice.md", "# The model against practice\n")
+    docs = {d["id"]: d for d in pruebas_web.calcular(tmp_path)["documentos"]}
+    assert docs["modelo_vs_practica"]["url"] == f"{pruebas_web.REPOSITORIO}/blob/main/docs/en/model_vs_practice.md"
+    # Sin traducción, la liga sigue en el original.
+    assert docs["revision_protagonistas"]["url"] == f"{pruebas_web.REPOSITORIO}/blob/main/docs/revision_protagonistas.md"
+    assert docs["revision_protagonistas"]["nota"] == pruebas_web.NOTA_REVISION_IA
+    # La tabla de la puerta automática se enlaza en inglés.
+    assert pruebas_web.ENLACES["pruebas_md"].endswith("/blob/main/docs/en/test_results.md")
+
+
+def test_traducciones_del_repo_real_existen():
+    for d in pruebas_web.DOCUMENTOS:
+        if d.get("ruta_en"):
+            assert (RAIZ / d["ruta_en"]).exists(), d["ruta_en"]
+
+
+def test_la_pagina_no_dice_preregistered_sin_registro_publico():
+    """Hallazgo I22: no hay liga pública del preregistro; la página dice «declared before the analysis»
+    (los commits que fijan el criterio son anteriores al análisis). Los documentos conservan su frase, que
+    es la que reconoce el veredicto."""
+    d = pruebas_web.calcular(RAIZ)
+    texto = json.dumps(d, ensure_ascii=False)
+    assert "preregist" not in texto.lower()
+    assert pruebas_web.texto_publico("H1 meets the preregistered criterion") == \
+        "H1 meets the criterion declared before the analysis"
