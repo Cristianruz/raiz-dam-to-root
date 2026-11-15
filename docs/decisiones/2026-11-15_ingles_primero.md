@@ -24,3 +24,13 @@ Reemplaza el punto «El tablero abre en el idioma del navegador…» de `docs/de
 **Qué queda en inglés:** lo que no está en el diccionario. Sobre todo las fuentes y citas, los nombres de archivo, las descripciones técnicas de «About & Data» y los textos que llegan de las entregas de datos (como en el tablero). El español es una traducción hecha con IA: conviene que la revise una persona hablante.
 
 **Prueba:** `tests/explorador_es.test.js` (cifras iguales y en el mismo orden, frases con cultivo, lo desconocido queda igual, mismo número de «#» en cada forma, sin palabras vetadas).
+
+## Tercera parte: el explorador con el diseño del tablero (15-nov-2026)
+
+**Quién lo pide:** Oscar Milo («métele el diseño del resto de la página a la pestaña "open the field explorer"»).
+
+**Qué cambia:** `web/explorer.html` se ve como el tablero: fondo oscuro, tarjetas verde noche, acento lima, la misma letra (Atkinson Hyperlegible) y el mapa base atenuado igual que en `js/dashboard.js`.
+
+**Cómo:** una hoja nueva, `web/css/tema_tablero.css`, cargada al final (antes de `imprimir.css`) y solo para pantalla. Da a las variables de `style.css` y de los módulos los valores del tablero; los pares «fondo --tinta + texto --blanco» se invierten juntos y conservan el contraste. En `app.js` la capa de OpenStreetMap lleva la misma atenuación que el tablero. No cambia ningún cálculo, texto ni dato. La ficha impresa sigue en papel blanco.
+
+**Comprobado en el navegador:** computadora y teléfono; inicio, mapa, ficha de parcela y «About & Data»; ningún texto con contraste menor de 3:1 sobre su fondo.

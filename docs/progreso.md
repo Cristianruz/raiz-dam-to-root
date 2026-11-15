@@ -102,3 +102,4 @@
 | 06:36 | Portada | PUBLICADO | PR #9 en `main`: el tablero es la portada y el explorador queda en `explorer.html`; revisor final sin bloqueos; CI y las cinco pruebas con navegador en verde sobre el commit fusionado | `dfbf35e`, `084bb30` |
 | 08:30 | Portada | HECHO | El tablero abre siempre en inglés; el selector lo cambia al español (ya no toma el idioma del navegador) | `docs/decisiones/2026-11-15_ingles_primero.md`, `tests/i18n.test.js` |
 | 09:30 | Explorador | HECHO (pendiente: revisión del español por una persona) | Selector English / Español en el explorador, misma elección que el tablero; fuentes y textos de las entregas quedan en inglés | `web/js/explorador_es.js`, `tests/explorador_es.test.js` |
+| 10:00 | Explorador | HECHO | El explorador con el diseño del tablero: `css/tema_tablero.css` (solo pantalla) y mapa base atenuado | `web/css/tema_tablero.css` |

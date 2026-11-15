@@ -1454,7 +1454,8 @@ function crearMapa() {
     },
     layers: [
       { id: "fondo", type: "background", paint: { "background-color": colorCSS("arena-mapa") } },
-      { id: "osm", type: "raster", source: "osm" },
+      // Atenuado como en el tablero (js/dashboard.js), para el fondo oscuro; los polígonos llevan el color.
+      { id: "osm", type: "raster", source: "osm", paint: { "raster-saturation": -0.6, "raster-brightness-max": 0.6, "raster-opacity": 0.8 } },
     ],
   };
   let mapa;
