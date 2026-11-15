@@ -111,7 +111,7 @@ def main():
         pass
 
     registrar_fuentes("A7", ["h3_series.csv", "h3_resultado.json", "h3_series.png"],
-                      "NASA HLS v2 vía Earth Engine (memoria A3-M) y mapa de cultivos A4", "datos/colab/A7_h3.py")
+                      "NASA HLS v2 (vía Earth Engine, memoria A3-M) y mapa de cultivos A4", "datos/colab/A7_h3.py")
     p = res["principal"]
     print(f"Grupos: {res['n_parcelas']}")
     for k in ("a", "b"):

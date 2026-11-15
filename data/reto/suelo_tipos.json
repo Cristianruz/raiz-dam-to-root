@@ -1,0 +1,1280 @@
+{
+ "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO; Soil Taxonomy (USDA): Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026; prefijos: Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026; municipio: Plan Municipal de Desarrollo de Delicias 2024–2027, anexo del Periódico Oficial del Estado de Chihuahua (2025), que cita a INEGI, Diccionario de Datos Edafológicos escala 1:250 000 (versión 4), 2016 (https://chihuahua.gob.mx/sites/default/atach2/periodico-oficial/anexos/2025-01/ANEXO%2003-2025%20ACUERDO%20N%C2%B0%20203-2024%20PMD%20DELICIAS.pdf), leído el 14-nov-2026",
+ "nota": "El tipo de suelo es contexto del paisaje: no dice qué nutrientes tiene una parcela. Los riesgos por parcela salen de suelo_reglas.json con las propiedades de la parcela. Los resúmenes son propios; cada grupo lleva su liga.",
+ "texto_explica_en": "Regional soil type from a global map, not a soil test.",
+ "wrb": {
+  "Histosols": {
+   "nombre_es": "Histosol",
+   "rasgo": "Suelos orgánicos (turba): horizonte hístico o fólico; material con más de 20 % de materia orgánica en peso",
+   "textura": "material orgánico",
+   "ph": "3–5.5 en turberas de lluvia; más de 6 en turba eutrófica",
+   "ph_rango": [
+    3.0,
+    6.0
+   ],
+   "cic_cmol_kg": null,
+   "materia_organica": "más de 20 % en peso",
+   "ricos_en": [],
+   "pobres_en": [
+    "N",
+    "P",
+    "K",
+    "S",
+    "Cu",
+    "Zn",
+    "Mn",
+    "Mo",
+    "Fe"
+   ],
+   "nutrientes_nota": "Gran reserva de N, poco disponible; la fuente pide fertilizar con NPK más pequeñas dosis de S, Cu, Zn, Mn, Mo y Fe",
+   "toxicidades": [
+    "acidez",
+    "toxinas orgánicas",
+    "acidez extrema si tiene pirita y se drena"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "baja capacidad de carga",
+    "hundimiento al drenar",
+    "acidez",
+    "poco suministro de nutrientes",
+    "exceso de agua"
+   ],
+   "cultivos_citados": [
+    "palma de aceite",
+    "Acacia",
+    "Eucalyptus",
+    "horticultura con mucho capital"
+   ],
+   "extension_mundial_mha": [
+    325,
+    375
+   ],
+   "texto_en": "Organic (peat) soil: a large nitrogen stock but little of it available; crops need fertilizer with sulfur and micronutrients.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 1 (https://www.fao.org/4/y1899e/y1899e04.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Anthrosols": {
+   "nombre_es": "Antrosol",
+   "rasgo": "Suelos modificados por el ser humano; los irrágricos se forman con el limo del agua de riego en zonas secas",
+   "textura": "variable; los irrágricos limosos retienen bien el agua y los arcillosos se endurecen al secarse",
+   "ph": "irrágricos: alcalinos, pueden tener cal libre",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "plágicos: 1–5 % de C orgánico",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Irrágricos: saturación de bases alta; hórticos: bien provistos de nutrientes y P alto; plágicos: ácidos y pobres en nutrientes, con P total alto",
+   "toxicidades": [
+    "sales en algunos irrágricos",
+    "Fe2+ y Mn2+ en arroz inundado"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "salinidad en algunos irrágricos",
+    "arcillosos duros y difíciles de labrar"
+   ],
+   "cultivos_citados": [
+    "cultivos comerciales y de subsistencia con riego",
+    "arroz",
+    "hortalizas",
+    "centeno",
+    "cebada",
+    "maíz para ensilaje"
+   ],
+   "extension_mundial_mha": null,
+   "texto_en": "Soil shaped by long irrigation or cultivation: in dry irrigation districts it is usually base-rich and alkaline, and some are saline.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 2 (https://www.fao.org/4/y1899e/y1899e05.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Technosols": {
+   "ficha": null,
+   "nota": "No aparece en Driessen et al. 2001 (la obra describe la WRB de 1998)."
+  },
+  "Cryosols": {
+   "nombre_es": "Criosol",
+   "rasgo": "Suelos con permafrost (horizonte críico a menos de 100 cm)",
+   "textura": "variable",
+   "ph": "variable; más alto si el material es calcáreo",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "mucho C orgánico en los crioturbados",
+   "ricos_en": [],
+   "pobres_en": [
+    "N",
+    "K",
+    "P"
+   ],
+   "nutrientes_nota": "La mayoría de los nutrientes está en la materia orgánica superficial",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "actividad biológica limitada a la capa activa",
+    "suelos limosos poco transitables al deshielo",
+    "erosión por sobrepastoreo"
+   ],
+   "cultivos_citados": [
+    "pastoreo (caribú, reno)"
+   ],
+   "extension_mundial_mha": null,
+   "texto_en": "Permafrost soil: nitrogen, potassium and phosphorus are generally low.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 10 (https://www.fao.org/4/y1899e/y1899e13.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Leptosols": {
+   "nombre_es": "Leptosol",
+   "rasgo": "Suelos muy someros sobre roca dura (menos de 25 cm), muy pedregosos o muy calcáreos",
+   "textura": "poca tierra fina",
+   "ph": null,
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "los réndzicos y mólicos tienen una capa superficial oscura y calcárea",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Sin datos de nutrientes en la fuente; normalmente libres de sales dañinas; los calcáreos tienen mejores propiedades químicas",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "poca profundidad",
+    "pedregosidad",
+    "poca agua disponible",
+    "erosión"
+   ],
+   "cultivos_citados": [
+    "pastoreo",
+    "bosque",
+    "terrazas en laderas"
+   ],
+   "extension_mundial_mha": 1655,
+   "texto_en": "Very shallow or stony soil with little water storage; usually free of harmful salts.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Solonetz": {
+   "nombre_es": "Solonetz",
+   "rasgo": "Suelos con horizonte nátrico: sodio intercambiable de 15 % o más",
+   "textura": "sedimentos finos",
+   "ph": "a menudo mayor que 8.5",
+   "ph_rango": [
+    8.5,
+    null
+   ],
+   "cic_cmol_kg": null,
+   "materia_organica": "capa superficial delgada en zonas semiáridas",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "El exceso de sodio es tóxico para plantas sensibles y estorba la absorción de otros nutrientes",
+   "toxicidades": [
+    "Na"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "horizonte nátrico denso que frena el agua y las raíces",
+    "encostramiento y encharcamiento",
+    "erosión en cárcavas"
+   ],
+   "cultivos_citados": [
+    "algodón en suelos sódicos (Gezira, Sudán)",
+    "forraje tras recuperarlo con yeso"
+   ],
+   "extension_mundial_mha": 135,
+   "texto_en": "Sodic soil: excess sodium harms sensitive crops and hinders the uptake of other nutrients; it is reclaimed with gypsum.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Vertisols": {
+   "nombre_es": "Vertisol",
+   "rasgo": "Arcillas pesadas que se agrietan al secarse (30 % o más de arcilla, horizonte vértico)",
+   "textura": "arcilla pesada",
+   "ph": "6.0–8.0; 8.0–9.5 con mucho sodio",
+   "ph_rango": [
+    6.0,
+    8.0
+   ],
+   "cic_cmol_kg": [
+    30,
+    80
+   ],
+   "materia_organica": "baja (el perfil de ejemplo tiene 0.4–0.9 % de C orgánico)",
+   "ricos_en": [
+    "Ca",
+    "Mg"
+   ],
+   "pobres_en": [
+    "N",
+    "P",
+    "S",
+    "Zn"
+   ],
+   "nutrientes_nota": "Calcio y magnesio ocupan más del 90 % del complejo de cambio; muchos tienen poco N y poco P disponible; S y/o Zn bajos en algunos sitios",
+   "toxicidades": [
+    "Al en los Vertisoles ácidos"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "muy duros en seco y pegajosos en húmedo",
+    "encharcamiento",
+    "infiltración muy lenta",
+    "salinización y sodificación"
+   ],
+   "cultivos_citados": [
+    "algodón",
+    "trigo",
+    "cebada",
+    "sorgo",
+    "garbanzo",
+    "caña de azúcar",
+    "mijo"
+   ],
+   "extension_mundial_mha": 335,
+   "texto_en": "Heavy cracking clay, rich in calcium and magnesium but often low in nitrogen and available phosphorus.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 3 (https://www.fao.org/4/y1899e/y1899e06.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Solonchaks": {
+   "nombre_es": "Solonchak",
+   "rasgo": "Suelos salinos: horizonte sálico (CEe mayor que 15 dS/m, o mayor que 8 si el pH pasa de 8.5) a menos de 50 cm",
+   "textura": null,
+   "ph": null,
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": null,
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Las sales vuelven proporcionalmente menos disponibles los nutrientes; antagonismo Na–K, Na–Ca y Mg–K; el cloruro altera el metabolismo del N",
+   "toxicidades": [
+    "Na",
+    "Cl"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "sequía osmótica",
+    "desequilibrio de iones",
+    "toxicidad"
+   ],
+   "cultivos_citados": [
+    "cultivos tolerantes a la sal (la fuente cita el algodón como tolerante y el chile como sensible)",
+    "pastoreo"
+   ],
+   "extension_mundial_mha": [
+    260,
+    340
+   ],
+   "texto_en": "Saline soil: salts make nutrients less available and sodium and chloride are toxic; it needs leaching and drainage.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Gleysols": {
+   "nombre_es": "Gleysol",
+   "rasgo": "Suelos saturados por el agua freática (propiedades gléyicas a menos de 50 cm)",
+   "textura": "variable",
+   "ph": null,
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "más materia orgánica en depresiones",
+   "ricos_en": [
+    "P",
+    "K"
+   ],
+   "pobres_en": [],
+   "nutrientes_nota": "En depresiones: más materia orgánica, CIC, bases, P y K que las lomas vecinas",
+   "toxicidades": [
+    "Fe2+",
+    "Mn2+"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "exceso de agua",
+    "falta de aireación"
+   ],
+   "cultivos_citados": [
+    "arroz",
+    "lechería y horticultura una vez drenados"
+   ],
+   "extension_mundial_mha": 720,
+   "texto_en": "Waterlogged soil: lack of oxygen is the main limit; once drained it can be productive.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Andosols": {
+   "nombre_es": "Andosol",
+   "rasgo": "Suelos de ceniza volcánica (horizonte ándico o vítrico)",
+   "textura": null,
+   "ph": "estable de ligeramente ácido a neutro (mayor que 5)",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "cerca de 8 % en superficie; hasta 30 %",
+   "ricos_en": [],
+   "pobres_en": [
+    "P"
+   ],
+   "nutrientes_nota": "Generalmente fértiles; fijan fósforo por el aluminio activo",
+   "toxicidades": [],
+   "fijacion_p": true,
+   "limitaciones": [
+    "fijación de fósforo",
+    "pendientes fuertes",
+    "poca capacidad de carga"
+   ],
+   "cultivos_citados": [
+    "caña de azúcar",
+    "tabaco",
+    "camote",
+    "té",
+    "hortalizas",
+    "trigo",
+    "frutales",
+    "arroz"
+   ],
+   "extension_mundial_mha": 110,
+   "texto_en": "Volcanic ash soil, generally fertile, that locks up phosphorus.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 3 (https://www.fao.org/4/y1899e/y1899e06.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Podzols": {
+   "nombre_es": "Podzol",
+   "rasgo": "Suelos con horizonte espódico (acumulación de humus con Al y Fe)",
+   "textura": "arenosa",
+   "ph": "3.5–4.5 en superficie",
+   "ph_rango": [
+    3.5,
+    4.5
+   ],
+   "cic_cmol_kg": null,
+   "materia_organica": "C/N de 20–50 en superficie",
+   "ricos_en": [],
+   "pobres_en": [
+    "P"
+   ],
+   "nutrientes_nota": "Nutrientes bajos por lavado intenso; deficiencia de P común",
+   "toxicidades": [
+    "Al"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "acidez fuerte",
+    "aluminio alto",
+    "baja fertilidad",
+    "poca agua"
+   ],
+   "cultivos_citados": [
+    "bosque",
+    "pastoreo extensivo"
+   ],
+   "extension_mundial_mha": 485,
+   "texto_en": "Strongly acid sandy soil: low nutrients, phosphorus deficiency and aluminium toxicity are common.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Plinthosols": {
+   "nombre_es": "Plintosol",
+   "rasgo": "Suelos con plintita (arcilla rica en Fe que se endurece al mojarse y secarse)",
+   "textura": "arcilla moteada",
+   "ph": null,
+   "ph_rango": null,
+   "cic_cmol_kg": "baja",
+   "materia_organica": "pobre en humus",
+   "ricos_en": [
+    "Fe"
+   ],
+   "pobres_en": [],
+   "nutrientes_nota": "Ricos en hierro y aluminio; fertilidad natural baja",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "encharcamiento o sequía",
+    "plintita densa"
+   ],
+   "cultivos_citados": [
+    "pastoreo",
+    "cacao",
+    "marañón"
+   ],
+   "extension_mundial_mha": 60,
+   "texto_en": "Iron-rich soil that hardens when it dries; low natural fertility.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Planosols": {
+   "nombre_es": "Planosol",
+   "rasgo": "Cambio textural abrupto, capa superficial arenosa y saturación temporal (propiedades estágnicas)",
+   "textura": "superficie arenosa o franca sobre subsuelo arcilloso",
+   "ph": "ácidos en suelos maduros",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "muy poca en zonas áridas",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Fertilidad baja; deficiencias o toxicidades de micronutrientes con reducción prolongada",
+   "toxicidades": [
+    "Al"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "encharcamiento",
+    "subsuelo denso",
+    "aluminio"
+   ],
+   "cultivos_citados": [
+    "trigo y remolacha drenados",
+    "arroz"
+   ],
+   "extension_mundial_mha": 130,
+   "texto_en": "Seasonally waterlogged soil over a dense subsoil, with poor fertility.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Stagnosols": {
+   "ficha": null,
+   "nota": "No aparece en Driessen et al. 2001 (la obra describe la WRB de 1998)."
+  },
+  "Nitisols": {
+   "nombre_es": "Nitisol",
+   "rasgo": "Suelos tropicales rojos, profundos y arcillosos (horizonte nítico)",
+   "textura": "arcillosa (más de 30 % de arcilla)",
+   "ph": "5.0–6.5",
+   "ph_rango": [
+    5.0,
+    6.5
+   ],
+   "cic_cmol_kg": "alta para un suelo tropical",
+   "materia_organica": "varios por ciento en superficie bajo bosque",
+   "ricos_en": [
+    "Fe"
+   ],
+   "pobres_en": [
+    "P"
+   ],
+   "nutrientes_nota": "P disponible bajo y bases normalmente bajas; fijan P, pero la deficiencia aguda es rara",
+   "toxicidades": [],
+   "fijacion_p": true,
+   "limitaciones": [
+    "sorción alta de P"
+   ],
+   "cultivos_citados": [
+    "cacao",
+    "café",
+    "hule",
+    "piña",
+    "cultivos alimentarios"
+   ],
+   "extension_mundial_mha": 200,
+   "texto_en": "Deep red tropical clay, rich in iron, that holds phosphorus tightly.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Ferralsols": {
+   "nombre_es": "Ferralsol",
+   "rasgo": "Suelos tropicales muy meteorizados, ricos en óxidos de Fe y Al (horizonte ferrálico)",
+   "textura": "arcillosa",
+   "ph": "bajo",
+   "ph_rango": null,
+   "cic_cmol_kg": [
+    3,
+    4
+   ],
+   "materia_organica": null,
+   "ricos_en": [
+    "Fe"
+   ],
+   "pobres_en": [
+    "N",
+    "K",
+    "Ca",
+    "Mg",
+    "S"
+   ],
+   "nutrientes_nota": "Químicamente pobres y bajos en muchos micronutrientes; Mn y Zn pueden ser tóxicos o deficientes; fijación fuerte de P",
+   "toxicidades": [
+    "Al",
+    "Mn",
+    "Zn"
+   ],
+   "fijacion_p": true,
+   "limitaciones": [
+    "baja fertilidad natural",
+    "fijación de P",
+    "sequía"
+   ],
+   "cultivos_citados": [
+    "cultivos anuales y perennes con cal y fertilización completa"
+   ],
+   "extension_mundial_mha": 750,
+   "texto_en": "Deeply weathered tropical soil, chemically poor, that fixes phosphorus; it needs lime and full fertilization.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Chernozems": {
+   "nombre_es": "Chernozem",
+   "rasgo": "Capa superficial gruesa, negra y rica en humus (mólica) con carbonatos secundarios",
+   "textura": "loess limoso",
+   "ph": "6.5–7.5 en superficie; 7.5–8.5 en el subsuelo",
+   "ph_rango": [
+    6.5,
+    7.5
+   ],
+   "cic_cmol_kg": [
+    20,
+    55
+   ],
+   "materia_organica": "5–15 % en superficie",
+   "ricos_en": [
+    "N",
+    "Ca",
+    "Mg"
+   ],
+   "pobres_en": [
+    "P"
+   ],
+   "nutrientes_nota": "N de 0.2–0.5 % en superficie; P solo en parte disponible (los cultivos responden al fósforo); Ca y Mg dominan el complejo de cambio",
+   "toxicidades": [
+    "Na (en los del sur)"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "erosión",
+    "veranos secos",
+    "sodio en los del sur"
+   ],
+   "cultivos_citados": [
+    "trigo",
+    "cebada",
+    "maíz",
+    "hortalizas"
+   ],
+   "extension_mundial_mha": 230,
+   "texto_en": "Deep black, humus-rich steppe soil, rich in nitrogen, calcium and magnesium; phosphorus is partly available.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 8 (https://www.fao.org/4/y1899e/y1899e11.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Kastanozems": {
+   "nombre_es": "Kastañozem",
+   "rasgo": "Capa superficial parda y rica en humus, con carbonatos secundarios a menos de 100 cm",
+   "textura": null,
+   "ph": "cerca de 7 en superficie, hasta cerca de 8.5 en profundidad",
+   "ph_rango": [
+    7.0,
+    8.5
+   ],
+   "cic_cmol_kg": [
+    25,
+    30
+   ],
+   "materia_organica": "2–4 %",
+   "ricos_en": [
+    "Ca",
+    "Mg"
+   ],
+   "pobres_en": [],
+   "nutrientes_nota": "Químicamente ricos; Ca y Mg dominan el complejo de cambio; cal y yeso en el subsuelo; sodio intercambiable de 4 a 20 %",
+   "toxicidades": [
+    "sales solubles en algunos sitios"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "falta de humedad",
+    "erosión",
+    "salinización secundaria con riego"
+   ],
+   "cultivos_citados": [
+    "granos pequeños",
+    "cultivos alimentarios y hortalizas con riego",
+    "pastoreo"
+   ],
+   "extension_mundial_mha": 465,
+   "texto_en": "Brown steppe soil, chemically rich in calcium and magnesium, with lime in the subsoil; irrigation can salinize it.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 8 (https://www.fao.org/4/y1899e/y1899e11.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Phaeozems": {
+   "nombre_es": "Feozem",
+   "rasgo": "Capa superficial oscura y rica en humus, más lavada, sin carbonatos en el primer metro",
+   "textura": null,
+   "ph": "5–7",
+   "ph_rango": [
+    5.0,
+    7.0
+   ],
+   "cic_cmol_kg": [
+    25,
+    30
+   ],
+   "materia_organica": "cerca de 5 %",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Fértiles: el lavado no agota las bases ni los nutrientes",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "sequías periódicas",
+    "erosión"
+   ],
+   "cultivos_citados": [
+    "soya",
+    "trigo",
+    "granos pequeños",
+    "algodón con riego",
+    "cereales",
+    "leguminosas",
+    "hortalizas"
+   ],
+   "extension_mundial_mha": 190,
+   "texto_en": "Dark, fertile prairie soil; drought and erosion are the main limits.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 8 (https://www.fao.org/4/y1899e/y1899e11.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Umbrisols": {
+   "nombre_es": "Umbrisol",
+   "rasgo": "Capa superficial oscura y ácida, con baja saturación de bases (úmbrica)",
+   "textura": "media",
+   "ph": "ácido",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "alta",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Fertilidad moderada, sobre todo por la materia orgánica superficial",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "pendientes",
+    "clima frío y húmedo",
+    "erosión"
+   ],
+   "cultivos_citados": [
+    "cereales",
+    "raíces",
+    "té",
+    "café de altura"
+   ],
+   "extension_mundial_mha": 100,
+   "texto_en": "Dark acid soil with moderate fertility that depends on its organic matter.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Durisols": {
+   "nombre_es": "Durisol",
+   "rasgo": "Suelos con horizonte dúrico o petrodúrico (cementado por sílice)",
+   "textura": "media a gruesa; sobre todo franco arenosa",
+   "ph": "típicamente 7.5–9.0",
+   "ph_rango": [
+    7.5,
+    9.0
+   ],
+   "cic_cmol_kg": null,
+   "materia_organica": "poco carbono",
+   "ricos_en": [],
+   "pobres_en": [
+    "Fe"
+   ],
+   "nutrientes_nota": "Muchos con sodio intercambiable alto y poco hierro extraíble",
+   "toxicidades": [
+    "Na"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "capa cementada que frena raíces y agua",
+    "erosión",
+    "sales en partes bajas"
+   ],
+   "cultivos_citados": [
+    "pastoreo; cultivo con riego tras romper la capa"
+   ],
+   "extension_mundial_mha": null,
+   "texto_en": "Soil with a silica-cemented layer that stops roots and water; often high in sodium.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Gypsisols": {
+   "nombre_es": "Gypsisol",
+   "rasgo": "Suelos con acumulación secundaria de yeso (horizonte gípsico)",
+   "textura": "franca o arcillosa en superficie",
+   "ph": null,
+   "ph_rango": null,
+   "cic_cmol_kg": [
+    10,
+    20
+   ],
+   "materia_organica": "baja",
+   "ricos_en": [
+    "Ca"
+   ],
+   "pobres_en": [
+    "N",
+    "P",
+    "K"
+   ],
+   "nutrientes_nota": "Totales bajos de N, P y K (necesitan fertilizante); con más de 25 % de yeso bajan el P, el K y el Mg disponibles",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "horizonte petrogípsico somero",
+    "hundimientos por disolución del yeso",
+    "encostramiento"
+   ],
+   "cultivos_citados": [
+    "granos pequeños",
+    "algodón",
+    "alfalfa",
+    "trigo",
+    "maíz",
+    "vid",
+    "dátil"
+   ],
+   "extension_mundial_mha": 100,
+   "texto_en": "Gypsum-rich soil, low in nitrogen, phosphorus and potassium; with much gypsum, phosphorus, potassium and magnesium are less available.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Calcisols": {
+   "nombre_es": "Calcisol",
+   "rasgo": "Suelos con acumulación secundaria de carbonato de calcio (horizonte cálcico o petrocálcico a menos de 100 cm)",
+   "textura": "media o fina, con buena retención de agua",
+   "ph": "cerca de neutro en superficie, más alto en profundidad (25 % o más de carbonatos)",
+   "ph_rango": null,
+   "cic_cmol_kg": [
+    10,
+    25
+   ],
+   "materia_organica": "1–2 %",
+   "ricos_en": [
+    "Ca",
+    "Mg"
+   ],
+   "pobres_en": [
+    "Fe",
+    "Zn"
+   ],
+   "nutrientes_nota": "Muchos son ricos en nutrientes; Ca y Mg forman más del 90 % de los cationes adsorbidos; Fe y Zn figuran entre las necesidades de fertilizante de las hortalizas; los cítricos son sensibles al carbonato activo",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "sequedad",
+    "pedregosidad",
+    "horizonte petrocálcico somero",
+    "encostramiento",
+    "salinización donde drena mal"
+   ],
+   "cultivos_citados": [
+    "trigo de invierno con riego",
+    "melón",
+    "algodón",
+    "sorgo",
+    "pasto Rhodes",
+    "alfalfa",
+    "hortalizas",
+    "girasol de temporal"
+   ],
+   "extension_mundial_mha": 1000,
+   "texto_en": "Lime-rich soil of dry regions, rich in calcium and magnesium; iron and zinc are common fertilizer needs.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 7 (https://www.fao.org/4/y1899e/y1899e09.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Retisols": {
+   "nombre_es": "Retisol (Albeluvisol en Driessen et al. 2001)",
+   "rasgo": "Horizonte árgico con lenguas de material blanqueado (albelúvicas)",
+   "textura": "capa eluvial arenosa",
+   "ph": "moderada a fuertemente ácido",
+   "ph_rango": null,
+   "cic_cmol_kg": [
+    10,
+    20
+   ],
+   "materia_organica": "1–10 % de C en superficie",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Nutrientes bajos; bases muy bajas en la capa eluvial; mucho aluminio intercambiable en los háplicos",
+   "toxicidades": [
+    "Al"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "acidez",
+    "pocos nutrientes",
+    "heladas y temporada corta"
+   ],
+   "cultivos_citados": [
+    "papa",
+    "trigo de invierno",
+    "maíz forrajero",
+    "remolacha"
+   ],
+   "extension_mundial_mha": 320,
+   "texto_en": "Acid, leached soil with low nutrient status and high aluminium.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente",
+   "nota": "Driessen et al. 2001 describe los Albeluvisols (WRB 1998); en la WRB 2022 el grupo equivalente se llama Retisols [P] (correspondencia sin verificar en la WRB 2022)"
+  },
+  "Acrisols": {
+   "nombre_es": "Acrisol",
+   "rasgo": "Suelos ácidos con horizonte árgico de arcillas de baja actividad y saturación de bases menor que 50 %",
+   "textura": null,
+   "ph": "ácido",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": null,
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Nutrientes escasos; sorción fuerte de P",
+   "toxicidades": [
+    "Al"
+   ],
+   "fijacion_p": true,
+   "limitaciones": [
+    "pocos nutrientes",
+    "toxicidad por Al",
+    "sorción de P",
+    "erosión"
+   ],
+   "cultivos_citados": [
+    "piña",
+    "marañón",
+    "palma de aceite",
+    "hule"
+   ],
+   "extension_mundial_mha": 1000,
+   "texto_en": "Acid, nutrient-poor soil with aluminium toxicity; it needs lime and full fertilization.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Lixisols": {
+   "nombre_es": "Lixisol",
+   "rasgo": "Horizonte árgico de arcillas de baja actividad con saturación de bases moderada a alta",
+   "textura": null,
+   "ph": "más alto que en Ferralsols y Acrisols",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": null,
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Reservas de nutrientes bajas; bases intercambiables de 2 cmol(+)/kg o menos",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "encostramiento",
+    "erosión",
+    "compactación"
+   ],
+   "cultivos_citados": [
+    "pastoreo",
+    "cultivos perennes"
+   ],
+   "extension_mundial_mha": 435,
+   "texto_en": "Weathered soil with low nutrient reserves and little capacity to hold nutrients.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Alisols": {
+   "nombre_es": "Alisol",
+   "rasgo": "Suelos muy ácidos con arcillas de alta actividad y aluminio en más de la mitad del complejo de cambio",
+   "textura": null,
+   "ph": "muy ácido (pH KCl menor que 4 en los datos de la fuente)",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "modesta en suelos cultivados",
+   "ricos_en": [
+    "Mg"
+   ],
+   "pobres_en": [
+    "Ca",
+    "K"
+   ],
+   "nutrientes_nota": "Nutrientes bajos en general, salvo a veces el Mg",
+   "toxicidades": [
+    "Al",
+    "Mn"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "toxicidad por Al",
+    "baja fertilidad",
+    "erosión"
+   ],
+   "cultivos_citados": [
+    "té",
+    "hule",
+    "palma de aceite",
+    "café y caña con cal"
+   ],
+   "extension_mundial_mha": 100,
+   "texto_en": "Very acid soil where aluminium is toxic; calcium and potassium are low.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 6 (https://www.fao.org/4/y1899e/y1899e08a.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Luvisols": {
+   "nombre_es": "Luvisol",
+   "rasgo": "Horizonte árgico con arcillas de alta actividad (arcilla lavada desde la superficie)",
+   "textura": null,
+   "ph": "ligeramente ácido en superficie, neutro en el subsuelo (puede tener carbonato)",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "pocos por ciento",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Fértiles, salvo algunas unidades; saturación de bases alta",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "superficies limosas que se degradan si se labran húmedas",
+    "erosión en laderas"
+   ],
+   "cultivos_citados": [
+    "granos pequeños",
+    "trigo",
+    "remolacha",
+    "forraje",
+    "frutales"
+   ],
+   "extension_mundial_mha": [
+    500,
+    600
+   ],
+   "texto_en": "Fertile soil with a clay-enriched subsoil and high base saturation.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 9 (https://www.fao.org/4/y1899e/y1899e12.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Cambisols": {
+   "nombre_es": "Cambisol",
+   "rasgo": "Suelos jóvenes con desarrollo incipiente del perfil (horizonte cámbico)",
+   "textura": "media a fina; la mayoría media",
+   "ph": "neutro a ligeramente ácido",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "capa superficial a menudo oscura",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "La mayoría tiene fertilidad química satisfactoria",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "clima",
+    "pendiente",
+    "poca profundidad",
+    "pedregosidad",
+    "bases bajas en algunos"
+   ],
+   "cultivos_citados": [
+    "cultivos alimentarios y oleaginosas con riego (cálcicos y vérticos en planicies aluviales secas)",
+    "cultivos anuales y perennes"
+   ],
+   "extension_mundial_mha": 1500,
+   "texto_en": "Young soil with satisfactory chemical fertility; it makes good farmland in most settings.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 5 (https://www.fao.org/4/y1899e/y1899e08.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Fluvisols": {
+   "nombre_es": "Fluvisol",
+   "rasgo": "Suelos jóvenes de depósitos aluviales (propiedades flúvicas: estratificación)",
+   "textura": "de arena gruesa a arcilla pesada",
+   "ph": "neutro o cercano a neutro en la mayoría",
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": null,
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Buena fertilidad natural; los costeros tienen carbonato de calcio y sodio; los ácidos sulfatados tienen deficiencia de P y N",
+   "toxicidades": [
+    "Al",
+    "Fe2+",
+    "H2S (ácidos sulfatados e inundados)"
+   ],
+   "fijacion_p": null,
+   "limitaciones": [
+    "inundaciones",
+    "salinidad",
+    "acidificación al drenar (sulfatados)"
+   ],
+   "cultivos_citados": [
+    "cultivos anuales",
+    "frutales",
+    "pastoreo",
+    "arroz"
+   ],
+   "extension_mundial_mha": 350,
+   "texto_en": "Young river-deposit soil with good natural fertility; flooding and salinity are the usual limits.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Arenosols": {
+   "nombre_es": "Arenosol",
+   "rasgo": "Suelos arenosos (franco arenosa o más gruesa hasta 100 cm)",
+   "textura": "franco arenosa o más gruesa",
+   "ph": null,
+   "ph_rango": null,
+   "cic_cmol_kg": [
+    null,
+    4
+   ],
+   "materia_organica": "C orgánico menor que 1 % (menor que 0.5 % en zonas secas)",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Poca capacidad de guardar nutrientes (CIC efectiva normalmente menor que 4 cmol(+)/kg); ricos en bases en zonas secas, agotados en el trópico húmedo",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "poca retención de nutrientes y agua",
+    "pérdidas por percolación",
+    "erosión"
+   ],
+   "cultivos_citados": [
+    "granos pequeños, melón, leguminosas y forraje con riego",
+    "yuca",
+    "cacahuate"
+   ],
+   "extension_mundial_mha": 900,
+   "texto_en": "Sandy soil that holds little water and few nutrients; drip irrigation and frequent small fertilizer doses suit it.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 3 (https://www.fao.org/4/y1899e/y1899e06.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  },
+  "Regosols": {
+   "nombre_es": "Regosol",
+   "rasgo": "Grupo residual: suelos minerales poco desarrollados, de textura media, sin horizonte diagnóstico salvo el ócrico",
+   "textura": "media",
+   "ph": null,
+   "ph_rango": null,
+   "cic_cmol_kg": null,
+   "materia_organica": "baja en climas cálidos y secos",
+   "ricos_en": [],
+   "pobres_en": [],
+   "nutrientes_nota": "Sin datos de nutrientes en la fuente",
+   "toxicidades": [],
+   "fijacion_p": null,
+   "limitaciones": [
+    "sensibles a la sequía",
+    "erosión",
+    "costra superficial"
+   ],
+   "cultivos_citados": [
+    "granos pequeños",
+    "remolacha",
+    "frutales (sobre loess)",
+    "pastoreo"
+   ],
+   "extension_mundial_mha": 260,
+   "texto_en": "Weakly developed soil; drought and surface crusting are the main limits.",
+   "fuente": "Driessen, P., Deckers, J., Spaargaren, O. y Nachtergaele, F. (eds.) 2001. Lecture Notes on the Major Soils of the World. World Soil Resources Reports 94, FAO, Set 4 (https://www.fao.org/4/y1899e/y1899e07.htm), leído el 14-nov-2026",
+   "etiqueta": "[V] resumen propio de la fuente"
+  }
+ },
+ "usda_ordenes": {
+  "Alfisols": {
+   "elemento_formativo": "alf",
+   "definicion_en": "Moderately leached soils with relatively high native fertility",
+   "fertilidad_en": "fertile, nutrient-rich",
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Andisols": {
+   "elemento_formativo": "and",
+   "definicion_en": "Soils formed in volcanic ash or other volcanic ejecta",
+   "fertilidad_en": "strong nutrient retention and high organic matter",
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Aridisols": {
+   "elemento_formativo": "id",
+   "definicion_en": "Calcium carbonate-containing soils of arid regions with subsurface horizon development",
+   "fertilidad_en": "limited nutrients, often alkaline",
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Entisols": {
+   "elemento_formativo": "ent",
+   "definicion_en": "Soils of recent origin",
+   "fertilidad_en": "depends on parent material",
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Gelisols": {
+   "elemento_formativo": "el",
+   "definicion_en": "Soils of very cold climates with permafrost within two meters of the surface",
+   "fertilidad_en": null,
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Histosols": {
+   "elemento_formativo": "ist",
+   "definicion_en": "Soils composed mainly of organic materials",
+   "fertilidad_en": "nutrient-rich enough for specific vegetation; productive when drained",
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Inceptisols": {
+   "elemento_formativo": "ept",
+   "definicion_en": "Soils with minimal horizon development",
+   "fertilidad_en": "moderately fertile; may need amendments",
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Mollisols": {
+   "elemento_formativo": "oll",
+   "definicion_en": "Soils of grassland ecosystems",
+   "fertilidad_en": "highly fertile, with calcium and magnesium",
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Oxisols": {
+   "elemento_formativo": "ox",
+   "definicion_en": "Very highly weathered soils, mainly in the intertropical regions",
+   "fertilidad_en": "low nutrient reserves, high acidity, poor fertility",
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Spodosols": {
+   "elemento_formativo": "od",
+   "definicion_en": "Acid soils with subsurface accumulation of humus complexed with Al and Fe",
+   "fertilidad_en": "low natural fertility; bases strongly leached",
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Ultisols": {
+   "elemento_formativo": "ult",
+   "definicion_en": "Strongly leached, acid forest soils with relatively low native fertility",
+   "fertilidad_en": "low base saturation, acidic and nutrient-poor",
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026; fertilidad: Lancaster University, Lancaster Environment Centre, «The Twelve Soil Orders of the World» (2024, mod. 2025) (https://www.lancaster.ac.uk/lec/research/soil-science-knowledge/twelve-soil-orders/), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  },
+  "Vertisols": {
+   "elemento_formativo": "ert",
+   "definicion_en": "Clay-rich soils that shrink and swell with changes in moisture",
+   "fertilidad_en": null,
+   "fuente": "elemento formativo: Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026; definición: University of Idaho, CALS, «Twelve soil orders» (https://www.uidaho.edu/cals/soil-orders), leído el 14-nov-2026",
+   "etiqueta": "[V] elemento formativo; [P] definición y fertilidad (páginas universitarias de divulgación)"
+  }
+ },
+ "usda_prefijos_gran_grupo": {
+  "calc": {
+   "significado_en": "A calcic horizon",
+   "implicacion": "carbonatos: ver la regla «carbonatos» (NOM-021)",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "calci": {
+   "significado_en": "A calcic horizon",
+   "implicacion": "carbonatos: ver la regla «carbonatos» (NOM-021)",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "petro": {
+   "significado_en": "Hardened calcic or gypsic horizon",
+   "implicacion": "capa endurecida que limita raíces",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "gyps": {
+   "significado_en": "Presence of gypsic horizon",
+   "implicacion": "yeso: ver Gypsisols",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "sal": {
+   "significado_en": "Presence of salic horizon",
+   "implicacion": "salinidad: ver la regla «salinidad» (NOM-021)",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "natr": {
+   "significado_en": "Presence of natric horizon",
+   "implicacion": "sodio: ver Solonetz",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "dur": {
+   "significado_en": "A duripan",
+   "implicacion": "capa cementada: ver Durisols",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "argi": {
+   "significado_en": "Presence of an argillic horizon",
+   "implicacion": "subsuelo con arcilla acumulada",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "camb": {
+   "significado_en": "A cambic horizon",
+   "implicacion": "desarrollo incipiente: ver Cambisols",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "hapl": {
+   "significado_en": "Minimum horizon",
+   "implicacion": "perfil sencillo",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "torr": {
+   "significado_en": "Torric moisture regime",
+   "implicacion": "régimen de humedad muy seco",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "ust": {
+   "significado_en": "Ustic moisture regime",
+   "implicacion": "régimen de humedad con estación seca",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "xer": {
+   "significado_en": "Xeric moisture regime",
+   "implicacion": "régimen de humedad mediterráneo",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "ud": {
+   "significado_en": "Udic moisture regime",
+   "implicacion": "régimen de humedad húmedo",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "aqu": {
+   "significado_en": "Aquic conditions",
+   "implicacion": "exceso de agua: ver Gleysols",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "fluv": {
+   "significado_en": "Floodplain",
+   "implicacion": "depósitos aluviales: ver Fluvisols",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "psamm": {
+   "significado_en": "Sandy textures",
+   "implicacion": "arenoso: ver Arenosols",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "cry": {
+   "significado_en": "Cold",
+   "implicacion": "frío",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  },
+  "pale": {
+   "significado_en": "Old development",
+   "implicacion": "suelo antiguo",
+   "fuente": "Soil Science Society of America, Glossary of Soil Science Terms, Appendix 1, Tabla A2 «Prefixes and their connotations for names of great groups» (https://agronomy.org/files/publications/soils-glossary/appendix-1.pdf y https://www.soils.org/files/publications/soils-glossary/appendix-1-a2.pdf), leído el 14-nov-2026",
+   "etiqueta": "[V] significado; implicación propia [I]"
+  }
+ },
+ "como_leer_un_gran_grupo": "nombre = prefijo(s) de gran grupo + nombre del suborden, que termina en el elemento formativo del orden (p. ej. Haplo + calc + ids → Aridisols, con horizonte cálcico); Moorberg, C.J. y Crouse, D.A. 2017 (act. 2021). Soils Laboratory Manual, cap. 4 «Soil Classification and Mapping», Tabla 4.2, CC BY 4.0 (https://kstatelibraries.pressbooks.pub/soilslabmanual/?p=31), leído el 14-nov-2026",
+ "zona": {
+  "municipio_delicias_pct": {
+   "Cambisol": 29.25,
+   "Calcisol": 27.81,
+   "Kastañozem": 25.72,
+   "Chernozem": 10.47,
+   "Luvisol": 2.38,
+   "Feozem": 0.35,
+   "Leptosol": 0.27,
+   "Vertisol": 0.26,
+   "Regosol": 0.02,
+   "zona_urbana": 3.44,
+   "cuerpo_de_agua": 0.03
+  },
+  "fuente": "Plan Municipal de Desarrollo de Delicias 2024–2027, anexo del Periódico Oficial del Estado de Chihuahua (2025), que cita a INEGI, Diccionario de Datos Edafológicos escala 1:250 000 (versión 4), 2016 (https://chihuahua.gob.mx/sites/default/atach2/periodico-oficial/anexos/2025-01/ANEXO%2003-2025%20ACUERDO%20N%C2%B0%20203-2024%20PMD%20DELICIAS.pdf), leído el 14-nov-2026",
+  "etiqueta": "[V]",
+  "nota": "Superficie del municipio (no de las zonas piloto). Otra cifra publicada (INEGI, Compendio municipal 2010: Cambisol 28.40, Calcisol 27.81, Kastañozem 24.18 %) no se pudo abrir: el sitio bloquea la lectura automática [P]"
+ }
+}

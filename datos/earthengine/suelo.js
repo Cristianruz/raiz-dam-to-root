@@ -20,3 +20,15 @@ Object.keys(ZONAS).forEach(function (z) {
                             crs: proj, maxPixels: 1e7});
   print(z, d);                                                           // listas por banda: una posición = una celda
 });
+
+// --- Agregado el 14-nov-2026 (noche): tipo de suelo por celda para B8_tipo_suelo_parcelas.py ---------------------------
+// Gran grupo de la Soil Taxonomy del USDA (OpenLandMap, 250 m, CC-BY-SA 4.0), banda grtgroup, en su malla nativa.
+// Salida: data/raw/reto/suelo_clases_<zona>.csv (zona, longitude, latitude, grtgroup).
+var olm = ee.Image('OpenLandMap/SOL/SOL_GRTGROUP_USDA-SOILTAX_C/v01').select('grtgroup');
+Object.keys(ZONAS).forEach(function (z) {
+  print(z, olm.addBands(ee.Image.pixelLonLat()).updateMask(olm.mask()).reduceRegion({
+    reducer: ee.Reducer.toList(), geometry: ee.Geometry.Rectangle(ZONAS[z], null, false), crs: olm.projection(), maxPixels: 1e7}));
+});
+// HWSD v2 (projects/sat-io/open-datasets/FAO/HWSD_V2_SMU, ~1 km) también se consultó: en las zonas aparecen tres unidades
+// (HWSD2_ID 18165, 18198 y 7001), pero sus bandas WRB4, WRB2_CODE y FAO90 son códigos numéricos sin tabla publicada en el
+// catálogo comunitario: no se pueden traducir a nombres sin la base de HWSD v2 (descarga aparte). No se entrega.

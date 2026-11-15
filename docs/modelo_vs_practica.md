@@ -46,6 +46,29 @@ Lámina en millares por hectárea (1 millar/ha = 10 cm). Zona Delicias–Saucill
   lo aplicado (17.4), porque esa diferencia viene sobre todo de la ET. Cambiar el rango mueve todas las cifras de la
   herramienta y es decisión del equipo.
 
+## 3-bis. Fecha de siembra del cereal de invierno (cambio del 14-nov)
+El modelo sembraba el cereal de invierno (avena o triticale) el 15 de octubre [S]. El documento maestro (§5.2) da la
+ventana «nov–dic» y el manual de etiquetado recomienda mediados de octubre para la avena: las dos fuentes del proyecto
+no coinciden y ninguna está verificada para riego de invierno en Delicias. Se revisó la fenología en HLS de las 16
+parcelas clasificadas como cereal de invierno en 2026 (todas en Delicias–Saucillo): 14 tienen su NDVI máximo de febrero
+a abril (6 en febrero, 2 en marzo, 6 en abril) y 2 en octubre–noviembre. Un máximo de febrero a abril corresponde mejor
+a una siembra tardía que a una del 15 de octubre con corte a ~115 días (principios de febrero).
+
+Decisión: el modelo siembra ahora el 1 de diciembre, punto medio de la ventana del maestro [S]. Sigue siendo un supuesto:
+la revisión en HLS es de 16 parcelas y un solo año, y el mapa de cultivos es por reglas. Efecto en la lámina bruta
+(millares/ha, Delicias–Saucillo, P10 / P50 / P90):
+
+| Rotación | Siembra 15-oct | Siembra 1-dic |
+|---|---|---|
+| cereal_invierno | 5.07 / 6.28 / 7.54 | 6.34 / 7.82 / 9.44 |
+| avena_maiz | 14.81 / 17.44 / 20.69 | 16.06 / 18.94 / 22.54 |
+| cereal_algodon | 17.23 / 20.88 / 25.38 | 18.45 / 22.42 / 27.27 |
+| cereal_sorgo | 14.72 / 17.65 / 21.35 | 16.00 / 19.19 / 23.19 |
+
+Las demás rotaciones no cambian. La lámina sube porque el ciclo se recorre hacia la primavera, con más ETo. En el
+contraste de ET (`docs/resultado_A8.md`) la zona de Delicias–Saucillo pasa de 830 a 837 mm modelados (+27 % a +28 % sobre
+SSEBop); Lázaro Cárdenas no cambia (no tiene parcelas de cereal).
+
 ## 4. Lo que NO se puede afirmar
 - Que el modelo «acierta» en nivel: no lo hace en alfalfa, nogal, algodón ni maíz forrajero.
 - Que la razón ET ÷ agua aplicada (65.6 % en alfalfa) sea una eficiencia de parcela medida: el propio expediente del
