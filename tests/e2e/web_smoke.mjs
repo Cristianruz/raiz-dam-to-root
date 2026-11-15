@@ -675,6 +675,59 @@ async function pruebaRelieve(page, prefijo, reducida, captura = null) {
   check(`${prefijo}al apagar «Terrain & runoff» la capa se oculta y la tarjeta de la tormenta también`, fin.visibilidad === "none" && (await tarjetaT.isHidden()));
 }
 
+/**
+ * Relieve del mapa plano (web/js/terreno2d.js): sombreado y rampa de elevación por zona con relieve en gemelo.json,
+ * velo fuera de las zonas piloto, barra de escala y leyenda; el interruptor apaga el sombreado y la rampa.
+ */
+async function pruebaTerreno2D(page, prefijo) {
+  const bloque = page.locator(".terreno2d");
+  const zonasDem = Object.entries(gemelo?.terreno?.zonas ?? {}).filter(([, z]) => z.teselas && z.elev_min_m < z.elev_max_m);
+  const leer = () => page.evaluate(() => {
+    const m = window.raizDepuracion.mapa;
+    const orden = m.getLayersOrder();
+    return {
+      capas: Object.fromEntries(orden.filter((id) => id.startsWith("terreno2d-")).map((id) => [id, { tipo: m.getLayer(id).type, visible: (m.getLayoutProperty(id, "visibility") ?? "visible") === "visible" }])),
+      debajoDeLasParcelas: orden.filter((id) => id.startsWith("terreno2d-")).every((id) => orden.indexOf(id) < orden.indexOf("parcelas-relleno") && orden.indexOf(id) > orden.indexOf("osm")),
+      escala: document.querySelector("#mapa .maplibregl-ctrl-scale")?.textContent ?? "",
+    };
+  });
+  let m = await leer();
+  const metros = (v) => `${nf({ maximumFractionDigits: 0 }).format(v)} m`;
+  check(`${prefijo}mapa plano: barra de escala de MapLibre`, /\d\s*k?m/.test(m.escala), m.escala);
+  const hayRectangulos = Object.values(cubo.zonas ?? {}).some((z) => Array.isArray(z.bbox));
+  check(`${prefijo}mapa plano: velo gris fuera de las zonas piloto, debajo de las parcelas`,
+    !hayRectangulos || (m.capas["terreno2d-velo"]?.tipo === "fill" && m.capas["terreno2d-velo"].visible && m.debajoDeLasParcelas), JSON.stringify(m.capas["terreno2d-velo"] ?? null));
+  if (!zonasDem.length) {
+    check(`${prefijo}mapa plano sin teselas de elevación: «Terrain shading: not available» y sin interruptor`,
+      (await bloque.getAttribute("data-terreno2d")) === "sin-relieve" && (await bloque.innerText()).includes("Terrain shading: not available") && (await bloque.locator('input[role="switch"]').count()) === 0);
+    return;
+  }
+  const capasDe = (estado) => zonasDem.every(([zid]) =>
+    estado.capas[`terreno2d-sombra-${zid}`]?.tipo === "hillshade" && estado.capas[`terreno2d-color-${zid}`]?.tipo === "color-relief");
+  const visibles = (estado, si) => zonasDem.every(([zid]) => estado.capas[`terreno2d-sombra-${zid}`]?.visible === si && estado.capas[`terreno2d-color-${zid}`]?.visible === si);
+  check(`${prefijo}mapa plano: sombreado (hillshade) y rampa (color-relief) de ${zonasDem.length} zona(s), encendidos y debajo de las parcelas`,
+    (await bloque.getAttribute("data-terreno2d")) === "listo" && capasDe(m) && visibles(m, true) && m.debajoDeLasParcelas, JSON.stringify(m.capas));
+  // Leyenda: rótulo con la resolución que declara la fuente de los datos, extremos de cada zona y la fuente.
+  const t = await bloque.innerText();
+  const resolucion = String(gemelo.terreno.fuente ?? "").match(/(\d+)\s*m\b/)?.[0];
+  check(`${prefijo}mapa plano: leyenda «Regional terrain, ${resolucion ?? ""} elevation model» con los extremos de gemelo.json y su fuente`,
+    t.includes(`Regional terrain, ${resolucion ? `${resolucion} ` : ""}elevation model`) && t.includes(gemelo.terreno.fuente) &&
+      zonasDem.every(([zid, z]) => t.includes(`${nombreZonaCubo(zid)}: ${metros(z.elev_min_m)} to ${metros(z.elev_max_m)}`)),
+    t.replace(/\n/g, " ").slice(0, 220));
+  // El interruptor apaga el sombreado y la rampa (el velo sigue) y los vuelve a encender.
+  const interruptor = bloque.locator('input[role="switch"]');
+  await interruptor.uncheck();
+  m = await leer();
+  check(`${prefijo}mapa plano: el interruptor «Terrain shading» apaga el sombreado y la rampa; el velo sigue`,
+    visibles(m, false) && (!hayRectangulos || m.capas["terreno2d-velo"].visible) && (await bloque.locator(".terreno2d-leyenda").isHidden()), JSON.stringify(m.capas));
+  await interruptor.check();
+  m = await leer();
+  check(`${prefijo}mapa plano: al encenderlo vuelven el sombreado y la rampa`, visibles(m, true) && (await bloque.locator(".terreno2d-leyenda").isVisible()));
+  // Convive con «Terrain & runoff»: los dos bloques están en el panel y el de las rutas no cambió de lugar.
+  check(`${prefijo}mapa plano: el bloque va antes de «Terrain overlay» en el panel`,
+    await page.evaluate(() => document.querySelector(".terreno2d")?.nextElementSibling?.id === "capa-relieve"));
+}
+
 /** Línea de relieve del renglón Soil (ficha abierta): pendiente, escurrimiento y depresiones, con el rótulo. */
 async function pruebaRelieveFicha(page, id, prefijo) {
   const p = porId.get(id);
@@ -1202,6 +1255,12 @@ const mismasColumnas = (vistas, esperadas) =>
   vistas.length === esperadas.cols.size &&
   vistas.every((c) => esperadas.cols.has(c.id) && Math.abs(c.cubre_m - esperadas.cols.get(c.id).cubre) < 1e-6 && Math.abs(c.pide_m - esperadas.cols.get(c.id).pide) < 1e-6);
 
+/** ¿Se ven las capas de sombreado del mapa plano (web/js/terreno2d.js)? [] si no hay ninguna. */
+const sombras2D = (page) => page.evaluate(() => {
+  const m = window.raizDepuracion.mapa;
+  return m.getLayersOrder().filter((id) => id.startsWith("terreno2d-sombra-")).map((id) => (m.getLayoutProperty(id, "visibility") ?? "visible") === "visible");
+});
+
 /** Vista 3D del gemelo (gemelo3d.js conectada por app.js). */
 async function pruebaGemelo3D(page, prefijo, telefono) {
   const boton = page.locator("#boton-gemelo");
@@ -1243,6 +1302,9 @@ async function pruebaGemelo3D(page, prefijo, telefono) {
   let g = await gemelo3d(page);
   check(`${prefijo}3D: se activa con el teclado (aria-pressed=true) con el relieve de ${nombre} (×${fmt3(exag)}, la de la zona)`,
     (await boton.getAttribute("aria-pressed")) === "true" && g.activo && g.terreno?.source === "gemelo-dem" && g.terreno?.exaggeration === exag, JSON.stringify(g.terreno));
+  // Con el terreno 3D puesto, el sombreado del mapa plano cede: la vista 3D trae el suyo (no se sombrea dos veces).
+  const sombrasEn3D = await sombras2D(page);
+  check(`${prefijo}3D: el sombreado del mapa plano se oculta mientras la vista 3D está activa`, sombrasEn3D.every((v) => !v), JSON.stringify(sombrasEn3D));
   check(`${prefijo}3D: cámara del gemelo (pitch ${camara.pitch}, bearing ${camara.bearing})`, Math.abs(g.pitch - camara.pitch) < 0.5 && Math.abs(g.bearing - camara.bearing) < 0.5, `${g.pitch} / ${g.bearing}`);
   const elev = await page.evaluate(() => window.raizDepuracion.elevacionesDeZona());
   check(`${prefijo}3D: el lienzo tiene terreno (teselas cargadas, elevación > 0 en la zona, ninguna tesela fallida)`,
@@ -1330,6 +1392,8 @@ async function pruebaGemelo3D(page, prefijo, telefono) {
       JSON.stringify({ pitch: plano.pitch, bearing: plano.bearing, capas: plano.capas, fuentes: plano.fuentes, minZoom: plano.minZoom }));
     const vuelven = await page.evaluate(() => window.raizDepuracion.parcelasDibujadas());
     check(`${prefijo}3D: al desactivar, el mapa plano sigue dibujando las parcelas`, vuelven > 0, `${vuelven}`);
+    const sombrasPlano = await sombras2D(page);
+    check(`${prefijo}3D: al desactivar, vuelve el sombreado del mapa plano`, sombrasPlano.length > 0 && sombrasPlano.every((v) => v), JSON.stringify(sombrasPlano));
 
     // Otra zona con su propia exageración; después «All areas» retira la vista sola.
     const otra = zonasCubo.find((id) => id !== z && gemelo.terreno.zonas[id]);
@@ -2022,6 +2086,11 @@ async function pruebasEscritorio(page, peticiones) {
   await checkContraste(page, "#conteos-semaforo .sem-circulo, #conteos-plazo .sem-circulo", "conteos del panel");
   await checkContraste(page, ".boton-parcela .sem-circulo", "círculos de la lista de parcelas");
 
+  // Relieve del mapa plano: sombreado, rampa, velo, escala y su interruptor (web/js/terreno2d.js)
+  await pruebaTerreno2D(page, "");
+  await page.locator("#mapa").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(CAPTURAS, "escritorio_terreno2d.png") });
+
   // Capa «Terrain & runoff» y «Simulate a storm» (con animación: el escritorio no pide movimiento reducido)
   await pruebaRelieve(page, "", false, "escritorio_relieve_tormenta.png");
 
@@ -2309,6 +2378,11 @@ async function pruebasTelefono(page, peticiones) {
   await page.locator("#t-campos").evaluate((el) => el.scrollIntoView({ block: "start" }));
   await page.screenshot({ path: path.join(CAPTURAS, "telefono_lista.png") });
   await page.screenshot({ path: path.join(CAPTURAS, "telefono_centro_control_completa.png"), fullPage: true });
+
+  // Relieve del mapa plano en el teléfono (web/js/terreno2d.js)
+  await pruebaTerreno2D(page, "teléfono: ");
+  await page.locator("#mapa").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: path.join(CAPTURAS, "telefono_terreno2d.png") });
 
   // Relieve con movimiento reducido (este contexto lo pide): la tormenta solo resalta las rutas.
   await pruebaRelieve(page, "teléfono: ", true);

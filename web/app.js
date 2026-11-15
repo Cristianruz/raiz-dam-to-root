@@ -66,6 +66,7 @@ import { dibujarGota } from "./js/gota.js";
 import { htmlWhatsApp, imprimirFicha } from "./js/mensaje.js";
 import { montarInicio, montarAcerca, LLAVE_INICIO } from "./js/acerca.js";
 import { crearGemelo3D } from "./js/gemelo3d.js";
+import { agregarTerreno2D } from "./js/terreno2d.js";
 import { crearLineaDeTiempo } from "./js/tiempo.js";
 import { montarEstadoGemelo } from "./js/estado_gemelo.js";
 import { montarInstalacion } from "./js/instalar.js";
@@ -1392,6 +1393,7 @@ function crearMapa() {
     agregarLocalidades(mapa);
     iniciarRelieve(mapa); // rutas de escurrimiento debajo de los puntos de las localidades
     iniciarGemelo3D(mapa); // después de las capas de la aplicación: el sombreado del relieve va debajo de ellas
+    agregarTerreno2D(mapa, { gemelo: estado.gemelo, cubo: estado.cubo, nombreZona, junto: "#capa-relieve" }); // mapa plano: sombreado, rampa, velo y escala
     estado.mapaListo = true;
     pintarMapa();
     // «listo» cuando la fuente de las parcelas ya está procesada (el GeoJSON se tesela aparte, después de «load»).
