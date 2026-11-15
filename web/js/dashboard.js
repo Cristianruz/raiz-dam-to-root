@@ -334,11 +334,16 @@ function ladoALado() {
               texto: rotulo(lluvias[i]),
               valor: c.p50,
               tope,
-              cifra:
-                c.p50 == null
-                  ? t("tablero.sin_dato")
-                  : `${fmt(c.p50 * CIEN, 0)}%`,
-              marca: 1 / tope,
+              // Kit §2.4: sin dotación no se divide (se dice «sin dotación»); con superficie sin clasificar la
+              // cifra es un mínimo («al menos»); siempre con su rango p10–p90.
+              cifra: c.sinDotacion
+                ? t("tablero.compromiso.sin_dotacion")
+                : t(c.alMenos ? "tablero.lado.al_menos" : "tablero.lado.pct", {
+                    pct: `${fmt(c.p50 * CIEN, 0)}%`,
+                    bajo: `${fmt(c.p10 * CIEN, 0)}%`,
+                    alto: `${fmt(c.p90 * CIEN, 0)}%`,
+                  }),
+              marca: c.sinDotacion ? null : 1 / tope,
             }),
           )
           .join("")}</button>`,
@@ -351,7 +356,7 @@ function ladoALado() {
     : t("tablero.lado.opciones_sin");
   const ops = p && !p.abstencion ? options() : [];
   if (!ops.length) {
-    cajaOpciones.innerHTML = `<p class="micro">${T("tablero.lado.sin_opciones")}</p>`;
+    cajaOpciones.innerHTML = `<p class="micro">${T(p ? "tablero.lado.sin_opciones" : "tablero.ficha.sin_parcelas")}</p>`;
     return;
   }
   const ha = haDe(p.area_ha);
@@ -369,15 +374,23 @@ function ladoALado() {
                     unidad: t("tablero.unidad"),
                   })
                 : t("tablero.lado.sin_riego", { rotulo: rotulo(r) });
+            // Kit §2.4: las hectáreas van con su rango (bajo con la estimación alta de la necesidad y al revés).
+            const bajo = ha(e.hectareas.bajo);
+            const alto = ha(e.hectareas.alto);
             return barra({
               r,
               texto: pide,
               valor: e.cobertura,
               tope: 1,
-              cifra: t("tablero.lado.ha", {
-                cubiertas: ha(e.hectareas.p50),
-                area: ha(p.area_ha),
-              }),
+              cifra: t(
+                bajo === alto ? "tablero.lado.ha" : "tablero.lado.ha_rango",
+                {
+                  cubiertas: ha(e.hectareas.p50),
+                  area: ha(p.area_ha),
+                  bajo,
+                  alto,
+                },
+              ),
             });
           })
           .join("")}</div>`,
@@ -400,6 +413,28 @@ function fieldList() {
     : `<option value="">${T("tablero.ficha.sin_coincidencias")}</option>`;
   if (list.some((f) => f.properties.id === state.field))
     $("#field-select").value = state.field;
+}
+// Buscar una parcela: la lista se filtra y, si la parcela abierta ya no está en ella, se abre la primera
+// coincidencia, para que el selector y la ficha digan lo mismo. Si no hay coincidencias en esta zona y lo escrito
+// es el ID de una parcela de otra zona piloto, se abre esa zona con su parcela.
+function buscarParcela() {
+  fieldList();
+  const consulta = $("#field-search").value.trim().toLocaleLowerCase(idioma());
+  if (!consulta) return;
+  const ids = [...$("#field-select").options].map((o) => o.value).filter(Boolean);
+  if (ids.length) {
+    if (!ids.includes(state.field)) chooseField(ids[0]);
+    return;
+  }
+  const otra = geo.features.find(
+    (f) =>
+      f.properties.zona !== state.zone &&
+      String(f.properties.id).toLocaleLowerCase(idioma()) === consulta,
+  );
+  if (!otra) return;
+  $("#zona-dashboard").value = otra.properties.zona;
+  changeZone();
+  chooseField(otra.properties.id);
 }
 // Clase de textura del perfil regional (suelo.json la trae en inglés): con nombre en los cuatro idiomas si es
 // una de las conocidas; si no, como viene.
@@ -430,7 +465,11 @@ function fieldDetails() {
   const demand = evalOp
     ? `${fmt(evalOp.lamina.p50)} ${t("tablero.unidad")}`
     : sinCalculo;
-  const coverage = evalOp ? `${fmt(evalOp.cobertura * 100, 0)}%` : sinCalculo;
+  // Porcentaje entero HACIA ABAJO, igual que el explorador (web/app.js, fmtCobertura): una dotación que no
+  // alcanza no se lee con un punto de más, y las dos páginas dicen la misma cifra.
+  const coverage = evalOp
+    ? `${fmt(Math.floor(evalOp.cobertura * CIEN), 0)}%`
+    : sinCalculo;
   const title = p.abstencion
     ? t("tablero.ficha.sin_clasificar")
     : cropName(p.cultivo_actual);
@@ -450,9 +489,9 @@ function fieldDetails() {
     : T("tablero.ficha.sin_calculo_nota");
   $("#field-detail").innerHTML =
     `<div class="field-title"><span class="crop-symbol">${icons[p.cultivo_actual] ?? "♧"}</span><div><h4>${esc(title)}</h4><p>${T("tablero.ficha.parcela", { id: p.id, area: ha(p.area_ha) })}</p></div></div>
-        <dl class="field-metrics"><div><dt>${T("tablero.ficha.demanda")}</dt><dd>${esc(demand)}</dd></div><div><dt>${T("tablero.ficha.suelo")}</dt><dd>${esc(profile ? `pH ${fmt(profile.ph)}` : sinSuelo)}</dd></div><div><dt>${T("tablero.ficha.riego")}</dt><dd id="field-irrigation">${T("tablero.ficha.sin_registrar")}</dd></div><div><dt>${T("tablero.ficha.pendiente")}</dt><dd>${esc(pendiente)}</dd></div><div><dt>${T("tablero.ficha.textura")}</dt><dd>${esc(texture)}</dd></div><div><dt>${T("tablero.ficha.plazo")}</dt><dd>${esc(termLabel)}</dd></div></dl>
         <div class="coverage">${T("tablero.ficha.cobertura")} <strong>${esc(coverage)}</strong><div class="progress"><div style="width:${ancho}%"></div></div></div>
         <p class="micro">${nota}</p>
+        <dl class="field-metrics"><div><dt>${T("tablero.ficha.demanda")}</dt><dd>${esc(demand)}</dd></div><div><dt>${T("tablero.ficha.suelo")}</dt><dd>${esc(profile ? `pH ${fmt(profile.ph)}` : sinSuelo)}</dd></div><div><dt>${T("tablero.ficha.riego")}</dt><dd id="field-irrigation">${T("tablero.ficha.sin_registrar")}</dd></div><div><dt>${T("tablero.ficha.pendiente")}</dt><dd>${esc(pendiente)}</dd></div><div><dt>${T("tablero.ficha.textura")}</dt><dd>${esc(texture)}</dd></div><div><dt>${T("tablero.ficha.plazo")}</dt><dd>${esc(termLabel)}</dd></div></dl>
         <a class="field-link" href="${esc(explorerLink(p.id))}">${T("tablero.abrir_explorador")} <span>↗</span></a>`;
   asesor?.actualizar();
   updateHighlight();
@@ -1101,6 +1140,8 @@ async function init() {
     if (!boton || boton.dataset.zona === state.zone) return;
     $("#zona-dashboard").value = boton.dataset.zona;
     changeZone();
+    // El bloque se vuelve a pintar: el foco regresa al botón de la zona elegida.
+    $('#lado-zonas [aria-pressed="true"]')?.focus();
   });
   $("#allocation").addEventListener("input", (e) => {
     state.allocation = Number(e.target.value);
@@ -1116,7 +1157,7 @@ async function init() {
     fieldDetails();
     crops();
   });
-  $("#field-search").addEventListener("input", fieldList);
+  $("#field-search").addEventListener("input", buscarParcela);
   $("#field-select").addEventListener("change", (e) =>
     chooseField(e.target.value),
   );

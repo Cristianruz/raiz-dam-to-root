@@ -3084,3 +3084,16 @@ button.lado-fila[aria-pressed="true"] {
 .climate-chart svg {
   height: auto;
 }
+/* Con su rango, la cifra es más larga: en pantallas angostas baja a su propia línea, bajo la pista. */
+@media (max-width: 600px) {
+  .lado-barra strong {
+    grid-column: 1 / -1;
+    order: 4;
+    text-align: left;
+    white-space: normal;
+  }
+}
+/* La ficha de la parcela: las características van después del área cubierta, con su separación. */
+.field-card .coverage + .micro + .field-metrics {
+  margin-top: 16px;
+}

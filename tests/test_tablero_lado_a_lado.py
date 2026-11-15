@@ -17,7 +17,7 @@ PORTADA = (RAIZ / "web/index.html").read_text(encoding="utf-8")
 TABLERO = (RAIZ / "web/js/dashboard.js").read_text(encoding="utf-8")
 TEXTOS = (RAIZ / "web/js/textos_tablero.js").read_text(encoding="utf-8")
 CLAVES = ["ceja", "titulo", "enlace", "zonas", "zonas_nota", "zona_meta", "registro", "menos", "opciones",
-          "opciones_sin", "opciones_nota", "pide", "sin_riego", "ha", "sin_opciones"]
+          "opciones_sin", "opciones_nota", "pide", "sin_riego", "ha", "ha_rango", "al_menos", "pct", "sin_opciones"]
 
 
 def _funcion():
@@ -41,6 +41,11 @@ def test_la_funcion_usa_las_reglas_comunes_y_las_lluvias_del_cubo():
     assert "aguaComprometida(" in f and "evaluarOpcion(" in f, "el bloque debe calcular con web/reglas.js"
     assert "cube.lluvia_pct" in f, "las lluvias salen del cubo, no se escriben"
     assert "state.allocation" in f, "la dotación es la del deslizador"
+    # Kit §2.4: mínimo («al menos») con superficie sin clasificar, «sin dotación» si D = 0, y siempre con rango
+    assert "c.alMenos" in f and "tablero.lado.al_menos" in f, "falta el «al menos» de la zona"
+    assert "c.sinDotacion" in f and "tablero.compromiso.sin_dotacion" in f, "falta el caso sin dotación"
+    assert "c.p10" in f and "c.p90" in f, "el agua comprometida va con su rango"
+    assert "e.hectareas.bajo" in f and "e.hectareas.alto" in f, "las hectáreas van con su rango"
     # se pinta con cada cambio de dotación, lluvia, zona (stats) y de parcela (fieldDetails)
     assert len(re.findall(r"\bladoALado\(\);", TABLERO)) >= 2
 

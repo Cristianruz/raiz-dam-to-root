@@ -431,7 +431,8 @@ export async function crearAsesor(contexto) {
       : dato(t("asesor.tarjeta.demanda"), fmt(x.lamina.p50, 2), unidad()) +
         dato(t("asesor.tarjeta.rango"), `${fmt(x.lamina.p10, 2)}–${fmt(x.lamina.p90, 2)}`, unidad()) +
         dotacion +
-        dato(t("asesor.tarjeta.cubierto"), percent(x.cobertura)) +
+        // entero hacia abajo, como la ficha del tablero y el explorador (web/app.js, fmtCobertura)
+        dato(t("asesor.tarjeta.cubierto"), percent(Math.floor(x.cobertura * POR_CIENTO) / POR_CIENTO)) +
         plazo;
     const restricciones = x.restricciones.length
       ? `<ul class="blocking-reasons">${x.restricciones.map((r) => `<li>${esc(textoRestriccion(r))}${fuenteDe(r)}</li>`).join("")}</ul>`

@@ -699,10 +699,10 @@ const TABLA = {
   "lado.enlace": ["Compare my options", "Comparar mis opciones", "Comparar minhas opções", "Comparer mes options"],
   "lado.zonas": ["Pilot areas", "Zonas piloto", "Zonas piloto", "Zones pilotes"],
   "lado.zonas_nota": [
-    "Water that perennial crops already ask for, as a share of the allocation you chose. The white mark is the allocation: past it, the allocation does not cover them. Choose an area to open it.",
-    "Agua que ya piden los cultivos perennes, como parte de la dotación elegida. La marca blanca es la dotación: más allá de ella, la dotación no los cubre. Elige una zona para abrirla.",
-    "Água que as culturas perenes já pedem, como parte da dotação escolhida. A marca branca é a dotação: além dela, a dotação não as cobre. Escolha uma zona para abri-la.",
-    "Eau que les cultures pérennes demandent déjà, en part de la dotation choisie. Le repère blanc est la dotation : au-delà, la dotation ne les couvre pas. Choisissez une zone pour l'ouvrir.",
+    "Water that perennial crops already ask for, as a share of the chosen allocation. Where part of an area has no crop classification, the figure is a minimum and says “at least”. The white mark is the allocation: past it, the allocation does not cover them. Choose an area to open it.",
+    "Agua que ya piden los cultivos perennes, como proporción de la dotación elegida. Donde parte de la zona no tiene clasificación de cultivo, la cifra es un mínimo y dice «al menos». La marca blanca es la dotación: más allá de ella, la dotación no los cubre. Elige una zona para abrirla.",
+    "Água que as culturas perenes já pedem, como proporção da dotação escolhida. Onde parte da zona não tem classificação de cultura, o número é um mínimo e diz «pelo menos». A marca branca é a dotação: além dela, a dotação não as cobre. Escolha uma zona para abri-la.",
+    "Eau que les cultures pérennes demandent déjà, en proportion de la dotation choisie. Là où une partie de la zone n'a pas de classification de culture, le chiffre est un minimum et dit « au moins ». Le repère blanc est la dotation : au-delà, la dotation ne les couvre pas. Choisissez une zone pour l'ouvrir.",
   ],
   "lado.zona_meta": [
     "{parcelas} fields · {ha} ha",
@@ -720,10 +720,10 @@ const TABLA = {
   ],
   "lado.opciones_sin": ["Options for the field", "Opciones de la parcela", "Opções da parcela", "Options de la parcelle"],
   "lado.opciones_nota": [
-    "Hectares of the field that the chosen allocation covers at the median need of each option. Next to each rain, the water the option asks for per year.",
-    "Hectáreas de la parcela que la dotación elegida cubre con la necesidad mediana de cada opción. Junto a cada lluvia, el agua que la opción pide al año.",
-    "Hectares da parcela que a dotação escolhida cobre com a necessidade mediana de cada opção. Junto a cada chuva, a água que a opção pede por ano.",
-    "Hectares de la parcelle que la dotation choisie couvre au besoin médian de chaque option. À côté de chaque pluie, l'eau que l'option demande par an.",
+    "Hectares of the field that the chosen allocation covers at the median need of each option, with the range between its high and low estimates. Next to each rain, the water the option asks for per year.",
+    "Hectáreas de la parcela que la dotación elegida cubre con la necesidad mediana de cada opción, con el rango entre su estimación alta y su estimación baja. Junto a cada lluvia, el agua que la opción pide al año.",
+    "Hectares da parcela que a dotação escolhida cobre com a necessidade mediana de cada opção, com a faixa entre a estimativa alta e a baixa. Junto a cada chuva, a água que a opção pede por ano.",
+    "Hectares de la parcelle que la dotation choisie couvre au besoin médian de chaque option, avec la plage entre son estimation haute et son estimation basse. À côté de chaque pluie, l'eau que l'option demande par an.",
   ],
   "lado.pide": [
     "{rotulo} · asks for {lamina} {unidad}",
@@ -736,6 +736,26 @@ const TABLA = {
     "{rotulo} · no necesita riego",
     "{rotulo} · não precisa de irrigação",
     "{rotulo} · pas d'irrigation nécessaire",
+  ],
+  // Agua ya comprometida de la zona (kit §2.4): con su rango y, si hay superficie sin clasificar, como mínimo.
+  "lado.al_menos": [
+    "at least {pct} (range {bajo}–{alto})",
+    "al menos {pct} (rango {bajo}–{alto})",
+    "pelo menos {pct} (faixa {bajo}–{alto})",
+    "au moins {pct} (plage {bajo}–{alto})",
+  ],
+  "lado.pct": [
+    "{pct} (range {bajo}–{alto})",
+    "{pct} (rango {bajo}–{alto})",
+    "{pct} (faixa {bajo}–{alto})",
+    "{pct} (plage {bajo}–{alto})",
+  ],
+  // Hectáreas que alcanzan (kit §2.4): siempre con su rango, salvo cuando los dos extremos son la misma cifra.
+  "lado.ha_rango": [
+    "{cubiertas} of {area} ha (range {bajo}–{alto})",
+    "{cubiertas} de {area} ha (rango {bajo}–{alto})",
+    "{cubiertas} de {area} ha (faixa {bajo}–{alto})",
+    "{cubiertas} sur {area} ha (plage {bajo}–{alto})",
   ],
   "lado.ha": ["{cubiertas} of {area} ha", "{cubiertas} de {area} ha", "{cubiertas} de {area} ha", "{cubiertas} sur {area} ha"],
   "lado.sin_opciones": [

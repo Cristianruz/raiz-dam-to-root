@@ -110,6 +110,8 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 06:36 | integrador | PR #9 fusionado en `main` (`084bb30`): el tablero es la portada, en cuatro idiomas y como aplicación; el explorador queda en `explorer.html`. `main` fusionado de vuelta en la integración (`63ccfb7`) |
 | 07:10 | Cristian | Pide revisar todo otra vez y que se vean las zonas y las opciones «si llueve o no» |
 | 07:20 | integrador | Revisión visual del tablero publicado (cinco vistas, computadora y teléfono): todo carga y calcula. Dos mejoras: bloque del resumen con las zonas piloto y las opciones de la parcela lado a lado, con la lluvia del registro y con menos lluvia (mismas reglas de `web/reglas.js`, cuatro idiomas, con su prueba), y la gráfica de la comprobación de lluvia a todo el ancho |
+| 07:30 | Cristian | Avisa que descansa una hora y pide revisarlo |
+| 07:45 | integrador | Tres revisores de contexto nuevo (el bloque contra el contrato; el tablero y el explorador como jurado): sin bloqueos en lo publicado. Corregido en el tablero: «al menos» y rango en el porcentaje de zona, «sin dotación» con la dotación en cero y rango en las hectáreas (kit §2.4); la búsqueda abre la parcela que encuentra; la cobertura va en porcentaje hacia abajo, como en el explorador; el área cubierta sube en la ficha. Lo abierto, en `docs/revisiones/2026-11-15_recorrido_final.md` |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 

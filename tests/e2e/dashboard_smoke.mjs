@@ -422,8 +422,13 @@ async function revisarFunciones(browser, base, geo) {
     const barrasPorZona = await filasZona.first().locator(".lado-barra").count();
     check("lado a lado: cada zona trae una barra por lluvia (la del registro y la menor)", barrasPorZona >= 2 && (await filasZona.first().locator(".lado-barra.activa").count()) === 1, `${barrasPorZona} barras`);
     const activa = page.locator('#lado-zonas [data-zona][aria-pressed="true"] .lado-barra.activa');
-    const pctActiva = (await activa.locator("strong").innerText()).trim();
-    check("lado a lado: el porcentaje de la zona en uso es el de la cifra «agua ya comprometida»", pctActiva.length > 0 && (await page.locator("#stats").innerText()).includes(pctActiva), pctActiva);
+    const cifraActiva = (await activa.locator("strong").innerText()).trim();
+    const pctActiva = cifraActiva.match(/\d[\d.,\s]*%/)?.[0] ?? "";
+    check("lado a lado: el porcentaje de la zona en uso es el de la cifra «agua ya comprometida»", pctActiva.length > 0 && (await page.locator("#stats").innerText()).includes(pctActiva), cifraActiva);
+    const conMinimo = T["tablero.lado.al_menos"].split("{pct}")[0];
+    check("lado a lado: con superficie sin clasificar, la cifra de la zona dice «al menos» y trae su rango (kit §2.4)", cifraActiva.startsWith(conMinimo) && /\(.*–.*\)/.test(cifraActiva), cifraActiva);
+    const cifraOpcion = (await page.locator("#lado-opciones .lado-barra.activa strong").first().innerText()).trim();
+    check("lado a lado: las hectáreas de la opción actual traen su rango, el mismo de la ficha", /\(.*–.*\)/.test(cifraOpcion) && (await page.locator("#field-detail").innerText()).includes(cifraOpcion.match(/\(\D*([\d.,]+)–/)?.[1] ?? "¿?"), cifraOpcion);
     const rotuloAntes = (await activa.locator(".lado-rotulo").innerText()).trim();
     const lluviaAntes = await page.locator("#rain").isChecked();
     await page.locator("#rain").setChecked(!lluviaAntes);
@@ -441,6 +446,39 @@ async function revisarFunciones(browser, base, geo) {
       await page.locator("#zona-dashboard").selectOption(zonaInicial);
     }
   }
+  // La búsqueda abre lo que encuentra: la ficha y el selector dicen la misma parcela; el ID de una parcela de otra
+  // zona abre esa zona. Al terminar se regresa a la zona y a la parcela de antes.
+  {
+    const zonaAntes = await page.locator("#zona-dashboard").inputValue();
+    const parcelaAntes = await page.locator("#field-select").inputValue();
+    const deLaZona = geo.features.filter((f) => f.properties.zona === zonaAntes && !f.properties.abstencion && f.properties.id !== parcelaAntes);
+    const deOtraZona = geo.features.find((f) => f.properties.zona !== zonaAntes && !f.properties.abstencion);
+    if (deLaZona.length) {
+      const id = deLaZona.at(-1).properties.id;
+      await page.locator("#field-search").fill(id);
+      check("búsqueda: escribir el ID de una parcela la abre en la ficha, no solo en la lista", (await page.locator("#field-select").inputValue()) === id && (await page.locator("#field-detail").innerText()).includes(id), id);
+    }
+    if (deOtraZona) {
+      const id = deOtraZona.properties.id;
+      await page.locator("#field-search").fill(id);
+      check("búsqueda: el ID de una parcela de otra zona abre esa zona y la parcela", (await page.locator("#zona-dashboard").inputValue()) === deOtraZona.properties.zona && (await page.locator("#field-detail").innerText()).includes(id), id);
+    }
+    await page.locator("#field-search").fill("");
+    await page.locator("#zona-dashboard").selectOption(zonaAntes);
+    await page.locator("#field-select").selectOption(parcelaAntes);
+    // Cobertura: el porcentaje de la ficha es entero y hacia abajo, como el del explorador.
+    const fichaPct = await page.evaluate(() => document.querySelector("#field-detail .coverage strong")?.textContent.trim() ?? "");
+    const esperado = await page.evaluate(async ([id]) => {
+      const cubo = await (await fetch("data/cubo.json")).json();
+      const actual = cubo.parcelas[id]?.opciones?.find((o) => o.id === "ACTUAL");
+      const D = Number(document.querySelector("#allocation").value);
+      const r = document.querySelector("#rain").checked ? cubo.lluvia_pct.find((v) => v < 0) : 0;
+      const L = actual?.agua?.lamina_bruta?.[String(r)]?.p50;
+      if (!(L > 0)) return null;
+      return Math.floor(Math.min(1, D / L) * 100);
+    }, [parcelaAntes]);
+    if (esperado != null) check("ficha: el porcentaje de cobertura es entero y hacia abajo, como en el explorador", fichaPct.replace(/\D/g, "") === String(esperado), `${fichaPct} · esperado ${esperado}`);
+  }
   if (await page.locator("[data-parcel-chip]").count()) {
     const acceso = page.locator("[data-parcel-chip]").first();
     const id = await acceso.getAttribute("data-parcel-chip");
@@ -454,6 +492,7 @@ async function revisarFunciones(browser, base, geo) {
   const { min, max } = await page.evaluate(() => ({ min: document.querySelector("#allocation").min, max: document.querySelector("#allocation").max }));
   await page.locator("#allocation").fill(min);
   const sinAgua = await page.locator("#stats").innerText();
+  check("lado a lado: sin dotación, las zonas dicen «sin dotación» y no llevan marca", (await page.locator("#lado-zonas .lado-barra strong").first().innerText()).trim() === T["tablero.compromiso.sin_dotacion"] && (await page.locator("#lado-zonas .lado-marca").count()) === 0);
   check("dotación en el mínimo: las cifras cambian y dicen que no hay dotación", sinAgua !== cifras && sinAgua.includes(T["tablero.cifra.sin_dotacion_nota"]));
   await page.locator("#allocation").fill(max);
   await page.locator("#rain").check();
