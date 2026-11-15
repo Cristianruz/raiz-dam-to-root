@@ -101,6 +101,9 @@ test("leyenda: frases fijas y cifras solo de gemelo.json", { skip: gemelo ? fals
   for (const t of [gemelo.terreno.rotulo, gemelo.terreno.fuente, gemelo.columnas.nota, gemelo.columnas.etiqueta, `×${fmt.format(gemelo.terreno.exageracion)}`, `${fmt.format(gemelo.columnas.metros_por_millar)} m of height`]) if (t) resto = resto.split(t).join(" ");
   assert.doesNotMatch(resto, /\d/, "todo dígito de la leyenda viene de gemelo.json");
   assert.doesNotMatch(texto, /\b(first|only)\b/i);
+  // La etiqueta de diseño se lee en inglés y la fuente, escrita en español, va marcada lang="es" (WCAG 3.1.2).
+  if (gemelo.columnas.etiqueta === "Diseño") assert.ok(texto.includes("Label: design choice") && !texto.includes("Diseño"), "etiqueta en inglés");
+  if (gemelo.terreno.fuente) assert.ok(html.includes(`<span lang="es">${gemelo.terreno.fuente}</span>`), "fuente con lang=es");
 });
 
 test("leyenda por zona: cada zona con SU exageración; sin la suya, la general", { skip: gemelo?.terreno ? false : "gemelo.json sin terreno" }, () => {

@@ -10,7 +10,7 @@
 | P2, P3, P4, P5 | **Gemini en Google Colab**, con el bloque de su guía (G0 ya completado + prompt de la pieza) | Escribir y correr el cuaderno, una celda por paso; la prueba de aceptación; la verificación de datos | No se autentica en Earth Engine (decisión a). No escribe fuera de `Raiz_entregas`. No rehace lo que ya entregó la sesión de datos. No pide cifras «típicas» |
 | P2 a P5 (revisión) | **App de Gemini, en un chat nuevo**, con `docs/prompts/para_gemini.md` | Revisión con contexto nuevo del cuaderno y la tabla antes de entregar. Quien escribió no se revisa a sí mismo | No reescribe el cuaderno: solo señala problemas |
 | P6 | **App de Gemini o Claude en el navegador** | Textos de interfaz, plantillas, WhatsApp, página, guion del video y People's Choice, con el bloque de [P6](P6_textos_pagina.md) | No escribe cifras: usa marcadores. No usa logotipos de NASA |
-| Todos | **Claude en el navegador** (claude.ai o la extensión de Claude para Chrome) | Leer documentación y catálogos: completar lo que [verificar_datos_nasa.md](verificar_datos_nasa.md) marca «por verificar en el catálogo». Revisar textos en inglés. Explicar un error | No lo use en el Chrome de Cristian: ahí corre la sesión de datos (Earth Engine) y no se toca. No le pegue datos personales de nadie |
+| Todos | **Claude en el navegador** (claude.ai o la extensión de Claude para Chrome) | Leer documentación y catálogos: completar lo que [verificar_datos_nasa.md](verificar_datos_nasa.md) marca «por verificar en el catálogo». Revisar textos en inglés. Explicar un error | No lo use en el navegador del integrador: ahí corre la sesión de datos (Earth Engine) y no se toca. No le pegue datos personales de nadie |
 | Todos | **NotebookLM** | Estudio y búsqueda de fuentes: cargue S9, S8, S10 y el kit, y pregúntele por una regla o por de dónde sale una cifra. Sigue vigente la sección 9 del kit 23 (kit v4 §10: «Sigue vigente del kit 23»). El kit 23 no está en el repo: pídalo a Cristian | Ninguna cifra sale de NotebookLM sin ir a la fuente original |
 | Cristian (y quien use Claude Code) | **Claude Code** en el repo | Integración, motor, web, pruebas y commits (kit §0.3) | — |
 
@@ -50,7 +50,7 @@
 **No lo use para:**
 - inventar o «recordar» cifras, fechas de siembra, Kc o eficiencias: si no hay documento, la cifra va en null y se avisa (G0, regla 1);
 - correr Earth Engine (decisión a: solo la sesión de datos);
-- tocar la sesión de Claude que corre en el Chrome de Cristian.
+- tocar la sesión de Claude que corre en el navegador del integrador.
 
 ## 4. Para quien use Claude Code (Cristian y quien lo apoye)
 

@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Decisión: perfil de suelo por parcela y aptitud de cada cultivo (14-nov-2026, 17:00)
 
 **Quién decide:** Cristian: que el sistema contemple el tipo de suelo (arenoso, arcilloso…), sus nutrientes y qué cultivos son más aptos para cada suelo y clima, y que no sirva solo para una zona.

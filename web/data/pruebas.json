@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pruebas_web.py a partir de los archivos del repo; no se edita a mano. Estados: passed, failed, partial, not run, run. Criterios: S9 §6.",
- "generado": "2026-11-15T04:09:44+00:00",
+ "generado": "2026-11-15T06:20:26+00:00",
  "script": "motor/pruebas_web.py",
  "fuente_criterios": "docs/sintesis/S9_proyecto_definitivo.md §6",
  "pruebas": [
@@ -71,11 +71,11 @@
   {
    "id": "backtest_h1",
    "numero": 2,
-   "titulo": "Back-test 2026 (H1, preregistered)",
+   "titulo": "Back-test 2026 (H1, criterion declared before the analysis)",
    "criterio": "With data up to March 14, the error at July 14 must be lower than that of baselines L1 and L1-s. Truth: outflow through the intake works of La Boquilla (SIH)",
    "criterio_fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
    "estado": "failed",
-   "resumen": "H1 does not meet the preregistered criterion (partial back-test; press-reported truth)",
+   "resumen": "H1 does not meet the criterion declared before the analysis (partial back-test; press-reported truth)",
    "partes": [],
    "metricas": [],
    "fuentes": [
@@ -131,7 +131,7 @@
   {
    "id": "experimento_h3",
    "numero": 3,
-   "titulo": "Natural experiment of 2025 (H3, preregistered)",
+   "titulo": "Natural experiment of 2025 (H3, criterion declared before the analysis)",
    "criterio": "In the year without dam water, the share of annual-crop fields with a summer crop falls 25 points or more below its 2019–2024 median, and the share of pecan orchards stays within 10 points of its median. The number of fields in each group is published",
    "criterio_fuente": "docs/sintesis/S9_proyecto_definitivo.md §6 (declared before seeing the result)",
    "estado": "failed",
@@ -281,7 +281,7 @@
   "fuente": "docs/pruebas.md",
   "comando": "python construir.py",
   "estado": "passed",
-  "corrida": "2026-11-15T04:09:44+00:00",
+  "corrida": "2026-11-15T06:20:26+00:00",
   "pasos": [
    {
     "id": "origen",
@@ -302,7 +302,7 @@
     "nombre": "Cube engine",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "cubo REAL: 1239 parcelas, 458 clasificadas, 1282 opciones"
+    "detalle": "cubo REAL: 1239 parcelas, 458 clasificadas, 1267 opciones"
    },
    {
     "id": "relieve",
@@ -313,24 +313,24 @@
    },
    {
     "id": "gemelo",
-    "nombre": "gemelo",
+    "nombre": "Digital twin, regional context and soil",
     "estado": "passed",
     "estado_original": "OK",
     "detalle": "gemelo: OK · contexto: OK · suelo: OK"
    },
    {
     "id": "pwa",
-    "nombre": "pwa",
+    "nombre": "Offline app (installable page)",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "precache a6e7c91d4375717f"
+    "detalle": "precache 70bc8502ae6e0ba6"
    },
    {
     "id": "manifest",
     "nombre": "Manifest of every figure",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "114196 cifras (0 simuladas), 35 fuentes de origen, 59 avisos"
+    "detalle": "112946 cifras (0 simuladas), 35 fuentes de origen, 59 avisos"
    },
    {
     "id": "contrato",
@@ -351,14 +351,14 @@
     "nombre": "Python tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "1040 passed, 30 warnings in 41.03s"
+    "detalle": "1134 passed, 30 warnings in 46.87s"
    },
    {
     "id": "node",
     "nombre": "JavaScript tests",
     "estado": "passed",
     "estado_original": "OK",
-    "detalle": "167 pass, 0 fail, 0 skipped"
+    "detalle": "223 pass, 0 fail, 0 skipped"
    }
   ],
   "nota": "Last full run recorded by python construir.py. The browser smoke test (tests/e2e/web_smoke.mjs) runs separately, before each release."
@@ -366,14 +366,14 @@
  "enlaces": {
   "repositorio": "https://github.com/Cristianruz/raiz-dam-to-root",
   "readme_ia": "https://github.com/Cristianruz/raiz-dam-to-root#siai-tools-used",
-  "pruebas_md": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/pruebas.md"
+  "pruebas_md": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/en/test_results.md"
  },
  "documentos": [
   {
    "id": "modelo_vs_practica",
    "titulo": "The model against what is really irrigated in the district",
    "ruta": "docs/modelo_vs_practica.md",
-   "url": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/modelo_vs_practica.md",
+   "url": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/en/model_vs_practice.md",
    "existe": true,
    "nota": "Gathers the published local references (water applied in the district and INIFAP guidance) next to the model's water need; it changes no verdict."
   },
@@ -381,7 +381,7 @@
    "id": "revision_protagonistas",
    "titulo": "True-color review of the story fields",
    "ruta": "docs/revision_protagonistas.md",
-   "url": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/revision_protagonistas.md",
+   "url": "https://github.com/Cristianruz/raiz-dam-to-root/blob/main/docs/en/story_fields_review.md",
    "existe": true,
    "nota": "Done by an AI session (the data session) looking at Sentinel-2 true-color images. The review by a person of the team who knows the area is still pending."
   }

@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Recursos oficiales del reto «Field Shift: Adapting Farms with NASA Data»
 
 **Origen:** https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/, pestañas Details y Resources.
@@ -20,9 +20,9 @@
   - mapas (líneas de tiempo, deslizadores de escenarios);
   - diseño para el agricultor (prioridades y restricciones).
 
-## Recursos de la lista oficial y su cruce con Raíz (criterio de pertinencia)
+## Recursos de la lista oficial y su cruce con ROOT (criterio de pertinencia)
 
-| Dato en Raíz | ¿Está en la lista oficial? | Renglón de la lista |
+| Dato en ROOT | ¿Está en la lista oficial? | Renglón de la lista |
 |---|---|---|
 | HLS v2 (Landsat 8/9 + Sentinel-2 armonizados) | Sí: Landsat y Copernicus Sentinel-2 (ESA). HLS es el producto de la NASA que los combina | Landsat; Copernicus Sentinel-2 |
 | NASA POWER (clima diario, ETo) | Sí | NASA POWER |
@@ -32,9 +32,10 @@
 | Fields of The World (límites de parcelas) | No; es un dato de terceros (CC-BY-4.0) | — |
 | SIH/Conagua, SIAP, SDR Chihuahua | No; son datos oficiales locales de México | — |
 
-Otros recursos de la lista que no usamos:
-- SMAP, ECOSTRESS, MODIS, GRACE/GRACE‑FO, NLDAS/GLDAS, OpenET, GAEZ, GEDI;
-- recursos de EE. UU. (USDA, NRCS, CDL, NAIP, NLCD, PRISM, NWIS, CoCoRaHS, AMS, NASS, LANDFIRE);
-- ERA5 (ESA).
+Actualización del 14-nov-2026, 23:20 (pestaña «Resources» releída en el navegador; la lista no cambió):
+- Ya en uso o entregados desde la consulta de las 12:50: SMAP, ECOSTRESS, MODIS, GRACE/GRACE‑FO, NLDAS/GLDAS, GAEZ, GEDI y ERA5 (como ERA5-Land).
+- ERA5 aparece en la página bajo «SPACE AGENCY PARTNER RESOURCES», junto a Copernicus Sentinel-2.
+- Sin uso, porque solo cubren EE. UU.: USDA Ag Data Commons, Web Soil Survey, CDL, PRISM, SSURGO/STATSGO2, NAIP, NLCD, CoCoRaHS (Norteamérica; sin verificar cobertura en Delicias), NWIS, AMS Market News, NASS QuickStats, OpenET y LANDFIRE.
+- La pestaña «Details» admite «compare at least three rotation strategies, including the existing rotation» y pide explicar el papel de cultivos fijadores de nitrógeno, de cobertura, de raíz profunda y tolerantes a sequía (glosario de `docs/pitch/textos_envio.md`).
 
 OpenET no cubre México (S9 §11).

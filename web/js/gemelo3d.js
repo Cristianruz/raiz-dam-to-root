@@ -599,6 +599,14 @@ function exageracionDe(terreno, zonaId) {
   return num(terreno?.zonas?.[zonaId]?.exageracion) ?? num(terreno?.exageracion);
 }
 
+// Etiquetas de los datos escritas en español (params.json → gemelo.json) y su rótulo en la interfaz en inglés.
+// Una etiqueta que no está aquí se muestra tal cual, marcada como español (lang="es").
+const ETIQUETAS_EN = { "Diseño": "design choice" };
+function htmlEtiqueta(etiqueta) {
+  const texto = String(etiqueta);
+  return ETIQUETAS_EN[texto] ? esc(ETIQUETAS_EN[texto]) : `<span lang="es">${esc(texto)}</span>`;
+}
+
 function htmlLeyenda(gemelo, zonaId) {
   const terreno = gemelo?.terreno ?? {};
   const columnas = gemelo?.columnas ?? {};
@@ -614,7 +622,7 @@ function htmlLeyenda(gemelo, zonaId) {
       [
         `Column scale: ${esc(fmt(metros))} m of height for each thousand m³/ha`,
         esc(columnas.nota ?? ""),
-        columnas.etiqueta ? `Label: ${esc(columnas.etiqueta)}` : "",
+        columnas.etiqueta ? `Label: ${htmlEtiqueta(columnas.etiqueta)}` : "",
       ]
         .filter(Boolean)
         .join(" · "),
@@ -630,7 +638,8 @@ function htmlLeyenda(gemelo, zonaId) {
     `<li>${muestra("sin-riego")}<span>Flat with a green outline: the current rotation asks for no irrigation</span></li>` +
     "</ul>" +
     escala.map((t) => `<p class="gemelo-leyenda-escala">${t}</p>`).join("") +
-    `<p class="gemelo-leyenda-fuente">Source: ${terreno.fuente ? esc(terreno.fuente) : "not available"}</p>` +
+    // La fuente viene de los datos en español («vía Google Earth Engine»): va marcada lang="es", como en la ficha.
+    `<p class="gemelo-leyenda-fuente">Source: ${terreno.fuente ? `<span lang="es">${esc(terreno.fuente)}</span>` : "not available"}</p>` +
     "</div>"
   );
 }

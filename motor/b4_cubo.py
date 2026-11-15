@@ -25,7 +25,8 @@ Escenario de goteo de La gota (kit X3.1; decisión docs/decisiones/2026-11-14_op
   superficie con el mismo cultivo y la ET sube en esa proporción; el retorno se deja con el mismo
   coeficiente como COTA SUPERIOR (X3.1) y se limita a presa − ET. tope_consumo compara las dos ET.
 - Sin ea_goteo con fuente los tres bloques quedan en null con la nota de siempre. Una opción que no pide
-  agua (descanso) no lleva escenario de goteo. La fuente y la etiqueta van una vez en cubo.meta.goteo;
+  agua (descanso) no lleva escenario de goteo. Una opción sin lámina neta (neta_mm_p50 null) lleva en null
+  «gota», los dos goteos y tope_consumo, y se avisa: la ET nunca se toma como 0. La fuente y la etiqueta van una vez en cubo.meta.goteo;
   cada bloque repite la etiqueta en su primer supuesto (la ficha lo muestra).
 
 Opciones y filtros oficiales (B3; contrato en la misma decisión, §1):
@@ -39,12 +40,36 @@ Opciones y filtros oficiales (B3; contrato en la misma decisión, §1):
 - opciones[].filtros lleva una entrada por filtro que aplica a la opción, con los campos del contrato
   («motivo» = texto_en y «fuente») más id, tipo, etiqueta, estado («passes», «warning» o
   «needs_local_check»), «pasa» (true, false o null = sin decidir) y «razon» (código) cuando no se decide.
+  Si el filtro trae texto_por_opcion_en.<rotación> (buzón v11: una nota que vale para UNA opción, p. ej.
+  la del sorgo en fecha_siembra), ese texto se suma al «motivo» de esa rotación y de ninguna otra; no se
+  agrega ningún campo. Un texto por opción con el lenguaje que la ficha no admite (CLAUDE.md, regla 10;
+  lista de motor/verificador.py) no se publica y se avisa: el validador del buzón aún no revisa esa llave.
+  Si la regla nombra un cultivo sin valor (fecha_siembra trae {"sorgo": null}: no hay ventana local), la
+  oración de ese cultivo solo va en el motivo de las opciones que lo siembran (motivo_para_secuencia).
   Nunca se decide con un umbral inventado: el filtro de helada adjunta prob_helada (heladas.json de la
   zona de la parcela, en la fecha calculada más cercana anterior o igual a la siembra «desde»; null fuera
   de las fechas calculadas) y solo pasa o advierte si el filtro trae regla.prob_helada_max. Con varias
   siembras manda la de mayor probabilidad, y si a alguna le falta la probabilidad el filtro no se aprueba.
   Un filtro que necesita un dato que no tenemos, o de un tipo que el motor no sabe evaluar, queda
   «needs_local_check».
+- Filtro de edad del rodal (regla.edad_min_anios; p. ej. corte_verano_alfalfa_establecida): se decide con la
+  edad_perenne_anios de CADA parcela: menor → «warning» (pasa false), igual o mayor → «passes», sin edad →
+  «needs_local_check» con razón «dato_local».
+- Si la secuencia de B3 no nombra los mismos cultivos con que A5 calculó la lámina y el plazo (avena_maiz: B3
+  agrega la alfalfa que se siembra al final), se publica la de A5 y la de B3 va como texto en agua.nota_plazo
+  (completa, en opciones_catalogo). Los filtros son los que B3 asigna a la rotación, menos los del cultivo
+  que la secuencia publicada no siembra (decisión docs/decisiones/2026-11-15_correcciones_motor.md §2; tabla
+  FILTROS_DE_CULTIVO): establecer alfalfa en año seco no va en una secuencia sin alfalfa, y el intervalo entre
+  rodales de alfalfa va solo si el cultivo actual es alfalfa (es la razón de la opción).
+- Una opción que agrega el equipo para completar la tabla oficial (origen_opcion «team_proposal») y cuya
+  rotación B3 sí define lleva el nombre del diseño del equipo (data/opciones_b4.json → nombres_en), no el de la
+  tabla oficial, que describe el caso para el que B3 la ofrece («Break the old alfalfa…» en un cereal de
+  invierno no dice nada); tampoco lleva la nota «official table…» en agua.nota_plazo, y su explicación va en
+  una llave propia (sufijo _team_proposal) con el mismo cálculo y ese nombre.
+- Kit B4, paso 1 («entran las alternativas que aprueben los filtros de B3») y la misma decisión, §3: una
+  alternativa con un filtro de edad del rodal reprobado (edad menor que regla.edad_min_anios) NO se ofrece a
+  esa parcela, y cubo.meta.notas dice cuántas parcelas quedaron sin ella y por qué. Sin edad se ofrece con
+  «needs_local_check». La opción ACTUAL nunca se quita.
 
 Lámina local de referencia (decisión del integrador con la sesión de datos, 14-nov), campo ADITIVO
 agua.lamina_local de cada opción (no cambia ningún campo del contrato; el semáforo sigue con la lámina del modelo):
@@ -70,6 +95,11 @@ Dos zonas (decisión docs/decisiones/2026-11-14_dos_zonas.md):
 - Llaves de explicaciones: EXP_ZONA_<rotación> con una sola zona con datos (compatibilidad);
   EXP_ZONA_<zona>_<rotación> cuando hay más de una zona con datos (cada zona con sus láminas).
 
+Plazo restante (S9 §5: «En alfalfa, plazo restante = plazo − edad observada»; contrato §2.3): lo descuentan
+la opción ACTUAL y la alternativa que sigue con el MISMO rodal perenne (su único cultivo es el actual: el corte
+de riego en verano sobre la alfalfa). Las que siembran algo nuevo llevan el plazo completo; el nogal nunca
+descuenta (horizonte de cálculo). El kit B4 paso 4 dice «Solo la opción ACTUAL»; prevalece S9.
+
 Reglas (kit B4): la web calcula cobertura, hectáreas y semáforo de agua; aquí solo se precalcula
 lámina por variante de lluvia, plazo, plazo restante, compromiso, estado del plazo, bloques de zona,
 semáforo de suelo y La gota. Ninguna cifra se escribe a mano: todo sale de las entradas.
@@ -86,7 +116,10 @@ import statistics
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # para importar simulados.py
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # para importar simulados.py y verificador.py
+
+# Lista de lenguaje que la ficha no admite (CLAUDE.md, regla 10): una sola fuente, el verificador.
+import verificador as V  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parent.parent
 LLUVIAS = ("0", "-20")
@@ -109,6 +142,21 @@ PASSES, WARNING, NEEDS_LOCAL_CHECK = "passes", "warning", "needs_local_check"
 DATOS_DISPONIBLES = ("heladas.json", "memoria")
 # Llave de «regla» con el umbral del filtro de helada (número, o {valor: número}); sin ella no se decide.
 UMBRAL_HELADA = "prob_helada_max"
+# Llave de «regla» con la edad mínima del rodal (filtro corte_verano_alfalfa_establecida de B3: «no en su primer
+# año»). Con ella el filtro se decide con la edad de CADA parcela (edad_perenne_anios de la memoria, A3-M).
+UMBRAL_EDAD = "edad_min_anios"
+# Llave opcional de un filtro de B3: {rotación: texto en inglés} que se suma al motivo SOLO en esa rotación.
+TEXTO_POR_OPCION = "texto_por_opcion_en"
+# Decisión docs/decisiones/2026-11-15_correcciones_motor.md §2: una opción solo lleva los filtros de los cultivos de
+# su secuencia PUBLICADA (la de A5, con la que se calculó su agua). B3 no dice de qué cultivo habla cada filtro; estos
+# dos hablan de la alfalfa que la tabla oficial vuelve a sembrar al final de avena_maiz y que A5 no cuenta.
+# {id del filtro: (cultivo, vale también si ese es el cultivo ACTUAL de la parcela)}:
+#   alfalfa_no_en_anio_seco: establecer alfalfa; no va en una secuencia publicada sin alfalfa.
+#   alfalfa_tras_alfalfa: intervalo entre un rodal y el siguiente; va además cuando hoy hay alfalfa en la parcela,
+#   porque romper ese rodal es la razón de la opción.
+FILTROS_DE_CULTIVO = {"alfalfa_no_en_anio_seco": ("alfalfa", False), "alfalfa_tras_alfalfa": ("alfalfa", True)}
+# Sufijo de la llave de explicación de una opción del equipo cuyo nombre no es el de la tabla oficial.
+SUFIJO_EXPL_PROPUESTA = "_team_proposal"
 # Por qué un filtro queda «needs_local_check» (códigos; el texto lo pone la web).
 RAZON_DATO_LOCAL = "dato_local"            # el filtro pide un dato que no tenemos por parcela
 RAZON_SIN_UMBRAL = "sin_umbral"            # la fuente no fija umbral: se muestra la probabilidad y no se decide
@@ -131,7 +179,7 @@ LAMINA_LOCAL = "lamina_local_cm"
 TIPOS_LAMINA_LOCAL = (("aplicada_dr005", "aplicada"), ("recomendada_inifap", "recomendada"))
 NOTA_LAMINA_LOCAL = {
     "aplicada": "District average from published records, not measured on this field. The water check uses the model need.",
-    "recomendada": "Regional recommendation, not measured on this field. The water check uses the model need.",
+    "recomendada": "Regional guideline, not measured on this field. The water check uses the model need.",
 }
 # Periodo de los registros, tal como lo escribe la fuente («medias 2009–2016»): dos años separados por un guion.
 PATRON_PERIODO = re.compile(r"\b((?:19|20)\d{2})\s*[–-]\s*((?:19|20)\d{2})\b")
@@ -252,7 +300,8 @@ def meses_cultivo(dias):
 
 
 def dias_desnudo_ventana(dias, params):
-    """Días de la ventana de suelo desnudo (params.suelo.ventana_desnudo) SIN cultivo en pie."""
+    """Días de la ventana de suelo desnudo (params.suelo.ventana_desnudo) SIN cultivo en pie. Una ventana con
+    inicio después del fin (p. ej. de diciembre a enero) cruza el año: va del inicio al 31-dic y del 1-ene al fin."""
     if dias is None:
         return None
     v = params["suelo"]["ventana_desnudo"]["valor"]
@@ -260,7 +309,9 @@ def dias_desnudo_ventana(dias, params):
     mf, df = (int(x) for x in v["fin"].split("-"))
     a = dt.date(ANIO_VENTANA, mi, di).timetuple().tm_yday
     b = dt.date(ANIO_VENTANA, mf, df).timetuple().tm_yday
-    return sum(1 for d in range(a, b + 1) if d not in dias)
+    ultimo = dt.date(ANIO_VENTANA, 12, 31).timetuple().tm_yday
+    ventana = range(a, b + 1) if a <= b else [*range(a, ultimo + 1), *range(1, b + 1)]
+    return sum(1 for d in ventana if d not in dias)
 
 
 # ---------------------------------------------------------------------------
@@ -285,13 +336,16 @@ def estado_plazo(cultivo, edad, abstencion, params):
 
 def flujos_gota(area_ha, l50_millares, neta_mm, params, m3_millar):
     """Flujos SIN redondear de X3.1 (m³) con la lámina P50 de lluvia 0: los usan el bloque «gota» y el
-    escenario de goteo. Balance: ET + acuífero + otras = presa."""
+    escenario de goteo. Balance: ET + acuífero + otras = presa. None si la lámina neta (ET) es null: sin ella
+    el balance no se puede cerrar y nunca se toma ET = 0 (inventaría una baja de la presa con goteo)."""
+    if neta_mm is None:
+        return None
     conduccion = params["eficiencia"]["conduccion"]["valor"]["media"]
     c_ret = params["gota"]["c_retorno_superficial"]["valor"]
     mm_a_m3_ha = m3_millar / params["unidades"]["millar"]["valor"]["lamina_mm"]
     llegan = l50_millares * m3_millar * area_ha
     salen = llegan / conduccion
-    et = (neta_mm or 0) * mm_a_m3_ha * area_ha
+    et = neta_mm * mm_a_m3_ha * area_ha
     ret = c_ret * salen
     otras = salen - et - ret
     if otras < -1e-6:
@@ -313,8 +367,10 @@ def _bloque(salen, llegan, et, ret, supuestos):
 
 
 def bloque_gota(area_ha, l50_millares, neta_mm, params, m3_millar, flujos=None):
-    """X3.1 con la lámina P50 de lluvia 0. Balance: ET + acuífero + otras = presa."""
+    """X3.1 con la lámina P50 de lluvia 0. Balance: ET + acuífero + otras = presa. None sin lámina neta."""
     f = flujos or flujos_gota(area_ha, l50_millares, neta_mm, params, m3_millar)
+    if f is None:
+        return None
     return _bloque(f["salen"], f["llegan"], f["et"], f["ret"], [
         f"Conduction efficiency: params.eficiencia.conduccion (mean; {params['eficiencia']['conduccion']['fuente']})",
         f"Return coefficient applied to dam outflow: params.gota.c_retorno_superficial ({params['gota']['c_retorno_superficial']['fuente']})",
@@ -473,6 +529,17 @@ def opcion_desde(dz, rot_id, params, avisos):
     return None
 
 
+def nota_secuencia_b3(sec_b3, sec_a5, nombre):
+    """Texto (en inglés, sin cifras: la ficha lo muestra junto al plazo) para una opción cuya secuencia de B3 no
+    nombra los mismos cultivos con que A5 calculó su lámina y su plazo. «nombre» da el nombre en inglés de un
+    cultivo. Ej.: «official table: Winter cereal → Forage maize → Alfalfa; the water need and term count Winter
+    cereal → Forage maize, not Alfalfa»."""
+    contados = " → ".join(nombre(c) for c in sec_a5) or "no crop"
+    sin_contar = [nombre(c) for c in dict.fromkeys(sec_b3) if c not in sec_a5]
+    texto = f"official table: {' → '.join(nombre(c) for c in sec_b3)}; the water need and term count {contados}"
+    return texto + (f", not {', '.join(sin_contar)}" if sin_contar else "")
+
+
 def bloque_zona(nombre, props, cubo_parcelas):
     """Bloque de zona (kit B4 paso 7) sobre un conjunto de parcelas. Abstenidas: no suman a perennes;
     el indicador es un mínimo. Se usa igual para el total («zona») y para cada zona («zonas.<id>»)."""
@@ -527,6 +594,14 @@ def umbral_helada(regla):
     return v if es_num(v) and 0 <= v <= 1 else None
 
 
+def umbral_edad(regla):
+    """Edad mínima del rodal si la «regla» del filtro la trae (edad_min_anios: número o {valor}); si no, None."""
+    v = regla.get(UMBRAL_EDAD) if isinstance(regla, dict) else None
+    if isinstance(v, dict):
+        v = v.get("valor")
+    return v if es_num(v) and v >= 0 else None
+
+
 def evidencia_helada(definicion, bloque_heladas):
     """(prob_helada, evidencia, completa) de una opción de B3: la probabilidad de helada después de la
     siembra «desde» de cada cultivo de su secuencia. Si hay varias siembras manda la de mayor probabilidad
@@ -552,16 +627,108 @@ def evidencia_helada(definicion, bloque_heladas):
     return principal["prob_helada"], evidencia, len(con_prob) == len(siembras)
 
 
-def filtros_de_opcion(rot_ref, b3, bloque_heladas):
+def textos_por_opcion(filtro):
+    """{rotación: texto} de filtro.texto_por_opcion_en, solo con los textos no vacíos; {} si no trae la llave
+    o no tiene esa forma."""
+    por_opcion = filtro.get(TEXTO_POR_OPCION)
+    if not isinstance(por_opcion, dict):
+        return {}
+    return {rot: t.strip() for rot, t in por_opcion.items() if isinstance(t, str) and t.strip()}
+
+
+def lenguaje_no_admitido(texto):
+    """True si el texto trae el lenguaje que la ficha no admite (CLAUDE.md, regla 10; lista del verificador)."""
+    return any(patron.search(texto) for patron, _ in V.PROHIBIDAS)
+
+
+def nota_de_opcion(filtro, rot_ref):
+    """Texto que el filtro trae SOLO para la rotación rot_ref; None si no lo trae o si no puede ir a la ficha."""
+    texto = textos_por_opcion(filtro).get(rot_ref)
+    return None if texto is None or lenguaje_no_admitido(texto) else texto
+
+
+def avisos_texto_por_opcion(b3):
+    """Un aviso por cada texto por opción de B3 que no se publica por su lenguaje. El aviso dice el filtro y la
+    opción, no repite la palabra (va a cubo.meta.notas)."""
+    return [f"{ARCHIVO_B3}: el texto del filtro {f.get('id')} para la opción {rot} ({TEXTO_POR_OPCION}) trae "
+            "lenguaje que la ficha no admite (CLAUDE.md, regla 10); no se agrega al motivo de esa opción"
+            for f in (b3 or {}).get("filtros") or [] if isinstance(f, dict)
+            for rot, texto in textos_por_opcion(f).items() if lenguaje_no_admitido(texto)]
+
+
+def filtro_va_en_la_opcion(filtro_id, secuencia, cultivo_actual):
+    """False si el filtro habla de un cultivo (FILTROS_DE_CULTIVO) que la secuencia publicada de la opción no
+    siembra, salvo que valga también por el cultivo actual de la parcela y ese sea el cultivo."""
+    regla = FILTROS_DE_CULTIVO.get(filtro_id)
+    if regla is None:
+        return True
+    cultivo, vale_por_actual = regla
+    return cultivo in secuencia or (vale_por_actual and cultivo_actual == cultivo)
+
+
+def filtros_de_edad_reprobados(filtros, b3):
+    """[(id del filtro, edad mínima)] de los filtros de edad del rodal (regla.edad_min_anios) que la parcela NO
+    aprueba (pasa False: su rodal es más joven). Sin edad el filtro queda sin decidir y no entra aquí."""
+    minimos = {f.get("id"): umbral_edad(f.get("regla")) for f in (b3 or {}).get("filtros") or [] if isinstance(f, dict)}
+    return [(e["id"], minimos[e["id"]]) for e in filtros if minimos.get(e["id"]) is not None and e["pasa"] is False]
+
+
+ORACION = re.compile(r"(?<=[.!?])\s+")
+PALABRA = re.compile(r"[a-z]{3,}")
+
+
+def palabras_distintivas(cultivo, nombres_en):
+    """Palabras del nombre en inglés de un cultivo que no salen en el nombre de ningún otro cultivo
+    (sorgo, «Forage sorghum» → {"sorghum»}: «forage» también es de «Forage maize»). nombres_en es
+    {cultivo: nombre en inglés} y sale de los datos (B3 o el diseño provisional), nunca de este archivo."""
+    propias = set(PALABRA.findall(str(nombres_en.get(cultivo) or "").lower()))
+    otras = set()
+    for c, n in nombres_en.items():
+        if c != cultivo:
+            otras |= set(PALABRA.findall(str(n or "").lower()))
+    return propias - otras
+
+
+def motivo_para_secuencia(filtro, secuencia, nombres_en):
+    """texto_en de un filtro para una opción concreta. Si la «regla» nombra un cultivo sin valor (p. ej.
+    fecha_siembra trae {"sorgo": null}: B3 no halló su ventana local), la oración que habla de ese cultivo
+    solo vale para las opciones que lo siembran: en las demás se quita, para que la tarjeta de alfalfa no
+    diga «No local window was found for sorghum». Si quitarla dejara el texto vacío, va completo."""
+    texto = filtro.get("texto_en")
+    regla = filtro.get("regla")
+    if not con_texto(texto) or not isinstance(regla, dict) or not nombres_en:
+        return texto
+    sin_valor = [c for c, v in regla.items() if v is None and c in nombres_en and c not in (secuencia or [])]
+    ajenas = set()
+    for c in sin_valor:
+        ajenas |= palabras_distintivas(c, nombres_en)
+    if not ajenas:
+        return texto
+    oraciones = [o for o in ORACION.split(texto.strip()) if o]
+    quedan = [o for o in oraciones if not (set(PALABRA.findall(o.lower())) & ajenas)]
+    return " ".join(quedan) if quedan and len(quedan) < len(oraciones) else texto
+
+
+def filtros_de_opcion(rot_ref, b3, bloque_heladas, edad=None, nombres_en=None):
     """Entradas de opciones[].filtros para la rotación rot_ref: una por filtro de B3 que la nombra en
-    «aplica_a». Campos del contrato (§2.3): «motivo» (= texto_en) y «fuente»; además id, tipo, etiqueta,
-    estado, «pasa» (true, false o null) y «razon» cuando no se decide. Ver el encabezado del archivo."""
+    «aplica_a». Campos del contrato (§2.3): «motivo» (= texto_en, sin la oración de un cultivo sin ventana
+    que la opción no siembra, ver motivo_para_secuencia, más el texto que el filtro traiga solo para esta
+    rotación en texto_por_opcion_en) y «fuente»; además id, tipo, etiqueta,
+    estado, «pasa» (true, false o null) y «razon» cuando no se decide. Ver el encabezado del archivo.
+    edad: edad_perenne_anios de la parcela (o None); decide los filtros cuya regla trae edad_min_anios:
+    menor → warning (nunca aprobado), igual o mayor → passes, sin edad → needs_local_check (dato local).
+    nombres_en: {cultivo: nombre en inglés} para reconocer de qué cultivo habla cada oración."""
     salida = []
+    definicion = (b3.get("opciones") or {}).get(rot_ref) or {}
+    secuencia = [x.get("cultivo") for x in definicion.get("secuencia") or [] if isinstance(x, dict)]
     for f in b3.get("filtros") or []:
         if rot_ref not in (f.get("aplica_a") or []):
             continue
+        nota = nota_de_opcion(f, rot_ref)
+        base = motivo_para_secuencia(f, secuencia, nombres_en)
+        motivo = f"{base} {nota}" if nota and con_texto(base) else base
         entrada = {"id": f.get("id"), "tipo": f.get("tipo"), "estado": NEEDS_LOCAL_CHECK, "pasa": None,
-                   "motivo": f.get("texto_en"), "fuente": f.get("fuente"), "etiqueta": f.get("etiqueta")}
+                   "motivo": motivo, "fuente": f.get("fuente"), "etiqueta": f.get("etiqueta")}
         faltan = [n for n in (f.get("necesita") or []) if n not in DATOS_DISPONIBLES]
         prob, umbral, completa = None, None, False
         if f.get("tipo") == "helada":
@@ -571,8 +738,17 @@ def filtros_de_opcion(rot_ref, b3, bloque_heladas):
                 evidencia["umbral_prob_helada"] = umbral
             entrada["prob_helada"] = prob
             entrada["evidencia"] = evidencia
+        edad_min = umbral_edad(f.get("regla"))
         if faltan:
             entrada["razon"] = RAZON_DATO_LOCAL
+        elif edad_min is not None:
+            # Filtro de edad del rodal: se decide con la edad observada de esta parcela, nunca por zona.
+            if edad is None:
+                entrada["razon"] = RAZON_DATO_LOCAL   # sin memoria no se sabe si el rodal está establecido
+            elif edad < edad_min:
+                entrada["estado"], entrada["pasa"] = WARNING, False
+            else:
+                entrada["estado"], entrada["pasa"] = PASSES, True
         elif f.get("tipo") != "helada":
             entrada["razon"] = RAZON_SIN_EVALUADOR
         elif prob is None:
@@ -677,8 +853,9 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     zonas_con_datos = [z for z in zonas_presentes if datos_zona[z] is not None]
     prefijar = len(zonas_con_datos) > 1  # llaves EXP_ZONA_<zona>_<rotación> solo con más de una zona con datos
 
-    def llave_expl(zona, rot_ref):
-        return f"EXP_ZONA_{zona}_{rot_ref}" if prefijar else f"EXP_ZONA_{rot_ref}"
+    def llave_expl(zona, rot_ref, del_equipo=False):
+        """del_equipo: la opción lleva el nombre del diseño del equipo y no el de la tabla oficial."""
+        return (f"EXP_ZONA_{zona}_{rot_ref}" if prefijar else f"EXP_ZONA_{rot_ref}") + (SUFIJO_EXPL_PROPUESTA if del_equipo else "")
 
     # Mediana POR ZONA de días de suelo desnudo medidos: referencia del semáforo de suelo de la opción ACTUAL.
     mediana_zona = {}
@@ -714,8 +891,11 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     heladas = leer_json(processed / ARCHIVO_HELADAS) if (processed / ARCHIVO_HELADAS).exists() else None
     if b3 is not None and heladas is None and any(f.get("tipo") == "helada" for f in b3.get("filtros") or []):
         avisos.append(f"Falta {ARCHIVO_HELADAS}: los filtros de helada quedan «{NEEDS_LOCAL_CHECK}» sin probabilidad")
-    provisionales, omitidas, filtros_cache, secuencias_distintas = set(), {}, {}, set()
+    avisos += avisos_texto_por_opcion(b3)
+    provisionales, omitidas, filtros_cache, secuencias_distintas = set(), {}, {}, {}
+    sin_neta = {}   # (zona, rotación) -> parcelas cuya opción no trae lámina neta: La gota queda en null
     propuestas = {}   # cultivo -> rotaciones del diseño provisional con que se completó B3
+    sin_ofrecer = {}  # (rotación, filtro de edad, edad mínima) -> parcelas que no reciben la opción (rodal joven)
 
     def nombre_en(rot_id):
         """Nombre en inglés de una rotación: el de B3 si la define; si no, el del diseño provisional."""
@@ -740,17 +920,31 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
             provisionales.add(cultivo)
         return cfg["alternativas"].get(cultivo, [])
 
+    def nombre_propio(rot_ref, es_propuesta):
+        """Nombre del diseño del equipo para una opción que el equipo agregó (team_proposal) a un cultivo, cuando
+        la tabla oficial la define con otro nombre; None si la opción lleva el nombre de siempre."""
+        propio = cfg["nombres_en"].get(rot_ref)
+        return propio if es_propuesta and con_texto(propio) and propio != nombre_en(rot_ref) else None
+
     def no_rota(rot_actual):
         """La rotación actual es la que el maestro declara «no rota» (nogal): no se le buscan alternativas."""
         return (def_b3.get(rot_actual) or {}).get("letra_maestro") == LETRA_NO_ROTA
 
-    def filtros_de(zona, rot_ref):
-        """Filtros de B3 de una rotación en una zona (no dependen de la parcela: se calculan una vez)."""
+    # Nombre en inglés de cada cultivo que nombran las secuencias de B3 (el de su rotación de un solo cultivo):
+    # sirve para saber de qué cultivo habla cada oración de un filtro (motivo_para_secuencia).
+    nombres_cultivo = {c: nombre_en(c) for d in def_b3.values() for c in
+                       ((x or {}).get("cultivo") for x in (d or {}).get("secuencia") or []) if con_texto(c)}
+
+    def filtros_de(zona, rot_ref, edad):
+        """Filtros de B3 de una rotación en una zona. De la parcela solo dependen por la edad del rodal (filtros
+        con regla.edad_min_anios): se calculan una vez por zona, rotación y edad."""
         if b3 is None:
             return []
-        if (zona, rot_ref) not in filtros_cache:
-            filtros_cache[(zona, rot_ref)] = filtros_de_opcion(rot_ref, b3, heladas_de_zona(heladas, zona))
-        return filtros_cache[(zona, rot_ref)]
+        llave = (zona, rot_ref, edad)
+        if llave not in filtros_cache:
+            filtros_cache[llave] = filtros_de_opcion(rot_ref, b3, heladas_de_zona(heladas, zona), edad,
+                                                     nombres_cultivo)
+        return filtros_cache[llave]
 
     features, cubo_parcelas, usadas = [], {}, set()
     for f in base["features"]:
@@ -807,11 +1001,26 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                     continue
                 sec, plazo_clave, lam, neta = o
                 es_actual = (k == 0)
+                rot_ref = cfg["actual"][cultivo] if es_actual else rot_id
+                filtros_rot = filtros_de(zona, rot_ref, edad)
+                reprobados = [] if es_actual else filtros_de_edad_reprobados(filtros_rot, b3)
+                if reprobados:
+                    # Kit B4, paso 1: solo entran las alternativas que aprueban los filtros. El rodal de esta
+                    # parcela es más joven que la edad mínima del filtro: la opción no se ofrece y se avisa.
+                    llave = (rot_id, *reprobados[0])
+                    sin_ofrecer[llave] = sin_ofrecer.get(llave, 0) + 1
+                    continue
+                es_propuesta = (not es_actual) and rot_id in propuestas.get(cultivo, set())
+                propio = nombre_propio(rot_ref, es_propuesta)
                 plazo = plazo_params(params, plazo_clave)
                 nota = None
+                # S9 §5 y contrato §2.3: plazo restante = plazo − edad observada del rodal. Lo descuentan la ACTUAL
+                # y la alternativa que sigue con el MISMO rodal (su único cultivo es el actual: el corte de riego en
+                # verano sobre la alfalfa). Las que siembran algo nuevo llevan el plazo completo; el nogal, nunca.
+                mismo_rodal = es_actual or [x for x in sec if x != "descanso"] == [cultivo]
                 if plazo_clave == "nogal":
                     restante, nota = dict(plazo), "calculation horizon; orchards live longer"
-                elif es_actual and plazo_clave == "alfalfa":
+                elif mismo_rodal and plazo_clave == "alfalfa":
                     if edad is None:
                         restante, nota = dict(plazo), "age not available"
                     else:
@@ -840,8 +1049,7 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                         sem_suelo = "gris"
                     else:
                         sem_suelo = "verde" if dd < dias_actual else ("ambar" if dd == dias_actual else "rojo")
-                rot_ref = cfg["actual"][cultivo] if es_actual else rot_id
-                usadas.add((zona, rot_ref, plazo_clave))
+                usadas.add((zona, rot_ref, plazo_clave, propio or ""))
                 # Indicadores de suelo, secuencia y advertencia: de B3 si define la rotación; si no,
                 # los del diseño provisional. La lámina y el calendario son siempre los de A5 (sec).
                 d_b3 = def_b3.get(rot_ref)
@@ -849,9 +1057,16 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                 if d_b3 is not None:
                     ind = d_b3.get("indicadores") or {}
                     sec_b3 = [x["cultivo"] for x in d_b3.get("secuencia") or [] if con_texto((x or {}).get("cultivo"))]
-                    secuencia = sec_b3 or sec
-                    if sec_b3 and set(sec_b3) != {x for x in sec if x != "descanso"}:
-                        secuencias_distintas.add(rot_ref)
+                    sec_a5 = [x for x in sec if x != "descanso"]
+                    if sec_b3 and set(sec_b3) != set(sec_a5):
+                        # La lámina y el plazo son los de A5: se publica la secuencia con que se calcularon y la de
+                        # B3 queda como texto en nota_plazo (y completa en opciones_catalogo). Se avisa una vez.
+                        secuencias_distintas.setdefault(rot_ref, (sec_b3, sec_a5))
+                        secuencia = sec
+                        if not es_propuesta:   # la opción del equipo no es la de la tabla oficial: sin su nota
+                            nota = "; ".join(x for x in (nota, nota_secuencia_b3(sec_b3, sec_a5, nombre_en)) if x)
+                    else:
+                        secuencia = sec_b3 or sec
                     suelo_op.update({"leguminosa": ind.get("leguminosa"),
                                      # Seguir con la rotación actual no rompe su propio ciclo de plagas.
                                      "ruptura_plagas": False if es_actual else ind.get("ruptura_plagas"),
@@ -864,8 +1079,14 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                                      "riesgo_salinidad": None})
                     advertir = (not es_actual) and ("alfalfa" in sec) and cultivo != "alfalfa"
                 flujos = flujos_gota(props["area_ha"], lam["0"]["p50"], neta, params, m3_millar)
-                con_tope, sin_tope, tope = bloques_goteo(flujos, goteo_zona[zona]) if goteo_zona[zona] else (None, None, None)
-                es_propuesta = (not es_actual) and rot_id in propuestas.get(cultivo, set())
+                if flujos is None:
+                    # Sin lámina neta (ET) La gota no cierra: los cuatro bloques en null y se avisa por zona.
+                    sin_neta[(zona, rot_ref)] = sin_neta.get((zona, rot_ref), 0) + 1
+                    gota, con_tope, sin_tope, tope = None, None, None, None
+                else:
+                    gota = bloque_gota(props["area_ha"], lam["0"]["p50"], neta, params, m3_millar, flujos)
+                    con_tope, sin_tope, tope = (bloques_goteo(flujos, goteo_zona[zona]) if goteo_zona[zona]
+                                                else (None, None, None))
                 origen_opcion = (ORIGEN_OPCION_PROPUESTA if es_propuesta or b3 is None or rot_ref not in def_b3
                                  else ORIGEN_OPCION_B3)
                 opciones.append({
@@ -874,7 +1095,7 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                     "origen_opcion": origen_opcion,
                     "etiqueta_opcion": (ETIQUETA_PROPUESTA if origen_opcion == ORIGEN_OPCION_PROPUESTA
                                         else (def_b3.get(rot_ref) or {}).get("etiqueta")),
-                    "nombre": (f"Current rotation: {nombre_en(rot_ref)}" if es_actual else nombre_en(rot_ref)),
+                    "nombre": (f"Current rotation: {nombre_en(rot_ref)}" if es_actual else propio or nombre_en(rot_ref)),
                     "secuencia": secuencia,
                     "agua": {"lamina_bruta": lam, "plazo_anios": plazo, "plazo_restante": restante,
                              "compromiso_millares_ha": compromiso, "nota_plazo": nota,
@@ -883,10 +1104,10 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                     "dinero": None,
                     "semaforo": {"suelo": sem_suelo, "dinero": "gris"},
                     "meses_cultivo": meses_cultivo(dias) if dias is not None else [0] * 12,
-                    "filtros": filtros_de(zona, rot_ref),
+                    "filtros": [f_ for f_ in filtros_rot if filtro_va_en_la_opcion(f_["id"], secuencia, cultivo)],
                     "advertir_si_rojo": advertir,
-                    "preguntas_ref": llave_expl(zona, rot_ref),
-                    "gota": bloque_gota(props["area_ha"], lam["0"]["p50"], neta, params, m3_millar, flujos),
+                    "preguntas_ref": llave_expl(zona, rot_ref, bool(propio)),
+                    "gota": gota,
                     "gota_goteo_con_tope": con_tope, "gota_goteo_sin_tope": sin_tope, "tope_consumo": tope,
                 })
         if opciones and not any(o["id"] == "ACTUAL" for o in opciones):
@@ -937,9 +1158,21 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     for cultivo, n in sorted(cortas.items()):
         avisos.append(f"{n} parcelas de {cultivo} quedan con menos de ACTUAL + 2 opciones (contrato §2.3): "
                       "faltan alternativas con lámina; no se completa con otras")
-    for rot_id in sorted(secuencias_distintas):
-        avisos.append(f"{ARCHIVO_B3}: la secuencia de {rot_id} no nombra los mismos cultivos con que A5 calculó "
-                      "su lámina; se muestra la de B3 y la lámina sigue siendo la de A5")
+    for rot_id, (sec_b3, sec_a5) in sorted(secuencias_distintas.items()):
+        avisos.append(f"{ARCHIVO_B3}: la secuencia de {rot_id} ({', '.join(sec_b3)}) no nombra los mismos cultivos "
+                      f"con que A5 calculó su lámina y su plazo ({', '.join(sec_a5) or 'descanso'}): se publica la de "
+                      "A5; la de B3 queda como texto en agua.nota_plazo y completa en opciones_catalogo. Los filtros "
+                      "son los que B3 asigna a la rotación, menos los del cultivo que A5 no cuenta (el del intervalo "
+                      "entre rodales se conserva si ese es el cultivo actual de la parcela)")
+    for (rot_id, filtro_id, edad_min), n in sorted(sin_ofrecer.items()):
+        avisos.append(f"{n} parcelas quedan sin la opción {rot_id}: su rodal tiene menos de {edad_min} años (filtro "
+                      f"{filtro_id} de {ARCHIVO_B3}; kit B4, paso 1: solo entran las alternativas que aprueban los "
+                      "filtros). Con edad desconocida la opción se ofrece con «needs_local_check»")
+    for (z, rot_id), n in sorted(sin_neta.items()):
+        dz_ = datos_zona[z]
+        archivo = dz_["archivo_rot"] if rot_id in dz_["rotaciones"] else dz_["archivo_dem"]
+        avisos.append(f"Zona {z}: la opción {rot_id} no trae lámina neta (neta_mm_p50) en {archivo}; La gota, los "
+                      f"dos goteos y tope_consumo quedan en null en {n} parcelas (nunca se toma ET = 0)")
     avisos = list(dict.fromkeys(avisos))  # sin repetidos, en orden de aparición
 
     from simulados import bloques_distrito_dotaciones  # mismo armado que los simulados, desde params
@@ -1014,8 +1247,9 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
            "features": features}
     expl = {"meta": {"mock": False, "dinamicos": ["d", "ha", "cobertura"],
                      "nota": "Template texts written by the team (no LLM yet); every number comes from 'valores' or from the slider."},
-            "explicaciones": {llave_expl(z, rid): explicacion(rid, clave, datos_zona[z], params, nombre_en(rid))
-                              for z, rid, clave in sorted(usadas)}}
+            "explicaciones": {llave_expl(z, rid, bool(propio)): explicacion(rid, clave, datos_zona[z], params,
+                                                                           propio or nombre_en(rid))
+                              for z, rid, clave, propio in sorted(usadas)}}
     peso = len(json.dumps(cubo, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
     if peso > FRACCION_AVISO_PESO * LIMITE_CUBO_BYTES:
         aviso = (f"cubo.json pesa {peso} bytes: está cerca del límite del contrato ({LIMITE_CUBO_BYTES} bytes, kit §2.3). "
@@ -1046,16 +1280,23 @@ def explicacion(rot_id, plazo_clave, dz, params, nombre):
         d = dz["demanda"][rot_id]["0"]
         lam = {"p10": num(d["bruta_millares_p10"]), "p50": num(d["bruta_millares_p50"]), "p90": num(d["bruta_millares_p90"])}
     plazo = plazo_params(params, plazo_clave)
-    # Plazo en palabras sin dígitos: una temporada, N años o de N a M años.
+    # Plazo en palabras sin dígitos: una temporada, N años o de N a M años. La explicación es una por zona y
+    # rotación y la comparten la opción ACTUAL (su tarjeta muestra el plazo RESTANTE de esta parcela) y la
+    # alternativa nueva: un plazo de varios años se dice como el compromiso típico del CULTIVO desde la siembra
+    # (también vale para la variante que conserva el rodal, como el corte de verano, que no siembra nada) y se
+    # remite a la tarjeta para los años que le quedan a esta parcela.
     if plazo["min"] == plazo["max"] == params["plazo"]["anual"]["valor"]:
-        plazo_txt = "for one season"
+        compromete = " and commits water for one season"
+    elif plazo_clave == "nogal":
+        # El del nogal es un horizonte de cálculo, no la vida de la huerta (kit §2.3; la tarjeta lleva la misma nota).
+        compromete = "; this option commits water over a calculation horizon of {{f2}} years, and orchards live longer"
     elif plazo["min"] == plazo["max"]:
-        plazo_txt = "for {{f2}} years"
+        compromete = "; from planting, this crop typically commits water for {{f2}} years (the card shows the term left for this field)"
     else:
-        plazo_txt = "for {{f2}} to {{f3}} years"
+        compromete = "; from planting, this crop typically commits water for {{f2}} to {{f3}} years (the card shows the term left for this field)"
     return {
         "textos": {
-            "por_que": f"{nombre} asks for {{{{f1}}}} thousand m³ per hectare per year and commits water {plazo_txt}. With your allocation of {{{{d}}}} thousand m³/ha it covers {{{{cobertura}}}} of the need: enough for {{{{ha}}}} hectares.",
+            "por_que": f"{nombre} asks for {{{{f1}}}} thousand m³ per hectare per year{compromete}. With your allocation of {{{{d}}}} thousand m³/ha it covers {{{{cobertura}}}} of the need: enough for {{{{ha}}}} hectares.",
             "evidencia": "Water need from the FAO Penman–Monteith method with NASA POWER daily climate and a Monte Carlo band (low {{f4}}, high {{f5}} thousand m³/ha). Field history from NASA HLS greenness.",
             "beneficios": "Shows how many years this choice ties up water before you plant, next to the dam allocation you expect.",
             "que_no_sabemos": "On-farm irrigation efficiency has not been measured in this district; the band reflects that assumption. Field boundaries are estimated by a neural network outside its training region.",

@@ -1,13 +1,13 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
- "_nota": "Supuestos de las piezas de datos. Cada valor lleva fuente y etiqueta; [S] = assumption. Los scripts se detienen si falta una clave. Copiar a la carpeta de trabajo (--dir).",
+ "_nota": "Assumptions of the data pieces. Each value carries a source and a label; [S] = assumption. The scripts stop if a key is missing. Copy to the working folder (--dir).",
  "ea_gravedad": {
   "valor": [
    0.45,
    0.7
   ],
   "etiqueta": "assumption [S]",
-  "fuente": "Sin valor medido en el DR-005 ni fuente en el repo; rango de sensibilidad propuesto por el equipo"
+  "fuente": "No value measured in DR-005 and no source in the repository; sensitivity range proposed by the team"
  },
  "sesgo_eto": {
   "valor": [
@@ -15,7 +15,7 @@
    0.0
   ],
   "etiqueta": "assumption [S]",
-  "fuente": "Sin fuente en el repo; se prueba la hipótesis de que POWER-PM sobreestima la ETo hasta 10 %"
+  "fuente": "No source in the repository; it tests the hypothesis that POWER-PM overestimates ETo by up to 10 %"
  },
  "presiembra_mm": {
   "valor": [
@@ -23,7 +23,7 @@
    200
   ],
   "etiqueta": "[P] kit A5",
-  "fuente": "Kit 40, A5: riego de presiembra de 15–20 cm"
+  "fuente": "Team kit (document 40), A5: pre-planting irrigation of 15–20 cm"
  },
  "plazo_alfalfa_anios": {
   "valor": {
@@ -31,17 +31,17 @@
    "max": 4
   },
   "etiqueta": "[P]",
-  "fuente": "FIRA AGROCOSTOS 2025: vida productiva de 3–4 años"
+  "fuente": "FIRA AGROCOSTOS 2025: productive life of 3–4 years"
  },
  "plazo_nogal_horizonte": {
   "valor": 10,
   "etiqueta": "assumption [S]",
-  "fuente": "S9 §5: horizonte de cálculo, no vida de la huerta; no se descuenta la edad"
+  "fuente": "S9 §5: calculation horizon, not the life of the orchard; the orchard age is not subtracted"
  },
  "umbral_verde_ndvi": {
   "valor": 0.4,
   "etiqueta": "assumption [S]",
-  "fuente": "S9 §5; sensibilidad 0.35–0.45; calibrar con etiquetas a ciegas"
+  "fuente": "S9 §5; sensitivity 0.35–0.45; to be calibrated with blind labels"
  },
  "umbral_desnudo_ndvi": {
   "valor": 0.2,
@@ -51,37 +51,37 @@
  "umbral_invierno_alfalfa": {
   "valor": 0.35,
   "etiqueta": "assumption [S]",
-  "fuente": "Manual de etiquetado (39): alfalfa en diciembre 0.35–0.65"
+  "fuente": "Labeling manual (document 39): alfalfa in December 0.35–0.65"
  },
  "umbral_invierno_nogal": {
   "valor": 0.3,
   "etiqueta": "assumption [S]",
-  "fuente": "Manual de etiquetado (39): nogal en dormancia 0.10–0.22 en diciembre; margen hasta 0.30"
+  "fuente": "Labeling manual (document 39): dormant pecan 0.10–0.22 in December; margin up to 0.30"
  },
  "viento_alto": {
   "valor": 75,
   "etiqueta": "assumption [S]",
-  "fuente": "Percentil de ws2m (feb–abr 1981–2025) que define día de viento alto; sin umbral publicado para Delicias"
+  "fuente": "Percentile of ws2m (Feb–Apr 1981–2025) that defines a high-wind day; no published threshold for Delicias"
  },
  "umbral_ruta_ha": {
   "valor": 50,
   "etiqueta": "assumption [S]",
-  "fuente": "Valor de visualización para dibujar rutas de escurrimiento"
+  "fuente": "Display value for drawing runoff routes"
  },
  "prof_depresion_ruta_m": {
   "valor": 3,
   "etiqueta": "assumption [S]",
-  "fuente": "Profundidad de relleno a partir de la cual no se dibuja ruta: por encima del ruido vertical de NASADEM (1–3 m por celda), el modelo de elevación marca una depresión cerrada y no permite saber por dónde sale el agua"
+  "fuente": "Fill depth above which no route is drawn: above the vertical noise of NASADEM (1–3 m per cell), the elevation model shows a closed depression and does not tell where the water leaves"
  },
  "elevacion_punto_m": {
   "valor": 1173,
   "etiqueta": "assumption [S]",
-  "fuente": "Sin fuente en el repo; se reemplaza por la mediana de NASADEM de la zona cuando llegue nasadem_zona_piloto.tif"
+  "fuente": "No source in the repository; assumption. The NASADEM median of the area is 1,201 m in Delicias–Saucillo and 1,194 m in Lázaro Cárdenas (nasadem_zona_piloto.tif); with them the psychrometric constant of FAO-56 would change by 0.3 % or less, so the value was not replaced"
  },
  "presiembra_algodon_mm": {
   "valor": 200,
   "etiqueta": "assumption [S]",
-  "fuente": "Sin fuente en el repo; extremo superior del rango del kit"
+  "fuente": "No source in the repository; upper end of the range of the team kit"
  },
  "kc_nogal_tabla": {
   "valor": [
@@ -95,12 +95,12 @@
  "cobertura_dosel_nogal": {
   "valor": 0.7,
   "etiqueta": "assumption [S]",
-  "fuente": "Fracción de cobertura efectiva del dosel; a medir con NDVI de las parcelas de nogal (S8, decisión 5)"
+  "fuente": "Effective canopy cover fraction; to be measured with the NDVI of the pecan fields (S8, decision 5). The estimate from NDVI is in nogal_referencia"
  },
  "altura_nogal_m": {
   "valor": 10,
   "etiqueta": "assumption [S]",
-  "fuente": "Altura típica de huerta adulta; entra en la Ec. 98 de FAO-56"
+  "fuente": "Typical height of an adult orchard; it enters FAO-56 Eq. 98"
  },
  "corte_verano_moderado": {
   "valor": {
@@ -110,95 +110,95 @@
    ],
    "riegos_jul_sep": 6
   },
-  "etiqueta": "[P] kit B3 (omitir 2–3 riegos entre julio y septiembre); riegos_jul_sep = 6 assumption [S]",
-  "fuente": "Kit 40, B3: variante moderada por omisión"
+  "etiqueta": "[P] team kit B3 (skip 2–3 irrigations between July and September); riegos_jul_sep = 6 assumption [S]",
+  "fuente": "Team kit (document 40), B3: moderate variant by default"
  },
  "umbral_resiembra_ndvi": {
   "valor": 0.25,
   "etiqueta": "assumption [S]",
-  "fuente": "NDVI mensual mínimo del año por debajo del cual se considera que la parcela estuvo desnuda (resiembra o establecimiento de la alfalfa); en la zona piloto los alfalfares establecidos tienen mínimos anuales ≥ 0.26 y los años de establecimiento 0.12–0.24. Sensibilidad 0.20–0.30"
+  "fuente": "Lowest monthly NDVI of the year below which the field is taken as bare (reseeding or establishment of the alfalfa); in the pilot area, established alfalfa stands have yearly minimums of 0.26 or more and establishment years 0.12–0.24. Sensitivity 0.20–0.30"
  },
  "ea_goteo": {
   "valor": 0.9,
   "etiqueta": "[V] indicative, not local",
-  "fuente": "FAO, Irrigation Water Management Training Manual No. 4, «Irrigation Scheduling» (Brouwer, Prins y Heibloem, 1989), Anexo I, Tabla 8 «Indicative values of the field application efficiency (ea)»: riego superficial 60 %, aspersión 75 %, goteo 90 %. https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026. Valor indicativo general, no medido en el DR-005"
+  "fuente": "FAO, Irrigation Water Management Training Manual No. 4, «Irrigation Scheduling» (Brouwer, Prins and Heibloem, 1989), Annex I, Table 8 «Indicative values of the field application efficiency (ea)»: surface irrigation 60 %, sprinkler 75 %, drip 90 %. https://www.fao.org/3/t7202e/t7202e08.htm, read on Nov 14, 2026. General indicative value, not measured in DR-005"
  },
  "ea_superficial_referencia": {
   "valor": 0.6,
   "etiqueta": "[V] indicative, not local",
-  "fuente": "FAO, Irrigation Water Management Training Manual No. 4, «Irrigation Scheduling» (Brouwer, Prins y Heibloem, 1989), Anexo I, Tabla 8 «Indicative values of the field application efficiency (ea)»: riego superficial 60 %, aspersión 75 %, goteo 90 %. https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026. Valor indicativo general, no medido en el DR-005. Solo referencia: el cálculo usa el rango de ea_gravedad"
+  "fuente": "FAO, Irrigation Water Management Training Manual No. 4, «Irrigation Scheduling» (Brouwer, Prins and Heibloem, 1989), Annex I, Table 8 «Indicative values of the field application efficiency (ea)»: surface irrigation 60 %, sprinkler 75 %, drip 90 %. https://www.fao.org/3/t7202e/t7202e08.htm, read on Nov 14, 2026. General indicative value, not measured in DR-005. A reference: the calculation uses the range of ea_gravedad"
  },
  "gedi_piso_instrumento_m": {
   "min": 2.5,
   "max": 3.2,
   "valor": 2.7,
   "etiqueta": "own analysis (A11)",
-  "fuente": "Análisis propio (datos/colab/A11_gedi_parcelas.py, 14-nov-2026): percentiles 10 y 90 (valor = mediana) de la mediana de rh98 por parcela en las 261 parcelas con 3 o más disparos que las reglas clasifican como alfalfa, barbecho o cereal de invierno (sin árboles). Por debajo de ese nivel rh98 refleja el ancho del pulso del instrumento, no la altura de la planta"
+  "fuente": "Own analysis (datos/colab/A11_gedi_parcelas.py, Nov 14, 2026): 10th and 90th percentiles (value = median) of the per-field median rh98 in the 261 fields with 3 or more shots that the rules classify as alfalfa, fallow or winter cereal (no trees). Below that level rh98 reflects the pulse width of the instrument, not plant height"
  },
  "gedi_umbral_dosel_alto_m": {
   "valor": 5,
   "min_disparos": {
    "valor": 3,
    "etiqueta": "own analysis (A11)",
-   "fuente": "Mínimo de disparos válidos por parcela para leer la altura; criterio propio"
+   "fuente": "Minimum valid shots per field to read the height; own criterion"
   },
   "etiqueta": "own analysis (A11), assumption [S]",
-  "fuente": "Criterio propio (A11, 14-nov-2026): percentil 90 de rh98 de la parcela de 5 m o más. Con ese umbral, 57 de 86 parcelas de nogal con 3 o más disparos muestran dosel alto, frente a 7 de 95 de alfalfa y 0 de 11 de cereal de invierno"
+  "fuente": "Own criterion (A11, Nov 14, 2026): 90th percentile of the field's rh98 of 5 m or more. With that threshold, 57 of 86 pecan fields with 3 or more shots show tall canopy, against 7 of 95 alfalfa fields and 0 of 11 winter cereal fields"
  },
  "lamina_local_cm": {
-  "_nota": "Láminas publicadas para la región, en cm por año o por ciclo. Son REFERENCIA para comparar con la lámina del modelo; el cálculo no las usa. 10 cm = 1 millar/ha",
+  "_nota": "Published irrigation depths for the region, in cm per year or per cycle. They are a REFERENCE to compare with the model depth; the calculation does not use them. 10 cm = 1 thousand m³/ha",
   "alfalfa": {
    "recomendada_inifap": {
     "min": 170,
     "max": 180,
     "etiqueta": "[V]",
-    "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (verificado en el expediente del proyecto, S2 §3): lámina anual de 170–180 cm"
+    "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (verified in the project dossier, S2 §3): 170–180 cm per year"
    },
    "aplicada_dr005": {
     "valor": 174.2,
     "etiqueta": "[V]",
-    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tables 2 and 3: DR-005, means for 2009–2016 (verified in the project dossier, S2 §3, Oct 29, 2026). The article does not say where the applied water was measured and computes ET with Hargreaves; it serves as a contrast, not as a calibration"
    },
    "et_estimada_dr005": {
     "valor": 113.9,
     "etiqueta": "[V]",
-    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tables 2 and 3: DR-005, means for 2009–2016 (verified in the project dossier, S2 §3, Oct 29, 2026). The article does not say where the applied water was measured and computes ET with Hargreaves; it serves as a contrast, not as a calibration"
    }
   },
   "chile": {
    "recomendada_inifap": {
     "valor": 92,
     "etiqueta": "[V]",
-    "fuente": "INIFAP, paquete tecnológico PT-0003 (2015): 12–14 riegos y 92 cm por gravedad (expediente del proyecto, S2 §3)"
+    "fuente": "INIFAP, technology package PT-0003 (2015): 12–14 irrigations and 92 cm by gravity (project dossier, S2 §3)"
    },
    "aplicada_dr005": {
     "valor": 161.1,
     "etiqueta": "[V]",
-    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tables 2 and 3: DR-005, means for 2009–2016 (verified in the project dossier, S2 §3, Oct 29, 2026). The article does not say where the applied water was measured and computes ET with Hargreaves; it serves as a contrast, not as a calibration"
    },
    "et_estimada_dr005": {
     "valor": 82.5,
     "etiqueta": "[V]",
-    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tables 2 and 3: DR-005, means for 2009–2016 (verified in the project dossier, S2 §3, Oct 29, 2026). The article does not say where the applied water was measured and computes ET with Hargreaves; it serves as a contrast, not as a calibration"
    }
   },
   "nogal": {
    "aplicada_dr005": {
     "valor": 137.2,
     "etiqueta": "[V]",
-    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tables 2 and 3: DR-005, means for 2009–2016 (verified in the project dossier, S2 §3, Oct 29, 2026). The article does not say where the applied water was measured and computes ET with Hargreaves; it serves as a contrast, not as a calibration"
    },
    "et_estimada_dr005": {
     "valor": 141.3,
     "etiqueta": "[V]",
-    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tablas 2 y 3: DR-005, medias 2009–2016 (verificado en el expediente del proyecto, S2 §3, 29-oct-2026). El artículo no dice en qué punto se midió el agua aplicada y calcula la ET con Hargreaves; sirve como contraste, no como calibración"
+    "fuente": "Villalobos-Cano et al. 2024, Sustainability 16(5):1851, DOI 10.3390/su16051851, Tables 2 and 3: DR-005, means for 2009–2016 (verified in the project dossier, S2 §3, Oct 29, 2026). The article does not say where the applied water was measured and computes ET with Hargreaves; it serves as a contrast, not as a calibration"
    }
   },
   "algodon": {
    "recomendada_inifap": {
     "valor": 68,
     "etiqueta": "[V]",
-    "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (verificado en el expediente del proyecto, S2 §3): ~68 cm (20 cm de presiembra + 48 cm en 4–5 auxilios)"
+    "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (verified in the project dossier, S2 §3): ~68 cm (20 cm pre-planting + 48 cm in 4–5 supplementary irrigations)"
    }
   },
   "maiz_forrajero": {
@@ -206,7 +206,7 @@
     "min": 50,
     "max": 60,
     "etiqueta": "[V]",
-    "fuente": "INIFAP, Folleto Técnico 53 (2014): 5 riegos de 10–12 cm, incluida la presiembra (documento maestro del proyecto, §5.2)"
+    "fuente": "INIFAP, Folleto Técnico 53 (2014): 5 irrigations of 10–12 cm, including pre-planting (project master document, §5.2)"
    }
   }
  },
@@ -215,68 +215,68 @@
    "pendiente": 1.26,
    "ordenada": -0.18
   },
-  "etiqueta": "[V] relación publicada; assumption [S] al aplicarla a huertas adultas de nogal",
-  "fuente": "Johnson, L.F. y Trout, T.J. (2012), Remote Sensing 4(2):439–455, DOI 10.3390/rs4020439, Ec. 1: Fc = 1.26 × NDVI − 0.18 (r² = 0.96; NDVI de Landsat; hortalizas, viñedos y huertas jóvenes del Valle de San Joaquín; los autores no la verificaron en huertas adultas). Leída el 14-nov-2026. Solo se usa en A12 (referencia); el cálculo de la demanda no la usa"
+  "etiqueta": "[V] published relation; assumption [S] when applied to adult pecan orchards",
+  "fuente": "Johnson, L.F. and Trout, T.J. (2012), Remote Sensing 4(2):439–455, DOI 10.3390/rs4020439, Eq. 1: Fc = 1.26 × NDVI − 0.18 (r² = 0.96; Landsat NDVI; vegetables, vineyards and young orchards of the San Joaquin Valley; the authors did not verify it in adult orchards). Read on Nov 14, 2026. Used in A12 as a reference; the demand calculation does not use it"
  },
  "nogal_referencia": {
-  "_nota": "REFERENCIA sobre las huertas de nogal de las zonas piloto (A12, 14-nov-2026). El cálculo de la demanda no usa este bloque: A5 sigue con cobertura_dosel_nogal. Detalle en docs/nogal_cobertura.md",
+  "_nota": "REFERENCE on the pecan orchards of the pilot areas (A12, Nov 14, 2026). The demand calculation does not use this block: A5 keeps cobertura_dosel_nogal. Details in docs/nogal_cobertura.md",
   "cobertura_estimada_ndvi": {
    "valor": 0.72,
    "min": 0.57,
    "max": 0.83,
    "etiqueta": "own analysis (A12), estimate",
-   "fuente": "Mediana y percentiles 10 y 90 de 105 parcelas clasificadas como nogal en las dos zonas: máximo de NDVI de jun–sep de 2026 (NASA HLS) convertido a cobertura con cobertura_ndvi_relacion. Compatible con el supuesto del modelo (cobertura_dosel_nogal = 0.7)"
+   "fuente": "Median and 10th and 90th percentiles of 105 fields classified as pecan in the two areas: maximum NDVI of Jun–Sep 2026 (NASA HLS) converted to cover with cobertura_ndvi_relacion. Consistent with the model's assumption (cobertura_dosel_nogal = 0.7)"
   },
   "kc_mid_estimado": {
    "valor": 1.07,
    "min": 0.97,
    "max": 1.08,
    "etiqueta": "own analysis (A12), estimate",
-   "fuente": "FAO-56, Ec. 98 con kc_nogal_tabla y altura_nogal_m, aplicada a la cobertura estimada de cada parcela (antes del ajuste por clima). El modelo usa 1.07"
+   "fuente": "FAO-56, Eq. 98 with kc_nogal_tabla and altura_nogal_m, applied to the estimated cover of each field (before the climate adjustment). The model uses 1.07"
   },
   "lamina_bruta_millares_ha_p50": {
    "valor": 19.1,
    "min": 17.13,
    "max": 19.36,
    "etiqueta": "own analysis (A12), estimate",
-   "fuente": "Lámina bruta P50 del nogal en Delicias–Saucillo (A5) con la cobertura en los percentiles 10 y 90 estimados (0.57 y 0.83) y con la del modelo (0.7). Rango por cobertura; no incluye la banda P10–P90 del clima y la eficiencia"
+   "fuente": "P50 gross irrigation depth of pecan in Delicias–Saucillo (A5) with the cover at the estimated 10th and 90th percentiles (0.57 and 0.83) and with the model's cover (0.7). Range by cover; it does not include the P10–P90 band of climate and efficiency"
   },
   "altura_gedi_p90_m": {
    "valor": 7.21,
    "min": 2.88,
    "max": 13.62,
-   "etiqueta": "own analysis (A11 y A12), estimate",
-   "fuente": "Mediana y percentiles 10 y 90, entre 86 parcelas de nogal con 3 o más disparos de GEDI, del percentil 90 de rh98 de cada parcela. El modelo supone 10 m (altura_nogal_m); con 7 m el Kc de media temporada cambia en el segundo decimal"
+   "etiqueta": "own analysis (A11 and A12), estimate",
+   "fuente": "Median and 10th and 90th percentiles, among 86 pecan fields with 3 or more GEDI shots, of the 90th percentile of rh98 of each field. The model assumes 10 m (altura_nogal_m); with 7 m the mid-season Kc changes in the second decimal"
   },
   "parcelas_con_patron_huerta_2016_2026": {
    "valor": 97,
-   "etiqueta": "own analysis (A3-M y A12), estimate",
-   "fuente": "De 105 parcelas de nogal, las que muestran el patrón de huerta en los 11 años de la memoria de HLS (2016–2026): tienen al menos 11 años"
+   "etiqueta": "own analysis (A3-M and A12), estimate",
+   "fuente": "Of 105 pecan fields, those that show the orchard pattern in all 11 years of the HLS memory (2016–2026): they are at least 11 years old"
   },
   "edad_promedio_huertas_encuesta_anios": {
    "valor": 27,
    "etiqueta": "[V]",
-   "fuente": "Orona Castillo, I. et al. (2019), «La producción y comercialización de nuez pecanera en México», Revista Mexicana de Ciencias Agrícolas 10(8):1797–1808 (revista del INIFAP; https://cienciasagricolas.inifap.gob.mx/index.php/agricolas/article/download/1833/2842/11310), leído el 14-nov-2026: «La edad de los huertos es similar en las tres zonas (27 años en promedio)»; encuestas de 2014–2015 en la Comarca Lagunera, Jiménez (Chihuahua) y Hermosillo (Sonora). No es Delicias y no es la vida de la huerta"
+   "fuente": "Orona Castillo, I. et al. (2019), «La producción y comercialización de nuez pecanera en México», Revista Mexicana de Ciencias Agrícolas 10(8):1797–1808 (INIFAP journal; https://cienciasagricolas.inifap.gob.mx/index.php/agricolas/article/download/1833/2842/11310), read on Nov 14, 2026: «La edad de los huertos es similar en las tres zonas (27 años en promedio)» (orchard age is similar in the three areas, 27 years on average); surveys of 2014–2015 in the Comarca Lagunera, Jiménez (Chihuahua) and Hermosillo (Sonora). It is not Delicias and it is not the life of the orchard"
   },
   "edad_arboles_unidad_tipica_delicias_anios": {
    "valor": 25,
    "etiqueta": "[V]",
-   "fuente": "López Díaz, J.C. et al. (2011), «Rentabilidad del nogal pecanero bajo sistemas de producción de mediana tecnología en Delicias, Chihuahua», Revista Mexicana de Agronegocios 29:720–731 (https://ageconsearch.umn.edu/record/114475), leído el 14-nov-2026: unidad típica con «árboles con madurez de producción comercial (25 años de edad)». No es una publicación del INIFAP y no es la vida de la huerta"
+   "fuente": "López Díaz, J.C. et al. (2011), «Rentabilidad del nogal pecanero bajo sistemas de producción de mediana tecnología en Delicias, Chihuahua», Revista Mexicana de Agronegocios 29:720–731 (https://ageconsearch.umn.edu/record/114475), read on Nov 14, 2026: typical unit with «árboles con madurez de producción comercial (25 años de edad)» (trees at commercial production maturity, 25 years old). It is not an INIFAP publication and it is not the life of the orchard"
   },
   "vida_huerta_anios": {
    "valor": null,
-   "etiqueta": "sin fuente",
-   "fuente": "No se encontró una publicación del INIFAP que dé la vida de la huerta en años (búsqueda del 14-nov-2026). No se publica una cifra; lo que sí tiene fuente es la edad de huertas en producción (ver las dos entradas anteriores)"
+   "etiqueta": "no source",
+   "fuente": "No INIFAP publication giving the life of the orchard in years was found (search of Nov 14, 2026). No figure is published; what does have a source is the age of orchards in production (see the two previous entries)"
   }
  },
  "suelo_margen_ph": {
   "valor": 0.5,
   "etiqueta": "assumption [S]",
-  "fuente": "Criterio propio (14-nov-2026): una diferencia de pH menor que este margen entre el mapa y el límite publicado de un cultivo no se rotula «outside range» sino «near the published limit». No sale de una cifra de incertidumbre del pH: la Tabla 4 de Poggio et al. 2021 (DOI 10.5194/soil-7-217-2021) está como imagen y no se pudo leer; el texto del artículo da eficiencias del modelo (MEC) de 0.31 a 0.74 según la propiedad, e ISRIC declara que sus modelos explican entre 30 % y 70 % de la variación"
+  "fuente": "Own criterion (Nov 14, 2026): a pH difference smaller than this margin between the map and the published limit of a crop is not labeled «outside range» but «near the published limit». It does not come from a pH uncertainty figure: Table 4 of Poggio et al. 2021 (DOI 10.5194/soil-7-217-2021) is an image and could not be read; the text of the article gives model efficiencies (MEC) of 0.31 to 0.74 depending on the property, and ISRIC states that its models explain between 30 % and 70 % of the variation"
  },
  "suelo_coincidencia_textura": {
   "valor": 0.47,
   "etiqueta": "own analysis (A13), estimate",
-  "fuente": "Fracción de parcelas en que la clase de textura USDA calculada con SoilGrids 2.0 (0–30 cm) es igual a la de OpenLandMap (0 cm): 584 de 1,238 parcelas con dato en las dos zonas; en las demás difieren a una clase vecina"
+  "fuente": "Share of fields where the USDA texture class computed from SoilGrids 2.0 (0–30 cm) equals the OpenLandMap one (0 cm): 584 of 1,238 fields with data in the two pilot areas; in the others they differ by a neighboring class"
  }
 }

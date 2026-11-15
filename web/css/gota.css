@@ -45,7 +45,7 @@
 .gota-mod-estado { font-weight: 700; }
 
 .gota-mod-nota {
-  font-size: 0.9rem; margin: 4px 0 8px; padding: 6px 8px;
+  font-size: var(--fs-2); margin: 4px 0 8px; padding: 6px 8px;
   background: var(--gota-blanco); border-left: 4px solid var(--gota-neutro); border-radius: 4px;
 }
 
@@ -53,43 +53,43 @@
 .gota-mod-cifras { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 6px 0; }
 .gota-mod-cifras:empty { display: none; }
 .gota-mod-cifra { margin: 0; color: var(--gota-oscuro); }
-.gota-mod-cifra-rotulo { font-weight: 700; font-size: 1.05rem; }
-.gota-mod-cifra-valor { font-size: 1.7rem; font-variant-numeric: tabular-nums; }
-.gota-mod-cifra small { display: block; font-size: 0.85rem; font-weight: 400; color: var(--gota-texto-suave); }
+.gota-mod-cifra-rotulo { font-weight: 700; font-size: var(--fs-3); }
+.gota-mod-cifra-valor { font-size: var(--fs-6); font-variant-numeric: tabular-nums; }
+.gota-mod-cifra small { display: block; font-size: var(--fs-2); font-weight: 400; color: var(--gota-texto-suave); }
 /* Eficiencias del goteo con su rótulo y su fuente, a la vista junto a las cifras (cubo.meta.goteo). */
 .gota-mod-etiqueta {
   margin: 0 0 6px; padding: 4px 8px; border-radius: 6px;
   border-left: 3px solid var(--gota-oscuro); background: var(--agua-clara, #DCEAF6);
-  font-size: 0.82rem; color: var(--gota-oscuro); line-height: 1.35;
+  font-size: var(--fs-2); color: var(--gota-oscuro); line-height: 1.35;
 }
 .gota-mod-etiqueta[hidden], .gota-mod-cota[hidden] { display: none; }
 .gota-mod-etiqueta-fuente { color: var(--gota-texto-suave); }
-.gota-mod-cota { margin: 0 0 6px; font-size: 0.82rem; color: var(--gota-texto-suave); }
+.gota-mod-cota { margin: 0 0 6px; font-size: var(--fs-2); color: var(--gota-texto-suave); }
 .gota-mod-alerta {
   background: var(--gota-alerta-fondo); border-left: 4px solid var(--gota-alerta);
   padding: 6px 8px; border-radius: 4px; font-weight: 700; margin: 8px 0;
 }
 
 /* ---------- Diagrama Sankey ---------- */
-.gota-mod-mostrando { font-size: 0.88rem; color: var(--gota-texto-suave); margin: 6px 0 2px; }
+.gota-mod-mostrando { font-size: var(--fs-2); color: var(--gota-texto-suave); margin: 6px 0 2px; }
 .gota-mod-diagrama { width: 100%; min-width: 0; }
 .gota-svg { display: block; width: 100%; height: auto; overflow: visible; }
 .gota-banda { fill: none; stroke: var(--gota-color); stroke-opacity: var(--gota-opacidad-banda); }
 .gota-nodo { fill: var(--gota-color); }
 .gota-etiqueta {
-  font-size: 13px; fill: var(--gota-texto);
+  font-size: var(--fs-2); fill: var(--gota-texto);
   /* Halo del color de fondo: la etiqueta se lee aunque pase sobre una banda. */
   paint-order: stroke; stroke: var(--gota-fondo); stroke-width: 4px; stroke-linejoin: round;
 }
 .gota-etiqueta-nombre { font-weight: 700; }
 .gota-etiqueta-valor { font-variant-numeric: tabular-nums; }
-.gota-svg--compacto .gota-etiqueta { font-size: 11.5px; }
+.gota-svg--compacto .gota-etiqueta { font-size: var(--fs-1); }
 /* Gota: blanca con borde de agua, visible sobre las cuatro bandas. */
 .gota-gotita { fill: var(--gota-blanco); stroke: var(--gota-flujo); stroke-width: 1.5px; pointer-events: none; }
 
 /* ---------- Leyenda ---------- */
 .gota-mod-leyenda {
-  list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.85rem;
+  list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: var(--fs-2);
 }
 .gota-mod-leyenda li { display: flex; align-items: center; gap: 6px; }
 .gota-modulo[data-gota-plan="barras"] .gota-mod-leyenda {
@@ -104,7 +104,7 @@
 /* ---------- Plan B: barras horizontales apiladas ---------- */
 .gota-pb { display: grid; gap: 10px; margin-top: 6px; }
 .gota-pb-fila { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px; align-items: center; }
-.gota-pb-rotulo { font-size: 0.9rem; font-weight: 700; }
+.gota-pb-rotulo { font-size: var(--fs-2); font-weight: 700; }
 .gota-pb-pista { height: 26px; background: var(--gota-blanco); border: 1px solid var(--gota-linea); border-radius: 4px; overflow: hidden; }
 .gota-pb-barra { display: flex; height: 100%; width: 0; transition: width var(--gota-transicion) ease; }
 .gota-pb-seg {
@@ -113,9 +113,9 @@
 }
 
 /* ---------- Frase fija, fuente y supuestos ---------- */
-.gota-mod-frase { font-size: 0.92rem; margin: 12px 0 4px; }
-.gota-mod-fuente { font-size: 0.82rem; color: var(--gota-texto-suave); margin: 0 0 6px; }
-.gota-mod-supuestos { font-size: 0.82rem; color: var(--gota-texto-suave); }
+.gota-mod-frase { font-size: var(--fs-2); margin: 12px 0 4px; }
+.gota-mod-fuente { font-size: var(--fs-2); color: var(--gota-texto-suave); margin: 0 0 6px; }
+.gota-mod-supuestos { font-size: var(--fs-2); color: var(--gota-texto-suave); }
 .gota-mod-supuestos summary { cursor: pointer; font-weight: 700; color: var(--gota-oscuro); min-height: 32px; display: flex; align-items: center; }
 .gota-mod-supuestos ul { margin: 4px 0 0; padding-left: 18px; }
 
@@ -129,7 +129,7 @@
 
 /* ---------- Pantallas angostas ---------- */
 @media (max-width: 520px) {
-  .gota-mod-cifra-valor { font-size: 1.4rem; }
+  .gota-mod-cifra-valor { font-size: var(--fs-5); }
   .gota-mod-cifras { gap: 6px 20px; }
   .gota-pb-fila { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 }

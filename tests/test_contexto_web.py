@@ -23,6 +23,7 @@ DE PRUEBA; los umbrales se leen de motor/esquemas.py y de data/params.json, no s
 import csv
 import importlib.util
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -243,6 +244,12 @@ def test_real_resumen_y_json_sin_nan(real):
     assert contexto["zonas"] == {z["id"]: {"nombre": z["nombre"]} for z in PARAMS["zona_piloto"]["zonas"]["valor"]}
     assert "NaN" not in texto and "Infinity" not in texto
     assert texto.endswith("\n")
+
+
+def test_las_fuentes_van_marcadas_en_ingles(real, lleno):
+    """Las líneas de LEEME.md del buzón llegan en inglés desde la reentrega del 15-nov (buzón v11)."""
+    assert cw.IDIOMA_FUENTES == "en"
+    assert real[1]["idioma_fuentes"] == "en" and lleno["contexto"]["idioma_fuentes"] == "en"
 
 
 # ---------------------------------------------------------------------------------------
@@ -807,6 +814,8 @@ ADVERTENCIAS_PEDIDAS = {
     "segundo_clima": "not the FAO-56 reference evapotranspiration",
     "agua_almacenada": "basin series",
     "temperatura_minima": "not from NASA",
+    # SMAP es el producto asimilado (L4): la zona de raíces es del modelo, no del radiómetro (auditoría final).
+    "humedad_suelo": "assimilated product",
 }
 
 
@@ -848,6 +857,104 @@ def test_malla_mascon_se_lee_de_la_linea_de_leeme_de_su_fuente():
     assert cw.malla_mascon(None, "grace") is None
     assert cw.malla_mascon("malla de 0,5 ° sobre mascons de 3 °", "grace") is None, "sin «grace =» no es de GRACE"
     assert cw.malla_mascon("grace = X (malla de 0,5 ° sobre mascons de 3 °)", "grace")["malla_grados"] == 0.5
+
+
+def test_malla_mascon_tambien_se_lee_en_ingles():
+    """La línea de LEEME llega en inglés desde el buzón v11: «0.5° grid on 3° mascons»."""
+    linea = ("Earth Engine: smap = PRODUCT (9 km grid); grace = OTHER (JPL mascons; 0.5° grid on 3° mascons; "
+             "one series); gldas = THIRD (0.25° grid)")
+    assert cw.malla_mascon(linea, "grace") == {"malla_grados": 0.5, "mascon_grados": 3.0,
+                                                "texto_fuente": "0.5° grid on 3° mascons"}
+    assert cw.malla_mascon(linea, "gldas") is None and cw.malla_mascon(linea, "smap") is None
+    assert cw.malla_mascon("grace = PRODUCT with no declared grid", "grace") is None
+    assert cw.malla_mascon("0.5° grid on 3° mascons", "grace") is None, "sin «grace =» no es de GRACE"
+    # Variantes razonables de la misma frase: coma decimal, espacios, «over», «built on», «product grid».
+    for frase in ("0,5 ° grid on 3 ° mascons", "0.5° grid over 3° mascons", "0.5° grid built on 3° mascons",
+                  "0.5° product grid built on 3° mascons", "0.5° GRID ON 3° MASCONS"):
+        assert cw.malla_mascon(f"grace = X ({frase})", "grace") == {
+            "malla_grados": 0.5, "mascon_grados": 3.0, "texto_fuente": frase}, frase
+
+
+def grados_de_mascon_independiente(linea, fuente_id=esquemas.FUENTE_DE_CUENCA):
+    """Lectura INDEPENDIENTE del motor (no usa motor/contexto_web.py ni depende del idioma): las dos cifras en
+    grados de la cláusula del tramo «<fuente_id> = …» que nombra los mascons, ordenadas; None si no las trae."""
+    inicio = re.search(rf"(?<!\w){re.escape(fuente_id)}\s*=", linea or "")
+    if not inicio:
+        return None
+    tramo = linea[inicio.end():]
+    cortes = [m.start() for otra in esquemas.FUENTES_CONTEXTO if otra != fuente_id
+              for m in [re.search(rf"(?<!\w){re.escape(otra)}\s*=", tramo)] if m]
+    tramo = tramo[:min(cortes)] if cortes else tramo
+    for clausula in re.split(r"[;()]", tramo):
+        grados = re.findall(r"(\d+(?:[.,]\d+)?)\s*°", clausula)
+        if "mascon" in clausula.lower() and len(grados) == 2:
+            return sorted(float(g.replace(",", ".")) for g in grados)
+    return None
+
+
+def series_de(regional, fuente_id=esquemas.FUENTE_DE_CUENCA):
+    return [(f"{zona} {clave}", serie) for zona, series in (regional or {}).items()
+            for clave, serie in series.items() if serie.get("fuente_id") == fuente_id]
+
+
+def comprobar_malla_no_perdida(regional, donde):
+    """Si la línea de fuente de GRACE declara la malla y los mascons, cada serie de GRACE lleva «malla_mascon»
+    con esas dos cifras (la del mascon, la mayor). Devuelve cuántas series la declaran."""
+    declaradas = 0
+    for nombre, serie in series_de(regional):
+        esperadas = grados_de_mascon_independiente(serie.get("fuente"))
+        if esperadas is None:
+            continue
+        declaradas += 1
+        mm = serie.get("malla_mascon")
+        assert mm, f"{donde} {nombre}: la fuente declara la malla de los mascons y contexto.json la perdió"
+        assert [mm["malla_grados"], mm["mascon_grados"]] == esperadas, f"{donde} {nombre}"
+        assert mm["texto_fuente"] in serie["fuente"], f"{donde} {nombre}: la frase sale de la línea de fuente"
+    return declaradas
+
+
+FRASES_MALLA = {"es": "malla de 0.5° sobre mascons de 3°", "en": "0.5° grid on 3° mascons"}   # DE PRUEBA
+
+
+def test_lectura_independiente_de_la_malla_en_los_dos_idiomas():
+    for frase in FRASES_MALLA.values():
+        assert grados_de_mascon_independiente(f"smap = A (9 km); grace = B (mascons; {frase}; x); gldas = C (0.25°)") \
+            == [0.5, 3.0], frase
+    assert grados_de_mascon_independiente("grace = B (mascons de JPL); gldas = C (0.25° sobre 1°)") is None
+
+
+@pytest.mark.parametrize("idioma", sorted(FRASES_MALLA))
+def test_contexto_json_no_pierde_la_malla_de_grace_que_trae_el_leeme(lleno, tmp_path, idioma):
+    """La línea de LEEME de contexto_regional.csv dice la malla de GRACE (en español o en inglés): la serie de
+    GRACE de contexto.json la lleva; las demás series, no."""
+    processed = tmp_path / "processed"
+    shutil.copytree(lleno["processed"], processed)
+    ruta = processed / "fuentes.json"
+    fuentes = json.loads(ruta.read_text(encoding="utf-8"))
+    fila = next(f for f in fuentes["fuentes"] if f["archivo"] == ARCHIVO_DE["contexto_regional"])
+    marca = f"{esquemas.FUENTE_DE_CUENCA} = PRODUCTO/DE/PRUEBA/GRACE ("
+    assert marca in fila["fuente"]
+    fila["fuente"] = fila["fuente"].replace(marca, f"{marca}{FRASES_MALLA[idioma]}; ")
+    ruta.write_text(json.dumps(fuentes, ensure_ascii=False), encoding="utf-8")
+    _, contexto, _ = construir_en(tmp_path, processed)
+    regional = contexto["contexto_regional"]
+    assert comprobar_malla_no_perdida(regional, idioma) == len(series_de(regional)) >= 1
+    for nombre, serie in series_de(regional):
+        assert serie["malla_mascon"] == {"malla_grados": 0.5, "mascon_grados": 3.0,
+                                         "texto_fuente": FRASES_MALLA[idioma]}, nombre
+    otras = [s for series in regional.values() for s in series.values()
+             if s.get("fuente_id") != esquemas.FUENTE_DE_CUENCA]
+    assert otras and all("malla_mascon" not in s for s in otras)
+
+
+def test_real_contexto_json_no_pierde_la_malla_de_grace(real):
+    """Con data/processed REAL y con el contexto.json publicado: si la línea de LEEME de la entrega declara
+    la malla de los mascons de GRACE (en el idioma que sea), la página la recibe."""
+    comprobar_malla_no_perdida(real[1].get("contexto_regional"), "data/processed")
+    ruta = RAIZ / "web/data/contexto.json"
+    if ruta.is_file():
+        comprobar_malla_no_perdida(json.loads(ruta.read_text(encoding="utf-8")).get("contexto_regional"),
+                                   "web/data/contexto.json")
 
 
 def test_malla_de_grace_en_contexto_json_real_sale_de_su_fuente():

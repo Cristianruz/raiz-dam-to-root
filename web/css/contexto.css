@@ -45,8 +45,8 @@
 }
 .contexto *, .contexto-recursos * { box-sizing: border-box; min-width: 0; }
 .contexto p, .contexto-recursos p { margin: 0; }
-.contexto-titulo { font-size: 1.15rem; margin: 0; }
-.contexto-subtitulo { font-size: 1rem; margin: 0; }
+.contexto-titulo { font-size: var(--fs-4); margin: 0; }
+.contexto-subtitulo { font-size: var(--fs-3); margin: 0; }
 .contexto-donde { color: var(--contexto-tinta-suave); font-weight: 700; }
 
 .contexto .solo-lector, .contexto-recursos .solo-lector {
@@ -60,7 +60,7 @@
   padding: 10px 12px; border-radius: 8px;
   border: 1px dashed var(--contexto-pedido);
   background: var(--contexto-pedido-claro);
-  font-size: 0.92rem;
+  font-size: var(--fs-2);
 }
 .contexto-pendiente-simbolo { font-weight: 700; }
 .contexto-pendiente-que { font-weight: 700; }
@@ -75,7 +75,7 @@
   border-left: 4px solid var(--contexto-agua);
   background: var(--contexto-agua-clara);
   border-radius: 0 8px 8px 0;
-  font-size: 0.92rem;
+  font-size: var(--fs-2);
 }
 
 /* ---------- «Climate of the year» ---------- */
@@ -97,12 +97,12 @@
 .contexto-cifra--par { flex: 2 1 300px; }
 .contexto-cifra-lado { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .contexto-cifra-lado .contexto-cifra { padding: 4px 0 0; background: none; }
-.contexto-cifra-rotulo { font-size: 0.85rem; color: var(--contexto-tinta-suave); font-weight: 700; }
-.contexto-cifra-valor { font-size: 1.5rem; font-weight: 700; line-height: 1.15; }
-.contexto-cifra-valor small { font-size: 0.85rem; font-weight: 400; }
-.contexto-cifra-valor--vacio { font-size: 1rem; font-weight: 400; font-style: italic; color: var(--contexto-tinta-suave); }
-.contexto-cifra-pie { font-size: 0.8rem; color: var(--contexto-tinta-suave); }
-.contexto-cifra-diferencia { font-size: 0.88rem; padding-top: 6px; border-top: 1px solid var(--contexto-borde); }
+.contexto-cifra-rotulo { font-size: var(--fs-2); color: var(--contexto-tinta-suave); font-weight: 700; }
+.contexto-cifra-valor { font-size: var(--fs-6); font-weight: 700; line-height: 1.15; }
+.contexto-cifra-valor small { font-size: var(--fs-2); font-weight: 400; }
+.contexto-cifra-valor--vacio { font-size: var(--fs-3); font-weight: 400; font-style: italic; color: var(--contexto-tinta-suave); }
+.contexto-cifra-pie { font-size: var(--fs-2); color: var(--contexto-tinta-suave); }
+.contexto-cifra-diferencia { font-size: var(--fs-2); padding-top: 6px; border-top: 1px solid var(--contexto-borde); }
 
 .contexto-rejilla-figuras {
   display: grid; gap: 14px;
@@ -121,8 +121,8 @@
   border: 1px solid var(--contexto-borde); border-radius: 12px;
 }
 .contexto-tarjeta--pendiente { border-style: dashed; }
-.contexto-tarjeta-titulo { font-size: 1rem; margin: 0; }
-.contexto-tarjeta-nota { font-size: 0.82rem; color: var(--contexto-tinta-suave); }
+.contexto-tarjeta-titulo { font-size: var(--fs-3); margin: 0; }
+.contexto-tarjeta-nota { font-size: var(--fs-2); color: var(--contexto-tinta-suave); }
 /* Advertencias de la sesión de datos (integración, etapa 3): a la vista en la tarjeta, con símbolo y texto. */
 .contexto-advertencias { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .contexto-advertencia {
@@ -130,12 +130,12 @@
   padding: 6px 10px; border-radius: 6px;
   border-left: 3px solid var(--contexto-serie-b);
   background: var(--contexto-arena);
-  font-size: 0.82rem; color: var(--contexto-tinta);
+  font-size: var(--fs-2); color: var(--contexto-tinta);
 }
 .contexto-advertencia-simbolo { font-weight: 700; color: var(--contexto-tinta); }
 .contexto-meta {
   display: flex; flex-wrap: wrap; gap: 2px 14px;
-  font-size: 0.8rem; color: var(--contexto-tinta-suave);
+  font-size: var(--fs-2); color: var(--contexto-tinta-suave);
 }
 .contexto-meta > span { overflow-wrap: anywhere; }
 /* Series de un panel con mallas distintas: un renglón por serie, con su nombre delante. */
@@ -147,13 +147,13 @@
 
 /* ---------- Gráficas ---------- */
 .contexto-figura { margin: 0; display: grid; gap: 6px; align-content: start; }
-.contexto-figura-titulo { font-weight: 700; font-size: 0.92rem; }
-.contexto-unidad { font-weight: 400; font-size: 0.82rem; color: var(--contexto-tinta-suave); }
+.contexto-figura-titulo { font-weight: 700; font-size: var(--fs-2); }
+.contexto-unidad { font-weight: 400; font-size: var(--fs-2); color: var(--contexto-tinta-suave); }
 /* La gráfica se dibuja al ancho en píxeles del lienzo (contexto.js la vuelve a dibujar si cambia). */
 .contexto-lienzo { touch-action: pan-y; cursor: crosshair; max-width: 560px; }
 .contexto-svg { display: block; max-width: 100%; height: auto; }
 .contexto-svg text { font-family: inherit; }
-.contexto-eje { font-size: 11px; fill: var(--contexto-tinta-suave); font-variant-numeric: tabular-nums; }
+.contexto-eje { font-size: var(--fs-1); fill: var(--contexto-tinta-suave); font-variant-numeric: tabular-nums; }
 .contexto-rejilla { stroke: var(--contexto-rejilla); stroke-width: 1; }
 .contexto-rejilla--cero { stroke: var(--contexto-rejilla-cero); }
 
@@ -175,18 +175,18 @@
 
 /* Año elegido: línea, rótulo con el año y marcadores (no solo color). */
 .contexto-elegido { stroke: var(--contexto-tinta); stroke-width: 1; }
-.contexto-elegido-texto { font-size: 12px; font-weight: 700; fill: var(--contexto-tinta); }
+.contexto-elegido-texto { font-size: var(--fs-1); font-weight: 700; fill: var(--contexto-tinta); }
 .contexto-cursor line { stroke: var(--contexto-tinta-suave); stroke-width: 1; stroke-dasharray: 2 2; }
 
 /* Lectura bajo la gráfica: leyenda (clave + nombre) y valores del año elegido o del punto bajo el puntero. */
 .contexto-lectura {
   display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px;
   min-height: 1.4em;
-  font-size: 0.85rem; font-variant-numeric: tabular-nums;
+  font-size: var(--fs-2); font-variant-numeric: tabular-nums;
 }
 .contexto-lectura b { font-weight: 700; }
 .contexto-lectura-serie { white-space: normal; }
-.contexto-lectura-ayuda { color: var(--contexto-tinta-suave); flex-basis: 100%; font-size: 0.8rem; }
+.contexto-lectura-ayuda { color: var(--contexto-tinta-suave); flex-basis: 100%; font-size: var(--fs-2); }
 .contexto-figura--explorando .contexto-lectura-x { text-decoration: underline dotted; }
 /* Clave de la serie: un tramo de la misma línea (mismo trazo y mismo marcador que en la gráfica). */
 .contexto-clave { display: inline-block; vertical-align: middle; margin-right: 6px; }
@@ -195,26 +195,26 @@
 .contexto-datos summary {
   width: fit-content; cursor: pointer;
   padding: 4px 2px; border-radius: 4px;
-  font-size: 0.85rem; color: var(--contexto-agua-osc); text-decoration: underline;
+  font-size: var(--fs-2); color: var(--contexto-agua-osc); text-decoration: underline;
 }
 .contexto-datos summary:hover { background: var(--contexto-arena); }
 .contexto summary:focus-visible, .contexto-tabla-caja:focus-visible, .contexto a:focus-visible, .contexto-recursos a:focus-visible {
   outline: 3px solid var(--contexto-agua); outline-offset: 2px;
 }
-.contexto-definiciones ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: 0.85rem; overflow-wrap: anywhere; }
+.contexto-definiciones ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: var(--fs-2); overflow-wrap: anywhere; }
 /* Fuentes completas de la sección: UNA lista plegada al final (cada texto puede ser largo y lo
    comparten varias tarjetas). En cada tarjeta queda a la vista solo el recurso y la fecha del archivo. */
 .contexto-fuentes ul { gap: 8px; }
 .contexto-fuentes li b { font-weight: 700; }
 .contexto-tabla-caja { overflow-x: auto; }
 .contexto-datos .contexto-tabla-caja { max-height: 17rem; overflow-y: auto; margin-top: 4px; border: 1px solid var(--contexto-borde); border-radius: 8px; }
-.contexto-tabla { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-.contexto-tabla caption { text-align: left; padding: 6px 8px; font-size: 0.8rem; color: var(--contexto-tinta-suave); }
+.contexto-tabla { width: 100%; border-collapse: collapse; font-size: var(--fs-2); }
+.contexto-tabla caption { text-align: left; padding: 6px 8px; font-size: var(--fs-2); color: var(--contexto-tinta-suave); }
 .contexto-tabla th, .contexto-tabla td {
   padding: 5px 8px; text-align: left; vertical-align: top;
   border-bottom: 1px solid var(--contexto-borde);
 }
-.contexto-tabla thead th { background: var(--contexto-arena); font-size: 0.8rem; }
+.contexto-tabla thead th { background: var(--contexto-arena); font-size: var(--fs-2); }
 .contexto-datos .contexto-tabla thead th { position: sticky; top: 0; }
 .contexto-datos .contexto-tabla td { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .contexto-datos .contexto-tabla td.contexto-celda-vacia { white-space: normal; font-style: italic; color: var(--contexto-tinta-suave); }
@@ -226,12 +226,12 @@
 
 /* ---------- «Challenge data sources» ---------- */
 .contexto-recursos-resumen { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
-.contexto-recursos-nota { font-size: 0.88rem; color: var(--contexto-tinta-suave); }
+.contexto-recursos-nota { font-size: var(--fs-2); color: var(--contexto-tinta-suave); }
 .contexto-estado {
   display: inline-flex; align-items: baseline; gap: 5px;
   padding: 2px 10px; border-radius: 999px;
   border: 2px solid var(--contexto-borde); background: var(--contexto-fondo);
-  font-size: 0.82rem; font-weight: 700; color: var(--contexto-tinta);
+  font-size: var(--fs-2); font-weight: 700; color: var(--contexto-tinta);
 }
 .contexto-estado b { font-weight: 700; }
 .contexto-estado--in-use { border-color: var(--contexto-en-uso); background: var(--contexto-en-uso-claro); }
@@ -240,12 +240,12 @@
 .contexto-tabla--recursos tbody th { min-width: 8em; }
 .contexto-tabla--recursos .contexto-estado { white-space: nowrap; }
 .contexto-tabla--recursos td:last-child { min-width: 15em; }
-.contexto-equivalente { display: block; margin-top: 2px; font-size: 0.82rem; color: var(--contexto-tinta-suave); }
+.contexto-equivalente { display: block; margin-top: 2px; font-size: var(--fs-2); color: var(--contexto-tinta-suave); }
 .contexto-archivos { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.contexto-archivos code, .contexto-definiciones code { font-size: 0.8rem; overflow-wrap: anywhere; }
+.contexto-archivos code, .contexto-definiciones code { font-size: var(--fs-2); overflow-wrap: anywhere; }
 .contexto-archivo-falta { color: var(--contexto-tinta-suave); }
-.contexto-archivo-falta span { font-style: italic; font-size: 0.78rem; }
-.contexto-archivos-fecha { display: block; margin-top: 2px; font-size: 0.78rem; color: var(--contexto-tinta-suave); }
+.contexto-archivo-falta span { font-style: italic; font-size: var(--fs-1); }
+.contexto-archivos-fecha { display: block; margin-top: 2px; font-size: var(--fs-1); color: var(--contexto-tinta-suave); }
 
 /* Angosto: la tabla de recursos se apila (un bloque por recurso, cada dato con su rótulo). Se decide con
    el ancho de SU contenedor (sirve igual en un panel lateral que en el teléfono); la regla @media es el
@@ -257,13 +257,13 @@
   .contexto-tabla--recursos th, .contexto-tabla--recursos td { display: block; width: 100%; }
   .contexto-tabla--recursos tr { border: 1px solid var(--contexto-borde); border-radius: 10px; margin-bottom: 10px; padding: 6px 0; background: var(--contexto-fondo); }
   .contexto-tabla--recursos th, .contexto-tabla--recursos td { border-bottom: none; padding: 3px 12px; }
-  .contexto-tabla--recursos tbody th { font-size: 0.98rem; }
+  .contexto-tabla--recursos tbody th { font-size: var(--fs-3); }
   .contexto-tabla--recursos .contexto-estado { white-space: normal; border-radius: 14px; }
   .contexto-tabla--recursos td:last-child { min-width: 0; }
   .contexto-tabla--recursos td::before {
     content: attr(data-rotulo);
     display: block;
-    font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    font-size: var(--fs-1); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
     color: var(--contexto-tinta-suave);
   }
 }
@@ -273,13 +273,13 @@
   .contexto-tabla--recursos th, .contexto-tabla--recursos td { display: block; width: 100%; }
   .contexto-tabla--recursos tr { border: 1px solid var(--contexto-borde); border-radius: 10px; margin-bottom: 10px; padding: 6px 0; background: var(--contexto-fondo); }
   .contexto-tabla--recursos th, .contexto-tabla--recursos td { border-bottom: none; padding: 3px 12px; }
-  .contexto-tabla--recursos tbody th { font-size: 0.98rem; }
+  .contexto-tabla--recursos tbody th { font-size: var(--fs-3); }
   .contexto-tabla--recursos .contexto-estado { white-space: normal; border-radius: 14px; }
   .contexto-tabla--recursos td:last-child { min-width: 0; }
   .contexto-tabla--recursos td::before {
     content: attr(data-rotulo);
     display: block;
-    font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    font-size: var(--fs-1); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
     color: var(--contexto-tinta-suave);
   }
   .contexto-clima, .contexto-tarjeta { padding: 12px; }

@@ -14,3 +14,8 @@ buzon/
 
 # Copias de trabajo de agentes (git worktree): nunca van al repositorio
 .claude/worktrees/
+
+# Sesión de datos: copias de trabajo locales que no van al repositorio (las entregas van por Drive, Raiz_entregas/)
+data/zonas/
+data/entrega_zonas/
+data/raw/ee_zonas/

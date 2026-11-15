@@ -85,7 +85,7 @@ def main():
 
     registrar_fuentes("A1_crudo", crudos, "NASA POWER Daily API, community=AG (respuesta original)",
                       "datos/colab/A1_power_eto.py")
-    registrar_fuentes("A1", ["eto_diaria.csv"], f"NASA POWER Daily API, community=AG, punto {LAT} N {LON} O",
+    registrar_fuentes("A1", ["eto_diaria.csv"], f"NASA POWER Daily API; community=AG, punto {LAT} N {LON} O",
                       "datos/colab/A1_power_eto.py")
     # Prueba de aceptación (kit A1)
     etos = [r[1] for r in filas]

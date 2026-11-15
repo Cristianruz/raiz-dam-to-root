@@ -344,7 +344,7 @@
       "unidad": "fracción",
       "fuente": null,
       "etiqueta": "[S]",
-      "nota": "pendiente: P5 en supuestos.json"
+      "nota": "entregado en data/processed/supuestos.json → ea_goteo (con su fuente y etiqueta); de ahí lo lee el escenario de goteo de motor/b4_cubo.py. Aquí queda en null para no duplicar el valor"
     }
   },
   "gota": {

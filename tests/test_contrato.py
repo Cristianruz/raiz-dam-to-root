@@ -30,7 +30,7 @@ for ruta in (str(RAIZ), str(RAIZ / "motor")):
         sys.path.insert(0, ruta)
 
 import validar_contrato  # noqa: E402
-from motor import manifest  # noqa: E402
+from motor import b4_cubo, manifest  # noqa: E402
 
 ARCHIVOS = ("parcelas.geojson", "cubo.json", "explicaciones.json")
 
@@ -157,6 +157,135 @@ def localidad_sin_fuente(cubo, geo, expl):
     cubo["localidades"][0]["fuente"] = ""
 
 
+# Revisión de dda5abb (puntos 1–4): lo que el validador dejaba pasar o rechazaba sin motivo.
+def propiedades(geo):
+    return {f["properties"]["id"]: f["properties"] for f in geo["features"]}
+
+
+def parcela_que_rota(cubo, geo):
+    """Id de la primera parcela clasificada que NO es nogal y lleva ACTUAL + 2 o más opciones."""
+    props = propiedades(geo)
+    for pid, pc in cubo["parcelas"].items():
+        if props[pid]["cultivo_actual"] != "nogal" and len(pc["opciones"]) >= 3:
+            return pid
+    pytest.skip("el cubo actual no trae una parcela que rote con ACTUAL + 2 opciones")
+
+
+def nogal_sin_rotacion(cubo):
+    """(id, bloque) de la primera parcela con «sin_rotacion»; si el cubo no la trae, la prueba se omite."""
+    for pid, pc in cubo["parcelas"].items():
+        if pc.get("sin_rotacion"):
+            return pid, pc
+    pytest.skip("el cubo actual no trae parcelas con sin_rotacion")
+
+
+def abstenida_con_estado_plazo(cubo, geo, expl):
+    p = next((f["properties"] for f in geo["features"] if f["properties"]["abstencion"]), None)
+    if p is None:
+        pytest.skip("el cubo actual no trae parcelas abstenidas")
+    p["estado_plazo"] = "libre"
+
+
+def sin_rotacion_en_cultivo_que_rota(cubo, geo, expl):
+    """La exención de ACTUAL + 2 es del nogal que no rota: otra parcela con «sin_rotacion» no la tiene."""
+    _, nogal = nogal_sin_rotacion(cubo)
+    pc = cubo["parcelas"][parcela_que_rota(cubo, geo)]
+    pc["opciones"] = [o for o in pc["opciones"] if o["id"] == "ACTUAL"]
+    pc["sin_rotacion"] = dict(nogal["sin_rotacion"])
+
+
+def sin_rotacion_con_letra_que_no_es_no_rota(cubo, geo, expl):
+    """El nogal queda exento porque el catálogo dice letra_maestro = nogal_no_rota; sin esa letra, no."""
+    _, nogal = nogal_sin_rotacion(cubo)
+    rot = next(o["rotacion"] for o in nogal["opciones"] if o["id"] == "ACTUAL")
+    cubo["opciones_catalogo"][rot]["letra_maestro"] = "ACTUAL"
+
+
+def gota_en_null_con_goteo(cubo, geo, expl):
+    """Sin La gota (lámina neta null) no puede haber escenario de goteo: los cuatro bloques van juntos."""
+    opcion_con_goteo(cubo)["gota"] = None
+
+
+# Auditoría de df97135 (H4a y H4b): una alteración por cada regla que el validador no comprobaba.
+BLOQUES_GOTA = ("gota", "gota_goteo_con_tope", "gota_goteo_sin_tope", "tope_consumo")
+
+
+def todas_las_gotas_en_null_sin_aviso(cubo, geo, expl):
+    """H4a: «gota» en null solo vale si el motor lo declara (aviso de lámina neta en cubo.meta.notas)."""
+    for pc in cubo["parcelas"].values():
+        for op in pc["opciones"]:
+            for b in BLOQUES_GOTA:
+                op[b] = None
+
+
+def opcion_sin_la_llave_gota(cubo, geo, expl):
+    """H4a: la llave «gota» es del contrato (kit §2.3): no puede faltar."""
+    op = primera_opcion(cubo)
+    for b in BLOQUES_GOTA[1:]:
+        op[b] = None   # sin La gota tampoco hay goteo: así el único error es la llave que falta
+    del op["gota"]
+
+
+def compromiso_de(op, restante):
+    """compromiso_millares_ha que corresponde a un plazo restante (kit B4, paso 5: lámina P50 × plazo restante)."""
+    lam = op["agua"]["lamina_bruta"]
+    return {r: {k: round(lam[r]["p50"] * restante[k], 2) for k in ("min", "max")} for r in validar_contrato.LLUVIAS}
+
+
+def compromiso_que_no_es_lamina_por_plazo(cubo, geo, expl):
+    """H4b (1): con lluvia 0, el máximo del compromiso sube una lámina (dato de la propia opción)."""
+    ag = primera_opcion(cubo)["agua"]
+    ag["compromiso_millares_ha"]["0"]["max"] += ag["lamina_bruta"]["0"]["p50"]
+
+
+def compromiso_con_menos_lluvia_que_no_es_lamina_por_plazo(cubo, geo, expl):
+    """H4b (1): la misma regla en la variante de lluvia −20 (mínimo y máximo, para no romper min ≤ max)."""
+    ag = primera_opcion(cubo)["agua"]
+    for k in ("min", "max"):
+        ag["compromiso_millares_ha"]["-20"][k] += ag["lamina_bruta"]["-20"]["p50"]
+
+
+def plazo_restante_mayor_que_el_plazo(cubo, geo, expl):
+    """H4b (2): el plazo restante no puede pasar del plazo. El compromiso se recalcula con ese plazo restante:
+    así el único error es el del plazo."""
+    op = next(o for pc in cubo["parcelas"].values() for o in pc["opciones"]
+              if o["agua"]["lamina_bruta"]["0"]["p50"] > 0 and "nogal" not in o["secuencia"])
+    ag = op["agua"]
+    ag["plazo_restante"] = {k: ag["plazo_anios"][k] + ag["plazo_anios"]["max"] for k in ("min", "max")}
+    ag["compromiso_millares_ha"] = compromiso_de(op, ag["plazo_restante"])
+
+
+def plazo_restante_negativo(cubo, geo, expl):
+    """H4b (2): ni bajar de cero (ya lo comprobaba el rango; se deja como control)."""
+    ag = primera_opcion(cubo)["agua"]
+    ag["plazo_restante"]["min"] = -ag["plazo_anios"]["max"]
+
+
+def nogal_con_la_edad_descontada(cubo, geo, expl):
+    """H4b (3): en nogal no se descuenta la edad (kit §2.3). Se descuenta la edad observada de un nogal, como
+    en la alfalfa, y el compromiso se recalcula: el único error es el del nogal."""
+    props = propiedades(geo)
+    for pid, pc in cubo["parcelas"].items():
+        edad = props[pid]["edad_perenne_anios"]
+        op = next((o for o in pc["opciones"] if o["id"] == "ACTUAL" and "nogal" in o["secuencia"]), None)
+        if op is None or not edad or edad >= op["agua"]["plazo_anios"]["min"]:
+            continue   # hace falta una edad que deje el plazo restante entre cero y el plazo
+        ag = op["agua"]
+        ag["plazo_restante"] = {k: ag["plazo_anios"][k] - edad for k in ("min", "max")}
+        ag["compromiso_millares_ha"] = compromiso_de(op, ag["plazo_restante"])
+        return
+    pytest.skip("el cubo actual no trae un nogal con edad observada menor que su horizonte")
+
+
+def marca_con_valor_que_no_es_el_punto_medio(cubo, geo, expl):
+    """H4b (4): el valor de una marca con rango es su punto medio (kit §2.3). Se lleva al máximo del rango:
+    sigue dentro de [min, max], así que la regla anterior no lo detecta."""
+    marca = next((m for m in cubo["dotaciones"]["marcas"] if m["min"] < m["max"]), None)
+    if marca is None:
+        pytest.skip("el cubo actual no trae una marca con rango (min < max)")
+    marca["valor"] = marca["max"]
+
+
 ALTERACIONES = {
     "P50 > P90": (p50_mayor_que_p90, "P10 ≤ P50 ≤ P90"),
     "semáforo de agua guardado": (semaforo_de_agua_guardado, "semáforo de agua"),
@@ -172,7 +301,26 @@ ALTERACIONES = {
     "demanda de zona con P50 > P90": (demanda_de_zona_p50_mayor_que_p90, "P10 ≤ P50 ≤ P90"),
     "localidad con latitud fuera de rango": (localidad_con_latitud_fuera_de_rango, "localidades[0].lat"),
     "localidad sin fuente": (localidad_sin_fuente, "falta la fuente"),
+    "abstenida con estado_plazo": (abstenida_con_estado_plazo, "parcela abstenida debe tener estado_plazo null"),
+    "sin_rotacion en un cultivo que rota": (sin_rotacion_en_cultivo_que_rota, "sin_rotacion es del nogal que no rota"),
+    "sin_rotacion sin la letra nogal_no_rota": (sin_rotacion_con_letra_que_no_es_no_rota,
+                                               "sin_rotacion es del nogal que no rota"),
+    "gota en null con escenario de goteo": (gota_en_null_con_goteo, "gota en null pide también en null"),
+    "todas las gotas en null sin aviso del motor": (todas_las_gotas_en_null_sin_aviso, "gota en null sin el aviso del motor"),
+    "opción sin la llave gota": (opcion_sin_la_llave_gota, "falta la llave gota"),
+    "compromiso que no es lámina × plazo restante": (compromiso_que_no_es_lamina_por_plazo,
+                                                    "agua.compromiso_millares_ha.0.max"),
+    "compromiso con lluvia −20 que no es lámina × plazo restante": (compromiso_con_menos_lluvia_que_no_es_lamina_por_plazo,
+                                                                   "agua.compromiso_millares_ha.-20.min"),
+    "plazo restante mayor que el plazo": (plazo_restante_mayor_que_el_plazo, "plazo_restante mayor que plazo_anios"),
+    "plazo restante negativo": (plazo_restante_negativo, "agua.plazo_restante.min"),
+    "nogal con la edad descontada": (nogal_con_la_edad_descontada, "en nogal no se descuenta la edad"),
+    "marca con valor que no es el punto medio": (marca_con_valor_que_no_es_el_punto_medio, "punto medio"),
 }
+
+# Alteraciones recalculadas para que SOLO falle su regla: el validador debe dar ese error y ningún otro.
+AISLADAS = ("opción sin la llave gota", "plazo restante mayor que el plazo", "nogal con la edad descontada",
+            "marca con valor que no es el punto medio")
 
 
 @pytest.mark.parametrize("nombre", list(ALTERACIONES))
@@ -181,6 +329,85 @@ def test_cubo_alterado_da_error(tmp_path, nombre):
     errores = validar_contrato.validar(copia_alterada(tmp_path, alterar))
     assert errores, f"el validador aceptó un contrato con «{nombre}»"
     assert any(mensaje in e for e in errores), f"se esperaba un error con «{mensaje}»: {errores}"
+    if nombre in AISLADAS:
+        assert all(mensaje in e for e in errores), f"«{nombre}» debía dar solo su error: {errores}"
+
+
+def test_sin_actual_es_un_motivo_de_sin_opciones(tmp_path):
+    """motor/b4_cubo.py escribe sin_opciones = «sin_actual» cuando no puede armar la opción ACTUAL; el
+    validador lo acepta con las opciones vacías (como «sin_clima_zona») y lo rechaza con opciones."""
+    assert "sin_actual" in validar_contrato.MOTIVOS_SIN_OPCIONES
+    for sub in ("vacia", "con"):
+        (tmp_path / sub).mkdir()
+
+    def vacia(cubo, geo, expl):
+        cubo["parcelas"][parcela_que_rota(cubo, geo)] = {"opciones": [], "sin_opciones": "sin_actual"}
+    assert validar_contrato.validar(copia_alterada(tmp_path / "vacia", vacia)) == []
+
+    def con_opciones(cubo, geo, expl):
+        cubo["parcelas"][parcela_que_rota(cubo, geo)]["sin_opciones"] = "sin_actual"
+    errores = validar_contrato.validar(copia_alterada(tmp_path / "con", con_opciones))
+    assert any("solo con opciones vacías" in e for e in errores), errores
+
+
+def cubo_del_motor_sin_neta(tmp_path):
+    """Cubo que arma motor/b4_cubo.py con la fixture de dos zonas (DATOS DE PRUEBA) después de quitarle la lámina
+    neta a UNA rotación de UNA zona: el motor deja en null La gota de esas opciones y lo declara con su aviso en
+    cubo.meta.notas. Devuelve (carpeta, zona, rotación, opciones en null)."""
+    zona, rot = validar_contrato.ZONA_SIN_SUFIJO, "algodon"
+    processed = tmp_path / "processed"
+    shutil.copytree(RAIZ / "tests/fixtures/b4_dos_zonas/processed", processed)
+    ruta = processed / "rotaciones.json"   # el archivo sin sufijo es el de la zona sin sufijo
+    datos = json.loads(ruta.read_text(encoding="utf-8"))
+    next(r for r in datos["rotaciones"] if r["id"] == rot)["lamina_bruta_millares"]["0"]["neta_mm_p50"] = None
+    ruta.write_text(json.dumps(datos, ensure_ascii=False), encoding="utf-8")
+    web = tmp_path / "web"
+    assert b4_cubo.construir(processed, web)["ejecutado"]
+    cubo = json.loads((web / "cubo.json").read_text(encoding="utf-8"))
+    en_null = sum(1 for pc in cubo["parcelas"].values() for o in pc["opciones"] if o["gota"] is None)
+    return web, zona, rot, en_null
+
+
+def reescribir_notas(web, cambiar):
+    """Aplica cambiar(nota) a cada nota de cubo.meta.notas (None = quitarla) y guarda el cubo."""
+    ruta = web / "cubo.json"
+    cubo = json.loads(ruta.read_text(encoding="utf-8"))
+    cubo["meta"]["notas"] = [x for x in (cambiar(n) for n in cubo["meta"]["notas"]) if x is not None]
+    ruta.write_text(json.dumps(cubo, ensure_ascii=False), encoding="utf-8")
+
+
+def test_gota_en_null_solo_pasa_con_el_aviso_del_motor(tmp_path):
+    """H4a: el null de «gota» va atado al aviso con que el motor declara que a esa rotación de esa zona le falta la
+    lámina neta. Con el cubo que arma el propio motor pasa; sin el aviso, o con el aviso de otra zona o de otra
+    rotación, cada opción en null da error."""
+    web, zona, rot, en_null = cubo_del_motor_sin_neta(tmp_path)
+    assert en_null > 0, "la fixture debe dejar opciones sin La gota"
+    assert validar_contrato.validar(web) == []
+
+    def es_el_aviso(nota):
+        return f"la opción {rot} no trae lámina neta" in nota
+    original = (web / "cubo.json").read_text(encoding="utf-8")
+    otra_zona = next(z for z in validar_contrato.zonas_de_params(RAIZ / "data/params.json") if z != zona)
+    casos = {
+        "sin el aviso": lambda n: None if es_el_aviso(n) else n,
+        "aviso de otra zona": lambda n: n.replace(f"Zona {zona}:", f"Zona {otra_zona}:") if es_el_aviso(n) else n,
+        "aviso de otra rotación": lambda n: n.replace(f"la opción {rot} ", "la opción otra_rotacion ") if es_el_aviso(n) else n,
+    }
+    for nombre, cambiar in casos.items():
+        (web / "cubo.json").write_text(original, encoding="utf-8")
+        reescribir_notas(web, cambiar)
+        errores = [e for e in validar_contrato.validar(web) if "gota en null sin el aviso del motor" in e]
+        assert len(errores) == en_null, f"{nombre}: {errores}"
+
+
+def test_los_datos_simulados_cumplen_el_contrato(tmp_path, monkeypatch):
+    """Las reglas del validador valen también para el cubo simulado (motor/simulados.py), que es lo que se publica
+    mientras no hay datos reales. Se genera en memoria: web/data no se toca."""
+    from motor import simulados
+    monkeypatch.setattr(simulados, "escribir_json", lambda ruta, datos: None)
+    for nombre, datos in zip(ARCHIVOS, simulados.generar()):
+        (tmp_path / nombre).write_text(json.dumps(datos, ensure_ascii=False), encoding="utf-8")
+    assert validar_contrato.validar(tmp_path) == []
 
 
 # --- 3) manifest.json (§2.5) -----------------------------------------------------

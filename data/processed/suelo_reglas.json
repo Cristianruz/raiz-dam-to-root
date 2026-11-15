@@ -1,5 +1,5 @@
 {
- "fuente": "NOM-021-SEMARNAT-2000 (México) para clases e interpretación; Montana State University Extension para la disponibilidad según el pH; NMSU e Illinois Agronomy Handbook para los avisos por cultivo; leído el 14-nov-2026",
+ "fuente": "NOM-021-SEMARNAT-2000 (Mexico) for classes and interpretation; Montana State University Extension for nutrient availability by pH; NMSU and the Illinois Agronomy Handbook for the crop notes; read on Nov 14, 2026",
  "nota": "Reglas generales: valen en cualquier región con el pH, la materia orgánica y la CIC de un mapa mundial (SoilGrids) o de un análisis. Un «riesgo» es una regla, no un diagnóstico; los nutrientes disponibles se miden con análisis de suelo.",
  "texto_aviso_en": "Rule-based risk from a global soil map; needs a soil test.",
  "textos_ficha_en": {
@@ -75,7 +75,7 @@
   },
   "tipo_suelo": {
    "zona": {
-    "texto_en": "Soils of the municipality (INEGI soil map): {lista}.",
+    "texto_en": "Soils of the municipality of Delicias (INEGI soil map): {lista}.",
     "cuando": "zona delicias_saucillo; {lista} = suelo_tipos.json → zona.municipio_delicias_pct, de mayor a menor"
    },
    "parcela": {
@@ -110,7 +110,7 @@
    "cautela": {
     "texto_en": "FAO advises treating these results in a conservative manner, at aggregation levels that match the resolution of the basic data.",
     "cuando": "en el detalle de GAEZ",
-    "fuente": "FAO e IIASA, GAEZ v4 Frequently Asked Questions, versión 2.0, noviembre de 2022 (https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf), pregunta 13: «should be treated in a conservative manner» … «appropriate aggregation levels, which are commensurate with the resolution of basic data»; pregunta 16: «It is generally not recommended to calculate statistics at finer administrative levels with this version of the database.» (después de hablar del primer nivel subnacional), leído el 14-nov-2026"
+    "fuente": "FAO and IIASA, GAEZ v4 Frequently Asked Questions, version 2.0, November 2022 (https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf), question 13: «should be treated in a conservative manner» … «appropriate aggregation levels, which are commensurate with the resolution of basic data»; question 16: «It is generally not recommended to calculate statistics at finer administrative levels with this version of the database.» (after discussing the subnational level just below the country), read on Nov 14, 2026"
    }
   }
  },
@@ -147,8 +147,8 @@
     "max": null
    }
   ],
-  "metodo": "pH en agua, relación 1:2",
-  "fuente": "NOM-021-SEMARNAT-2000, que establece las especificaciones de fertilidad, salinidad y clasificación de suelos (DOF 31-dic-2002), texto en https://www.norlexinternacional.com/arch/N021ST00.htm, leído el 14-nov-2026, AS-02",
+  "metodo": "pH in water, 1:2 ratio",
+  "fuente": "NOM-021-SEMARNAT-2000, which sets the specifications for soil fertility, salinity and classification (DOF Dec 31, 2002), text at https://www.norlexinternacional.com/arch/N021ST00.htm, read on Nov 14, 2026, AS-02",
   "etiqueta": "[V]"
  },
  "disponibilidad_ph": {
@@ -199,8 +199,8 @@
   },
   "regla": "un nutriente queda «less available» si el pH sale de su rango por más de margen_ph y «near the limit» si sale por menos",
   "texto_fe": "Iron becomes nearly insoluble as soil pH nears eight; chelated forms raise its availability.",
-  "fuente": "McCauley, A., Jones, C. y Olson-Rutz, K. 2017 (marzo). Soil pH and Organic Matter. Nutrient Management Module 8 (4449-8), Montana State University Extension (PDF: https://landresources.montana.edu/nm/documents/soilmodulepdf/4449-8.pdf; ficha: https://apps.msuextension.org/publications/pub.html?sku=4449-8), leído el 14-nov-2026",
-  "etiqueta": "[V] rangos de la fuente; margen assumption [S]"
+  "fuente": "McCauley, A., Jones, C. and Olson-Rutz, K. 2017 (March). Soil pH and Organic Matter. Nutrient Management Module 8 (4449-8), Montana State University Extension (PDF: https://landresources.montana.edu/nm/documents/soilmodulepdf/4449-8.pdf; page: https://apps.msuextension.org/publications/pub.html?sku=4449-8), read on Nov 14, 2026",
+  "etiqueta": "[V] ranges from the source; margin assumption [S]"
  },
  "materia_organica": {
   "factor_c_a_mo": 1.724,
@@ -261,7 +261,7 @@
   "unidad": "%",
   "nota": "materia orgánica = carbono orgánico × 1.724 (Van Bemmelen, como en la norma). La CIC y el C orgánico de SoilGrids son estimaciones de un modelo; la norma usa Walkley y Black",
   "clasificacion": "la MO estimada se redondea a 0.1 % antes de buscar su clase, porque la tabla impresa salta de 0.5 a 0.6, de 1.5 a 1.6 y de 3.5 a 3.6; mo_pct_estimada se entrega con 2 decimales",
-  "fuente": "NOM-021-SEMARNAT-2000, que establece las especificaciones de fertilidad, salinidad y clasificación de suelos (DOF 31-dic-2002), texto en https://www.norlexinternacional.com/arch/N021ST00.htm, leído el 14-nov-2026, AS-07",
+  "fuente": "NOM-021-SEMARNAT-2000, which sets the specifications for soil fertility, salinity and classification (DOF Dec 31, 2002), text at https://www.norlexinternacional.com/arch/N021ST00.htm, read on Nov 14, 2026, AS-07",
   "etiqueta": "[V]"
  },
  "cic": {
@@ -294,7 +294,7 @@
   ],
   "unidad": "cmol(+)/kg",
   "nota": "la copia de la norma imprime «Muy baja: > 5»; se lee «< 5»",
-  "fuente": "NOM-021-SEMARNAT-2000, que establece las especificaciones de fertilidad, salinidad y clasificación de suelos (DOF 31-dic-2002), texto en https://www.norlexinternacional.com/arch/N021ST00.htm, leído el 14-nov-2026, AS-12",
+  "fuente": "NOM-021-SEMARNAT-2000, which sets the specifications for soil fertility, salinity and classification (DOF Dec 31, 2002), text at https://www.norlexinternacional.com/arch/N021ST00.htm, read on Nov 14, 2026, AS-12",
   "etiqueta": "[V]"
  },
  "carbonatos": {
@@ -333,8 +333,8 @@
    "análisis de suelo (carbonatos)"
   ],
   "huecos": "la tabla impresa salta de 2.0 a 2.2 y de 15 a 17 %: un valor en un hueco va a la clase de abajo si está a 0.1 o menos de su máximo y, si no, a la de arriba (2.1 → bajo; 16 → alto) [S]",
-  "fuente": "NOM-021-SEMARNAT-2000, que establece las especificaciones de fertilidad, salinidad y clasificación de suelos (DOF 31-dic-2002), texto en https://www.norlexinternacional.com/arch/N021ST00.htm, leído el 14-nov-2026, AS-30 (Horton y Newson)",
-  "etiqueta": "[V] tabla; huecos assumption [S]"
+  "fuente": "NOM-021-SEMARNAT-2000, which sets the specifications for soil fertility, salinity and classification (DOF Dec 31, 2002), text at https://www.norlexinternacional.com/arch/N021ST00.htm, read on Nov 14, 2026, AS-30 (Horton and Newson)",
+  "etiqueta": "[V] table; gaps assumption [S]"
  },
  "salinidad": {
   "tabla_ce": [
@@ -379,7 +379,7 @@
   "necesita": [
    "análisis de suelo (CE y PSI)"
   ],
-  "fuente": "NOM-021-SEMARNAT-2000, que establece las especificaciones de fertilidad, salinidad y clasificación de suelos (DOF 31-dic-2002), texto en https://www.norlexinternacional.com/arch/N021ST00.htm, leído el 14-nov-2026, AS-18 y definiciones 4.8 a 4.10",
+  "fuente": "NOM-021-SEMARNAT-2000, which sets the specifications for soil fertility, salinity and classification (DOF Dec 31, 2002), text at https://www.norlexinternacional.com/arch/N021ST00.htm, read on Nov 14, 2026, AS-18 and definitions 4.8 to 4.10",
   "etiqueta": "[V]"
  },
  "analisis_suelo": {
@@ -571,7 +571,7 @@
    "nota": "datos para cereales de grano pequeño",
    "metodo": "AS-08"
   },
-  "fuente": "NOM-021-SEMARNAT-2000, que establece las especificaciones de fertilidad, salinidad y clasificación de suelos (DOF 31-dic-2002), texto en https://www.norlexinternacional.com/arch/N021ST00.htm, leído el 14-nov-2026",
+  "fuente": "NOM-021-SEMARNAT-2000, which sets the specifications for soil fertility, salinity and classification (DOF Dec 31, 2002), text at https://www.norlexinternacional.com/arch/N021ST00.htm, read on Nov 14, 2026",
   "etiqueta": "[V]"
  },
  "cultivos": {
@@ -582,7 +582,7 @@
      "ph_mayor_que": 7.0
     },
     "texto_en": "Zinc is poorly available to pecan roots in alkaline soils; orchards in such soils usually get foliar zinc sprays each spring. Confirm with a leaf analysis.",
-    "fuente": "NMSU, Guide H-658 «Diagnosing Nutrient Disorders of New Mexico Pecan Trees» (R. Heerema, rev. 2025) (https://pubs.nmsu.edu/_h/H658.pdf), leído el 14-nov-2026 («Zinc availability for root uptake is low in soils with pH above 7.0»); NMSU, Guide H-657 «Diseases and Other Disorders of Pecan in New Mexico» (rev. 2026) (https://pubs.nmsu.edu/_h/H657/index.html), leído el 14-nov-2026",
+    "fuente": "NMSU, Guide H-658 «Diagnosing Nutrient Disorders of New Mexico Pecan Trees» (R. Heerema, rev. 2025) (https://pubs.nmsu.edu/_h/H658.pdf), read on Nov 14, 2026 («Zinc availability for root uptake is low in soils with pH above 7.0»); NMSU, Guide H-657 «Diseases and Other Disorders of Pecan in New Mexico» (rev. 2026) (https://pubs.nmsu.edu/_h/H657/index.html), read on Nov 14, 2026",
     "etiqueta": "[V]"
    },
    {
@@ -595,14 +595,14 @@
     ],
     "texto_en": "Iron deficiency symptoms occur regularly in pecan orchards on soils with very high lime content; the lime content needs a soil test.",
     "nota": "La fuente cita 10–25 % de cal (cuenca del Pecos); la condición usa 10 % o más para que el aviso no se apague con más cal. La misma guía dice que con menos de 10 % de cal los síntomas de Fe del nogal suelen deberse a riego excesivo (sobre todo por inundación), lluvia excesiva o mal drenaje, y que con mucha cal se trata con quelatos de Fe",
-    "fuente": "NMSU, Guide H-658 «Diagnosing Nutrient Disorders of New Mexico Pecan Trees» (R. Heerema, rev. 2025) (https://pubs.nmsu.edu/_h/H658.pdf), leído el 14-nov-2026 («Iron deficiency symptoms occur regularly in pecan orchards with very high lime content (10–25%), as in the Pecos Basin»)",
+    "fuente": "NMSU, Guide H-658 «Diagnosing Nutrient Disorders of New Mexico Pecan Trees» (R. Heerema, rev. 2025) (https://pubs.nmsu.edu/_h/H658.pdf), read on Nov 14, 2026 («Iron deficiency symptoms occur regularly in pecan orchards with very high lime content (10–25%), as in the Pecos Basin»)",
     "etiqueta": "[V]"
    },
    {
     "elemento": "Mn",
     "condicion": null,
     "texto_en": "Orchards may benefit from one or two foliar manganese sprays each spring or early summer.",
-    "fuente": "NMSU, Guide H-658 «Diagnosing Nutrient Disorders of New Mexico Pecan Trees» (R. Heerema, rev. 2025) (https://pubs.nmsu.edu/_h/H658.pdf), leído el 14-nov-2026",
+    "fuente": "NMSU, Guide H-658 «Diagnosing Nutrient Disorders of New Mexico Pecan Trees» (R. Heerema, rev. 2025) (https://pubs.nmsu.edu/_h/H658.pdf), read on Nov 14, 2026",
     "etiqueta": "[V]"
    },
    {
@@ -610,8 +610,8 @@
     "condicion": null,
     "evidencia_local": true,
     "texto_en": "Soil tests from pecan orchards in this irrigation district found most soils low in nitrogen, phosphorus, zinc, iron and copper.",
-    "fuente": "Gutiérrez González, L.S. et al. 2022. Análisis del suelo y su importancia en el cultivo del nogal pecanero en el Distrito de Riego 05 Delicias. Rev. Biológico Agropecuaria Tuxpan 10(1), DOI 10.47808/revistabioagro.v10i1.395 (resumen en https://agris.fao.org/search/en/records/67598d78c7a957febdfbf098: análisis de 2018 a mayo de 2021 en huertas de Delicias, Saucillo, Meoqui, Rosales y Julimes; «la mayoría de los suelos presentan concentraciones bajas de nitrógeno, fosforo, zinc, hierro y cobre»; «solo el 14% de los suelos tienen un pH de 6.7 a 7.3»), leído el 14-nov-2026",
-    "etiqueta": "[V] resumen; sin cifras por parcela"
+    "fuente": "Gutiérrez González, L.S. et al. 2022. «Análisis del suelo y su importancia en el cultivo del nogal pecanero en el Distrito de Riego 05 Delicias». Rev. Biológico Agropecuaria Tuxpan 10(1), DOI 10.47808/revistabioagro.v10i1.395 (abstract at https://agris.fao.org/search/en/records/67598d78c7a957febdfbf098: soil analyses from 2018 to May 2021 in orchards of Delicias, Saucillo, Meoqui, Rosales and Julimes; «la mayoría de los suelos presentan concentraciones bajas de nitrógeno, fosforo, zinc, hierro y cobre» (most soils have low concentrations of nitrogen, phosphorus, zinc, iron and copper); «solo el 14% de los suelos tienen un pH de 6.7 a 7.3» (14 % of the soils have a pH of 6.7 to 7.3)), read on Nov 14, 2026",
+    "etiqueta": "[V] summary; no figures per field"
    }
   ],
   "maiz_forrajero": [
@@ -621,7 +621,7 @@
      "ph_mayor_que": 7.3
     },
     "texto_en": "Maize is prone to zinc deficiency on soils with high pH, low organic matter, coarse texture or very high phosphorus.",
-    "fuente": "Illinois Agronomy Handbook, cap. 8 «Managing Soil pH and Crop Nutrients», Tabla 8.10 (http://extension.cropsciences.illinois.edu/handbook/pdfs/chapter08.pdf), leído el 14-nov-2026 (zinc, maíz joven: «High pH (>7.3)», «Low in organic matter», «Coarse-textured (sandy) soils», «Very high phosphorus»)",
+    "fuente": "Illinois Agronomy Handbook, ch. 8 «Managing Soil pH and Crop Nutrients», Table 8.10 (http://extension.cropsciences.illinois.edu/handbook/pdfs/chapter08.pdf), read on Nov 14, 2026 (zinc, young maize: «High pH (>7.3)», «Low in organic matter», «Coarse-textured (sandy) soils», «Very high phosphorus»)",
     "etiqueta": "[V]"
    }
   ],
@@ -632,7 +632,7 @@
      "materia_organica_pct_menor_que": 2.0
     },
     "texto_en": "Alfalfa on soils with little organic matter, high pH or sandy texture is prone to boron deficiency, mostly in dry periods.",
-    "fuente": "Illinois Agronomy Handbook, cap. 8 «Managing Soil pH and Crop Nutrients», Tabla 8.10 (http://extension.cropsciences.illinois.edu/handbook/pdfs/chapter08.pdf), leído el 14-nov-2026 (boro, alfalfa: «Low organic matter», «High pH», «Coarse-textured (sandy) soils», con «Drought»; y «Application of B on soils with less than 2% organic matter is recommended for areas of high alfalfa production.»)",
+    "fuente": "Illinois Agronomy Handbook, ch. 8 «Managing Soil pH and Crop Nutrients», Table 8.10 (http://extension.cropsciences.illinois.edu/handbook/pdfs/chapter08.pdf), read on Nov 14, 2026 (boron, alfalfa: «Low organic matter», «High pH», «Coarse-textured (sandy) soils», with «Drought»; and «Application of B on soils with less than 2% organic matter is recommended for areas of high alfalfa production.»)",
     "etiqueta": "[V]"
    }
   ],
@@ -643,8 +643,8 @@
      "ph_clase_minima": "medianamente alcalino"
     },
     "texto_en": "Oats are prone to manganese deficiency on high-pH soils, mostly in cool, wet weather.",
-    "fuente": "Illinois Agronomy Handbook, cap. 8 «Managing Soil pH and Crop Nutrients», Tabla 8.10 (http://extension.cropsciences.illinois.edu/handbook/pdfs/chapter08.pdf), leído el 14-nov-2026 (manganeso, soya y avena: «High pH», «Organic soils», «Restricted root zone», con «Cool, wet»)",
-    "etiqueta": "[V] fuente («high pH», sin cifra); umbral por clase de pH assumption [S]"
+    "fuente": "Illinois Agronomy Handbook, ch. 8 «Managing Soil pH and Crop Nutrients», Table 8.10 (http://extension.cropsciences.illinois.edu/handbook/pdfs/chapter08.pdf), read on Nov 14, 2026 (manganese, soybean and oats: «High pH», «Organic soils», «Restricted root zone», with «Cool, wet»)",
+    "etiqueta": "[V] source («high pH», no figure); threshold by pH class assumption [S]"
    }
   ],
   "chile": null,

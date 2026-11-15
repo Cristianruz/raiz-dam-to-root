@@ -1089,8 +1089,12 @@ function htmlFigura(modelo) {
 // ---------------------------------------------------------------------------
 // «Regional context»
 // ---------------------------------------------------------------------------
+// Decimales por unidad (I8 de la revisión total): los milímetros de lluvia y ETo van sin decimales; el exacto, en el title.
+const DECIMALES_UNIDAD = { mm: 0 };
 function htmlCifra(rotulo, valor, unidad, pie) {
-  const cuerpo = valor != null ? `<span class="contexto-cifra-valor">${esc(formatoNumero(valor))} <small>${esc(unidad)}</small></span>` : `<span class="contexto-cifra-valor contexto-cifra-valor--vacio">${esc(TEXTO_SIN_DATO)}</span>`;
+  const dec = DECIMALES_UNIDAD[unidad];
+  const corto = formatoNumero(valor, dec != null ? { decimales: dec } : {});
+  const cuerpo = valor != null ? `<span class="contexto-cifra-valor" title="${esc(`${formatoNumero(valor)} ${unidad}`)}">${esc(corto)} <small>${esc(unidad)}</small></span>` : `<span class="contexto-cifra-valor contexto-cifra-valor--vacio">${esc(TEXTO_SIN_DATO)}</span>`;
   return `<div class="contexto-cifra"><span class="contexto-cifra-rotulo">${esc(rotulo)}</span>${cuerpo}${pie ? `<span class="contexto-cifra-pie">${esc(pie)}</span>` : ""}</div>`;
 }
 
@@ -1104,7 +1108,7 @@ function htmlCifras(contexto, zonaId, anio) {
     valor != null ? (incompleto(dias) ? `${fuente}: ${incompleto(dias)}` : fuente) : `${fuente}: ${motivoDeDias(dias, a.diasDelAnio)}`;
   const diferencia =
     a.diferencia != null
-      ? `Difference: <b>${esc(formatoNumero(a.diferencia, { signo: true }))} mm</b> (GPM IMERG minus NASA POWER)`
+      ? `Difference: <b>${esc(formatoNumero(a.diferencia, { signo: true, decimales: DECIMALES_UNIDAD.mm }))} mm</b> (GPM IMERG minus NASA POWER)`
       : "Difference: not computed, one of the two sources has no total for this year";
   return `<div class="contexto-cifras" role="group" aria-label="${esc(`${TITULO_CLIMA}: agricultural year ${a.anio}`)}">
       <div class="contexto-cifra contexto-cifra--par">
@@ -1526,7 +1530,7 @@ export function montarRecursosReto(contenedor, opciones = {}) {
       .join("");
     raiz.innerHTML = `${cabeza}
       ${htmlResumenRecursos(contarEstados(recursos))}
-      <p class="contexto-recursos-nota">The status is computed from the files that passed validation, not written by hand. None of these sources changes the water calculation of a field.</p>
+      <p class="contexto-recursos-nota">The status is computed from the files that passed validation, not written by hand. The water need of each field comes from NASA POWER, with the crop map from HLS; NASADEM and GPM IMERG drive the terrain and the storm simulation. The other sources are context, contrast or evidence: they do not change the water calculation of a field.</p>
       <div class="contexto-tabla-caja"><table class="contexto-tabla contexto-tabla--recursos">
         <caption class="solo-lector">${TITULO_RECURSOS}: resource, agency, role in ROOT, status and files</caption>
         <thead><tr><th scope="col">Resource</th><th scope="col">Agency</th><th scope="col">Role in ROOT</th><th scope="col">Status</th><th scope="col">Files</th></tr></thead>

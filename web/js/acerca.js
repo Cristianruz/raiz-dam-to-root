@@ -85,6 +85,7 @@ const ESTADOS_PASO = {
   passed: { texto: "Passed", simbolo: "✓" },
   failed: { texto: "Failed", simbolo: "✕" },
   pending: { texto: "Pending", simbolo: "…" },
+  warning: { texto: "Warning", simbolo: "⚠" }, // construir.py: ADVERTENCIA → «warning»
   skipped: { texto: "Skipped", simbolo: "–" },
   "not run": { texto: "Not run", simbolo: "○" },
 };
@@ -92,15 +93,26 @@ const ESTADOS_PASO = {
 // Conjuntos de datos NASA. «patron» decide qué entradas de manifest.fuentes_de_origen pertenecen al
 // conjunto (la fuente lo menciona); «producto» reconoce la entrada cuya fuente EMPIEZA con el producto
 // (de ahí sale el nombre del producto que se muestra). Una entrada puede pertenecer a dos conjuntos
-// (p. ej., relieve_meta.json: NASADEM y la lluvia de la tormenta).
+// (p. ej., relieve_meta.json: NASADEM y la lluvia de la tormenta). «ids» (opcional) saca de la fuente
+// los identificadores de catálogo del producto (contexto_regional.csv empieza con la plataforma, «Earth
+// Engine (…)», y lista un producto por serie; la de GEDI trae detalles en español): así la columna Product
+// nunca muestra la plataforma ni texto en español.
 const FAMILIAS = [
   { id: "hls", patron: /\bHLS\b/, producto: /^NASA HLS\b/, dato: "Satellite imagery: Harmonized Landsat and Sentinel (HLS)" },
   { id: "power", patron: /\bPOWER\b/, producto: /^NASA POWER\b/, dato: "Daily weather: NASA POWER" },
   { id: "nasadem", patron: /\bNASADEM/, producto: /^NASADEM\b/, dato: "Elevation: NASADEM" },
   { id: "imerg", patron: /\bIMERG\b|\bGPM\b/, producto: /^(NASA )?GPM\b/, dato: "Rainfall: GPM IMERG" },
   { id: "viirs", patron: /\bSSEBop\b|\bVIIRS\b/, producto: /^(USGS )?SSEBop\b|^VIIRS\b/, dato: "Evapotranspiration: SSEBop on VIIRS" },
-  { id: "modis", patron: /\bMODIS\b/, producto: /^(NASA )?MODIS\b/, dato: "Vegetation: MODIS" },
+  { id: "modis", patron: /\bMODIS\b/, producto: /^(NASA )?MODIS\b/, ids: /\bMODIS\/\w+\/\w+/g, dato: "Vegetation, evapotranspiration and land surface temperature: MODIS" },
+  { id: "smap", patron: /\bSMAP\b/, producto: /^(NASA )?SMAP\b/, ids: /\bNASA\/SMAP\/[\w/]+/g, dato: "Soil moisture: SMAP (assimilated into a land surface model)" },
+  { id: "grace", patron: /\bGRACE\b/, producto: /^(NASA )?GRACE\b/, ids: /\bNASA\/GRACE\/[\w/]+/g, dato: "Water stored in the basin: GRACE / GRACE-FO" },
+  { id: "gldas", patron: /\bGLDAS\b/, producto: /^(NASA )?GLDAS\b/, ids: /\bNASA\/GLDAS\/[\w/]+/g, dato: "Land surface model: GLDAS" },
+  { id: "nldas", patron: /\bNLDAS\b/, producto: /^(NASA )?NLDAS\b/, ids: /\bNASA\/NLDAS\/[\w/]+/g, dato: "Second climate source: NLDAS" },
+  { id: "gedi", patron: /\bGEDI L2A\b|\bLARSE\/GEDI\b/, producto: /^GEDI\b/, ids: /\bLARSE\/GEDI\/\w+/g, dato: "Laser height reading: GEDI" },
+  { id: "ecostress", patron: /\bECOSTRESS\b/, producto: /^(NASA )?ECOSTRESS\b/, dato: "Field evapotranspiration: ECOSTRESS" },
 ];
+// Remite a la tabla del reto, que dice el papel de cada serie regional y su estado.
+const VER_RECURSOS = "see “Challenge data sources” below";
 
 // Para qué se usa cada archivo (nombre sin extensión ni sufijo de zona). Un objeto da un texto por
 // conjunto de datos («*» = cualquier otro). Lo que no está aquí se describe por su pieza del kit.
@@ -118,6 +130,21 @@ const USOS = {
   relieve_parcelas: "Mean slope and run-on of each field (Soil row)",
   relieve_meta: { nasadem: "Scale label of the “Terrain & runoff” layer", "*": "Storm depth of “Simulate a storm”" },
   et_contraste: "Regional contrast of the modeled ET (test of the water need)",
+  heladas: "Chance of frost after each planting date (rules and filters of the options)",
+  h3_series: "Field memory series behind the H3 test",
+  contexto_regional: {
+    modis: `Regional greenness, a second evapotranspiration contrast and land surface temperature (Regional context; ${VER_RECURSOS})`,
+    smap: `Regional soil moisture, surface layer and root zone (Regional context; ${VER_RECURSOS})`,
+    grace: `Water stored in the basin, month by month (Regional context; ${VER_RECURSOS})`,
+    gldas: `A third evapotranspiration contrast and root-zone moisture (Regional context; ${VER_RECURSOS})`,
+    nldas: `Rainfall and potential evaporation from a second climate source (Regional context; ${VER_RECURSOS})`,
+    "*": `Regional context series (${VER_RECURSOS})`,
+  },
+  gedi_parcelas: `Laser height reading of each field, evidence in the field card (${VER_RECURSOS})`,
+  ecostress_parcelas: {
+    power: "Weather behind the crop water need that ECOSTRESS is set against",
+    "*": `Evapotranspiration of each field, month by month, evidence in the field card (${VER_RECURSOS})`,
+  },
 };
 const USO_IMERG_TORMENTA = "Storm depth of “Simulate a storm”";
 const USO_IMERG_RESERVA = "Daily rainfall over the pilot area; not used in the calculation yet";
@@ -299,16 +326,20 @@ export function montarInicio(contenedor = typeof document !== "undefined" ? docu
 // ---------------------------------------------------------------------------
 // About & Data: datos NASA
 // ---------------------------------------------------------------------------
-/** Primer tramo de la fuente registrada, antes de « vía », «;» o «,» fuera de paréntesis. */
+// Paréntesis que hablan de la plataforma o del proceso, no del producto («(vía Google Earth Engine, memoria A3-M)»).
+const PARENTESIS_DE_PLATAFORMA = /\s*\((?:[^()]*\b(?:vía|via|Earth Engine|proyecto|memoria)\b[^()]*)\)/gi;
+
+/** Primer tramo de la fuente registrada, antes de « vía », « y », «;» o «,» fuera de paréntesis;
+ *  sin los paréntesis que nombran la plataforma (la columna Product nunca muestra «Earth Engine»). */
 function productoCorto(fuente) {
-  const s = String(fuente ?? "").trim();
+  const s = String(fuente ?? "").trim().replace(PARENTESIS_DE_PLATAFORMA, "");
   let prof = 0;
   for (let i = 0; i < s.length; i += 1) {
     const c = s[i];
     if (c === "(") prof += 1;
     else if (c === ")") prof = Math.max(0, prof - 1);
     else if (prof === 0 && (c === ";" || c === ",")) return s.slice(0, i).trim();
-    else if (prof === 0 && /^ (vía|via) /i.test(s.slice(i, i + 5))) return s.slice(0, i).trim();
+    else if (prof === 0 && /^ (vía|via|y) /i.test(s.slice(i, i + 5))) return s.slice(0, i).trim();
   }
   return s;
 }
@@ -331,7 +362,8 @@ function usoDe(f, familia, zonasIds, tormentas) {
   const uso = USOS[base];
   if (typeof uso === "string") return uso;
   if (uso && typeof uso === "object") return uso[familia.id] ?? uso["*"];
-  return f?.pieza ? `Input of kit piece ${f.pieza}` : nombreArchivo(f?.archivo);
+  // Sin uso registrado: no se muestra la pieza interna del kit («Input of kit piece A7», I9 de la revisión total).
+  return f?.pieza ? "Input to the build (no use recorded)" : nombreArchivo(f?.archivo);
 }
 
 /** Quita los productos que son el principio de otro («NASA HLS v…» dentro de «NASA HLS v… (…)»). */
@@ -352,7 +384,12 @@ function filasNasa(manifest, cubo, relieve) {
     if (!miembros.length) continue;
     miembros.forEach((f) => usadas.add(f));
     const cortos = miembros.map((f) => productoCorto(f.fuente));
-    let productos = sinPrefijos(unicos(cortos.filter((p) => familia.producto.test(p))));
+    // Con «ids», los identificadores de catálogo leídos de la fuente (la frase de la fuente trae detalles en español,
+    // como «rasterizado a 25 m», que no van en la columna Product); si no hay, el producto con que empieza la fuente.
+    let productos = familia.ids
+      ? unicos(miembros.flatMap((f) => String(f.fuente ?? "").match(familia.ids) ?? []).map((x) => x.replace(/\/+$/, "")))
+      : [];
+    if (!productos.length) productos = sinPrefijos(unicos(cortos.filter((p) => familia.producto.test(p))));
     if (!productos.length) productos = unicos(cortos).slice(0, 1);
     const escala = familia.id === "nasadem" ? unicos(zonasRelieve.map((z) => z?.rotulo)) : [];
     filas.push({
@@ -416,9 +453,10 @@ function htmlDatosNasa(manifest, cubo, relieve, id, error) {
   const otrasHtml = otras.length
     ? `<details class="acerca-otras"><summary>Other sources in the build</summary><ul class="acerca-archivos">${otras
         .map(
-          (f) => `<li><details><summary><code>${esc(nombreArchivo(f.archivo))}</code> <span lang="es">${esc(productoCorto(f.fuente))}</span></summary>` +
-            `<p class="acerca-fuente-registrada" lang="es">${esc(f.fuente)}</p>` +
-            (f.fecha ? `<p class="acerca-pie">Date: ${esc(f.fecha)}</p>` : "") + `</details></li>`,
+          // Solo el archivo, el producto corto y la fecha: la fuente registrada completa es el registro de entregas del
+          // equipo (en español, con notas de proceso) y no va a la página (I6 de la revisión total). Está en manifest.json.
+          (f) => `<li><code>${esc(nombreArchivo(f.archivo))}</code> <span lang="es">${esc(productoCorto(f.fuente))}</span>` +
+            (f.fecha ? ` <span class="acerca-pie">· ${esc(f.fecha)}</span>` : "") + `</li>`,
         )
         .join("")}</ul></details>`
     : "";
@@ -594,7 +632,7 @@ function htmlCierre(pruebas, id) {
   return `<section class="acerca-bloque" aria-labelledby="${id}-repo">
       <h3 id="${id}-repo">Repository and AI</h3>
       ${ligas ? `<p class="acerca-ligas">${ligas}</p>` : ""}
-      <p class="acerca-ia"><strong>SI/AI tools used:</strong> Claude Code, Claude and Gemini helped write the code, data scripts and texts; field boundaries are neural-network predictions (Fields of The World). AI never generates the numbers or makes the decision: farmers and technicians decide.${
+      <p class="acerca-ia"><strong>SI/AI tools used:</strong> Claude Code, Claude and Gemini helped write the code, data scripts and texts; field boundaries are neural-network predictions (Fields of The World). The WhatsApp message in English, Portuguese and French was machine-drafted from the Spanish one; review by a speaker. AI never generates the numbers or makes the decision: farmers and technicians decide.${
         enlaces.readme_ia ? ` ${enlace(enlaces.readme_ia, NOMBRES_ENLACES.readme_ia)}.` : ""
       }</p>
       <p class="acerca-aviso">${esc(AVISO_JUICIO)}</p>
