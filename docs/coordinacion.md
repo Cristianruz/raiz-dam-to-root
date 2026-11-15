@@ -151,3 +151,13 @@ Revisión pedida por Cristian: cada chat, cada rama y la conversación del integ
 | `Tena` | `351bbf5`: un commit con un tablero nuevo en `web/index.html`, un asesor y un recomendador, hecho sobre `e819b52`. Revisado en `docs/revisiones/2026-11-15_rama_tena.md`. Cristian decidió corregirlo y publicarlo como página principal, en cuatro idiomas y como aplicación (04:12). Corregido en la integración y publicado con el PR #9 (`084bb30`); la rama `Tena` queda como estaba y debe actualizarse desde `main` antes de seguir en ella |
 
 Hallazgos de las revisiones de anoche, uno por uno: `docs/revisiones/2026-11-15_cierre_hallazgos.md` (146 renglones: 73 resueltos, 31 parciales, 25 abiertos, 11 de persona y 6 para después del evento, comprobados contra `f0dbf3b`).
+
+## Notas de «Laptop» después del congelamiento (15-nov, 12:45, hora de Chihuahua)
+
+Comprobado sobre `main` `701a34f` (PR #15), con el navegador, abriendo `explorer.html?lang=en#P0757` y `explorer.html?lang=es#P0757`:
+
+| Qué | Resultado | Dueño | Cuándo |
+|---|---|---|---|
+| El traductor del explorador (`web/js/explorador_es.js`) y la vista previa del WhatsApp | El mensaje en español, inglés, portugués y francés sale **idéntico** con la página en inglés y en español: el traductor no entra a `[lang]` y el teléfono del mensaje y las opciones del selector lo llevan. El botón «Vista previa del mensaje de WhatsApp» y la etiqueta «Idioma del mensaje» sí se traducen | — | — |
+| Con la página en español quedan dos textos en inglés en la vista del mensaje: la leyenda «WhatsApp message preview — a mock-up: nothing is sent. The farmer reads it in …» y la nota «Machine-drafted translation; review by a speaker.» | Cosmético: mezcla de idiomas en la interfaz en español; no cambia ninguna cifra | Diccionario de `web/js/explorador_es.js` (la leyenda cambia con el idioma del mensaje: necesita una forma con el nombre del idioma) | Después del envío |
+| El WhatsApp en español llama «Cereal de invierno y maíz forrajero» a la rotación `avena_maiz`; la ficha y el tablero, «Avena (invierno) + maíz forrajero (verano)» (`docs/revisiones/2026-11-15_recorrido_final.md`, fila 13) | Nombre distinto entre vistas | `web/js/mensaje.js` («Laptop»): un nombre por idioma para `avena_maiz` en `IDIOMAS.<idioma>.palabras.opciones` | Después del envío |
