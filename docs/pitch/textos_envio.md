@@ -263,7 +263,7 @@ Data
 
 Tools and libraries
 - Google Earth Engine: access platform for HLS, NASADEM, GPM IMERG, SSEBop, the regional context series, GEDI, SoilGrids and OpenLandMap (non-commercial project of the Community tier).
-- AppEEARS Team. (2026). Application for Extracting and Exploring Analysis Ready Samples (AppEEARS). Ver. 3.137. NASA EOSDIS Land Processes Distributed Active Archive Center (LP DAAC), USGS/Earth Resources Observation and Science (EROS) Center, Sioux Falls, South Dakota, USA. Accessed November 15, 2026. https://appeears.earthdatacloud.nasa.gov Used to request the ECOSTRESS point samples.
+- Used to request the ECOSTRESS point samples: AppEEARS Team. (2026). Application for Extracting and Exploring Analysis Ready Samples (AppEEARS). Ver. 3.137. NASA EOSDIS Land Processes Distributed Active Archive Center (LP DAAC), USGS/Earth Resources Observation and Science (EROS) Center, Sioux Falls, South Dakota, USA. Accessed November 15, 2026. https://appeears.earthdatacloud.nasa.gov
 - MapLibre GL JS 5.24.0 (BSD 3-clause), d3 7.9.0 (ISC) and d3-sankey 0.12.3 (BSD 3-clause), copied unchanged from npm and verified by hash; their license files are next to each library.
 - pytest 9.1.0 (Python tests) and Playwright with Chromium (browser smoke tests, run locally).
 
