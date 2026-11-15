@@ -427,6 +427,8 @@ async function revisarFunciones(browser, base, geo) {
     check("lado a lado: el porcentaje de la zona en uso es el de la cifra «agua ya comprometida»", pctActiva.length > 0 && (await page.locator("#stats").innerText()).includes(pctActiva), cifraActiva);
     const conMinimo = T["tablero.lado.al_menos"].split("{pct}")[0];
     check("lado a lado: con superficie sin clasificar, la cifra de la zona dice «al menos» y trae su rango (kit §2.4)", cifraActiva.startsWith(conMinimo) && /\(.*–.*\)/.test(cifraActiva), cifraActiva);
+    const pasaDeCien = (await page.locator("#lado-zonas .lado-relleno.excede").count()) > 0;
+    check("lado a lado: si una zona pasa de la dotación, se dice de dónde sale la diferencia y se enlaza con el explorador (kit §2.4)", pasaDeCien ? (await page.locator("#lado-excede").innerText()).includes(T["tablero.lado.excede"]) && ((await page.locator("#lado-excede a").getAttribute("href")) ?? "").startsWith("explorer.html#") : await page.locator("#lado-excede").isHidden());
     const cifraOpcion = (await page.locator("#lado-opciones .lado-barra.activa strong").first().innerText()).trim();
     check("lado a lado: las hectáreas de la opción actual traen su rango, el mismo de la ficha", /\(.*–.*\)/.test(cifraOpcion) && (await page.locator("#field-detail").innerText()).includes(cifraOpcion.match(/\(\D*([\d.,]+)–/)?.[1] ?? "¿?"), cifraOpcion);
     const rotuloAntes = (await activa.locator(".lado-rotulo").innerText()).trim();
@@ -465,6 +467,17 @@ async function revisarFunciones(browser, base, geo) {
     }
     await page.locator("#field-search").fill("");
     await page.locator("#zona-dashboard").selectOption(zonaAntes);
+    // Una parcela cuya rotación actual no pide agua (descanso): la ficha lo dice con palabras (kit §2.4).
+    const enDescanso = await page.evaluate(async ([zona]) => {
+      const cubo = await (await fetch("data/cubo.json")).json();
+      const geo = await (await fetch("data/parcelas.geojson")).json();
+      const f = geo.features.find((x) => x.properties.zona === zona && !x.properties.abstencion && cubo.parcelas[x.properties.id]?.opciones?.find((o) => o.id === "ACTUAL")?.agua?.lamina_bruta?.["0"]?.p50 === 0);
+      return f?.properties.id ?? null;
+    }, [zonaAntes]);
+    if (enDescanso) {
+      await page.locator("#field-select").selectOption(enDescanso);
+      check("ficha: una rotación actual sin lámina dice «no necesita riego»", (await page.locator("#field-detail").innerText()).includes(T["tablero.ficha.sin_riego"]), enDescanso);
+    }
     await page.locator("#field-select").selectOption(parcelaAntes);
     // Cobertura: el porcentaje de la ficha es entero y hacia abajo, como el del explorador.
     const fichaPct = await page.evaluate(() => document.querySelector("#field-detail .coverage strong")?.textContent.trim() ?? "");
