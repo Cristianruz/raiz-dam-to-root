@@ -3,19 +3,19 @@
 Before you plant, see the water you are committing.
 
 2
-00:00:02,400 --> 00:00:05,800
+00:00:02,400 --> 00:00:06,000
 NASA data, a crop-water model, an answer per field.
 
 3
-00:00:05,800 --> 00:00:08,400
+00:00:06,000 --> 00:00:08,600
 Set the water allocation. The map and the indicator respond.
 
 4
-00:00:08,400 --> 00:00:12,400
+00:00:08,600 --> 00:00:12,600
 Each option: water asked, hectares covered, years committed.
 
 5
-00:00:12,400 --> 00:00:16,400
+00:00:12,600 --> 00:00:16,400
 Every option says why, and what changes from today.
 
 6
@@ -24,7 +24,7 @@ From the dam to the crop and the aquifer.
 
 7
 00:00:18,800 --> 00:00:21,400
-The year the dam delivered no water.
+What satellites saw on this field, year by year.
 
 8
 00:00:21,400 --> 00:00:23,800
