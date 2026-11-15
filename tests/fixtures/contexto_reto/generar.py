@@ -224,16 +224,10 @@ def ecostress_parcelas():
 
 
 def gaez_zona():
-    """Tres indicadores de prueba por zona y, como en la entrega real, columnas adicionales: clase_nombre (el
-    nombre de una clase) y nota. El primer cultivo lleva además una fila con una unidad con multiplicador
-    («10kg de prueba/ha»), una fila de clase con su nombre y una nota: lo que la página escribe distinto."""
-    lineas = ["zona,cultivo,variable,valor,unidad,resolucion_m,clase_nombre,nota"]
-    primero = esquemas.CULTIVOS_GAEZ[0]
+    lineas = ["zona,cultivo,variable,valor,unidad,resolucion_m"]
     for zona in ZONAS:
         for i, cultivo in enumerate(esquemas.CULTIVOS_GAEZ[:3], start=1):
-            lineas.append(f"{zona},{cultivo},Indicador de prueba,{40 + 10 * i},indice de prueba,9000,,")
-        lineas.append(f"{zona},{primero},Rendimiento de prueba,1234.5,10kg de prueba/ha,9000,,Nota de prueba del cultivo")
-        lineas.append(f"{zona},{primero},Clase de prueba,2,Class,9000,Alta de prueba,Nota de prueba del cultivo")
+            lineas.append(f"{zona},{cultivo},Indicador de prueba,{40 + 10 * i},indice de prueba,9000")
     return lineas
 
 

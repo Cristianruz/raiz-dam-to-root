@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/contexto_web.py con las entregas validadas de data/processed; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
- "generado": "2026-11-15T07:10:39+00:00",
+ "generado": "2026-11-15T07:34:03+00:00",
  "decision": "docs/decisiones/2026-11-14_recursos_del_reto.md",
  "zonas": {
   "delicias_saucillo": {
@@ -59806,6 +59806,7 @@
     0
    ]
   },
+  "conteo": "escenas",
   "aviso": "Satellite ET at 70 m on clear days, not a field measurement"
  },
  "ecostress_motivo": null,
@@ -59821,8 +59822,7 @@
      "valor": 1678.5,
      "unidad": "10kg DW/ha",
      "resolucion_m": 9277,
-     "valor_mostrar": 16.785,
-     "unidad_mostrar": "t DW/ha"
+     "cultivo_gaez": "Alfalfa"
     },
     {
      "cultivo": "alfalfa",
@@ -59830,21 +59830,24 @@
      "valor": 2.0,
      "unidad": "Class",
      "resolucion_m": 9277,
-     "clase_nombre": "High"
+     "clase_nombre": "High",
+     "cultivo_gaez": "Alfalfa"
     },
     {
      "cultivo": "alfalfa",
      "variable": "Suitability index  range (0 – 10000); current cropland in grid cell",
      "valor": 7778.0,
      "unidad": "Index (0–10000)",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Alfalfa"
     },
     {
      "cultivo": "algodon",
      "variable": "Average attainable yield of current cropland",
      "valor": 913.0,
      "unidad": "kg lint/ha",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Cotton"
     },
     {
      "cultivo": "algodon",
@@ -59852,14 +59855,16 @@
      "valor": 2.0,
      "unidad": "Class",
      "resolucion_m": 9277,
-     "clase_nombre": "High"
+     "clase_nombre": "High",
+     "cultivo_gaez": "Cotton"
     },
     {
      "cultivo": "algodon",
      "variable": "Suitability index  range (0 – 10000); current cropland in grid cell",
      "valor": 7778.0,
      "unidad": "Index (0–10000)",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Cotton"
     },
     {
      "cultivo": "maiz_forrajero",
@@ -59867,6 +59872,7 @@
      "valor": 9341.0,
      "unidad": "kg DW/ha",
      "resolucion_m": 9277,
+     "cultivo_gaez": "Maize",
      "nota": "GAEZ Maize = grain maize (mze): theme res05 has no silage-maize (mzs) layer with high inputs and gravity irrigation; the value is for grain, not forage"
     },
     {
@@ -59876,6 +59882,7 @@
      "unidad": "Class",
      "resolucion_m": 9277,
      "clase_nombre": "Good",
+     "cultivo_gaez": "Maize",
      "nota": "GAEZ Maize = grain maize (mze): theme res05 has no silage-maize (mzs) layer with high inputs and gravity irrigation; the value is for grain, not forage"
     },
     {
@@ -59884,6 +59891,7 @@
      "valor": 5556.0,
      "unidad": "Index (0–10000)",
      "resolucion_m": 9277,
+     "cultivo_gaez": "Maize",
      "nota": "GAEZ Maize = grain maize (mze): theme res05 has no silage-maize (mzs) layer with high inputs and gravity irrigation; the value is for grain, not forage"
     },
     {
@@ -59891,7 +59899,8 @@
      "variable": "Average attainable yield of current cropland",
      "valor": 2938.5,
      "unidad": "kg DW/ha",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Oat"
     },
     {
      "cultivo": "cereal_invierno",
@@ -59899,21 +59908,24 @@
      "valor": 3.0,
      "unidad": "Class",
      "resolucion_m": 9277,
-     "clase_nombre": "Good"
+     "clase_nombre": "Good",
+     "cultivo_gaez": "Oat"
     },
     {
      "cultivo": "cereal_invierno",
      "variable": "Suitability index  range (0 – 10000); current cropland in grid cell",
      "valor": 5556.0,
      "unidad": "Index (0–10000)",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Oat"
     },
     {
      "cultivo": "sorgo",
      "variable": "Average attainable yield of current cropland",
      "valor": 7540.0,
      "unidad": "kg DW/ha",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Sorghum"
     },
     {
      "cultivo": "sorgo",
@@ -59921,14 +59933,16 @@
      "valor": 2.0,
      "unidad": "Class",
      "resolucion_m": 9277,
-     "clase_nombre": "High"
+     "clase_nombre": "High",
+     "cultivo_gaez": "Sorghum"
     },
     {
      "cultivo": "sorgo",
      "variable": "Suitability index  range (0 – 10000); current cropland in grid cell",
      "valor": 7778.0,
      "unidad": "Index (0–10000)",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Sorghum"
     }
    ],
    "lazaro_cardenas": [
@@ -59938,8 +59952,7 @@
      "valor": 1665.5,
      "unidad": "10kg DW/ha",
      "resolucion_m": 9277,
-     "valor_mostrar": 16.655,
-     "unidad_mostrar": "t DW/ha"
+     "cultivo_gaez": "Alfalfa"
     },
     {
      "cultivo": "alfalfa",
@@ -59947,21 +59960,24 @@
      "valor": 2.0,
      "unidad": "Class",
      "resolucion_m": 9277,
-     "clase_nombre": "High"
+     "clase_nombre": "High",
+     "cultivo_gaez": "Alfalfa"
     },
     {
      "cultivo": "alfalfa",
      "variable": "Suitability index  range (0 – 10000); current cropland in grid cell",
      "valor": 7778.0,
      "unidad": "Index (0–10000)",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Alfalfa"
     },
     {
      "cultivo": "algodon",
      "variable": "Average attainable yield of current cropland",
      "valor": 910.0,
      "unidad": "kg lint/ha",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Cotton"
     },
     {
      "cultivo": "algodon",
@@ -59969,14 +59985,16 @@
      "valor": 2.0,
      "unidad": "Class",
      "resolucion_m": 9277,
-     "clase_nombre": "High"
+     "clase_nombre": "High",
+     "cultivo_gaez": "Cotton"
     },
     {
      "cultivo": "algodon",
      "variable": "Suitability index  range (0 – 10000); current cropland in grid cell",
      "valor": 7778.0,
      "unidad": "Index (0–10000)",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Cotton"
     },
     {
      "cultivo": "maiz_forrajero",
@@ -59984,6 +60002,7 @@
      "valor": 9319.5,
      "unidad": "kg DW/ha",
      "resolucion_m": 9277,
+     "cultivo_gaez": "Maize",
      "nota": "GAEZ Maize = grain maize (mze): theme res05 has no silage-maize (mzs) layer with high inputs and gravity irrigation; the value is for grain, not forage"
     },
     {
@@ -59993,6 +60012,7 @@
      "unidad": "Class",
      "resolucion_m": 9277,
      "clase_nombre": "Good",
+     "cultivo_gaez": "Maize",
      "nota": "GAEZ Maize = grain maize (mze): theme res05 has no silage-maize (mzs) layer with high inputs and gravity irrigation; the value is for grain, not forage"
     },
     {
@@ -60001,6 +60021,7 @@
      "valor": 5556.0,
      "unidad": "Index (0–10000)",
      "resolucion_m": 9277,
+     "cultivo_gaez": "Maize",
      "nota": "GAEZ Maize = grain maize (mze): theme res05 has no silage-maize (mzs) layer with high inputs and gravity irrigation; the value is for grain, not forage"
     },
     {
@@ -60008,7 +60029,8 @@
      "variable": "Average attainable yield of current cropland",
      "valor": 2916.5,
      "unidad": "kg DW/ha",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Oat"
     },
     {
      "cultivo": "cereal_invierno",
@@ -60016,21 +60038,24 @@
      "valor": 3.0,
      "unidad": "Class",
      "resolucion_m": 9277,
-     "clase_nombre": "Good"
+     "clase_nombre": "Good",
+     "cultivo_gaez": "Oat"
     },
     {
      "cultivo": "cereal_invierno",
      "variable": "Suitability index  range (0 – 10000); current cropland in grid cell",
      "valor": 5556.0,
      "unidad": "Index (0–10000)",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Oat"
     },
     {
      "cultivo": "sorgo",
      "variable": "Average attainable yield of current cropland",
      "valor": 7508.5,
      "unidad": "kg DW/ha",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Sorghum"
     },
     {
      "cultivo": "sorgo",
@@ -60038,14 +60063,16 @@
      "valor": 2.0,
      "unidad": "Class",
      "resolucion_m": 9277,
-     "clase_nombre": "High"
+     "clase_nombre": "High",
+     "cultivo_gaez": "Sorghum"
     },
     {
      "cultivo": "sorgo",
      "variable": "Suitability index  range (0 – 10000); current cropland in grid cell",
      "valor": 7778.0,
      "unidad": "Index (0–10000)",
-     "resolucion_m": 9277
+     "resolucion_m": 9277,
+     "cultivo_gaez": "Sorghum"
     }
    ]
   }

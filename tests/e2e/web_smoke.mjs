@@ -82,9 +82,11 @@
 // - inglés en el origen (15-nov): con las citas en inglés en los datos (fuente_en, nota_en, detalle_en e
 //   idioma_fuentes), nada queda marcado lang="es" en el panel, en la ficha ni en «About & Data» (el mensaje de
 //   WhatsApp aparte); la puerta automática muestra el detalle de cada paso en inglés; ECOSTRESS dice de cuántas
-//   escenas sale el valor, lleva a la vista el aviso de la entrega y, si el calendario del modelo no tiene cultivo
-//   en ese mes, lo dice (P0757 y P0632), sin comparar con el modelo; GAEZ escribe la clase con su nombre, la unidad
-//   con multiplicador en toneladas y la nota de la entrega; la memoria de una huerta de nogal explica sus años
+//   lecturas sale el valor («clear overpasses» con su intervalo si la entrega es la corregida, que cuenta
+//   sobrevuelos; «clear-sky scenes» con el archivo anterior; las dos formas se prueban, la que los datos no traen
+//   con una variante en memoria), lleva a la vista el aviso de la entrega y, si el calendario del modelo no tiene
+//   cultivo en ese mes, lo dice (P0757 y P0632), sin comparar con el modelo; GAEZ escribe la clase por su nombre, el
+//   factor de la unidad de FAO aparte, el cultivo con que GAEZ evalúa y las notas; la memoria de una huerta de nogal explica sus años
 //   «Summer crop»; y el caso de «gota» vacía (H6): con gota, los dos goteos y tope_consumo en null y el aviso del
 //   motor en meta.notas (variante en memoria que pasa validar_contrato.py), la ficha dice que no hay dato y no
 //   muestra NaN, undefined ni un ahorro;
@@ -104,7 +106,7 @@ import { createRequire } from "node:module";
 import { aguaComprometida, conteosZona, cobertura, evaluarOpcion } from "../../web/reglas.js";
 import { fraseResumen, formatoHectareas } from "../../web/js/resumen.js";
 import { ESTADOS_APTITUD, ROTULO_APTITUD, grupoDeTextura } from "../../web/js/suelo.js";
-import { NOTA_GEDI, NOTA_REGIONAL, NOTA_ECOSTRESS_SIN_CULTIVO, riesgoDeHelada, climaDelAnio, contarEstados, diasIncompletos, formatoNumero, textoMascon, textoEcostress, ultimoMesConDato, sinCultivoEnElMes, valorGaez } from "../../web/js/contexto.js";
+import { NOTA_GEDI, NOTA_REGIONAL, NOTA_ECOSTRESS_SIN_CULTIVO, riesgoDeHelada, climaDelAnio, contarEstados, diasIncompletos, formatoNumero, textoMascon, textoEcostress, ultimoMesConDato, sinCultivoEnElMes, valorGaez, cultivoDeGaez, notasDeGaez } from "../../web/js/contexto.js";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
 import { TEXTO_TITULO, TEXTO_NOTA, TEXTO_SIN_DATO, prioridadesDeParcela } from "../../web/js/prioridades.js";
 
@@ -2258,29 +2260,42 @@ async function pruebaInglesEnElOrigen(page, prefijo) {
   });
 }
 
-/** ECOSTRESS en la ficha (revisión independiente del 15-nov): escenas, aviso a la vista y nota de «sin cultivo». */
-async function pruebaEcostress(page, prefijo) {
-  const eco = contexto?.ecostress;
-  if (!eco) {
-    omitir(`${prefijo}ECOSTRESS en la ficha`, "contexto.json sin el bloque ecostress");
-    return;
-  }
-  const ids = [P0757, porId.has("P0632") ? "P0632" : null].filter((id) => id && eco.parcelas?.[id]);
+/** Lo que hay detrás del valor de ECOSTRESS de un mes (como lo arma web/js/contexto.js): { n, conteo, minimo, maximo }. */
+function detrasDeEcostress(eco, id, mes) {
+  const i = eco.meses.indexOf(mes);
+  return { n: eco.escenas_parcelas?.[id]?.[i], conteo: eco.conteo, minimo: eco.minimos_parcelas?.[id]?.[i], maximo: eco.maximos_parcelas?.[id]?.[i] };
+}
+/** Cómo debe decir el conteo la ficha: sobrevuelos (entrega corregida) o escenas (archivo anterior). */
+const reConteo = (eco, n) => (eco.conteo === "sobrevuelos" ? new RegExp(` from ${n} clear overpass(es)?\\b`) : new RegExp(` from ${n} clear-sky scenes?\\b`));
+
+/**
+ * ECOSTRESS en la ficha (revisión independiente del 15-nov): de cuántas lecturas sale el valor (y su intervalo, si la
+ * entrega lo trae), aviso a la vista y nota de «sin cultivo». `eco` es el bloque de contexto.json que la página leyó
+ * (el real o una variante en memoria); `abrirFicha(id)` abre la ficha de esa parcela.
+ */
+async function comprobarEcostress(page, prefijo, eco, ids, abrirFicha) {
   const vistos = [];
-  await conZona(page, "", async () => {
   for (const id of ids) {
     const u = ultimoMesConDato(eco.meses, eco.parcelas[id]);
     if (!u) continue;
-    const n = eco.escenas_parcelas?.[id]?.[eco.meses.indexOf(u.mes)];
+    const detras = detrasDeEcostress(eco, id, u.mes);
+    const n = detras.n;
+    const esperado = textoEcostress(u.valor, u.mes, detras);
     const actual = actualDe(id);
     const sinCultivo = sinCultivoEnElMes(actual?.meses_cultivo, u.mes);
     vistos.push(sinCultivo);
-    await abrirDesdeLista(page, id);
+    await abrirFicha(id);
     const li = page.locator('#seccion-evidencia li[data-evidencia="Evapotranspiration (ECOSTRESS)"]');
     const t = (await li.innerText().catch(() => "")).replace(/\s+/g, " ");
     const nota = li.locator(".evidencia-nota");
-    check(`${prefijo}ECOSTRESS de ${id}: «${textoEcostress(u.valor, u.mes, n)}» (valor, mes y ${n} escenas de contexto.json)`,
-      n > 0 && t.includes(`Evapotranspiration (ECOSTRESS): ${textoEcostress(u.valor, u.mes, n)}`) && new RegExp(` from ${n} clear-sky scenes?\\b`).test(t), t.slice(0, 160));
+    check(`${prefijo}ECOSTRESS de ${id}: «${esperado}» (valor, mes y lo que hay detrás, de contexto.json)`,
+      n > 0 && t.includes(`Evapotranspiration (ECOSTRESS): ${esperado}`) && reConteo(eco, n).test(t) &&
+        // «overpasses» solo con la entrega corregida (cuenta sobrevuelos); «scenes» solo con el archivo anterior.
+        /clear-sky scenes?\b/.test(t) === (eco.conteo !== "sobrevuelos") && /clear overpass(es)?\b/.test(t) === (eco.conteo === "sobrevuelos"), t.slice(0, 160));
+    // El intervalo va solo con la entrega corregida, con dos o más sobrevuelos y sus dos extremos.
+    const conIntervalo = eco.conteo === "sobrevuelos" && n > 1 && detras.minimo != null && detras.maximo != null;
+    check(`${prefijo}ECOSTRESS de ${id}: ${conIntervalo ? `con el intervalo entre sobrevuelos (${formatoNumero(detras.minimo)} to ${formatoNumero(detras.maximo)})` : "sin intervalo (un solo sobrevuelo, o el archivo no lo trae)"}`,
+      conIntervalo ? t.includes(`(${formatoNumero(detras.minimo)} to ${formatoNumero(detras.maximo)})`) : !/\(\S+ to \S+\)/.test(t.split(" Source:")[0]), t.slice(0, 160));
     check(`${prefijo}ECOSTRESS de ${id}: el aviso de la entrega a la vista junto al valor (no plegado en «Full source»)`,
       Boolean(eco.aviso) && (await nota.isVisible()) && (await nota.innerText()).includes(eco.aviso) && /not a field measurement/.test(await nota.innerText()) &&
         (await nota.evaluate((el) => !el.closest("details"))), (await nota.innerText().catch(() => "")).slice(0, 160));
@@ -2291,13 +2306,72 @@ async function pruebaEcostress(page, prefijo) {
     check(`${prefijo}ECOSTRESS de ${id}: sin contraste con el modelo, cociente, porcentaje ni «median» a la vista`, !/\b(model|ratio|median)\b|%|same days/i.test(visible), visible.slice(0, 200));
     await cerrarFicha(page);
   }
+  return vistos;
+}
+
+/** ECOSTRESS con los datos de hoy (la forma del archivo que haya en data/processed). */
+async function pruebaEcostress(page, prefijo) {
+  const eco = contexto?.ecostress;
+  if (!eco) {
+    omitir(`${prefijo}ECOSTRESS en la ficha`, "contexto.json sin el bloque ecostress");
+    return;
+  }
+  const ids = [P0757, porId.has("P0632") ? "P0632" : null].filter((id) => id && eco.parcelas?.[id]);
+  let vistos = [];
+  await conZona(page, "", async () => {
+    vistos = await comprobarEcostress(page, prefijo, eco, ids, (id) => abrirDesdeLista(page, id));
   });
   if (ids.length === 2 && vistos.length === 2) {
     check(`${prefijo}ECOSTRESS: las dos protagonistas ejercitan los dos casos (con cultivo y sin cultivo en el mes mostrado)`, vistos.includes(true) && vistos.includes(false), JSON.stringify(vistos));
   }
 }
 
-/** GAEZ en «Regional context» (hallazgo 15 de la sesión de datos): clase con su nombre, toneladas y nota de la entrega. */
+/**
+ * La OTRA forma del archivo de ECOSTRESS, en memoria (page.route): si los datos de hoy son el archivo anterior
+ * (cuenta escenas), se prueba la de la entrega corregida (cuenta sobrevuelos y trae el menor y el mayor); si ya son la
+ * corregida, la anterior. Los extremos de la variante son DATOS DE PRUEBA derivados del valor (no son lecturas).
+ */
+async function pruebaEcostressOtraForma(navegador, base) {
+  const eco = contexto?.ecostress;
+  const ids = [P0757, porId.has("P0632") ? "P0632" : null].filter((id) => id && eco?.parcelas?.[id]);
+  if (!eco || !ids.length) {
+    omitir("ECOSTRESS, la otra forma del archivo", "contexto.json sin el bloque ecostress o sin las protagonistas");
+    return;
+  }
+  const c = structuredClone(contexto);
+  const hoyCorregida = eco.conteo === "sobrevuelos";
+  const rotulo = hoyCorregida ? "archivo anterior (variante)" : "entrega corregida (variante)";
+  if (hoyCorregida) {
+    c.ecostress.conteo = "escenas";
+    delete c.ecostress.minimos_parcelas;
+    delete c.ecostress.maximos_parcelas;
+  } else {
+    const dosDecimales = (v) => Math.round(v * 100) / 100;
+    c.ecostress.conteo = "sobrevuelos";
+    // DE PRUEBA: el menor y el mayor alrededor del valor de cada mes con dato (para tener un intervalo que escribir).
+    c.ecostress.minimos_parcelas = Object.fromEntries(Object.entries(eco.parcelas).map(([id, v]) => [id, v.map((x) => (x == null ? null : dosDecimales(x * 0.75)))]));
+    c.ecostress.maximos_parcelas = Object.fromEntries(Object.entries(eco.parcelas).map(([id, v]) => [id, v.map((x) => (x == null ? null : dosDecimales(x * 1.25)))]));
+    // Y un solo sobrevuelo en la segunda protagonista (si hay dos): sin intervalo, en singular.
+    if (ids[1]) {
+      const u = ultimoMesConDato(eco.meses, eco.parcelas[ids[1]]);
+      c.ecostress.escenas_parcelas[ids[1]][eco.meses.indexOf(u.mes)] = 1;
+    }
+  }
+  for (const id of ids) {
+    const v = await abrir(navegador, base, { viewport: { width: 1366, height: 860 }, reducedMotion: "reduce" }, `ECOSTRESS, ${rotulo}, ${id}`, { "contexto.json": c }, { hash: `#${id}` });
+    await v.page.waitForSelector("#ficha:not([hidden])");
+    await comprobarEcostress(v.page, `${rotulo}: `, c.ecostress, [id], async () => {});
+    check(`${rotulo}: ${id} sin errores de consola`, v.errores.length === 0, v.errores.join(" | "));
+    await v.ctx.close();
+  }
+}
+
+/**
+ * GAEZ en «Regional context» (hallazgo 15 de la sesión de datos; parche datos/parches/2026-11-15_gaez_lectura_y_no_suelo.patch
+ * de la rama datos-satelite): la clase por su nombre, el factor de la unidad de FAO aparte, el cultivo con que GAEZ
+ * evalúa la clase del proyecto y las notas (la de la entrega y qué es «DW»). Lo esperado se arma con las mismas
+ * funciones puras de web/js/contexto.js sobre contexto.json.
+ */
 async function pruebaGaez(page, prefijo) {
   const filas = contexto?.gaez?.zonas?.[zonaContexto] ?? [];
   if (!filas.length) {
@@ -2305,28 +2379,49 @@ async function pruebaGaez(page, prefijo) {
     return;
   }
   await conZona(page, zonaContexto, async () => {
-  await abrirContexto(page);
-  const tarjeta = page.locator('#contexto-regional [data-tarjeta="gaez"]');
-  const celdas = await tarjeta.locator("tbody tr").evaluateAll((xs) => xs.map((x) => (x.querySelector("td:last-child")?.textContent ?? "").replace(/\s+/g, " ").trim()));
-  check(`${prefijo}GAEZ: cada valor escrito como lo arma valorGaez con los datos (${filas.length} filas)`,
-    celdas.length === filas.length && filas.every((f, i) => celdas[i].startsWith(valorGaez(f))), celdas.slice(0, 3).join(" | "));
-  const conMultiplicador = filas.filter((f) => f.valor_mostrar != null);
-  if (conMultiplicador.length) {
-    check(`${prefijo}GAEZ: la unidad con multiplicador («${conMultiplicador[0].unidad}») se escribe en «${conMultiplicador[0].unidad_mostrar}», no pegada a la cifra`,
-      conMultiplicador.every((f) => celdas[filas.indexOf(f)] === `${formatoNumero(f.valor_mostrar)} ${f.unidad_mostrar}`) && celdas.every((c) => !/\d\s*10kg/.test(c)), celdas[filas.indexOf(conMultiplicador[0])]);
-  }
-  const clases = filas.filter((f) => f.clase_nombre);
-  if (clases.length) {
-    check(`${prefijo}GAEZ: cada clase con su nombre («${valorGaez(clases[0])}»), no «${formatoNumero(clases[0].valor)} ${clases[0].unidad}»`,
-      clases.every((f) => celdas[filas.indexOf(f)] === `${f.clase_nombre} (${String(f.unidad).toLowerCase()} ${formatoNumero(f.valor)})`), celdas[filas.indexOf(clases[0])]);
-  }
-  const notas = [...new Set(filas.filter((f) => f.nota).map((f) => f.nota))];
-  if (notas.length) {
-    const escritas = await tarjeta.locator(".contexto-gaez-nota").allInnerTexts();
-    check(`${prefijo}GAEZ: la nota de la entrega a la vista, una vez por cultivo (${notas.length})`,
-      escritas.length === new Set(filas.filter((f) => f.nota).map((f) => `${f.cultivo}|${f.nota}`)).size && notas.every((n) => escritas.some((e) => e.includes(n))), escritas.join(" | ").slice(0, 200));
-  }
-  await page.locator("#bloque-contexto > summary").click(); // se pliega de nuevo
+    await abrirContexto(page);
+    const tarjeta = page.locator('#contexto-regional [data-tarjeta="gaez"]');
+    const renglones = await tarjeta.locator("tbody tr").evaluateAll((xs) => xs.map((x) => ({
+      cultivo: (x.querySelector("th")?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      valor: (x.querySelector("td:last-child")?.textContent ?? "").replace(/\s+/g, " ").trim(),
+    })));
+    check(`${prefijo}GAEZ: cada valor escrito como lo arma valorGaez con los datos (${filas.length} filas)`,
+      renglones.length === filas.length && filas.every((f, i) => renglones[i].valor.startsWith(valorGaez(f))), renglones.slice(0, 3).map((r) => r.valor).join(" | "));
+    // Una unidad de FAO que empieza con un factor («10kg DW/ha») no queda pegada a la cifra («1,678.5 10kg»).
+    const conFactor = filas.filter((f) => /^\d/.test(String(f.unidad)));
+    if (conFactor.length) {
+      check(`${prefijo}GAEZ: la unidad con factor («${conFactor[0].unidad}») lleva el factor aparte («${valorGaez(conFactor[0])}»)`,
+        conFactor.every((f) => renglones[filas.indexOf(f)].valor === valorGaez(f) && valorGaez(f).startsWith(`${formatoNumero(f.valor)} × `)) &&
+          renglones.every((r) => !/\d\s\d+kg/.test(r.valor)), renglones[filas.indexOf(conFactor[0])].valor);
+    }
+    const clases = filas.filter((f) => f.clase_nombre);
+    if (clases.length) {
+      check(`${prefijo}GAEZ: cada clase por su nombre («${clases[0].clase_nombre}»), no «${formatoNumero(clases[0].valor)} ${clases[0].unidad}»`,
+        clases.every((f) => renglones[filas.indexOf(f)].valor === f.clase_nombre), renglones[filas.indexOf(clases[0])].valor);
+    }
+    // El renglón escribe el nombre del proyecto y, si GAEZ evalúa la clase con otro cultivo, «GAEZ: <ese cultivo>».
+    // El nombre del proyecto es el que la página escribe (su mapa de cultivos); con él se arma lo esperado.
+    const partes = renglones.map((r) => {
+      const m = r.cultivo.match(/^(.*?)\s*GAEZ: (.+)$/);
+      return m ? { nombre: m[1].trim(), gaez: m[2].trim() } : { nombre: r.cultivo, gaez: null };
+    });
+    if (filas.some((f) => f.cultivo_gaez)) {
+      const esperados = filas.map((f, i) => cultivoDeGaez(f, { [f.cultivo]: partes[i].nombre }).gaez);
+      check(`${prefijo}GAEZ: el renglón dice con qué cultivo evalúa GAEZ solo cuando no es el del proyecto (${[...new Set(esperados.filter(Boolean))].join(", ") || "ninguno"})`,
+        filas.every((f, i) => partes[i].gaez === esperados[i]) && filas.every((f, i) => !esperados[i] || esperados[i] === f.cultivo_gaez),
+        [...new Set(renglones.map((r) => r.cultivo))].join(" | "));
+    }
+    const notas = notasDeGaez(filas);
+    if (notas.length) {
+      const escritas = await tarjeta.locator(".contexto-tarjeta-nota").allInnerTexts();
+      check(`${prefijo}GAEZ: las notas a la vista, una vez cada una (${notas.length}: la de la entrega y qué es «DW»)`,
+        notas.every((n) => escritas.filter((e) => e.trim() === n).length === 1), escritas.join(" | ").slice(0, 220));
+    }
+    // Regla 10: la clase de aptitud es el nombre que publica FAO; la tarjeta no la vuelve una recomendación.
+    const textoTarjeta = await tarjeta.innerText();
+    check(`${prefijo}GAEZ: la tarjeta no dice «best», «only», «first» ni «recommended» y conserva «not of a single field»`,
+      !/\b(best|only|first|recommended)\b/i.test(textoTarjeta) && /not of a single field/.test(textoTarjeta));
+    await page.locator("#bloque-contexto > summary").click(); // se pliega de nuevo
   });
 }
 
@@ -3562,6 +3657,7 @@ async function main() {
     await pruebaEnlaceDirecto(navegador, base, "teléfono: ", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
     await pruebaNDVIHuecos(navegador, base);
     await pruebaGotaVacia(navegador, base);
+    await pruebaEcostressOtraForma(navegador, base);
 
     // Pantalla de inicio de tres pasos (visitante nuevo): en escritorio se cierra con Escape; en teléfono, con el botón.
     await pruebaInicio(navegador, base, { viewport: { width: 1366, height: 860 } }, "inicio, escritorio", "", "Escape");

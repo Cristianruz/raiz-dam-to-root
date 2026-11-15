@@ -58,21 +58,27 @@ Contenido de contexto.json (lo lee web/js/contexto.js; toda cifra de la página 
                      no, null si tiene menos disparos que min_disparos o no hay criterio. Los tres
                      conteos (null sin criterio) suman n_con_dato.
   ecostress        null + ecostress_motivo, o {archivo, fuente, fecha, meses, parcelas: {id: [valores
-                   por mes]}, escenas_parcelas: {id: [n_escenas por mes]}, aviso}. «escenas_parcelas» va
-                   alineada a «meses» como «parcelas»: cuántas escenas despejadas hay detrás de cada valor
-                   (la ficha lo escribe junto a la cifra). El nombre termina en «parcelas» para que el
-                   manifiesto la agrupe por patrón (parcelas.*) y no crezca con el número de parcelas. «aviso» es el rótulo que la propia entrega trae en su línea
-                   de LEEME («satellite ET at 70 m on clear days, not a field measurement»), para que la
-                   ficha lo ponga a la vista; null si la línea no lo trae (la página usa entonces un aviso
-                   sin la resolución). El contraste con el modelo (etc_modelo_mm, razon) NO va a la página
-                   (docs/revisiones/2026-11-15_ecostress.md: se leería como validación o como déficit).
+                   por mes]}, escenas_parcelas: {id: [n_escenas por mes]}, conteo, aviso} y, solo con la
+                   entrega corregida del 15-nov, minimos_parcelas y maximos_parcelas: {id: [valor por mes]}.
+                   Todas las listas van alineadas a «meses». Los nombres terminan en «parcelas» para que el
+                   manifiesto las agrupe por patrón (parcelas.*) y no crezca con el número de parcelas.
+                   · escenas_parcelas: lo que hay detrás de cada valor (columna n_escenas); la ficha lo
+                     escribe junto a la cifra.
+                   · conteo: qué cuenta n_escenas. «sobrevuelos» en la entrega corregida (la que trae
+                     et_min_mm_dia y et_max_mm_dia: las escenas del mismo sobrevuelo se promedian);
+                     «escenas» en la anterior, donde un sobrevuelo podía contar dos veces (D5 de la
+                     revisión). La ficha dice «clear overpasses» o «clear-sky scenes» según este campo.
+                   · minimos_parcelas y maximos_parcelas: el menor y el mayor de los sobrevuelos usados
+                     (et_min_mm_dia y et_max_mm_dia); la ficha escribe el intervalo con dos o más.
+                   · aviso: el rótulo que la propia entrega trae en su línea de LEEME («satellite … at
+                     70 m on clear days, not a field measurement»), para que la ficha lo ponga a la
+                     vista; null si la línea no lo trae (la página usa entonces un aviso sin la resolución).
+                   El contraste con el modelo (etc_modelo_mm, razon) y la incertidumbre (incertidumbre_w_m2)
+                   NO van a la página (docs/revisiones/2026-11-15_ecostress.md: el contraste se leería
+                   como validación o como déficit).
   gaez             null + gaez_motivo, o {archivo, fuente, fecha, zonas: {zona: [{cultivo, variable,
-                   valor, unidad, resolucion_m}]}}. Campos opcionales de cada fila, solo si la entrega
-                   los trae: «clase_nombre» (el nombre de la clase de aptitud: «High», «Good»), «nota»
-                   (p. ej. que el maíz de GAEZ es de grano) y, cuando la unidad de FAO lleva un
-                   multiplicador pegado («10kg DW/ha»), «valor_mostrar» y «unidad_mostrar»: el mismo
-                   valor en toneladas («t DW/ha»), que es lo que la página escribe. «valor» y «unidad»
-                   quedan tal como los publica FAO.
+                   valor, unidad, resolucion_m, y si la entrega los trae: clase_nombre, cultivo_gaez,
+                   nota}]}}
   heladas          null + heladas_motivo, o el contenido de heladas.json más «entrega» {archivo,
                    fuente, fecha}
   et_contraste     null + et_contraste_motivo, o {zona, motivo_otras_zonas, archivo, fuente, fecha,
@@ -147,15 +153,14 @@ IDIOMA_FUENTES = "en"
 # Frase con que la entrega de ECOSTRESS rotula su dato en la línea de LEEME («satellite ET at 70 m on clear days,
 # not a field measurement»): el tramo de la línea que la contiene va a la ficha como aviso a la vista.
 MARCA_AVISO_ECOSTRESS = "not a field measurement"
-# Definición del SI (no es un dato): 1 t = 1,000 kg. Para escribir en toneladas una unidad de GAEZ que trae un
-# multiplicador pegado («10kg DW/ha» = decenas de kilogramos de materia seca por hectárea).
-KG_POR_TONELADA = 1000
-# Unidad de GAEZ con multiplicador: «<entero>kg <resto>» (p. ej. «10kg DW/ha»).
-UNIDAD_CON_MULTIPLICADOR = re.compile(r"^(\d+)\s*kg\b\s*(.*)$")
+# Columnas de la entrega corregida del 15-nov: el menor y el mayor de los sobrevuelos usados en el mes. Si el archivo
+# las trae, además, su n_escenas cuenta sobrevuelos (las escenas del mismo sobrevuelo van promediadas); el archivo
+# anterior no las trae y cuenta escenas.
+COLUMNA_ET_MIN, COLUMNA_ET_MAX = "et_min_mm_dia", "et_max_mm_dia"
+CONTEO_SOBREVUELOS, CONTEO_ESCENAS = "sobrevuelos", "escenas"
 
 # Redondeos de presentación (no cambian el dato de origen).
 DECIMALES_MM = 1
-DECIMALES_TONELADAS = 3   # los del valor de GAEZ (un decimal) más los dos que agrega pasar de 10 kg a t
 DECIMALES_MEDIA = 4
 DECIMALES_ALTURA = 2   # los de la entrega de GEDI (metros con centésimas)
 # Unidades del contrato que se suman en el año (láminas y días); las demás se promedian.
@@ -174,6 +179,11 @@ ARCHIVO_CONTEXTO = "contexto_regional.csv"
 ARCHIVO_GEDI = "gedi_parcelas.csv"
 ARCHIVO_ECOSTRESS = "ecostress_parcelas.csv"
 ARCHIVO_GAEZ = "gaez_zona.csv"
+# Columnas adicionales de gaez_zona.csv (pieza G1 de la sesión de datos) que la tarjeta necesita para leer la fila:
+# el nombre de la clase de aptitud de FAO (en esa fila «valor» es el número de clase), el cultivo con que GAEZ evalúa
+# la clase del proyecto (Maize para maiz_forrajero, Oat para cereal_invierno) y la nota de la entrega (el maíz de
+# GAEZ es de grano). Son textos; la fila que no los trae va sin ellos.
+COLUMNAS_TEXTO_GAEZ = ("clase_nombre", "cultivo_gaez", "nota")
 ARCHIVO_HELADAS = "heladas.json"
 # Criterios para leer la altura de GEDI: entrega de la sesión de datos (pieza A11), ya validada.
 ARCHIVO_SUPUESTOS = "supuestos.json"
@@ -649,21 +659,31 @@ def aviso_de_ecostress(fuente):
 
 
 def bloque_ecostress(ruta, registro):
-    """ET de ECOSTRESS por parcela y mes, y cuántas escenas despejadas hay detrás de cada valor (n_escenas).
-    El contraste con el modelo de la entrega (etc_modelo_mm, razon) no se lleva a la página."""
+    """ET de ECOSTRESS por parcela y mes, lo que hay detrás de cada valor (n_escenas) y, si la entrega es la
+    corregida del 15-nov, el menor y el mayor de los sobrevuelos usados. Funciona con los dos archivos: el
+    anterior (sin et_min_mm_dia ni et_max_mm_dia; n_escenas cuenta escenas) y el corregido (con ellas; n_escenas
+    cuenta sobrevuelos). El contraste con el modelo (etc_modelo_mm, razon) y la incertidumbre no van a la página."""
     filas = leer_csv(ruta)
     meses = sorted({fila["mes"].strip() for fila in filas if _mes(fila["mes"]) is not None})
     indice = {m: i for i, m in enumerate(meses)}
-    parcelas, escenas = {}, {}
+    con_intervalo = bool(filas) and COLUMNA_ET_MIN in filas[0] and COLUMNA_ET_MAX in filas[0]
+    parcelas, escenas, minimos, maximos = {}, {}, {}, {}
     for fila in filas:
         mes = fila["mes"].strip()
         if mes in indice:
-            pid = fila["id"].strip()
-            parcelas.setdefault(pid, [None] * len(meses))[indice[mes]] = numero(fila["et_mm_dia"])
-            escenas.setdefault(pid, [None] * len(meses))[indice[mes]] = entero(fila.get("n_escenas"))
+            pid, i = fila["id"].strip(), indice[mes]
+            parcelas.setdefault(pid, [None] * len(meses))[i] = numero(fila["et_mm_dia"])
+            escenas.setdefault(pid, [None] * len(meses))[i] = entero(fila.get("n_escenas"))
+            if con_intervalo:
+                minimos.setdefault(pid, [None] * len(meses))[i] = numero(fila[COLUMNA_ET_MIN])
+                maximos.setdefault(pid, [None] * len(meses))[i] = numero(fila[COLUMNA_ET_MAX])
     procedencia_ = procedencia(registro)
-    return {**procedencia_, "meses": meses, "parcelas": parcelas, "escenas_parcelas": escenas,
-            "aviso": aviso_de_ecostress(procedencia_.get("fuente"))}
+    bloque = {**procedencia_, "meses": meses, "parcelas": parcelas, "escenas_parcelas": escenas,
+              "conteo": CONTEO_SOBREVUELOS if con_intervalo else CONTEO_ESCENAS,
+              "aviso": aviso_de_ecostress(procedencia_.get("fuente"))}
+    if con_intervalo:
+        bloque["minimos_parcelas"], bloque["maximos_parcelas"] = minimos, maximos
+    return bloque
 
 
 def bloque_gaez(ruta, zonas, registro, avisos):
@@ -682,26 +702,13 @@ def bloque_gaez(ruta, zonas, registro, avisos):
             "unidad": fila["unidad"].strip(),
             "resolucion_m": numero_limpio(fila["resolucion_m"]),
         }
-        # Columnas adicionales de la entrega, solo si vienen con texto: el nombre de la clase y la nota.
-        for columna in ("clase_nombre", "nota"):
+        # Los textos que leen la fila (COLUMNAS_TEXTO_GAEZ), solo si la entrega los trae y no están vacíos.
+        for columna in COLUMNAS_TEXTO_GAEZ:
             texto = (fila.get(columna) or "").strip()
             if texto:
                 renglon[columna] = texto
-        renglon.update(en_toneladas(renglon["valor"], renglon["unidad"]))
         por_zona.setdefault(zona, []).append(renglon)
     return {**procedencia(registro), "zonas": por_zona}
-
-
-def en_toneladas(valor, unidad):
-    """{valor_mostrar, unidad_mostrar} de un valor de GAEZ cuya unidad trae un multiplicador pegado
-    («10kg DW/ha»): el mismo valor en toneladas («t DW/ha»), para que la página no escriba «1,678.5 10kg».
-    {} si la unidad no tiene esa forma o no hay valor: entonces la página escribe valor y unidad tal cual."""
-    m = UNIDAD_CON_MULTIPLICADOR.match(unidad or "")
-    if valor is None or not m:
-        return {}
-    multiplicador, resto = int(m.group(1)), m.group(2).strip()
-    return {"valor_mostrar": round(valor * multiplicador / KG_POR_TONELADA, DECIMALES_TONELADAS),
-            "unidad_mostrar": f"t {resto}".strip()}
 
 
 def bloque_heladas(ruta, registro):

@@ -53,6 +53,9 @@ Vocabulario de un campo (columna de CSV, propiedad de GeoJSON o llave de un obje
   nulo      True: la celda puede venir vacía (o null en JSON).
   opcional  True (solo propiedades de GeoJSON): la propiedad puede faltar del todo; si viene,
             se valida como las demás (p. ej., «zona»: si viene, debe ser un id de zona).
+            En un CSV, las columnas que pueden faltar van aparte, en «columnas_opcionales» del
+            esquema (mismo vocabulario que «columnas»): si la entrega las trae se validan y entran
+            a las reglas de fila; si no, no se piden (p. ej., et_min_mm_dia de ECOSTRESS).
   nulo_si   {"columna": c, "valores": [...]} (solo CSV): la celda puede venir vacía SOLO si la
             columna c de la misma fila trae uno de esos valores (p. ej., prob_max vacío solo
             con acuerdo_metodos «1/1»). Una celda mal escrita sigue siendo error, no «vacía».
@@ -887,13 +890,26 @@ ESQUEMAS = {
             "et_mm_dia": _con(NO_NEGATIVO, nulo=True),
             "n_escenas": {"tipo": "entero", "min": 0},
         },
+        # Reentrega del 15-nov (nota «15-nov 00:34» de datos/PARA_INTEGRADOR.md en la rama datos-satelite, tras la
+        # revisión independiente docs/revisiones/2026-11-15_ecostress.md, I7): el menor y el mayor de los
+        # sobrevuelos usados en el mes. La ficha los escribe como intervalo, así que se declaran; son opcionales
+        # porque la entrega anterior no los trae. incertidumbre_w_m2 no se muestra y sigue sin declararse.
+        "columnas_opcionales": {
+            "et_min_mm_dia": _con(NO_NEGATIVO, nulo=True),
+            "et_max_mm_dia": _con(NO_NEGATIVO, nulo=True),
+        },
         "llave": ("id", "mes"),
         # «vacío si no hubo escena» (FUENTE_RECURSOS): sin escenas no hay ET. Con escenas puede
-        # venir vacía (no se exige «llenas_si_no»).
-        "reglas": [{"regla": "vacias_segun", "columna": "n_escenas", "valor": 0, "columnas": ["et_mm_dia"]}],
+        # venir vacía (no se exige «llenas_si_no»). Lo mismo el menor y el mayor, si vienen; y, por
+        # definición, menor ≤ mediana ≤ mayor (la regla compara solo los valores presentes).
+        "reglas": [{"regla": "vacias_segun", "columna": "n_escenas", "valor": 0,
+                    "columnas": ["et_mm_dia", "et_min_mm_dia", "et_max_mm_dia"]},
+                   {"regla": "orden", "columnas": ["et_min_mm_dia", "et_mm_dia", "et_max_mm_dia"]}],
         "fuente_reglas": (f"{FUENTE_RECURSOS}: id de parcelas_base.geojson; mes AAAA-MM; llave (id, mes); "
                           "et_mm_dia vacío si no hubo escena (n_escenas = 0); n_escenas entero ≥ 0; "
-                          "ET ≥ 0 por definición"),
+                          "ET ≥ 0 por definición. Columnas opcionales de la reentrega del 15-nov: "
+                          "et_min_mm_dia y et_max_mm_dia (≥ 0, vacías sin escenas, menor ≤ mediana ≤ mayor "
+                          "por definición)"),
     },
     "gaez_zona.csv": {
         "pieza": "A13", "tipo": "csv",

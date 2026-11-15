@@ -26,13 +26,13 @@ import {
   NOTA_REGIONAL,
   sinCultivoEnElMes,
   textoEcostress,
-  valorGaez,
   anioPorOmision,
   cargarContexto,
   citasDeTarjeta,
   climaDelAnio,
   contarEstados,
   criteriosGedi,
+  cultivoDeGaez,
   diasIncompletos,
   diferenciaLluvia,
   escalaY,
@@ -49,6 +49,7 @@ import {
   modeloTarjetas,
   montarContextoRegional,
   montarRecursosReto,
+  notasDeGaez,
   num,
   ordenarRecursos,
   puntosAnuales,
@@ -58,6 +59,7 @@ import {
   textoMascon,
   ultimoMesConDato,
   valorAnual,
+  valorGaez,
 } from "../web/js/contexto.js";
 
 const leer = (ruta) => JSON.parse(readFileSync(new URL(ruta, import.meta.url), "utf8"));
@@ -556,6 +558,32 @@ test("formatoNumero y etiquetaMes", () => {
   assert.equal(etiquetaMes(null), "");
 });
 
+test("GAEZ: la clase por su nombre, el factor de la unidad de FAO aparte y el cultivo con que GAEZ evalúa la clase", () => {
+  // Filas como las de gaez_zona.csv (pieza G1): «unidad» es la cadena de FAO. Valores de prueba.
+  const nombres = { alfalfa: "Alfalfa", maiz_forrajero: "Forage maize" };
+  assert.equal(valorGaez({ cultivo: "alfalfa", valor: 2, unidad: "Class", clase_nombre: "High" }), "High");
+  assert.equal(valorGaez({ valor: 1678.5, unidad: "10kg DW/ha" }), `${formatoNumero(1678.5)} × 10 kg DW/ha`);
+  assert.equal(valorGaez({ valor: 913, unidad: "kg lint/ha" }), `${formatoNumero(913)} kg lint/ha`);
+  assert.equal(valorGaez({ valor: 7778, unidad: "Index (0–10000)" }), `${formatoNumero(7778)} Index (0–10000)`);
+  assert.equal(valorGaez({ valor: 2, unidad: "Class" }), `${formatoNumero(2)} Class`, "sin clase_nombre, número y unidad");
+  assert.equal(valorGaez(null), "—");
+  assert.deepEqual(cultivoDeGaez({ cultivo: "maiz_forrajero", cultivo_gaez: "Maize" }, nombres), { nombre: "Forage maize", gaez: "Maize" });
+  assert.deepEqual(cultivoDeGaez({ cultivo: "alfalfa", cultivo_gaez: "Alfalfa" }, nombres), { nombre: "Alfalfa", gaez: null });
+  assert.deepEqual(cultivoDeGaez({ cultivo: "alfalfa" }, nombres), { nombre: "Alfalfa", gaez: null });
+  const nota = "nota de prueba";
+  assert.deepEqual(notasDeGaez([{ unidad: "10kg DW/ha" }, { nota }, { nota }]), [nota, "DW: dry weight."]);
+  assert.deepEqual(notasDeGaez([{ unidad: "kg lint/ha" }]), []);
+  assert.deepEqual(notasDeGaez(null), []);
+});
+
+test("GAEZ de hoy (web/data/contexto.json): cada fila de clase trae su nombre y el maíz dice con qué cultivo lo evalúa GAEZ", { skip: !(REAL && REAL.gaez) && "sin gaez en web/data/contexto.json" }, () => {
+  for (const filas of Object.values(REAL.gaez.zonas)) {
+    for (const f of filas.filter((x) => x.unidad === "Class")) assert.ok(f.clase_nombre, `${f.cultivo}: clase sin nombre`);
+    for (const f of filas.filter((x) => x.cultivo === "maiz_forrajero")) assert.ok(cultivoDeGaez(f).gaez, "maíz sin cultivo de GAEZ");
+    if (filas.some((x) => x.cultivo === "maiz_forrajero")) assert.ok(notasDeGaez(filas).some((n) => n !== "DW: dry weight."), "falta la nota del maíz");
+  }
+});
+
 test("ordenarRecursos y contarEstados: en uso, pedidas, no aplica; conteos calculados de la lista", () => {
   for (const [nombre, contexto] of [["fixture", LLENO], ["sin entregas", SIN_ENTREGAS], ["real", REAL]]) {
     if (!contexto) continue;
@@ -662,6 +690,8 @@ test("ECOSTRESS: escenas detrás del valor, aviso a la vista y nota de «sin cul
   // textoEcostress: sin el número de escenas (un contexto.json anterior), solo el valor y el mes.
   assert.equal(textoEcostress(2.5, "2026-08", null), `${formatoNumero(2.5)} mm/day in ${etiquetaMes("2026-08")}`);
   assert.equal(textoEcostress(2.5, "2026-08", 3), `${formatoNumero(2.5)} mm/day in ${etiquetaMes("2026-08")}, from 3 clear-sky scenes`);
+  assert.equal(textoEcostress(2.5, "2026-08", { n: 3, conteo: "escenas", minimo: 1, maximo: 4 }), `${formatoNumero(2.5)} mm/day in ${etiquetaMes("2026-08")}, from 3 clear-sky scenes`,
+    "el archivo anterior cuenta escenas: ni «overpasses» ni intervalo");
   const sinEscenas = { ...LLENO, ecostress: { ...eco, escenas_parcelas: undefined } };
   assert.doesNotMatch(evidenciaDeParcela({ contexto: sinEscenas, id: unaId }).at(-1).texto, /scene/);
   // Sin el rótulo de la entrega (ecostress.aviso null): el aviso fijo, que no lleva ninguna cifra.
@@ -686,35 +716,71 @@ test("ECOSTRESS: escenas detrás del valor, aviso a la vista y nota de «sin cul
   assert.ok(evidenciaDeParcela({ contexto: LLENO, id: unaId, mesesCultivo: sinCultivo }).at(-1).texto.includes(etiquetaMes(u.mes)));
 });
 
+// Dos contextos pequeños DE PRUEBA con el bloque de ECOSTRESS como lo escribe el motor con cada forma del archivo:
+// el anterior (n_escenas cuenta escenas; sin intervalo) y el de la entrega corregida del 15-nov (cuenta sobrevuelos y
+// trae el menor y el mayor de cada mes). Los valores no son datos.
+const ECO_ANTERIOR = {
+  ecostress: {
+    archivo: "ecostress_parcelas.csv", fuente: "prueba", fecha: "prueba", aviso: "Satellite estimate at 70 m on clear days, not a field measurement",
+    meses: ["2026-01", "2026-08"], conteo: "escenas",
+    parcelas: { A: [0.9, 2.11], B: [0.9, null], C: [null, 0.66] },
+    escenas_parcelas: { A: [1, 2], B: [1, 0], C: [0, 3] },
+  },
+};
+const ECO_CORREGIDO = {
+  ecostress: {
+    ...ECO_ANTERIOR.ecostress, conteo: "sobrevuelos",
+    minimos_parcelas: { A: [0.9, 1.57], B: [0.9, null], C: [null, 0.14] },
+    maximos_parcelas: { A: [0.9, 2.66], B: [0.9, null], C: [null, 1.17] },
+  },
+};
+
+test("ECOSTRESS con la entrega corregida: «clear overpasses» y el intervalo con dos o más; con el archivo anterior, «scenes» y sin intervalo", () => {
+  const fila = (contexto, id) => evidenciaDeParcela({ contexto, id }).at(-1).texto;
+  const ago = etiquetaMes("2026-08");
+  const ene = etiquetaMes("2026-01");
+  // Entrega corregida: dos o más sobrevuelos, con su intervalo; uno solo, sin intervalo y en singular.
+  assert.equal(fila(ECO_CORREGIDO, "A"), `${formatoNumero(2.11)} mm/day in ${ago}, from 2 clear overpasses (${formatoNumero(1.57)} to ${formatoNumero(2.66)})`);
+  assert.equal(fila(ECO_CORREGIDO, "C"), `${formatoNumero(0.66)} mm/day in ${ago}, from 3 clear overpasses (${formatoNumero(0.14)} to ${formatoNumero(1.17)})`);
+  assert.equal(fila(ECO_CORREGIDO, "B"), `${formatoNumero(0.9)} mm/day in ${ene}, from 1 clear overpass`, "el último mes con dato; un sobrevuelo: sin intervalo");
+  // Archivo anterior: los mismos valores, contados como escenas y sin intervalo.
+  assert.equal(fila(ECO_ANTERIOR, "A"), `${formatoNumero(2.11)} mm/day in ${ago}, from 2 clear-sky scenes`);
+  assert.equal(fila(ECO_ANTERIOR, "B"), `${formatoNumero(0.9)} mm/day in ${ene}, from 1 clear-sky scene`);
+  // Entrega corregida sin uno de los extremos en ese mes: sin intervalo (no se inventa el que falta).
+  const sinMaximo = { ecostress: { ...ECO_CORREGIDO.ecostress, maximos_parcelas: { A: [0.9, null] } } };
+  assert.equal(fila(sinMaximo, "A"), `${formatoNumero(2.11)} mm/day in ${ago}, from 2 clear overpasses`);
+  // En los dos casos: sin «median», sin contraste con el modelo, y el aviso de la entrega en la nota.
+  for (const contexto of [ECO_ANTERIOR, ECO_CORREGIDO]) {
+    for (const id of ["A", "B", "C"]) {
+      const f = evidenciaDeParcela({ contexto, id }).at(-1);
+      assert.doesNotMatch(`${f.texto} ${f.nota}`, /\b(median|model|ratio)\b|%|same days|validat/i);
+      assert.equal(f.nota, `${contexto.ecostress.aviso}.`);
+    }
+  }
+  // textoEcostress con el detalle: lo mismo, sin pasar por el bloque.
+  assert.equal(textoEcostress(2.11, "2026-08", { n: 2, conteo: "sobrevuelos", minimo: 1.57, maximo: 2.66 }), fila(ECO_CORREGIDO, "A"));
+  assert.equal(textoEcostress(2.11, "2026-08", { n: 1, conteo: "sobrevuelos", minimo: 2.11, maximo: 2.11 }), `${formatoNumero(2.11)} mm/day in ${ago}, from 1 clear overpass`);
+});
+
 test("ECOSTRESS con los datos reales: P0757 con cultivo en el mes; P0632 sin cultivo, con su nota", { skip: REAL?.ecostress ? false : "sin ecostress en contexto.json" }, () => {
   const cubo = JSON.parse(readFileSync(new URL("../web/data/cubo.json", import.meta.url), "utf-8"));
   const eco = REAL.ecostress;
   const actual = (id) => (cubo.parcelas[id]?.opciones ?? []).find((o) => o.id === "ACTUAL");
   for (const id of ["P0757", "P0632", "L0175"].filter((x) => eco.parcelas[x] && actual(x))) {
     const u = ultimoMesConDato(eco.meses, eco.parcelas[id]);
-    const n = eco.escenas_parcelas[id][eco.meses.indexOf(u.mes)];
+    const i = eco.meses.indexOf(u.mes);
+    const n = eco.escenas_parcelas[id][i];
     const fila = evidenciaDeParcela({ contexto: REAL, id, mesesCultivo: actual(id).meses_cultivo }).at(-1);
-    assert.equal(fila.texto, `${formatoNumero(u.valor)} mm/day in ${etiquetaMes(u.mes)}, from ${n} clear-sky ${n === 1 ? "scene" : "scenes"}`, id);
+    // Con el archivo de hoy o con la entrega corregida (la que declara conteo «sobrevuelos» y trae el intervalo).
+    const [minimo, maximo] = [eco.minimos_parcelas?.[id]?.[i], eco.maximos_parcelas?.[id]?.[i]];
+    const esperado = eco.conteo === "sobrevuelos"
+      ? `${formatoNumero(u.valor)} mm/day in ${etiquetaMes(u.mes)}, from ${n} clear ${n === 1 ? "overpass" : "overpasses"}${n > 1 && minimo != null && maximo != null ? ` (${formatoNumero(minimo)} to ${formatoNumero(maximo)})` : ""}`
+      : `${formatoNumero(u.valor)} mm/day in ${etiquetaMes(u.mes)}, from ${n} clear-sky ${n === 1 ? "scene" : "scenes"}`;
+    assert.equal(fila.texto, esperado, id);
     assert.ok(fila.nota.startsWith(`${eco.aviso}.`), `${id}: aviso a la vista`);
     const sinCultivo = !actual(id).meses_cultivo[Number(u.mes.slice(5)) - 1];
     assert.equal(fila.nota.endsWith(NOTA_ECOSTRESS_SIN_CULTIVO), sinCultivo, `${id}: nota de sin cultivo ${sinCultivo ? "presente" : "ausente"}`);
   }
-});
-
-test("valorGaez: clase con su nombre, unidad con multiplicador en toneladas y lo demás tal cual", () => {
-  // Las cifras vienen de la fila; aquí solo se arma el texto.
-  assert.equal(valorGaez({ valor: 2, unidad: "Class", clase_nombre: "High" }), `High (class ${formatoNumero(2)})`);
-  assert.equal(valorGaez({ valor: 1678.5, unidad: "10kg DW/ha", valor_mostrar: 16.785, unidad_mostrar: "t DW/ha" }), `${formatoNumero(16.785)} t DW/ha`);
-  assert.equal(valorGaez({ valor: 9341, unidad: "kg DW/ha" }), `${formatoNumero(9341)} kg DW/ha`);
-  assert.equal(valorGaez({ valor: 7778, unidad: "Index" }), `${formatoNumero(7778)} Index`);
-  assert.equal(valorGaez(null), "—");
-  // Con la fixture: la fila de la clase y la de la unidad con multiplicador se escriben distinto que su valor crudo.
-  const filas = Object.values(LLENO.gaez.zonas)[0];
-  const clase = filas.find((f) => f.clase_nombre);
-  assert.equal(valorGaez(clase), `${clase.clase_nombre} (${clase.unidad.toLowerCase()} ${formatoNumero(clase.valor)})`);
-  const decenas = filas.find((f) => f.valor_mostrar != null);
-  assert.equal(valorGaez(decenas), `${formatoNumero(decenas.valor_mostrar)} ${decenas.unidad_mostrar}`);
-  assert.ok(!valorGaez(decenas).includes(decenas.unidad), "no se escribe la unidad con el multiplicador pegado");
 });
 
 test("lecturaDeGedi: dosel alto, sin dosel alto, pocos disparos, sin disparos; null sin criterio", () => {

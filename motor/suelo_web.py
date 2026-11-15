@@ -181,6 +181,10 @@ ARCHIVO_REGLAS = "suelo_reglas.json"
 # Zona → llave de suelo_tipos.json → zona con los suelos del municipio (textos_ficha_en.tipo_suelo.zona.cuando:
 # «zona delicias_saucillo; {lista} = suelo_tipos.json → zona.municipio_delicias_pct»). Lázaro Cárdenas no la tiene.
 LISTA_MUNICIPIO_DE_ZONA = {"delicias_saucillo": E.ZONA_PCT}
+# Superficies del mismo cuadro del INEGI (Tabla 1 del Plan Municipal de Desarrollo de Delicias) que no son suelo: con
+# ellas la lista suma el 100 % de la superficie del municipio, como pide el validador (motor/esquemas.py). No van en la
+# lista de suelos y no avisan; cualquier otra llave que no sea un grupo WRB del catálogo sí avisa.
+NO_SUELO = ("zona_urbana", "cuerpo_de_agua")
 # Nutrientes que la ficha NO muestra como «near the limit» (textos_ficha_en.suelo.cerca_del_limite.cuando: «con
 # cerca_del_limite sin N, K, Ca, Mg ni S (decisión del integrador)»; docs/suelo_tipos_y_nutrientes.md §6 de la rama
 # datos-satelite: a pH 8.1 el grupo queda a 0.1 de su rango y en suelos calcáreos el Ca y el Mg dominan el complejo
@@ -756,8 +760,8 @@ def leer_catalogo(processed, avisos):
 
 def suelos_del_municipio(catalogo, zona, plantilla, avisos):
     """{texto_en, suelos: [{grupo, pct}], fuente, etiqueta} de la zona (INEGI, del catálogo), o None. Los nombres
-    son los grupos de la WRB del catálogo (por su nombre_es); lo que no es un grupo (zona urbana, cuerpo de agua) no
-    es un suelo y no entra a la lista."""
+    son los grupos de la WRB del catálogo (por su nombre_es); lo que no es un grupo no entra a la lista: las superficies
+    que no son suelo (NO_SUELO: zona urbana, cuerpo de agua) sin aviso, y cualquier otra llave con aviso."""
     llave = LISTA_MUNICIPIO_DE_ZONA.get(zona)
     bloque = (catalogo or {}).get("zona") or {}
     pct = bloque.get(llave) if llave else None
@@ -768,7 +772,7 @@ def suelos_del_municipio(catalogo, zona, plantilla, avisos):
     for nombre, valor in pct.items():
         if nombre in grupo_de and finito(valor) is not None:
             suelos.append({"grupo": grupo_de[nombre], "pct": valor})
-        else:
+        elif nombre not in NO_SUELO:
             fuera.append(nombre)
     if fuera:
         avisos.append(f"{ARCHIVO_CATALOGO}: zona.{llave} trae {', '.join(fuera)}, que no son grupos de suelo de la WRB del "

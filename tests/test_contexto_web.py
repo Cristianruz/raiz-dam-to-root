@@ -567,6 +567,8 @@ def test_ecostress_lleva_las_escenas_de_cada_valor(lleno):
     escenas sale cada valor. «escenas_parcelas» va alineada a «meses», como los valores, y es la columna n_escenas del CSV."""
     eco = lleno["contexto"]["ecostress"]
     assert set(eco["escenas_parcelas"]) == set(eco["parcelas"])
+    # La fixture grande es la forma anterior del archivo: cuenta escenas y no trae intervalo.
+    assert eco["conteo"] == cw.CONTEO_ESCENAS and "minimos_parcelas" not in eco
     with (lleno["processed"] / "ecostress_parcelas.csv").open(encoding="utf-8", newline="") as f:
         filas = list(csv.DictReader(f))
     assert filas, "la fixture trae filas"
@@ -580,6 +582,65 @@ def test_ecostress_lleva_las_escenas_de_cada_valor(lleno):
     # El contraste con el modelo de la entrega no se lleva a la página (I3 de la revisión).
     texto = json.dumps(eco, ensure_ascii=False)
     assert "etc_modelo" not in texto and "razon" not in texto
+
+
+# Dos fixtures pequeñas de ecostress_parcelas.csv, DE PRUEBA: la forma anterior (n_escenas cuenta escenas) y la de la
+# entrega corregida del 15-nov (n_escenas cuenta sobrevuelos; al final, el menor y el mayor y la incertidumbre).
+ECOSTRESS_ANTERIOR = (
+    "id,mes,et_mm_dia,n_escenas,zona,etc_modelo_mm,razon\n"
+    "P0001,2026-01,0.9,1,zona_a,3.0,0.3\n"
+    "P0001,2026-08,2.11,2,zona_a,7.5,0.28\n"
+    "P0002,2026-01,,0,zona_a,,\n"
+    "P0002,2026-08,0.66,2,zona_a,,\n"
+)
+ECOSTRESS_CORREGIDO = (
+    "id,mes,et_mm_dia,n_escenas,zona,etc_modelo_mm,razon,et_min_mm_dia,et_max_mm_dia,incertidumbre_w_m2\n"
+    "P0001,2026-01,0.9,1,zona_a,3.0,0.3,0.9,0.9,56\n"
+    "P0001,2026-08,2.11,2,zona_a,7.5,0.28,1.57,2.66,110\n"
+    "P0002,2026-01,,0,zona_a,,,,,\n"
+    "P0002,2026-08,0.66,2,zona_a,,,0.14,1.17,86\n"
+)
+REGISTRO_ECOSTRESS = {"archivo": "ecostress_parcelas.csv", "fecha": "prueba",
+                      "fuente": "producto de prueba; satellite estimate at 70 m on clear days, not a field measurement"}
+
+
+def bloque_ecostress_de(tmp_path, texto):
+    ruta = tmp_path / "ecostress_parcelas.csv"
+    ruta.write_text(texto, encoding="utf-8")
+    return cw.bloque_ecostress(ruta, REGISTRO_ECOSTRESS)
+
+
+def test_ecostress_archivo_anterior_cuenta_escenas_y_no_trae_intervalo(tmp_path):
+    """Con el archivo de hoy (sin et_min_mm_dia ni et_max_mm_dia): los valores, las escenas y el aviso; el conteo
+    se declara «escenas» y el bloque no lleva mínimos ni máximos (la ficha no escribe intervalo)."""
+    eco = bloque_ecostress_de(tmp_path, ECOSTRESS_ANTERIOR)
+    assert eco["meses"] == ["2026-01", "2026-08"]
+    assert eco["parcelas"] == {"P0001": [0.9, 2.11], "P0002": [None, 0.66]}
+    assert eco["escenas_parcelas"] == {"P0001": [1, 2], "P0002": [0, 2]}
+    assert eco["conteo"] == cw.CONTEO_ESCENAS
+    assert "minimos_parcelas" not in eco and "maximos_parcelas" not in eco
+
+
+def test_ecostress_entrega_corregida_cuenta_sobrevuelos_y_trae_el_intervalo(tmp_path):
+    """Con la entrega corregida: los mismos campos, el conteo «sobrevuelos» y el menor y el mayor de cada mes,
+    alineados a «meses» (vacíos donde no hubo sobrevuelo). Ni el contraste con el modelo ni la incertidumbre."""
+    eco = bloque_ecostress_de(tmp_path, ECOSTRESS_CORREGIDO)
+    anterior = bloque_ecostress_de(tmp_path, ECOSTRESS_ANTERIOR)
+    for campo in ("meses", "parcelas", "escenas_parcelas", "aviso", "archivo", "fuente", "fecha"):
+        assert eco[campo] == anterior[campo], campo
+    assert eco["conteo"] == cw.CONTEO_SOBREVUELOS
+    assert eco["minimos_parcelas"] == {"P0001": [0.9, 1.57], "P0002": [None, 0.14]}
+    assert eco["maximos_parcelas"] == {"P0001": [0.9, 2.66], "P0002": [None, 1.17]}
+    assert eco["aviso"] == "Satellite estimate at 70 m on clear days, not a field measurement"
+    texto = json.dumps(eco, ensure_ascii=False)
+    assert "etc_modelo" not in texto and "razon" not in texto and "incertidumbre" not in texto and "110" not in texto
+
+
+def test_ecostress_con_una_sola_de_las_dos_columnas_no_hay_intervalo(tmp_path):
+    """El intervalo necesita sus dos extremos: un archivo con solo et_min_mm_dia se lee como el anterior."""
+    solo_min = "\n".join(",".join(f.split(",")[:8]) for f in ECOSTRESS_CORREGIDO.strip().split("\n")) + "\n"
+    eco = bloque_ecostress_de(tmp_path, solo_min)
+    assert eco["conteo"] == cw.CONTEO_ESCENAS and "minimos_parcelas" not in eco
 
 
 def test_ecostress_aviso_sale_de_la_linea_de_la_entrega(lleno):
@@ -638,10 +699,17 @@ def test_ecostress_real_trae_escenas_y_aviso():
     eco = json.loads(web.read_text(encoding="utf-8"))["ecostress"]
     with ruta.open(encoding="utf-8", newline="") as f:
         filas = list(csv.DictReader(f))
+    corregida = cw.COLUMNA_ET_MIN in filas[0] and cw.COLUMNA_ET_MAX in filas[0]
+    assert eco["conteo"] == (cw.CONTEO_SOBREVUELOS if corregida else cw.CONTEO_ESCENAS)
+    assert ("minimos_parcelas" in eco) == corregida and ("maximos_parcelas" in eco) == corregida
     for fila in filas:
         i = eco["meses"].index(fila["mes"])
         assert eco["escenas_parcelas"][fila["id"]][i] == int(fila["n_escenas"])
         assert (eco["parcelas"][fila["id"]][i] is None) == (fila["et_mm_dia"].strip() == "")
+        if corregida:   # el intervalo, tal como viene en la entrega
+            for lista, columna in (("minimos_parcelas", cw.COLUMNA_ET_MIN), ("maximos_parcelas", cw.COLUMNA_ET_MAX)):
+                esperado = float(fila[columna]) if fila[columna].strip() else None
+                assert eco[lista][fila["id"]][i] == esperado, (fila["id"], fila["mes"], columna)
     assert eco["aviso"] and "not a field measurement" in eco["aviso"] and eco["aviso"] in eco["fuente"].replace(
         eco["aviso"][:1].lower() + eco["aviso"][1:], eco["aviso"])
 
@@ -649,58 +717,30 @@ def test_ecostress_real_trae_escenas_y_aviso():
 def test_lleno_gaez_y_heladas(lleno):
     gaez = lleno["contexto"]["gaez"]
     assert set(gaez["zonas"]) == set(ZONAS) and gaez["fuente"]
-    base = {"cultivo", "variable", "valor", "unidad", "resolucion_m"}
-    # Campos opcionales: solo en las filas donde la entrega los trae (o donde la unidad lleva multiplicador).
-    opcionales = {"clase_nombre", "nota", "valor_mostrar", "unidad_mostrar"}
     for filas in gaez["zonas"].values():
-        assert all(base <= set(f) <= base | opcionales for f in filas)
+        assert [set(f) for f in filas] == [{"cultivo", "variable", "valor", "unidad", "resolucion_m"}] * len(filas)
         assert all(f["cultivo"] in esquemas.CULTIVOS_GAEZ and isinstance(f["valor"], float) for f in filas)
-        # Las tres filas sin columnas adicionales quedan como antes.
-        assert [set(f) for f in filas[:3]] == [base] * 3
-        # Unidad con multiplicador («10kg …/ha»): el mismo valor en toneladas, y el de FAO intacto.
-        [decenas] = [f for f in filas if f["unidad"].startswith("10kg")]
-        assert decenas["valor"] == 1234.5 and decenas["unidad"] == "10kg de prueba/ha"
-        assert decenas["valor_mostrar"] == pytest.approx(decenas["valor"] * 10 / cw.KG_POR_TONELADA)
-        assert decenas["unidad_mostrar"] == "t de prueba/ha" and decenas["nota"] == "Nota de prueba del cultivo"
-        # Clase con nombre: el nombre llega; el valor y la unidad no cambian ni se pasan a toneladas.
-        [clase] = [f for f in filas if f.get("clase_nombre")]
-        assert (clase["clase_nombre"], clase["valor"], clase["unidad"]) == ("Alta de prueba", 2.0, "Class")
-        assert "valor_mostrar" not in clase
     heladas = lleno["contexto"]["heladas"]
     original = json.loads((lleno["processed"] / "heladas.json").read_text(encoding="utf-8"))
     assert {k: v for k, v in heladas.items() if k != "entrega"} == original, "el contenido de heladas.json, tal cual"
     assert heladas["entrega"]["fuente"] and heladas["entrega"]["fecha"] == GEN.FECHA_PRUEBA
 
 
-def test_gaez_en_toneladas_solo_con_multiplicador():
-    """«10kg DW/ha» → t DW/ha con la definición del SI; una unidad sin multiplicador o un valor vacío no se tocan."""
-    assert cw.en_toneladas(1678.5, "10kg DW/ha") == {"valor_mostrar": 16.785, "unidad_mostrar": "t DW/ha"}
-    assert cw.en_toneladas(9341.0, "kg DW/ha") == {}
-    assert cw.en_toneladas(913.0, "kg lint/ha") == {}
-    assert cw.en_toneladas(2.0, "Class") == {}
-    assert cw.en_toneladas(None, "10kg DW/ha") == {}
-
-
-def test_gaez_real_lleva_clase_nota_y_toneladas():
-    """Hallazgo 15 de la sesión de datos (datos/PARA_INTEGRADOR.md, 14-nov 22:20): con la entrega real, la alfalfa
-    va en t DW/ha, cada clase con su nombre y el maíz con la nota de que GAEZ evalúa maíz de grano."""
-    ruta = RAIZ / "data/processed/gaez_zona.csv"
-    web = RAIZ / "web/data/contexto.json"
-    if not ruta.exists() or not web.exists():
-        pytest.skip("sin gaez_zona.csv o sin contexto.json")
-    gaez = json.loads(web.read_text(encoding="utf-8"))["gaez"]
-    with ruta.open(encoding="utf-8", newline="") as f:
-        filas = list(csv.DictReader(f))
-    for fila in filas:
-        [r] = [x for x in gaez["zonas"][fila["zona"]] if (x["cultivo"], x["variable"]) == (fila["cultivo"], fila["variable"].strip())]
-        assert r.get("clase_nombre", "") == fila["clase_nombre"].strip()
-        assert r.get("nota", "") == fila["nota"].strip()
-        assert (r["valor"], r["unidad"]) == (float(fila["valor"]), fila["unidad"].strip()), "valor y unidad de FAO, intactos"
-        if fila["unidad"].strip().startswith("10kg"):
-            assert r["unidad_mostrar"] == "t " + fila["unidad"].strip()[len("10kg"):].strip()
-            assert r["valor_mostrar"] == pytest.approx(float(fila["valor"]) * 10 / cw.KG_POR_TONELADA)
-        else:
-            assert "valor_mostrar" not in r and "unidad_mostrar" not in r
+def test_gaez_lleva_los_textos_de_la_entrega_solo_si_vienen(tmp_path):
+    """bloque_gaez: clase_nombre, cultivo_gaez y nota (columnas adicionales de G1) pasan tal cual cuando traen texto; la
+    celda vacía no se escribe. Valores de prueba."""
+    zona = ZONAS[0]
+    ruta = tmp_path / cw.ARCHIVO_GAEZ
+    ruta.write_text("zona,cultivo,variable,valor,unidad,resolucion_m,cultivo_gaez,clase_nombre,nota\n"
+                    f"{zona},alfalfa,Clase de prueba,2,Class,9000,Alfalfa,High,\n"
+                    f"{zona},maiz_forrajero,Rendimiento de prueba,10,kg DW/ha,9000,Maize,,nota de prueba\n",
+                    encoding="utf-8")
+    avisos = []
+    bloque = cw.bloque_gaez(ruta, set(ZONAS), {"archivo": cw.ARCHIVO_GAEZ, "fuente": "prueba", "fecha": "prueba"}, avisos)
+    clase, maiz = bloque["zonas"][zona]
+    assert (clase["clase_nombre"], clase["cultivo_gaez"]) == ("High", "Alfalfa") and "nota" not in clase
+    assert (maiz["cultivo_gaez"], maiz["nota"]) == ("Maize", "nota de prueba") and "clase_nombre" not in maiz
+    assert set(cw.COLUMNAS_TEXTO_GAEZ) <= set(clase) | set(maiz) and avisos == []
 
 
 def test_et_contraste_lleva_la_zona_del_archivo_sin_sufijo(lleno):

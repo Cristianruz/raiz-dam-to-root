@@ -46,7 +46,8 @@
 //       Renglones para la ficha: la lectura de altura de GEDI y la ET de ECOSTRESS del último mes con
 //       dato. [] si los dos bloques son null. GEDI (rh, altura relativa) NO marca cero sobre suelo
 //       desnudo: el renglón no se rotula «canopy height» ni se presenta como altura del cultivo.
-//       ECOSTRESS: el valor, el mes y de cuántas escenas despejadas sale (ecostress.escenas_parcelas); la nota, a la vista,
+//       ECOSTRESS: el valor, el mes y de cuántos sobrevuelos despejados sale, con su intervalo si son dos o más
+//       (ecostress.escenas_parcelas, conteo, minimos_parcelas y maximos_parcelas); la nota, a la vista,
 //       dice que es una estimación satelital y no una medición en la parcela (ecostress.aviso) y, si el calendario
 //       del modelo (mesesCultivo, de la opción ACTUAL del cubo) no tiene cultivo en ese mes, que el valor es el
 //       del campo sin cultivo. No se compara con el modelo (docs/revisiones/2026-11-15_ecostress.md).
@@ -821,15 +822,30 @@ export function sinCultivoEnElMes(mesesCultivo, mes) {
   return !mesesCultivo[i];
 }
 
+// Qué cuenta ecostress.escenas_parcelas (ecostress.conteo, que escribe motor/contexto_web.py): la entrega corregida
+// del 15-nov cuenta sobrevuelos; la anterior, escenas (un sobrevuelo podía contar dos veces).
+const CONTEO_SOBREVUELOS = "sobrevuelos";
+
 /**
- * Texto del valor de ECOSTRESS de un mes: «2.11 mm/day in Aug 2026, from 2 clear-sky scenes». Con una sola escena,
- * «from 1 clear-sky scene» (un valor de una escena no es una mediana). Sin el número de escenas en los datos, solo
- * el valor y el mes. Todas las cifras salen de contexto.json.
+ * Texto del valor de ECOSTRESS de un mes, con lo que hay detrás:
+ *   «2.11 mm/day in Aug 2026, from 2 clear overpasses (1.57 to 2.66)»   entrega corregida, dos o más sobrevuelos
+ *   «0.9 mm/day in Jan 2026, from 1 clear overpass»                     un solo sobrevuelo: sin intervalo
+ *   «2.11 mm/day in Aug 2026, from 2 clear-sky scenes»                  entrega anterior (cuenta escenas)
+ * Nunca dice «median» (con una sola lectura no lo es). Sin el conteo en los datos, solo el valor y el mes.
+ * `detras` = { n, conteo, minimo, maximo }: n lecturas; conteo = ecostress.conteo; minimo y maximo, el menor y el
+ * mayor de los sobrevuelos (solo la entrega corregida los trae). También se acepta el número solo (n). Todas las
+ * cifras salen de contexto.json.
  */
-export function textoEcostress(valor, mes, escenas) {
+export function textoEcostress(valor, mes, detras) {
   const base = `${formatoNumero(valor)} mm/day in ${etiquetaMes(mes)}`;
-  const n = num(escenas);
-  return n != null && n > 0 ? `${base}, from ${formatoNumero(n)} clear-sky ${plural(n, "scene", "scenes")}` : base;
+  const d = detras != null && typeof detras === "object" ? detras : { n: detras };
+  const n = num(d.n);
+  if (n == null || n <= 0) return base;
+  if (d.conteo !== CONTEO_SOBREVUELOS) return `${base}, from ${formatoNumero(n)} clear-sky ${plural(n, "scene", "scenes")}`;
+  const [minimo, maximo] = [num(d.minimo), num(d.maximo)];
+  // El intervalo solo tiene sentido con dos o más sobrevuelos y con sus dos extremos en los datos.
+  const intervalo = n > 1 && minimo != null && maximo != null ? ` (${formatoNumero(minimo)} to ${formatoNumero(maximo)})` : "";
+  return `${base}, from ${formatoNumero(n)} clear ${plural(n, "overpass", "overpasses")}${intervalo}`;
 }
 
 /**
@@ -866,13 +882,16 @@ export function evidenciaDeParcela({ contexto, id, mesesCultivo } = {}) {
   const eco = contexto && contexto.ecostress;
   if (eco) {
     const ultimo = ultimoMesConDato(eco.meses, (eco.parcelas || {})[id]);
-    // Escenas despejadas detrás del valor de ese mes (ecostress.escenas_parcelas, alineada a «meses» como los valores).
-    const escenas = ultimo ? ((eco.escenas_parcelas || {})[id] || [])[(eco.meses || []).indexOf(ultimo.mes)] : null;
+    // Lo que hay detrás del valor de ese mes (listas alineadas a «meses», como los valores): cuántas lecturas
+    // (escenas_parcelas), si son sobrevuelos o escenas (conteo) y, en la entrega corregida, el menor y el mayor.
+    const i = ultimo ? (eco.meses || []).indexOf(ultimo.mes) : -1;
+    const delMes = (lista) => (i >= 0 ? ((lista || {})[id] || [])[i] : null);
+    const detras = { n: delMes(eco.escenas_parcelas), conteo: eco.conteo, minimo: delMes(eco.minimos_parcelas), maximo: delMes(eco.maximos_parcelas) };
     const sinCultivo = Boolean(ultimo) && sinCultivoEnElMes(mesesCultivo, ultimo.mes);
     const aviso = typeof eco.aviso === "string" && eco.aviso.trim() ? `${eco.aviso.trim().replace(/\.$/, "")}.` : AVISO_ECOSTRESS;
     lista.push({
       etiqueta: "Evapotranspiration (ECOSTRESS)",
-      texto: ultimo ? textoEcostress(ultimo.valor, ultimo.mes, escenas) : "ECOSTRESS: no clear scene over this field",
+      texto: ultimo ? textoEcostress(ultimo.valor, ultimo.mes, detras) : "ECOSTRESS: no clear scene over this field",
       // A la vista junto al valor, como la nota de GEDI: estimación satelital, no una medición en la parcela.
       nota: ultimo ? [aviso, sinCultivo ? NOTA_ECOSTRESS_SIN_CULTIVO : ""].filter(Boolean).join(" ") : null,
       lectura: null,
@@ -1297,6 +1316,43 @@ function nombreCultivo(id, nombres) {
   return (nombres && nombres[id]) || String(id ?? "").replace(/_/g, " ");
 }
 
+// GAEZ (gaez_zona.csv, pieza G1 de la sesión de datos): «unidad» es la cadena que publica FAO, sin cambios. Una unidad
+// que empieza con un factor («10kg DW/ha») cuenta en múltiplos de ese factor; «DW» es materia seca (dry weight).
+const UNIDAD_CON_FACTOR = /^(\d+(?:[.,]\d+)?)\s*(\S.*)$/;
+const MARCA_DW = /\bDW\b/;
+const NOTA_DW = "DW: dry weight.";
+
+/** Valor de una fila de GAEZ como se lee: la fila de clase dice el nombre de la clase de FAO (clase_nombre), no su
+ *  número; una unidad con factor lo escribe aparte («1,678.5 × 10 kg DW/ha»); lo demás, número y unidad. */
+export function valorGaez(fila) {
+  const f = fila || {};
+  const clase = String(f.clase_nombre ?? "").trim();
+  if (clase) return clase;
+  const texto = formatoNumero(f.valor);
+  const unidad = String(f.unidad ?? "").trim();
+  const conFactor = unidad.match(UNIDAD_CON_FACTOR);
+  if (!conFactor) return conUnidad(texto, unidad);
+  const [, factor, resto] = conFactor;
+  return `${texto} × ${factor} ${resto}`;
+}
+
+/** Cultivo de una fila de GAEZ: el nombre del proyecto y, si GAEZ evalúa la clase con otro cultivo (cultivo_gaez:
+ *  Maize para el maíz forrajero, Oat para el cereal de invierno), ese nombre aparte; null si es el mismo. */
+export function cultivoDeGaez(fila, nombres) {
+  const nombre = nombreCultivo(fila && fila.cultivo, nombres);
+  const gaez = String((fila && fila.cultivo_gaez) || "").trim();
+  return { nombre, gaez: gaez && gaez.toLowerCase() !== nombre.toLowerCase() ? gaez : null };
+}
+
+/** Notas de la tarjeta de GAEZ: las de la entrega, una vez cada una (p. ej., el maíz de GAEZ es de grano), y qué es
+ *  «DW» si alguna unidad lo trae. */
+export function notasDeGaez(filas) {
+  const lista = Array.isArray(filas) ? filas : [];
+  const notas = [...new Set(lista.map((f) => String((f && f.nota) || "").trim()).filter(Boolean))];
+  if (lista.some((f) => MARCA_DW.test(String((f && f.unidad) || "")))) notas.push(NOTA_DW);
+  return notas;
+}
+
 function htmlTarjetaGaez(contexto, zonaId, nivel, nombres) {
   const titulo = "Agro-climatic suitability by crop";
   const cabeza = `<h${nivel} class="contexto-tarjeta-titulo">${titulo}</h${nivel}>`;
@@ -1314,42 +1370,22 @@ function htmlTarjetaGaez(contexto, zonaId, nivel, nombres) {
     .map((f) => {
       const resolucion = formatoResolucion(f.resolucion_m);
       const escala = !unaEscala && resolucion ? ` <span class="contexto-equivalente">${esc(resolucion)} grid</span>` : "";
-      return `<tr><th scope="row">${esc(nombreCultivo(f.cultivo, nombres))}</th><td>${esc(f.variable)}</td><td>${esc(valorGaez(f))}${escala}</td></tr>`;
+      const cultivo = cultivoDeGaez(f, nombres);
+      const comoGaez = cultivo.gaez ? ` <span class="contexto-equivalente">GAEZ: ${esc(cultivo.gaez)}</span>` : "";
+      return `<tr><th scope="row">${esc(cultivo.nombre)}${comoGaez}</th><td>${esc(f.variable)}</td><td>${esc(valorGaez(f))}${escala}</td></tr>`;
     })
-    .join("");
-  // Notas de la entrega (columna «nota»; p. ej. que el maíz de GAEZ es de grano): una vez por cultivo, bajo la tabla.
-  const vistas = new Set();
-  const notasEntrega = filas
-    .filter((f) => typeof f.nota === "string" && f.nota.trim())
-    .filter((f) => !vistas.has(`${f.cultivo}|${f.nota}`) && vistas.add(`${f.cultivo}|${f.nota}`))
-    .map((f) => `<p class="contexto-tarjeta-nota contexto-gaez-nota" data-cultivo="${esc(f.cultivo)}"><b>${esc(nombreCultivo(f.cultivo, nombres))}:</b> ${esc(f.nota.trim())}</p>`)
     .join("");
   const escalaComun = unaEscala ? `<p class="contexto-meta"><span>Regional, ${esc(resoluciones[0])} grid</span></p>` : "";
   const fuente = htmlFuenteCorta(citasDeGaez(contexto, zonaId));
+  const notasEntrega = notasDeGaez(filas).map((n) => `<p class="contexto-tarjeta-nota">${esc(n)}</p>`).join("");
   return `<article class="contexto-tarjeta" data-tarjeta="gaez">${cabeza}
       <table class="contexto-tabla contexto-tabla--gaez">
         <caption class="solo-lector">${titulo}</caption>
         <thead><tr><th scope="col">Crop</th><th scope="col">Indicator</th><th scope="col">Value</th></tr></thead>
         <tbody>${cuerpo}</tbody>
       </table>
-      ${notasEntrega}${escalaComun}${fuente}${nota}
+      ${escalaComun}${fuente}${notasEntrega}${nota}
     </article>`;
-}
-
-/**
- * Valor de una fila de GAEZ como texto. Tres casos, todos con lo que trae contexto.json:
- * - una clase con nombre (clase_nombre): «High (class 2)», el nombre y, entre paréntesis, la unidad y el número;
- * - una unidad de FAO con multiplicador pegado («10kg DW/ha»), que el motor ya pasó a toneladas (valor_mostrar y
- *   unidad_mostrar): «16.8 t DW/ha»;
- * - lo demás, el valor con su unidad tal como los publica FAO.
- */
-export function valorGaez(f) {
-  if (!f) return "—";
-  if (typeof f.clase_nombre === "string" && f.clase_nombre.trim()) {
-    return `${f.clase_nombre.trim()} (${conUnidad(String(f.unidad ?? "").toLowerCase(), formatoNumero(f.valor)).trim()})`;
-  }
-  if (num(f.valor_mostrar) != null && f.unidad_mostrar) return conUnidad(formatoNumero(f.valor_mostrar), f.unidad_mostrar);
-  return conUnidad(formatoNumero(f.valor), f.unidad);
 }
 
 /** Ancho en píxeles al que se dibuja la gráfica de un lienzo. */

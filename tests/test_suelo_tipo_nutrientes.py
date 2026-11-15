@@ -197,6 +197,20 @@ def test_suelos_del_municipio_segun_inegi(suelo_real, reglas, tipos):
     assert "lazaro_cardenas" not in suelo_real["tipo_suelo"]["zonas"]
 
 
+def test_zona_urbana_y_cuerpo_de_agua_no_son_suelo_ni_avisan():
+    """Las superficies del cuadro del INEGI que no son suelo (sw.NO_SUELO) completan el 100 % del municipio: no entran a
+    la lista ni avisan. Otra llave que no sea un grupo WRB del catálogo sí avisa. Valores de prueba."""
+    catalogo = {"wrb": {"Cambisols": {"nombre_es": "Cambisol"}},
+                "zona": {"fuente": "prueba", "etiqueta": "[V]",
+                         "municipio_delicias_pct": {"Cambisol": 90.0, sw.NO_SUELO[0]: 9.0, sw.NO_SUELO[1]: 1.0}}}
+    avisos = []
+    z = sw.suelos_del_municipio(catalogo, "delicias_saucillo", "Soils: {lista}.", avisos)
+    assert [s["grupo"] for s in z["suelos"]] == ["Cambisols"] and avisos == []
+    catalogo["zona"]["municipio_delicias_pct"]["Inventado"] = 1.0
+    sw.suelos_del_municipio(catalogo, "delicias_saucillo", "Soils: {lista}.", avisos)
+    assert len(avisos) == 1 and "Inventado" in avisos[0] and not any(n in avisos[0] for n in sw.NO_SUELO)
+
+
 @reales
 def test_todas_las_parcelas_del_archivo_traen_su_tipo(suelo_real):
     filas = leer_filas("tipo_suelo_parcelas.csv")
