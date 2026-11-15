@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pwa.py recorriendo web/ (todo menos sw.js y lo oculto); nunca se edita a mano. «version» es la huella del contenido de esos archivos: web/sw.js guarda la copia sin conexión en la caché raiz-<version> y la renueva cuando cambia.",
- "version": "76e49e7b391365eb",
+ "version": "d6477232065802ca",
  "archivos": [
   "app.js",
   "css/acerca.css",
@@ -69,6 +69,7 @@
   "icons/raiz-maskable-512.png",
   "index.html",
   "js/acerca.js",
+  "js/beneficios.js",
   "js/contexto.js",
   "js/estado_gemelo.js",
   "js/gemelo3d.js",
