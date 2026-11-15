@@ -1,28 +1,33 @@
-/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; Codex. */
+/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026; initial version with OpenAI Codex */
+/* Vista «Planificar» y bloque de lluvia histórica (web/js/asesor.js).
+   Primero el teléfono (390 px de ancho): una columna, texto legible, nada se sale de la pantalla y cada control
+   mide al menos 44 px de alto. Las pantallas anchas agregan columnas al final del archivo. */
+
+/* ---------- Formulario por pasos ---------- */
 .decision-form h3 {
   margin: 0;
   font-size: 18px;
 }
 .form-heading {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
   margin-bottom: 22px;
 }
 .form-heading span {
-  font-size: 11px;
+  font-size: 12px;
   color: #617052;
 }
 .decision-form-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
 }
 .decision-form-grid label {
   display: grid;
   gap: 8px;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.5;
   color: #52644b;
 }
@@ -30,62 +35,114 @@
 .decision-form-grid select {
   width: 100%;
   min-width: 0;
+  min-height: 44px;
   padding: 11px;
   border: 1px solid #dce3d4;
   border-radius: 6px;
   background: #fafcf7;
-  font-size: 12px;
+  /* 16 px: el teléfono no acerca la página al tocar el campo */
+  font-size: 16px;
   color: #23432e;
-  min-height: 43px;
+}
+.decision-form .decision-steps button,
+.decision-form .button,
+#forecast-analysis .button {
+  min-height: 44px;
 }
 .confirmation {
   display: flex;
   gap: 10px;
   align-items: center;
+  min-height: 44px;
   margin: 25px 0 16px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
 }
 .confirmation input {
   accent-color: #3c6745;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
 }
 .form-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 20px;
 }
 .form-actions .button {
-  font-size: 12px;
+  font-size: 13px;
 }
+
+/* ---------- Resumen y avisos del plan ---------- */
 #decision-summary {
   font-size: 13px;
-  line-height: 1.9;
+  line-height: 1.8;
   color: #4b6344;
   padding: 5px 0 20px;
+  overflow-wrap: anywhere;
 }
+#decision-summary p {
+  margin: 0 0 8px;
+}
+.plan-notes {
+  margin: 0;
+  padding-left: 20px;
+}
+.plan-notes li {
+  margin: 6px 0;
+}
+.plan-notes small,
+.decision-card small {
+  display: block;
+  color: #94af86;
+}
+
+/* ---------- Tarjetas del plan ---------- */
 .decision-results {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
 }
-.decision-card {
-  padding: 25px;
+.decision-results:empty {
+  display: none;
 }
-.decision-card.blocked {
-  border-left: 5px solid #b67743;
+.decision-card {
+  padding: 20px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* Restricción encontrada: una marca lateral y el rótulo en ámbar, sin ocultar ni atenuar la opción.
+   Los colores son los del tema oscuro del tablero (web/css/interfaz.css). */
+.decision-card.restricted {
+  border-left: 4px solid #de9b76;
+}
+.decision-card[data-state="restriccion"] .pill {
+  background: #e0a47718;
+  border-color: #e0a47755;
+  color: #f5c5a3;
+}
+.decision-card[data-state="calculado"] .pill {
+  background: #b9ed871b;
+  border-color: #b9ed8750;
+  color: #d1f6b3;
+}
+.decision-card .card-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 .decision-card h3 {
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 550;
 }
 .decision-card .pill {
-  font-size: 9px;
+  font-size: 11px;
   white-space: normal;
 }
 .decision-action {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.7;
   color: #2e5439;
   font-weight: 550;
@@ -93,34 +150,57 @@
 }
 .decision-values {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-  padding: 20px 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px 0;
+  margin: 0;
   border-block: 1px solid #e4eada;
 }
 .decision-values dt {
-  font-size: 10px;
-  line-height: 1.6;
+  font-size: 12px;
+  line-height: 1.5;
   color: #627058;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 .decision-values dd {
-  font-size: 19px;
+  font-size: 17px;
   margin: 0;
   color: #385132;
 }
+/* La unidad acompaña a la cifra, más pequeña: en el teléfono la cifra se lee de un vistazo */
+.decision-values .unit {
+  font-size: 13px;
+  font-weight: 400;
+  color: #a3b897;
+}
+/* web/css/interfaz.css se carga después y pone estas cifras en dos columnas; en el teléfono no caben:
+   una columna (selector más específico para que valga aquí) y sin doble línea antes de los desplegables. */
+.decision-results .decision-values {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  border-bottom: 0;
+  padding-bottom: 14px;
+}
+.decision-results .decision-values dd {
+  font-size: 20px;
+}
 .decision-card details {
-  font-size: 12px;
-  line-height: 1.9;
+  font-size: 13px;
+  line-height: 1.8;
   border-top: 1px solid #e2e7d9;
-  padding-top: 14px;
   margin-top: 14px;
-  overflow-wrap: anywhere;
+}
+.decision-results .decision-card details {
+  margin-top: 0;
+  padding-top: 0;
 }
 .decision-card summary,
 .evidence-table summary {
   cursor: pointer;
   font-weight: 550;
+  /* 12 + 20 + 12 = 44 px de alto para el dedo */
+  padding: 12px 0;
+  line-height: 20px;
 }
 .decision-card ul {
   padding-left: 20px;
@@ -128,18 +208,33 @@
 .decision-card li {
   margin: 9px 0;
 }
-.decision-card small {
-  color: #69785d;
+.decision-card a {
+  color: inherit;
+  text-decoration: underline;
 }
 .blocking-reasons {
   color: #854722;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
 }
+.decision-card .micro {
+  font-size: 12px !important;
+}
+/* Aviso de juicio: cierra cada tarjeta, a la vista, sin necesidad de desplegar nada */
+.decision-card .aviso-juicio {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid #ffffff1a;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #b4caa6;
+}
+
+/* ---------- Rango histórico de lluvia y su comprobación ---------- */
 .forecast-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
   margin-bottom: 22px;
 }
 .forecast-metrics h3 {
@@ -148,25 +243,36 @@
 }
 .forecast-metrics strong {
   display: block;
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 500;
   margin: 17px 0;
 }
 .forecast-metrics p,
 .evidence-table p {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
   color: #65745a;
+  overflow-wrap: anywhere;
+}
+#forecast-analysis .section-heading {
+  align-items: flex-start;
+}
+.climate-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 .table-scroll {
   overflow-x: auto;
   max-width: 100%;
   margin: 20px 0;
+  border: 1px solid #e5eadf;
+  border-radius: 8px;
 }
 .table-scroll table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
+  font-size: 12px;
   text-align: right;
 }
 .table-scroll th,
@@ -176,96 +282,72 @@
   white-space: nowrap;
 }
 .evidence-table {
-  font-size: 12px;
-}
-.observation {
-  background: #edf3e7;
-  border-radius: 8px;
-  padding: 15px;
-  margin-top: 18px;
-}
-.observation h4 {
   font-size: 13px;
-  margin: 0;
-}
-.observation p {
-  font-size: 12px;
-  line-height: 1.7;
+  min-width: 0;
 }
 #decision-checks {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.8;
+  overflow-wrap: anywhere;
 }
-.decision-card .micro {
-  font-size: 11px !important;
-}
-.decision-results:empty {
-  display: none;
-}
-@media (max-width: 1050px) {
+
+/* ---------- Tableta ---------- */
+@media (min-width: 601px) {
+  .form-heading {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
   .decision-form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .decision-values {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .forecast-metrics {
-    gap: 12px;
-  }
-  .forecast-metrics strong {
-    font-size: 26px;
-  }
-}
-@media (max-width: 600px) {
-  .decision-form-grid {
-    grid-template-columns: 1fr;
-  }
-  .form-heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .decision-card {
-    padding: 20px;
-  }
-  .decision-card h3 {
-    font-size: 17px;
-  }
-  .decision-card .card-heading {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .decision-action {
-    font-size: 15px;
-  }
-  .decision-values {
-    grid-template-columns: 1fr 1fr;
-    gap: 17px;
-  }
-  .decision-values dd {
-    font-size: 17px;
-  }
-  .forecast-metrics {
-    grid-template-columns: 1fr;
-  }
-  .form-actions {
-    flex-wrap: wrap;
-  }
   .decision-form-grid input,
   .decision-form-grid select {
+    font-size: 14px;
+  }
+  .form-actions {
+    flex-wrap: nowrap;
+  }
+  .decision-card {
+    padding: 25px;
+  }
+  .decision-card .card-heading {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .decision-card h3 {
+    font-size: 19px;
+  }
+  .decision-action {
     font-size: 16px;
   }
-  .confirmation {
-    font-size: 12px;
+  .decision-results .decision-values {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
   }
-  #forecast-analysis .section-heading {
-    align-items: flex-start;
+  .decision-results .decision-values dd {
+    font-size: 22px;
+  }
+  .forecast-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .table-scroll {
-    border: 1px solid #e5eadf;
-    border-radius: 8px;
+    border: 0;
+    border-radius: 0;
   }
-  .decision-card details {
-    font-size: 12px;
+}
+
+/* ---------- Escritorio ---------- */
+@media (min-width: 1051px) {
+  .decision-form-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .forecast-metrics {
+    gap: 20px;
+  }
+  .forecast-metrics strong {
+    font-size: 32px;
   }
 }
