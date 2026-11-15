@@ -69,7 +69,7 @@ import { crearGemelo3D } from "./js/gemelo3d.js";
 import { crearLineaDeTiempo } from "./js/tiempo.js";
 import { montarEstadoGemelo } from "./js/estado_gemelo.js";
 import { montarInstalacion } from "./js/instalar.js";
-import { fraseResumen, casoResumen, dibujarNDVI, idDeHash, hashDe } from "./js/resumen.js";
+import { fraseResumen, casoResumen, dibujarNDVI, idDeHash, hashDe, formatoHectareas, hectareasTexto } from "./js/resumen.js";
 import { leerSuelo, htmlPerfilDeSuelo, htmlAptitud, htmlNotaDeZona } from "./js/suelo.js";
 import { evidenciaDeParcela, riesgoDeHelada, montarContextoRegional, montarRecursosReto } from "./js/contexto.js";
 
@@ -2313,6 +2313,27 @@ function htmlFiltros(o, D = estado.D) {
   );
 }
 
+/**
+ * «Enough for …» de la tarjeta (revisión con Playwright, 2026-11-15, punto 6). Si la mediana cubre toda la parcela:
+ * «Enough for the whole field ({área} ha)» y, si la estimación alta no la cubre, cuántas hectáreas cubre esa. Si no:
+ * «Enough for {X} of {área} hectares (range …)», con lo que alcanza y el área en el MISMO formato
+ * (formatoHectareas de web/js/resumen.js: los decimales del área, hacia abajo, nunca más que el área).
+ */
+function htmlAlcanza(ev, areaHa) {
+  const fh = formatoHectareas(areaHa);
+  const { p50, bajo, alto } = ev.hectareas;
+  if (ev.cobertura >= 1) {
+    const alta = Number.isFinite(bajo) && bajo < areaHa
+      ? ` <span>(at the high estimate of its need: ${esc(fh(bajo))} ${hectareasTexto(bajo)})</span>`
+      : "";
+    return `<p class="alcanza" data-alcanza="toda"><strong>Enough for the whole field (${esc(fmtDato(areaHa))} ha)</strong>${alta}</p>`;
+  }
+  return (
+    `<p class="alcanza" data-alcanza="parte"><strong>Enough for ${esc(fh(p50))} of ${esc(fh(areaHa))} ${hectareasTexto(areaHa)}</strong> ` +
+    `<span>(range ${esc(fh(bajo))} to ${esc(fh(alto))})</span></p>`
+  );
+}
+
 function textoPlazo(plazo) {
   if (!plazo) return "Water term: no data";
   return `Commits water for ${fmtRango(plazo.min, plazo.max)} ${anios(plazo.max)}`;
@@ -2354,9 +2375,7 @@ function actualizarFicha() {
           `<div class="leyenda-banda" aria-hidden="true"><span>likely range ${esc(fmtDato(L.p10))}–${esc(fmtDato(L.p90))}</span><span>┆ dashed line: your allocation (${esc(fmt(D))})</span></div>`
         : "";
 
-    const alcanza =
-      `<p class="alcanza"><strong>Enough for ${esc(fmt(ev.hectareas.p50))} of ${esc(fmtDato(p.area_ha))} hectares</strong> ` +
-      `<span>(range ${esc(fmt(ev.hectareas.bajo))} to ${esc(fmt(ev.hectareas.alto))})</span></p>`;
+    const alcanza = htmlAlcanza(ev, p.area_ha);
 
     $('[data-parte="agua"]', tarjeta).innerHTML =
       `${circulo(ev.semaforo, SEMAFORO)}<div>` +
@@ -2402,7 +2421,11 @@ function pintarResumen(p, ops) {
   } catch (err) {
     console.error("ROOT: the summary could not be computed", err);
   }
-  const datos = { parcela: p, opcionActual: actual, evaluacion, D: estado.D, formato: (v, k) => (k === "area" ? fmtDato(v) : fmt(v)) };
+  // Hectáreas y área con el mismo formato que la tarjeta (formatoHectareas); dotación con un decimal; años del plazo,
+  // con la precisión del dato.
+  const fh = formatoHectareas(p.area_ha);
+  const formato = (v, k) => (k === "ha" || k === "area" ? fh(v) : k === "anios" ? fmtDato(v) : fmt(v));
+  const datos = { parcela: p, opcionActual: actual, evaluacion, D: estado.D, formato };
   const texto = fraseResumen(datos);
   if (nodo.textContent !== texto) nodo.textContent = texto;
   nodo.dataset.caso = casoResumen(datos);
@@ -2430,13 +2453,20 @@ function htmlLaminaLocal(o, L, areaHa, D) {
     return `<p class="lamina-local" data-tipo="ninguna"><span class="lamina-local-titulo">${esc(t.titulo)}:</span> ${esc(TEXTO_SIN_REFERENCIA)}</p>`;
   }
   const lamina = valor != null ? fmtDato(valor) : fmtRango(rango.min, rango.max);
+  // Hectáreas que alcanzan con la referencia local: mismo formato que el área (formatoHectareas, punto 6 de la
+  // revisión); si alcanza para toda la parcela, lo dice así.
+  const fh = formatoHectareas(areaHa);
+  const peor = cobertura(D, valor ?? rango.max); // con la lámina mayor alcanza para menos
   const ha = valor != null
-    ? fmt(areaHa * cobertura(D, valor))
-    : fmtRango(areaHa * cobertura(D, rango.max), areaHa * cobertura(D, rango.min), fmt);
+    ? fh(areaHa * cobertura(D, valor))
+    : fmtRango(areaHa * cobertura(D, rango.max), areaHa * cobertura(D, rango.min), fh);
+  const alcanzaLocal = peor >= 1
+    ? `enough for the whole field (${esc(fmtDato(areaHa))} ha)`
+    : `enough for ${esc(ha)} of ${esc(fh(areaHa))} ${hectareasTexto(areaHa)}`;
   return (
     `<div class="lamina-local" data-tipo="${esc(ll.tipo)}"><p><span class="lamina-local-titulo">${esc(titulo)}:</span> ` +
     `<strong>${esc(lamina)}</strong> thousand m³/ha · ` +
-    `<span class="lamina-local-alcanza">enough for ${esc(ha)} of ${esc(fmtDato(areaHa))} hectares</span> ` +
+    `<span class="lamina-local-alcanza">${alcanzaLocal}</span> ` +
     `<span class="lamina-local-limite">— ${esc(t.limite)}</span>${ll.etiqueta ? ` <span class="lamina-local-etiqueta">${esc(ll.etiqueta)}</span>` : ""}</p>` +
     `<details class="lamina-local-fuente"><summary>Source of the local reference</summary><p class="fuente">${textoEs(ll.fuente)}` +
     `${ll.nota ? ` ${esc(ll.nota)}` : ""}</p></details></div>` +

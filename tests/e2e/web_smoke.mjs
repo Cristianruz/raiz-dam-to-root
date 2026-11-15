@@ -87,7 +87,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { aguaComprometida, conteosZona, cobertura, evaluarOpcion } from "../../web/reglas.js";
-import { fraseResumen } from "../../web/js/resumen.js";
+import { fraseResumen, formatoHectareas } from "../../web/js/resumen.js";
 import { ESTADOS_APTITUD, ROTULO_APTITUD, grupoDeTextura } from "../../web/js/suelo.js";
 import { NOTA_GEDI, NOTA_REGIONAL, riesgoDeHelada, climaDelAnio, contarEstados, diasIncompletos, formatoNumero, textoMascon } from "../../web/js/contexto.js";
 import { LLAVE_INICIO } from "../../web/js/acerca.js";
@@ -1355,7 +1355,32 @@ function fraseEsperada(id, D) {
   const p = porId.get(id);
   const actual = actualDe(id) ?? null;
   const evaluacion = actual && !p.abstencion ? evaluarOpcion(actual, p.area_ha, D, 0) : null;
-  return fraseResumen({ parcela: p, opcionActual: actual, evaluacion, D, formato: (v, k) => (k === "area" ? nfFicha(v, 3) : nfFicha(v)) });
+  // El mismo formato que app.js (pintarResumen): hectáreas y área con formatoHectareas; años con la precisión del dato.
+  const fh = formatoHectareas(p.area_ha);
+  return fraseResumen({ parcela: p, opcionActual: actual, evaluacion, D, formato: (v, k) => (k === "ha" || k === "area" ? fh(v) : k === "anios" ? nfFicha(v, 3) : nfFicha(v)) });
+}
+
+/**
+ * C2 de la revisión total y punto 6 de la revisión con Playwright («Enough for 8 of 7.95 hectares», «20.7 of 20.66»):
+ * con cada marca de dotación, ninguna cifra de hectáreas que alcanzan (tarjeta, rango, lámina local, frase) pasa del
+ * área, y el área se escribe igual que en formatoHectareas. Devuelve la lista de textos que fallan.
+ */
+async function hectareasSobreArea(page, id) {
+  const area = porId.get(id).area_ha;
+  const fh = formatoHectareas(area);
+  const num = (x) => Number(String(x).replace(/,/g, "").replace("−", "-"));
+  const malos = [];
+  for (const m of marcas) {
+    await fijarDeslizador(page, m.valor);
+    const textos = await page.locator("#ficha .alcanza, #ficha .lamina-local-alcanza, #ficha-resumen").allInnerTexts();
+    for (const t of textos.map((x) => x.replace(/\s+/g, " "))) {
+      for (const [, x, y] of t.matchAll(/([\d,.]+)(?:–[\d,.]+)? of ([\d,.]+) hectares?/g)) if (!(num(x) <= area) || y !== fh(area)) malos.push(`${m.id}: ${t}`);
+      for (const [, a, b] of t.matchAll(/range ([\d,.]+) to ([\d,.]+)/g)) if (!(num(a) <= area && num(b) <= area)) malos.push(`${m.id}: ${t}`);
+      for (const [, y] of t.matchAll(/whole field \(([\d,.]+) ha\)/g)) if (y !== nfFicha(area, 3)) malos.push(`${m.id}: ${t}`);
+      for (const [, x] of t.matchAll(/high estimate of its need: ([\d,.]+) hectares?/g)) if (!(num(x) < area)) malos.push(`${m.id}: ${t}`);
+    }
+  }
+  return malos;
 }
 
 /**
@@ -1374,6 +1399,13 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
     }
     const caso = await page.locator("#ficha-resumen").getAttribute("data-caso");
     check(`${prefijo}frase resumen de ${P0757}: caso «parcial» o «completa»`, ["parcial", "completa"].includes(caso), caso);
+    // Punto 1 de la revisión con Playwright: el plazo del agua de la opción ACTUAL va en la frase (leído del cubo).
+    const plazo = actualDe(P0757)?.agua?.plazo_anios;
+    if (plazo) {
+      const fraseP = (await texto(page, "#ficha-resumen")).trim();
+      const esperado = plazo.max <= 1 ? "ties up water for one season" : `ties up water for ${plazo.min === plazo.max ? nfFicha(plazo.min, 3) : `${nfFicha(plazo.min, 3)}–${nfFicha(plazo.max, 3)}`} years`;
+      check(`${prefijo}frase resumen de ${P0757}: lleva el plazo del agua de la opción actual («${esperado}»)`, fraseP.includes(esperado), fraseP);
+    }
     const frase = await texto(page, "#ficha-resumen");
     check(`${prefijo}frase resumen: describe, sin «best», «recommended» ni pesos`, !/\b(best|recommended|weight|score)\b/i.test(frase));
     // --- NDVI mensual con sus umbrales (leídos de ndvi_mensual.json) ---
@@ -1412,9 +1444,11 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
         await fijarDeslizador(page, D);
         const t = (await caja.innerText()).replace(/\s+/g, " ");
         vistos.push(t);
-        const ha = nfFicha(area * cobertura(D, ll.valor_millares_ha));
-        check(`${prefijo}lámina local de ${P0757}/${conRefLocal.o.id} con ${D}: ${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha y «enough for ${ha} of ${nfFicha(area, 3)} hectares»`,
-          t.includes(`${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha`) && t.includes(`enough for ${ha} of ${nfFicha(area, 3)} hectares`), t);
+        const fh = formatoHectareas(area);
+        const cob = cobertura(D, ll.valor_millares_ha);
+        const alcanza = cob >= 1 ? `enough for the whole field (${nfFicha(area, 3)} ha)` : `enough for ${fh(area * cob)} of ${fh(area)} hectares`;
+        check(`${prefijo}lámina local de ${P0757}/${conRefLocal.o.id} con ${D}: ${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha y «${alcanza}»`,
+          t.includes(`${nfFicha(ll.valor_millares_ha, 3)} thousand m³/ha`) && t.includes(alcanza), t);
       }
       check(`${prefijo}lámina local: las hectáreas cambian con el deslizador`, vistos[0] !== vistos[1]);
       const titulo = ll.tipo === "aplicada"
@@ -2070,6 +2104,8 @@ async function pruebasEscritorio(page, peticiones) {
       );
       check(`ficha de ${id}: cada tarjeta con Water, Soil y Money`, resumen.every((r) => r.renglones.join(",") === "Water,Soil,Money"), JSON.stringify(resumen.map((r) => r.renglones)));
       check(`ficha de ${id}: botón Why? con las cinco respuestas en cada tarjeta`, resumen.every((r) => r.preguntas === 5));
+      const sobreArea = await hectareasSobreArea(page, id);
+      check(`ficha de ${id}: con cada marca, ninguna cifra de hectáreas que alcanzan pasa del área y el área va con su precisión (C2)`, sobreArea.length === 0, sobreArea.slice(0, 3).join(" | "));
       const confianza = await texto(page, "#ficha .ficha-cultivo");
       check(`ficha de ${id}: cultivo con su confianza (o «confidence not available»)`, /confidence/.test(confianza) && !/—\s*—/.test(confianza), confianza);
     }
@@ -2113,7 +2149,7 @@ async function pruebasEscritorio(page, peticiones) {
     const area = new Intl.NumberFormat("en-US", { maximumFractionDigits: 3 }).format(porId.get(id).area_ha);
     const alcanza = await t.locator(".alcanza").innerText();
     check(`necesidad cero (${id}/${o.id}): «No irrigation needed», semáforo verde`, lamina.includes("No irrigation needed") && sem === "verde", `${lamina} · ${sem}`);
-    check(`necesidad cero (${id}/${o.id}): alcanza para toda la parcela`, alcanza.includes(`of ${area} hectares`) && alcanza.startsWith(`Enough for ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(porId.get(id).area_ha)}`), alcanza);
+    check(`necesidad cero (${id}/${o.id}): alcanza para toda la parcela`, alcanza.startsWith(`Enough for the whole field (${area} ha)`), alcanza);
     await cerrarFicha(page);
   } else {
     omitir("necesidad cero «No irrigation needed»", "ninguna opción con lámina P50 = 0 en estos datos");
