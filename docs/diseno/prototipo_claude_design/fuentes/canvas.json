@@ -1,0 +1,103 @@
+{
+ "v": 3,
+ "attachments": {},
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-15T05:45:00Z"
+ },
+ "title": "ROOT – From Dam to Root · App prototype",
+ "launch": {
+  "view": "canvas",
+  "page": "app"
+ },
+ "pages": [
+  {
+   "id": "app",
+   "name": "ROOT app"
+  }
+ ],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "1 · Start",
+   "page": "app",
+   "is_interactive": true,
+   "radius": 36
+  },
+  "Map.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "2 · Map and allocation",
+   "page": "app",
+   "is_interactive": true,
+   "radius": 36
+  },
+  "Field.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "3 · Field",
+   "page": "app",
+   "is_interactive": true,
+   "radius": 36
+  },
+  "Rain.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "4 · Relief and rain",
+   "page": "app",
+   "is_interactive": true,
+   "radius": 36
+  },
+  "Desktop.dc.html": {
+   "x": 0,
+   "y": 1084,
+   "w": 1440,
+   "h": 900,
+   "title": "Control center",
+   "page": "app",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "DesktopRain.dc.html": {
+   "x": 1520,
+   "y": 1084,
+   "w": 1440,
+   "h": 900,
+   "title": "Control center · relief and rain",
+   "page": "app",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Map.dc.html",
+  "Field.dc.html",
+  "Rain.dc.html",
+  "Desktop.dc.html",
+  "DesktopRain.dc.html"
+ ],
+ "notes": {
+  "t-root": {
+   "x": 0,
+   "y": -300,
+   "text": "ROOT",
+   "kind": "title1",
+   "maxW": 1800,
+   "page": "app"
+  }
+ },
+ "noteOrder": [
+  "t-root"
+ ],
+ "designSystems": []
+}

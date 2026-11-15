@@ -12,6 +12,7 @@
 | [`escalabilidad.md`](escalabilidad.md) | Qué ya sirve para cualquier suelo y zona, qué sigue atado a Delicias y el diseño de un perfil por distrito |
 | [`concepto_visual.md`](concepto_visual.md) | Concepto «el mapa primero» a partir de las referencias del equipo, con dueños y horarios |
 | [`prompt_claude_design.md`](prompt_claude_design.md) | Prompt completo para diseñar la aplicación en Claude Design, con las cifras reales de las tres parcelas de la historia |
+| [`prototipo_claude_design/`](prototipo_claude_design/README.md) | Prototipo navegable que salió de ese prompt (tema oscuro, una sola pantalla de mapa, capas, ficha, relieve con escurrimiento animado): fuentes del lienzo, tokens, imágenes ilustrativas y sus generadores. Propuesta de diseño; no toca `web/` |
 | `README.md` | Este documento |
 
 **Prioridad de documentos:** S9 → kit v4 → S8 (`CLAUDE.md`). Este pase no cambia el alcance, el contrato de datos ni las reglas; si una propuesta las toca, la decide Cristian y se registra en `docs/decisiones/`.
