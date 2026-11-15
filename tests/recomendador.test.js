@@ -17,12 +17,16 @@ import {
   formatoHa,
   textoCobertura,
   textoRestriccion,
+  textoDeCondicion,
+  nombreOpcion,
 } from "../web/js/recomendador.js";
 import * as modulo from "../web/js/recomendador.js";
 import { evaluarOpcion } from "../web/reglas.js";
 import { formatoHectareas } from "../web/js/resumen.js";
 import { IDIOMAS, fijarIdioma } from "../web/js/i18n.js";
 import { enlaceSeguro, fuenteHtml } from "../web/js/asesor.js";
+import { TEXTOS_TABLERO } from "../web/js/textos_tablero.js";
+import { TEXTOS_ASESOR } from "../web/js/textos_asesor.js";
 
 const leer = (ruta) => fs.readFileSync(new URL(ruta, import.meta.url), "utf-8");
 const cubo = JSON.parse(leer("../web/data/cubo.json"));
@@ -274,6 +278,62 @@ test("comprobaciones del botón: pasan con datos reales y no fallan con zona o v
   const sinParcela = comprobarPlan({ cubo, parcela: null, dotacion: MARCAS[0], lluvia: LLUVIAS[0] }, null);
   assert.equal(sinParcela.length, 1);
   assert.equal(sinParcela[0].ok, false);
+});
+
+test("títulos del plan: los textos de «Cultivos y opciones» (tablero.opcion.<rotación>) en los cuatro idiomas, no el nombre en inglés del cubo", () => {
+  let vistos = 0;
+  for (const codigo of IDIOMAS) {
+    fijarIdioma(codigo);
+    for (const [id, datos] of Object.entries(cubo.parcelas)) {
+      if (parcelaDe(id).abstencion) continue;
+      const p = plan(id, MARCAS[0], 0);
+      if (p.estado !== "calculado") continue;
+      for (const tarjeta of p.tarjetas) {
+        const opcion = datos.opciones.find((o) => o.id === tarjeta.id);
+        const deCultivos = TEXTOS_TABLERO[codigo][`tablero.opcion.${opcion.rotacion}`];
+        assert.ok(deCultivos, `${codigo} ${id} ${opcion.id}: falta tablero.opcion.${opcion.rotacion}`);
+        const esperado = opcion.id === "ACTUAL" ? TEXTOS_ASESOR[codigo]["asesor.opcion.actual"].replace("{nombre}", deCultivos) : deCultivos;
+        assert.equal(tarjeta.nombre, esperado, `${codigo} ${id} ${opcion.id}`);
+        if (codigo !== "en") assert.notEqual(tarjeta.nombre, opcion.nombre, `${codigo} ${id} ${opcion.id}: título en inglés`);
+        vistos += 1;
+      }
+    }
+  }
+  assert.ok(vistos > 0);
+  // Una rotación sin clave se muestra con el nombre que traigan los datos, sin romperse.
+  fijarIdioma("es");
+  assert.equal(nombreOpcion({ id: "otra", rotacion: "rotacion_nueva", nombre: "Nombre del dato" }), "Nombre del dato");
+  fijarIdioma("en");
+});
+
+test("lo que el cubo trae escrito va como condición citada de la tabla de rotaciones, en los cuatro idiomas", () => {
+  const delCubo = { texto: "Leave at least twelve months.", origen: "cubo" };
+  const capturado = { texto: "Texto de la captura.", origen: "captura" };
+  for (const codigo of IDIOMAS) {
+    fijarIdioma(codigo);
+    const rotulo = TEXTOS_ASESOR[codigo]["asesor.condicion_tabla"].split("{texto}")[0];
+    assert.equal(textoDeCondicion(delCubo), `${rotulo}${delCubo.texto}`);
+    assert.equal(textoDeCondicion(capturado), capturado.texto, "lo capturado no es de la tabla");
+    assert.ok(textoRestriccion(delCubo).includes(`${rotulo}${delCubo.texto}`));
+  }
+  fijarIdioma("en");
+});
+
+test("un área mayor que la de la parcela no se acepta: sin plan y con el aviso en el idioma, con el área del dato", () => {
+  const id = "P0632";
+  const area = parcelaDe(id).area_ha;
+  for (const codigo of IDIOMAS) {
+    fijarIdioma(codigo);
+    const absurda = plan(id, MARCAS[1], 0, { area: 1e9 });
+    assert.equal(absurda.estado, "entradas_invalidas");
+    assert.equal(absurda.tarjetas.length, 0);
+    const aviso = TEXTOS_ASESOR[codigo]["asesor.error.area_mayor"].replace("{area}", formatoHa(area)(area));
+    assert.deepEqual(absurda.errores, [aviso]);
+    assert.equal(plan(id, MARCAS[1], 0, { area: area + 0.01 }).estado, "entradas_invalidas", "un poco más que la parcela tampoco");
+    assert.equal(plan(id, MARCAS[1], 0, { area }).estado, "calculado", "el área de la parcela sí");
+    assert.equal(plan(id, MARCAS[1], 0, { area: area / 2 }).estado, "calculado", "una parte de la parcela sí");
+  }
+  fijarIdioma("en");
 });
 
 test("ya no hay segundo modelo de demanda; el plan usa las reglas de la ficha", () => {

@@ -24,7 +24,16 @@
 // - red: ninguna petición a dominios que no sean el propio y tile.openstreetmap.org (las teselas se cortan en la
 //   prueba: sin ellas la ficha y los polígonos siguen ahí);
 // - sin la biblioteca del mapa: modo local con los polígonos dibujados; sin suelo.json y sin cubo.json: lo dice;
-// - un dato con marcado HTML no entra a la página como marcado.
+// - un dato con marcado HTML no entra a la página como marcado;
+// - arranque con datos lentos (pronostico.json retrasado): la vista de la liga, las pestañas y el mapa responden
+//   antes de que llegue; el asesor se dibuja al llegar;
+// - ida y vuelta al explorador: los enlaces «Abrir el explorador» llevan la parcela (explorer.html#<id>) y, al
+//   volver con Atrás o al recargar, zona, parcela, dotación y lluvia siguen como estaban;
+// - todo botón, enlace y campo visible tiene nombre accesible, en los cuatro idiomas, en escritorio y en teléfono;
+// - en teléfono: TODOS los controles visibles miden 44 px (no una lista fija), las cejas, las etiquetas y la barra
+//   de pestañas llevan letra de 12 px o más y las etiquetas, contraste de 4.5:1; un dedo sobre el mapa desplaza
+//   la página (gestos cooperativos) y los controles del mapa hablan el idioma elegido;
+// - modo local: un solo punto de tabulación para el mapa y flechas para pasar de un polígono a otro.
 //
 // Lo que dibuja js/asesor.js (#decision-inputs, #decision-summary, #recommendations, #decision-checks,
 // #forecast-analysis y #field-irrigation) se revisa igual que lo demás: ni claves sin traducir («asesor.…»), ni
@@ -192,6 +201,87 @@ function textosVisibles(page) {
   );
 }
 
+/**
+ * Botones, enlaces y campos a la vista sin nombre accesible (aria-labelledby, aria-label, su <label>, su texto
+ * visible, title o placeholder). Un nombre hecho solo de signos («↗», «↓») no cuenta: debe traer letras.
+ */
+function sinNombre(page) {
+  return page.evaluate(() => {
+    const conLetras = (s) => /\p{L}/u.test(s ?? "");
+    const nombreDe = (el) => {
+      const porId = (el.getAttribute("aria-labelledby") ?? "").split(/\s+/).filter(Boolean).map((id) => document.getElementById(id)?.textContent ?? "").join(" ");
+      const candidatos = [porId, el.getAttribute("aria-label"), [...(el.labels ?? [])].map((l) => l.textContent).join(" "), el.innerText ?? el.textContent, el.getAttribute("title"), el.getAttribute("placeholder")];
+      return candidatos.find(conLetras) ?? "";
+    };
+    const fuera = [];
+    for (const el of document.querySelectorAll('a[href], button, select, summary, input, textarea, [role="button"], [role="tab"], [tabindex="0"]')) {
+      if (!el.checkVisibility() || !el.getClientRects().length) continue;
+      if (!nombreDe(el)) fuera.push(`${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""}${typeof el.className === "string" && el.className ? `.${el.className.trim().split(/\s+/).join(".")}` : ""}`);
+    }
+    return fuera;
+  });
+}
+/**
+ * Controles a la vista con menos de 44 px de alto o de ancho: TODOS los que hay en la vista, no una lista.
+ * Una casilla se mide con su rótulo (es lo que se toca). No se miden: el enlace «saltar al contenido» (solo
+ * aparece con el foco del teclado), los enlaces dentro de un renglón de texto (excepción de WCAG 2.5.8), los
+ * polígonos del modo local (su tamaño es el de la parcela) ni el botón de instalación (web/js/instalar.js, de otra
+ * página).
+ */
+function controlesChicos(page) {
+  return page.evaluate(() => {
+    const MINIMO = 43.5;
+    const enRenglon = (el) => el.tagName === "A" && [...el.parentElement.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.nodeValue.trim());
+    const fuera = [];
+    for (const el of document.querySelectorAll('a[href], button, select, summary, input, textarea, [role="button"], [role="tab"]')) {
+      if (!el.checkVisibility() || el.matches(".skip") || el.closest("#map-fallback, #dashboard-install") || enRenglon(el)) continue;
+      const medido = el.matches('input[type="checkbox"], input[type="radio"]') ? (el.closest("label") ?? el) : el;
+      const r = medido.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      if (r.height < MINIMO || r.width < MINIMO) fuera.push(`${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""}${typeof el.className === "string" && el.className ? `.${el.className.trim().split(/\s+/)[0]}` : ""} ${Math.round(r.width)}×${Math.round(r.height)}`);
+    }
+    return fuera;
+  });
+}
+/** Letra de las cejas, las etiquetas y la barra de pestañas (px) y contraste del texto de las etiquetas contra su fondo. */
+function letraYContraste(page) {
+  return page.evaluate(() => {
+    const canal = (v) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+    const luz = ([r, g, b]) => 0.2126 * canal(r) + 0.7152 * canal(g) + 0.0722 * canal(b);
+    const color = (texto) => {
+      const m = texto.match(/[\d.]+/g)?.map(Number) ?? [0, 0, 0, 0];
+      return { rgb: m.slice(0, 3), a: m.length > 3 ? m[3] : 1 };
+    };
+    // Fondo efectivo: se apilan los fondos de los ancestros hasta dar con uno opaco (la página es oscura).
+    const fondoDe = (el) => {
+      const capas = [];
+      for (let e = el; e; e = e.parentElement) {
+        const c = color(getComputedStyle(e).backgroundColor);
+        if (c.a > 0) capas.push(c);
+        if (c.a >= 1) break;
+      }
+      let rgb = capas.at(-1)?.a >= 1 ? capas.pop().rgb : color(getComputedStyle(document.documentElement).backgroundColor).rgb;
+      for (const c of capas.reverse()) rgb = rgb.map((v, i) => c.rgb[i] * c.a + v * (1 - c.a));
+      return rgb;
+    };
+    const chicas = [];
+    const pocoContraste = [];
+    for (const el of document.querySelectorAll(".eyebrow, .pill, nav a[data-view]")) {
+      if (!el.checkVisibility() || !el.textContent.trim()) continue;
+      const estilo = getComputedStyle(el);
+      const px = parseFloat(estilo.fontSize);
+      const quien = `${el.className || el.tagName} «${el.textContent.trim().slice(0, 24)}»`;
+      if (px < 12) chicas.push(`${quien} ${px}px`);
+      if (el.matches(".pill")) {
+        const [a, b] = [luz(color(estilo.color).rgb), luz(fondoDe(el))];
+        const razon = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+        if (razon < 4.5) pocoContraste.push(`${quien} ${razon.toFixed(2)}:1`);
+      }
+    }
+    return { chicas, pocoContraste };
+  });
+}
+
 // ---------------------------------------------------------------- comprobaciones por idioma
 async function revisarIdioma(browser, base, codigo, geo) {
   const { page, contexto, errores } = await abrir(browser, base);
@@ -225,15 +315,19 @@ async function revisarIdioma(browser, base, codigo, geo) {
   // Puentes al explorador de parcelas.
   const parcela = await page.locator("#field-select").inputValue();
   check(`[${codigo}] enlace de la ficha a explorer.html#<id>`, (await page.locator(".field-link").getAttribute("href")) === `explorer.html#${encodeURIComponent(parcela)}`);
-  check(`[${codigo}] enlace visible al explorador con su rótulo`, (await page.locator('a[href="explorer.html"]:visible').allInnerTexts()).some((s) => s.includes(T["tablero.abrir_explorador"])));
+  const alExplorador = await page.evaluate((rotulo) => [...document.querySelectorAll("a")].filter((a) => a.checkVisibility() && a.innerText.includes(rotulo)).map((a) => a.getAttribute("href")), T["tablero.abrir_explorador"]);
+  check(`[${codigo}] enlaces visibles «${T["tablero.abrir_explorador"]}», todos con la parcela (explorer.html#<id>)`, alExplorador.length > 0 && alExplorador.every((h) => h === `explorer.html#${encodeURIComponent(parcela)}`), alExplorador.join(", "));
+  check(`[${codigo}] «Acerca y datos» abre el explorador sin parcela`, (await page.locator(".top-actions .icon-button").getAttribute("href")) === "explorer.html");
   check(`[${codigo}] el pie dice dónde están la leyenda de etiquetas, «About & Data» y «Tests in sight»`, (await page.locator("footer").innerText()).includes(T["tablero.pie.leyenda"]));
 
   // Vista por vista: claves sin traducir, palabras vetadas, español en la interfaz en inglés, desplazamiento.
   const sinTraducir = [];
   const vetadas = [];
   const enEspanol = [];
+  const anonimos = [];
   for (const vista of VISTAS) {
     await irA(page, vista);
+    anonimos.push(...(await sinNombre(page)).map((s) => `${vista}: ${s}`));
     const grupos = await textosVisibles(page);
     for (const texto of [...grupos.propios, ...grupos.asesor, ...grupos.datos, ...grupos.nombres]) {
       if (/(?:tablero|asesor)\.[a-z_]/.test(texto)) sinTraducir.push(`${vista}: ${texto}`);
@@ -252,6 +346,7 @@ async function revisarIdioma(browser, base, codigo, geo) {
     const [ceja] = [await page.locator("#breadcrumb").innerText()];
     check(`[${codigo}] vista «${vista}» con su nombre en la ruta`, ceja.trim().length > 0 && !ceja.includes("tablero."), ceja);
   }
+  check(`[${codigo}] todo botón, enlace y campo visible tiene nombre accesible`, anonimos.length === 0, corto(anonimos, 5));
   check(`[${codigo}] ninguna clave sin traducir a la vista`, sinTraducir.length === 0, corto(sinTraducir));
   check(`[${codigo}] ninguna palabra vetada en los textos del tablero ni del asesor`, vetadas.length === 0, corto(vetadas));
   if (codigo === "en") check("[en] ningún texto del tablero ni del asesor en español", enEspanol.length === 0, corto(enEspanol, 6));
@@ -376,9 +471,26 @@ async function revisarTelefono(browser, base, codigo, ancho, alto) {
   await page.goto(`${base}/index.html?lang=${codigo}`);
   await listo(page);
   const rotulo = `[${codigo} ${ancho}×${alto}]`;
+  const T = TEXTOS_TABLERO[codigo];
+  const anonimos = [];
+  const chicosEnVistas = [];
+  const letra = { chicas: [], pocoContraste: [] };
   for (const vista of VISTAS) {
     await irA(page, vista);
     check(`${rotulo} vista «${vista}» sin desplazamiento horizontal`, await sinDesplazamiento(page), await page.evaluate(() => `${document.documentElement.scrollWidth} de ${innerWidth}`));
+    anonimos.push(...(await sinNombre(page)).map((s) => `${vista}: ${s}`));
+    if (ancho <= 600) {
+      chicosEnVistas.push(...(await controlesChicos(page)).map((s) => `${vista}: ${s}`));
+      const medida = await letraYContraste(page);
+      letra.chicas.push(...medida.chicas.map((s) => `${vista}: ${s}`));
+      letra.pocoContraste.push(...medida.pocoContraste.map((s) => `${vista}: ${s}`));
+    }
+  }
+  check(`${rotulo} todo botón, enlace y campo visible tiene nombre accesible`, anonimos.length === 0, corto(anonimos, 5));
+  if (ancho <= 600) {
+    check(`${rotulo} TODOS los controles visibles de las cinco vistas miden al menos 44 px`, chicosEnVistas.length === 0, corto(chicosEnVistas, 6));
+    check(`${rotulo} cejas, etiquetas y barra de pestañas con letra de 12 px o más`, letra.chicas.length === 0, corto([...new Set(letra.chicas)], 5));
+    check(`${rotulo} etiquetas con contraste de al menos 4.5:1`, letra.pocoContraste.length === 0, corto([...new Set(letra.pocoContraste)], 5));
   }
   await irA(page, "resumen");
   const medidas = await page.evaluate(() => {
@@ -416,6 +528,41 @@ async function revisarTelefono(browser, base, codigo, ancho, alto) {
   });
   check(`${rotulo} controles de al menos 44 px`, chicos.length === 0, chicos.slice(0, 4).join(" | "));
   check(`${rotulo} el selector de idioma está a la vista`, await page.locator("#idioma").isVisible());
+  // Los dos botones que en teléfono quedan con solo el icono llevan su nombre en el idioma.
+  const soloIcono = await page.evaluate(() => ["#exportar", "#fit-map"].map((s) => document.querySelector(s)).map((b) => ({ rotulo: b.getAttribute("aria-label"), texto: b.innerText.trim() })));
+  check(`${rotulo} #exportar y #fit-map llevan aria-label en el idioma`, soloIcono[0].rotulo === T["tablero.descargar_resumen"] && soloIcono[1].rotulo === T["tablero.mapa.zona_completa"], JSON.stringify(soloIcono));
+  if ((await page.locator("body").getAttribute("data-dashboard-map")) === "listo") {
+    // Un dedo sobre el mapa desplaza la página: gestos cooperativos, con su aviso y sus controles en el idioma.
+    const mapa = await page.evaluate(() => ({
+      cooperativo: document.querySelector("#map .maplibregl-canvas-container").classList.contains("maplibregl-cooperative-gestures"),
+      gesto: getComputedStyle(document.querySelector("#map .maplibregl-canvas")).touchAction,
+      aviso: document.querySelector("#map .maplibregl-mobile-message")?.textContent ?? null,
+      acercar: document.querySelector("#map .maplibregl-ctrl-zoom-in")?.getAttribute("aria-label") ?? null,
+      alejar: document.querySelector("#map .maplibregl-ctrl-zoom-out")?.getAttribute("title") ?? null,
+      creditos: document.querySelector("#map .maplibregl-ctrl-attrib-button")?.getAttribute("aria-label") ?? null,
+    }));
+    // Con «pan-x pan-y» el navegador desplaza la página con un dedo; mover el mapa pide dos (lo dice el aviso).
+    check(`${rotulo} mapa con gestos cooperativos: un dedo desplaza la página y el aviso va en el idioma`, mapa.cooperativo && mapa.gesto === "pan-x pan-y" && mapa.aviso === T["tablero.mapa.gesto_tactil"], JSON.stringify(mapa));
+    check(`${rotulo} controles del mapa en el idioma elegido`, mapa.acercar === T["tablero.mapa.acercar"] && mapa.alejar === T["tablero.mapa.alejar"] && mapa.creditos === T["tablero.mapa.atribucion"], JSON.stringify(mapa));
+  }
+  // La barra de contexto y los accesos a parcelas pasan a otra línea en lugar de desbordarse; el foco en la
+  // búsqueda de parcelas no queda bajo la barra de pestañas.
+  const ajuste = await page.evaluate(() => {
+    const zona = document.querySelector("#zona-dashboard").getBoundingClientRect();
+    return { accesos: getComputedStyle(document.querySelector("#scene-parcels")).flexWrap, zonaCabe: zona.right <= innerWidth + 1 && zona.left >= 0 };
+  });
+  check(`${rotulo} los accesos a parcelas pasan a otra línea y el selector de zona cabe entero`, ajuste.accesos === "wrap" && ajuste.zonaCabe, JSON.stringify(ajuste));
+  if (ancho <= 600) {
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.locator("#field-search").focus();
+    const foco = await page.evaluate(() => {
+      const campo = document.querySelector("#field-search").getBoundingClientRect();
+      const barra = document.querySelector(".sidebar").getBoundingClientRect();
+      const cabecera = document.querySelector(".topbar").getBoundingClientRect();
+      return { campo: [Math.round(campo.top), Math.round(campo.bottom)], barra: Math.round(barra.top), cabecera: Math.round(cabecera.bottom), libre: campo.bottom <= barra.top && campo.top >= cabecera.bottom };
+    });
+    check(`${rotulo} el foco en la búsqueda de parcelas no queda bajo la barra de pestañas`, foco.libre, JSON.stringify(foco));
+  }
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: path.join(CAPTURAS, `dashboard_${codigo}_${ancho}.png`) });
   check(`${rotulo} sin errores de página`, errores.length === 0, errores.slice(0, 2).join(" | "));
@@ -436,6 +583,12 @@ async function revisarFallos(browser, base) {
   await page.locator("#map-fallback path.fallback-field").nth(3).focus();
   await page.keyboard.press("Enter");
   check("modo local: una parcela se elige con el teclado", (await page.locator("#field-select").inputValue()) === otra);
+  const tabulacion = await page.evaluate(() => ({ puntos: document.querySelectorAll('#map-fallback [tabindex="0"]').length, elegido: document.querySelector('#map-fallback [tabindex="0"]')?.dataset.id ?? null, poligonos: document.querySelectorAll("#map-fallback path.fallback-field").length }));
+  check("modo local: un solo punto de tabulación para el mapa (el polígono elegido)", tabulacion.puntos === 1 && tabulacion.elegido === otra && tabulacion.poligonos > 1, JSON.stringify(tabulacion));
+  await page.keyboard.press("ArrowRight");
+  const conFlecha = await page.evaluate(() => document.activeElement?.dataset?.id ?? null);
+  const siguiente = await page.locator("#map-fallback path.fallback-field").nth(4).getAttribute("data-id");
+  check("modo local: las flechas pasan de un polígono a otro", conFlecha === siguiente, `${conFlecha} · ${siguiente}`);
   check("modo local: sin desplazamiento horizontal ni errores", (await sinDesplazamiento(page)) && errores.length === 0, errores.slice(0, 2).join(" | "));
   await contexto.close();
 
@@ -479,6 +632,79 @@ async function revisarFallos(browser, base) {
   await contexto.close();
 }
 
+// ---------------------------------------------------------------- arranque con un archivo lento
+async function revisarArranqueLento(browser, base) {
+  const RETRASO_MS = 6000;
+  const { page, contexto, errores } = await abrir(browser, base);
+  let llego = false;
+  await page.route("**/data/pronostico.json", async (ruta) => {
+    await new Promise((ok) => setTimeout(ok, RETRASO_MS));
+    llego = true;
+    await ruta.continue().catch(() => {});
+  });
+  await page.goto(`${base}/index.html?lang=es#cultivos`);
+  await page.locator('[data-panel="cultivos"]').waitFor({ state: "visible", timeout: 60000 });
+  await page.waitForSelector("body[data-dashboard-map]", { timeout: 30000 });
+  const alAbrir = await page.evaluate(() => ({
+    panel: [...document.querySelectorAll("[data-panel]")].filter((p) => !p.hidden).map((p) => p.dataset.panel).join(),
+    pestana: document.querySelector('nav a[aria-current="page"]')?.dataset.view ?? null,
+    mapa: document.body.dataset.dashboardMap ?? null,
+    listo: document.body.dataset.dashboard ?? null,
+    tarjetas: document.querySelectorAll(".crop-card").length,
+  }));
+  check("arranque lento: la vista de la liga (#cultivos) está activa antes de que llegue pronostico.json", !llego && alAbrir.panel === "cultivos" && alAbrir.pestana === "cultivos" && alAbrir.tarjetas > 0, JSON.stringify(alAbrir));
+  check("arranque lento: el mapa ya inició antes de que llegue", !llego && ["listo", "local"].includes(alAbrir.mapa) && alAbrir.listo !== "listo", JSON.stringify(alAbrir));
+  await page.locator('nav a[data-view="predicciones"]').click();
+  const alTocar = await page.evaluate(() => ({ hash: location.hash, panel: [...document.querySelectorAll("[data-panel]")].filter((p) => !p.hidden).map((p) => p.dataset.panel).join() }));
+  check("arranque lento: tocar «Historia» cambia el panel antes de que llegue", !llego && alTocar.hash === "#predicciones" && alTocar.panel === "predicciones", JSON.stringify(alTocar));
+  await page.waitForSelector('body[data-dashboard="listo"]', { timeout: 60000 }); // el mapa está en otra vista: no se espera su dibujo
+  check("arranque lento: al llegar el archivo, el asesor se dibuja (lluvia histórica y formulario)", llego && (await page.locator("#forecast-analysis h2").count()) === 1 && (await page.locator("#decision-form").count()) === 1);
+  check("arranque lento: sin errores de página", errores.length === 0, errores.slice(0, 2).join(" | "));
+  await contexto.close();
+}
+
+// ---------------------------------------------------------------- ida y vuelta al explorador
+async function revisarIdaYVuelta(browser, base, geo) {
+  const { page, contexto, errores } = await abrir(browser, base);
+  const PARCELA = "L0175";
+  const zona = geo.features.find((f) => f.properties.id === PARCELA).properties.zona;
+  await page.goto(`${base}/index.html?lang=es`);
+  await listo(page);
+  await page.locator("#zona-dashboard").selectOption(zona);
+  await page.locator("#field-select").selectOption(PARCELA);
+  const max = await page.evaluate(() => document.querySelector("#allocation").max);
+  await page.locator("#allocation").fill(max);
+  await page.locator("#rain").check();
+  const estado = () =>
+    page.evaluate(() => ({
+      zona: document.querySelector("#zona-dashboard").value,
+      parcela: document.querySelector("#field-select").value,
+      dotacion: document.querySelector("#allocation").value,
+      lluvia: document.querySelector("#rain").checked,
+      escenario: document.querySelector("#scenario-label").textContent,
+      ficha: document.querySelector("#field-detail").innerText,
+    }));
+  const antes = await estado();
+  check("ida y vuelta: el escenario dice la lluvia elegida", antes.lluvia && antes.zona === zona && antes.parcela === PARCELA && antes.dotacion === max, JSON.stringify({ ...antes, ficha: undefined }));
+  const enlace = page.locator(".sidebar-bottom a");
+  check("ida y vuelta: «Abrir el explorador» lleva la parcela", (await enlace.getAttribute("href")) === `explorer.html#${PARCELA}`, await enlace.getAttribute("href"));
+  await enlace.click();
+  await page.waitForURL(new RegExp(`explorer\\.html#${PARCELA}$`), { waitUntil: "commit" });
+  await page.goBack();
+  await listo(page);
+  const alVolver = await estado();
+  check("ida y vuelta: al volver con Atrás siguen la zona, la parcela, la dotación y la lluvia", JSON.stringify(alVolver) === JSON.stringify(antes), JSON.stringify({ ...alVolver, ficha: undefined }));
+  check("ida y vuelta: el escenario no vuelve a «cambio de lluvia 0»", alVolver.escenario === antes.escenario && alVolver.lluvia, alVolver.escenario);
+  await page.reload();
+  await listo(page);
+  check("ida y vuelta: al recargar también se conservan", JSON.stringify(await estado()) === JSON.stringify(antes));
+  // Sin la casilla guardada, se lee la que deja el navegador: nunca se supone.
+  await page.locator("#rain").uncheck();
+  check("ida y vuelta: al quitar «menos lluvia» el escenario cambia", (await page.locator("#scenario-label").textContent()) !== antes.escenario);
+  check("ida y vuelta: sin errores de página", errores.length === 0, errores.slice(0, 2).join(" | "));
+  await contexto.close();
+}
+
 // ---------------------------------------------------------------- principal
 const srv = await servidor();
 const base = `http://127.0.0.1:${srv.address().port}`;
@@ -499,9 +725,13 @@ try {
   await revisarFunciones(browser, base, geo);
   await revisarTelefono(browser, base, "en", 390, 844);
   await revisarTelefono(browser, base, "es", 390, 844);
+  await revisarTelefono(browser, base, "pt", 390, 844);
+  await revisarTelefono(browser, base, "fr", 390, 844);
   await revisarTelefono(browser, base, "en", 320, 700);
   await revisarTelefono(browser, base, "fr", 768, 1024);
   await revisarFallos(browser, base);
+  await revisarArranqueLento(browser, base);
+  await revisarIdaYVuelta(browser, base, geo);
   check("red: ninguna petición a dominios que no sean el propio y tile.openstreetmap.org", hostsAjenos.size === 0, [...hostsAjenos].join(", "));
   console.log(`NOTA   teselas pedidas a ${HOST_TESELAS} (cortadas por la prueba): ${teselasPedidas}`);
 } catch (err) {

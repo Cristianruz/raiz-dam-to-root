@@ -23,6 +23,7 @@ import {
   icono,
 } from "./interfaz.js";
 import { crearAsesor } from "./asesor.js";
+import { formatoHa } from "./recomendador.js";
 import { montarInstalacion } from "./instalar.js";
 import {
   aguaComprometida,
@@ -146,13 +147,50 @@ function current() {
 function zone() {
   return cube.zonas[state.zone];
 }
+// Hectáreas con el MISMO formato del plan y de la ficha del explorador (formatoHa: los decimales del área,
+// hacia abajo y nunca más que el área), para que las cuatro vistas digan el mismo número.
+const haDe = (areaHa) => formatoHa(areaHa);
 function fieldLabel(f) {
   const p = f.properties;
-  return `${p.id} · ${p.abstencion ? t("tablero.cultivo.sin_clasificar") : cropName(p.cultivo_actual)} · ${fmt(p.area_ha)} ha`;
+  return `${p.id} · ${p.abstencion ? t("tablero.cultivo.sin_clasificar") : cropName(p.cultivo_actual)} · ${haDe(p.area_ha)(p.area_ha)} ha`;
 }
 // Enlace a la ficha de la parcela en el explorador (explorer.html#<id>).
 function explorerLink(id) {
   return id ? `explorer.html#${encodeURIComponent(id)}` : "explorer.html";
+}
+// Todos los enlaces «Abrir el explorador» llevan la parcela elegida (el de «Acerca y datos» no es de una parcela).
+function enlacesAlExplorador() {
+  const destino = explorerLink(selected()?.properties.id);
+  document
+    .querySelectorAll('a[href^="explorer.html"]:not(.icon-button)')
+    .forEach((a) => a.setAttribute("href", destino));
+}
+
+// Zona, parcela, dotación y lluvia se conservan entre visitas de la misma sesión (ida y vuelta al explorador,
+// recarga). Si el navegador no deja usar sessionStorage (navegación privada), se sigue sin él.
+const LLAVE_ESTADO = "root.tablero.estado";
+function leerEstadoGuardado() {
+  try {
+    const guardado = JSON.parse(sessionStorage.getItem(LLAVE_ESTADO) ?? "null");
+    return guardado && typeof guardado === "object" ? guardado : {};
+  } catch {
+    return {};
+  }
+}
+function recordarEstado() {
+  try {
+    sessionStorage.setItem(
+      LLAVE_ESTADO,
+      JSON.stringify({
+        zona: state.zone,
+        parcela: state.field,
+        dotacion: state.allocation,
+        lluvia: state.rain,
+      }),
+    );
+  } catch {
+    // sin almacenamiento: el estado vale para esta visita
+  }
 }
 
 // Título, descripción y ruta de la vista en uso, y el título de la pestaña del navegador.
@@ -275,6 +313,7 @@ function texturaDe(clase) {
 }
 function fieldDetails() {
   const p = selected()?.properties;
+  enlacesAlExplorador();
   if (!p) {
     $("#field-detail").textContent = t("tablero.ficha.sin_parcelas");
     return;
@@ -304,21 +343,21 @@ function fieldDetails() {
   const pendiente = Number.isFinite(p.relieve?.pendiente_media_pct)
     ? `${fmt(p.relieve.pendiente_media_pct)}%`
     : t("tablero.sin_dato");
+  const ha = haDe(p.area_ha);
   const nota = evalOp
     ? T("tablero.ficha.hectareas", {
-        cubiertas: fmt(evalOp.hectareas.p50),
-        area: fmt(p.area_ha),
-        bajo: fmt(evalOp.hectareas.bajo),
-        alto: fmt(evalOp.hectareas.alto),
+        cubiertas: ha(evalOp.hectareas.p50),
+        area: ha(p.area_ha),
+        bajo: ha(evalOp.hectareas.bajo),
+        alto: ha(evalOp.hectareas.alto),
       })
     : T("tablero.ficha.sin_calculo_nota");
   $("#field-detail").innerHTML =
-    `<div class="field-title"><span class="crop-symbol">${icons[p.cultivo_actual] ?? "♧"}</span><div><h4>${esc(title)}</h4><p>${T("tablero.ficha.parcela", { id: p.id, area: fmt(p.area_ha) })}</p></div></div>
+    `<div class="field-title"><span class="crop-symbol">${icons[p.cultivo_actual] ?? "♧"}</span><div><h4>${esc(title)}</h4><p>${T("tablero.ficha.parcela", { id: p.id, area: ha(p.area_ha) })}</p></div></div>
         <dl class="field-metrics"><div><dt>${T("tablero.ficha.demanda")}</dt><dd>${esc(demand)}</dd></div><div><dt>${T("tablero.ficha.suelo")}</dt><dd>${esc(profile ? `pH ${fmt(profile.ph)}` : sinSuelo)}</dd></div><div><dt>${T("tablero.ficha.riego")}</dt><dd id="field-irrigation">${T("tablero.ficha.sin_registrar")}</dd></div><div><dt>${T("tablero.ficha.pendiente")}</dt><dd>${esc(pendiente)}</dd></div><div><dt>${T("tablero.ficha.textura")}</dt><dd>${esc(texture)}</dd></div><div><dt>${T("tablero.ficha.plazo")}</dt><dd>${esc(termLabel)}</dd></div></dl>
         <div class="coverage">${T("tablero.ficha.cobertura")} <strong>${esc(coverage)}</strong><div class="progress"><div style="width:${ancho}%"></div></div></div>
         <p class="micro">${nota}</p>
         <a class="field-link" href="${esc(explorerLink(p.id))}">${T("tablero.abrir_explorador")} <span>↗</span></a>`;
-  $("#recommendation-link").href = explorerLink(p.id);
   asesor?.actualizar();
   updateHighlight();
 }
@@ -334,7 +373,8 @@ function crops() {
     .map((r) => {
       const l = r.lamina_bruta_millares[String(state.rain)];
       const area = selected()?.properties.area_ha;
-      const ha = hectareasQueAlcanzan(area, state.allocation, l);
+      const alcanza = hectareasQueAlcanzan(area, state.allocation, l);
+      const ha = haDe(area);
       const crop = r.cultivos[0];
       const kc = cube.opciones_catalogo[r.id]?.secuencia?.[0]?.siembra;
       const planting =
@@ -353,11 +393,11 @@ function crops() {
       const nota = state.field
         ? T("tablero.cultivos.area", {
             id: state.field,
-            cubiertas: fmt(ha.p50),
-            area: fmt(area),
+            cubiertas: ha(alcanza.p50),
+            area: ha(area),
           })
         : T("tablero.cultivos.sin_parcela");
-      return `<article class="card crop-card"><span class="crop-symbol">${icons[crop] ?? "♧"}</span><h3>${esc(optionName(r))}</h3><span class="pill">${T(plazo)}</span><div class="water-number">${fmt(l.p50)} <small style="font-size:11px">${unidad}</small></div><p>${T("tablero.cultivos.rango", { bajo: fmt(l.p10), alto: fmt(l.p90) })}</p><div class="crop-meta"><span>${T("tablero.cultivos.compromiso")} <strong>${esc(years(r.plazo_anios))}</strong></span><span>${T("tablero.cultivos.siembra")} <strong>${esc(planting)}</strong></span><span>${T("tablero.cultivos.base")} <strong>${l.p50 === 0 ? T("tablero.cultivos.sin_riego") : T("tablero.cultivos.riego_modelado")}</strong></span></div><p class="micro">${nota}</p></article>`;
+      return `<article class="card crop-card" data-rotacion="${esc(r.id)}"><span class="crop-symbol">${icons[crop] ?? "♧"}</span><h3>${esc(optionName(r))}</h3><span class="pill">${T(plazo)}</span><div class="water-number">${fmt(l.p50)} <small style="font-size:11px">${unidad}</small></div><p>${T("tablero.cultivos.rango", { bajo: fmt(l.p10), alto: fmt(l.p90) })}</p><div class="crop-meta"><span>${T("tablero.cultivos.compromiso")} <strong>${esc(years(r.plazo_anios))}</strong></span><span>${T("tablero.cultivos.siembra")} <strong>${esc(planting)}</strong></span><span>${T("tablero.cultivos.base")} <strong>${l.p50 === 0 ? T("tablero.cultivos.sin_riego") : T("tablero.cultivos.riego_modelado")}</strong></span></div><p class="micro">${nota}</p></article>`;
     })
     .join("");
 }
@@ -480,6 +520,7 @@ function paddingMapa() {
 function chooseField(id) {
   if (!features().some((f) => f.properties.id === id)) return;
   state.field = id;
+  recordarEstado();
   fieldDetails();
   crops();
   const f = selected();
@@ -501,6 +542,7 @@ function changeZone() {
     fs[0]
   )?.properties.id;
   $("#field-search").value = "";
+  recordarEstado();
   fieldList();
   accesosParcelas();
   stats();
@@ -601,6 +643,9 @@ function updateHighlight() {
       if (!selectionMarker) {
         const el = document.createElement("div");
         el.className = "map-selection-marker";
+        // El marcador rotula la parcela elegida: es un indicador, no un control (sin punto de tabulación).
+        el.setAttribute("role", "img");
+        el.tabIndex = -1;
         selectionMarker = new maplibregl.Marker({
           element: el,
           anchor: "bottom",
@@ -610,6 +655,7 @@ function updateHighlight() {
       selectionMarker
         .setLngLat([(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2])
         .addTo(state.map);
+      selectionMarker.getElement().setAttribute("aria-label", state.field);
     }
   }
   document
@@ -625,6 +671,14 @@ function updateHighlight() {
     .forEach((p) =>
       p.classList.toggle("selected", p.dataset.id === state.field),
     );
+  puntoDeTabulacion();
+}
+// Modo local: un solo punto de tabulación para todo el mapa (el polígono elegido o, si no hay, el primero).
+// De un polígono a otro se pasa con las flechas; Enter o la barra espaciadora lo eligen.
+function puntoDeTabulacion() {
+  const poligonos = [...document.querySelectorAll(".fallback-field")];
+  const entrada = poligonos.find((p) => p.dataset.id === state.field) ?? poligonos[0];
+  for (const p of poligonos) p.tabIndex = p === entrada ? 0 : -1;
 }
 
 // Modo local, sin teselas: los polígonos de la zona dibujados en SVG con los datos ya cargados.
@@ -665,11 +719,46 @@ function drawFallback() {
         return polygons
           .map(
             (rings) =>
-              `<path tabindex="0" role="button" aria-label="${esc(fieldLabel(f))}" style="--field-color:${color}" class="fallback-field${f.properties.id === state.field ? " selected" : ""}" data-id="${esc(f.properties.id)}" d="${rings.map((ring) => "M" + ring.map(project).join(" L") + " Z").join(" ")}"><title>${esc(fieldLabel(f))}</title></path>`,
+              `<path tabindex="-1" role="button" aria-label="${esc(fieldLabel(f))}" style="--field-color:${color}" class="fallback-field${f.properties.id === state.field ? " selected" : ""}" data-id="${esc(f.properties.id)}" d="${rings.map((ring) => "M" + ring.map(project).join(" L") + " Z").join(" ")}"><title>${esc(fieldLabel(f))}</title></path>`,
           )
           .join("");
       })
       .join("")}</svg>`;
+  puntoDeTabulacion();
+}
+// Textos de los controles de la biblioteca del mapa, en el idioma en uso (opción «locale» de MapLibre).
+function textosDelMapa() {
+  return {
+    "NavigationControl.ZoomIn": t("tablero.mapa.acercar"),
+    "NavigationControl.ZoomOut": t("tablero.mapa.alejar"),
+    "AttributionControl.ToggleAttribution": t("tablero.mapa.atribucion"),
+    "CooperativeGesturesHandler.MobileHelpText": t("tablero.mapa.gesto_tactil"),
+    "CooperativeGesturesHandler.WindowsHelpText": t("tablero.mapa.gesto_ctrl"),
+    "CooperativeGesturesHandler.MacHelpText": t("tablero.mapa.gesto_cmd"),
+    "Map.Title": t("tablero.mapa.aria"),
+    "Marker.Title": t("tablero.nav.terreno"),
+  };
+}
+// La biblioteca fija sus textos al crear el mapa: al cambiar el idioma se vuelven a poner en sus controles.
+function rotularMapa() {
+  const caja = $("#map");
+  const poner = (selector, clave, atributos) => {
+    const el = caja.querySelector(selector);
+    if (!el) return;
+    if (!atributos) el.textContent = t(clave);
+    else for (const a of atributos) el.setAttribute(a, t(clave));
+  };
+  const rotulo = ["aria-label", "title"];
+  poner(".maplibregl-ctrl-zoom-in", "tablero.mapa.acercar", rotulo);
+  poner(".maplibregl-ctrl-zoom-out", "tablero.mapa.alejar", rotulo);
+  poner(".maplibregl-ctrl-attrib-button", "tablero.mapa.atribucion", rotulo);
+  poner(".maplibregl-canvas", "tablero.mapa.aria", ["aria-label"]);
+  poner(".maplibregl-mobile-message", "tablero.mapa.gesto_tactil");
+  const escritorio = caja.querySelector(".maplibregl-desktop-message");
+  if (escritorio)
+    escritorio.textContent = t(
+      /mac/i.test(navigator.platform ?? "") ? "tablero.mapa.gesto_cmd" : "tablero.mapa.gesto_ctrl",
+    );
 }
 function pintarNotaMapa() {
   $("#map-note").textContent =
@@ -726,11 +815,15 @@ function mapInit() {
       bounds: zone().bbox,
       fitBoundsOptions: { padding: paddingMapa() },
       attributionControl: { compact: true },
+      // En pantalla táctil, un dedo desplaza la página y dos mueven el mapa (el mapa no atrapa el desplazamiento).
+      cooperativeGestures: window.matchMedia?.("(pointer: coarse)").matches ?? false,
+      locale: textosDelMapa(),
     });
     state.map.addControl(
       new maplibregl.NavigationControl({ showCompass: false }),
       "bottom-right",
     );
+    rotularMapa();
     state.map.on("style.load", () => {
       state.map.addSource("fields", { type: "geojson", data: datosDelMapa() });
       state.map.addLayer({
@@ -815,6 +908,7 @@ function pintarDatos() {
         : t("tablero.corte_sin_fecha"),
   });
   pintarNotaMapa();
+  rotularMapa();
   pintarCabecera();
   fieldList();
   accesosParcelas();
@@ -858,17 +952,36 @@ async function init() {
         `<option value="${esc(id)}">${esc(z.nombre_mostrar)}</option>`,
     )
     .join("");
+  // Lo elegido antes en esta sesión (zona, parcela, dotación y lluvia) vuelve a su lugar; lo que falte o ya no
+  // exista en los datos se toma de los controles y de las referencias del cubo, sin suponerlo.
+  const guardado = leerEstadoGuardado();
+  if (Object.hasOwn(cube.zonas, guardado.zona ?? ""))
+    $("#zona-dashboard").value = guardado.zona;
   state.zone = $("#zona-dashboard").value;
   const slider = cube.dotaciones.deslizador;
+  const dotacionGuardada =
+    typeof guardado.dotacion === "number" &&
+    guardado.dotacion >= slider.min &&
+    guardado.dotacion <= slider.max
+      ? guardado.dotacion
+      : null;
   Object.assign($("#allocation"), {
     min: slider.min,
     max: slider.max,
     step: slider.paso,
     value:
+      dotacionGuardada ??
       cube.dotaciones.marcas.find((m) => m.id === "como_2026")?.valor ??
       slider.min,
   });
   state.allocation = Number($("#allocation").value);
+  // La casilla de lluvia: la guardada en la sesión o, si no hay, como la deje el navegador al volver a la página.
+  const menosLluvia = cube.lluvia_pct.find((v) => v < 0);
+  if (typeof guardado.lluvia === "number")
+    $("#rain").checked = guardado.lluvia < 0 && menosLluvia != null;
+  const lluviaDeLaCasilla = () =>
+    $("#rain").checked && menosLluvia != null ? menosLluvia : 0;
+  state.rain = lluviaDeLaCasilla();
   mapBlock = $(".map-detail-grid");
   mapAnchor = document.createComment("map-anchor");
   mapBlock.before(mapAnchor);
@@ -883,16 +996,19 @@ async function init() {
     },
   });
   changeZone();
+  if (guardado.parcela) chooseField(guardado.parcela); // solo si sigue en la zona
   pintarDatos();
   $("#zona-dashboard").addEventListener("change", changeZone);
   $("#allocation").addEventListener("input", (e) => {
     state.allocation = Number(e.target.value);
+    recordarEstado();
     stats();
     fieldDetails();
     crops();
   });
-  $("#rain").addEventListener("change", (e) => {
-    state.rain = e.target.checked ? cube.lluvia_pct.find((v) => v < 0) : 0;
+  $("#rain").addEventListener("change", () => {
+    state.rain = lluviaDeLaCasilla();
+    recordarEstado();
     stats();
     fieldDetails();
     crops();
@@ -910,13 +1026,19 @@ async function init() {
     if (el) chooseField(el.dataset.id);
   });
   $("#map-fallback").addEventListener("keydown", (e) => {
+    const el = e.target.closest("[data-id]");
+    if (!el) return;
     if (e.key === "Enter" || e.key === " ") {
-      const el = e.target.closest("[data-id]");
-      if (el) {
-        e.preventDefault();
-        chooseField(el.dataset.id);
-      }
+      e.preventDefault();
+      chooseField(el.dataset.id);
+      return;
     }
+    // Flechas: de un polígono al siguiente o al anterior, sin salir del mapa.
+    const paso = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!paso) return;
+    e.preventDefault();
+    const poligonos = [...$("#map-fallback").querySelectorAll("[data-id]")];
+    poligonos[(poligonos.indexOf(el) + paso + poligonos.length) % poligonos.length].focus();
   });
   document.querySelectorAll("[data-filter]").forEach((b) =>
     b.addEventListener("click", () => {
@@ -928,6 +1050,12 @@ async function init() {
   $("#export-timeline").addEventListener("click", exportTimeline);
   $("#app-content").hidden = false;
   $("#load-status").hidden = true;
+  // La navegación y el mapa se montan ANTES de esperar al asesor: con un archivo lento (pronostico.json) la
+  // vista de la liga, las pestañas y el mapa ya responden; el asesor se dibuja cuando llegue.
+  route();
+  mapInit();
+  window.addEventListener("hashchange", route);
+  document.body.dataset.dashboardNav = "lista";
   // El asesor recibe el cubo ya leído (no lo vuelve a pedir) y el estado vigente en cada llamada.
   asesor = await crearAsesor(() => ({
     cubo: cube,
@@ -937,9 +1065,6 @@ async function init() {
     dotacion: state.allocation,
     lluvia: state.rain,
   }));
-  route();
-  mapInit();
-  window.addEventListener("hashchange", route);
   document.body.dataset.dashboard = "listo";
 }
 

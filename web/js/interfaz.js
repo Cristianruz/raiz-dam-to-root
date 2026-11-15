@@ -123,6 +123,10 @@ export function prepararInterfaz({ cubo, cambiarModo, centrarParcela }) {
     `${icono("download")}<span data-i18n="tablero.descargar_resumen"></span>`;
   $("#fit-map").innerHTML =
     `${icono("target")}<span data-i18n="tablero.mapa.zona_completa"></span>`;
+  // En teléfono el texto de estos dos botones se oculta y queda el icono: el nombre accesible va en aria-label,
+  // en el idioma en uso (pintarTextos lo vuelve a poner en cada cambio de idioma).
+  $("#exportar").dataset.i18nAttr = "aria-label:tablero.descargar_resumen";
+  $("#fit-map").dataset.i18nAttr = "aria-label:tablero.mapa.zona_completa";
   const scene = $(".map-detail-grid"),
     mapCard = $(".map-card"),
     water = $(".water-card");

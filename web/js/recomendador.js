@@ -16,6 +16,7 @@ import {
 import { formatoHectareas } from "./resumen.js";
 import { t, tiene, fmtNumero, fmtFecha, deDato, idioma, IDIOMA_BASE } from "./i18n.js";
 import "./textos_asesor.js"; // registra los textos «asesor.…» en los cuatro idiomas
+import "./textos_tablero.js"; // y los «tablero.opcion.…»: el plan nombra las opciones como «Cultivos y opciones»
 
 /** Aviso de juicio, en el idioma en uso. En inglés es la misma frase de la ficha (web/app.js). */
 export const avisoJuicio = () => t("asesor.aviso_juicio");
@@ -30,6 +31,17 @@ export const ESTADOS = ["restriccion", "revisar", "calculado", "sin_datos"];
 export function nombreCultivo(id) {
   const clave = `asesor.cultivo.${id}`;
   return tiene(clave, IDIOMA_BASE) ? t(clave) : String(id ?? "");
+}
+
+/**
+ * Título de una opción del plan, en el idioma en uso: el MISMO texto de «Cultivos y opciones» (claves
+ * tablero.opcion.<rotación>, que describen y no ordenan). La rotación vigente lleva delante «Rotación actual:».
+ * Una rotación sin clave se muestra con el nombre que traigan los datos.
+ */
+export function nombreOpcion(opcion) {
+  const clave = `tablero.opcion.${opcion?.rotacion ?? opcion?.id}`;
+  if (!tiene(clave, IDIOMA_BASE)) return deDato(opcion, "nombre") ?? String(opcion?.id ?? "");
+  return opcion.id === "ACTUAL" ? t("asesor.opcion.actual", { nombre: t(clave) }) : t(clave);
 }
 
 const esNumero = (v) => typeof v === "number" && Number.isFinite(v);
@@ -102,9 +114,17 @@ export function textoCobertura(tarjeta) {
   return t("asesor.cobertura.parte", { ha: fh(p50), area, bajo: fh(bajo), alto: fh(alto) });
 }
 
+/**
+ * Texto visible de un punto de la tarjeta. Lo que viene escrito en el cubo (condiciones de la tabla de
+ * rotaciones) lleva delante su rótulo, para que se lea como condición citada y no como orden de la herramienta.
+ */
+export function textoDeCondicion(x) {
+  return x.origen === "cubo" ? t("asesor.condicion_tabla", { texto: x.texto }) : x.texto;
+}
+
 /** Texto visible de una restricción encontrada; el cierre deja la decisión en manos de la persona y su técnico. */
 export function textoRestriccion(r) {
-  return t("asesor.restriccion.frase", { texto: r.texto });
+  return t("asesor.restriccion.frase", { texto: textoDeCondicion(r) });
 }
 
 // Estado de un filtro del cubo, igual que en la ficha (web/app.js, estadoDeFiltro).
@@ -249,6 +269,9 @@ export function planDeParcela({
   const errores = [];
   const area = entrada.area == null ? parcela.area_ha : entrada.area;
   if (!esNumero(area) || !(area > 0)) errores.push(t("asesor.error.area"));
+  // No se evalúa un área mayor que la de la parcela (el área sale del dato, con el formato de la ficha).
+  else if (esNumero(parcela.area_ha) && area > parcela.area_ha)
+    errores.push(t("asesor.error.area_mayor", { area: formatoHa(parcela.area_ha)(parcela.area_ha) }));
   const volumen = entrada.volumenDisponible ?? null;
   const D = dotacionDeEntrada({ dotacion, volumen, area, m3PorMillar });
   if (D == null && !errores.length) errores.push(t(volumen == null ? "asesor.error.dotacion" : "asesor.error.volumen"));
@@ -288,7 +311,7 @@ export function planDeParcela({
     const lamina = opcion.agua?.lamina_bruta?.[llave];
     const comun = {
       id: opcion.id,
-      nombre: deDato(opcion, "nombre") ?? String(opcion.id ?? ""),
+      nombre: nombreOpcion(opcion),
       rotacion: opcion.rotacion ?? null,
       etiqueta: opcion.etiqueta_opcion ?? null,
       area,
