@@ -741,3 +741,33 @@ No tengo `send_message` en esta sesión; te respondo aquí.
   13 de 431 y 16 de 524 en Lázaro Cárdenas. Arreglo: exportar con `crs` y `crsTransform` de la proyección nativa de NASADEM
   (`datos/earthengine/A3_hls_nasadem.js`, hoy `scale: ESCALA`) y rehacer A9 (`relieve_*`). Necesita Earth Engine en el
   navegador de Cristian, así que no lo hago esta noche.
+
+## 14-nov 22:45 — Para «Revisión multiagente»: `datos-satelite` ya trae fusionada la integración (09bdafd)
+Leí `docs/coordinacion.md`; sigo con mi papel (entregas en Drive y en `datos-satelite`, y la revisión cruzada de lo que la
+página muestra de mis datos). Espero tu hash del agente de suelo para comparar celda por celda. No tengo `send_message`:
+todo lo mío va en este archivo.
+
+**Paso 1 de la coordinación:** fusioné `claude/keen-mayer-sp0vvm` (09bdafd) en `datos-satelite` → **7412eaf**. Fusionar ahora
+`datos-satelite` en la integración no da conflictos (mientras no cambies los archivos de abajo). Los 27 conflictos eran todos
+de archivos agregados en las dos ramas; los resolví así:
+- **Quedan los míos** (tu copia es igual a una versión anterior mía): `datos/LEEME.md`, `datos/colab/` A1, A5, A7, A10, B3 y
+  B6, `datos/earthengine/suelo.js` y `datos/supuestos.json`.
+- **Quedan los tuyos** (los renombraste a ROOT sin otro cambio): `docs/` ee_uso, h1_especificacion_operativa, h1_verdad_sih,
+  h1b_especificacion, nogal_cobertura, resultado_H1, resultado_H1b, resultado_H3, revision_protagonistas, suelo_parcelas y
+  verificacion_fuentes_datos, y `data/reto/opciones_b3.json` y `data/reto/supuestos.json`. También `docs/referencias/`
+  recursos_reto y ref_cultivos_sdr (los reescribiste después que yo).
+- **Los míos con tu encabezado ROOT:** `docs/modelo_vs_practica.md` (trae la sección 3-bis: cereal de invierno sembrado el
+  1-dic) y `docs/resultado_A8.md` («1,140 mm (1,139.5)» y la nota del cambio; el tuyo dice «1,139 mm»).
+- **`.gitignore`:** el tuyo, más tres carpetas locales de esta sesión (`data/zonas/`, `data/entrega_zonas/`,
+  `data/raw/ee_zonas/`).
+
+**Lo que gana la integración al fusionar 7412eaf** (nada en `web/`, `motor/`, `tests/` ni `data/processed/`; 26 archivos nuevos
+y 12 cambiados, 4.7 MB de datos): los scripts que rehacen las 35 entregas (`datos/colab/` B7, B8, E0, E1, G1 y
+`correr_todo.py`; `datos/navegador/gaez_leer.js`; las versiones nuevas de A1, A5, A7, A10, B3, B6 y `datos/supuestos.json`);
+el crudo nuevo de `data/raw/reto/` (pasos de ECOSTRESS de AppEEARS y sus solicitudes, celdas de GAEZ, clases de suelo de
+OpenLandMap); y `docs/ecostress.md`, `docs/reproducir_datos.md`, `docs/suelo_textos_ficha.md` y
+`docs/suelo_tipos_y_nutrientes.md`. Con eso, el repositorio público trae cómo se rehace cada entrega:
+`python datos/colab/correr_todo.py --salida <carpeta vacía> --comparar <buzón>` → 35 de 35 idénticas.
+
+**Pruebas en 7412eaf:** `correr_todo.py` 35 de 35 iguales a lo entregado. `construir.py` con mi buzón actual: entraron 35,
+rechazados 0; CONTRATO OK; VERIFICADOR OK; 1072 pytest y 167 node; «OK: todo pasa».
