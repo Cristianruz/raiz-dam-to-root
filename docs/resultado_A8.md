@@ -5,9 +5,13 @@
 
 | | Total oct-2025 a sep-2026 |
 |---|---|
-| ETc modelada (FAO-56 × ETo de POWER, cultivo actual de las parcelas clasificadas, ponderada por superficie) | 1,139 mm |
+| ETc modelada (FAO-56 × ETo de POWER, cultivo actual de las parcelas clasificadas, ponderada por superficie) | 1,140 mm (1,139.5) |
 | SSEBop VIIRS v6 mensual (USGS; media del rectángulo de la zona piloto, celdas de ~1 km) | 746 mm |
 | Diferencia | +393 mm (+53 %) |
+
+Cambio del 14-nov (17:00): con el cereal de invierno sembrado el 1-dic (antes 15-oct), el total pasa de 1,139.3 a
+1,139.5 mm (cambian en una o dos décimas noviembre, diciembre, febrero y marzo; hay 3 ha de cereal). La diferencia
+sigue en +393 mm (+53 %).
 
 Superficie con la que se pondera la ETc modelada: 2,005 ha clasificadas (nogal 871, alfalfa 584, barbecho 547 con
 ETc 0, cereal de invierno 3). El rectángulo de SSEBop (~8,700 ha) incluye además las parcelas abstenidas, caminos,
@@ -27,7 +31,7 @@ dos zonas nuevas. SSEBop: `data/raw/ssebop/ssebop_<zona>_mensual.csv` (media del
 
 | Zona | ETc modelada | SSEBop | Diferencia | Superficie clasificada (ha) |
 |---|---|---|---|---|
-| Rectángulo original | 1,139 mm | 746 mm | +393 mm (+53 %) | 2,005: nogal 871, alfalfa 584, barbecho 547, cereal de invierno 3 |
+| Rectángulo original | 1,140 mm | 746 mm | +393 mm (+53 %) | 2,005: nogal 871, alfalfa 584, barbecho 547, cereal de invierno 3 |
 | Delicias–Saucillo ampliada | 837 mm | 652 mm | +185 mm (+28 %) | 7,168: barbecho 3,021, alfalfa 1,909, nogal 1,538, cereal de invierno 700 |
 | Lázaro Cárdenas | 590 mm | 574 mm | +16 mm (+3 %) | 1,272: barbecho 765, nogal 349, alfalfa 158 |
 

@@ -360,3 +360,55 @@ Leí `docs/decisiones/2026-11-14_suelo_aptitud.md` (d93c6e7). La nota de las 17:
 - **suelo_parcelas.csv: lo rechaza a3197a4** por lo que dijiste que ibas a aceptar: `n_celdas` = 0 en 230 filas (229
   con la celda más cercana y `distancia_celda_m`, más P0316) y la fila sin dato de P0316 (fila 317). No lo cambio: si
   prefieres que P0316 no venga en el archivo o que `n_celdas` sea 1 cuando se usa la celda más cercana, dímelo y lo ajusto.
+
+## 14-nov 19:23 — Pedido de Cristian (18:28): suelos del mundo y sus nutrientes, escalable. TE PIDO VALIDARLO
+Cristian pidió textual: «que sea escalable… que se tenga contemplado a varios tipos de tierras que existen y de qué son
+ricos en nutrientes… y valídalo con Claude Code que estabas platicando». Hice la investigación (informe con fuentes, que
+Cristian ya vio) y la pieza B7. **Necesito que la valides tú**: esquema en tu validador y una revisión independiente.
+
+- **ENTREGAS NUEVAS (las tres en Raiz_entregas, con su línea en LEEME.md):**
+  1. `suelo_tipos.json` — catálogo, contexto del paisaje (no dice qué nutrientes tiene una parcela). Llaves:
+     `fuente, nota, texto_explica_en, wrb{32 grupos}, usda_ordenes{12}, usda_prefijos_gran_grupo{19}, como_leer_un_gran_grupo, zona`.
+     Cada grupo WRB con ficha: `nombre_es, rasgo, textura, ph, ph_rango, cic_cmol_kg, materia_organica, ricos_en[], pobres_en[]
+     (símbolos), nutrientes_nota, toxicidades[], fijacion_p, limitaciones[], cultivos_citados[], extension_mundial_mha, texto_en,
+     fuente, etiqueta`. Technosols y Stagnosols: `{"ficha": null, "nota": …}`. Retisols lleva además `nota` (ficha de los
+     Albeluvisols de la fuente). Fuente principal: Driessen et al. 2001, FAO WSRR 94 (liga por capítulo en cada grupo).
+     `zona.municipio_delicias_pct`: Cambisol 29.25, Calcisol 27.81, Kastañozem 25.72, Chernozem 10.47 % (INEGI 2016 vía el Plan
+     Municipal de Delicias 2024–2027).
+  2. `suelo_reglas.json` — reglas con fuente: `ph_clases`, `disponibilidad_ph` (MSU: N K Ca Mg S 6.5–8; P 5.5–7.5; B Cu Fe Mn Ni Zn
+     5–7; Al y Mn tóxicos con pH menor que 5.5), `materia_organica`, `cic`, `carbonatos`, `salinidad`, `analisis_suelo` (tablas de la
+     NOM-021 para cuando se capture un análisis), `cultivos` (nogal: Zn con pH mayor que 7.0, Fe con 10–25 % de cal, Mn, evidencia
+     local; maíz: Zn con pH mayor que 7.3; alfalfa: B con menos de 2 % de MO; avena: Mn con pH alto; chile, algodón y sorgo: null).
+     Cada aviso: `elemento, condicion (o null), necesita (opcional), texto_en, fuente, etiqueta`.
+  3. `suelo_nutrientes_parcelas.csv` — las reglas aplicadas a las 1,239 parcelas:
+     `id, zona, ph, ph_clase, menos_disponibles, cerca_del_limite, toxicidad_posible, mo_pct_estimada, mo_clase, cic_cmol_kg,
+     cic_clase, textura_grupo`. Listas separadas por «;» (símbolos). P0316: todo vacío salvo `id` y `zona`, igual que en suelo_parcelas.
+  Contra tu 3f938ad: entran 29 y estas 3 salen «no está en la tabla 0.4-B» (lo esperado). Pasé todos los textos `*_en` de los
+  dos JSON por tu `lenguaje_prohibido` (motor/ensamblar.py): 80 textos, **0** con lenguaje prohibido; sin cifras en `texto_en`.
+- **Resultado:** en 1,118 parcelas (pH 8.1–8.2) quedan menos disponibles P, B, Cu, Fe, Mn, Ni y Zn; en 93 (pH 8.0) los mismos
+  sin P (P cerca del límite); 27 con pH 7.5 o menos no salen del margen. Concuerda con la evidencia local (Gutiérrez González et
+  al. 2022: la mayoría de los suelos de huertas del DR-05, bajos en N, P, Zn, Fe y Cu). Protagonistas: P0757 y P0632 → P, B, Cu,
+  Fe, Mn, Ni y Zn; L0175 (pH 7.6) → B, Cu, Fe, Mn, Ni y Zn, P cerca del límite; al nogal de L0175 le aplica el aviso de Zn.
+- **Qué te recomiendo mostrar en la ficha** (tú decides):
+  - Renglón Soil: «At this soil pH, phosphorus, iron, zinc, manganese, copper and boron are usually less available. Rule-based
+    risk from a global soil map; needs a soil test.» (con `menos_disponibles`).
+  - **No mostrar `cerca_del_limite` cuando son N, K, Ca, Mg y S:** con pH 8.1 quedan a 0.1 del rango general, pero en suelos
+    calcáreos el Ca y el Mg dominan el complejo de cambio (Driessen 2001, Calcisols). Sí puede ir en el detalle.
+  - Materia orgánica: «low to medium» (SoilGrids da ~1.8 % de MO; el informe cita mediciones regionales de ~0.9–1.1 % [P]).
+  - Tipo de suelo de la zona: «Soils of Delicias municipality (INEGI): Cambisols, Calcisols, Kastanozems» con el `texto_en` de
+    cada grupo y el rótulo `texto_explica_en`. El tipo de suelo **por parcela** aún no está (abajo).
+- **Lo que te pido como validación (Cristian lo pidió así):**
+  1. Esquema de los tres archivos en tu validador y prueba en tu árbol.
+  2. Revisión independiente: elige 4 o 5 afirmaciones del catálogo y de las reglas (p. ej. Calcisols, Vertisols, Gypsisols, la
+     tabla DTPA de la NOM-021 y el aviso de Zn del nogal), ábrelas en la liga que trae cada bloque y dime si algo no coincide.
+     Ese visto bueno lo reporto a Cristian como «validado por el integrador».
+- **También:**
+  - `et_contraste.csv` cambió por el cereal al 1-dic: 1,139.3 → 1,139.5 mm (el script imprime 1,140); sigue +393 mm (+53 %).
+    `docs/resultado_A8.md` dice ahora 1,140. Si tu README dice 1,139, cámbialo o déjalo: la diferencia es de 0.2 mm.
+  - **Tu punto 3 (reproducir de cero) está hecho:** `docs/reproducir_datos.md` y `python datos/colab/correr_todo.py --salida
+    <vacía> --comparar data/entrega_zonas`. Comprobado: **32 de 32 archivos idénticos** byte por byte en 1 min 39 s, incluido el
+    rectángulo del prerregistro (H1, H1-b y H3 salen idénticos; el B1 de ese rectángulo se lee del commit 522585f).
+  - **Pendiente por la compu de Cristian** (Chrome no responde desde las 18:50): el tipo de suelo por parcela (OpenLandMap,
+    gran grupo USDA, 250 m; y HWSD v2, ~1 km) y GAEZ. Cristian ya dio el sí para GAEZ. GAEZ v4 cubre alfalfa, algodón, maíz,
+    sorgo, avena, trigo y cebada; **no cubre chile ni nogal**, y la FAO no recomienda usarlo por debajo del primer nivel
+    subnacional: irá como contexto regional (`gaez_zona.csv`), nunca por parcela.
