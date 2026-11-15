@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """B3 · Opciones y filtros oficiales por cultivo actual (decisión del integrador del 14-nov-2026, 16:25).
 
 Todo sale del documento maestro del proyecto, §5.2 «Rotaciones candidatas» y «Filtros duros» (versión 3.1, 29-oct-2026),
@@ -27,8 +27,9 @@ def ind(leg, plagas, raiz, fuente):
 
 
 # Ventanas de siembra con fuente (las que el maestro o el expediente 27 traen). Lo demás, null.
-S_ALFALFA = ("09-15", "10-31", f"{INIFAP17}: best planting from Sep 15 to Oct 31 ({MAESTRO})")
-S_ALGODON = ("04-01", "05-10", f"{INIFAP17}: Southeast–Delicias, from Apr 1 to May 10 (best from Apr 20 to 30) ({MAESTRO})")
+# Como lo dice el maestro: alfalfa «siembra del 15-sep al 31-oct»; algodón «del 1-abr al 10-may (óptima del 20 al 30-abr)».
+S_ALFALFA = ("09-15", "10-31", f"{INIFAP17}: planting from Sep 15 to Oct 31 ({MAESTRO})")
+S_ALGODON = ("04-01", "05-10", f"{INIFAP17}: Southeast–Delicias, from Apr 1 to May 10 (optimal from Apr 20 to 30) ({MAESTRO})")
 S_MAIZ = ("04-01", "05-31", f"INIFAP, Folleto Técnico 53 (2014): irrigated spring planting from Apr 1 to May 31 ({MAESTRO})")
 S_CEREAL = ("11-01", "12-31", f"{MAESTRO}, option A: autumn–winter oats or triticale, «Nov–Dec»; winter irrigation in Delicias not verified. The demand model plants on Dec 1 (midpoint of the window) [S]")
 S_CHILE = ("02-01", None, "SDR Chihuahua, Mar 3, 2026: chile from February in the south-central region (data dossier 27, §2.3); it is a practice, not an absence of frost risk. No closing date in the sources")
@@ -125,8 +126,14 @@ OPCIONES = {
         "secuencia": [],
         "indicadores": ind(False, None, None, f"{MAESTRO}, option E: standing stubble protects against erosion"),
         "advertir_si_rojo": False,
-        "por_que_en": "Worst-case option: the field rests with standing stubble, which asks for no irrigation and protects the soil from wind. Income is low.",
-        "fuente": f"{MAESTRO}, option E («the rest rests with standing stubble»; low income)", "etiqueta": "[V]"},
+        # Descripción, no orden entre opciones: el maestro llama a la opción E «peor escenario» (de agua); el texto dice
+        # para qué situación está pensada y lo que dice su tabla, sin cifra de ingreso (la página no tiene dato verificado).
+        "por_que_en": "Intended for the worst water-supply scenario (option E of the master document): the field rests with "
+                      "standing stubble, which needs no irrigation and protects the soil against erosion. The master document "
+                      "lists low income as the risk of this option and gives no figure for it.",
+        "fuente": f"{MAESTRO}, option E («worst scenario»: «the rest rests with standing stubble»; supporting data «less "
+                  "demand; protects against erosion»; risk «low income», with no figure); no irrigation: rotaciones.json "
+                  "(A5), zero depth", "etiqueta": "[V]"},
 }
 
 # Alternativas del maestro por cultivo actual (la opción ACTUAL no se lista).
@@ -223,7 +230,7 @@ def main():
     usadas = {x for v in POR_CULTIVO.values() for x in v} | {x for f in FILTROS for x in f["aplica_a"]}
     if usadas - set(OPCIONES):
         raise SystemExit(f"Ids sin definir en «opciones»: {sorted(usadas - set(OPCIONES))}")
-    out = {"_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+    out = {"_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
            "fuente": f"{MAESTRO}, «Candidate rotations» and «Hard filters»; data dossier 27, §2.3 (INIFAP, Agenda Técnica "
                      "Agrícola de Chihuahua 2017). The primary sources are given in each option and each filter",
            "opciones": OPCIONES, "por_cultivo_actual": POR_CULTIVO, "filtros": FILTROS,

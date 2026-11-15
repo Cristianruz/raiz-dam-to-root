@@ -402,9 +402,10 @@ def textos_ficha():
         "suelo": {
             "aviso": caso(AVISO, "siempre que se muestre el renglón de suelo"),
             "menos_disponibles": caso("Less available at this soil pH: {nutrientes}.", "menos_disponibles no está vacío"),
-            "cerca_del_limite": caso("Near the edge of their best pH range: {nutrientes}.",
+            # «more available» como en MSU (disponibilidad_ph.grupos[].mas_disponible_entre); sin «best».
+            "cerca_del_limite": caso("Near the edge of the pH range where they are more available: {nutrientes}.",
                                      "solo en el detalle, con cerca_del_limite sin N, K, Ca, Mg ni S (decisión del integrador)"),
-            "sin_aviso_ph": caso("At this estimated pH, no nutrient falls outside its best availability range.",
+            "sin_aviso_ph": caso("At this estimated pH, no nutrient falls outside the pH range where it is more available.",
                                  "menos_disponibles y cerca_del_limite vacíos"),
             "toxicidad": caso("Below pH {ph_toxico}, aluminium and manganese can reach toxic levels.", "toxicidad_posible no está vacío",
                               marcadores={"ph_toxico": "disponibilidad_ph.toxicidad_ph_menor_que.valor"}),
