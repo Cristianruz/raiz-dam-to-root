@@ -1,0 +1,183 @@
+<!doctype html>
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
+<!-- docs/pitch/video/tarjetas.html — Tarjetas y banda de subtítulos del video de 30 s o menos (kit C7).
+     No es parte de la aplicación: tests/e2e/grabar_video.mjs la abre con Playwright y la captura como imagen.
+     Una sola página con tres vistas, según ?vista=
+       apertura   título, lema (?lema=, que el grabador lee del guion), equipo y reto;
+       como       «How it works»: tres pasos en una línea, con iconos dibujados aquí (sin logotipos). Los nombres
+                  de productos de NASA llevan data-producto: el grabador comprueba que cada uno aparezca en
+                  web/data/manifest.json antes de usar la tarjeta;
+       cierre     frase de cierre (?frase=, del guion), aviso de juicio y liga pública (?liga=);
+                  ?app=si agrega la línea de la aplicación instalable (el grabador la pide solo si existen
+                  web/manifest.webmanifest y web/sw.js);
+       banda      banda inferior de una toma: rótulo del tiempo de la historia (?rotulo=) y subtítulo (?texto=).
+     Identidad de la página: colores de web/style.css (:root) y Atkinson Hyperlegible de web/vendor/.
+     Ningún dígito en los textos (CLAUDE.md, reglas 2 y 3): el grabador lo revisa leyendo el texto dibujado.
+     Los números de este archivo son medidas de diseño, no datos. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ROOT – video cards</title>
+<style>
+  @font-face {
+    font-family: "Atkinson Hyperlegible"; font-style: normal; font-weight: 400; font-display: block;
+    src: url("../../../web/vendor/atkinson-hyperlegible-5.3.0/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Atkinson Hyperlegible"; font-style: normal; font-weight: 700; font-display: block;
+    src: url("../../../web/vendor/atkinson-hyperlegible-5.3.0/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
+  }
+  :root {
+    /* Los mismos tonos de web/style.css (:root) */
+    --agua: #1F6FB2;
+    --agua-clara: #DCEAF6;
+    --ambar: #D98E04;
+    --arena: #F5EFE6;
+    --tinta: #1D2329;
+    --blanco: #FFFFFF;
+    /* Medidas del lienzo del video (las fija el grabador con el tamaño de la ventana) */
+    --margen: 168px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; }
+  body {
+    background: var(--tinta); color: var(--blanco);
+    font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    overflow: hidden;
+  }
+  [hidden] { display: none !important; }
+
+  /* ---------- Tarjetas a pantalla completa ---------- */
+  .tarjeta {
+    position: absolute; inset: 0; padding: 0 var(--margen);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  /* La raya de agua a la izquierda: la misma seña de la frase principal de la ficha (.resumen-frase) */
+  .tarjeta-cuerpo { border-left: 10px solid var(--agua); padding-left: 56px; }
+  .tarjeta-pie {
+    position: absolute; left: var(--margen); right: var(--margen); bottom: 96px;
+    padding-top: 30px; border-top: 2px solid rgba(245, 239, 230, 0.22);
+    display: flex; justify-content: space-between; align-items: baseline; gap: 48px;
+    font-size: 34px; color: var(--agua-clara);
+  }
+  .tarjeta-pie strong { color: var(--arena); }
+
+  .marca { font-size: 44px; font-weight: 700; letter-spacing: 0.01em; color: var(--ambar); }
+  .marca b { color: var(--arena); }
+  .lema { margin-top: 36px; max-width: 1380px; font-size: 96px; line-height: 1.12; font-weight: 700; color: var(--arena); }
+
+  .frase { font-size: 148px; line-height: 1.04; font-weight: 700; color: var(--arena); }
+  .aviso { margin-top: 44px; max-width: 1320px; font-size: 48px; line-height: 1.3; color: var(--blanco); }
+  .liga { color: var(--arena); font-weight: 700; overflow-wrap: anywhere; }
+  .app { color: var(--agua-clara); white-space: nowrap; }
+
+  /* ---------- «How it works»: tres pasos en una línea ---------- */
+  .como-titulo { position: absolute; left: var(--margen); top: 176px; font-size: 44px; font-weight: 700; color: var(--ambar); letter-spacing: 0.01em; }
+  .pasos { position: absolute; left: 96px; right: 96px; top: 346px; display: grid; grid-template-columns: 1fr 84px 1fr 84px 1fr; align-items: start; }
+  .paso { text-align: center; padding: 0 12px; }
+  .paso svg { width: 190px; height: 190px; fill: none; stroke: var(--arena); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+  .paso svg .agua { stroke: #6FB1E6; }
+  .paso svg .agua-llena { fill: #6FB1E6; stroke: none; }
+  .paso svg .ambar { stroke: var(--ambar); }
+  .junto { white-space: nowrap; }
+  .paso h2 { margin-top: 34px; font-size: 54px; line-height: 1.12; font-weight: 700; color: var(--arena); text-wrap: balance; }
+  .paso p { margin-top: 22px; font-size: 36px; line-height: 1.28; color: var(--agua-clara); text-wrap: balance; }
+  .flecha { align-self: start; margin-top: 62px; }
+  .flecha svg { width: 84px; height: 64px; fill: none; stroke: var(--ambar); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ---------- Banda inferior de una toma ---------- */
+  .banda {
+    position: absolute; inset: 0; padding: 0 72px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;
+    text-align: center; border-top: 4px solid var(--agua);
+  }
+  .banda-rotulo {
+    font-size: 27px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ambar);
+  }
+  .banda-texto { font-size: 58px; line-height: 1.14; font-weight: 700; color: var(--blanco); text-wrap: balance; }
+</style>
+</head>
+<body>
+  <section class="tarjeta" data-vista="apertura" hidden>
+    <div class="tarjeta-cuerpo">
+      <p class="marca"><b>ROOT</b> – From Dam to Root</p>
+      <h1 class="lema" data-campo="lema"></h1>
+    </div>
+    <p class="tarjeta-pie"><strong>Orbital Farming</strong><span>Field Shift: Adapting Farms with NASA Data</span></p>
+  </section>
+
+  <section class="tarjeta" data-vista="como" hidden>
+    <p class="como-titulo">How it works</p>
+    <div class="pasos">
+      <div class="paso">
+        <!-- satélite: cuerpo, dos paneles y la señal hacia abajo -->
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <rect x="48" y="30" width="24" height="30" rx="4"/>
+          <rect x="12" y="34" width="28" height="22" rx="3"/><line x1="26" y1="34" x2="26" y2="56"/>
+          <rect x="80" y="34" width="28" height="22" rx="3"/><line x1="94" y1="34" x2="94" y2="56"/>
+          <line x1="40" y1="45" x2="48" y2="45"/><line x1="72" y1="45" x2="80" y2="45"/>
+          <path class="agua" d="M46 76 Q60 66 74 76"/><path class="agua" d="M38 90 Q60 74 82 90"/><path class="agua" d="M30 104 Q60 82 90 104"/>
+        </svg>
+        <h2>NASA data</h2>
+        <p>Satellite and climate records:<br><span data-producto="HLS">HLS</span> · <span data-producto="NASA POWER">POWER</span> · <span data-producto="IMERG">IMERG</span></p>
+      </div>
+      <div class="flecha"><svg viewBox="0 0 84 64" aria-hidden="true"><path d="M8 32 H72"/><path d="M50 12 L74 32 L50 52"/></svg></div>
+      <div class="paso">
+        <!-- planta con una gota: el agua que pide el cultivo -->
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <path d="M60 108 V58"/>
+          <path d="M60 80 C38 80 28 66 28 52 C48 52 60 62 60 80 Z"/>
+          <path d="M60 66 C60 46 72 34 90 34 C90 52 80 66 60 66 Z"/>
+          <path class="agua-llena" d="M60 8 C68 20 73 26 73 33 A13 13 0 0 1 47 33 C47 26 52 20 60 8 Z"/>
+          <line class="ambar" x1="24" y1="108" x2="96" y2="108"/>
+        </svg>
+        <h2>A <span class="junto">crop-water</span> model</h2>
+        <p>The water each crop asks for, with its likely range</p>
+      </div>
+      <div class="flecha"><svg viewBox="0 0 84 64" aria-hidden="true"><path d="M8 32 H72"/><path d="M50 12 L74 32 L50 52"/></svg></div>
+      <div class="paso">
+        <!-- parcela con surcos y su marca -->
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <path d="M14 96 L34 50 H86 L106 96 Z"/>
+          <line x1="48" y1="50" x2="40" y2="96"/><line x1="60" y1="50" x2="60" y2="96"/><line x1="72" y1="50" x2="80" y2="96"/>
+          <path class="ambar" d="M60 44 C50 30 46 25 46 19 A14 14 0 0 1 74 19 C74 25 70 30 60 44 Z"/>
+          <circle class="ambar" cx="60" cy="19" r="4"/>
+        </svg>
+        <h2>An answer per field</h2>
+        <p>Water per year, years committed, hectares the allocation covers</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tarjeta" data-vista="cierre" hidden>
+    <div class="tarjeta-cuerpo">
+      <h1 class="frase" data-campo="frase"></h1>
+      <p class="aviso">This tool supports, never replaces, the judgment of farmers and local experts.</p>
+    </div>
+    <p class="tarjeta-pie"><span class="liga" data-campo="liga"></span><span class="app" data-campo="app" hidden>Installs as an app · opens offline</span></p>
+  </section>
+
+  <section class="banda" data-vista="banda" hidden>
+    <p class="banda-rotulo" data-campo="rotulo"></p>
+    <p class="banda-texto" data-campo="texto"></p>
+  </section>
+
+<script>
+  // Llena la vista pedida con los textos de la dirección (los pone el grabador; aquí no hay textos de las tomas).
+  const p = new URLSearchParams(location.search);
+  const vista = document.querySelector(`[data-vista="${CSS.escape(p.get("vista") || "apertura")}"]`);
+  if (vista) {
+    vista.hidden = false;
+    for (const nodo of vista.querySelectorAll("[data-campo]")) {
+      const valor = p.get(nodo.dataset.campo);
+      if (nodo.dataset.campo === "app") nodo.hidden = valor !== "si";
+      else if (valor) nodo.textContent = valor;
+      else nodo.hidden = true;
+    }
+  }
+  // El grabador espera esta marca (con la tipografía ya cargada) antes de capturar.
+  document.fonts.ready.then(() => { document.body.dataset.tarjeta = "lista"; });
+</script>
+</body>
+</html>
