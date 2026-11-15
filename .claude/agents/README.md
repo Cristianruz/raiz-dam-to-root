@@ -14,6 +14,7 @@ Origen: [anthropics/claude-plugins-official](https://github.com/anthropics/claud
 | `code-reviewer` | `plugins/feature-dev/agents/code-reviewer.md` | `a7df173bf77a00da5584c6401a1061524fdbe477b6fef5dd496d4c7a9113c78c` | Glob, Grep, LS, Read, NotebookRead, WebFetch, TodoWrite, WebSearch, KillShell, BashOutput (`model: sonnet`) | Revisor de calidad y de errores en la revisión de cada pieza y en la final. Contrasta con `CLAUDE.md` y reporta solo hallazgos con confianza ≥ 80 | Se eligió la versión de feature-dev porque su lista de herramientas **no incluye Edit, Write ni Bash**. Sin Bash no puede correr `git diff`: hay que pasarle el diff o la lista de archivos (`docs/prompts/revisor.md` lo hace). Tiene WebFetch y WebSearch: no le pase datos privados del equipo |
 | `silent-failure-hunter` | `plugins/pr-review-toolkit/agents/silent-failure-hunter.md` | `fa9b0daec5a267e7e66435cc48b3328301fc9f70c3af259fe248881327a1babc` | No declara `tools`: **hereda todas**, incluidas Edit, Write y Bash (`model: inherit`) | Fallas silenciosas: `try/except` que tragan errores, el ensamblador que «corrige» en silencio (K-ENS lo prohíbe) y valores por omisión que ocultan un dato faltante (regla 2: null y aviso) | Se invoca siempre con la instrucción «solo lectura; no modifique archivos». Menciona funciones del proyecto de origen (`logError`, `logForDebugging`, `constants/errorIds.ts` y Sentry) que **no existen en ROOT**: esas partes se ignoran. Su `description` no es YAML estricto (hay «: » dentro de un texto sin comillas). Se probó con un lector tolerante y da `name` y `description` válidos. Si `/agents` no lo muestra, esa es la causa |
 | `pr-test-analyzer` | `plugins/pr-review-toolkit/agents/pr-test-analyzer.md` | `fcb1cde9ba7b21694b508766a8d6a79bc91bed9982f828f816210059934f46b4` | No declara `tools`: **hereda todas** (`model: inherit`) | Huecos de pruebas: K-TEST, `web/reglas.js` (§2.4), el balance de La gota y el verificador de C3 | Se invoca con «solo lectura». Califica cada prueba sugerida de 1 a 10; en el protocolo, las de 8 a 10 cuentan como IMPORTANTE |
+| `comment-analyzer` | `plugins/pr-review-toolkit/agents/comment-analyzer.md` | `4a9c1f2eb8234a4b9231983e75739663d512e1aed242388964a165a719b84698` | No declara `tools`: **hereda todas** (`model: inherit`) | Revisor de comentarios y documentación: exactitud frente al código, comentarios que se pudren y los que sobran. Útil con los comentarios en español y los encabezados del proyecto | Se invoca siempre en **solo lectura** («no modifique archivos»), como los otros revisores copiados; su texto dice que solo aconseja. Copiado el 15-nov-2026, mismo commit `b5b01ac`, licencia Apache-2.0 (texto al final de este archivo) |
 
 ## Agentes propios de ROOT
 
@@ -29,11 +30,12 @@ Origen: [anthropics/claude-plugins-official](https://github.com/anthropics/claud
 ## Cuándo se usa cada uno
 El protocolo completo está en `docs/prompts/README.md`. En corto:
 - **Revisión de una pieza:** `revisor-contrato` si la pieza toca datos, motor o contrato; `revisor-cifras` si toca la web, textos o documentos; `code-reviewer` siempre.
-- **Revisión final de la rama:** los cinco en paralelo, más un validador por hallazgo.
+- **Comentarios y documentación en el diff:** además, `comment-analyzer`.
+- **Revisión final de la rama:** los cinco en paralelo (y `comment-analyzer`, si el diff cambia comentarios o documentación), más un validador por hallazgo.
 
 ## No se copió
 - Ningún hook ni plugin completo.
-- Los demás agentes de pr-review-toolkit (`code-simplifier`, `comment-analyzer` y `type-design-analyzer`) y de feature-dev (`code-architect` y `code-explorer`): no los pide el protocolo.
+- Los demás agentes de pr-review-toolkit (`code-simplifier` y `type-design-analyzer`) y de feature-dev (`code-architect` y `code-explorer`): no los pide el protocolo.
 - Detalle en `.claude/skills/README.md`, «Lo que NO se instaló y por qué».
 
 ## Texto de la licencia Apache-2.0 (anthropics/claude-plugins-official, `LICENSE`)
