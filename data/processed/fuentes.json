@@ -1,7 +1,7 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/ensamblar.py; no se edita a mano. tipo «entrega»: archivo del buzón copiado sin modificar a esta carpeta (fuente, fecha y script de LEEME.md; url_o_api y fecha_consulta repiten fuente y fecha para motor/manifest.py). tipo «origen»: filas de los fuentes_<pieza>.csv entregados (kit K-ENS paso 6(a)).",
- "generado": "2026-11-14T22:17:37+00:00",
+ "generado": "2026-11-15T00:28:57+00:00",
  "fuentes": [
   {
    "archivo": "contexto_regional.csv",
@@ -15,7 +15,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "c5e7ee211e82587173cff97c506ba5378801891090568d14f78931c90540b17c",
    "ruta_buzon": "contexto_regional.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "cultivos_parcelas.csv",
@@ -29,21 +29,21 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "6f6fee58eb78e95f085ee17d66e80709a4d2ba811596e47d557e4c70bc2293b6",
    "ruta_buzon": "cultivos_parcelas.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "demanda_cultivos.csv",
    "tipo": "entrega",
    "pieza": "A5",
    "rol": null,
-   "fuente": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona delicias_saucillo",
+   "fuente": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona delicias_saucillo; desde el 14-nov 17:00 el cereal de invierno se siembra el 1-dic en el modelo (antes 15-oct; punto medio de la ventana «nov–dic» del maestro §5.2 [S]): cambia cereal_invierno",
    "fecha": "2026-11-14",
    "script": "datos/colab/A5_demanda_plazo.py",
-   "url_o_api": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona delicias_saucillo",
+   "url_o_api": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona delicias_saucillo; desde el 14-nov 17:00 el cereal de invierno se siembra el 1-dic en el modelo (antes 15-oct; punto medio de la ventana «nov–dic» del maestro §5.2 [S]): cambia cereal_invierno",
    "fecha_consulta": "2026-11-14",
-   "sha256": "83f3ce1353e5d6d0c9bcdba73992faa4a4540f11fe64d1fe33a0148dd19ef3e7",
+   "sha256": "43252e4d7f98863f57fd892e5db05a2caa1e16c9f55f349bd3dd675c52634bbb",
    "ruta_buzon": "demanda_cultivos.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -51,14 +51,14 @@
    "tipo": "entrega",
    "pieza": "A5",
    "rol": null,
-   "fuente": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona lazaro_cardenas",
+   "fuente": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona lazaro_cardenas; desde el 14-nov 17:00 el cereal de invierno se siembra el 1-dic en el modelo (antes 15-oct; punto medio de la ventana «nov–dic» del maestro §5.2 [S]): cambia cereal_invierno",
    "fecha": "2026-11-14",
    "script": "datos/colab/A5_demanda_plazo.py",
-   "url_o_api": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona lazaro_cardenas",
+   "url_o_api": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona lazaro_cardenas; desde el 14-nov 17:00 el cereal de invierno se siembra el 1-dic en el modelo (antes 15-oct; punto medio de la ventana «nov–dic» del maestro §5.2 [S]): cambia cereal_invierno",
    "fecha_consulta": "2026-11-14",
-   "sha256": "230be28e7df7b6d1101a639202f26734869a9fd435b548381bd8d2d19775fd53",
+   "sha256": "a62944800eebed4089632410bbe3f3dc2ef43c65cfa506e9d8489695e1437a2b",
    "ruta_buzon": "demanda_cultivos_lazaro_cardenas.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -73,7 +73,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "4198a284dc8d350cf22e3eab4368cea7bfded7000f62d5923956f6d9eda7f032",
    "ruta_buzon": "et_contraste.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "eto_diaria.csv",
@@ -87,7 +87,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "89657914bad2e1be107ceb5a8d24833ccab0477cde570e160a683a5c56923046",
    "ruta_buzon": "eto_diaria.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -102,7 +102,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "16af45819b7f02190938043e4a2d67a878baae029fc4eebf1dbbf52a50d51563",
    "ruta_buzon": "eto_diaria_lazaro_cardenas.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -117,7 +117,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "5897ac4f2ddce87e36c5c0f89642f445da76c86a93385522a900c8455c2e11ba",
    "ruta_buzon": "gedi_parcelas.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "h3_series.csv",
@@ -131,7 +131,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "ef8579ef63bd2ca95735bbbb111dc6d0d7b42efda4ce424ff9e444d12537b303",
    "ruta_buzon": "h3_series.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "heladas.json",
@@ -145,7 +145,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "1a94266e2fe5d2a015660f42629d02cf1de04c2a52a64bd3fa2e29b2becc5c82",
    "ruta_buzon": "heladas.json",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "hls_mensual_parcelas.csv",
@@ -159,7 +159,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "fd97e0ade393c48a45f2b4c27acee672c592af4afbf56976f69cae36bf057fc9",
    "ruta_buzon": "hls_mensual_parcelas.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "imerg_diaria.csv",
@@ -173,7 +173,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "b308b68fa304cf8caa71a8dd6bcdb9a5904429d98851c6277fa426186420104e",
    "ruta_buzon": "imerg_diaria.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -188,7 +188,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "7005e73d8e22b0a897dbf5de4cf512f0b1f09d0f6c723899ca85cc18f6b37197",
    "ruta_buzon": "imerg_diaria_lazaro_cardenas.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -203,7 +203,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "132d19249f1b12e99fa3098794ee9980da7ac5b18d33118d158c80c6d46584f7",
    "ruta_buzon": "memoria_parcelas.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "memoria_resumen.csv",
@@ -217,7 +217,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "ce1cd1b8ed962589ac1d545c569029e3c17aaf4a3982e09c1949cc22ff67a8f3",
    "ruta_buzon": "memoria_resumen.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "nasadem_zona_piloto.tif",
@@ -231,7 +231,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "7ec898b86c90f6360876589af9ebdabdf3469c0c30691f88ecd572a788e8b31e",
    "ruta_buzon": "nasadem_zona_piloto.tif",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -246,22 +246,36 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "1e4566efddc29e94996abc3b6f3663c4f80da8b7e693403e0ad271b87736562b",
    "ruta_buzon": "nasadem_zona_piloto_lazaro_cardenas.tif",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "lazaro_cardenas"
+  },
+  {
+   "archivo": "opciones_b3.json",
+   "tipo": "entrega",
+   "pieza": "B3",
+   "rol": null,
+   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), «Rotaciones candidatas» y «Filtros duros»; expediente de datos 27, §2.3 (INIFAP, Agenda Técnica Agrícola de Chihuahua 2017). Las fuentes primarias van en cada opción y en cada filtro. Opciones D (avena-veza) y E (sorgo con 1–2 auxilios) del maestro no se entregan: ver «opciones_del_maestro_no_entregadas» en el archivo; segunda entrega (14-nov 17:00): filtro alfalfa_no_en_anio_seco con tipo dotacion_minima (lamina_minima_cm 40) y fuente en la opción sorgo; tercera entrega (14-nov 17:46): textos en inglés sin «only» ni «first» y nombre_en sin cifras (regla 10 del validador)",
+   "fecha": "2026-11-14",
+   "script": "datos/colab/B3_opciones.py",
+   "url_o_api": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), «Rotaciones candidatas» y «Filtros duros»; expediente de datos 27, §2.3 (INIFAP, Agenda Técnica Agrícola de Chihuahua 2017). Las fuentes primarias van en cada opción y en cada filtro. Opciones D (avena-veza) y E (sorgo con 1–2 auxilios) del maestro no se entregan: ver «opciones_del_maestro_no_entregadas» en el archivo; segunda entrega (14-nov 17:00): filtro alfalfa_no_en_anio_seco con tipo dotacion_minima (lamina_minima_cm 40) y fuente en la opción sorgo; tercera entrega (14-nov 17:46): textos en inglés sin «only» ni «first» y nombre_en sin cifras (regla 10 del validador)",
+   "fecha_consulta": "2026-11-14",
+   "sha256": "3f0f065551b83cddf0296f17bfb26a1f806ca78cb8dd70842d22b040d5a2bd44",
+   "ruta_buzon": "opciones_b3.json",
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "parcelas_base.geojson",
    "tipo": "entrega",
    "pieza": "B1",
    "rol": null,
-   "fuente": "Fields of The World global predictions (CC-BY-4.0), source.coop/ftw/global-data (vectores alpha MX y confianza prue_v1 500 m); dos zonas (propiedad zona; ids P… delicias_saucillo y L… lazaro_cardenas, de norte a sur); ftw_confianza = media del raster de confianza dentro de la parcela o, si no hay celda válida, de las celdas a 1-2 celdas; geometría simplificada (~10 m en parcelas ≥ 5 ha, ~3 m en las menores) y sin traslapes después de simplificar (máximo 0.01 %); protagonistas P0757 (alfalfa por vencer, Km 92), P0244 (descanso en 2026, libre, El Molino) y L0175 (nogal, Lázaro Cárdenas)",
+   "fuente": "Fields of The World global predictions (CC-BY-4.0), source.coop/ftw/global-data (vectores alpha MX y confianza prue_v1 500 m); dos zonas (propiedad zona; ids P… delicias_saucillo y L… lazaro_cardenas, de norte a sur); ftw_confianza = media del raster de confianza dentro de la parcela o, si no hay celda válida, de las celdas a 1-2 celdas; geometría simplificada (~10 m en parcelas ≥ 5 ha, ~3 m en las menores) y sin traslapes después de simplificar (máximo 0.01 %); protagonistas P0757 (alfalfa por vencer, Km 92), P0244 (descanso en 2026, libre, El Molino) y L0175 (nogal, Lázaro Cárdenas); protagonistas: P0757, P0632 (sustituye a P0244, decisión del 14-nov 16:25) y L0175",
    "fecha": "2026-11-14",
    "script": "datos/colab/B1_parcelas_ftw.py",
-   "url_o_api": "Fields of The World global predictions (CC-BY-4.0), source.coop/ftw/global-data (vectores alpha MX y confianza prue_v1 500 m); dos zonas (propiedad zona; ids P… delicias_saucillo y L… lazaro_cardenas, de norte a sur); ftw_confianza = media del raster de confianza dentro de la parcela o, si no hay celda válida, de las celdas a 1-2 celdas; geometría simplificada (~10 m en parcelas ≥ 5 ha, ~3 m en las menores) y sin traslapes después de simplificar (máximo 0.01 %); protagonistas P0757 (alfalfa por vencer, Km 92), P0244 (descanso en 2026, libre, El Molino) y L0175 (nogal, Lázaro Cárdenas)",
+   "url_o_api": "Fields of The World global predictions (CC-BY-4.0), source.coop/ftw/global-data (vectores alpha MX y confianza prue_v1 500 m); dos zonas (propiedad zona; ids P… delicias_saucillo y L… lazaro_cardenas, de norte a sur); ftw_confianza = media del raster de confianza dentro de la parcela o, si no hay celda válida, de las celdas a 1-2 celdas; geometría simplificada (~10 m en parcelas ≥ 5 ha, ~3 m en las menores) y sin traslapes después de simplificar (máximo 0.01 %); protagonistas P0757 (alfalfa por vencer, Km 92), P0244 (descanso en 2026, libre, El Molino) y L0175 (nogal, Lázaro Cárdenas); protagonistas: P0757, P0632 (sustituye a P0244, decisión del 14-nov 16:25) y L0175",
    "fecha_consulta": "2026-11-14",
-   "sha256": "60888e29f2e0bc5321a4dccec5ca2ef256c2f9b8ab03825d4c81b87e7899aa16",
+   "sha256": "24d48ce8b9b82ffc76852a0c8d6a72ab88badf82a653af6676b4725571fa97ae",
    "ruta_buzon": "parcelas_base.geojson",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "relieve_meta.json",
@@ -275,7 +289,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "dc4e959ee72f347d43ea4f0941be299d6c703d830b51080741fe0d8cb5048c72",
    "ruta_buzon": "relieve_meta.json",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -290,7 +304,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "277657440c3a12f2352502b345ded3743932c1a5e77b9162ec01fd7a1db6191f",
    "ruta_buzon": "relieve_meta_lazaro_cardenas.json",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -305,7 +319,7 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "019ad831a6e2744a733bed8c51cb45b177e649a911a46096495e278be739dbb3",
    "ruta_buzon": "relieve_parcelas.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "relieve_rutas.geojson",
@@ -319,21 +333,21 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "74a53c57d083b901b03a13d973e5392d8065c67af3f0e0c4ed1fc89c51a25674",
    "ruta_buzon": "relieve_rutas.geojson",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "rotaciones.json",
    "tipo": "entrega",
    "pieza": "A5",
    "rol": null,
-   "fuente": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona delicias_saucillo",
+   "fuente": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona delicias_saucillo; se agregan las rotaciones cereal_invierno, cereal_algodon y cereal_sorgo (opción C del maestro §5.2); las anteriores no cambian; desde el 14-nov 17:00 el cereal de invierno se siembra el 1-dic en el modelo (antes 15-oct; punto medio de la ventana «nov–dic» del maestro §5.2 [S]): cambian cereal_invierno, avena_maiz, cereal_algodon y cereal_sorgo, las demás no",
    "fecha": "2026-11-14",
    "script": "datos/colab/A5_demanda_plazo.py",
-   "url_o_api": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona delicias_saucillo",
+   "url_o_api": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona delicias_saucillo; se agregan las rotaciones cereal_invierno, cereal_algodon y cereal_sorgo (opción C del maestro §5.2); las anteriores no cambian; desde el 14-nov 17:00 el cereal de invierno se siembra el 1-dic en el modelo (antes 15-oct; punto medio de la ventana «nov–dic» del maestro §5.2 [S]): cambian cereal_invierno, avena_maiz, cereal_algodon y cereal_sorgo, las demás no",
    "fecha_consulta": "2026-11-14",
-   "sha256": "564232b8dcf2f57e4913f1c475adcc002831e086fa2340dab510c901c18caf7e",
+   "sha256": "e1fa3977b46fcd0e022c8ff8ba10b866024989e690767806bf3372d24ca71378",
    "ruta_buzon": "rotaciones.json",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "delicias_saucillo"
   },
   {
@@ -341,14 +355,14 @@
    "tipo": "entrega",
    "pieza": "A5",
    "rol": null,
-   "fuente": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona lazaro_cardenas",
+   "fuente": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona lazaro_cardenas; se agregan las rotaciones cereal_invierno, cereal_algodon y cereal_sorgo (opción C del maestro §5.2); las anteriores no cambian; desde el 14-nov 17:00 el cereal de invierno se siembra el 1-dic en el modelo (antes 15-oct; punto medio de la ventana «nov–dic» del maestro §5.2 [S]): cambian cereal_invierno, avena_maiz, cereal_algodon y cereal_sorgo, las demás no",
    "fecha": "2026-11-14",
    "script": "datos/colab/A5_demanda_plazo.py",
-   "url_o_api": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona lazaro_cardenas",
+   "url_o_api": "FAO-56 (Kc Tabla 12, etapas Tabla 11) con ETo de NASA POWER; supuestos.json; zona lazaro_cardenas; se agregan las rotaciones cereal_invierno, cereal_algodon y cereal_sorgo (opción C del maestro §5.2); las anteriores no cambian; desde el 14-nov 17:00 el cereal de invierno se siembra el 1-dic en el modelo (antes 15-oct; punto medio de la ventana «nov–dic» del maestro §5.2 [S]): cambian cereal_invierno, avena_maiz, cereal_algodon y cereal_sorgo, las demás no",
    "fecha_consulta": "2026-11-14",
-   "sha256": "c4d0b72c84e84d66eee2a168506f279f6d276335fd411a11e5ee55d2008c45a3",
+   "sha256": "bacd3089b7e530f92eaffc8ed7550a1452a817b950e8598700311c1d414e3092",
    "ruta_buzon": "rotaciones_lazaro_cardenas.json",
-   "ingreso": "2026-11-14T22:17:37+00:00",
+   "ingreso": "2026-11-15T00:28:57+00:00",
    "zona": "lazaro_cardenas"
   },
   {
@@ -363,21 +377,49 @@
    "fecha_consulta": "2026-11-14",
    "sha256": "64b9dff72e7e2f335adeb68bfa93ff6cad3d61f23eb35ada106ca5cc89c4346f",
    "ruta_buzon": "suelo_desnudo.csv",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
+  },
+  {
+   "archivo": "suelo_parcelas.csv",
+   "tipo": "entrega",
+   "pieza": "A14",
+   "rol": null,
+   "fuente": "ISRIC SoilGrids 2.0 (250 m, CC-BY 4.0; Poggio et al. 2021, DOI 10.5194/soil-7-217-2021; Earth Engine: projects/soilgrids-isric/<propiedad>_mean con propiedad = sand, silt, clay, phh2o, soc, cec; capas 0–5, 5–15 y 15–30 cm promediadas con peso 5, 10 y 15; factores de ISRIC: g/kg ÷ 10 = %, pH × 10 ÷ 10, dg/kg ÷ 10 = g/kg, mmol(c)/kg ÷ 10 = cmol(c)/kg); valor de la parcela = promedio de las celdas con centro dentro o, si no hay ninguna (n_celdas = 0), la celda más cercana al centroide; clase_textura calculada con el triángulo del USDA; nitrogeno_g_kg vacío (el mapa da una relación C:N cercana a 1, no creíble) y salinidad_ce_ds_m vacío (sin producto); columnas adicionales: zona, clase_textura_olm (OpenLandMap SOL_TEXTURE-CLASS_USDA-TT_M v02 a 0 cm, Hengl 2018, DOI 10.5281/zenodo.1475451, CC-BY-SA 4.0) y distancia_celda_m; estimación regional de un modelo global, no un análisis de suelo",
+   "fecha": "2026-11-14",
+   "script": "datos/earthengine/suelo.js + datos/colab/A13_suelo_parcelas.py",
+   "url_o_api": "ISRIC SoilGrids 2.0 (250 m, CC-BY 4.0; Poggio et al. 2021, DOI 10.5194/soil-7-217-2021; Earth Engine: projects/soilgrids-isric/<propiedad>_mean con propiedad = sand, silt, clay, phh2o, soc, cec; capas 0–5, 5–15 y 15–30 cm promediadas con peso 5, 10 y 15; factores de ISRIC: g/kg ÷ 10 = %, pH × 10 ÷ 10, dg/kg ÷ 10 = g/kg, mmol(c)/kg ÷ 10 = cmol(c)/kg); valor de la parcela = promedio de las celdas con centro dentro o, si no hay ninguna (n_celdas = 0), la celda más cercana al centroide; clase_textura calculada con el triángulo del USDA; nitrogeno_g_kg vacío (el mapa da una relación C:N cercana a 1, no creíble) y salinidad_ce_ds_m vacío (sin producto); columnas adicionales: zona, clase_textura_olm (OpenLandMap SOL_TEXTURE-CLASS_USDA-TT_M v02 a 0 cm, Hengl 2018, DOI 10.5281/zenodo.1475451, CC-BY-SA 4.0) y distancia_celda_m; estimación regional de un modelo global, no un análisis de suelo",
+   "fecha_consulta": "2026-11-14",
+   "sha256": "f28dc9c7697ddf1ff53d22ac0d4539ab5201b7376ec7a9cc54615d67f41aaaab",
+   "ruta_buzon": "suelo_parcelas.csv",
+   "ingreso": "2026-11-15T00:28:57+00:00"
+  },
+  {
+   "archivo": "suelo_requisitos.json",
+   "tipo": "entrega",
+   "pieza": "A15",
+   "rol": null,
+   "fuente": "FAO ECOCROP (fichas por especie en ecocrop.apps.fao.org) y FAO Tierras y Aguas («Crop information») para pH y textura; FAO-29, Tabla 4, para salinidad (vía opciones_b3.json); Gutiérrez González et al. 2022 (DOI 10.47808/revistabioagro.v10i1.395) para nutrientes en nogal; todo leído el 14-nov-2026, cada bloque con su liga; rangos generales y mundiales, no ensayos del DR-005; nogal sin rango de pH ni textura (null)",
+   "fecha": "2026-11-14",
+   "script": "datos/colab/B6_suelo_requisitos.py",
+   "url_o_api": "FAO ECOCROP (fichas por especie en ecocrop.apps.fao.org) y FAO Tierras y Aguas («Crop information») para pH y textura; FAO-29, Tabla 4, para salinidad (vía opciones_b3.json); Gutiérrez González et al. 2022 (DOI 10.47808/revistabioagro.v10i1.395) para nutrientes en nogal; todo leído el 14-nov-2026, cada bloque con su liga; rangos generales y mundiales, no ensayos del DR-005; nogal sin rango de pH ni textura (null)",
+   "fecha_consulta": "2026-11-14",
+   "sha256": "51aa9c298273ccc55fe9804158e5417f6f8b1242a02488f622a9dda4fdf08a82",
+   "ruta_buzon": "suelo_requisitos.json",
+   "ingreso": "2026-11-15T00:28:57+00:00"
   },
   {
    "archivo": "supuestos.json",
    "tipo": "entrega",
    "pieza": "B3",
    "rol": null,
-   "fuente": "Supuestos de la sesión de datos (datos/supuestos.json en la rama datos-satelite): cada uno con valor, etiqueta y fuente; los marcados assumption [S] no tienen fuente local. Incluye ea_goteo = 0.90 y ea_superficial_referencia = 0.60: valores indicativos de FAO, Irrigation Water Management Training Manual No. 4 (1989), Anexo I, Tabla 8, https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026 (no medidos en el DR-005); gedi_piso_instrumento_m y gedi_umbral_dosel_alto_m: análisis propio de A11 (datos/colab/A11_gedi_parcelas.py)",
+   "fuente": "Supuestos de la sesión de datos (datos/supuestos.json en la rama datos-satelite): cada uno con valor, etiqueta y fuente; los marcados assumption [S] no tienen fuente local. Incluye ea_goteo = 0.90 y ea_superficial_referencia = 0.60: valores indicativos de FAO, Irrigation Water Management Training Manual No. 4 (1989), Anexo I, Tabla 8, https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026 (no medidos en el DR-005); gedi_piso_instrumento_m y gedi_umbral_dosel_alto_m: análisis propio de A11 (datos/colab/A11_gedi_parcelas.py); lamina_local_cm: láminas recomendadas por INIFAP y aplicadas en el DR-005 en 2009–2016 (Villalobos-Cano et al. 2024, DOI 10.3390/su16051851), solo como referencia; desde el 14-nov 17:10: bloques cobertura_ndvi_relacion (Johnson y Trout 2012) y nogal_referencia (cobertura del nogal estimada con NDVI, altura de GEDI y edad de huertas con fuente; solo referencia, el cálculo no los usa); desde el 14-nov 17:46: suelo_margen_ph (0.5, assumption [S]) y suelo_coincidencia_textura (0.47, análisis propio) para el renglón de suelo de la ficha",
    "fecha": "2026-11-14",
    "script": "datos/supuestos.json (lo leen A3, A4, A5 y A9)",
-   "url_o_api": "Supuestos de la sesión de datos (datos/supuestos.json en la rama datos-satelite): cada uno con valor, etiqueta y fuente; los marcados assumption [S] no tienen fuente local. Incluye ea_goteo = 0.90 y ea_superficial_referencia = 0.60: valores indicativos de FAO, Irrigation Water Management Training Manual No. 4 (1989), Anexo I, Tabla 8, https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026 (no medidos en el DR-005); gedi_piso_instrumento_m y gedi_umbral_dosel_alto_m: análisis propio de A11 (datos/colab/A11_gedi_parcelas.py)",
+   "url_o_api": "Supuestos de la sesión de datos (datos/supuestos.json en la rama datos-satelite): cada uno con valor, etiqueta y fuente; los marcados assumption [S] no tienen fuente local. Incluye ea_goteo = 0.90 y ea_superficial_referencia = 0.60: valores indicativos de FAO, Irrigation Water Management Training Manual No. 4 (1989), Anexo I, Tabla 8, https://www.fao.org/3/t7202e/t7202e08.htm, leído el 14-nov-2026 (no medidos en el DR-005); gedi_piso_instrumento_m y gedi_umbral_dosel_alto_m: análisis propio de A11 (datos/colab/A11_gedi_parcelas.py); lamina_local_cm: láminas recomendadas por INIFAP y aplicadas en el DR-005 en 2009–2016 (Villalobos-Cano et al. 2024, DOI 10.3390/su16051851), solo como referencia; desde el 14-nov 17:10: bloques cobertura_ndvi_relacion (Johnson y Trout 2012) y nogal_referencia (cobertura del nogal estimada con NDVI, altura de GEDI y edad de huertas con fuente; solo referencia, el cálculo no los usa); desde el 14-nov 17:46: suelo_margen_ph (0.5, assumption [S]) y suelo_coincidencia_textura (0.47, análisis propio) para el renglón de suelo de la ficha",
    "fecha_consulta": "2026-11-14",
-   "sha256": "bb23b55a5eb3f1bdcd109f015c62b5e9378b53f016b0c6640309871190d8c9d7",
+   "sha256": "793c2a681ea5e56c0b578260fa87c83044906a29de6b2a2b48abb93e6d660d2f",
    "ruta_buzon": "supuestos.json",
-   "ingreso": "2026-11-14T22:17:37+00:00"
+   "ingreso": "2026-11-15T00:28:57+00:00"
   }
  ]
 }

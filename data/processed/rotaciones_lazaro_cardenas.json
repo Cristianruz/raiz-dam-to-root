@@ -191,8 +191,8 @@
     0.25
    ],
    "siembra": [
-    10,
-    15
+    12,
+    1
    ],
    "dias": [
     15,
@@ -200,7 +200,7 @@
     45,
     20
    ],
-   "nota": "avena forrajera, corte a ~115 días; etapas FAO escaladas [S]"
+   "nota": "avena forrajera, corte a ~115 días; etapas FAO escaladas [S]; siembra el 1-dic: punto medio de la ventana «nov–dic» del maestro §5.2 [S]. En HLS, 14 de las 16 parcelas clasificadas como cereal en 2026 tienen su NDVI máximo de febrero a abril"
   }
  },
  "rotaciones": [
@@ -402,6 +402,34 @@
    }
   },
   {
+   "id": "cereal_invierno",
+   "nombre": "Cereal de invierno",
+   "cultivos": [
+    "cereal_invierno"
+   ],
+   "plazo": "anual",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 6.21,
+     "p50": 7.62,
+     "p90": 9.15,
+     "neta_mm_p50": 342,
+     "etc_mm_p50": 343
+    },
+    "-20": {
+     "p10": 6.25,
+     "p50": 7.63,
+     "p90": 9.18,
+     "neta_mm_p50": 343,
+     "etc_mm_p50": 343
+    }
+   }
+  },
+  {
    "id": "avena_maiz",
    "nombre": "Avena (invierno) + maíz forrajero (verano)",
    "cultivos": [
@@ -415,18 +443,76 @@
    },
    "lamina_bruta_millares": {
     "0": {
-     "p10": 14.7,
-     "p50": 17.2,
-     "p90": 20.29,
-     "neta_mm_p50": 790,
-     "etc_mm_p50": 841
+     "p10": 15.84,
+     "p50": 18.67,
+     "p90": 22.14,
+     "neta_mm_p50": 879,
+     "etc_mm_p50": 923
     },
     "-20": {
-     "p10": 15.04,
-     "p50": 17.51,
-     "p90": 20.58,
-     "neta_mm_p50": 804,
-     "etc_mm_p50": 841
+     "p10": 16.21,
+     "p50": 18.94,
+     "p90": 22.39,
+     "neta_mm_p50": 893,
+     "etc_mm_p50": 923
+    }
+   }
+  },
+  {
+   "id": "cereal_algodon",
+   "nombre": "Cereal de invierno + algodón (verano)",
+   "cultivos": [
+    "cereal_invierno",
+    "algodon"
+   ],
+   "plazo": "anual",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 18.59,
+     "p50": 22.2,
+     "p90": 26.85,
+     "neta_mm_p50": 1052,
+     "etc_mm_p50": 1159
+    },
+    "-20": {
+     "p10": 19.23,
+     "p50": 22.76,
+     "p90": 27.21,
+     "neta_mm_p50": 1083,
+     "etc_mm_p50": 1159
+    }
+   }
+  },
+  {
+   "id": "cereal_sorgo",
+   "nombre": "Cereal de invierno + sorgo forrajero (verano)",
+   "cultivos": [
+    "cereal_invierno",
+    "sorgo"
+   ],
+   "plazo": "anual",
+   "plazo_anios": {
+    "min": 1,
+    "max": 1
+   },
+   "lamina_bruta_millares": {
+    "0": {
+     "p10": 15.95,
+     "p50": 18.96,
+     "p90": 22.78,
+     "neta_mm_p50": 880,
+     "etc_mm_p50": 986
+    },
+    "-20": {
+     "p10": 16.47,
+     "p50": 19.41,
+     "p90": 23.21,
+     "neta_mm_p50": 908,
+     "etc_mm_p50": 986
     }
    }
   },

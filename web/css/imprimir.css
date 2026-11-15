@@ -157,8 +157,15 @@
   #ficha .meses-leyenda { font-size: 6pt; margin-top: 0.4mm; gap: 2mm; }
   /* La leyenda del calendario (cultivo / suelo desnudo) basta una vez: en la tarjeta de la izquierda. */
   #ficha .tarjeta:not(:first-child) .meses-leyenda { display: none; }
-  #ficha .filtros { padding: 0.8mm 1.5mm; font-size: 6.5pt; gap: 0.3mm; }
-  #ficha .advertencia { margin: 1mm 1.5mm 1mm; padding: 0.8mm 1.2mm; font-size: 7pt; }
+  #ficha .filtros { padding: 0.8mm 1.5mm; font-size: 6pt; gap: 0.2mm; line-height: 1.15; }
+  /* En papel cada filtro va con su estado y su texto; la fuente larga se lee en la ficha en línea. */
+  #ficha .filtros .fuente { display: none; }
+  /* En papel solo los filtros que piden atención (aviso o revisión local); los aprobados, en línea. */
+  /* En papel los filtros van como un resumen de una línea (cuántos piden revisión local, avisan o pasan);
+     el texto de cada uno se lee en la ficha en línea. */
+  #ficha .filtros li[data-estado] { display: none !important; }
+  #ficha .filtros li.filtros-resumen { display: block !important; }
+  #ficha .advertencia { margin: 0.6mm 1.2mm; padding: 0.5mm 1mm; font-size: 6pt; line-height: 1.15; }
   #ficha .nota-abstenida { padding: 1mm 2mm; }
 
   /* La gota, estática */

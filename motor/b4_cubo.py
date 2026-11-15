@@ -101,6 +101,14 @@ RAZON_SIN_UMBRAL = "sin_umbral"            # la fuente no fija umbral: se muestr
 RAZON_SIN_PROBABILIDAD = "sin_probabilidad"  # sin fecha de siembra, fuera de las fechas calculadas o sin heladas.json
 RAZON_SIN_EVALUADOR = "sin_evaluador"      # tipo de filtro que el motor no sabe evaluar
 ORIGEN_B3, ORIGEN_PROVISIONAL = "b3", "provisional"
+# Decisión docs/decisiones/2026-11-14_opciones_b3.md, §1 (14-nov, 16:55): donde la tabla oficial (B3) da
+# menos de MIN_ALTERNATIVAS para un cultivo, se completa con el diseño provisional del equipo y la opción
+# lo dice («origen_opcion» y «etiqueta_opcion»). El cultivo que el maestro declara «no rota» no se completa:
+# la parcela lleva solo ACTUAL y «sin_rotacion» con el motivo y la fuente de B3.
+MIN_ALTERNATIVAS = 2
+LETRA_NO_ROTA = "nogal_no_rota"
+ORIGEN_OPCION_B3, ORIGEN_OPCION_PROPUESTA = "official_table", "team_proposal"
+ETIQUETA_PROPUESTA = "[S] team proposal, not from the agronomic guide"
 # Contrato §2.3: cubo.json pesa menos de 5 MB (lo comprueba validar_contrato.py). Los bloques de goteo y
 # los filtros se repiten en cada opción: desde esta fracción del límite se avisa, antes de que falle.
 LIMITE_CUBO_BYTES = 5 * 1024 * 1024
@@ -636,6 +644,7 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     if b3 is not None and heladas is None and any(f.get("tipo") == "helada" for f in b3.get("filtros") or []):
         avisos.append(f"Falta {ARCHIVO_HELADAS}: los filtros de helada quedan «{NEEDS_LOCAL_CHECK}» sin probabilidad")
     provisionales, omitidas, filtros_cache, secuencias_distintas = set(), {}, {}, set()
+    propuestas = {}   # cultivo -> rotaciones del diseño provisional con que se completó B3
 
     def nombre_en(rot_id):
         """Nombre en inglés de una rotación: el de B3 si la define; si no, el del diseño provisional."""
@@ -648,9 +657,21 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
         if b3 is not None:
             lista = (b3.get("por_cultivo_actual") or {}).get(cultivo)
             if isinstance(lista, list):
-                return [x for x in dict.fromkeys(lista) if x != actual]
+                oficiales = [x for x in dict.fromkeys(lista) if x != actual]
+                if no_rota(actual) or len(oficiales) >= MIN_ALTERNATIVAS:
+                    return oficiales
+                # Menos de las que pide el contrato: se completa con el diseño provisional, rotulado.
+                faltan = [x for x in cfg["alternativas"].get(cultivo, []) if x != actual and x not in oficiales]
+                extra = faltan[:MIN_ALTERNATIVAS - len(oficiales)]
+                if extra:
+                    propuestas.setdefault(cultivo, set()).update(extra)
+                return oficiales + extra
             provisionales.add(cultivo)
         return cfg["alternativas"].get(cultivo, [])
+
+    def no_rota(rot_actual):
+        """La rotación actual es la que el maestro declara «no rota» (nogal): no se le buscan alternativas."""
+        return (def_b3.get(rot_actual) or {}).get("letra_maestro") == LETRA_NO_ROTA
 
     def filtros_de(zona, rot_ref):
         """Filtros de B3 de una rotación en una zona (no dependen de la parcela: se calculan una vez)."""
@@ -773,9 +794,15 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                     advertir = (not es_actual) and ("alfalfa" in sec) and cultivo != "alfalfa"
                 flujos = flujos_gota(props["area_ha"], lam["0"]["p50"], neta, params, m3_millar)
                 con_tope, sin_tope, tope = bloques_goteo(flujos, goteo_zona[zona]) if goteo_zona[zona] else (None, None, None)
+                es_propuesta = (not es_actual) and rot_id in propuestas.get(cultivo, set())
+                origen_opcion = (ORIGEN_OPCION_PROPUESTA if es_propuesta or b3 is None or rot_ref not in def_b3
+                                 else ORIGEN_OPCION_B3)
                 opciones.append({
                     "id": "ACTUAL" if es_actual else rot_id,
                     "rotacion": rot_ref,
+                    "origen_opcion": origen_opcion,
+                    "etiqueta_opcion": (ETIQUETA_PROPUESTA if origen_opcion == ORIGEN_OPCION_PROPUESTA
+                                        else (def_b3.get(rot_ref) or {}).get("etiqueta")),
                     "nombre": (f"Current rotation: {nombre_en(rot_ref)}" if es_actual else nombre_en(rot_ref)),
                     "secuencia": secuencia,
                     "agua": {"lamina_bruta": lam, "plazo_anios": plazo, "plazo_restante": restante,
@@ -797,6 +824,11 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
             cubo_parcelas[pid] = {"opciones": [], "sin_opciones": SIN_ACTUAL}
         else:
             cubo_parcelas[pid] = {"opciones": opciones}
+            rot_actual = cfg["actual"].get(cultivo)
+            if b3 is not None and no_rota(rot_actual) and [o["id"] for o in opciones] == ["ACTUAL"]:
+                d_nr = def_b3.get(rot_actual) or {}
+                cubo_parcelas[pid]["sin_rotacion"] = {"motivo": d_nr.get("por_que_en"), "fuente": d_nr.get("fuente"),
+                                                      "etiqueta": d_nr.get("etiqueta")}
 
     # Bloque «zona» (todas las parcelas; compatibilidad) y bloque «zonas» (uno por zona con parcelas).
     props_all = [f["properties"] for f in features]
@@ -820,11 +852,15 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
     if provisionales:
         avisos.append(f"{ARCHIVO_B3} no trae alternativas para: {', '.join(sorted(provisionales))}; esas parcelas "
                       f"siguen con el diseño provisional (data/opciones_b4.json, {cfg.get('etiqueta')})")
-    # El contrato pide ACTUAL + 2 alternativas (kit §2.3). Si las oficiales (o las que tienen lámina) no
-    # alcanzan, NO se completa con otras: se dice aquí, y validar_contrato.py lo marca como error.
+    for cultivo, rots in sorted(propuestas.items()):
+        avisos.append(f"{ARCHIVO_B3} da menos de {MIN_ALTERNATIVAS} alternativas para {cultivo}: se completa con "
+                      f"{', '.join(sorted(rots))} del diseño provisional, rotuladas «{ETIQUETA_PROPUESTA}»")
+    # El contrato pide ACTUAL + 2 alternativas (kit §2.3), salvo el cultivo que no rota («sin_rotacion»).
+    # Si aun completando no alcanzan (sin lámina en la zona), se dice aquí y validar_contrato.py lo marca.
     cortas = {}
     for p_ in props_all:
-        if 0 < len(cubo_parcelas[p_["id"]]["opciones"]) < 3:
+        pc_ = cubo_parcelas[p_["id"]]
+        if 0 < len(pc_["opciones"]) < 3 and not pc_.get("sin_rotacion"):
             cortas[p_["cultivo_actual"]] = cortas.get(p_["cultivo_actual"], 0) + 1
     for cultivo, n in sorted(cortas.items()):
         avisos.append(f"{n} parcelas de {cultivo} quedan con menos de ACTUAL + 2 opciones (contrato §2.3): "
@@ -850,7 +886,9 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                  f"Filters are never decided with an invented threshold: «{NEEDS_LOCAL_CHECK}» means the filter needs "
                  "local data the tool does not have, or its source sets no threshold."]
         meta_opciones = {"origen": ORIGEN_B3, "archivo": f"data/processed/{ARCHIVO_B3}", "fuente": b3.get("fuente"),
-                         "provisionales": sorted(provisionales)}
+                         "provisionales": sorted(provisionales),
+                         "completadas": {c: sorted(r) for c, r in sorted(propuestas.items())},
+                         "etiqueta_propuesta": ETIQUETA_PROPUESTA}
     if hay_goteo:
         notas += [
             "Drip scenario: the drip and surface field efficiencies are indicative values from the cited source, "

@@ -797,6 +797,24 @@ def regla_vacias_segun(regla, filas, ctx, res, faltantes):
                 res.motivo(f"{c} sin valor con {col} distinto de {fmt(valor)}", f"fila {n}: {col} = {fmt(v)}")
 
 
+def regla_todas_o_ninguna(regla, filas, ctx, res, faltantes):
+    """Las «columnas» de cada fila vienen todas llenas o todas vacías (suelo_parcelas.csv: una parcela que
+    el mapa no cubre lleva su fila sin dato; una fila a medias es un error). Las filas sin dato se cuentan
+    en un aviso con «aviso_ninguna»."""
+    cols = regla["columnas"]
+    sin_dato = []
+    for n, fila in filas:
+        llenas = [c for c in cols if fila.get(c) is not None]
+        if not llenas:
+            sin_dato.append(str(fila.get("id") or f"fila {n}"))
+        elif len(llenas) < len(cols):
+            vacias = [c for c in cols if fila.get(c) is None]
+            res.motivo(f"fila a medias: {', '.join(cols)} van todas llenas o todas vacías",
+                       f"fila {n}: vacías {', '.join(vacias)}")
+    if sin_dato:
+        res.aviso(f"{regla.get('aviso_ninguna', 'filas sin dato')}: {len(sin_dato)} ({', '.join(sin_dato[:5])})")
+
+
 def regla_suma_cercana(regla, filas, ctx, res, faltantes):
     """La suma de «columnas» de cada fila es «total» ± «tolerancia» (suelo_parcelas.csv: arena, limo y
     arcilla suman 100 ± 2). Una fila con alguna de esas celdas vacía o mal escrita ya tiene su motivo
@@ -845,6 +863,7 @@ REGLAS_CSV = {
     "vacias_segun": regla_vacias_segun,
     # Perfil de suelo (docs/decisiones/2026-11-14_suelo_aptitud.md).
     "suma_cercana": regla_suma_cercana,
+    "todas_o_ninguna": regla_todas_o_ninguna,
     "forma_texto": regla_forma_texto,
 }
 

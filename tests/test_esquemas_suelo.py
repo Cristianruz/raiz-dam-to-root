@@ -37,7 +37,7 @@ from test_ensamblar import BUZON_DOS_ZONAS, LIMITES, buzon_con, correr, motivos_
 DECISION = "docs/decisiones/2026-11-14_suelo_aptitud.md"
 PERFIL, REQUISITOS = "suelo_parcelas.csv", "suelo_requisitos.json"
 NUEVOS = {PERFIL: ("A14", "csv"), REQUISITOS: ("A15", "json")}
-REGLAS_NUEVAS_CSV = {"suma_cercana", "forma_texto"}
+REGLAS_NUEVAS_CSV = {"suma_cercana", "forma_texto", "todas_o_ninguna"}
 ZONAS = LIMITES["zonas_ids"]                 # de data/params.json (zona_piloto.zonas)
 CUBO_REAL = RAIZ / "web/data/cubo.json"
 
@@ -123,8 +123,12 @@ def test_columnas_exactas_del_contrato():
     assert columnas["id"].get("unico") and columnas["id"].get("id_parcela")
     for opcional in ("nitrogeno_g_kg", "cic_cmol_kg", "salinidad_ce_ds_m"):
         assert columnas[opcional].get("nulo") is True, f"{opcional} puede venir vacío"
-    for obligatoria in ("arena_pct", "limo_pct", "arcilla_pct", "clase_textura", "ph", "carbono_organico_g_kg",
-                        "profundidad_cm", "n_celdas"):
+    # Las columnas de suelo admiten vacío solo todas juntas (parcela que el mapa no cubre): regla
+    # todas_o_ninguna. La capa y las celdas siempre van.
+    juntas = ("arena_pct", "limo_pct", "arcilla_pct", "clase_textura", "ph", "carbono_organico_g_kg")
+    regla = next(r for r in esquemas.ESQUEMAS[PERFIL]["reglas"] if r["regla"] == "todas_o_ninguna")
+    assert tuple(regla["columnas"]) == juntas
+    for obligatoria in ("profundidad_cm", "n_celdas"):
         assert not columnas[obligatoria].get("nulo"), obligatoria
 
 
@@ -258,12 +262,11 @@ PERFIL_INVALIDO = {
                                    "arena_pct + limo_pct + arcilla_pct debe sumar 100 ± 2"),
     "porcentaje mayor que 100": (dict(arena_pct=120, limo_pct=0, arcilla_pct=0), "arena_pct fuera de [0, 100]"),
     "porcentaje negativo": (dict(arena_pct=60, limo_pct=-10, arcilla_pct=50), "limo_pct fuera de [0, 100]"),
-    "fracción vacía": (dict(arcilla_pct=""), "arcilla_pct: celda vacía no permitida"),
+    "fracción vacía": (dict(arcilla_pct=""), "fila a medias"),
     "clase de textura en otro idioma": (dict(clase_textura="franco"), "clase_textura fuera de la lista permitida"),
     "clase de textura con mayúscula": (dict(clase_textura="Loam"), "clase_textura fuera de la lista permitida"),
     "pH fuera de la escala": (dict(ph=14.5), "ph fuera de [0, 14]"),
     "pH negativo": (dict(ph=-1), "ph fuera de [0, 14]"),
-    "pH vacío": (dict(ph=""), "ph: celda vacía no permitida"),
     "pH con coma decimal": (dict(ph="siete"), "ph: no es un número"),
     "carbono negativo": (dict(carbono_organico_g_kg=-0.5), "carbono_organico_g_kg menor que 0"),
     "nitrógeno negativo": (dict(nitrogeno_g_kg=-0.1), "nitrogeno_g_kg menor que 0"),
@@ -273,7 +276,8 @@ PERFIL_INVALIDO = {
     "capa sin guion": (dict(profundidad_cm="30"), "profundidad_cm no tiene la forma «a-b»"),
     "capa con texto": (dict(profundidad_cm="0-30 cm"), "profundidad_cm no tiene la forma «a-b»"),
     "capa al revés": (dict(profundidad_cm="30-0"), "profundidad_cm: el primer número debe ser menor que el segundo"),
-    "cero celdas": (dict(n_celdas=0), "n_celdas menor que 1"),
+    "celdas negativas": (dict(n_celdas=-1), "n_celdas menor que 0"),
+    "fila a medias": (dict(ph=""), "fila a medias"),
     "celdas no enteras": (dict(n_celdas=2.5), "n_celdas: debe ser entero"),
 }
 
@@ -283,6 +287,15 @@ def test_perfil_invalido_se_rechaza_con_su_motivo(tmp_path, caso):
     cambios, clave = PERFIL_INVALIDO[caso]
     m = rechazo(tmp_path, PERFIL, perfil_con(**cambios))
     assert clave in m, m
+
+
+def test_perfil_parcela_sin_dato_y_parcela_menor_que_una_celda_entran(tmp_path):
+    """Una parcela que el mapa no cubre lleva su fila con todas las columnas de suelo vacías (entra con
+    aviso); una parcela más chica que una celda lleva n_celdas = 0 (se usó la celda más cercana)."""
+    vacia = dict(arena_pct="", limo_pct="", arcilla_pct="", clase_textura="", ph="", carbono_organico_g_kg="",
+                 nitrogeno_g_kg="", cic_cmol_kg="", salinidad_ce_ds_m="", n_celdas=0)
+    entra(tmp_path, PERFIL, perfil_con(**vacia))
+    entra(tmp_path, PERFIL, perfil_con(n_celdas=0))
 
 
 def test_perfil_el_motivo_dice_la_fila_y_el_valor(tmp_path):

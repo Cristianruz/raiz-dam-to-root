@@ -444,7 +444,10 @@ button, input, select { font: inherit; color: inherit; }
 }
 .boton-cerrar:hover { background: var(--arena); }
 
-.ficha-cuerpo { padding: 12px 16px 32px; display: grid; gap: 18px; }
+.ficha-cuerpo { padding: 12px 16px 32px; display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
+/* Ningún control de la ficha se sale de la pantalla del teléfono (nombres de opción largos). */
+.ficha-cuerpo select { max-width: 100%; }
+.ficha-cuerpo label { min-width: 0; max-width: 100%; }
 .ficha-cuerpo h3 { font-size: 1.1rem; margin-bottom: 6px; }
 
 .ficha-encabezado { display: grid; gap: 4px; }
@@ -528,7 +531,9 @@ button, input, select { font: inherit; color: inherit; }
 .meses-leyenda i.desnudo { background-color: var(--tierra); background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.45) 0 2px, transparent 2px 5px); }
 
 .filtros { list-style: none; margin: 0; padding: 8px 12px; display: grid; gap: 4px; font-size: 0.85rem; border-bottom: 1px solid var(--arena-osc); }
+.filtros li { overflow-wrap: anywhere; }
 .filtros li.no { color: var(--rojo); }
+.filtros li.revisar { background: var(--ambar-claro); border-left: 3px solid var(--ambar); padding-left: 6px; }
 .advertencia {
   margin: 8px 12px 0; background: var(--rojo-claro); border-left: 4px solid var(--rojo);
   padding: 6px 8px; border-radius: 4px; font-size: 0.9rem; font-weight: 700;

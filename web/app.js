@@ -1642,17 +1642,54 @@ function htmlMeses(o) {
   );
 }
 
+// Filtros de la tabla oficial (B3) con tres estados (docs/decisiones/2026-11-14_opciones_b3.md): «passes»,
+// «warning» y «needs_local_check». Un filtro sin decidir NUNCA se dibuja como aprobado.
+const RAZON_FILTRO = {
+  dato_local: "it needs field data the tool does not have",
+  sin_umbral: "the source sets no threshold",
+  sin_probabilidad: "no frost probability for this planting date",
+  sin_evaluador: "the tool does not evaluate this rule yet",
+};
+function estadoDeFiltro(f) {
+  if (f.estado) return f.estado;
+  if (f.pasa === true) return "passes";
+  if (f.pasa === false) return "warning";
+  return "needs_local_check";
+}
 function htmlFiltros(o) {
   const filtros = Array.isArray(o.filtros) ? o.filtros : [];
   if (!filtros.length) return "";
+  const marcas = {
+    passes: ["si", "✓ Passes:"],
+    warning: ["no", "⚠ Warning:"],
+    needs_local_check: ["revisar", "? Needs a local check:"],
+  };
+  // Resumen para la hoja impresa: cuántos filtros piden revisión local, cuántos avisan y cuántos pasan.
+  const cuenta = { needs_local_check: 0, warning: 0, passes: 0 };
+  for (const f of filtros) cuenta[estadoDeFiltro(f)] = (cuenta[estadoDeFiltro(f)] ?? 0) + 1;
+  const partes = [
+    cuenta.needs_local_check ? `${fmtDato(cuenta.needs_local_check)} need a local check` : "",
+    cuenta.warning ? `${fmtDato(cuenta.warning)} ${cuenta.warning === 1 ? "warning" : "warnings"}` : "",
+    cuenta.passes ? `${fmtDato(cuenta.passes)} ${cuenta.passes === 1 ? "passes" : "pass"}` : "",
+  ].filter(Boolean);
+  const resumen = `<li class="filtros-resumen solo-impresion">Rules: ${partes.join(" · ")} (details online)</li>`;
   return (
     '<ul class="filtros" aria-label="Rules and filters">' +
+    resumen +
     filtros
-      .map(
-        (f) =>
-          `<li class="${f.pasa === false ? "no" : "si"}">${f.pasa === false ? "✕ Does not pass:" : "✓"} ${esc(f.motivo ?? f.filtro)}` +
-          `${f.fuente ? ` <span class="fuente">— ${esc(f.fuente)}</span>` : ""}</li>`,
-      )
+      .map((f) => {
+        const e = estadoDeFiltro(f);
+        const [clase, marca] = marcas[e] ?? marcas.needs_local_check;
+        const razon = e === "needs_local_check" && RAZON_FILTRO[f.razon] ? `<span class="filtro-razon"> (${RAZON_FILTRO[f.razon]})</span>` : "";
+        const helada = Number.isFinite(f.prob_helada)
+          ? `<span class="filtro-helada"> Chance of frost after this planting date: ${fmtPct(f.prob_helada)}.</span>`
+          : "";
+        const etiqueta = f.etiqueta ? ` ${esc(f.etiqueta)}` : "";
+        return (
+          `<li class="${clase}" data-estado="${esc(e)}">${marca} <span class="filtro-texto">${esc(f.motivo ?? f.filtro)}</span>${razon}${helada}` +
+          `${f.fuente ? ` <span class="fuente">— ${esc(f.fuente)}${etiqueta}</span>` : ""}</li>`
+        );
+      })
       .join("") +
     "</ul>"
   );

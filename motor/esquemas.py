@@ -838,20 +838,25 @@ ESQUEMAS = {
         "pieza": "A14", "tipo": "csv",
         "columnas": {
             "id": _con(ID, unico=True),
-            "arena_pct": PORCENTAJE,
-            "limo_pct": PORCENTAJE,
-            "arcilla_pct": PORCENTAJE,
-            "clase_textura": {"tipo": "texto", "valores": CLASES_TEXTURA},
-            "ph": {"tipo": "numero", "min": PH_MIN, "max": PH_MAX},
-            "carbono_organico_g_kg": NO_NEGATIVO,
+            # Vacías juntas = parcela que el mapa no cubre (regla todas_o_ninguna); nunca a medias.
+            "arena_pct": _con(PORCENTAJE, nulo=True),
+            "limo_pct": _con(PORCENTAJE, nulo=True),
+            "arcilla_pct": _con(PORCENTAJE, nulo=True),
+            "clase_textura": {"tipo": "texto", "valores": CLASES_TEXTURA, "nulo": True},
+            "ph": {"tipo": "numero", "min": PH_MIN, "max": PH_MAX, "nulo": True},
+            "carbono_organico_g_kg": _con(NO_NEGATIVO, nulo=True),
             # «vacío si el producto no lo trae» (nitrógeno y CIC) o «si no hay producto con cobertura».
             "nitrogeno_g_kg": _con(NO_NEGATIVO, nulo=True),
             "cic_cmol_kg": _con(NO_NEGATIVO, nulo=True),
             "salinidad_ce_ds_m": _con(NO_NEGATIVO, nulo=True),
             "profundidad_cm": {"tipo": "texto"},
-            "n_celdas": {"tipo": "entero", "min": 1},
+            # 0 = parcela más chica que una celda: se usó la celda más cercana (distancia_celda_m).
+            "n_celdas": {"tipo": "entero", "min": 0},
         },
         "reglas": [
+            {"regla": "todas_o_ninguna",
+             "columnas": ["arena_pct", "limo_pct", "arcilla_pct", "clase_textura", "ph", "carbono_organico_g_kg"],
+             "aviso_ninguna": "parcelas sin dato de suelo (el mapa no las cubre; la ficha dice «no soil data»)"},
             {"regla": "suma_cercana", "columnas": ["arena_pct", "limo_pct", "arcilla_pct"],
              "total": SUMA_TEXTURA_PCT, "tolerancia": TOLERANCIA_SUMA_TEXTURA_PCT},
             {"regla": "forma_texto", "columna": "profundidad_cm", "patron": FORMA_PROFUNDIDAD,
@@ -860,7 +865,8 @@ ESQUEMAS = {
         "fuente_reglas": (f"{FUENTE_SUELO}: una fila por parcela de parcelas_base.geojson (id único); arena, "
                           "limo y arcilla en % que suman 100 ± 2; clase_textura de las 12 clases USDA de su "
                           "tabla; nitrógeno, CIC y salinidad vacíos si el producto no los trae; "
-                          "profundidad_cm «a-b» (p. ej. 0-30) con a < b; al menos una celda del mapa. Límites "
+                          "profundidad_cm «a-b» (p. ej. 0-30) con a < b; n_celdas ≥ 0 (0 = parcela más chica que una celda, "
+                          "con la celda más cercana); fila sin dato solo con todas sus columnas de suelo vacías. Límites "
                           "por definición: porcentajes entre 0 y 100; pH entre 0 y 14 (la escala); carbono, "
                           "nitrógeno, CIC y conductividad eléctrica ≥ 0"),
     },

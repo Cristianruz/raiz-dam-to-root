@@ -341,7 +341,8 @@ def test_cultivo_que_b3_no_lista_sigue_provisional_y_se_avisa(con_b3):
     rep, geo, cubo, _, _ = con_b3
     assert "cereal_invierno" not in B3["por_cultivo_actual"]
     assert cubo["meta"]["opciones"] == {"origen": b4_cubo.ORIGEN_B3, "archivo": f"data/processed/{ARCHIVO}",
-                                        "fuente": B3["fuente"], "provisionales": ["cereal_invierno"]}
+                                        "fuente": B3["fuente"], "provisionales": ["cereal_invierno"],
+                                        "completadas": {}, "etiqueta_propuesta": b4_cubo.ETIQUETA_PROPUESTA}
     aviso = [a for a in rep["avisos"] if "cereal_invierno" in a and "diseño provisional" in a]
     assert aviso and aviso[0] in cubo["meta"]["notas"]
     # La nota del diseño provisional completo ya no va; va la de la tabla oficial con su fuente.
@@ -382,6 +383,39 @@ def test_menos_de_dos_alternativas_oficiales_no_se_completa_y_el_contrato_lo_mar
     aviso = [a for a in rep["avisos"] if "parcelas de nogal" in a and "ACTUAL + 2" in a]
     assert aviso and aviso[0].startswith(f"{len(nogales)} parcelas"), rep["avisos"]
     assert any("mínimo ACTUAL + 2 alternativas" in e for e in validar_contrato.validar(web))
+
+
+def test_menos_de_dos_alternativas_se_completa_con_la_propuesta_del_equipo_rotulada(tmp_path):
+    """Decisión de opciones B3, §1 (14-nov, 16:55): si la tabla oficial da menos de 2 alternativas para un
+    cultivo que sí rota, se completa con el diseño provisional y cada opción agregada lo dice."""
+    cambio = _poner(["alfalfa_corte_verano"], "por_cultivo_actual", "alfalfa")
+    rep, geo, cubo, _, web = correr(procesados(tmp_path, b3=alterado(cambio)), tmp_path)
+    extra = [x for x in CFG["alternativas"]["alfalfa"] if x != "alfalfa_corte_verano"][:1]
+    alfalfas = [ops for p, ops in parcelas_con_opciones(geo, cubo) if p["cultivo_actual"] == "alfalfa"]
+    assert alfalfas
+    for ops in alfalfas:
+        assert [o["id"] for o in ops] == ["ACTUAL", "alfalfa_corte_verano", *extra]
+        assert ops[1]["origen_opcion"] == b4_cubo.ORIGEN_OPCION_B3
+        assert ops[2]["origen_opcion"] == b4_cubo.ORIGEN_OPCION_PROPUESTA
+        assert ops[2]["etiqueta_opcion"] == b4_cubo.ETIQUETA_PROPUESTA
+    assert cubo["meta"]["opciones"]["completadas"] == {"alfalfa": extra}
+    assert any("se completa con" in a and "alfalfa" in a for a in rep["avisos"]), rep["avisos"]
+    assert validar_contrato.validar(web) == []
+
+
+def test_cultivo_que_no_rota_lleva_solo_actual_con_su_motivo(tmp_path):
+    """El cultivo que el maestro declara «no rota» (nogal) no se completa: solo ACTUAL y «sin_rotacion»
+    con el motivo y la fuente de B3; el contrato lo acepta."""
+    cambio = _poner([], "por_cultivo_actual", "nogal")
+    rep, geo, cubo, _, web = correr(procesados(tmp_path, b3=alterado(cambio)), tmp_path)
+    nogales = [p["id"] for p, ops in parcelas_con_opciones(geo, cubo) if p["cultivo_actual"] == "nogal"]
+    assert nogales
+    for pid in nogales:
+        pc = cubo["parcelas"][pid]
+        assert [o["id"] for o in pc["opciones"]] == ["ACTUAL"]
+        assert pc["sin_rotacion"]["motivo"] == B3["opciones"]["nogal"]["por_que_en"]
+        assert pc["sin_rotacion"]["fuente"] == B3["opciones"]["nogal"]["fuente"]
+    assert validar_contrato.validar(web) == []
 
 
 def test_secuencia_distinta_de_la_de_a5_se_avisa(tmp_path):

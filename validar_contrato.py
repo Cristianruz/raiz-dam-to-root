@@ -357,7 +357,15 @@ class Validador:
                 continue  # parcela clasificada sin opciones por un motivo declarado (p. ej. zona sin clima)
             if not any(o.get("id") == "ACTUAL" for o in ops):
                 self.error(w0, "falta la opción ACTUAL")
-            if len(ops) < 3:
+            sin_rot = pc.get("sin_rotacion")
+            if sin_rot is not None:
+                # Cultivo que no rota (nogal, maestro §5.2): solo ACTUAL, con su motivo y fuente
+                # (docs/decisiones/2026-11-14_opciones_b3.md, §1).
+                if not isinstance(sin_rot, dict) or not sin_rot.get("motivo") or not sin_rot.get("fuente"):
+                    self.error(w0, "sin_rotacion debe traer motivo y fuente")
+                elif [o.get("id") for o in ops] != ["ACTUAL"]:
+                    self.error(w0, "con sin_rotacion la parcela lleva solo la opción ACTUAL")
+            elif len(ops) < 3:
                 self.error(w0, f"mínimo ACTUAL + 2 alternativas; hay {len(ops)}")
             for o in ops:
                 w = f"{w0}.{o.get('id')}"

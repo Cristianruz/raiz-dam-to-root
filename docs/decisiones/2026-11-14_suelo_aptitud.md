@@ -32,9 +32,9 @@ Todas las fuentes del gemelo son mundiales (HLS, NASA POWER, NASADEM, GPM IMERG,
 | `cic_cmol_kg` | capacidad de intercambio catiónico, cmol(+)/kg; vacío si el producto no lo trae |
 | `salinidad_ce_ds_m` | conductividad eléctrica, dS/m; vacío si no hay producto con cobertura |
 | `profundidad_cm` | capa promediada, p. ej. `0-30` |
-| `n_celdas` | celdas del mapa dentro de la parcela |
+| `n_celdas` | celdas del mapa dentro de la parcela; 0 si la parcela es más chica que una celda (se usa la celda más cercana) |
 
-Una fila por parcela. En `LEEME.md`: producto exacto, versión, profundidades, cómo se promedió y su licencia.
+Una fila por parcela. Una parcela que el mapa no cubre lleva todas sus columnas de suelo vacías (nunca a medias). En `LEEME.md`: producto exacto, versión, profundidades, cómo se promedió y su licencia.
 
 ### `suelo_requisitos.json`
 ```json

@@ -16,6 +16,8 @@ Pasos (en este orden; si uno falla, se reporta y se sigue con los demás):
       entradas de B4 pero web/data ya tiene un cubo REAL (meta.mock = false), el paso FALLA y NO
       reemplaza la web con simulados (un archivo renombrado o rechazado no debe pasar en silencio).
   (b2) motor/relieve_web.py: relieve.json y relieve_rutas.geojson para la web.
+  (b3) motor/gemelo_web.py, motor/contexto_web.py y motor/suelo_web.py: gemelo.json, ndvi_mensual.json,
+       contexto.json y suelo.json; motor/pwa.py: lista de precarga de la app sin conexión.
   (c) motor/manifest.py: genera web/data/manifest.json.
   (d) python validar_contrato.py: debe imprimir «CONTRATO OK».
   (d2) motor/verificador.py: cifras de las explicaciones (set dorado).
@@ -273,6 +275,44 @@ def paso_relieve():
     return Paso("relieve", OK, f"zonas: {', '.join(zonas)}")
 
 
+# --- (b3) gemelo digital, bases del reto y suelo ----------------------------------
+def paso_gemelo():
+    """(b3) Datos de las piezas del gemelo para la web, después del cubo (suelo_web lee cubo.json) y antes
+    del manifest: gemelo.json y ndvi_mensual.json (motor/gemelo_web.py), contexto.json (motor/contexto_web.py)
+    y suelo.json (motor/suelo_web.py). Cada pieza sin su entrega escribe su bloque en null con el motivo y la
+    página lo dice; una excepción es FALLA. Las teselas de relieve no se regeneran aquí (necesitan rasterio:
+    python motor/dem_teselas.py)."""
+    titulo("(b3) Gemelo digital, bases del reto y suelo (gemelo_web, contexto_web, suelo_web)")
+    detalles = []
+    for modulo, etiqueta in (("motor.gemelo_web", "gemelo"), ("motor.contexto_web", "contexto"),
+                             ("motor.suelo_web", "suelo")):
+        try:
+            rep = importar(modulo).construir()
+        except Exception as ex:  # noqa: BLE001
+            print(f"  {modulo}.construir() falló: {type(ex).__name__}: {ex}")
+            return Paso("gemelo", FALLA, f"{modulo}: {type(ex).__name__}: {ex}")
+        for a in rep.get("avisos") or []:
+            print(f"  aviso ({etiqueta}): {a}")
+        if rep.get("ejecutado") is False:
+            print(f"  {etiqueta}: no se generó ({rep.get('motivo')})")
+            detalles.append(f"{etiqueta}: not run")
+        else:
+            detalles.append(f"{etiqueta}: OK")
+    print("  " + " · ".join(detalles))
+    return Paso("gemelo", OK, " · ".join(detalles))
+
+
+def paso_pwa():
+    """Lista de precarga de la app sin conexión (motor/pwa.py): al final, para que su versión cambie con
+    lo que la página carga."""
+    try:
+        rep = importar("motor.pwa").construir()
+    except Exception as ex:  # noqa: BLE001
+        print(f"  pwa.construir() falló: {type(ex).__name__}: {ex}")
+        return Paso("pwa", FALLA, f"{type(ex).__name__}: {ex}")
+    return Paso("pwa", OK, f"precache {rep.get('version') or ''}".strip() if isinstance(rep, dict) else "precache")
+
+
 # --- (c) manifest --------------------------------------------------------------
 def paso_manifest(rotulo="(c) Manifest (motor/manifest.py)"):
     titulo(rotulo)
@@ -439,6 +479,8 @@ def main(argv=None):
     ens, reporte = paso_ensamblar()
     sim = paso_simulados(reporte)
     rel = paso_relieve()
+    gem = paso_gemelo()
+    pwa = paso_pwa()
     man = paso_manifest()
     con = paso_contrato()
     ver = paso_verificador()
@@ -449,7 +491,7 @@ def main(argv=None):
         py = paso_pytest()
         js = paso_node()
 
-    pasos = (origen, ens, sim, rel, man, con, ver, py, js)
+    pasos = (origen, ens, sim, rel, gem, pwa, man, con, ver, py, js)
     # docs/pruebas.md con la tabla de esta corrida y, a partir de ella, web/data/pruebas.json (5c).
     # Con --rapido pytest y node no corrieron: no se reescribe ni la tabla ni pruebas.json (su «puerta»
     # diría passed con la corrida anterior); el reporte lo dice.
@@ -464,7 +506,9 @@ def main(argv=None):
         # (c2) El manifest otra vez, ahora con las cifras de pruebas.json de esta corrida (regla 11).
         if web.estado == OK and man.estado == OK:
             man = paso_manifest("(c2) Manifest con las cifras de pruebas.json (motor/manifest.py)")
-    todos = (origen, ens, sim, rel, man, con, ver, py, js, web)
+    if not args.rapido:
+        pwa = paso_pwa()  # otra vez, con pruebas.json y manifest.json de esta corrida
+    todos = (origen, ens, sim, rel, gem, pwa, man, con, ver, py, js, web)
     fallas = [p.nombre for p in todos if p.estado == FALLA]
     pendientes = [p.nombre for p in todos if p.estado == PENDIENTE]
     if reporte:
@@ -490,6 +534,8 @@ def main(argv=None):
         f" 4. Sigue simulado : {estado_simulado(reporte)}",
         f" 5. Cubo ..........: {sim}",
         f" 5b. Relieve ......: {rel}",
+        f" 5d. Gemelo .......: {gem}",
+        f" 5e. App sin red ..: {pwa}",
         f" 5c. Pruebas web ..: {web}",
         f" 6. Manifest ......: {man}",
         f" 7. Contrato ......: {con}",
