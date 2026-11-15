@@ -24,6 +24,7 @@ carpetas temporales: data/processed y web/data no se tocan.
     motor interpola en explicaciones.json. Los textos que la ficha muestra se recorren en el cubo armado con
     la fixture y en el cubo real (web/data/cubo.json).
 """
+import csv
 import json
 import re
 import shutil
@@ -422,6 +423,97 @@ def test_secuencia_distinta_de_la_de_a5_se_avisa(tmp_path):
     cambio = _poner("otro_cultivo", "opciones", "sorgo", "secuencia", 0, "cultivo")
     rep, _, cubo, _, _ = correr(procesados(tmp_path, b3=alterado(cambio)), tmp_path)
     assert any("la secuencia de sorgo" in a and "A5" in a for a in rep["avisos"]), rep["avisos"]
+
+
+def test_secuencia_de_b3_con_un_cultivo_que_a5_no_cuenta_publica_la_de_a5_con_nota(tmp_path):
+    """Revisión de dda5abb, punto 5 (caso real de avena_maiz: B3 cereal → maíz → alfalfa; A5 calcula la lámina y el
+    plazo de una temporada con cereal → maíz). La opción publica la secuencia con que se calculó su agua (la de A5) y
+    la de B3 queda como texto en agua.nota_plazo (campo que ya existe) y, completa, en opciones_catalogo. Los
+    filtros siguen siendo los que B3 asigna a la rotación (avisan del paso que la tabla oficial agrega)."""
+    paso_alfalfa = json.loads(json.dumps(B3["opciones"]["alfalfa"]["secuencia"][0]))  # el paso de alfalfa de la fixture
+    b3 = alterado(lambda o: o["opciones"]["avena_maiz"]["secuencia"].append(paso_alfalfa))
+    rep, geo, cubo, _, web = correr(procesados(tmp_path, b3=b3), tmp_path)
+    a5 = {z: {r["id"]: r for r in json.loads((PROCESADOS_DOS_ZONAS / f"rotaciones{'' if z == DZ else '_' + z}.json")
+                                            .read_text(encoding="utf-8"))["rotaciones"]} for z in (DZ, LC)}
+    sec_b3 = [x["cultivo"] for x in b3["opciones"]["avena_maiz"]["secuencia"]]
+    nombre = lambda c: (B3["opciones"].get(c) or {}).get("nombre_en") or CFG["nombres_en"][c]  # noqa: E731
+    vistas = 0
+    for p, ops in parcelas_con_opciones(geo, cubo):
+        for o in ops:
+            if o["rotacion"] != "avena_maiz":
+                continue
+            vistas += 1
+            r = a5[p["zona"]]["avena_maiz"]
+            assert o["secuencia"] == r["cultivos"], "se publica la secuencia con que A5 calculó la lámina"
+            assert o["agua"]["lamina_bruta"]["0"]["p50"] == r["lamina_bruta_millares"]["0"]["p50"]
+            nota = o["agua"]["nota_plazo"]
+            assert nota and all(nombre(c) in nota for c in sec_b3), nota
+            assert not re.search(r"\d", nota) and not palabras_prohibidas(nota), nota
+            ids = [f["id"] for f in o["filtros"]]
+            assert ids == [f["id"] for f in B3["filtros"] if "avena_maiz" in f["aplica_a"]]
+    assert vistas, "la fixture debe ofrecer avena_maiz"
+    assert [x["cultivo"] for x in cubo["opciones_catalogo"]["avena_maiz"]["secuencia"]] == sec_b3
+    aviso = [a for a in rep["avisos"] if "la secuencia de avena_maiz" in a]
+    assert aviso and "se publica la de A5" in aviso[0] and aviso[0] in cubo["meta"]["notas"], rep["avisos"]
+    assert validar_contrato.validar(web) == []
+
+
+# Filtro de edad del rodal (revisión de dda5abb, punto 6): DATOS DE PRUEBA con la forma del filtro real
+# corte_verano_alfalfa_establecida de B3 (tipo «sucesion», regla.edad_min_anios, necesita «memoria»).
+def filtro_de_edad(umbral):
+    return {"id": "edad_rodal_prueba", "tipo": "sucesion", "aplica_a": ["alfalfa_corte_verano"],
+            "regla": {"edad_min_anios": umbral, "unidad": "años (valor de prueba)"}, "necesita": ["memoria"],
+            "texto_en": "For an established stand (test filter).", "fuente": "PRUEBA: fixture de tests/test_opciones_b3.py",
+            "etiqueta": "[prueba]"}
+
+
+def test_filtro_de_edad_del_rodal_se_evalua_con_la_edad_de_cada_parcela(tmp_path):
+    """Antes se evaluaba una vez por zona y rotación y quedaba «sin_evaluador» para todas las alfalfas. Ahora, con
+    la edad de CADA parcela: menor que regla.edad_min_anios → warning (nunca aprobado); igual o mayor → passes;
+    edad null → needs_local_check (dato local). El umbral sale de las edades de la fixture: así hay de los tres."""
+    processed = procesados(tmp_path)
+    ruta = processed / "cultivos_parcelas.csv"
+    with open(ruta, encoding="utf-8", newline="") as f:
+        filas = list(csv.DictReader(f))
+    alfalfas = [r for r in filas if r["cultivo_actual"] == "alfalfa" and r["abstencion"] == "False"]
+    umbral = sorted({int(r["edad_perenne_anios"]) for r in alfalfas})[1]   # la segunda edad: hay menores y mayores
+    alfalfas[0]["edad_perenne_anios"] = ""                                  # y una sin edad
+    with open(ruta, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(filas[0]))
+        w.writeheader()
+        w.writerows(filas)
+    (processed / ARCHIVO).write_text(json.dumps(alterado(lambda o: o["filtros"].append(filtro_de_edad(umbral))),
+                                                ensure_ascii=False), encoding="utf-8")
+    rep, geo, cubo, _, web = correr(processed, tmp_path)
+    vistos = set()
+    for p, ops in parcelas_con_opciones(geo, cubo):
+        for o in ops:
+            f = next((x for x in o["filtros"] if x["id"] == "edad_rodal_prueba"), None)
+            assert (f is not None) == (o["rotacion"] == "alfalfa_corte_verano"), (p["id"], o["id"])
+            if f is None:
+                continue
+            edad = p["edad_perenne_anios"]
+            if edad is None:
+                assert (f["estado"], f["pasa"], f["razon"]) == (NEEDS, None, b4_cubo.RAZON_DATO_LOCAL), p["id"]
+                vistos.add("sin_edad")
+            elif edad < umbral:
+                assert (f["estado"], f["pasa"]) == (WARNING, False) and "razon" not in f, p["id"]
+                vistos.add("joven")
+            else:
+                assert (f["estado"], f["pasa"]) == (PASSES, True) and "razon" not in f, p["id"]
+                vistos.add("establecida")
+    assert vistos == {"sin_edad", "joven", "establecida"}, vistos
+    assert validar_contrato.validar(web) == []
+
+
+def test_filtro_de_edad_que_ademas_pide_un_dato_local_no_decide(tmp_path):
+    """Con un dato local que no tenemos, el filtro de edad tampoco se decide (no se aprueba a medias)."""
+    f = filtro_de_edad(1)
+    f["necesita"] = ["memoria", "dato local que no tenemos"]
+    _, geo, cubo, _, _ = correr(procesados(tmp_path, b3=alterado(lambda o: o["filtros"].append(f))), tmp_path)
+    estados = {(x["estado"], x.get("razon")) for _, ops in parcelas_con_opciones(geo, cubo) for o in ops
+               for x in o["filtros"] if x["id"] == f["id"]}
+    assert estados == {(NEEDS, b4_cubo.RAZON_DATO_LOCAL)}
 
 
 # ---------------------------------------------------------------------------------------
