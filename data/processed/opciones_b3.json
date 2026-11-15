@@ -1,6 +1,6 @@
 {
  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
- "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), «Rotaciones candidatas» y «Filtros duros»; expediente de datos 27, §2.3 (INIFAP, Agenda Técnica Agrícola de Chihuahua 2017). Las fuentes primarias van en cada opción y en cada filtro",
+ "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), «Candidate rotations» and «Hard filters»; data dossier 27, §2.3 (INIFAP, Agenda Técnica Agrícola de Chihuahua 2017). The primary sources are given in each option and each filter",
  "opciones": {
   "alfalfa": {
    "letra_maestro": "ACTUAL",
@@ -13,18 +13,18 @@
       "desde": "09-15",
       "hasta": "10-31"
      },
-     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: siembra óptima del 15-sep al 31-oct (Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026))"
+     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: best planting from Sep 15 to Oct 31 (Project master document, §5.2 (v3.1, Oct 29, 2026))"
     }
    ],
    "indicadores": {
     "leguminosa": true,
     "ruptura_plagas": null,
     "raiz_profunda": null,
-    "fuente": "Leguminosa: clasificación botánica de la alfalfa (no viene del maestro). Lo demás, sin dato en el maestro"
+    "fuente": "Legume: botanical classification of alfalfa (not from the master document). The rest: no data in the master document"
    },
    "advertir_si_rojo": false,
    "por_que_en": "Current rotation. Alfalfa is kept for 3–4 years; INIFAP reports 170–180 cm of irrigation per year in Chihuahua.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), «Actual típica»; INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (lámina de 170–180 cm/año; establecimiento con 40 cm)",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), «typical current»; INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (170–180 cm of irrigation per year; 40 cm to establish)",
    "etiqueta": "[V]"
   },
   "nogal": {
@@ -38,18 +38,18 @@
       "desde": null,
       "hasta": null
      },
-     "fuente": "No aplica: huerta establecida"
+     "fuente": "Not applicable: established orchard"
     }
    ],
    "indicadores": {
     "leguminosa": false,
     "ruptura_plagas": null,
     "raiz_profunda": null,
-    "fuente": "Sin dato en el maestro"
+    "fuente": "No data in the master document"
    },
    "advertir_si_rojo": false,
    "por_que_en": "An orchard does not rotate. Minimum-irrigation scenarios are the ones that apply, and kernel filling (August–September) should not be put at risk.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), «Nogal»: no rota; lámina de ~1.5–1.82 m; no afectar el llenado de almendra (ago–sep)",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), «Pecan»: does not rotate; ~1.5–1.82 m of irrigation; do not put kernel filling at risk (Aug–Sep)",
    "etiqueta": "[V]"
   },
   "chile": {
@@ -63,18 +63,18 @@
       "desde": "02-01",
       "hasta": null
      },
-     "fuente": "SDR Chihuahua, 3-mar-2026: chile desde febrero en la región centro-sur (expediente 27 §2.3); es práctica, no ausencia de riesgo de helada. Sin fecha límite en las fuentes"
+     "fuente": "SDR Chihuahua, Mar 3, 2026: chile from February in the south-central region (data dossier 27, §2.3); it is a practice, not an absence of frost risk. No closing date in the sources"
     }
    ],
    "indicadores": {
     "leguminosa": false,
     "ruptura_plagas": false,
     "raiz_profunda": null,
-    "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026): chile seguido de barbecho desnudo de nov a mar; «mucho suelo desnudo»"
+    "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026): chile followed by bare fallow from Nov to Mar; «much bare soil»"
    },
    "advertir_si_rojo": false,
    "por_que_en": "Current rotation. Chile followed by bare fallow from November to March leaves the soil uncovered in the windy season.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), «Actual típica»",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), «typical current»",
    "etiqueta": "[V]"
   },
   "algodon": {
@@ -88,18 +88,18 @@
       "desde": "04-01",
       "hasta": "05-10"
      },
-     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: Sureste-Delicias, del 1-abr al 10-may (óptima del 20 al 30-abr) (Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026))"
+     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: Southeast–Delicias, from Apr 1 to May 10 (best from Apr 20 to 30) (Project master document, §5.2 (v3.1, Oct 29, 2026))"
     }
    ],
    "indicadores": {
     "leguminosa": false,
     "ruptura_plagas": null,
     "raiz_profunda": null,
-    "fuente": "Sin dato en el maestro"
+    "fuente": "No data in the master document"
    },
    "advertir_si_rojo": false,
    "por_que_en": "Current rotation. INIFAP reports about 68 cm of irrigation for cotton in Delicias; stalks must be destroyed before November 30.",
-   "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: ~68 cm (presiembra de 20 cm + 48 cm en 4–5 auxilios); NOM-026 (Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción C)",
+   "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: ~68 cm (20 cm pre-planting irrigation + 48 cm in 4–5 supplementary irrigations); NOM-026 (Project master document, §5.2 (v3.1, Oct 29, 2026), option C)",
    "etiqueta": "[V]"
   },
   "maiz_forrajero": {
@@ -113,18 +113,18 @@
       "desde": "04-01",
       "hasta": "05-31"
      },
-     "fuente": "INIFAP, Folleto Técnico 53 (2014): siembra de primavera con riego del 1-abr al 31-may (Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026))"
+     "fuente": "INIFAP, Folleto Técnico 53 (2014): irrigated spring planting from Apr 1 to May 31 (Project master document, §5.2 (v3.1, Oct 29, 2026))"
     }
    ],
    "indicadores": {
     "leguminosa": false,
     "ruptura_plagas": null,
     "raiz_profunda": null,
-    "fuente": "Sin dato en el maestro"
+    "fuente": "No data in the master document"
    },
    "advertir_si_rojo": false,
    "por_que_en": "Current rotation. INIFAP reports 5 irrigations of 10–12 cm (50–60 cm in total) for spring forage maize in Chihuahua.",
-   "fuente": "INIFAP, Folleto Técnico 53 (2014) (Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A)",
+   "fuente": "INIFAP, Folleto Técnico 53 (2014) (Project master document, §5.2 (v3.1, Oct 29, 2026), option A)",
    "etiqueta": "[V]"
   },
   "sorgo": {
@@ -138,18 +138,18 @@
       "desde": null,
       "hasta": null
      },
-     "fuente": "Sin fecha de siembra de sorgo en el maestro ni en el expediente 27"
+     "fuente": "No sorghum planting date in the master document or in data dossier 27"
     }
    ],
    "indicadores": {
     "leguminosa": false,
     "ruptura_plagas": null,
     "raiz_profunda": null,
-    "fuente": "Sin dato en el maestro"
+    "fuente": "No data in the master document"
    },
    "advertir_si_rojo": false,
    "por_que_en": "Current rotation. The project documents give no local planting date or irrigation depth for sorghum.",
-   "fuente": "Cultivo actual observado por las reglas de A4 (mapa de cultivos). El maestro §5.2 y el expediente 27 no traen fecha de siembra ni lámina de sorgo; la lámina es la del modelo de demanda (A5)",
+   "fuente": "Current crop seen by the A4 rules (crop map). The master document §5.2 and data dossier 27 give no sorghum planting date or irrigation depth; the depth is the demand model's (A5)",
    "etiqueta": "assumption [S]"
   },
   "cereal_invierno": {
@@ -163,18 +163,18 @@
       "desde": "11-01",
       "hasta": "12-31"
      },
-     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado. El modelo de demanda siembra el 1-dic (punto medio de la ventana) [S]"
+     "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option A: autumn–winter oats or triticale, «Nov–Dec»; winter irrigation in Delicias not verified. The demand model plants on Dec 1 (midpoint of the window) [S]"
     }
    ],
    "indicadores": {
     "leguminosa": false,
     "ruptura_plagas": null,
     "raiz_profunda": null,
-    "fuente": "Sin dato en el maestro"
+    "fuente": "No data in the master document"
    },
    "advertir_si_rojo": false,
    "por_que_en": "Current rotation. Irrigated winter oats or triticale are not verified for Delicias; the single depth found (about 54 cm) comes from La Laguna.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: ~54 cm (Ochoa-Espinoza 2022, La Laguna, no Delicias)",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option A: ~54 cm (Ochoa-Espinoza 2022, La Laguna, not Delicias)",
    "etiqueta": "assumption [S]"
   },
   "avena_maiz": {
@@ -188,7 +188,7 @@
       "desde": "11-01",
       "hasta": "12-31"
      },
-     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado. El modelo de demanda siembra el 1-dic (punto medio de la ventana) [S]"
+     "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option A: autumn–winter oats or triticale, «Nov–Dec»; winter irrigation in Delicias not verified. The demand model plants on Dec 1 (midpoint of the window) [S]"
     },
     {
      "ciclo": "PV",
@@ -197,7 +197,7 @@
       "desde": "04-01",
       "hasta": "05-31"
      },
-     "fuente": "INIFAP, Folleto Técnico 53 (2014): siembra de primavera con riego del 1-abr al 31-may (Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026))"
+     "fuente": "INIFAP, Folleto Técnico 53 (2014): irrigated spring planting from Apr 1 to May 31 (Project master document, §5.2 (v3.1, Oct 29, 2026))"
     },
     {
      "ciclo": "OI",
@@ -206,19 +206,19 @@
       "desde": "09-15",
       "hasta": "10-31"
      },
-     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: siembra óptima del 15-sep al 31-oct (Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026)); se resiembra al año, con al menos 12 meses entre alfalfas"
+     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: best planting from Sep 15 to Oct 31 (Project master document, §5.2 (v3.1, Oct 29, 2026)); alfalfa is sown again after a year, with at least 12 months between stands"
     }
    ],
    "indicadores": {
     "leguminosa": false,
     "ruptura_plagas": null,
     "raiz_profunda": null,
-    "fuente": "Sin dato en el maestro para esta secuencia"
+    "fuente": "No data in the master document for this sequence"
    },
    "advertir_si_rojo": false,
    "por_que_en": "Suggested for an old alfalfa stand: one year of winter cereal and forage maize before sowing alfalfa again, because alfalfa should not follow alfalfa for at least 12 months.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A; maíz forrajero: INIFAP, Folleto Técnico 53 (2014); cereal de invierno ~54 cm: Ochoa-Espinoza 2022 (La Laguna, no Delicias)",
-   "etiqueta": "[V] maíz forrajero y alfalfa; assumption [S] cereal de invierno con riego en Delicias"
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option A; forage maize: INIFAP, Folleto Técnico 53 (2014); winter cereal ~54 cm: Ochoa-Espinoza 2022 (La Laguna, not Delicias)",
+   "etiqueta": "[V] forage maize and alfalfa; assumption [S] irrigated winter cereal in Delicias"
   },
   "alfalfa_corte_verano": {
    "letra_maestro": "B",
@@ -231,19 +231,19 @@
       "desde": null,
       "hasta": null
      },
-     "fuente": "No se siembra: se mantiene la alfalfa establecida"
+     "fuente": "Nothing is planted: the established alfalfa is kept"
     }
    ],
    "indicadores": {
     "leguminosa": true,
     "ruptura_plagas": null,
     "raiz_profunda": null,
-    "fuente": "Leguminosa: clasificación botánica de la alfalfa (no viene del maestro)"
+    "fuente": "Legume: botanical classification of alfalfa (not from the master document)"
    },
    "advertir_si_rojo": true,
    "por_que_en": "Keeps the stand and plans a summer rest: 2–3 irrigations are skipped between July and September. Trials report that yield always drops and that stand survival depends on the soil.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción B (variante moderada, actualización del 29-oct): INIFAP La Laguna 2008; UC ANR 8522 (2015); Bali et al. 2024. Ensayos de otras regiones; sin ensayo publicado en el DR-005",
-   "etiqueta": "[V] ensayos de otras regiones; assumption [S] para el DR-005"
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option B (moderate variant, update of Oct 29): INIFAP La Laguna 2008; UC ANR 8522 (2015); Bali et al. 2024. Trials from other regions; no published trial in DR-005",
+   "etiqueta": "[V] trials from other regions; assumption [S] for DR-005"
   },
   "cereal_algodon": {
    "letra_maestro": "C",
@@ -256,7 +256,7 @@
       "desde": "11-01",
       "hasta": "12-31"
      },
-     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado. El modelo de demanda siembra el 1-dic (punto medio de la ventana) [S]"
+     "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option A: autumn–winter oats or triticale, «Nov–Dec»; winter irrigation in Delicias not verified. The demand model plants on Dec 1 (midpoint of the window) [S]"
     },
     {
      "ciclo": "PV",
@@ -265,19 +265,19 @@
       "desde": "04-01",
       "hasta": "05-10"
      },
-     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: Sureste-Delicias, del 1-abr al 10-may (óptima del 20 al 30-abr) (Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026))"
+     "fuente": "INIFAP, Agenda Técnica Agrícola de Chihuahua 2017: Southeast–Delicias, from Apr 1 to May 10 (best from Apr 20 to 30) (Project master document, §5.2 (v3.1, Oct 29, 2026))"
     }
    ],
    "indicadores": {
     "leguminosa": false,
     "ruptura_plagas": true,
     "raiz_profunda": null,
-    "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción C: P. capsici se controla con rotación (INIFAP; Silva-Rojas et al. 2009)"
+    "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option C: P. capsici is managed by rotation (INIFAP; Silva-Rojas et al. 2009)"
    },
    "advertir_si_rojo": false,
    "por_que_en": "Suggested after chile: Phytophthora capsici is managed by rotation, and local research asks for at least 5 years without host crops after an outbreak. It is two crops in a year, so it can need more water than chile alone.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción C: INIFAP («no sembrar chile después de chile»); Silva-Rojas et al. 2009 (Delicias y Camargo); algodón: INIFAP, Agenda Técnica Agrícola de Chihuahua 2017",
-   "etiqueta": "[V] regla de rotación y algodón; assumption [S] cereal de invierno con riego en Delicias"
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option C: INIFAP («do not plant chile after chile»); Silva-Rojas et al. 2009 (Delicias and Camargo); cotton: INIFAP, Agenda Técnica Agrícola de Chihuahua 2017",
+   "etiqueta": "[V] rotation rule and cotton; assumption [S] irrigated winter cereal in Delicias"
   },
   "cereal_sorgo": {
    "letra_maestro": "C",
@@ -290,7 +290,7 @@
       "desde": "11-01",
       "hasta": "12-31"
      },
-     "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción A: avena o triticale de otoño-invierno, «nov–dic»; riego de invierno en Delicias no verificado. El modelo de demanda siembra el 1-dic (punto medio de la ventana) [S]"
+     "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option A: autumn–winter oats or triticale, «Nov–Dec»; winter irrigation in Delicias not verified. The demand model plants on Dec 1 (midpoint of the window) [S]"
     },
     {
      "ciclo": "PV",
@@ -299,19 +299,19 @@
       "desde": null,
       "hasta": null
      },
-     "fuente": "Sin fecha de siembra de sorgo en el maestro ni en el expediente 27"
+     "fuente": "No sorghum planting date in the master document or in data dossier 27"
     }
    ],
    "indicadores": {
     "leguminosa": false,
     "ruptura_plagas": true,
     "raiz_profunda": null,
-    "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción C: P. capsici se controla con rotación (INIFAP; Silva-Rojas et al. 2009)"
+    "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option C: P. capsici is managed by rotation (INIFAP; Silva-Rojas et al. 2009)"
    },
    "advertir_si_rojo": false,
    "por_que_en": "Suggested after chile: Phytophthora capsici is managed by rotation, and local research asks for at least 5 years without host crops after an outbreak. It is two crops in a year, so it can need more water than chile alone.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción C: INIFAP («no sembrar chile después de chile»); Silva-Rojas et al. 2009 (Delicias y Camargo)",
-   "etiqueta": "[V] regla de rotación; assumption [S] cereal de invierno y sorgo (sin fecha ni lámina local)"
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option C: INIFAP («do not plant chile after chile»); Silva-Rojas et al. 2009 (Delicias and Camargo)",
+   "etiqueta": "[V] rotation rule; assumption [S] winter cereal and sorghum (no local date or depth)"
   },
   "descanso": {
    "letra_maestro": "no_sembrar",
@@ -321,11 +321,11 @@
     "leguminosa": false,
     "ruptura_plagas": null,
     "raiz_profunda": null,
-    "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción E: el rastrojo en pie protege contra la erosión"
+    "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option E: standing stubble protects against erosion"
    },
    "advertir_si_rojo": false,
    "por_que_en": "Worst-case option: the field rests with standing stubble, which asks for no irrigation and protects the soil from wind. Income is low.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción E («el resto descansa con rastrojo en pie»; ingreso bajo)",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option E («the rest rests with standing stubble»; low income)",
    "etiqueta": "[V]"
   }
  },
@@ -373,12 +373,15 @@
     "cereal_sorgo"
    ],
    "regla": {
-    "ventana_por_cultivo": "la de «secuencia.siembra» de cada opción (MM-DD)",
+    "ventana_por_cultivo": "the one in «secuencia.siembra» of each option (MM-DD)",
     "sorgo": null
    },
    "necesita": [],
-   "texto_en": "Planting must fall inside the window reported for the crop. No local window was found for sorghum.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), filtro 1 (fechas de siembra INIFAP por cultivo)",
+   "texto_en": "Planting must fall inside the window reported for the crop.",
+   "texto_por_opcion_en": {
+    "cereal_sorgo": "No local planting window was found for sorghum, so this rule covers only the winter cereal."
+   },
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), filter 1 (INIFAP planting dates by crop)",
    "etiqueta": "[V]"
   },
   {
@@ -390,14 +393,14 @@
    "regla": {
     "helada": "Tmin <= 0 °C",
     "umbral_de_probabilidad": null,
-    "nota": "el maestro no fija umbral: se muestra la probabilidad de heladas.json para la fecha de siembra y no se decide"
+    "nota": "the master document sets no threshold: the frost probability of heladas.json for the planting date is shown and nothing is decided"
    },
    "necesita": [
     "heladas.json"
    ],
    "texto_en": "Chile planted from February is exposed to late frost. The card shows the chance of frost after the planting date; it does not decide.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), filtro 2; probabilidad calculada con NASA POWER (heladas.json). INEGI 1983: última helada en marzo y primera en noviembre",
-   "etiqueta": "[V] regla; la probabilidad es de una celda regional, no de una estación"
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), filter 2; probability computed with NASA POWER (heladas.json). INEGI 1983: last frost in March and earliest in November",
+   "etiqueta": "[V] rule; the probability is for a regional grid cell, not a station"
   },
   {
    "id": "chile_sin_solanaceas",
@@ -415,7 +418,7 @@
     "dato local que no tenemos"
    ],
    "texto_en": "Do not plant chile after chile. After a Phytophthora capsici outbreak, keep at least 5 years without host crops. The satellite memory shows summer crops but not which crop, so this needs a local check.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), filtro 3: Silva-Rojas et al. 2009 (Delicias y Camargo; se adopta el criterio más estricto); INIFAP indica 4 años",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), filter 3: Silva-Rojas et al. 2009 (Delicias and Camargo; the stricter criterion is adopted); INIFAP gives 4 years",
    "etiqueta": "[V]"
   },
   {
@@ -431,7 +434,7 @@
    },
    "necesita": [],
    "texto_en": "Cotton stalks must be shredded within 10 days after harvest and uprooted before November 30 (official plant-health rule NOM-026).",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), filtro 4; INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (NOM-026)",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), filter 4; INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (NOM-026)",
    "etiqueta": "[V]"
   },
   {
@@ -444,11 +447,11 @@
     "lamina_minima_cm": 40,
     "riegos": 5,
     "lamina_por_riego_cm": 8,
-    "nota": "se compara en vivo con la dotación elegida; 40 cm = 4 millares/ha solo para establecer la alfalfa"
+    "nota": "compared live with the chosen allocation; 40 cm = 4 thousand m³/ha just to establish the alfalfa"
    },
    "necesita": [],
    "texto_en": "Alfalfa should not be established in a dry year: it needs about 40 cm of irrigation just to establish.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), filtro 5; INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (40 cm en cinco riegos de 8 cm)",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), filter 5; INIFAP, Agenda Técnica Agrícola de Chihuahua 2017 (40 cm in five irrigations of 8 cm)",
    "etiqueta": "[V]"
   },
   {
@@ -464,7 +467,7 @@
     "memoria"
    ],
    "texto_en": "Leave at least 12 months between one alfalfa stand and the next (autotoxicity).",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), filtro 6. Fundación Produce Chihuahua indica un mínimo de 6–7 meses (fuente secundaria); se adopta el más estricto",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), filter 6. Fundación Produce Chihuahua gives a minimum of 6–7 months (secondary source); the stricter value is adopted",
    "etiqueta": "[V]"
   },
   {
@@ -513,14 +516,14 @@
      "perdida": 5.0
     },
     "avena_y_triticale": null,
-    "nota": "avena y triticale no tienen umbral numérico en FAO-29 (solo «tolerancia moderada»). La ECe del suelo no es la CE del agua de riego"
+    "nota": "oats and triticale have no numeric threshold in FAO-29 («moderately tolerant»). The ECe of the soil is not the EC of the irrigation water"
    },
    "necesita": [
     "dato local que no tenemos"
    ],
    "texto_en": "Salt tolerance differs by crop (FAO thresholds for soil salinity). There is no measured soil salinity for this field, so this needs a local check.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), filtro 7: FAO-29, Tabla 4 (umbral de ECe del extracto de saturación del suelo, dS/m, y pérdida por cada dS/m de más); valores de S2 §3 que el maestro declara vigentes. Algodón, trigo y cebada: lista del mismo filtro",
-   "etiqueta": "[V] umbrales; sin medición por parcela"
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), filter 7: FAO-29, Table 4 (ECe threshold of the soil saturation extract, dS/m, and yield loss per dS/m above it); values from S2 §3, which the master document declares current. Cotton, wheat and barley: list of the same filter",
+   "etiqueta": "[V] thresholds; no measurement per field"
   },
   {
    "id": "atrazina",
@@ -545,7 +548,7 @@
     "dato local que no tenemos"
    ],
    "texto_en": "If atrazine was used on the previous maize or sorghum, labels ask to wait 5–10 months depending on the next crop and not to sow alfalfa. Check the label of the exact product.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), filtro 8: etiquetas mexicanas de atrazina (Tridente y ADAMA), verificadas en S2 §3",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), filter 8: Mexican atrazine labels (Tridente and ADAMA), verified in S2 §3",
    "etiqueta": "[V]"
   },
   {
@@ -562,7 +565,7 @@
     "memoria"
    ],
    "texto_en": "For an established stand; never in its year of establishment.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción B («solo se ofrece si la alfalfa está establecida, no en su primer año»)",
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option B: offered for an established alfalfa stand, never in its year of establishment",
    "etiqueta": "[V]"
   },
   {
@@ -581,12 +584,12 @@
     "dato local que no tenemos"
    ],
    "texto_en": "Skipping summer irrigations is reasonable on deep, non-sandy soil without high salinity, and not elsewhere; risk is high on heavy clay under extreme heat. Soil texture and salinity are not measured for this field: needs a local check.",
-   "fuente": "Documento maestro del proyecto, §5.2 (v3.1, 29-oct-2026), opción B y su actualización del 29-oct (Bali et al. 2024; UC ANR 8522)",
-   "etiqueta": "[V] ensayos de otras regiones"
+   "fuente": "Project master document, §5.2 (v3.1, Oct 29, 2026), option B and its update of Oct 29 (Bali et al. 2024; UC ANR 8522)",
+   "etiqueta": "[V] trials from other regions"
   }
  ],
  "opciones_del_maestro_no_entregadas": {
-  "D_avena_veza": "Opción D del maestro (avena-veza de otoño-invierno). No se entrega: el modelo de demanda (A5) no tiene coeficiente de cultivo con fuente para la mezcla, y el maestro marca semilla, comprador y calendario en Delicias como no verificados.",
-  "E_sorgo_con_1_2_auxilios": "Opción E del maestro (sorgo con 1–2 riegos de auxilio). No se entrega como tal: A5 calcula el sorgo con su demanda completa y las fuentes no dan la lámina de un riego de auxilio de sorgo. La parte «el resto descansa con rastrojo en pie» es la opción «descanso»."
+  "D_avena_veza": "Option D of the master document (autumn–winter oat–vetch). Not delivered: the demand model (A5) has no sourced crop coefficient for the mix, and the master document marks seed, buyer and calendar in Delicias as not verified.",
+  "E_sorgo_con_1_2_auxilios": "Option E of the master document (sorghum with 1–2 supplementary irrigations). Not delivered as such: A5 computes sorghum with its full demand and the sources give no depth for a supplementary sorghum irrigation. The part «the rest rests with standing stubble» is the «descanso» option."
  }
 }

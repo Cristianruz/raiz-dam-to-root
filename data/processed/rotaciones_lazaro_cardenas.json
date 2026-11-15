@@ -2,14 +2,14 @@
  "params": {
   "corridas": {
    "valor": 2000,
-   "etiqueta": "[S] número de corridas Monte Carlo"
+   "etiqueta": "[S] number of Monte Carlo runs"
   },
   "periodo_clima": {
    "valor": [
     1991,
     2025
    ],
-   "etiqueta": "assumption [S], propuesto en el preregistro"
+   "etiqueta": "assumption [S], proposed in the preregistration"
   },
   "ea_gravedad": {
    "valor": [
@@ -17,7 +17,7 @@
     0.7
    ],
    "etiqueta": "assumption [S]",
-   "fuente": "Sin valor medido en el DR-005 ni fuente en el repo; rango de sensibilidad propuesto por el equipo"
+   "fuente": "No value measured in DR-005 and no source in the repository; sensitivity range proposed by the team"
   },
   "sesgo_eto": {
    "valor": [
@@ -25,7 +25,7 @@
     0.0
    ],
    "etiqueta": "assumption [S]",
-   "fuente": "Sin fuente en el repo; se prueba la hipótesis de que POWER-PM sobreestima la ETo hasta 10 %"
+   "fuente": "No source in the repository; it tests the hypothesis that POWER-PM overestimates ETo by up to 10 %"
   },
   "presiembra_mm": {
    "valor": [
@@ -33,12 +33,12 @@
     200
    ],
    "etiqueta": "[P] kit A5",
-   "fuente": "Kit 40, A5: riego de presiembra de 15–20 cm"
+   "fuente": "Team kit (document 40), A5: pre-planting irrigation of 15–20 cm"
   },
   "presiembra_algodon_mm": {
    "valor": 200,
    "etiqueta": "assumption [S]",
-   "fuente": "Sin fuente en el repo; extremo superior del rango del kit"
+   "fuente": "No source in the repository; upper end of the range of the team kit"
   },
   "kc_nogal_tabla": {
    "valor": [
@@ -52,12 +52,12 @@
   "cobertura_dosel_nogal": {
    "valor": 0.7,
    "etiqueta": "assumption [S]",
-   "fuente": "Fracción de cobertura efectiva del dosel; a medir con NDVI de las parcelas de nogal (S8, decisión 5)"
+   "fuente": "Effective canopy cover fraction; to be measured with the NDVI of the pecan fields (S8, decision 5). The estimate from NDVI is in nogal_referencia"
   },
   "altura_nogal_m": {
    "valor": 10,
    "etiqueta": "assumption [S]",
-   "fuente": "Altura típica de huerta adulta; entra en la Ec. 98 de FAO-56"
+   "fuente": "Typical height of an adult orchard; it enters FAO-56 Eq. 98"
   },
   "corte_verano_moderado": {
    "valor": {
@@ -67,8 +67,8 @@
     ],
     "riegos_jul_sep": 6
    },
-   "etiqueta": "[P] kit B3 (omitir 2–3 riegos entre julio y septiembre); riegos_jul_sep = 6 assumption [S]",
-   "fuente": "Kit 40, B3: variante moderada por omisión"
+   "etiqueta": "[P] team kit B3 (skip 2–3 irrigations between July and September); riegos_jul_sep = 6 assumption [S]",
+   "fuente": "Team kit (document 40), B3: moderate variant by default"
   },
   "plazo_alfalfa_anios": {
    "valor": {
@@ -76,12 +76,12 @@
     "max": 4
    },
    "etiqueta": "[P]",
-   "fuente": "FIRA AGROCOSTOS 2025: vida productiva de 3–4 años"
+   "fuente": "FIRA AGROCOSTOS 2025: productive life of 3–4 years"
   },
   "plazo_nogal_horizonte": {
    "valor": 10,
    "etiqueta": "assumption [S]",
-   "fuente": "S9 §5: horizonte de cálculo, no vida de la huerta; no se descuenta la edad"
+   "fuente": "S9 §5: calculation horizon, not the life of the orchard; the orchard age is not subtracted"
   }
  },
  "cultivos": {
