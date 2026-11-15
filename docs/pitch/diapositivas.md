@@ -54,7 +54,7 @@
 | Title | Every crop is a water commitment with a term |
 | One idea | Three answers per option, field by field |
 | Text on slide | How much water per year · For how many years · How many hectares the allocation covers |
-| Capture | `tests/e2e/capturas/escritorio_ficha_tarjetas.png` (Field P0757, alfalfa, marca «Normal year») |
+| Capture | `docs/pitch/capturas/ficha_alfalfa_tarjetas.png` (Field P0757, alfalfa, marca «Normal year») |
 | Cifra y fuente | Las de la captura: lámina de 28.4 millares/ha y «Enough for 2.65 of 7.95 hectares» con 9.5 millares/ha (`web/data/cubo.json` → `parcelas.P0757`; cálculo de `web/reglas.js`) |
 | Nota del orador | La alfalfa obliga de 3 a 4 años [P]; el nogal se calcula a 10 años [S]. Esta parcela tiene tres años: su plazo está por vencer y es el momento de comparar. ROOT no marca una opción como la mejor. Las alternativas salen de la tabla oficial de rotaciones (`data/processed/opciones_b3.json`, maestro §5.2); donde faltan, van propuestas del equipo rotuladas [S]. |
 

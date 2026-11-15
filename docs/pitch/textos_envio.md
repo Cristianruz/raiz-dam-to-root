@@ -5,7 +5,7 @@
 
 ## Antes de pegar (Cristian)
 
-Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que se pegan: los bloques están completos, en inglés y sin marcadores.
+Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que se pegan: los bloques están completos y en inglés. Los únicos textos «to be confirmed» que llevan son los de «References» (puntos 9 y 10).
 
 1. **Liga del video.** El archivo es `docs/pitch/video_30s.mp4` (30 s o menos; se vuelve a grabar sobre la página final con `node tests/e2e/grabar_video.mjs`). Súbalo, pruebe la liga en incógnito y póngala en la sección 2.
 2. **Liga del PDF de las diapositivas.** El archivo es `docs/pitch/diapositivas.pdf` (lo genera `node tests/e2e/diapositivas_pdf.mjs` de `docs/pitch/diapositivas.html`). Antes de exportarlo, cambie el marcador «[INTEGRANTES]» de la portada por los nombres.
@@ -16,6 +16,7 @@ Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que s
 7. **Investigación previa con otras herramientas.** `README.md` («SI/AI tools used») nombra a ChatGPT, Gemini, DeepSeek y NotebookLM para la búsqueda y la síntesis previas; `AI_USAGE.md` no lo registra, y por eso el bloque de SI no lo dice. Si se usaron, agregue una línea a `AI_USAGE.md` y esta frase al bloque: `Prior research: Claude, ChatGPT, Gemini, DeepSeek and NotebookLM for search and synthesis; each figure was checked in its original source.`
 8. **Líneas de cada integrante en `AI_USAGE.md`.** El renglón de P2 a P6 (Gemini en Colab o Claude en el navegador) sigue «por llenar». Si nadie usó esas herramientas, quite del bloque de SI el renglón «Notebooks».
 9. **Cita de software de AppEEARS.** AppEEARS pide que se cite la herramienta. El repo registra la versión (3.137) y los identificadores de las dos solicitudes (`docs/ecostress.md`; `data/processed/fuentes.json`), pero no el texto de la cita. En «References» va como «software citation to be confirmed»: cópielo de la página de AppEEARS, con la fecha de acceso, antes de pegar.
+10. **Licencias sin confirmar en «References».** El bloque lleva cinco «terms to be confirmed», de licencias o términos de uso: SIH/Conagua; INIFAP, FIRA e IMTA; ERA5-Land; el catálogo de suelo y las reglas de nutrientes; y ECOCROP. Se dejan a propósito, porque el repo no tiene el texto de esos términos: no los complete de memoria.
 
 ## 1. Qué piden el plan, el kit y la guía de envío 2026
 
@@ -37,7 +38,7 @@ Lo que solo Cristian puede resolver. Nada de esto va dentro de los bloques que s
 - Lo que va dentro de los bloques `text` se pega en el formulario. Lo de fuera son notas internas: no se pegan.
 - **Nombres de los campos por confirmar.** Los títulos de las secciones 3 a 9 siguen la guía de envío 2026 que trajo Cristian. Antes de pegar, confirme en el formulario real el texto exacto de cada campo y su límite de caracteres; si un campo es más corto, recorte desde el final de cada bloque.
 - **Idioma de las ligas.** Los bloques solo enlazan `README.md`, `LIMITATIONS.md`, `DATA_LICENSE.md` y las traducciones de `docs/en/` (índice en `docs/en/README.md`: `result_H1.md`, `result_H1b.md`, `H1b_specification.md`, `result_H3.md`, `model_vs_practice.md`, `story_fields_review.md`). Nunca enlace un `docs/*.md` en español desde el formulario.
-- «[LINK: pendiente — quién la da]» marca una liga que falta. Los pendientes que solo resuelve Cristian están arriba, en «Antes de pegar (Cristian)»; ningún bloque lleva marcadores.
+- «[LINK: pendiente — quién la da]» marca una liga que falta. Los pendientes que solo resuelve Cristian están arriba, en «Antes de pegar (Cristian)»; fuera de «References» (puntos 9 y 10), ningún bloque lleva marcadores.
 - Si el `README.md` o los datos cambian después de la última corrida, vuelva a leer las cifras contra la sección 12.
 
 ## 2. Ligas
@@ -287,7 +288,7 @@ Notas:
 
 - [ ] Todo el formulario en inglés; ninguna liga a un documento en español.
 - [ ] Nombres de los campos y límites de caracteres confirmados en el formulario real, incluido «Use of Super Intelligence (SI)».
-- [ ] Los nueve puntos de «Antes de pegar (Cristian)» están resueltos; ningún bloque lleva marcadores ni texto en español.
+- [ ] Los diez puntos de «Antes de pegar (Cristian)» están resueltos; fuera de los «to be confirmed» de «References», ningún bloque lleva marcadores ni texto en español.
 - [ ] Video de 30 segundos o menos con subtítulos en inglés, o diapositivas (máximo 7).
 - [ ] Ligas sin inicio de sesión, probadas en incógnito: web, repositorio, video y diapositivas.
 - [ ] La sección «NASA Data» enumera cada producto con versión, resolución, periodo, acceso y uso.
