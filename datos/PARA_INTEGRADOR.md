@@ -771,3 +771,45 @@ OpenLandMap); y `docs/ecostress.md`, `docs/reproducir_datos.md`, `docs/suelo_tex
 
 **Pruebas en 7412eaf:** `correr_todo.py` 35 de 35 iguales a lo entregado. `construir.py` con mi buzón actual: entraron 35,
 rechazados 0; CONTRATO OK; VERIFICADOR OK; 1072 pytest y 167 node; «OK: todo pasa».
+
+## 14-nov 23:24 — Revisión programada de las 23:15: integración 16c905d con mi buzón actual
+Para «Revisión multiagente». Construí `claude/keen-mayer-sp0vvm` (16c905d) en una copia aparte, con mi buzón de Drive de
+ahora (los 7 archivos que tu v10 no tiene).
+- `construir.py`: entraron 35, rechazados 0; CONTRATO OK; 1088 pytest y 190 node; «OK: todo pasa».
+- **Fidelidad, celda por celda, de `web/data` contra mis archivos: sin diferencias.** ECOSTRESS: 1,239 parcelas × 12 meses
+  = 14,868 celdas. GAEZ: 30 renglones. Perfil de suelo: 1,239 parcelas, 12,390 celdas.
+- `web_smoke`: **638/639**. Falla «teléfono: objetivos táctiles de al menos 44 px de alto con la ficha abierta (punto 7)»
+  por el botón «Breaks pest cycles» de `web/js/prioridades.js`. Ese botón no lee ningún archivo mío (es un interruptor de la
+  interfaz); lo estoy corriendo con tu v10 para confirmarlo y lo anoto aquí abajo.
+- **Ya aplicados (gracias):** 9 («Enough for the whole field (20.66 ha)»), 12 (fuentes de la presa en [P]), 13 (README con
+  1,139.5 y ECOSTRESS y GAEZ entregados), 16 (el goteo se describe y no se recomienda) y 17 (GEDI: «it does not measure crop
+  height. Fields without trees read about 2.7 m»). I14: con mi `opciones_b3.json` de las 22:27 la tarjeta de alfalfa ya no
+  trae la frase del sorgo; tu repositorio todavía tiene la v10, así que hace falta ingerir de nuevo.
+
+**Siguen pendientes** (pantalla · qué dice · qué debería decir · fuente; el detalle está en la nota de las 22:20):
+- 5 · Ficha, ECOSTRESS · «2.11 mm/day, median of the clear scenes of Aug 2026» · con `n_escenas` y el contraste con el
+  modelo; en P0632, el último mes dentro del ciclo · `web/data/contexto.json` → `ecostress.parcelas` lleva solo `et_mm_dia`
+  (12 valores por parcela): falta pasar `n_escenas` y `etc_modelo_mm` de `ecostress_parcelas.csv`.
+- 6 · Ficha de L0175, memoria · «Summer crop» en 2016, 2025 y 2026 junto a «≥ 11 years» · la línea de la leyenda del nogal ·
+  `memoria_parcelas.csv`.
+- 7 · Tarjeta «Pecan orchard» · «✓ Soil favorable» con «No published range» · veredicto neutro · `suelo_requisitos.json`.
+- 8 · Tarjeta de P0757 · «enough for 1 hectares.» · «enough for 1 hectare.» · texto de la página.
+- 10 · About & Data, «Automated gate» · «no solicitado (use --origen)», «buzón validado: entraron 35, rechazados 0», «cubo
+  REAL: 1239 parcelas, 458 clasificadas, 1282 opciones», «113524 cifras (0 simuladas), 35 fuentes de origen, 59 avisos»,
+  pasos «gemelo» y «pwa» · en inglés (textos en la nota de las 22:20) · `web/data/pruebas.json`.
+- 11 · About & Data · «Pending: every field reports a single method in acuerdo_metodos.» · «Pending: every field reports a
+  single method (phenological rules); the Random Forest has not been run.» · `cultivos_parcelas.csv`.
+- 14 · Ficha, suelo · solo «Phosphorus, potassium, iron, zinc: needs a soil test» · nutrientes por parcela, tipo de suelo y
+  `textos_ficha_en` · en curso con tu agente de suelo; comparo cuando me des el hash.
+- 15 · Contexto regional, GAEZ · «1,665.5 10kg DW/ha», «2 Class», «Forage maize … 9,319.5 kg DW/ha» · «16.7 t DW/ha», «High
+  (class 2)» con `clase_nombre`, y la `nota` del maíz (ya en inglés en mi `gaez_zona.csv`) · `web/data/contexto.json` →
+  `gaez.zonas` no lleva `clase_nombre` ni `nota`.
+- Nuevo · Ficha de P0632 · «Enough for 9.24 of 20.66 hectares (range 7.65 to 11.4)» · los mismos decimales en el rango
+  («7.65 to 11.40», o «7.7 to 11.4») · texto de la página.
+- Nuevo · Ficha de P0757, «Follow the drop» · «Conagua 2024, acuífero 0831 (DR_0831): 122.8 de 614 hm³/año» y «IMTA, COMEII 2021
+  (rango medido 2012–2016)», con las llaves internas «params.eficiencia.conduccion» y «params.gota.c_retorno_superficial» a la
+  vista · «Conagua 2024, aquifer 0831 (DR_0831): 122.8 of 614 hm³/year», «IMTA, COMEII 2021 (range measured 2012–2016)», y las
+  llaves en palabras («district conduction efficiency», «return coefficient») · `data/params.json` (tuyo).
+- `idioma_fuentes` sigue en "es" en `web/data/suelo.json` y `contexto.json`; mis líneas de LEEME ya están en inglés.
+- `datos-satelite` (52151ac, con la integración ya fusionada) todavía no está en la integración: trae los scripts que rehacen
+  las 35 entregas (nota de las 22:45).
