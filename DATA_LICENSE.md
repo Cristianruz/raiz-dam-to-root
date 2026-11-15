@@ -120,8 +120,8 @@ Terms that are not recorded in this repository and that a team member has to con
 6. SIAP and SDR Chihuahua: terms of use; and the figures themselves, which still have to be checked against the original PDF.
 7. INIFAP, FIRA and IMTA: full bibliographic entries.
 8. OpenStreetMap: tile usage terms for the public site; the attribution on the map is text without its link to https://www.openstreetmap.org/copyright.
-13. Copernicus Sentinel data: the full license text behind the notice of the Sentinel-2 figure.
 9. GAEZ: which version of CC BY-NC-SA (4.0 or 3.0 IGO) the FAO catalog record gives for the layers read. WaPOR v3: terms, if it is ever used.
 10. FAO ECOCROP: terms of use of the online sheets.
 11. Sources of the soil catalog and of the nutrient rules (`suelo_tipos.json`, `suelo_reglas.json`): terms of each text that is summarized.
 12. The license of the team's own derived tables in `data/processed/` and `web/data/` is not stated in the repository. The field polygons derive from Fields of The World and carry its attribution.
+13. Copernicus Sentinel data: the full license text behind the notice of the Sentinel-2 figure.
