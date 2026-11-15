@@ -43,7 +43,7 @@ GUT = ("Gutiérrez González, L.S. et al. 2022. «Análisis del suelo y su impor
        "(abstract at https://agris.fao.org/search/en/records/67598d78c7a957febdfbf098: soil analyses from 2018 to May 2021 in "
        "orchards of Delicias, Saucillo, Meoqui, Rosales and Julimes; «la mayoría de los suelos presentan concentraciones bajas de "
        "nitrógeno, fosforo, zinc, hierro y cobre» (most soils have low concentrations of nitrogen, phosphorus, zinc, iron and "
-       f"copper); «solo el 14% de los suelos tienen un pH de 6.7 a 7.3» (only 14 % of the soils have a pH of 6.7 to 7.3)), {LEIDO}")
+       f"copper); «solo el 14% de los suelos tienen un pH de 6.7 a 7.3» (14 % of the soils have a pH of 6.7 to 7.3)), {LEIDO}")
 PMD = ("Municipal Development Plan of Delicias 2024–2027 («Plan Municipal de Desarrollo de Delicias 2024–2027»), annex of the "
        "Official Gazette of the State of Chihuahua (2025), citing INEGI, «Diccionario de Datos Edafológicos», scale 1:250 000 "
        "(version 4), 2016 "
@@ -65,7 +65,7 @@ GAEZ_FAQ = ("FAO and IIASA, GAEZ v4 Frequently Asked Questions, version 2.0, Nov
             "(https://s3.eu-west-1.amazonaws.com/data.gaezdev.aws.fao.org/documentation/GAEZ4_FAQ.pdf), question 13: «should be treated "
             "in a conservative manner» … «appropriate aggregation levels, which are commensurate with the resolution of basic data»; "
             "question 16: «It is generally not recommended to calculate statistics at finer administrative levels with this version of "
-            f"the database.» (after discussing the first subnational level), {LEIDO}")
+            f"the database.» (after discussing the subnational level just below the country), {LEIDO}")
 
 
 def g(nombre_es, s, rasgo, textura, ph, cic, mo, ricos, pobres, nota, tox, fija_p, limita, cultivos, ext, texto_en, ph_rango=None):
