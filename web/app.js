@@ -753,6 +753,19 @@ function textoEs(texto) {
   return `<span lang="es">${esc(texto)}</span>`;
 }
 
+/**
+ * Fuente de un dato (I5 de la revisión total). Las citas del cubo llegan en español y con códigos internos del proyecto
+ * (S#, §, kit…); la interfaz es inglés y aquí no se traducen. Si el dato trae su versión en inglés (…_en), esa va a la
+ * vista; si no, la cita completa queda plegada en un <details> «Source» con lang="es". La etiqueta de evidencia
+ * ([V], [P], [S]) va siempre a la vista, en el rótulo. `etiqueta` undefined = este dato no lleva etiqueta.
+ */
+function htmlFuente(fuente, { en = null, etiqueta = undefined, rotulo = "Source" } = {}) {
+  const marca = etiqueta === undefined ? "" : etiquetaDato(etiqueta);
+  if (en) return `<span class="fuente-en">${esc(rotulo)}: ${esc(en)}</span>${marca}`;
+  if (!fuente) return `${esc(rotulo)}: not available${marca}`;
+  return `<details class="fuente-plegada"><summary>${esc(rotulo)}${marca}</summary><p class="fuente">${textoEs(fuente)}</p></details>`;
+}
+
 function leerControles() {
   estado.D = Number($("#dotacion").value);
   estado.r = $("#lluvia").checked && estado.rSeca !== undefined ? estado.rSeca : estado.rBase;
@@ -1516,7 +1529,7 @@ function pintarLocalidades() {
     })
     .join("");
   const fuentes = [...new Set(locs.map((l) => l.fuente).filter(Boolean))];
-  $("#localidades-fuente").innerHTML = `Source: ${fuentes.length ? textoEs(fuentes.join("; ")) : "not available"}`;
+  $("#localidades-fuente").innerHTML = htmlFuente(fuentes.join("; "));
 }
 
 function agregarLocalidades(mapa) {
@@ -1826,8 +1839,8 @@ function pintarDistrito() {
         : "") +
       `<p>Capacity at <abbr title="Normal maximum operating level">NAMO</abbr>: <strong>${conExacto(b.namo_hm3, fmtHm3)} hm³</strong></p>` +
       // Fuente y etiqueta de cada cifra ([P] prensa, [V] verificado; cubo.distrito, copia de params.json).
-      `<p class="fuente" data-dato="almacenamiento">Storage: ${b.fuente_almacenamiento ? textoEs(b.fuente_almacenamiento) : "no source"}${etiquetaDato(b.etiqueta_almacenamiento)}.</p>` +
-      `<p class="fuente" data-dato="namo">Capacity: ${b.fuente_namo ? textoEs(b.fuente_namo) : "no source"}${etiquetaDato(b.etiqueta_namo)}.</p>`;
+      `<div class="fuente" data-dato="almacenamiento">${htmlFuente(b.fuente_almacenamiento, { en: b.fuente_almacenamiento_en, etiqueta: b.etiqueta_almacenamiento ?? null, rotulo: "Storage source" })}</div>` +
+      `<div class="fuente" data-dato="namo">${htmlFuente(b.fuente_namo, { en: b.fuente_namo_en, etiqueta: b.etiqueta_namo ?? null, rotulo: "Capacity source" })}</div>`;
   } else {
     $("#boquilla").innerHTML = "<p>No data.</p>";
   }
@@ -1842,7 +1855,7 @@ function pintarDistrito() {
       "<p>Availability</p>" +
       `<p class="dato-grande">${v == null ? "no data" : `${esc(fmtSigno(v))} hm³ per year`}</p>` +
       (v != null && v < 0 ? "<p>A negative availability is the official deficit published by Conagua, not a measured loss.</p>" : "") +
-      `<p class="fuente" data-dato="acuifero">Source: ${a.fuente ? textoEs(a.fuente) : "no source"}${etiquetaDato(a.etiqueta)}</p>`;
+      `<div class="fuente" data-dato="acuifero">${htmlFuente(a.fuente, { en: a.fuente_en, etiqueta: a.etiqueta ?? null })}</div>`;
   } else {
     $("#acuifero").innerHTML = "<p>No data.</p>";
   }
@@ -2000,7 +2013,7 @@ function htmlSinRotacion(sr) {
   return (
     '<div class="sin-rotacion" data-parte="sin-rotacion">' +
     `<p><strong>${esc(NOTA_SIN_ROTACION)}</strong> ${esc(sr.motivo ?? "")}</p>` +
-    `<p class="fuente">Source: ${sr.fuente ? textoEs(sr.fuente) : "not available"}${sr.etiqueta ? ` ${esc(sr.etiqueta)}` : ""}</p>` +
+    `<div class="fuente">${htmlFuente(sr.fuente, { en: sr.fuente_en, etiqueta: sr.etiqueta || undefined })}</div>` +
     "</div>"
   );
 }
@@ -2200,7 +2213,7 @@ function htmlDinero(o) {
   const d = o.dinero;
   const cuerpo =
     d && d.margen_min != null
-      ? `<p>Margin: <strong>${esc(fmtRango(d.margen_min, d.margen_max))}</strong></p><p class="fuente">Source: ${esc(d.fuente ?? "no source")}</p>`
+      ? `<p>Margin: <strong>${esc(fmtRango(d.margen_min, d.margen_max))}</strong></p><div class="fuente">${htmlFuente(d.fuente, { en: d.fuente_en })}</div>`
       : "<p><strong>No verified data</strong></p>";
   return (
     `<div class="renglon renglon-dinero" data-semaforo="${esc(sem)}">${circulo(sem, SEMAFORO_OTROS)}<div>` +
@@ -2327,13 +2340,14 @@ function htmlFiltros(o, D = estado.D) {
         const helada = Number.isFinite(f.prob_helada)
           ? `<span class="filtro-helada"> Chance of frost after this planting date: ${fmtPct(f.prob_helada)}.</span>`
           : "";
-        const etiqueta = f.etiqueta ? ` ${esc(f.etiqueta)}` : "";
+
         const vivo = f.vivo
           ? `<span class="filtro-vivo"> Your allocation, ${esc(fmt(f.vivo.D))} thousand m³/ha, ${f.pasa ? "reaches" : "is below"} the ${esc(fmtMillares(f.vivo.minimo))} thousand m³/ha this rule asks for.</span>`
           : "";
         return (
           `<li class="${clase}" data-estado="${esc(e)}" data-filtro="${esc(f.id ?? "")}"${f.vivo ? ' data-vivo="si"' : ""}>${marca} <span class="filtro-texto">${esc(f.motivo ?? f.filtro)}</span>${razon}${helada}${vivo}` +
-          `${f.fuente ? ` <span class="fuente">— ${esc(f.fuente)}${etiqueta}</span>` : ""}</li>`
+          // La cita de la tabla oficial (en español, con códigos internos) va plegada en «Source» (I5).
+          `${f.fuente ? htmlFuente(f.fuente, { en: f.fuente_en, etiqueta: f.etiqueta || undefined }) : ""}</li>`
         );
       })
       .join("") +

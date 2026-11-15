@@ -1597,7 +1597,7 @@ async function pruebaFichaCompleta(page, prefijo, telefono) {
   if (conSinRotacion) {
     const sr = cubo.parcelas[conSinRotacion].sin_rotacion;
     await abrirDesdeLista(page, conSinRotacion);
-    const t = (await page.locator("#ficha [data-parte='sin-rotacion']").innerText().catch(() => "")).replace(/\s+/g, " ");
+    const t = (await page.locator("#ficha [data-parte='sin-rotacion']").textContent().catch(() => "")).replace(/\s+/g, " ");
     check(`${prefijo}${conSinRotacion} (no rota): una tarjeta y su motivo y fuente del dato`, (await page.locator("#ficha .tarjeta").count()) === 1 && t.includes(sr.motivo) && t.includes(sr.fuente.slice(0, 40)), t.slice(0, 160));
     await page.locator("#ficha [data-parte='sin-rotacion']").scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(CAPTURAS, `${sufijo}_ficha_nogal_sin_rotacion.png`) });
@@ -1856,14 +1856,15 @@ async function pruebaAuditoriaMotor(page, prefijo, telefono) {
   const d = cubo.distrito ?? {};
   const b = d.boquilla;
   if (b) {
-    const alm = await texto(page, '#boquilla [data-dato="almacenamiento"]');
-    const namo = await texto(page, '#boquilla [data-dato="namo"]');
+    // I5: la cita está plegada en «Storage source» / «Capacity source»: se lee el contenido del nodo.
+    const alm = await page.locator('#boquilla [data-dato="almacenamiento"]').textContent();
+    const namo = await page.locator('#boquilla [data-dato="namo"]').textContent();
     check(`${prefijo}La Boquilla: almacenamiento con su fuente y su etiqueta ${b.etiqueta_almacenamiento}`, alm.includes(b.fuente_almacenamiento) && alm.includes(b.etiqueta_almacenamiento), alm);
     check(`${prefijo}La Boquilla: capacidad (NAMO) con su fuente y su etiqueta ${b.etiqueta_namo}`, namo.includes(b.fuente_namo) && namo.includes(b.etiqueta_namo), namo);
   }
   const llave = Object.keys(d).find((k) => k.startsWith("acuifero_"));
   if (llave) {
-    const a = await texto(page, '#acuifero [data-dato="acuifero"]');
+    const a = await page.locator('#acuifero [data-dato="acuifero"]').textContent();
     check(`${prefijo}acuífero: fuente y etiqueta ${d[llave].etiqueta}`, a.includes(d[llave].fuente) && a.includes(d[llave].etiqueta), a);
   }
   // Textos de las marcas, la equivalencia y el punto de medición en inglés (los del cubo, copia de params). En el
@@ -1996,7 +1997,7 @@ async function pruebasEscritorio(page, peticiones) {
   // Localidades del equipo: listadas en texto (con su fuente) si el cubo las trae
   const locs = Array.isArray(cubo.localidades) ? cubo.localidades : [];
   if (locs.length) {
-    const textoLoc = await texto(page, "#bloque-localidades");
+    const textoLoc = (await page.locator("#bloque-localidades").textContent()).replace(/\s+/g, " "); // I5: la fuente va plegada
     check(
       "localidades del equipo listadas en texto con su fuente",
       (await page.locator("#lista-localidades li").count()) === locs.length && locs.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(locs[0].fuente),
@@ -2652,7 +2653,7 @@ async function pruebasDosZonas(page, v) {
   }
 
   // Localidades: listadas en texto con su fuente; «Show on map» las lleva al mapa.
-  const textoLoc = await texto(page, "#bloque-localidades");
+  const textoLoc = (await page.locator("#bloque-localidades").textContent()).replace(/\s+/g, " "); // I5: la fuente va plegada
   check(
     "dos zonas: localidades listadas en texto con la leyenda y su fuente",
     textoLoc.includes("Team reference localities (not fields)") && c.localidades.every((l) => textoLoc.includes(l.nombre)) && textoLoc.includes(c.localidades[0].fuente),

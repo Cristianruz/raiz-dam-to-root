@@ -595,8 +595,11 @@ function htmlTabla(modelo) {
 
 function htmlFuente(fuente) {
   const texto = String(fuente ?? "").trim();
-  // La fuente viene de los datos y está en español; la interfaz, en inglés.
-  return texto ? `<p class="resumen-ndvi-fuente">${esc(PREFIJO_FUENTE)}<span lang="es">${esc(texto)}</span></p>` : "";
+  // La fuente viene de los datos y está en español; la interfaz, en inglés: queda plegada en «Source» (I5 de la
+  // revisión total: la cita traía el proyecto de Earth Engine y notas internas a la vista).
+  return texto
+    ? `<details class="resumen-ndvi-fuente"><summary>${esc(PREFIJO_FUENTE.replace(/:\s*$/, ""))}</summary><p lang="es">${esc(texto)}</p></details>`
+    : "";
 }
 
 function textoLectura(modelo, i, elegido) {
