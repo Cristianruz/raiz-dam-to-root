@@ -134,9 +134,9 @@ function fieldLabel(f) {
   const p = f.properties;
   return `${p.id} · ${p.abstencion ? "Not classified" : cropName(p.cultivo_actual)} · ${fmt(p.area_ha)} ha`;
 }
-// Enlace a la ficha de la parcela en la página principal (index.html#<id>).
+// Enlace a la ficha de la parcela en la página principal (explorer.html#<id>).
 function explorerLink(id) {
-  return id ? `index.html#${encodeURIComponent(id)}` : "index.html";
+  return id ? `explorer.html#${encodeURIComponent(id)}` : "explorer.html";
 }
 
 function route() {
@@ -855,7 +855,7 @@ init().catch((err) => {
   status.hidden = false;
   status.textContent = `The dashboard could not load: ${err.message}. Reload the page or `;
   const link = document.createElement("a");
-  link.href = "index.html";
+  link.href = "explorer.html";
   link.textContent = "open the field explorer";
   status.append(link, ".");
   document.body.dataset.dashboard = "error";
