@@ -11,3 +11,6 @@ node_modules/
 buzon/
 .env
 /dist/
+
+# Copias de trabajo de agentes (git worktree): nunca van al repositorio
+.claude/worktrees/
