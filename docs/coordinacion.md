@@ -93,6 +93,8 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 02:38 | integrador | Video de 29 s y diapositivas regenerados sobre la página final (`ae9d54e`) |
 | 02:50 | «Laptop» e integrador | La hoja impresa cita la fuente de la marca en inglés (`10f8be4`, fusionado en `bb44e04`). Revisión cruzada de «Laptop» sobre la mezcla: todo en verde. 1182 pytest y 243 de Node; web_smoke 875/875, pwa 39/39 y sin conexión 22/22 |
 | 02:51 | integrador | PR #7 fusionado en `main` (`c5a9c25`, squash) con la CI en verde sobre `028c785`. `main` se fusionó de vuelta en la integración (`31e6d11`) y se avisó a «Laptop», a las dos conversaciones de diseño y a la sesión de datos |
+| 03:35 | integrador | Buzón v14 de la sesión de datos, solo textos: el motivo del descanso como descripción y las notas de nutrientes sin «best» (`5b6cff4`). Entraron 35, rechazados 0. 1182 pytest y 243 de Node; web_smoke 875/875, pwa 39/39 y sin conexión 22/22 |
+| 03:40 | integrador | Revisión de la rama `Tena` (`351bbf5`, tablero y recomendador) con tres revisores de contexto nuevo, a pedido de Cristian. No se fusiona nada de esa rama sin su decisión |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 
@@ -115,6 +117,7 @@ Revisión pedida por Cristian: cada chat, cada rama y la conversación del integ
 | `ee-crudos` | Rásteres crudos por zona (31 archivos, 192 MiB). No se fusiona ni se borra: es el respaldo de `datos/colab/correr_todo.py` |
 | `revision/web-dos-zonas` | Un commit (`ad42dc3`) que no es ancestro de la integración, pero su contenido ya está: el clic con tolerancia (`web/app.js`) y la hoja impresa en una carta (la comprueba `web_smoke`). Se borra después del evento |
 | `dependabot/…` (PR #2 y #3) | Sin fusionar a propósito hasta después del envío; el #3 rompe la prueba que fija la versión con que se generaron las teselas |
-| `Milo`, `Milo2`, `Tena` | Siguen en `e819b52` (el `main` anterior), sin commits propios. Hay que actualizarlas desde `main` (`c5a9c25`) antes de trabajar en ellas |
+| `Milo`, `Milo2` | Siguen en `e819b52` (el `main` de hace dos PR), sin commits propios. Hay que actualizarlas desde `main` antes de trabajar en ellas |
+| `Tena` | `351bbf5`: un commit con un tablero nuevo en `web/index.html`, un asesor y un recomendador, hecho sobre `e819b52`. En revisión; no se fusiona sin la decisión de Cristian |
 
 Hallazgos de las revisiones de anoche, uno por uno: `docs/revisiones/2026-11-15_cierre_hallazgos.md` (146 renglones: 73 resueltos, 31 parciales, 25 abiertos, 11 de persona y 6 para después del evento, comprobados contra `f0dbf3b`).
