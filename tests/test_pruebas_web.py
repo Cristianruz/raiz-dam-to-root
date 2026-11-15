@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas de motor/pruebas_web.py (las cinco pruebas a la vista, S9 §6) y de las reglas de
 web/js/acerca.js que se pueden revisar sin navegador (sin cifras escritas a mano, sin «first»/«only»).
 
@@ -37,7 +37,7 @@ def parcelas(raiz, filas):
 
 def llm_eval(raiz, casos=30, malos=0, trampas=5, alteradas=0, plantilla=None):
     plantilla = casos if plantilla is None else plantilla
-    lineas = ["# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+    lineas = ["# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
               f"# casos correctos: {casos - malos} de {casos}",
               f"# cifras alteradas: {alteradas} de 71 números en los casos aprobados (meta 0 %)",
               f"# uso de plantilla: {plantilla} de {casos}",
@@ -283,7 +283,7 @@ def test_acerca_js_sin_cifras_ni_palabras_prohibidas():
 
     ruta = RAIZ / "web/js/acerca.js"
     fuente = ruta.read_text(encoding="utf-8")
-    assert fuente.startswith("// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026")
+    assert fuente.startswith("// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026")
     malas = sc.cifras_sin_fuente(sc.fragmentos_js(fuente), "acerca.js")
     assert not malas, sc.mensaje("js/acerca.js", malas)
     visibles = " ".join(t for _, t in sc.fragmentos_js(fuente))
@@ -299,7 +299,7 @@ def test_acerca_js_sin_cifras_ni_palabras_prohibidas():
 
 def test_acerca_css_con_encabezado():
     assert (RAIZ / "web/css/acerca.css").read_text(encoding="utf-8").startswith(
-        "/* AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 */")
+        "/* AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 */")
 
 
 # --- Repo real ---------------------------------------------------------------------------------

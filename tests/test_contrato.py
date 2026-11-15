@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """K-TEST 8: contrato de datos v4 (kit §2.2–2.5) con validar_contrato.py.
 
 1) Los archivos de web/data pasan el validador.

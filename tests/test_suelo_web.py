@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas de motor/suelo_web.py (perfil de suelo y aptitud de cada opción → web/data/suelo.json).
 
 Decisión: docs/decisiones/2026-11-14_suelo_aptitud.md.
@@ -105,7 +105,7 @@ def test_sin_entregas_los_tres_bloques_van_en_null_con_su_motivo(tmp_path):
         assert suelo[f"{bloque}_motivo"] == sw.MOTIVO_PEDIDO == "Requested from the data team — not delivered yet"
     assert suelo["aptitud_falta"] == [sw.ARCHIVO_PERFIL, sw.ARCHIVO_REQUISITOS]
     assert suelo["motivo_pedido"] == sw.MOTIVO_PEDIDO and suelo["avisos"] == []
-    assert suelo["_encabezado"] == "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+    assert suelo["_encabezado"] == "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
     assert suelo["decision"] == "docs/decisiones/2026-11-14_suelo_aptitud.md"
     assert resumen["bloques"] == {b: False for b in BLOQUES}
     assert resumen["parcelas_con_perfil"] == 0 and resumen["opciones_evaluadas"] == 0 and resumen["estados"] == {}

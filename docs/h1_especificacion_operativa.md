@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # H1 · Especificación operativa del back-test (escrita y subida ANTES de correr el modelo)
 
 **Fecha y hora:** 14-nov-2026, 14:11 (hora de Chihuahua; commit b9baced). El commit que introduce este archivo es anterior al commit

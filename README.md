@@ -1,8 +1,8 @@
-*AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026*
+*AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026*
 
-# Raíz – From Dam to Root
+# ROOT – From Dam to Root
 
-Team **Los Norteados** · NASA Space Apps Challenge 2026, Chihuahua local event · Challenge *Field Shift: Adapting Farms with NASA Data*
+Team **Orbital Farming** · NASA Space Apps Challenge 2026, Chihuahua local event · Challenge *Field Shift: Adapting Farms with NASA Data*
 
 > **Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover.** (S9 §1)
 
@@ -19,11 +19,11 @@ Labels used everywhere: **[V]** verified in a primary source · **[P]** press or
 
 ## Summary
 
-Raíz is a **digital twin of the pilot areas** of the DR-005 Delicias irrigation district (Chihuahua, Mexico). It is a replica of the pilot areas that is updated with data and lets a farmer or a technician try out decisions before planting. We do not use the label to promise more than there is ([`docs/decisiones/2026-11-14_gemelo_digital.md`](docs/decisiones/2026-11-14_gemelo_digital.md)).
+ROOT is a **digital twin of the pilot areas** of the DR-005 Delicias irrigation district (Chihuahua, Mexico). It is a replica of the pilot areas that is updated with data and lets a farmer or a technician try out decisions before planting. We do not use the label to promise more than there is ([`docs/decisiones/2026-11-14_gemelo_digital.md`](docs/decisiones/2026-11-14_gemelo_digital.md)).
 
-For each estimated field, Raíz shows every crop option as a multi-year water commitment and sets it against the dam allocation that the user picks.
+For each estimated field, ROOT shows every crop option as a multi-year water commitment and sets it against the dam allocation that the user picks.
 
-| Part of a twin | In Raíz today | Where it comes from |
+| Part of a twin | In ROOT today | Where it comes from |
 |---|---|---|
 | Replica of the terrain and the fields | 1,239 estimated fields on a map; slope and runoff routes of each area | Fields of The World; NASADEM, 30 m |
 | Observed state | Greenness of each field, year by year, 2016–2026; bare-soil days | HLS (Landsat + Sentinel-2) |
@@ -117,7 +117,7 @@ These pieces are being built on the working branch. The page does not do any of 
 
 Status values: **in use** (the page or a published test reads it) · **delivered, not on the page yet** (validated in `data/processed/`, see In progress) · **requested, not delivered yet**. Resolutions and periods are the ones recorded in `data/processed/fuentes.json`, in the delivered files or in the data-session documents named in each row.
 
-| Product | What Raíz uses it for | Resolution and period, as recorded in the repo | Status |
+| Product | What ROOT uses it for | Resolution and period, as recorded in the repo | Status |
 |---|---|---|---|
 | HLS v2, Harmonized Landsat Sentinel-2 (`NASA/HLS/HLSL30/v002`, `NASA/HLS/HLSS30/v002`, via Google Earth Engine) | Monthly greenness per field: 2026 crop map (rules), field memory, bare-soil days, test H3 | 30 m (`docs/equipo/verificar_datos_nasa.md` §2). Agricultural years 2016–2026 | In use |
 | NASA POWER, Daily API, community AG | Daily climate for FAO-56 reference ET and crop water need, one file per area; climatology of test H1; contrast of the storm depth | One MERRA-2 cell of 0.5° × 0.625° per area. 1984-01-01 to 2026-11-09 (`data/processed/eto_diaria.csv`) | In use |
@@ -317,7 +317,7 @@ The Earth Engine pieces run in a separate session, never in this repository. NAS
 | `requirements.txt`, `requirements-datos.txt`, `package.json` | Python dependencies with exact versions; rasterio, needed just to regenerate the relief tiles; Node test script (no dependencies) |
 | `data/params.json` | Every constant of the project, with value, unit, source and label |
 | `data/opciones_b4.json` | Provisional crop options per current crop [S], until the team's rotation table arrives |
-| `data/recursos_reto.json` | Challenge data resources and their role in Raíz |
+| `data/recursos_reto.json` | Challenge data resources and their role in ROOT |
 | `data/processed/` | Validated cache of the team's deliveries, with sha256 in `fuentes.json` |
 | `data/raw/`, `data/simulados.json` | Untouched public data (empty on this branch); inputs of the simulated data used before real deliveries (not data) |
 | `motor/` | `ensamblar.py` and `esquemas.py` (mailbox), `b4_cubo.py` (cube and the drop), `relieve_web.py` (relief layer), `manifest.py`, `verificador.py` (figure checker), `pruebas_web.py` (tests in sight), `demo_offline.py` (single-file demo), `simulados.py`. In progress: `gemelo_web.py`, `dem_teselas.py`, `ndvi_web.py`, `contexto_web.py` |
@@ -343,4 +343,4 @@ Code: Apache-2.0 (`LICENSE`). Third-party data and libraries keep their own lice
 
 ## Resumen en español
 
-Raíz muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa (S9 §1). Es un gemelo digital de dos zonas piloto del DR-005 Delicias, Chihuahua, con datos abiertos de la NASA (HLS, POWER, NASADEM y GPM IMERG). No tiene sensores en campo ni datos en tiempo real: se actualiza en cada corrida. La herramienta no reparte, vende ni intercambia agua, no pronostica la presa y apoya, sin sustituir, el juicio del agricultor y del técnico. Los resultados desfavorables se publican igual que los favorables, y las pruebas que no se han ejecutado aparecen como «not run».
+ROOT muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa (S9 §1). Es un gemelo digital de dos zonas piloto del DR-005 Delicias, Chihuahua, con datos abiertos de la NASA (HLS, POWER, NASADEM y GPM IMERG). No tiene sensores en campo ni datos en tiempo real: se actualiza en cada corrida. La herramienta no reparte, vende ni intercambia agua, no pronostica la presa y apoya, sin sustituir, el juicio del agricultor y del técnico. Los resultados desfavorables se publican igual que los favorables, y las pruebas que no se han ejecutado aparecen como «not run».

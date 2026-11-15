@@ -1,5 +1,5 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Golden set for the verifier; values are test data. Set dorado del verificador de cifras (motor/verificador.py): 25 casos legítimos que deben pasar y 5 trampas que deben fallar por el motivo indicado. Los textos están en inglés, como la web. Los valores de los marcadores se copiaron de web/data/explicaciones.json, web/data/cubo.json, web/data/parcelas.geojson y data/params.json del 14-nov-2026 (y el 3.5 de la trampa T02, de S9 §5); aquí solo sirven para probar el verificador, no se muestran en la web.",
  "fuente": "Kit v4 C3 paso 5 (30 casos, incluye 5 trampas) y K-TEST 6; S9 §6 prueba 4 (0 % de cifras alteradas)",
  "n_casos": 30,

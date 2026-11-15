@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Preguntas difíciles · respuestas para los 3 minutos de preguntas
 
 **BORRADOR para que el equipo lo ajuste (responsable de presentación y pitch).** Cada respuesta se sostiene con una cifra del repo; si el repo cambia, cambia la respuesta.
@@ -18,7 +18,7 @@
 ## A. Jurado local (agricultores, técnicos, gente del distrito)
 
 ### 1. ¿Quién decide, la herramienta o el agricultor?
-- **Respuesta.** Decide el agricultor, con su técnico. Raíz pone las opciones lado a lado y no marca ninguna como la mejor. Cada ficha y cada mensaje llevan el aviso de que la herramienta apoya y no sustituye ese juicio.
+- **Respuesta.** Decide el agricultor, con su técnico. ROOT pone las opciones lado a lado y no marca ninguna como la mejor. Cada ficha y cada mensaje llevan el aviso de que la herramienta apoya y no sustituye ese juicio.
 - **Cifra.** Ninguna: es una regla del proyecto.
 - **Archivo.** `CLAUDE.md`, regla 10; `web/index.html` (aviso fijo); `web/js/mensaje.js` (aviso en español).
 
@@ -124,7 +124,7 @@
 - **Archivo.** `docs/decisiones/2026-11-14_gemelo_digital.md`; `README.md`, «Summary» («What the twin is not»); `LIMITATIONS.md`, «What "digital twin" means here».
 
 ### 19. ¿En qué se diferencia de OpenET o de un mapa de NDVI?
-- **Respuesta.** OpenET no cubre México, y mide el agua que ya consumió lo que está sembrado. Un mapa de NDVI dice qué tan verde está la parcela. Raíz usa ese verdor como insumo y contesta otra pregunta, antes de sembrar: cuánta agua pide cada opción, por cuántos años obliga y para cuántas hectáreas alcanza la dotación que usted elija.
+- **Respuesta.** OpenET no cubre México, y mide el agua que ya consumió lo que está sembrado. Un mapa de NDVI dice qué tan verde está la parcela. ROOT usa ese verdor como insumo y contesta otra pregunta, antes de sembrar: cuánta agua pide cada opción, por cuántos años obliga y para cuántas hectáreas alcanza la dotación que usted elija.
 - **Cifra.** Plazo de la alfalfa: 3 a 4 años [P]. Nogal: horizonte de cálculo de 10 años [S].
 - **Archivo.** S9 §4 y §11; `README.md`, «NASA Data» (OpenET) y «Summary».
 
@@ -132,7 +132,7 @@
 - **Respuesta.** Cinco están dentro del cálculo o de una prueba publicada: HLS, POWER, NASADEM, GPM IMERG y VIIRS con SSEBop. SMAP, MODIS, GRACE, GLDAS, NLDAS y GEDI ya se entregaron y se validaron, como contexto regional o como evidencia por parcela; **[SI ESTÁ CONECTADO]** la página los muestra en «Regional context». ECOSTRESS está pedido y no ha llegado. Ninguna serie regional cambia el semáforo de una parcela.
 - **Archivo.** `README.md`, «NASA Data»; `docs/decisiones/2026-11-14_recursos_del_reto.md`; `docs/referencias/recursos_reto.md`.
 
-| Base de datos | Para qué la usa Raíz | Estado |
+| Base de datos | Para qué la usa ROOT | Estado |
 |---|---|---|
 | HLS v2 (Landsat y Sentinel-2 armonizados, 30 m) | Verdor mensual por parcela: mapa de cultivos de 2026, memoria de 2016 a 2026, días de suelo desnudo y la prueba H3 | En uso |
 | NASA POWER (clima diario) | Clima para calcular con FAO-56 el agua que pide cada cultivo; climatología de la prueba H1 | En uso |

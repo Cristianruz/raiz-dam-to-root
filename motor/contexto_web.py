@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Bases de datos del reto para la web: escribe web/data/contexto.json.
 
 Decisión: docs/decisiones/2026-11-14_recursos_del_reto.md (papel de cada base de datos del reto y
@@ -97,7 +97,7 @@ if str(RAIZ) not in sys.path:
 
 from motor import esquemas as E  # noqa: E402
 
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 NOMBRE_SALIDA = "contexto.json"
 NOMBRE_FUENTES = "fuentes.json"
 DECISION = "docs/decisiones/2026-11-14_recursos_del_reto.md"

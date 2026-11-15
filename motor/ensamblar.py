@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Ensamblador del buzón de entregas (kit v4: K-ENS pasos 1, 2 y 6(a); tabla 0.4-B).
 
 Qué hace:
@@ -70,7 +70,7 @@ from motor import esquemas as E  # noqa: E402
 # Lista de lenguaje que la ficha no admite (CLAUDE.md, regla 10): una sola fuente, el verificador.
 from motor import verificador as V  # noqa: E402
 
-ENCABEZADO ="AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO ="AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 SALIDA_POR_OMISION = RAIZ / "data/processed"
 LOG_POR_OMISION = RAIZ / "docs/entregas_log.md"
 PARAMS_POR_OMISION = RAIZ / "data/params.json"

@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Textos para el formulario de envío (en inglés)
 
 **BORRADOR para que el equipo lo ajuste (responsable de presentación y pitch, con el integrador).** Cada texto sale del `README.md` del 14-nov, incluidos los cambios de las 22:53 (commit `b73e8b3`: H1-b y «Model against local practice»); no agrega cifras nuevas. Una sola frase se aparta del README: la del goteo (sección 5), porque en ese punto el README quedó atrasado. Además, estos textos no copian una frase del README que otro documento del repo contradice (nota al final de la sección 5).
@@ -37,15 +37,15 @@
 ## 3. Project name
 
 ```text
-Raíz – From Dam to Root
+ROOT – From Dam to Root
 ```
 
-Team: Los Norteados · Local event: Chihuahua · Challenge: Field Shift: Adapting Farms with NASA Data
+Team: Orbital Farming · Local event: Chihuahua · Challenge: Field Shift: Adapting Farms with NASA Data
 
 ## 4. High-level summary (short)
 
 ```text
-Raíz is a digital twin of two pilot areas of the DR-005 Delicias irrigation district in Chihuahua, Mexico. Before you plant, it shows the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover. The user picks the dam allocation with a slider. For each estimated field, Raíz compares the current rotation with alternatives, using open NASA data (HLS, NASA POWER, NASADEM and GPM IMERG). Every test result is published with the same visibility, favorable or not. The tool supports, never replaces, the judgment of farmers and local experts.
+ROOT is a digital twin of two pilot areas of the DR-005 Delicias irrigation district in Chihuahua, Mexico. Before you plant, it shows the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover. The user picks the dam allocation with a slider. For each estimated field, ROOT compares the current rotation with alternatives, using open NASA data (HLS, NASA POWER, NASADEM and GPM IMERG). Every test result is published with the same visibility, favorable or not. The tool supports, never replaces, the judgment of farmers and local experts.
 ```
 
 Versión de una línea, por si el campo es muy corto:
@@ -63,7 +63,7 @@ In the DR-005 Delicias irrigation district (73,002 ha; 8,113 producers), farmers
 The mechanism behind the project: an annual crop can be skipped in a dry year; a perennial crop cannot. Its water stays committed for years and, when the dam falls short, it comes from the aquifer.
 
 WHAT RAÍZ DOES
-Raíz is a digital twin of two pilot areas: a replica that is updated with data and lets a farmer or a technician try out decisions before planting. It has three screens.
+ROOT is a digital twin of two pilot areas: a replica that is updated with data and lets a farmer or a technician try out decisions before planting. It has three screens.
 
 1. Control center. A map of 1,239 estimated fields, an allocation slider in thousand cubic meters per hectare with three reference marks taken from the press, and a "Rain −20 %" switch. The main indicator is the water already committed: the share of the allocation that perennial fields ask for before a single hectare of annual crops is planted. A "Terrain & runoff" overlay with "Simulate a storm" shows runoff routes at area scale.
 2. Field sheet. The field memory since 2016, the current rotation and two or three alternatives with Water, Soil and Money rows, a "Follow the drop" diagram (dam, canal, field, crop, aquifer), and a "Why?" section with the five answers the challenge asks for.

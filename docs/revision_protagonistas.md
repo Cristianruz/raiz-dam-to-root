@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Revisión de las parcelas protagonistas en color verdadero (kit B1, paso 4)
 
 **Fecha de la revisión:** 14-nov-2026, 15:50 (hora de Chihuahua).

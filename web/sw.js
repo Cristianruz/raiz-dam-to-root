@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/sw.js — Service worker del gemelo digital: la aplicación sigue funcionando sin red con la última copia
 // sincronizada (docs/decisiones/2026-11-14_gemelo_digital.md, «Qué cambia en el producto», punto 4).
 // Sin dependencias. Lo registra web/js/instalar.js; el listado de archivos lo genera motor/pwa.py.
@@ -60,7 +60,7 @@ const sinConsulta = (url) => url.split(/[?#]/)[0];
 const BUSQUEDA = { ignoreSearch: true, ignoreVary: true };
 
 // ------------------------------------------------------------------------------------------ copias guardadas
-/** Nombres de las cachés de Raíz, de la más vieja a la más nueva (el navegador las entrega en orden de creación). */
+/** Nombres de las cachés de ROOT, de la más vieja a la más nueva (el navegador las entrega en orden de creación). */
 async function nombresDeCopias() {
   return (await caches.keys()).filter((nombre) => nombre.startsWith(PREFIJO));
 }
@@ -99,7 +99,7 @@ async function copiaVigente() {
   return hallada;
 }
 
-/** Borra las cachés de Raíz que no sean `conservar`. */
+/** Borra las cachés de ROOT que no sean `conservar`. */
 async function borrarOtras(conservar) {
   const nombres = await nombresDeCopias();
   await Promise.all(nombres.filter((nombre) => nombre !== conservar).map((nombre) => caches.delete(nombre)));

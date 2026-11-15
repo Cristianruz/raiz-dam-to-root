@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Genera web/data/manifest.json (kit v4 §2.5). Nunca se escribe a mano.
 
 Contenido:
@@ -72,7 +72,7 @@ except ImportError:  # pragma: no cover - depende de cómo se llame
     from relieve_web import ZONA_POR_OMISION
 
 RAIZ = Path(__file__).resolve().parent.parent
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 SCRIPT_SIMULADOS = "motor/simulados.py"
 SCRIPT_ENSAMBLADO = "motor/ensamblar.py"
 SCRIPT_RELIEVE = "motor/relieve_web.py"

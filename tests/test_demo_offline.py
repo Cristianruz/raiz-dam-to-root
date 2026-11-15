@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas de motor/demo_offline.py: la copia SIN RED de la web en un solo archivo HTML.
 
 Sin navegador (la prueba con Chromium y la red cortada es tests/e2e/offline_smoke.mjs):
@@ -27,7 +27,7 @@ WEB = RAIZ / "web"
 sys.path.insert(0, str(RAIZ / "motor"))
 import demo_offline  # noqa: E402
 
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 NOTA_SIN_COMMIT = "Offline copy built from the repository — no network needed; base map tiles need a connection."
 
 
@@ -278,7 +278,7 @@ def test_la_orden_escribe_la_copia_con_el_commit_de_git(tmp_path):
 
 # --- Webs mínimas: los casos que la web real no trae -------------------------------------------------
 INDEX = """<!doctype html>
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 (web de prueba) -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 (web de prueba) -->
 <html lang="en"><head><meta charset="utf-8"><title>prueba</title>
 <!-- <link rel="stylesheet" href="comentada.css"> <script src="comentado.js"></script> -->
 {cabeza}

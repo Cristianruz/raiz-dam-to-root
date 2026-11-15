@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/instalar.js — Aplicación instalable y sin conexión: registra el service worker (web/sw.js), ofrece
 // «Install app» y dice si hay conexión y si la copia sin conexión ya está guardada
 // (docs/decisiones/2026-11-14_gemelo_digital.md, «Qué cambia en el producto», punto 4).

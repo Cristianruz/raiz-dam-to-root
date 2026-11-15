@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """K-TEST 6: verificador de cifras (kit v4 C3 paso 3; S9 §6 prueba 4).
 
 - Los casos del set dorado (tests/casos/set_dorado.json) dan el veredicto esperado y

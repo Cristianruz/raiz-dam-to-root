@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas de motor/relieve_web.py (capa de relieve y tormenta para la web).
 
 - Sin entregas no escribe nada y borra la capa vieja.

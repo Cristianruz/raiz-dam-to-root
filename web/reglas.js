@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // Reglas que calcula la web con el deslizador (kit v4 §2.4; S9 §5).
 // ÚNICA implementación: la usan web/app.js y las pruebas (tests/reglas.test.js).
 // Ninguna cifra vive aquí: todo entra por parámetro desde cubo.json / parcelas.geojson.

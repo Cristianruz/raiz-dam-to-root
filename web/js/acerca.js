@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/acerca.js — Pantalla de inicio de tres pasos y sección «About & Data» (kit C5, pasos 2 y 3;
 // S9 §4 «Pruebas a la vista» y §6). Módulo ES, sin dependencias.
 //
@@ -231,7 +231,7 @@ export function montarInicio(contenedor = typeof document !== "undefined" ? docu
   fondo.innerHTML = `
     <section class="acerca-inicio-tarjeta" role="dialog" aria-modal="true" aria-labelledby="${id}-titulo" aria-describedby="${id}-lema" tabindex="-1">
       <button type="button" class="acerca-inicio-x" aria-label="Close the introduction"><span aria-hidden="true">×</span></button>
-      <h2 class="acerca-inicio-titulo" id="${id}-titulo">Raíz – From Dam to Root</h2>
+      <h2 class="acerca-inicio-titulo" id="${id}-titulo">ROOT – From Dam to Root</h2>
       <p class="acerca-inicio-lema" id="${id}-lema">Before you plant, see the water you are committing.</p>
       <ol class="acerca-inicio-pasos">
         ${PASOS_INICIO.map((p) => `<li><strong>${esc(p.titulo)}</strong><span>${esc(p.texto)}</span></li>`).join("")}
@@ -391,8 +391,8 @@ function htmlDatosNasa(manifest, cubo, relieve, id, error) {
   const { filas, otras, hayCache } = filasNasa(manifest, cubo, relieve);
   const cuerpo = filas.length
     ? `<div class="acerca-tabla-caja"><table class="acerca-tabla">
-        <caption class="solo-lector">NASA data used by Raíz, read from manifest.json</caption>
-        <thead><tr><th scope="col">Data</th><th scope="col">Product</th><th scope="col">What Raíz uses it for</th><th scope="col">Files and recorded source</th></tr></thead>
+        <caption class="solo-lector">NASA data used by ROOT, read from manifest.json</caption>
+        <thead><tr><th scope="col">Data</th><th scope="col">Product</th><th scope="col">What ROOT uses it for</th><th scope="col">Files and recorded source</th></tr></thead>
         <tbody>${filas
           .map(
             (r) => `<tr data-familia="${esc(r.familia.id)}">
@@ -400,7 +400,7 @@ function htmlDatosNasa(manifest, cubo, relieve, id, error) {
               <td data-etiqueta="Product">${r.productos.map((p) => `<span class="acerca-producto">${esc(p)}</span>`).join("")}` +
               (r.escala.length ? `<span class="acerca-escala">Scale: ${r.escala.map(esc).join(" · ")}</span>` : "") +
               `</td>
-              <td data-etiqueta="What Raíz uses it for"><ul class="acerca-usos">${r.usos.map((u) => `<li>${esc(u)}</li>`).join("")}</ul></td>
+              <td data-etiqueta="What ROOT uses it for"><ul class="acerca-usos">${r.usos.map((u) => `<li>${esc(u)}</li>`).join("")}</ul></td>
               <td data-etiqueta="Files and recorded source"><ul class="acerca-archivos">${r.archivos.map((f) => htmlArchivo(f, hayCache)).join("")}</ul></td>
             </tr>`,
           )

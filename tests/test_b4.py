@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Motor B4 (motor/b4_cubo.py) con una y con dos zonas (decisión docs/decisiones/2026-11-14_dos_zonas.md).
 
 (a) Con data/processed actual (una zona, sin propiedad «zona» ni sufijos): «zonas» trae solo

@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // Funciones puras de web/js/contexto.js (bases de datos del reto;
 // docs/decisiones/2026-11-14_recursos_del_reto.md): las MISMAS que usa la página.
 // - clima del año: valores del año elegido, diferencia IMERG − POWER, año por omisión y modelos de las gráficas;

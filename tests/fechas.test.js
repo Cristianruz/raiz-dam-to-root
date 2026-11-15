@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // Fechas de la hoja impresa (web/js/mensaje.js → fmtFechaUi) con la zona horaria de la zona piloto.
 // - Una fecha sin hora («AAAA-MM-DD», como la fecha de consulta de las fuentes) es un día del calendario:
 //   sale el mismo día en cualquier zona horaria. Antes, new Date("2026-11-14") se leía como medianoche UTC y

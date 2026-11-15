@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Las cinco pruebas a la vista (S9 §6) para la sección «About & Data» de la web (kit C5, paso 3).
 
 Escribe web/data/pruebas.json con cada prueba, su criterio declarado ANTES de ver el resultado
@@ -43,7 +43,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 SCRIPT = "motor/pruebas_web.py"
 
 # Repositorio público (git remote «origin») y anclas que cita la web.

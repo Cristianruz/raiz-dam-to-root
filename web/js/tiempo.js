@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/tiempo.js — Línea de tiempo del gemelo digital: el estado observado de cada parcela, año agrícola por
 // año agrícola (docs/decisiones/2026-11-14_gemelo_digital.md, «Qué cambia en el producto», punto 2).
 // Módulo ES, sin dependencias. Estilos: web/css/tiempo.css (cargue esa hoja junto con este módulo).

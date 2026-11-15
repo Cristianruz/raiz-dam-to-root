@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Data licenses / Licencias de datos
 
 The code of this repository is licensed under Apache 2.0 (`LICENSE`). That license does not cover third-party data or libraries: each keeps its own license or terms of use.

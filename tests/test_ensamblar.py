@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas del ensamblador del buzón (motor/ensamblar.py; kit v4 K-ENS y tabla 0.4-B).
 
 Cubre:
@@ -580,7 +580,7 @@ VALIDOS = {
     "opciones_b3.json": (FIXTURES / "opciones_b3/opciones_b3.json").read_text(encoding="utf-8"),
     "fuentes_A1.csv": f"archivo,url_o_api,fecha_consulta,sha256\npower.json,https://power.larc.nasa.gov/api/temporal/daily/point,2026-11-14,{'a' * 64}\n",
     "resultado_H1.md": "# Resultado H1\nmeets the preregistered criterion (prueba)\n",
-    "plantillas_explicaciones.md": "<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->\n¿Por qué? Pide {{f1}} millares por {{f2}}.\n",
+    "plantillas_explicaciones.md": "<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->\n¿Por qué? Pide {{f1}} millares por {{f2}}.\n",
     "figura_tornado.png": None,  # se arma con la firma PNG
 }
 

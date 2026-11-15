@@ -1,5 +1,5 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/dem_teselas.py; no se edita a mano. Dice de qué ráster salieron las teselas de esta carpeta; tests/test_gemelo_motor.py lo compara con el .tif y con las teselas.",
  "zona": "delicias_saucillo",
  "origen": {

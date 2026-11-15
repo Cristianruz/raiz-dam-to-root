@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Verificador de cifras de las explicaciones (kit v4 C3 paso 3; K-TEST 6; S9 §6 prueba 4).
 
 Las explicaciones (web/data/explicaciones.json) traen, por llave, «textos» con las
@@ -42,7 +42,7 @@ RUTA_MANIFEST = RAIZ / "web/data/manifest.json"
 RUTA_PARAMS = RAIZ / "data/params.json"
 RUTA_SET_DORADO = RAIZ / "tests/casos/set_dorado.json"
 RUTA_REPORTE = RAIZ / "docs/figuras/llm_eval.csv"
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 
 # Las 5 respuestas de cada explicación (kit v4 §2.5; igual que validar_contrato.py).
 PREGUNTAS = ("por_que", "evidencia", "beneficios", "que_no_sabemos", "riesgos")

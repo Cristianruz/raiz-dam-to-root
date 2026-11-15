@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Uso de Earth Engine · proyecto `iondroplet` (no comercial, nivel Comunidad, 150 EECU-h/mes)
 
 | Fecha y hora (CST) | Tarea | Área | Uso | Nota |

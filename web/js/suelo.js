@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/suelo.js — Perfil de suelo de la parcela y aptitud de cada opción para ese suelo
 // (docs/decisiones/2026-11-14_suelo_aptitud.md). Módulo ES independiente, sin dependencias. Todo lo
 // que muestra sale de web/data/suelo.json (lo escribe motor/suelo_web.py): este archivo no trae ninguna

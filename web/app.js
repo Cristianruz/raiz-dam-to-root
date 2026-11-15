@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/app.js — Centro de control (kit C1) y ficha de parcela (kit C2), sin frameworks.
 //
 // Reglas de este archivo:
@@ -151,7 +151,7 @@ const PREGUNTAS = [
 
 const GLOSARIO = [
   ["ET", "Evapotranspiration: the water the crop transpires plus what evaporates from the soil. It is the water actually consumed."],
-  ["NDVI (“greenness”)", "A satellite index of how green a field is. Raíz reads it from NASA HLS images."],
+  ["NDVI (“greenness”)", "A satellite index of how green a field is. ROOT reads it from NASA HLS images."],
   ["Bare soil", "Days with almost no green cover. Bare soil in the windy season can blow away."],
   ["Frost risk", "Chance of a freezing night in the planting window, from NASA POWER temperatures."],
   ["Water balance", "Every cubic metre that leaves the dam ends up as crop consumption, aquifer recharge or other losses."],
@@ -384,7 +384,7 @@ function cargarOpcional(ruta) {
   if (!opcionales.has(ruta)) {
     const promesa = leerOpcional(ruta).then((r) => {
       if (r.estado !== "ok") opcionales.delete(ruta);
-      if (r.estado === "error") console.error(`Raíz: ${ruta} could not be read (${r.detalle})`);
+      if (r.estado === "error") console.error(`ROOT: ${ruta} could not be read (${r.detalle})`);
       return r;
     });
     opcionales.set(ruta, promesa);
@@ -418,7 +418,7 @@ async function iniciar() {
     ]);
     estado.suelo = suelo.estado === "ok" ? suelo.datos : null;
     estado.sueloError = suelo.estado === "error" ? suelo.detalle : null;
-    if (estado.sueloError) console.error(`Raíz: data/suelo.json could not be read (${estado.sueloError})`);
+    if (estado.sueloError) console.error(`ROOT: data/suelo.json could not be read (${estado.sueloError})`);
     estado.contexto = datosDe(contexto);
     estado.ndvi = datosDe(ndvi);
     // Cómo fue cada lectura: «ausente» (404, no se construyó) no es lo mismo que «error» (la ficha lo distingue).
@@ -1302,7 +1302,7 @@ function crearMapa() {
       cooperativeGestures: !esAncho(),
     });
   } catch (err) {
-    console.warn("Raíz: map not available", err);
+    console.warn("ROOT: map not available", err);
     avisoMapa("The map could not be drawn here (WebGL not available); use the field list to open each field.");
     document.body.dataset.mapa = "sin-mapa";
     return;
@@ -1331,7 +1331,7 @@ function crearMapa() {
       }
       return;
     }
-    console.warn("Raíz: map warning", ev?.error?.message ?? ev);
+    console.warn("ROOT: map warning", ev?.error?.message ?? ev);
   });
 
   mapa.on("load", () => {
@@ -1543,7 +1543,7 @@ async function iniciarRelieve(mapa) {
     });
   } catch (err) {
     // Falla inesperada del módulo: no es «not run». Se dice en el bloque (y en la consola).
-    console.error("Raíz: terrain layer could not be built", err);
+    console.error("ROOT: terrain layer could not be built", err);
     const aviso = document.createElement("p");
     aviso.className = "relieve-no-corrido relieve-error";
     aviso.setAttribute("role", "alert");
@@ -1579,7 +1579,7 @@ function iniciarGemelo3D(mapa) {
     });
     estado.vista3d.actualizar({ features: estado.parcelas.features, cubo: estado.cubo, D: estado.D, r: estado.r });
   } catch (err) {
-    console.error("Raíz: the 3D twin view could not be prepared", err);
+    console.error("ROOT: the 3D twin view could not be prepared", err);
     estado.vista3d = null;
   }
   // Control del mapa con el botón y su motivo (texto + aria-pressed; operable con el teclado: es un <button>).
@@ -1670,7 +1670,7 @@ function iniciarLineaDeTiempo() {
   try {
     estado.linea = crearLineaDeTiempo({ contenedor: cont, gemelo: estado.gemelo, alCambiar: alCambiarAnio, reducirMovimiento: reduceMovimiento });
   } catch (err) {
-    console.error("Raíz: the timeline could not be built", err);
+    console.error("ROOT: the timeline could not be built", err);
     estado.linea = null;
     return;
   }
@@ -1699,7 +1699,7 @@ function iniciarEstadoGemelo() {
       zonaId: estado.zonaSel,
     });
   } catch (err) {
-    console.error("Raíz: the twin status card could not be built", err);
+    console.error("ROOT: the twin status card could not be built", err);
     estado.estadoGemelo = null;
     return;
   }
@@ -1719,7 +1719,7 @@ function iniciarInstalacion() {
   try {
     estado.instalacion = montarInstalacion(cont);
   } catch (err) {
-    console.warn("Raíz: install and offline indicator not available", err);
+    console.warn("ROOT: install and offline indicator not available", err);
   }
 }
 
@@ -1896,7 +1896,7 @@ function pintarNDVI(p) {
       nivel: 3,
     });
   } catch (err) {
-    console.error("Raíz: the NDVI chart could not be drawn", err);
+    console.error("ROOT: the NDVI chart could not be drawn", err);
     cont.innerHTML = '<p class="ayuda">Monthly NDVI: could not be drawn for this field.</p>';
   }
 }
@@ -1925,7 +1925,7 @@ function htmlEvidencia(p) {
       htmlPerfilDeSuelo({ suelo: estado.suelo, id: p.id, error: estado.sueloError }) +
       htmlNotaDeZona({ suelo: estado.suelo, zonaId: zona, nombreZona: nombreZona(zona) });
   } catch (err) {
-    console.error("Raíz: the soil profile could not be built", err);
+    console.error("ROOT: the soil profile could not be built", err);
     perfil = '<p class="suelo-perfil suelo-pendiente">Soil profile: could not be shown for this field.</p>';
   }
   const ctx = estado.contexto;
@@ -1933,7 +1933,7 @@ function htmlEvidencia(p) {
   try {
     filas = ctx ? evidenciaDeParcela({ contexto: ctx, id: p.id }) : [];
   } catch (err) {
-    console.error("Raíz: the satellite evidence could not be read", err);
+    console.error("ROOT: the satellite evidence could not be read", err);
   }
   const items = filas.map(
     (f) =>
@@ -2083,7 +2083,7 @@ function htmlSuelo(o, relieve = "", p = {}) {
   try {
     aptitud = htmlAptitud({ suelo: estado.suelo, idParcela: p.id, idOpcion: o.id, nombresCultivo: CULTIVOS, error: estado.sueloError });
   } catch (err) {
-    console.error("Raíz: the soil fit could not be built", err);
+    console.error("ROOT: the soil fit could not be built", err);
   }
   return (
     `<div class="renglon renglon-suelo" data-semaforo="${esc(sem)}">${circulo(sem, SEMAFORO_OTROS)}<div>` +
@@ -2154,7 +2154,7 @@ function htmlSiembra(o, p = {}) {
     try {
       riesgo = riesgoDeHelada({ contexto: estado.contexto, fechaSiembra: x.siembra.desde, zonaId: zonaDe(p) });
     } catch (err) {
-      console.error("Raíz: frost risk could not be read", err);
+      console.error("ROOT: frost risk could not be read", err);
     }
     if (riesgo) fuente = riesgo.fuente;
     const helada = riesgo
@@ -2328,7 +2328,7 @@ function pintarResumen(p, ops) {
   try {
     evaluacion = actual && !p.abstencion ? evaluarOpcion(actual, p.area_ha, estado.D, estado.r) : null;
   } catch (err) {
-    console.error("Raíz: the summary could not be computed", err);
+    console.error("ROOT: the summary could not be computed", err);
   }
   const datos = { parcela: p, opcionActual: actual, evaluacion, D: estado.D, formato: (v, k) => (k === "area" ? fmtDato(v) : fmt(v)) };
   const texto = fraseResumen(datos);
@@ -2517,7 +2517,7 @@ function pintarWhatsApp() {
       sinOpciones: estado.cubo.parcelas?.[f.properties.id]?.sin_opciones ?? null,
     });
   } catch (err) {
-    console.warn("Raíz: WhatsApp preview not available", err);
+    console.warn("ROOT: WhatsApp preview not available", err);
     vista.innerHTML = "<p>The message preview is not available for this field.</p>";
   }
 }
@@ -2543,7 +2543,7 @@ async function imprimir() {
       parcela: f.properties,
     });
   } catch (err) {
-    console.error("Raíz: the field sheet could not be printed", err);
+    console.error("ROOT: the field sheet could not be printed", err);
     // Se quitan los agregados de la hoja (los marca mensaje.js con data-impresion) y se avisa en pantalla.
     for (const n of $$("[data-impresion]")) n.remove();
     document.documentElement.classList.remove("imprimir-ficha");
@@ -2591,7 +2591,7 @@ function abrirAcerca() {
     document.body.dataset.acerca = "listo";
     return montado;
   }).catch((err) => {
-    console.warn("Raíz: About & Data could not be built", err);
+    console.warn("ROOT: About & Data could not be built", err);
     $("#acerca-cuerpo").innerHTML = '<p class="ayuda">The data sources and test results could not be shown here.</p>';
     estado.acerca = null; // se reintenta la próxima vez que se abra
     return null;

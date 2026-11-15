@@ -1,5 +1,5 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Excepciones de tests/test_sin_cifras.py (K-TEST 7): textos con dígitos que NO son cifras de los datos. Cada una lleva su motivo. Use «texto» (literal, distingue mayúsculas) o «patron» (expresión regular de Python). «archivos» limita la excepción (por omisión aplica a todos). Una cifra que la web muestra (dotación, hectáreas, lluvia −20 %, resolución, años de la memoria…) NUNCA va aquí: se lee de los datos.",
  "excepciones": [
   {

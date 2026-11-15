@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas del validador del buzón para el perfil de suelo y la aptitud de cada cultivo.
 
 Contrato: docs/decisiones/2026-11-14_suelo_aptitud.md («Entregas nuevas»).

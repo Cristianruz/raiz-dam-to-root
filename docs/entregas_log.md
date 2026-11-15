@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Bitácora de entregas del buzón
 
 Una línea por corrida de `motor/ensamblar.py` con buzón (kit v4, K-ENS paso 1). La escribe el

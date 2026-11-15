@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """B4 + X3.1 · Ensambla el cubo v4 con los datos REALES de data/processed (kit B4 y X3.1), por zona.
 
 Entradas (data/processed, ya validadas por motor/ensamblar.py):

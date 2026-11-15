@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/gota.js — «Follow the drop» (La gota, kit X3.1 y X3.2) dentro de la ficha de la parcela.
 //
 // Uso (desde app.js):

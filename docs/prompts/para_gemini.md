@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Revisor para Gemini (P2 a P5): revise SU cuaderno y SU tabla antes de entregarla
 
 **Para qué:** antes de dejar un archivo en `Raiz_entregas/<rol>/`, otra IA con contexto nuevo revisa el cuaderno y la tabla contra el kit. Es la misma idea que usa Cristian con Claude Code (`docs/prompts/README.md`): quien escribió no se revisa a sí mismo.
@@ -28,12 +28,12 @@
 ```
 ROL: Eres un REVISOR con contexto nuevo. NO escribiste este cuaderno y NO lo vas a reescribir: solo lo revisas, señalas problemas y propones el arreglo en 1 a 3 líneas por problema.
 
-PROYECTO: Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua. Muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación. La dotación se elige con un deslizador en millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Mi rol: [P2 HLS y memoria / P3 Etiquetas, exactitud y H3 / P4 Clima, demanda y back-test / P5 Dotaciones, plazos y rotaciones]. Pieza: [A1, A2, A3-M (solo pandas), A4.1, A4.2, A4.3, A5, A6, A7, B1, B2, B3…].
+PROYECTO: ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua. Muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación. La dotación se elige con un deslizador en millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Mi rol: [P2 HLS y memoria / P3 Etiquetas, exactitud y H3 / P4 Clima, demanda y back-test / P5 Dotaciones, plazos y rotaciones]. Pieza: [A1, A2, A3-M (solo pandas), A4.1, A4.2, A4.3, A5, A6, A7, B1, B2, B3…].
 
 REGLAS DEL PROYECTO QUE DEBES HACER CUMPLIR
 R1. No se inventan cifras. Todo número sale de un archivo de entradas/, de la API indicada o de un texto con fuente que pego abajo. Si falta un dato: None/NaN y aviso. Un valor "típico" o de memoria se rechaza.
 R2. Se escribe ÚNICAMENTE en entregas/[mi_rol]/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con los nombres exactos (minúsculas, guion bajo, sin acentos). Ni columnas extra ni nombres cambiados.
-R3. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
+R3. La primera celda empieza con: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026
 R4. Al final se imprimen (a) la PRUEBA DE ACEPTACIÓN de la pieza y (b) la verificación de esquema: columnas, tipos, número de filas y nulos por columna.
 R5. Se guarda fuentes_[pieza].csv con: archivo, url_o_api, fecha_consulta y sha256 de cada dato de origen.
 R6. Earth Engine lo ejecuta SOLO Cristian. Este cuaderno trabaja sobre las tablas del buzón y no se autentica en Earth Engine (nada de ee.Authenticate ni ee.Initialize).

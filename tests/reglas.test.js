@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // K-TEST 4: reglas de la web (kit v4 §2.4; S9 §5) sobre la MISMA función que usa la página
 // (web/reglas.js). Las entradas salen de los datos (web/data/cubo.json y parcelas.geojson):
 // la dotación D de cada caso se deriva de las láminas del propio cubo, sin cifras de memoria.

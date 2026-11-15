@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/resumen.js — Ficha del gemelo digital: frase resumen descriptiva, gráfica del NDVI mensual de la
 // parcela y enlace directo a una parcela con «#id» (docs/decisiones/2026-11-14_gemelo_digital.md, «Qué
 // cambia en el producto», punto 5). Son ideas del prototipo de Lara (prototipos/front_lara/), portadas

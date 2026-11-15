@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // Pruebas de las funciones puras de web/js/resumen.js y web/js/estado_gemelo.js (sin DOM, con Node).
 // Conectada al comando único (node --test tests/*.test.js, paso de construir.py).
 // Uso:  node --test tests/resumen.test.js

@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Escribe web/data/gemelo.json: lo que la vista 3D y la línea de tiempo del gemelo digital leen.
 
 Decisión y contrato: docs/decisiones/2026-11-14_gemelo_digital.md (nunca se escribe a mano).
@@ -44,7 +44,7 @@ import dem_teselas  # noqa: E402
 import ndvi_web  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parent.parent
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 SALIDA = "gemelo.json"
 # Textos fijos del contrato (docs/decisiones/2026-11-14_gemelo_digital.md).
 FUENTE_TERRENO = "NASADEM (NASA/NASADEM_HGT/001), 30 m, vía Google Earth Engine"

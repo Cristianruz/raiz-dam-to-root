@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas de la aplicación instalable y sin conexión (docs/decisiones/2026-11-14_gemelo_digital.md, punto 4), sin red
 ni navegador. La prueba con Chromium (instalar, cortar la red y recargar) es tests/e2e/pwa_smoke.mjs.
 
@@ -38,7 +38,7 @@ sys.path.insert(0, str(RAIZ / "motor"))
 import pwa  # noqa: E402
 
 WEB = RAIZ / "web"
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 DECISION = "docs/decisiones/2026-11-14_gemelo_digital.md"
 PROHIBIDAS = re.compile(r"\b(first|only|sav(e|es|ed|ing|ings))\b", re.I)  # CLAUDE.md regla 10
 URL_REMOTA = re.compile(r"""(?:https?:|wss?:|ftp:)?//[A-Za-z0-9\[]""")     # http://x, https://x, //cdn.x…
@@ -225,7 +225,7 @@ def mini(tmp_path):
     web = tmp_path / "web"
     (web / "data/dem/zona/7").mkdir(parents=True)
     (web / "js").mkdir()
-    (web / "index.html").write_text("<!doctype html><title>Raíz</title>", encoding="utf-8")
+    (web / "index.html").write_text("<!doctype html><title>ROOT</title>", encoding="utf-8")
     (web / "sw.js").write_text("// worker de prueba\n", encoding="utf-8")
     (web / "app.js").write_text("// app\n", encoding="utf-8")
     (web / "js/modulo.js").write_text("// módulo\n", encoding="utf-8")
@@ -241,8 +241,8 @@ def mini(tmp_path):
 # --- 1. Manifest ---------------------------------------------------------------------------------------
 def test_manifest_tiene_los_campos_requeridos(manifest):
     assert manifest["_encabezado"] == ENCABEZADO
-    assert manifest["name"] == "Raíz – From Dam to Root"
-    assert manifest["short_name"] == "Raíz"
+    assert manifest["name"] == "ROOT – From Dam to Root"
+    assert manifest["short_name"] == "ROOT"
     assert manifest["start_url"] == "./" and manifest["scope"] == "./", \
         "start_url y scope deben ser relativos: la web vive en una subcarpeta de GitHub Pages"
     assert manifest["display"] == "standalone"

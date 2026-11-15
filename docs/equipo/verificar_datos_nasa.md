@@ -1,7 +1,7 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Verificar los datos NASA y de terceros antes de usarlos o entregarlos
 
-**Para qué:** cada dato que entra a Raíz se revisa antes de usarlo y antes de entregar la tabla que sale de él. Se revisan:
+**Para qué:** cada dato que entra a ROOT se revisa antes de usarlo y antes de entregar la tabla que sale de él. Se revisan:
 - unidades y escala;
 - rango;
 - faltantes y valores de «sin dato»;
@@ -91,7 +91,7 @@ Así el ensamblador no lo rechaza y nadie tiene que defender ante el jurado una 
 **Prompt: `eto_diaria.csv`** (antes de usarla en A2 o A6):
 ```text
 Eres revisor de datos. NO inventes cifras: usa solo el archivo y los rangos de control que te doy, con su fuente.
-Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que lea /content/drive/MyDrive/Raiz_entregas/eto_diaria.csv e imprima:
+Escribe UNA celda (primera línea: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026) que lea /content/drive/MyDrive/Raiz_entregas/eto_diaria.csv e imprima:
 1) columnas y tipos: ¿están fecha, eto_mm, tmin, tmax, lluvia_mm, ws2m? (otras columnas: solo lístalas);
 2) primera y última fecha (se esperan 1984-01-01 y 2026-11-09, dato del integrador); fechas repetidas; días que faltan en el calendario;
 3) por columna: mínimo, máximo, nulos y cuántos -999 quedan;
@@ -136,7 +136,7 @@ Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
 **Prompt: los GeoTIFF de HLS** (P2, antes del Random Forest):
 ```text
 Eres revisor de datos. NO inventes cifras ni rangos: imprime solo lo que trae el archivo.
-Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que abra con rasterio /content/drive/MyDrive/Raiz_entregas/hls_reflect_2025_10_a_2026_09.tif y /content/drive/MyDrive/Raiz_entregas/hls_mensual_2025_10_a_2026_09.tif (dime el comando de instalación si hace falta) e imprima, para cada uno:
+Escribe UNA celda (primera línea: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026) que abra con rasterio /content/drive/MyDrive/Raiz_entregas/hls_reflect_2025_10_a_2026_09.tif y /content/drive/MyDrive/Raiz_entregas/hls_mensual_2025_10_a_2026_09.tif (dime el comando de instalación si hace falta) e imprima, para cada uno:
 1) CRS (EPSG), tamaño de celda, filas, columnas, tipo de dato y valor de "sin dato" declarado;
 2) extensión (oeste, sur, este, norte) y si contiene el rectángulo de la zona piloto que te pego;
 3) número de bandas y sus nombres (descripciones de banda); ¿siguen el patrón AAAA_MM_<banda>? ¿cubren de 2025_10 a 2026_09?
@@ -149,7 +149,7 @@ Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
 **Prompt: `hls_mensual_parcelas.csv` y `suelo_desnudo.csv`**
 ```text
 Eres revisor de datos. NO inventes cifras ni rangos: usa el archivo y los controles que te doy, con su fuente.
-Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que lea de /content/drive/MyDrive/Raiz_entregas/ hls_mensual_parcelas.csv, suelo_desnudo.csv y parcelas_base.geojson e imprima:
+Escribe UNA celda (primera línea: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026) que lea de /content/drive/MyDrive/Raiz_entregas/ hls_mensual_parcelas.csv, suelo_desnudo.csv y parcelas_base.geojson e imprima:
 1) columnas: ¿hls_mensual_parcelas.csv trae id, mes, banda, mediana, p25, p75, n_validos? ¿suelo_desnudo.csv trae id, dias_suelo_desnudo_feb_abr, dias_desnudo_viento_alto, ndvi_ultimo_mes, meses_validos?
 2) id que no existen en parcelas_base.geojson (deben ser 0) y parcelas de parcelas_base sin filas;
 3) meses presentes (formato AAAA-MM) y si cubren de 2025-10 a 2026-09;
@@ -163,7 +163,7 @@ Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
 **Prompt: memoria y cultivos**
 ```text
 Eres revisor de datos. NO inventes cifras: usa los archivos y las reglas que te pego.
-Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que lea de /content/drive/MyDrive/Raiz_entregas/ memoria_parcelas.csv, memoria_resumen.csv y cultivos_parcelas.csv e imprima:
+Escribe UNA celda (primera línea: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026) que lea de /content/drive/MyDrive/Raiz_entregas/ memoria_parcelas.csv, memoria_resumen.csv y cultivos_parcelas.csv e imprima:
 1) años agrícolas presentes en memoria_parcelas.csv y cuántas parcelas tiene cada uno;
 2) estados fuera de la lista perenne, verano, invierno, doble, descanso, sin_dato (deben ser 0);
 3) filas con meses_verdes > meses_validos (deben ser 0); max_verano y max_invierno entre -1 y 1 o vacíos;
@@ -202,7 +202,7 @@ Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
 **Prompt: relieve entregado**
 ```text
 Eres revisor de datos. NO inventes cifras ni rangos.
-Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que lea de /content/drive/MyDrive/Raiz_entregas/ relieve_parcelas.csv, relieve_rutas.geojson y relieve_meta.json e imprima:
+Escribe UNA celda (primera línea: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026) que lea de /content/drive/MyDrive/Raiz_entregas/ relieve_parcelas.csv, relieve_rutas.geojson y relieve_meta.json e imprima:
 1) relieve_parcelas.csv: columnas; id que no existen en parcelas_base.geojson (deben ser 0); mínimo, mediana y máximo de pendiente_media_pct (control del kit A9: entre 0 y 5 % en la zona agrícola), aportacion_externa_ha y frac_depresion;
 2) relieve_rutas.geojson: tamaño en bytes (debe ser < 1,000,000), tipos de geometría y número de líneas;
 3) relieve_meta.json: todas sus llaves y valores; la tormenta con su mm, definición, fuente y periodo;
@@ -240,7 +240,7 @@ La tormenta de referencia de `relieve_meta.json` salió de **NASA POWER** (`eto_
 **Prompt: `et_contraste.csv`** (sirve también para WaPOR, §6):
 ```text
 Eres revisor de datos. NO inventes cifras.
-Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que lea /content/drive/MyDrive/Raiz_entregas/et_contraste.csv e imprima:
+Escribe UNA celda (primera línea: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026) que lea /content/drive/MyDrive/Raiz_entregas/et_contraste.csv e imprima:
 1) columnas: ¿son exactamente mes, et_modelo_mm, et_ssebop_mm, et_wapor_mm?
 2) ¿hay 12 meses, de 2025-10 a 2026-09, sin repetidos? (kit A8, prueba);
 3) por columna: mínimo, máximo, nulos y valores negativos (deben ser 0). et_wapor_mm puede estar vacía si no hubo acceso a WaPOR (kit A8, paso 3);
@@ -293,7 +293,7 @@ Imprime, para un mes, los valores de las décadas de WaPOR tal como vienen, el f
 **Prompt: `parcelas_base.geojson`**
 ```text
 Eres revisor de datos. NO inventes cifras.
-Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que lea /content/drive/MyDrive/Raiz_entregas/parcelas_base.geojson con geopandas e imprima:
+Escribe UNA celda (primera línea: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026) que lea /content/drive/MyDrive/Raiz_entregas/parcelas_base.geojson con geopandas e imprima:
 1) CRS, número de parcelas (se esperan 338, dato del integrador), columnas, tipos de geometría y geometrías inválidas;
 2) ¿están id, area_ha, modulo, ftw_confianza, protagonista? ¿Hay id repetidos? Primer y último id;
 3) area_ha: mínimo, máximo y suma (se esperan 5,794 ha, dato del integrador); area_ha recalculada en una proyección en metros (dime cuál) frente a la del archivo (diferencia máxima en %);
@@ -327,7 +327,7 @@ Termina con una tabla VERIFICACIÓN | resultado | OK o REVISAR.
 **Prompt: `LBQCH.csv`**
 ```text
 Eres revisor de datos. NO inventes cifras ni nombres de columna.
-Escribe UNA celda (primera línea: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026) que lea /content/drive/MyDrive/Raiz/entradas/LBQCH.csv (prueba la codificación y el separador; dime cuáles usaste) e imprima:
+Escribe UNA celda (primera línea: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026) que lea /content/drive/MyDrive/Raiz/entradas/LBQCH.csv (prueba la codificación y el separador; dime cuáles usaste) e imprima:
 1) los nombres de columna TAL COMO VIENEN y las primeras 5 filas;
 2) cuál columna es la fecha y cuál el caudal de salida por obra de toma, elegidas POR NOMBRE (dime por qué); si no hay una columna clara de caudal en m³/s, detente y avísame;
 3) primera y última fecha; días que faltan y días con caudal cero o negativo entre el 2026-03-14 y el 2026-07-14;

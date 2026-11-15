@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // tests/gemelo3d.test.js — Prueba de Node de web/js/gemelo3d.js (vista 3D del gemelo): cálculo de las columnas y
 // leyenda, con la exageración de cada zona (gemelo.json → terreno.zonas.<id>.exageracion; la general de respaldo).
 // La parte con navegador (relieve, cámara, clic, columna que se ve en cada píxel) está en tests/e2e/web_smoke.mjs.

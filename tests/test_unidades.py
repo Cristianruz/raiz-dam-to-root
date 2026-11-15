@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """K-TEST 2: unidades. 1 millar/ha = 1,000 m³/ha = 10 cm = 100 mm (S9 §5; kit B4).
 
 Los valores se leen de data/params.json (unidades.millar). Las únicas constantes

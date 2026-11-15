@@ -1,5 +1,5 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Supuestos de las piezas de datos. Cada valor lleva fuente y etiqueta; [S] = assumption. Los scripts se detienen si falta una clave. Copiar a la carpeta de trabajo (--dir).",
  "ea_gravedad": {
   "valor": [

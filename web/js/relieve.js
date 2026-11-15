@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/relieve.js — Relieve y tormenta (S9 §4 bis; kit A9, parte web). Módulo ES, sin dependencias.
 //
 // Qué exporta (lo conecta app.js; este archivo no toca el resto de la página):
@@ -658,7 +658,7 @@ export async function agregarCapaRelieve(mapa, ctx = {}) {
   };
   // Falla de lectura o de dibujo: no es «not run». Se dice en la página y en la consola.
   const conError = (texto, err) => {
-    console.error(`Raíz: ${texto}`, err ?? "");
+    console.error(`ROOT: ${texto}`, err ?? "");
     elemento.dataset.relieve = "error";
     elemento.innerHTML = `<p class="relieve-no-corrido relieve-error" role="alert">${esc(texto)}</p>`;
   };

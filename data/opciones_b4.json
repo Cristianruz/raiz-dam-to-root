@@ -1,5 +1,5 @@
 {
-  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
   "_nota": "Opciones por cultivo actual para el cubo (kit B4, paso 1). DISEÑO PROVISIONAL del integrador [S] mientras P5 entrega B3 (rotaciones del maestro §5.2 y filtros duros): ACTUAL + 2 alternativas; en alfalfa establecida se añade el corte de riego en verano. Las láminas NO están aquí: salen de rotaciones.json (A5) o, si la rotación no existe, de demanda_cultivos.csv.",
   "etiqueta": "Diseño [S]",
   "actual": {

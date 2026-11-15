@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Guion del video · 30 segundos o menos, sin voz
 
 **BORRADOR para que el equipo lo ajuste (responsable de presentación y pitch, con quien graba el video).** El texto en pantalla va en inglés y sin cifras escritas a mano.
@@ -38,7 +38,7 @@ La toma 4 trae dos filas: «[CON P0632]», la protagonista «libre» que fijó l
 | 5 · El compromiso | 15.5 | 19.0 | «Close». En la lista «Fields», clic en **L0175**. Se abre «Field L0175»: «Water term: committed» y la tarjeta «Current rotation: Pecan orchard». | A pecan orchard stays committed. | 5 |
 | 6 · La gota | 19.0 | 23.5 | En la misma ficha L0175, bajar a «Follow the drop». Las gotas recorren el diagrama una vez. | Follow the drop: dam, canal, field, aquifer. | 7 |
 | 7 · Las pruebas | 23.5 | 27.0 | «Close». Clic en «About & Data» y bajar a «Tests in sight»: se ven las pruebas con su estado, también las que no cumplen y las «Not run». | Five tests, published whatever the result. | 6 |
-| 8 · Cierre | 27.0 | 29.0 | «Close». Cabecera «Raíz – From Dam to Root» y el aviso «This tool supports, never replaces, the judgment of farmers and local experts.» | Raíz – From Dam to Root. The farmer decides. | 8 |
+| 8 · Cierre | 27.0 | 29.0 | «Close». Cabecera «ROOT – From Dam to Root» y el aviso «This tool supports, never replaces, the judgment of farmers and local experts.» | ROOT – From Dam to Root. The farmer decides. | 8 |
 
 Notas de la tabla:
 - **Toma 1.** La línea de tiempo avanza un año al pulsar «Play» y otro cada intervalo de `web/data/gemelo.json` → `tiempo.intervalo_ms`. Por eso se coloca en 2023: llega a 2025 dentro de la toma.
@@ -98,7 +98,7 @@ Five tests, published whatever the result.
 
 8
 00:00:27,000 --> 00:00:29,000
-Raíz – From Dam to Root. The farmer decides.
+ROOT – From Dam to Root. The farmer decides.
 ```
 
 ## 6. Lista de comprobación para grabarlo con Playwright

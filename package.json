@@ -1,7 +1,7 @@
 {
   "name": "raiz-dam-to-root",
   "private": true,
-  "description": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026. Solo para que Node trate los .js como módulos ES en las pruebas; no hay dependencias.",
+  "description": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026. Solo para que Node trate los .js como módulos ES en las pruebas; no hay dependencias.",
   "type": "module",
   "license": "Apache-2.0",
   "scripts": {

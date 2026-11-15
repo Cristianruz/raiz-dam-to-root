@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Agentes del proyecto (`.claude/agents/`)
 
 Este archivo **no es un agente**: no lleva frontmatter. Documenta el origen, la licencia y los riesgos de cada agente. Claude Code solo carga como agentes los `.md` con `name` y `description` en el frontmatter.
@@ -9,13 +9,13 @@ Este archivo **no es un agente**: no lleva frontmatter. Documenta el origen, la 
 
 Origen: [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official), commit `b5b01ac4f889fec0c4c6bb89f27ca7c8574473f6` (2026-11-14), clonado con `git clone --depth 1` el 14-nov-2026. Licencia: **Apache-2.0**; el texto completo está al final de este archivo y es idéntico al `LICENSE` de la raíz del repo y de cada plugin.
 
-| Agente | Ruta en el origen | sha256 | Herramientas (frontmatter) | Para qué en Raíz | Riesgos y notas |
+| Agente | Ruta en el origen | sha256 | Herramientas (frontmatter) | Para qué en ROOT | Riesgos y notas |
 |---|---|---|---|---|---|
 | `code-reviewer` | `plugins/feature-dev/agents/code-reviewer.md` | `a7df173bf77a00da5584c6401a1061524fdbe477b6fef5dd496d4c7a9113c78c` | Glob, Grep, LS, Read, NotebookRead, WebFetch, TodoWrite, WebSearch, KillShell, BashOutput (`model: sonnet`) | Revisor de calidad y de errores en la revisión de cada pieza y en la final. Contrasta con `CLAUDE.md` y reporta solo hallazgos con confianza ≥ 80 | Se eligió la versión de feature-dev porque su lista de herramientas **no incluye Edit, Write ni Bash**. Sin Bash no puede correr `git diff`: hay que pasarle el diff o la lista de archivos (`docs/prompts/revisor.md` lo hace). Tiene WebFetch y WebSearch: no le pase datos privados del equipo |
-| `silent-failure-hunter` | `plugins/pr-review-toolkit/agents/silent-failure-hunter.md` | `fa9b0daec5a267e7e66435cc48b3328301fc9f70c3af259fe248881327a1babc` | No declara `tools`: **hereda todas**, incluidas Edit, Write y Bash (`model: inherit`) | Fallas silenciosas: `try/except` que tragan errores, el ensamblador que «corrige» en silencio (K-ENS lo prohíbe) y valores por omisión que ocultan un dato faltante (regla 2: null y aviso) | Se invoca siempre con la instrucción «solo lectura; no modifique archivos». Menciona funciones del proyecto de origen (`logError`, `logForDebugging`, `constants/errorIds.ts` y Sentry) que **no existen en Raíz**: esas partes se ignoran. Su `description` no es YAML estricto (hay «: » dentro de un texto sin comillas). Se probó con un lector tolerante y da `name` y `description` válidos. Si `/agents` no lo muestra, esa es la causa |
+| `silent-failure-hunter` | `plugins/pr-review-toolkit/agents/silent-failure-hunter.md` | `fa9b0daec5a267e7e66435cc48b3328301fc9f70c3af259fe248881327a1babc` | No declara `tools`: **hereda todas**, incluidas Edit, Write y Bash (`model: inherit`) | Fallas silenciosas: `try/except` que tragan errores, el ensamblador que «corrige» en silencio (K-ENS lo prohíbe) y valores por omisión que ocultan un dato faltante (regla 2: null y aviso) | Se invoca siempre con la instrucción «solo lectura; no modifique archivos». Menciona funciones del proyecto de origen (`logError`, `logForDebugging`, `constants/errorIds.ts` y Sentry) que **no existen en ROOT**: esas partes se ignoran. Su `description` no es YAML estricto (hay «: » dentro de un texto sin comillas). Se probó con un lector tolerante y da `name` y `description` válidos. Si `/agents` no lo muestra, esa es la causa |
 | `pr-test-analyzer` | `plugins/pr-review-toolkit/agents/pr-test-analyzer.md` | `fcb1cde9ba7b21694b508766a8d6a79bc91bed9982f828f816210059934f46b4` | No declara `tools`: **hereda todas** (`model: inherit`) | Huecos de pruebas: K-TEST, `web/reglas.js` (§2.4), el balance de La gota y el verificador de C3 | Se invoca con «solo lectura». Califica cada prueba sugerida de 1 a 10; en el protocolo, las de 8 a 10 cuentan como IMPORTANTE |
 
-## Agentes propios de Raíz
+## Agentes propios de ROOT
 
 | Agente | sha256 | Herramientas | Qué hace |
 |---|---|---|---|

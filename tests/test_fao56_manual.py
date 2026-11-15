@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Prueba 5 de S9 §6, parte FAO-56: la ETo del proyecto contra los ejemplos resueltos del manual.
 
 El cálculo vive en datos/colab/eto_fao56.py (pieza A1 de la sesión de datos) y es el mismo que produjo

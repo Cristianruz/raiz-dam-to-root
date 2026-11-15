@@ -1,5 +1,5 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Lo escribe motor/suelo_web.py con las entregas validadas de data/processed y las opciones de cubo.json; no se edita a mano. Un bloque en null lleva su motivo en «<bloque>_motivo».",
  "generado": "2026-11-14T00:00:00+00:00",
  "decision": "docs/decisiones/2026-11-14_suelo_aptitud.md",

@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Verificación de fuentes leídas en los archivos crudos (sesión de datos, 14-nov-2026)
 
 Completa los «por verificar» de `docs/equipo/verificar_datos_nasa.md` con lo que traen los propios archivos.

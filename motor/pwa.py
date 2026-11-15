@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Aplicación instalable y sin conexión (PWA) del gemelo digital: iconos, manifest y listado de la copia.
 
 Decisión: docs/decisiones/2026-11-14_gemelo_digital.md («Qué cambia en el producto», punto 4).
@@ -53,7 +53,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 WEB = RAIZ / "web"
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 
 MANIFEST = "manifest.webmanifest"
 PRECACHE = "data/precache.json"
@@ -66,8 +66,8 @@ COLORES = {"agua": "#1F6FB2", "brote": "#4C9A2A", "tierra": "#8A5A3B", "ambar": 
 
 # Textos del manifest. Interfaz en inglés; sin «first», sin «only» y sin cifras (CLAUDE.md, reglas 3, 9 y 10).
 # La descripción es la misma frase de <meta name="description"> de web/index.html.
-NOMBRE = "Raíz – From Dam to Root"
-NOMBRE_CORTO = "Raíz"
+NOMBRE = "ROOT – From Dam to Root"
+NOMBRE_CORTO = "ROOT"
 DESCRIPCION = ("Before you plant, see the water you are committing: how much each crop needs per year, "
                "for how many years, and how many hectares the dam can cover.")
 
@@ -88,7 +88,7 @@ SUELO_Y = 0.56               # línea del suelo: arriba el aire (arena), abajo l
 PASTO_ALTO = 0.035           # franja verde en la superficie del suelo
 GOTA_RADIO = 0.150           # la gota descansa sobre el suelo: círculo con punta hacia arriba
 GOTA_PUNTA_Y = 0.105
-# Raíz: curvas de Bézier cuadráticas (inicio, control, fin) con grosor inicial y final (se adelgazan).
+# ROOT: curvas de Bézier cuadráticas (inicio, control, fin) con grosor inicial y final (se adelgazan).
 RAICES = (
     ((0.500, 0.560), (0.516, 0.740), (0.494, 0.905), 0.056, 0.020),   # raíz principal
     ((0.500, 0.640), (0.400, 0.655), (0.272, 0.800), 0.038, 0.014),   # rama izquierda
@@ -186,7 +186,7 @@ def dibujar_icono(lado, proposito="any"):
     d.rectangle([0, y_suelo, n, n], fill=tierra + (255,))
     d.rectangle([0, y_suelo, n, y_pasto], fill=brote + (255,))
 
-    # Raíz: círculos a lo largo de cada curva, cada vez más chicos (trazo redondeado que se adelgaza).
+    # ROOT: círculos a lo largo de cada curva, cada vez más chicos (trazo redondeado que se adelgaza).
     for p0, p1, p2, grueso0, grueso1 in RAICES:
         for x, y, t in _bezier(p0, p1, p2, pasos=160):
             cx, cy = px(x, y)
@@ -338,7 +338,7 @@ def construir(web=WEB, regenerar_iconos=False):
 def main(argv=None):
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    ap = argparse.ArgumentParser(description="Raíz: iconos, manifest y listado de la copia sin conexión (PWA).")
+    ap = argparse.ArgumentParser(description="ROOT: iconos, manifest y listado de la copia sin conexión (PWA).")
     ap.add_argument("--web", default=str(WEB), help="carpeta de la web (por omisión, web/)")
     ap.add_argument("--iconos", action="store_true", help="vuelve a dibujar todos los iconos (necesita Pillow)")
     args = ap.parse_args(argv)

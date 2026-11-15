@@ -1,5 +1,5 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/gemelo_web.py a partir de data/params.json (bloque gemelo), web/data/dem/, web/data/parcelas.geojson y web/data/ndvi_mensual.json; nunca se edita a mano (contrato: docs/decisiones/2026-11-14_gemelo_digital.md).",
  "terreno": {
   "encoding": "terrarium",

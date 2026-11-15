@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // Bibliotecas con versión fija y verificadas por hash (CLAUDE.md regla 5).
 // 1) Cada archivo de web/vendor/VERSIONS.json existe y su sha384 coincide.
 // 2) Si existe web/index.html: cada <script src> y <link href> que carga un recurso

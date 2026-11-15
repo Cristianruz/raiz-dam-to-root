@@ -1,8 +1,8 @@
 {
- "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+ "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
  "_nota": "Generado por motor/pwa.py; nunca se edita a mano (docs/decisiones/2026-11-14_gemelo_digital.md, punto 4).",
- "name": "Raíz – From Dam to Root",
- "short_name": "Raíz",
+ "name": "ROOT – From Dam to Root",
+ "short_name": "ROOT",
  "description": "Before you plant, see the water you are committing: how much each crop needs per year, for how many years, and how many hectares the dam can cover.",
  "lang": "en",
  "dir": "ltr",

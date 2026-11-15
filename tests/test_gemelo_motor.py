@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas del motor del gemelo digital (docs/decisiones/2026-11-14_gemelo_digital.md), sin red.
 
 Qué se comprueba:
@@ -513,7 +513,7 @@ def test_sin_rasterio_lo_dice_y_no_borra(tmp_path, monkeypatch):
 
 def test_requirements_datos_fija_la_version_que_genero_las_teselas(gemelo):
     lineas = (RAIZ / "requirements-datos.txt").read_text(encoding="utf-8").splitlines()
-    assert lineas[0] == "# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+    assert lineas[0] == "# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
     fijas = [x.strip() for x in lineas if x.strip() and not x.startswith("#")]
     assert len(fijas) == 1 and fijas[0].startswith("rasterio=="), fijas
     if gemelo["terreno"] is not None:

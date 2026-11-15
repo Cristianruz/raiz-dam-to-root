@@ -1,5 +1,5 @@
 {
-  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
   "_nota": "Todas las constantes del proyecto (kit v4 §2.5). Cada clave: valor, unidad, fuente, etiqueta y nota. Etiquetas: [V] verificado en fuente primaria; [P] prensa o fuente secundaria; [S] supuesto declarado; [NE] no encontrado; Diseño = valor de interfaz, no dato. Lo pendiente queda en null.",
   "zona_piloto": {
     "bbox": {

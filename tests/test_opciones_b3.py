@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Opciones y filtros oficiales (B3): contrato de docs/decisiones/2026-11-14_opciones_b3.md.
 
 Todo con la fixture DE PRUEBA tests/fixtures/opciones_b3/ (opciones_b3.json, heladas.json y supuestos.json:

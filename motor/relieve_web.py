@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Capa «Terrain & runoff» para la web (S9 §4 bis; kit A9, parte web).
 
 Copia a web/data/ lo que la web necesita para dibujar las rutas de escurrimiento y el botón
@@ -72,7 +72,7 @@ def construir(processed=RAIZ / "data/processed", web=RAIZ / "web/data", params_r
                 "motivo": "ningún relieve_meta*.json de data/processed es de una zona de params.zona_piloto.zonas"}
     web.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(rutas, web / "relieve_rutas.geojson")
-    salida = {"_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+    salida = {"_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
               "fuente": "data/processed/relieve_meta*.json (A9, NASADEM vía Earth Engine)",
               "zonas": bloques}
     (web / "relieve.json").write_text(json.dumps(salida, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

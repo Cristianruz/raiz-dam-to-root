@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Herramientas: qué usar en cada rol
 
 **Regla de oro** (kit §9): la IA escribe código y borradores; **los números salen de los datos y la decisión es del agricultor**. Toda herramienta de IA que use queda anotada en la hoja AI_USAGE (§5).
@@ -54,7 +54,7 @@
 
 ## 4. Para quien use Claude Code (Cristian y quien lo apoye)
 
-- **Skills:** [`.claude/skills/`](../../.claude/skills/). Su [README](../../.claude/skills/README.md) explica cada una: origen, licencia, para qué sirve en Raíz y riesgos revisados. Otra pieza las está instalando ahora.
+- **Skills:** [`.claude/skills/`](../../.claude/skills/). Su [README](../../.claude/skills/README.md) explica cada una: origen, licencia, para qué sirve en ROOT y riesgos revisados. Otra pieza las está instalando ahora.
 - **Agentes:** [`.claude/agents/`](../../.claude/agents/). Su [README](../../.claude/agents/README.md) explica cada uno y cuándo se usa (revisión de contrato, de cifras y de código).
 - **Protocolo de revisión de cada pieza:** [`docs/prompts/README.md`](../prompts/README.md). El ciclo es implementador → revisor con contexto nuevo → corrección, con máximo 3 rondas.
 - **Prompt de revisión para Gemini** (lo usan P2 a P5): [`docs/prompts/para_gemini.md`](../prompts/para_gemini.md). Ese archivo todavía nombra la carpeta vieja por rol: manda la carpeta plana `Raiz_entregas` (decisión b).

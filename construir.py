@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Comando único de reconstrucción (kit v4 §0.2 y K-INT; CLAUDE.md regla 6).
 
     python construir.py            reconstruye todo desde la caché (data/processed)
@@ -365,7 +365,7 @@ def escribir_pruebas_md(pasos, total_s):
     ahora = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(timespec="seconds")
     filas = "\n".join(f"| {p.nombre} | {p.estado} | {p.detalle} |" for p in pasos)
     texto = (
-        "<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->\n"
+        "<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->\n"
         "# Resultado de las pruebas (generado por `python construir.py`; no se edita a mano)\n\n"
         f"Corrida: {ahora} · duración {total_s:.1f} s\n\n"
         "| Paso | Estado | Detalle |\n|---|---|---|\n" + filas + "\n\n"
@@ -468,7 +468,7 @@ def estado_simulado(reporte):
 def main(argv=None):
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    ap = argparse.ArgumentParser(description="Comando único de Raíz: reconstruye datos, cálculo, manifest y pruebas.")
+    ap = argparse.ArgumentParser(description="Comando único de ROOT: reconstruye datos, cálculo, manifest y pruebas.")
     ap.add_argument("--origen", action="store_true",
                     help="vuelve a pedir los datos de origen con API sin sesión y lista las piezas de Earth Engine")
     ap.add_argument("--rapido", action="store_true", help="salta pytest y node para iterar")

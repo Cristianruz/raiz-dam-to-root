@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Diapositivas de respaldo · máximo 7
 
 **BORRADOR para que el equipo lo ajuste (responsable de presentación y pitch).** El texto de cada diapositiva va en inglés; la nota del orador, en español.
@@ -28,12 +28,12 @@
 
 | Campo | Contenido |
 |---|---|
-| Title | Raíz – From Dam to Root |
+| Title | ROOT – From Dam to Root |
 | One idea | What the tool is, in one sentence |
-| Text on slide | Before you plant, see the water you are committing. · Team Los Norteados · Chihuahua, Mexico · Challenge: Field Shift |
+| Text on slide | Before you plant, see the water you are committing. · Team Orbital Farming · Chihuahua, Mexico · Challenge: Field Shift |
 | Capture | **[SI ESTÁ CONECTADO]** captura nueva de la vista 3D de Delicias – Saucillo con las columnas de agua. **[ALTERNATIVA]** `tests/e2e/capturas/escritorio_centro_control.png` |
 | Cifra y fuente | Ninguna en el texto. La frase es la de `docs/sintesis/S9_proyecto_definitivo.md` §1 |
-| Nota del orador | «Raíz muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa.» Diga que es un gemelo digital de dos zonas piloto del distrito de Delicias. |
+| Nota del orador | «ROOT muestra, antes de sembrar, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la presa.» Diga que es un gemelo digital de dos zonas piloto del distrito de Delicias. |
 
 ### Slide 2 · The problem
 
@@ -55,7 +55,7 @@
 | Text on slide | How much water per year · For how many years · How many hectares the allocation covers |
 | Capture | `tests/e2e/capturas/escritorio_ficha_tarjetas.png` (Field P0757, alfalfa, marca «Normal year») |
 | Cifra y fuente | Las de la captura: lámina de 28.4 millares/ha y «Enough for 2.7 of 7.95 hectares» con 9.5 millares/ha (`web/data/cubo.json` → `parcelas.P0757`; cálculo de `web/reglas.js`) |
-| Nota del orador | La alfalfa obliga de 3 a 4 años [P]; el nogal se calcula a 10 años [S]. Esta parcela tiene tres años: su plazo está por vencer y es el momento de comparar. Raíz no marca una opción como la mejor. Las alternativas son provisionales (`data/opciones_b4.json`). |
+| Nota del orador | La alfalfa obliga de 3 a 4 años [P]; el nogal se calcula a 10 años [S]. Esta parcela tiene tres años: su plazo está por vencer y es el momento de comparar. ROOT no marca una opción como la mejor. Las alternativas son provisionales (`data/opciones_b4.json`). |
 
 ### Slide 4 · Follow the drop
 

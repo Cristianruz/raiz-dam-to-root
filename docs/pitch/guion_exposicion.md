@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Guion de la exposición · 4 minutos + 3 de preguntas
 
 **BORRADOR para que el equipo lo ajuste (responsable de presentación y pitch).** Las cifras salen del repo; si el repo cambia, cambia el guion.
@@ -40,7 +40,7 @@ Los tiempos de inicio están calculados a 135 palabras por minuto con la versió
 
 | Tiempo | Qué se dice | Qué se ve en pantalla | Cifra y fuente |
 |---|---|---|---|
-| 0:00 | Buenas tardes. Somos Los Norteados. | Centro de control. **[SI ESTÁ CONECTADO]** vista 3D de Delicias – Saucillo con la línea de tiempo en 2019. **[ALTERNATIVA]** mapa 2D con la capa «Field memory: 2025». | — |
+| 0:00 | Buenas tardes. Somos Orbital Farming. | Centro de control. **[SI ESTÁ CONECTADO]** vista 3D de Delicias – Saucillo con la línea de tiempo en 2019. **[ALTERNATIVA]** mapa 2D con la capa «Field memory: 2025». | — |
 | 0:02 | En 2025, al distrito de Delicias no le llegó agua de las presas. | **[SI ESTÁ CONECTADO]** «Play» en la línea de tiempo: corre de 2019 a 2025 y se pausa en 2025, donde aparece «Year without dam water: the district received no dam allocation». **[ALTERNATIVA]** se queda la capa «Field memory: 2025». | Año sin agua de las presas [P] (`docs/sintesis/S9_proyecto_definitivo.md` §2; texto del resaltado en `web/data/gemelo.json` → `tiempo.destacados`) |
 | 0:09 | Quien sembraba maíz o algodón pudo no sembrar. El nogal no: pide agua aunque la presa no entregue. | Misma pantalla. Señalar las parcelas «P Perennial» y las «R Rest». | Mecanismo, sin cifra (S9 §2) |
 | 0:17 | Ese año se autorizaron más de ochenta y siete millones de metros cúbicos de pozo para riegos de supervivencia, sobre todo de nogal. | Panel «Aquifer» del centro de control. | 87.4 hm³ de agua subterránea [P] (S9 §2 y Anexo A: El Diario de Delicias, 31-ene-2025; `README.md`, «Summary»). 1 hm³ es un millón de m³ |
@@ -50,7 +50,7 @@ Los tiempos de inicio están calculados a 135 palabras por minuto con la versió
 
 | Tiempo | Qué se dice | Qué se ve en pantalla | Cifra y fuente |
 |---|---|---|---|
-| 0:36 | Raíz es un gemelo digital de dos zonas del distrito: más de mil doscientas parcelas estimadas, con datos abiertos de la NASA. No tiene sensores. | Centro de control completo, con el mapa. **[ALTERNATIVA]** clic en «Enough water?» para volver del mapa de memoria al semáforo. | 1,239 parcelas estimadas en dos zonas (`web/data/cubo.json` → `zona.conteos.total`; `README.md`, «Pilot areas»). Qué significa «gemelo» y qué no es: `docs/decisiones/2026-11-14_gemelo_digital.md` |
+| 0:36 | ROOT es un gemelo digital de dos zonas del distrito: más de mil doscientas parcelas estimadas, con datos abiertos de la NASA. No tiene sensores. | Centro de control completo, con el mapa. **[ALTERNATIVA]** clic en «Enough water?» para volver del mapa de memoria al semáforo. | 1,239 parcelas estimadas en dos zonas (`web/data/cubo.json` → `zona.conteos.total`; `README.md`, «Pilot areas»). Qué significa «gemelo» y qué no es: `docs/decisiones/2026-11-14_gemelo_digital.md` |
 | 0:48 | **[SI ESTÁ CONECTADO]** Cada columna es el agua que pide una parcela: azul, lo que alcanza; rojo, lo que falta. | Vista 3D de Delicias – Saucillo. Mover un poco el deslizador para que las columnas cambien. | La altura es una escala visual, no una medición (`web/data/gemelo.json` → `columnas.nota`; `data/params.json` → `gemelo`, etiqueta «Diseño») |
 | 0:48 | **[ALTERNATIVA]** Cada parcela lleva un color: verde, alcanza; rojo, no alcanza; gris, no sabemos qué cultivo tiene. | Mapa 2D con la leyenda «Enough water for the current rotation?». | Regla del semáforo: S9 §5; `web/reglas.js` (`semaforoAgua`) |
 | 0:55 | Pongo una dotación como la de 2026: tres millares y medio por hectárea. Abro esta alfalfa, de casi ocho hectáreas. | **[SI ESTÁ CONECTADO]** antes, cambiar «Pilot area» a «All areas»: la vista 3D trabaja con una zona a la vez y L0175 está en la otra. Clic en la marca «Like 2026»: el deslizador queda en «3.5 thousand m³/ha». En la lista «Fields», clic en **P0757** (Alfalfa · 7.95 ha). Se abre «Field P0757». | Marca «Like 2026»: 3 a 4 millares/ha, punto medio 3.5, [P] por confirmar (`cubo.json` → `dotaciones.marcas`; `data/params.json` → `dotaciones`). Superficie 7.95 ha (`web/data/parcelas.geojson` → P0757) |
@@ -59,7 +59,7 @@ Los tiempos de inicio están calculados a 135 palabras por minuto con la versió
 | 1:28 | **[CON P0632]** Esta parcela tiene un cultivo de un solo ciclo: está libre. | «Close». Clic en **P0632** (Winter cereal · 20.66 ha): «F Water term: free». Tarjeta «Current rotation: Winter cereal»: «Enough for 11.5 of 20.66 hectares (range 9.6 to 14.3)» y «Commits water for 1 year». | Estado «libre», 20.66 ha y cultivo «cereal de invierno» (`web/data/parcelas.geojson` → P0632). Alcanza para 11.51 de 20.66 ha (rango 9.59 a 14.26), que la página redondea: `web/reglas.js` (`evaluarOpcion`) con la lámina P50 de 6.28 millares/ha (`cubo.json` → `parcelas.P0632`, opción ACTUAL). Cambio de protagonista: `docs/decisiones/2026-11-14_opciones_b3.md` §2 |
 | 1:28 | **[MIENTRAS SIGA P0244]** Esta parcela descansa: está libre. | «Close». Clic en **P0244** (Fallow · 27.97 ha): «F Water term: free». | Estado «libre» y 27.97 ha (`parcelas.geojson` → P0244). Su rotación actual no pide agua; por eso la decisión la cambia por P0632 |
 | 1:32 | Esta huerta de nogal está comprometida; la calculamos a diez años. | «Close». Clic en **L0175** (Pecan orchard · 10.76 ha, zona Lázaro Cárdenas): «C Water term: committed» y «Commits water for 10 years (calculation horizon; orchards live longer)». | Estado «comprometida» (`parcelas.geojson` → L0175). Nogal: horizonte de cálculo de 10 años [S] (S9 §5; `cubo.json` → `parcelas.L0175`) |
-| 1:37 | Raíz no dice qué sembrar. Pone las opciones lado a lado. | Ficha L0175 con sus tarjetas (Pecan orchard · Cotton · Do not plant / standing stubble) y el aviso «This tool supports, never replaces, the judgment of farmers and local experts.» | Aviso fijo (`web/index.html`; `CLAUDE.md`, regla 10) |
+| 1:37 | ROOT no dice qué sembrar. Pone las opciones lado a lado. | Ficha L0175 con sus tarjetas (Pecan orchard · Cotton · Do not plant / standing stubble) y el aviso «This tool supports, never replaces, the judgment of farmers and local experts.» | Aviso fijo (`web/index.html`; `CLAUDE.md`, regla 10) |
 
 ### Bloque 3 · La gota (1:42 a 2:16)
 
@@ -88,9 +88,9 @@ Los tiempos de inicio están calculados a 135 palabras por minuto con la versió
 
 | Tiempo | Qué se dice | Qué se ve en pantalla | Cifra y fuente |
 |---|---|---|---|
-| 3:21 | Raíz no reparte ni vende agua, no pronostica la presa y no decide por nadie: apoya al agricultor y al técnico. | «Close». Ficha P0757 → «Preview WhatsApp message»: mensaje en español con los avisos «Es una simulación; la asignación oficial la decide Conagua.» y «Esta herramienta apoya y no sustituye el juicio del agricultor ni del técnico.» | Límites declarados (S9 §11; `CLAUDE.md`, regla 10; avisos en `web/js/mensaje.js`) |
+| 3:21 | ROOT no reparte ni vende agua, no pronostica la presa y no decide por nadie: apoya al agricultor y al técnico. | «Close». Ficha P0757 → «Preview WhatsApp message»: mensaje en español con los avisos «Es una simulación; la asignación oficial la decide Conagua.» y «Esta herramienta apoya y no sustituye el juicio del agricultor ni del técnico.» | Límites declarados (S9 §11; `CLAUDE.md`, regla 10; avisos en `web/js/mensaje.js`) |
 | 3:30 | Pedimos tres cosas. Un técnico de módulo que nos diga cuánta agua se pierde en la parcela. Agricultores que revisen su parcela y nos corrijan. Y que ustedes la abran y muevan la dotación. | Misma pantalla. | Eficiencia parcelaria: rango supuesto de 0.45 a 0.70 [S], sin valor medido (`README.md`, «Open question»; `LIMITATIONS.md`). Revisión manual de las protagonistas, pendiente (`docs/reparto_faltantes.md`, D3) |
-| 3:45 | Antes de sembrar, vea el agua que compromete. Gracias. | Cabecera «Raíz – From Dam to Root». Liga de la página: [LINK: pendiente — integrador]. | Frase de S9 §1 |
+| 3:45 | Antes de sembrar, vea el agua que compromete. Gracias. | Cabecera «ROOT – From Dam to Root». Liga de la página: [LINK: pendiente — integrador]. | Frase de S9 §1 |
 
 Después vienen los 3 minutos de preguntas: `docs/pitch/preguntas_dificiles.md`.
 
@@ -148,11 +148,11 @@ Frase de apoyo si el jurado insiste: «Preferimos enseñarle un gris que un colo
 
 **Español (65 palabras; de 28 a 30 segundos entre 140 y 130 palabras por minuto):**
 
-> En Delicias se decide qué sembrar antes de saber cuánta agua dará la presa. Un nogal o una alfalfa piden agua por años. Raíz es un gemelo digital de dos zonas, con datos de la NASA. Elija la dotación, toque su parcela y vea cuánta agua pide cada cultivo, por cuántos años y para cuántas hectáreas alcanza. Publicamos también lo que falló. Decide el agricultor.
+> En Delicias se decide qué sembrar antes de saber cuánta agua dará la presa. Un nogal o una alfalfa piden agua por años. ROOT es un gemelo digital de dos zonas, con datos de la NASA. Elija la dotación, toque su parcela y vea cuánta agua pide cada cultivo, por cuántos años y para cuántas hectáreas alcanza. Publicamos también lo que falló. Decide el agricultor.
 
 **English (65 words; 28 to 30 seconds at 140 to 130 words per minute):**
 
-> In Delicias, farmers choose crops before knowing how much water the dam delivers. Pecan and alfalfa ask for water for years. Raíz is a digital twin of two pilot areas, built on NASA data. Pick an allocation, tap a field, see how much water each crop needs, for how many years, and how many hectares it covers. We publish failed tests too. The farmer decides.
+> In Delicias, farmers choose crops before knowing how much water the dam delivers. Pecan and alfalfa ask for water for years. ROOT is a digital twin of two pilot areas, built on NASA data. Pick an allocation, tap a field, see how much water each crop needs, for how many years, and how many hectares it covers. We publish failed tests too. The farmer decides.
 
 Las dos versiones no llevan cifras: no dependen de qué zona o qué marca esté en pantalla.
 

@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """K-TEST 3: ejemplo de escala de S9 §5, sobre la MISMA función que usa la página.
 
 Los valores esperados se leen de tests/casos/escala_s9.json (fuente: S9 §5, láminas

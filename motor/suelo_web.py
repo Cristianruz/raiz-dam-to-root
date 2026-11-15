@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Perfil de suelo por parcela y aptitud de cada opción para la web: escribe web/data/suelo.json.
 
 Decisión: docs/decisiones/2026-11-14_suelo_aptitud.md (qué se agrega, qué no es y el contrato de las
@@ -105,7 +105,7 @@ if str(RAIZ) not in sys.path:
 
 from motor import esquemas as E  # noqa: E402
 
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 NOMBRE_SALIDA = "suelo.json"
 NOMBRE_FUENTES = "fuentes.json"
 NOMBRE_CUBO = "cubo.json"

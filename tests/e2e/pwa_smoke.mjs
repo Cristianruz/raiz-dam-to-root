@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // tests/e2e/pwa_smoke.mjs — Prueba de humo de la aplicación instalable y SIN CONEXIÓN (web/sw.js,
 // web/js/instalar.js, web/manifest.webmanifest y web/data/precache.json de motor/pwa.py) con Playwright.
 //

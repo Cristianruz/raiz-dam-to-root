@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/contexto.js — Bases de datos del reto en la página: «Regional context», «Challenge data
 // sources» y la evidencia por parcela (docs/decisiones/2026-11-14_recursos_del_reto.md).
 // Módulo ES independiente, sin dependencias. Todo lo que muestra sale de web/data/contexto.json
@@ -34,7 +34,7 @@
 //         nivel           opcional: nivel del encabezado de la sección (NIVEL_POR_OMISION)
 //       fijarAnio(a) solo cambia lo que depende del año (no cierra las tablas abiertas).
 //   montarRecursosReto(contenedor, { contexto, nivel }) -> { elemento, destruir() } | null
-//       Tabla «Challenge data sources» (Resource · Agency · Role in Raíz · Status · Files), con el
+//       Tabla «Challenge data sources» (Resource · Agency · Role in ROOT · Status · Files), con el
 //       estado en símbolo y texto, ordenada (en uso, pedidas, no aplica) y un resumen cuyos conteos
 //       se calculan de contexto.recursos.
 //   evidenciaDeParcela({ contexto, id }) -> [{ etiqueta, texto, nota, lectura, fuente, archivo, fecha }]
@@ -1460,7 +1460,7 @@ export function montarRecursosReto(contenedor, opciones = {}) {
         (r) => `<tr data-recurso="${esc(r.id)}" data-estado="${esc(r.estado)}">
           <th scope="row">${esc(r.nombre)}</th>
           <td data-rotulo="Agency">${esc(r.organismo || "—")}</td>
-          <td data-rotulo="Role in Raíz">${htmlPapel(r, contexto.motivo_pedido)}</td>
+          <td data-rotulo="Role in ROOT">${htmlPapel(r, contexto.motivo_pedido)}</td>
           <td data-rotulo="Status">${insignia(r)}</td>
           <td data-rotulo="Files">${htmlArchivos(r)}</td>
         </tr>`,
@@ -1470,8 +1470,8 @@ export function montarRecursosReto(contenedor, opciones = {}) {
       ${htmlResumenRecursos(contarEstados(recursos))}
       <p class="contexto-recursos-nota">The status is computed from the files that passed validation, not written by hand. None of these sources changes the water calculation of a field.</p>
       <div class="contexto-tabla-caja"><table class="contexto-tabla contexto-tabla--recursos">
-        <caption class="solo-lector">${TITULO_RECURSOS}: resource, agency, role in Raíz, status and files</caption>
-        <thead><tr><th scope="col">Resource</th><th scope="col">Agency</th><th scope="col">Role in Raíz</th><th scope="col">Status</th><th scope="col">Files</th></tr></thead>
+        <caption class="solo-lector">${TITULO_RECURSOS}: resource, agency, role in ROOT, status and files</caption>
+        <thead><tr><th scope="col">Resource</th><th scope="col">Agency</th><th scope="col">Role in ROOT</th><th scope="col">Status</th><th scope="col">Files</th></tr></thead>
         <tbody>${filas}</tbody>
       </table></div>`;
   }

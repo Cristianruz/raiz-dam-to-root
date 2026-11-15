@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas de construir.py (el comando único, CLAUDE.md regla 6) en lo que puede fallar en silencio:
 
 - sin RAIZ_BUZON el ensamblado no dice «OK — buzón validado» (queda OMITIDO);

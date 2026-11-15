@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas de motor/contexto_web.py (bases de datos del reto → web/data/contexto.json).
 
 Decisión: docs/decisiones/2026-11-14_recursos_del_reto.md.

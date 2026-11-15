@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # P2 · Mapa de cultivos con Random Forest y las 3 protagonistas
 
 **Qué le toca ahora** (S9 §10; kit §3; decisiones del integrador del 14-nov a las 10:30):
@@ -56,7 +56,7 @@
 **Bloque para pegar en Gemini** (G0 completo + tarea):
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria.
 
 ENTORNO
 Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
@@ -67,7 +67,7 @@ Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome d
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
-2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
+2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026
 3. Escribe ÚNICAMENTE en Raiz_entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en Raiz/cuadernos/. No sobrescribas archivos de otras personas ni de la sesión de datos, salvo que la TAREA lo diga. Los id de parcela son los de Raiz_entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
@@ -164,7 +164,7 @@ Aviso en el grupo: `ENTREGA: B1_protagonistas.png — prueba OK`. Y por mensaje 
 **Bloque para pegar en Gemini:**
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria (con P3).
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria (con P3).
 
 ENTORNO
 Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
@@ -175,7 +175,7 @@ Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome d
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
-2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
+2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026
 3. Escribe ÚNICAMENTE en Raiz_entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en Raiz/cuadernos/. No sobrescribas archivos de otras personas ni de la sesión de datos, salvo que la TAREA lo diga. Los id de parcela son los de Raiz_entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
@@ -320,7 +320,7 @@ Son tareas de apoyo para la página y la exposición. La tabla 0.4-B solo pide �
 **Bloque para pegar en Gemini:**
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P2 HLS y memoria.
 
 ENTORNO
 Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
@@ -331,7 +331,7 @@ Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome d
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
-2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
+2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026
 3. Escribe ÚNICAMENTE en Raiz_entregas/ y ÚNICAMENTE los archivos del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No sobrescribas archivos de otras personas ni de la sesión de datos. Los id de parcela son los de Raiz_entregas/parcelas_base.geojson.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
@@ -351,7 +351,7 @@ DOCUMENTOS DE REFERENCIA (pegados)
 [PEGA AQUÍ la lista de figuras que pide Cristian para la página.]
 
 TAREA
-Con cultivos_parcelas.csv, memoria_parcelas.csv, parcelas_base.geojson y hls_mensual_parcelas.csv de Raiz_entregas/, genera las figuras que te pido, una celda por figura. En el título o pie de cada figura va la fuente: "Source: NASA HLS L30/S30 v002; Raíz analysis". En la franja de memoria va la nota fija "Rule-based reading of monthly greenness; not a crop census." Sin logotipos. Las parcelas abstenidas van en gris con la leyenda "Not classified". No escribas en la figura ningún número que no venga de las tablas.
+Con cultivos_parcelas.csv, memoria_parcelas.csv, parcelas_base.geojson y hls_mensual_parcelas.csv de Raiz_entregas/, genera las figuras que te pido, una celda por figura. En el título o pie de cada figura va la fuente: "Source: NASA HLS L30/S30 v002; ROOT analysis". En la franja de memoria va la nota fija "Rule-based reading of monthly greenness; not a crop census." Sin logotipos. Las parcelas abstenidas van en gris con la leyenda "Not classified". No escribas en la figura ningún número que no venga de las tablas.
 PRUEBA: cada figura abre, se lee en un teléfono y cada número que muestra está en una entrega con su línea en LEEME.md.
 ```
 - **Hora límite:** dom 8:00 (figuras del mapa y de la memoria) y dom 11:00 (figuras para la página; código congelado).

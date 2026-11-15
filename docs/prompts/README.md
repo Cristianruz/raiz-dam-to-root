@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Protocolo de revisión de cada pieza
 
 **Qué es:** el camino que sigue cada pieza del kit v4 desde su especificación hasta el commit del integrador. Lo citan `CLAUDE.md` («Operación») y la bitácora `docs/progreso.md`.
@@ -184,13 +184,13 @@ El protocolo no detiene un hito (kit §0.1, regla 10): sáb 14:30, sáb 20:30, d
 Agentes y skills: `.claude/agents/README.md` y `.claude/skills/README.md`.
 
 ---
-**Origen y licencias.** Prompts propios en español, adaptados a Raíz. No son traducciones literales.
+**Origen y licencias.** Prompts propios en español, adaptados a ROOT. No son traducciones literales.
 - **[obra/superpowers](https://github.com/obra/superpowers)**, commit `22f0b463e7a5e579904dd6211a520321035526f7`, licencia MIT (© 2025 Jesse Vincent). Se tomaron de `skills/subagent-driven-development/`:
   - `implementer-prompt.md`: contexto nuevo, estados del reporte y autoevaluación;
   - `task-reviewer-prompt.md`: dos veredictos y «nada más, nada menos»;
   - `re-review-prompt.md`: ADDRESSED / NOT ADDRESSED → ATENDIDO / NO ATENDIDO;
   - `references/fix-loop.md` y `references/final-review.md`.
-  - Cambios para Raíz: 3 rondas en lugar de 5, R1 después de 2 fallas iguales, severidades en español, el implementador no hace commits y las reglas de cifras de `CLAUDE.md`.
+  - Cambios para ROOT: 3 rondas en lugar de 5, R1 después de 2 fallas iguales, severidades en español, el implementador no hace commits y las reglas de cifras de `CLAUDE.md`.
 - **[anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official)**, commit `b5b01ac4f889fec0c4c6bb89f27ca7c8574473f6`, licencia Apache-2.0. Se tomaron:
   - de `plugins/code-review/commands/code-review.md`: revisores en paralelo, un validador por hallazgo y umbral de confianza 80;
   - de los agentes de `plugins/pr-review-toolkit/` y `plugins/feature-dev/`: los copiados en `.claude/agents/`.

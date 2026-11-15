@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // tests/e2e/web_smoke.mjs — Prueba de humo de la web (C1 + C2) con Playwright.
 //
 // Uso:   node tests/e2e/web_smoke.mjs

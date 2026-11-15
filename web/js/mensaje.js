@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/mensaje.js — Mensaje al agricultor (maqueta de WhatsApp) y ficha imprimible (kit C4; S9 §3, pantalla 3).
 // Módulo ES, sin dependencias. No envía nada, no guarda nada y no tiene formularios.
 //
@@ -463,7 +463,7 @@ export function htmlWhatsApp(parcela, opciones, ctx = {}) {
     "The farmer reads it in Spanish.</figcaption>" +
     '<div class="wa-telefono" lang="es">' +
     '<div class="wa-barra" aria-hidden="true"><span class="wa-avatar">R</span>' +
-    '<span class="wa-contacto"><strong>Raíz</strong><small>vista previa · no se envía</small></span></div>' +
+    '<span class="wa-contacto"><strong>ROOT</strong><small>vista previa · no se envía</small></span></div>' +
     '<div class="wa-chat"><div class="wa-burbuja">' +
     linea("wa-saludo", m.saludo) +
     lista +

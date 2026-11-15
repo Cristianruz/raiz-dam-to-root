@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 # Comando único + pruebas en cada push y pull request; publica web/ en GitHub Pages
 # SOLO en push a main y SOLO si el job de pruebas pasó (kit v4 §0.2 y K-INT).
 # Requisito del repo: Settings → Pages → Source: «GitHub Actions».

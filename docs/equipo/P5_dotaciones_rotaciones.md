@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # P5 · Dotaciones, opciones por cultivo, propuesta de supuestos y tabla única de cifras
 
 **Qué le toca ahora** (S9 §10; kit §3; decisiones del integrador del 14-nov a las 10:30):
@@ -45,7 +45,7 @@
 **Bloque para pegar en Gemini:**
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P5 Dotaciones, plazos y rotaciones.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P5 Dotaciones, plazos y rotaciones.
 
 ENTORNO
 Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
@@ -56,7 +56,7 @@ Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome d
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
-2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
+2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026
 3. Escribe ÚNICAMENTE en Raiz_entregas/ y ÚNICAMENTE los archivos y campos del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en Raiz/cuadernos/. No sobrescribas archivos de otras personas ni de la sesión de datos.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
@@ -169,7 +169,7 @@ Aviso: `ENTREGA: dotaciones.json — prueba OK`.
 **El formato de partida** es el de `data/opciones_b4.json`, que hoy lee el motor (`motor/b4_cubo.py`). Así se ve hoy:
 ```json
 {
-  "_encabezado": "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026",
+  "_encabezado": "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026",
   "_nota": "Opciones por cultivo actual para el cubo (kit B4, paso 1). DISEÑO PROVISIONAL del integrador [S] mientras P5 entrega B3 …",
   "etiqueta": "Diseño [S]",
   "actual": {
@@ -196,7 +196,7 @@ Aviso: `ENTREGA: dotaciones.json — prueba OK`.
 **Bloque para pegar en Gemini:**
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P5 Dotaciones, plazos y rotaciones.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P5 Dotaciones, plazos y rotaciones.
 
 ENTORNO
 Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
@@ -207,7 +207,7 @@ Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome d
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
-2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
+2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026
 3. Escribe ÚNICAMENTE en Raiz_entregas/ y ÚNICAMENTE los archivos y campos del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). NUNCA escribas rotaciones.json ni supuestos.json: son de la sesión de datos. Solo si la TAREA lo pide expresamente, guarda un archivo de trabajo en Raiz/cuadernos/.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
@@ -229,7 +229,7 @@ Fila de la tabla 0.4-B del kit (copiada tal cual; ya no aplica tal cual):
 | B3 (P5) | `rotaciones.json` y `filtros.py` (con sus 8 pruebas impresas) | Estructura del prompt B3, más la opción «no sembrar / rastrojo en pie» |
 CAMBIO ACORDADO EL 14-NOV (manda sobre la fila de arriba): NO escribas rotaciones.json ni filtros.py. Escribe opciones_b3.json en Raiz_entregas/ con esta estructura (la de data/opciones_b4.json, más "filtros"):
 {
-  "_encabezado": "AI-assisted (Gemini) — Raíz, NASA Space Apps 2026",
+  "_encabezado": "AI-assisted (Gemini) — ROOT, NASA Space Apps 2026",
   "_nota": "<qué es y de dónde sale>",
   "etiqueta": "<[V], [P] o [S], según las fuentes>",
   "actual": { "<cultivo_actual>": "<id>", ... },
@@ -318,7 +318,7 @@ Aviso: `ENTREGA: opciones_b3.json — prueba OK (nota no validada; para Cristian
 | **Herramienta** | Colab con Gemini, o Gemini o Claude en el navegador para buscar y leer las fuentes ([herramientas.md](herramientas.md)) |
 | **Hora límite** | Primera versión sáb 14:30, para que Cristian la lleve a las mentorías. Se actualiza con las respuestas de las mentorías (sáb, antes de las 18:00) |
 
-**Formato** (Markdown; una tabla y, si hace falta, notas debajo). Lleva la línea `<!-- AI-assisted (Gemini) — Raíz, NASA Space Apps 2026 -->` al inicio:
+**Formato** (Markdown; una tabla y, si hace falta, notas debajo). Lleva la línea `<!-- AI-assisted (Gemini) — ROOT, NASA Space Apps 2026 -->` al inicio:
 
 | clave | valor actual (archivo) | valor propuesto | fuente (documento, página o URL, fecha de consulta) | etiqueta | nota |
 |---|---|---|---|---|---|
@@ -331,7 +331,7 @@ Aviso: `ENTREGA: opciones_b3.json — prueba OK (nota no validada; para Cristian
 **Bloque para pegar en Gemini o Claude:**
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P5 Dotaciones, plazos y rotaciones.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P5 Dotaciones, plazos y rotaciones.
 
 ENTORNO
 Google Colab (Python 3) con Google Drive montado en /content/drive, o un chat en el navegador. Carpetas:
@@ -341,7 +341,7 @@ Earth Engine NO se usa.
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo valor propuesto sale de un documento que te pego o que abro yo, con su página o URL y su fecha de consulta. Si no hay fuente, escribe "sin fuente encontrada". Nunca uses un valor "típico" o de memoria.
-2. Si usas Colab: celdas cortas, una por paso, con comentarios en español; la primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
+2. Si usas Colab: celdas cortas, una por paso, con comentarios en español; la primera celda empieza con: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026
 3. Escribe ÚNICAMENTE propuesta_supuestos.md en Raiz_entregas/. NUNCA escribas supuestos.json ni rotaciones.json: son de la sesión de datos.
 4. Al final imprime la PRUEBA DE ACEPTACIÓN.
 5. Si un paso falla dos veces con el mismo error, detente y explícame el problema en 5 líneas antes de seguir.
@@ -353,7 +353,7 @@ REGLAS OBLIGATORIAS
 11. Al final escribe la línea para Raiz_entregas/LEEME.md con el formato: archivo | fuente | fecha | script (fecha AAAA-MM-DD; sin el carácter "|" dentro de un campo). Si usas Colab, dame una celda que la AGREGUE al final de LEEME.md con open(ruta, "a"), nunca con "w".
 
 ESQUEMA DE SALIDA DE ESTA TAREA
-propuesta_supuestos.md (nota no validada; la lee Cristian). Primera línea: <!-- AI-assisted (Gemini) — Raíz, NASA Space Apps 2026 -->. Después, una tabla Markdown con las columnas: clave | valor actual (archivo) | valor propuesto | fuente (documento, página o URL, fecha de consulta) | etiqueta | nota. Debajo, si hace falta, notas cortas.
+propuesta_supuestos.md (nota no validada; la lee Cristian). Primera línea: <!-- AI-assisted (Gemini) — ROOT, NASA Space Apps 2026 -->. Después, una tabla Markdown con las columnas: clave | valor actual (archivo) | valor propuesto | fuente (documento, página o URL, fecha de consulta) | etiqueta | nota. Debajo, si hace falta, notas cortas.
 
 DOCUMENTOS DE REFERENCIA (pegados)
 Kit v4, A5 paso 3 (copiado tal cual):
@@ -401,7 +401,7 @@ Aviso: `ENTREGA: propuesta_supuestos.md — nota para Cristian`.
 **Bloque para pegar en Gemini:**
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P5 Dotaciones, plazos y rotaciones.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P5 Dotaciones, plazos y rotaciones.
 
 ENTORNO
 Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
@@ -412,7 +412,7 @@ Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome d
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
-2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
+2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026
 3. Escribe ÚNICAMENTE en Raiz_entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No sobrescribas archivos de otras personas ni de la sesión de datos.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;
@@ -483,7 +483,7 @@ Aviso: `ENTREGA: cifras.csv — prueba OK`.
 
 ```text
 CONTEXTO
-Trabajo en Raíz – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Los Norteados, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P5 Dotaciones, plazos y rotaciones.
+Trabajo en ROOT – From Dam to Root (NASA Space Apps 2026, reto "Field Shift: Adapting Farms with NASA Data"), equipo Orbital Farming, Distrito de Riego 005 Delicias, Chihuahua, México. El proyecto muestra, antes de sembrar y por parcela, el agua que compromete cada cultivo: cuánta pide al año, por cuántos años obliga y para cuántas hectáreas alcanza la dotación de la presa. La dotación se elige con un deslizador de 0 a 12 millares por hectárea (1 millar/ha = 1,000 m³/ha = 10 cm de lámina), con lluvia 0 % o −20 %. Ya no hay escenarios "seco, normal y bueno". Mi rol: P5 Dotaciones, plazos y rotaciones.
 
 ENTORNO
 Google Colab (Python 3), con Google Drive montado en /content/drive. Carpetas:
@@ -494,7 +494,7 @@ Earth Engine NO se usa: lo corre solo la sesión de datos (Claude en el Chrome d
 
 REGLAS OBLIGATORIAS
 1. No inventes cifras. Todo número sale de un archivo de Raiz_entregas/ o de Raiz/entradas/, de la API indicada o del texto con fuente que te pego. Si falta un dato, usa None o NaN y avísame. Nunca uses un valor "típico" o de memoria.
-2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — Raíz, NASA Space Apps 2026
+2. Dame el código en celdas cortas, una por paso, con comentarios en español. Espera a que te diga "listo" antes de dar la siguiente. La primera celda empieza con: # AI-assisted (Gemini) — ROOT, NASA Space Apps 2026
 3. Escribe ÚNICAMENTE en Raiz_entregas/ y ÚNICAMENTE los archivos y columnas del ESQUEMA DE SALIDA, con esos nombres exactos (minúsculas, guion bajo, sin acentos). No sobrescribas archivos de otras personas ni de la sesión de datos.
 4. Al final imprime:
    (a) la PRUEBA DE ACEPTACIÓN de la tarea;

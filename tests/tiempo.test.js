@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // tests/tiempo.test.js — Prueba de Node de las funciones sin DOM de web/js/tiempo.js (línea de tiempo del gemelo):
 // rangoDeAnios, estadoDe y contarEstados, las mismas que usa la página para contar los seis estados de cada año.
 // La parte con navegador (deslizador, Play/Pause, movimiento reducido, nota de 2025, mapa) está en

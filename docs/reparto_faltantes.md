@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Qué falta y quién lo hace · corte del sábado 14-nov-2026, 15:50
 
 **Origen:** inventario contra S9, S10 y el kit v4 (un revisor de solo lectura), con el estado real del repo y del buzón.

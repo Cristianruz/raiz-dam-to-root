@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Pruebas del validador del buzón para las bases de datos del reto.
 
 Contrato: docs/decisiones/2026-11-14_recursos_del_reto.md («Contrato de las entregas nuevas»).

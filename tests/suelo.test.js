@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // Funciones puras de web/js/suelo.js (perfil de suelo y aptitud de cada opción;
 // docs/decisiones/2026-11-14_suelo_aptitud.md): las MISMAS que usa la página.
 // - formato: porcentajes, rangos, capa, números y el valor que no se confunde con la cota;
@@ -763,5 +763,5 @@ test("el módulo no trae cifras: sus textos fijos no tienen dígitos", () => {
     ...Object.values(ESTADOS_APTITUD).flatMap((e) => [e.etiqueta, e.icono])];
   for (const t of fijos) assert.ok(!/\d/.test(t), t);
   assert.equal(TEXTO_NO_MAPEADO, "Phosphorus, potassium, iron, zinc: needs a soil test");
-  assert.ok(FUENTE_JS.startsWith("// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"));
+  assert.ok(FUENTE_JS.startsWith("// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"));
 });

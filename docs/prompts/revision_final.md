@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Revisión final de toda la rama
 
 **Cuándo:** con las funciones congeladas (dom 8:00), antes de Q1, y antes de cada pull request de `claude/sleepy-heisenberg-pxyhtx` a `main`. A `main` solo se llega por pull request; lo fusiona Cristian.
@@ -28,7 +28,7 @@ Cada uno recibe el **preámbulo común** y su **foco**. Todos trabajan con conte
 
 **Preámbulo común:**
 ```
-Usted hace la REVISIÓN FINAL de la rama [rama] de Raíz – From Dam to Root (NASA Space Apps 2026), de [BASE] a [HEAD]. Paquete: [tmp]/final.diff. Pendientes de la bitácora (MENOR diferidos y decisiones del integrador): [tmp]/pendientes_bitacora.txt.
+Usted hace la REVISIÓN FINAL de la rama [rama] de ROOT – From Dam to Root (NASA Space Apps 2026), de [BASE] a [HEAD]. Paquete: [tmp]/final.diff. Pendientes de la bitácora (MENOR diferidos y decisiones del integrador): [tmp]/pendientes_bitacora.txt.
 Reglas: SOLO LECTURA (no modifique archivos, el índice ni la rama; no corra `python construir.py` ni los scripts de motor/; sin red; sin subagentes). Lea CLAUDE.md, docs/sintesis/S9_proyecto_definitivo.md y las secciones del kit que su foco indique. Prioridad: S9 → kit v4 → S8.
 Reporte solo hallazgos con confianza ≥ 80, con severidad CRITICO | IMPORTANTE | MENOR, archivo:línea y la regla o sección que se incumple. Para cada MENOR diferido de la bitácora que caiga en su foco, diga si debe corregirse antes de fusionar (SÍ/NO, en una línea). No reabra una DECISIÓN del integrador salvo que tenga evidencia nueva; si la tiene, dígalo aparte.
 Formato: tabla | # | Sev. | Archivo:línea | Problema | Regla o sección | Arreglo | Conf. |, luego "Lo sólido" (2 a 4 puntos) y "Comprobaciones que ejecuté".
@@ -51,7 +51,7 @@ Formato: tabla | # | Sev. | Archivo:línea | Problema | Regla o sección | Arreg
 
 ## Paso 4 — Un validador por hallazgo (en paralelo, contexto nuevo, solo lectura)
 ```
-Usted VALIDA un hallazgo de la revisión final de Raíz – From Dam to Root. No revise nada más.
+Usted VALIDA un hallazgo de la revisión final de ROOT – From Dam to Root. No revise nada más.
 Hallazgo #[n]: [texto completo: severidad, archivo:línea, problema, regla citada, revisor que lo reportó].
 Contexto: rama [rama], [BASE]..[HEAD]; CLAUDE.md; [sección del kit o de S9 que cita el hallazgo].
 Reglas: SOLO LECTURA; sin red; sin subagentes; no corra `python construir.py` ni los scripts de motor/. Puede leer archivos y correr una prueba enfocada si la necesita.

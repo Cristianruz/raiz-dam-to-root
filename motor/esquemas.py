@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """Esquemas del buzón de entregas: SOLO DATOS (la lógica vive en motor/ensamblar.py).
 
 Fuentes de lo que aquí se exige:

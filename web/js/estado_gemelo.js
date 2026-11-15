@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/estado_gemelo.js — Tarjeta «Twin status» del gemelo digital: separa lo OBSERVADO, lo MODELADO y lo
 // que es ESCENARIO de quien usa la página, con la fecha de cada fuente
 // (docs/decisiones/2026-11-14_gemelo_digital.md, «Qué cambia en el producto», punto 3).
@@ -65,7 +65,7 @@
 //   2. El nombre corto de la fuente de un renglón observado NO se escribe aquí: se reconoce en la fuente
 //      registrada (CONJUNTOS). Si la fuente cambia, el renglón cambia; si no se reconoce, no se afirma
 //      ninguna y queda la fuente registrada dentro de «Source files».
-//   3. El método de los renglones modelados sí es texto fijo: describe el modelo de Raíz (decisión del
+//   3. El método de los renglones modelados sí es texto fijo: describe el modelo de ROOT (decisión del
 //      gemelo, tabla «Modelo físico»), no un dato.
 //   4. Un renglón sin archivo en el manifest lo dice («no source file registered»); nunca una fecha supuesta.
 //   5. Sin colores en el JS: viven en css/resumen.css. Todo texto de los datos se escapa antes de insertarse.

@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // web/js/gemelo3d.js — Vista 3D del gemelo digital: relieve de NASADEM y columnas de agua por parcela
 // (docs/decisiones/2026-11-14_gemelo_digital.md, «Qué cambia en el producto», punto 1). Módulo ES, sin dependencias.
 //
@@ -697,7 +697,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
     try {
       alAvisar({ tipo, mensaje, zonaId: zonaId ?? null, detalle });
     } catch (error) {
-      console.warn("Raíz: twin view notice handler failed", error);
+      console.warn("ROOT: twin view notice handler failed", error);
     }
   }
 
@@ -1280,7 +1280,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
       }
       pintar();
     } catch (error) {
-      console.warn("Raíz: twin view not available", error);
+      console.warn("ROOT: twin view not available", error);
       est.montado = true; // para que desmontar retire lo que alcanzó a entrar
       est.activo = false;
       desmontar(est.inclinada, false);
@@ -1298,7 +1298,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
       try {
         quitarCapasYFuentes();
       } catch (error) {
-        console.warn("Raíz: twin view layers could not be removed cleanly", error);
+        console.warn("ROOT: twin view layers could not be removed cleanly", error);
       }
       soltarProtocolo(biblioteca, alFallarTesela);
       mapa.off("error", alErrorDelMapa);
@@ -1364,7 +1364,7 @@ export function crearGemelo3D({ mapa, gemelo, reglas, alElegirParcela, reducirMo
       try {
         quitarImagenes();
       } catch (error) {
-        console.warn("Raíz: twin view images could not be removed cleanly", error);
+        console.warn("ROOT: twin view images could not be removed cleanly", error);
       }
     }
     est.destruido = true;

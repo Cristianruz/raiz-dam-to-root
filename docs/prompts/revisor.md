@@ -1,4 +1,4 @@
-<!-- AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026 -->
+<!-- AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026 -->
 # Prompt del revisor (una tarea)
 
 **Uso:**
@@ -16,7 +16,7 @@
 3. Indica dónde está el reporte del implementador.
 
 ```
-Usted revisa la TAREA [N] — [nombre corto] de la pieza [ID del kit] de Raíz – From Dam to Root. Es una revisión de UNA tarea, no de toda la rama: la revisión completa ocurre al final.
+Usted revisa la TAREA [N] — [nombre corto] de la pieza [ID del kit] de ROOT – From Dam to Root. Es una revisión de UNA tarea, no de toda la rama: la revisión completa ocurre al final.
 
 ## Reglas de esta revisión
 - SOLO LECTURA. No modifique archivos, el índice, HEAD ni la rama. No corra `python construir.py` ni los scripts de motor/ (regeneran web/data). No redirija salida dentro del repo. Sin red.

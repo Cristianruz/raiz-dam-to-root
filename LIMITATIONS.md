@@ -1,8 +1,8 @@
-*AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026*
+*AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026*
 
 # Limitations
 
-Declared limitations of Raíz – From Dam to Root as of Nov 14, 2026. Sources: S9 §11, the related assumptions of S9 §4 bis, §5 and §12, S8, the decision documents in `docs/decisiones/`, and what the current build shows. Labels: **[V]** verified in a primary source · **[P]** press or secondary source · **[S]** declared assumption · **[NE]** not found.
+Declared limitations of ROOT – From Dam to Root as of Nov 14, 2026. Sources: S9 §11, the related assumptions of S9 §4 bis, §5 and §12, S8, the decision documents in `docs/decisiones/`, and what the current build shows. Labels: **[V]** verified in a primary source · **[P]** press or secondary source · **[S]** declared assumption · **[NE]** not found.
 
 ## What the tool does not do (S9 §11)
 
@@ -13,7 +13,7 @@ Declared limitations of Raíz – From Dam to Root as of Nov 14, 2026. Sources: 
 
 ## What "digital twin" means here
 
-Raíz is presented as a digital twin of the pilot areas: a replica, an observed state, a model and scenarios (`docs/decisiones/2026-11-14_gemelo_digital.md`). The label has limits:
+ROOT is presented as a digital twin of the pilot areas: a replica, an observed state, a model and scenarios (`docs/decisiones/2026-11-14_gemelo_digital.md`). The label has limits:
 
 - **No field sensors.** Nothing is measured on the ground. The observed state comes from satellite and climate data.
 - **No real-time data.** The twin is refreshed on each run of `python construir.py`. Between runs it does not change. `web/data/manifest.json` records the source of every figure, and its date where one is recorded; the values that still lack a reading date are listed there under `avisos` (among them the allocation marks taken from the press and the dam capacity).

@@ -1,4 +1,4 @@
-// AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+// AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 // Funciones puras de web/js/relieve.js (kit A9, parte web; S9 §4 bis): las MISMAS que usa la página.
 // - prepararRutas: de segmentos sueltos (D8) a piezas sin tramos repetidos y caminos para las gotas;
 // - puntoEn: punto a una distancia del inicio de un camino;

@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 # Dependencias de Python con versión exacta (comando único y pruebas).
 # construir.py, motor/ y validar_contrato.py solo usan la biblioteca estándar;
 # pytest y sus dependencias se fijan para que local y GitHub Actions corran lo mismo.

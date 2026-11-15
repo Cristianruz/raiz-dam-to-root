@@ -1,4 +1,4 @@
-# AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026
+# AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026
 """NDVI mensual por parcela para la ficha del gemelo digital.
 
 Decisión y contrato: docs/decisiones/2026-11-14_gemelo_digital.md.
@@ -30,7 +30,7 @@ import math
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
-ENCABEZADO = "AI-assisted (Claude Code) — Raíz, NASA Space Apps 2026"
+ENCABEZADO = "AI-assisted (Claude Code) — ROOT, NASA Space Apps 2026"
 ENTRADA = "hls_mensual_parcelas.csv"
 SALIDA = "ndvi_mensual.json"
 BANDA = "ndvi"
