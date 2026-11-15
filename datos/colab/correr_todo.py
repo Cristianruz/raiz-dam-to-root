@@ -122,7 +122,7 @@ def reto(d, zonas_dir, entrega):
            "--requisitos", os.path.join(d, "suelo_requisitos.json"))
     correr("B8_tipo_suelo_parcelas.py", d, "--crudo", crudo)
     correr("G1_gaez_zona.py", d, "--crudo", crudo)
-    for n in ("cultivos_parcelas.csv", "eto_diaria.csv", "eto_diaria_lazaro_cardenas.csv"):
+    for n in ("cultivos_parcelas.csv", "eto_diaria.csv", "eto_diaria_lazaro_cardenas.csv", "hls_mensual_parcelas.csv"):
         shutil.copyfile(os.path.join(entrega, n), os.path.join(d, n))
     correr("E0_ecostress_solicitud.py", d)
     for z in ("delicias_saucillo", "lazaro_cardenas"):          # las solicitudes que se subieron a AppEEARS
