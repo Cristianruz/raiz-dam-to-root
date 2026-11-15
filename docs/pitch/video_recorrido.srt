@@ -31,21 +31,25 @@ From the dam to the crop and the aquifer.
 What satellites saw on this field, year by year.
 
 9
-00:00:52,000 --> 00:01:00,000
-A free field can choose. An orchard stays committed.
+00:00:52,000 --> 00:00:57,000
+Soil and satellite evidence, each with its source.
 
 10
-00:01:00,000 --> 00:01:06,000
-The year the dam delivered no water.
+00:00:57,000 --> 00:01:05,000
+A free field can choose. An orchard stays committed.
 
 11
-00:01:06,000 --> 00:01:12,000
-A message for the farmer, in their language.
+00:01:05,000 --> 00:01:11,000
+The year the dam delivered no water.
 
 12
-00:01:12,000 --> 00:01:18,000
-Five tests, published whatever the result.
+00:01:11,000 --> 00:01:17,000
+A message for the farmer, in their language.
 
 13
-00:01:18,000 --> 00:01:22,000
+00:01:17,000 --> 00:01:23,000
+Five tests, published whatever the result.
+
+14
+00:01:23,000 --> 00:01:27,000
 The farmer decides.

@@ -125,6 +125,7 @@ const GOLPES = {
   porque: { tipo: "pagina", clave: "porque", rotulo: "Ask why" },
   gota: { tipo: "pagina", clave: "gota", rotulo: "Follow the drop" },
   evidencia: { tipo: "pagina", clave: "evidencia", rotulo: "Satellite evidence" },
+  suelo: { tipo: "pagina", clave: "suelo", rotulo: "Soil and evidence" },
   otras: { tipo: "pagina", clave: "otras", rotulo: "Other fields" },
   anios: { tipo: "pagina", clave: "anios", rotulo: "Look back" },
   compartir: { tipo: "pagina", clave: "compartir", rotulo: "Share" },
@@ -132,7 +133,7 @@ const GOLPES = {
 };
 const G = GOLPES;
 const TOMAS = RECORRIDO
-  ? [APERTURA, COMO, G.dotacion, G.idioma, G.parcela, G.porque, G.gota, G.evidencia, G.otras, G.anios, G.compartir, G.pruebas, CIERRE]
+  ? [APERTURA, COMO, G.dotacion, G.idioma, G.parcela, G.porque, G.gota, G.evidencia, G.suelo, G.otras, G.anios, G.compartir, G.pruebas, CIERRE]
   : [APERTURA, COMO, G.dotacion, G.parcela, G.porque, G.gota, G.evidencia, G.compartir, G.pruebas, CIERRE];
 // Las otras dos parcelas de ejemplo (solo en el recorrido): una con el plazo libre y un nogal comprometido.
 const OTRAS_PARCELAS = ["P0632", "L0175"];
@@ -906,6 +907,21 @@ function tramosDelExplorador(ctx) {
         : ["#seccion-gota [data-gota-nodo]:first-of-type"];
       await resaltar(page, [{ sel: presa }], FICHA);
       return { encuadre: encuadre({ ancho: diagrama.w + 36, centro: diagrama }), resaltado: "si" };
+    },
+  });
+
+  // ---- Soil and evidence (solo en el recorrido): la sección de suelo y evidencia satelital de la ficha, con sus fuentes
+  lista.push({
+    toma: "suelo", parte: 1, nombre: `${PARCELA}: la sección «Soil and satellite evidence» de la ficha`,
+    async prep(page) {
+      await quitarResaltado(page);
+      await verPuntero(page, false);
+      await desplazarA(page, "#ficha", "#t-evidencia", { cabecera: ".ficha-cabeza", margen: 220, ms: 0 });
+    },
+    async accion(page) {
+      await desplazarA(page, "#ficha", "#t-evidencia", { cabecera: ".ficha-cabeza", margen: 12, ms: DESPLAZAR_MS });
+      await resaltar(page, [{ sel: ["#ficha #t-evidencia"] }], FICHA);
+      return { encuadre: await encuadreFicha(page), resaltado: "si" };
     },
   });
 

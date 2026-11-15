@@ -14,7 +14,7 @@ Salidas: `docs/pitch/video_recorrido.mp4` y `docs/pitch/video_recorrido.srt`.
 ## 1. Qué cambia frente al video de 30 s
 
 - **Las mismas tomas, con más tiempo cada una**: las tarjetas se leen completas y el resultado de cada acción se queda a la vista varios segundos.
-- **Tres golpes más**: el idioma de la portada (del inglés al español), las otras dos parcelas de ejemplo (P0632, con el plazo libre, y L0175, un nogal comprometido) y la vista 3D con su línea de tiempo hasta el año destacado.
+- **Cuatro golpes más**: el idioma de la portada (del inglés al español), la sección de suelo y evidencia satelital de la ficha, las otras dos parcelas de ejemplo (P0632, con el plazo libre, y L0175, un nogal comprometido) y la vista 3D con su línea de tiempo hasta el año destacado.
 - Necesita la portada nueva (el tablero) y la vista 3D: si falta alguna, el grabador lo dice y no produce el video.
 - Los límites que comprueba el grabador son otros: de 60 a 90 s y menos de 25 MB (el de 30 s conserva los suyos).
 
@@ -24,7 +24,7 @@ Las de la sección 2 de `docs/pitch/guion_video_30s.md`: ningún dígito en subt
 
 ## 3. Tabla de tomas
 
-Duración total: **82.0 segundos**. Los encuadres, los resaltados y los selectores de las tomas que comparte con el video corto son los de la sección 3 de su guion.
+Duración total: **87.0 segundos**. Los encuadres, los resaltados y los selectores de las tomas que comparte con el video corto son los de la sección 3 de su guion.
 
 | Toma | Inicio (s) | Fin (s) | Qué se ve | Resaltado | Rótulo | Subtítulo (inglés) |
 |---|---|---|---|---|---|---|
@@ -36,15 +36,16 @@ Duración total: **82.0 segundos**. Los encuadres, los resaltados y los selector
 | 6 · El porqué | 30 | 40 | Clic en «Why?» de una alternativa; «Why it's suggested»; «Benefits» | Como en el video corto | Ask why | Every option says why, and what changes from today. |
 | 7 · La gota | 40 | 46 | «Follow the drop» con sus gotas | El primer nodo | Follow the drop | From the dam to the crop and the aquifer. |
 | 8 · La evidencia | 46 | 52 | La memoria satelital de la parcela por año y su curva de verdor | La tira de años y, después, la curva | Satellite evidence | What satellites saw on this field, year by year. |
-| 9 · Otras parcelas | 52 | 60 | La ficha de P0632 y la de L0175 | La frase principal y el plazo de cada una | Other fields | A free field can choose. An orchard stays committed. |
-| 10 · Los años | 60 | 66 | Vista 3D: «Play» hasta el año destacado y su nota | La nota del año destacado | Look back | The year the dam delivered no water. |
-| 11 · Compartir | 66 | 72 | El mensaje de WhatsApp cambia de idioma | El saludo del mensaje | Share | A message for the farmer, in their language. |
-| 12 · Las pruebas | 72 | 78 | «Tests in sight», con el estado de cada prueba | El estado de cada prueba | Check the tests | Five tests, published whatever the result. |
-| 13 · Cierre | 78 | 82 | Tarjeta de cierre | — | — | The farmer decides. |
+| 9 · El suelo | 52 | 57 | En la misma ficha, la sección «Soil and satellite evidence» (`#t-evidencia`), con sus fuentes | El título de la sección | Soil and evidence | Soil and satellite evidence, each with its source. |
+| 10 · Otras parcelas | 57 | 65 | La ficha de P0632 y la de L0175 | La frase principal y el plazo de cada una | Other fields | A free field can choose. An orchard stays committed. |
+| 11 · Los años | 65 | 71 | Vista 3D: «Play» hasta el año destacado y su nota | La nota del año destacado | Look back | The year the dam delivered no water. |
+| 12 · Compartir | 71 | 77 | El mensaje de WhatsApp cambia de idioma | El saludo del mensaje | Share | A message for the farmer, in their language. |
+| 13 · Las pruebas | 77 | 83 | «Tests in sight», con el estado de cada prueba | El estado de cada prueba | Check the tests | Five tests, published whatever the result. |
+| 14 · Cierre | 83 | 87 | Tarjeta de cierre | — | — | The farmer decides. |
 
 Notas:
 - **Toma 4.** El selector se localiza por estructura (el `<select>` cuyas opciones traen `en` y `es`). Al terminar, fuera de cámara, la portada vuelve al inglés.
-- **Toma 10.** La vista 3D dibuja pocos cuadros por segundo con WebGL por software: en una máquina sin tarjeta gráfica se ve entrecortada. Por eso en el video corto su lugar lo ocupa la evidencia satelital.
+- **Toma 11.** La vista 3D dibuja pocos cuadros por segundo con WebGL por software: en una máquina sin tarjeta gráfica se ve entrecortada. Por eso en el video corto su lugar lo ocupa la evidencia satelital.
 
 ## 4. Cifras que la página muestra
 
@@ -88,23 +89,27 @@ From the dam to the crop and the aquifer.
 What satellites saw on this field, year by year.
 
 9
-00:00:52,000 --> 00:01:00,000
-A free field can choose. An orchard stays committed.
+00:00:52,000 --> 00:00:57,000
+Soil and satellite evidence, each with its source.
 
 10
-00:01:00,000 --> 00:01:06,000
-The year the dam delivered no water.
+00:00:57,000 --> 00:01:05,000
+A free field can choose. An orchard stays committed.
 
 11
-00:01:06,000 --> 00:01:12,000
-A message for the farmer, in their language.
+00:01:05,000 --> 00:01:11,000
+The year the dam delivered no water.
 
 12
-00:01:12,000 --> 00:01:18,000
-Five tests, published whatever the result.
+00:01:11,000 --> 00:01:17,000
+A message for the farmer, in their language.
 
 13
-00:01:18,000 --> 00:01:22,000
+00:01:17,000 --> 00:01:23,000
+Five tests, published whatever the result.
+
+14
+00:01:23,000 --> 00:01:27,000
 The farmer decides.
 ```
 
@@ -116,7 +121,6 @@ Para sumarlos hace falta un tramo nuevo en `tests/e2e/grabar_video.mjs` (en `GOL
 |---|---|---|---|
 | Comparar opciones | La vista de comparar opciones de la portada | Tablero | Compare the options side by side. |
 | La hoja | «Print field sheet»: la ficha con `@media print` (emulación de Playwright) | Explorador, `#boton-imprimir` | A sheet to print for the farmer. |
-| El suelo | Las filas de suelo de las tarjetas y «Soil and satellite evidence» | Explorador, `#t-evidencia` | What the soil says about each option. |
 | La lluvia | El interruptor de la lluvia: el indicador sube | Tablero o explorador (`#lluvia`) | Less rain: every option asks for more water. |
 | El goteo | En «Follow the drop», el botón del goteo (solo si `web/data/cubo.json` → `meta.goteo.disponible`) | Explorador, `#seccion-gota` | The same field, if it switched to drip. |
 | El relieve | La capa de relieve y la tormenta simulada en el mapa 2D (`web/js/relieve.js`) | Explorador, `#capa-relieve` | Where heavy rain runs and gathers. |
