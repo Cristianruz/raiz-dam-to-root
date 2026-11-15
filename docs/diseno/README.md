@@ -10,6 +10,8 @@
 | [`diagramas.md`](diagramas.md) | 19 diagramas Mermaid del sistema actual: contexto, datos, comando único, CI, arquitectura web, navegación, reglas, estados, modelo de datos, pruebas, protocolo y plan del domingo |
 | `referencias_github.md` (en preparación) | Repositorios de GitHub con más estrellas para diseño, agentes especialistas y flujos de trabajo, con licencia y qué sirve para ROOT |
 | [`escalabilidad.md`](escalabilidad.md) | Qué ya sirve para cualquier suelo y zona, qué sigue atado a Delicias y el diseño de un perfil por distrito |
+| [`concepto_visual.md`](concepto_visual.md) | Concepto «el mapa primero» a partir de las referencias del equipo, con dueños y horarios |
+| [`prompt_claude_design.md`](prompt_claude_design.md) | Prompt completo para diseñar la aplicación en Claude Design, con las cifras reales de las tres parcelas de la historia |
 | `README.md` | Este documento |
 
 **Prioridad de documentos:** S9 → kit v4 → S8 (`CLAUDE.md`). Este pase no cambia el alcance, el contrato de datos ni las reglas; si una propuesta las toca, la decide Cristian y se registra en `docs/decisiones/`.
