@@ -124,6 +124,7 @@ Si una pieza necesita tocar un archivo de otro dueño, se le pide al dueño por 
 | 11:39 | integrador | PR #13 fusionado en `main` (`975b596`): los dos videos con movimiento y en registro formal |
 | 11:55 | Cristian | Avisa que el video, desde el segundo 11, no muestra la vista que hizo Milo (el explorador con el diseño del tablero), que él creía en `main` |
 | 12:00 | integrador | La rama de Milo (`claude/ingles-primero`, cuatro commits) no estaba en `main`. Revisada (`docs/revisiones/2026-11-15_rama_ingles_primero.md`) y fusionada en la integración: el tablero abre en inglés, el explorador tiene español opcional y el diseño oscuro del tablero. Una corrección: el rojo del semáforo se aclara para que el símbolo conserve el contraste. Videos regrabados sobre esa vista |
+| 12:25 | integrador | PR #14 fusionado en `main` (`8b1ead3`) con la CI en verde: la vista de Milo ya es la publicada. Con navegador, sobre la mezcla: explorador 878/878, tablero 315/315, comparación 279/279, aplicación 50/50 y sin conexión 23/23. Recorrido largo regrabado sobre esa vista (94 comprobaciones) |
 
 Las filas de las 22:37 a las 23:45 se agregaron después, con las horas de los commits de la rama de integración (`git log --first-parent`, pasadas de UTC a la hora de Chihuahua, UTC−6). La fila de las 22:40 es la hora que anotó el integrador al crear el archivo; su commit es de las 22:37.
 
