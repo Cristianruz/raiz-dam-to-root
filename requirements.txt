@@ -2,7 +2,7 @@
 # Dependencias de Python con versión exacta (comando único y pruebas).
 # construir.py, motor/ y validar_contrato.py solo usan la biblioteca estándar;
 # pytest y sus dependencias se fijan para que local y GitHub Actions corran lo mismo.
-pytest==9.1.0
+pytest==9.2.0
 iniconfig==2.3.1
 packaging==26.3
 pluggy==1.7.0

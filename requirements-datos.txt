@@ -7,4 +7,4 @@
 # versionan como archivos estáticos y el comando único solo las lee con la biblioteca estándar.
 # Versión exacta con la que se generaron (también queda anotada en web/data/dem/<zona>/origen.json).
 # numpy llega como dependencia de rasterio.
-rasterio==1.4.3
+rasterio==1.5.2
